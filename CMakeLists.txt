@@ -188,6 +188,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_typewriter_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_typewriter_phrase_pack_test COMMAND chronontemplate_typewriter_phrase_pack_test)
 
+    add_executable(chronontemplate_apple_phrase_pack_test tests/apple_phrase_pack.cpp)
+    target_link_libraries(chronontemplate_apple_phrase_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_apple_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_apple_phrase_pack_test COMMAND chronontemplate_apple_phrase_pack_test)
+
     # The first pack: the subscribe card, its controller-driven entrance/exit and
     # the click pulse that only holds because a preset appends keys.
     add_executable(chronontemplate_youtube_subscribe_test tests/youtube_subscribe.cpp)
