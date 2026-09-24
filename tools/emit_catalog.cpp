@@ -28,6 +28,8 @@
 
 #include "chrononmotion/templates/Templates.hpp"
 #include "chronontemplate/Presets.hpp"
+#include "chronontemplate/ApplePhrasePack.hpp"
+#include "chronontemplate/ImportantPhrasePack.hpp"
 
 #include <cstdint>
 #include <fstream>
@@ -45,6 +47,73 @@ namespace {
 
     constexpr std::int64_t kSchemaVersion = 1;
     constexpr const char* kSource = "ChrononTemplate";
+
+    json phraseTrack(const chronontemplate::PhraseTrack& track) {
+        json keys = json::array();
+        for (const auto& key : track.keyframes) {
+            keys.push_back({{"frame", key.frame}, {"value", key.value}});
+        }
+        return {{"property", track.property}, {"keyframes", keys}, {"easing", track.easing}};
+    }
+
+    json applePhraseMotions() {
+        json rows = json::array();
+        for (const auto animation : chronontemplate::applePhraseAnimations()) {
+            const auto definition = chronontemplate::definition(animation);
+            json tracks = json::array();
+            for (const auto& track : definition.tracks) tracks.push_back(phraseTrack(track));
+            json animators = json::array();
+            for (const auto& animator : definition.textAnimators) {
+                std::string shape = "square";
+                if (animator.selector.window == "reveal") shape = "square";
+                else if (animator.selector.window == "reveal_soft") shape = "smooth";
+                else if (animator.selector.window == "band") shape = "square";
+                json properties = json::array();
+                for (const auto& track : animator.properties) properties.push_back(phraseTrack(track));
+                animators.push_back({{"id", definition.id + "_text"},
+                                     {"selector", {{"kind", animator.selector.unit},
+                                                    {"shape", shape},
+                                                    {"order", animator.selector.order},
+                                                    {"stagger", animator.selector.window == "full" ? 0 : 1}}},
+                                     {"properties", properties}});
+            }
+            rows.push_back({{"id", definition.id}, {"category", "apple_phrase_v1"},
+                            {"targets", json::array({"text", "phrase"})},
+                            {"unit", definition.textAnimators.empty() ? "glyph" : definition.textAnimators.front().selector.unit},
+                            {"enter", definition.enter}, {"tracks", tracks},
+                            {"text_animators", animators}});
+        }
+        return rows;
+    }
+
+    bool nativePhraseMotion(const json& motion, const std::set<std::string>& candidates) {
+        const std::string id = motion.value("id", "");
+        if (candidates.find(id) == candidates.end()) return false;
+        const std::set<std::string> layerProperties{
+            "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
+            "rotation", "rotation_z", "opacity"};
+        const std::set<std::string> textProperties{
+            "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
+            "opacity", "tracking"};
+        for (const auto& track : motion.value("tracks", json::array())) {
+            if (!layerProperties.contains(track.value("property", ""))) return false;
+        }
+        for (const auto& animator : motion.value("text_animators", json::array())) {
+            const auto selector = animator.value("selector", json::object());
+            const std::string unit = selector.value("kind", "glyph");
+            const std::string shape = selector.value("shape", "square");
+            const std::string order = selector.value("order", "forward");
+            if ((unit != "glyph" && unit != "character" && unit != "grapheme" &&
+                 unit != "word" && unit != "line") ||
+                (shape != "square" && shape != "smooth") ||
+                (order != "forward" && order != "reverse" &&
+                 order != "from_center" && order != "to_center")) return false;
+            for (const auto& track : animator.value("properties", json::array())) {
+                if (!textProperties.contains(track.value("property", ""))) return false;
+            }
+        }
+        return true;
+    }
 
     [[noreturn]] void fail(const std::string& message) {
         throw std::runtime_error("emit_catalog: " + message);
@@ -391,7 +460,10 @@ int main(int argc, char** argv) {
         if (!data.contains("overlay_presets")) fail("catalog needs `overlay_presets`");
         if (!data.contains("selections")) fail("catalog needs `selections`");
 
-        const std::set<std::string> motionIDs = validateMotions(data["motions"]);
+        json motions = data["motions"];
+        const json appleMotions = applePhraseMotions();
+        for (const auto& row : appleMotions) motions.push_back(row);
+        const std::set<std::string> motionIDs = validateMotions(motions);
 
         const json& presets = data["overlay_presets"];
         requireObject(presets, "overlay_presets");
@@ -412,9 +484,25 @@ int main(int argc, char** argv) {
         emitted["templates"] = packRows;
         emitted["final3d_presets"] = presetRows;
         emitted["native_phrase_style"] = nativePhraseStyle();
-        emitted["motions"] = data["motions"];
+        emitted["motions"] = motions;
         emitted["overlay_presets"] = data["overlay_presets"];
         emitted["selections"] = data["selections"];
+        std::set<std::string> phraseCandidates;
+        for (const auto& id : data["selections"]["tyson_phrase_motions"]) {
+            phraseCandidates.insert(id.get<std::string>());
+        }
+        for (const auto& motion : motions) {
+            const std::string id = motion.value("id", "");
+            if (id.rfind("typewriter_", 0) == 0 || motion.value("category", "") == "apple_phrase_v1") {
+                phraseCandidates.insert(id);
+            }
+        }
+        json phrasePool = json::array();
+        for (const auto& motion : motions) {
+            if (nativePhraseMotion(motion, phraseCandidates)) phrasePool.push_back(motion["id"]);
+        }
+        if (phrasePool.empty()) fail("no GPU-native phrase motion is eligible for phrase_motion_pool");
+        emitted["selections"]["phrase_motion_pool"] = phrasePool;
 
         std::string rendered = emitted.dump(2);
         rendered.push_back('\n');
