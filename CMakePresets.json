@@ -1,0 +1,105 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "dev",
+      "displayName": "Development (unoptimised, tests on)",
+      "description": "Debug build of chronontemplate plus the two template test binaries.",
+      "binaryDir": "${sourceDir}/build/dev",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CHRONONTEMPLATE_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "dev-fast",
+      "inherits": "dev",
+      "displayName": "Development, cached and linked fast",
+      "description": "`dev` with ccache, mold and Ninja. Needs ccache and mold on PATH.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/dev-fast",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=mold"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release (warnings as errors)",
+      "description": "Optimised build with -Wall -Wextra -Werror, the gate a change must pass.",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CHRONONTEMPLATE_BUILD_TESTS": "ON",
+        "CHRONONTEMPLATE_WERROR": "ON"
+      }
+    },
+    {
+      "name": "release-fast",
+      "inherits": "release",
+      "displayName": "Release, cached and linked fast (the gate, fast)",
+      "description": "`release` with ccache, mold and Ninja: same -Wall -Wextra -Werror gate, warm-cache rebuilds in seconds. Needs ccache and mold on PATH.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release-fast",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=mold"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release"
+    },
+    {
+      "name": "dev-fast",
+      "configurePreset": "dev-fast",
+      "jobs": 16
+    },
+    {
+      "name": "release-fast",
+      "configurePreset": "release-fast",
+      "jobs": 16
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "dev-fast",
+      "configurePreset": "dev-fast",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release-fast",
+      "configurePreset": "release-fast",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

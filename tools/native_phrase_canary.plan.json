@@ -1,0 +1,66 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "chronontemplate_native_phrase_canary",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 24,
+    "fps_den": 1,
+    "duration_frames": 60
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "color",
+      "color": [0.0, 0.0, 0.0, 1.0],
+      "size": [1920, 1080],
+      "start_frame": 0,
+      "duration_frames": 60
+    },
+    {
+      "id": "phrase",
+      "type": "text",
+      "text": "CHRONONTEMPLATE",
+      "size": [1600, 360],
+      "position": [960, 540],
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 190,
+        "fill": "#FFFFFF",
+        "stroke": {"color": "#FFFFFF", "width": 0},
+        "shadow": {"color": "#FFFFFF", "opacity": 0.92, "blur": 42, "offset": [0, 0]}
+      },
+      "start_frame": 0,
+      "duration_frames": 60,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "keyframes": [
+              {"frame": 0, "value": 0.84},
+              {"frame": 18, "value": 1.04},
+              {"frame": 42, "value": 1.0},
+              {"frame": 59, "value": 1.0}
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "opacity",
+            "keyframes": [
+              {"frame": 0, "value": 0.0},
+              {"frame": 12, "value": 1.0},
+              {"frame": 59, "value": 1.0}
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "native_phrase_canary.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}
