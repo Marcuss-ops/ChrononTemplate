@@ -18,8 +18,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO="$(cd "$ROOT/.." && pwd)"
 OUT="${1:-$ROOT/out/important_phrase_classic_v1}"
-ASSETS_ROOT="$REPO/Chronon3d"
-CLI="$ASSETS_ROOT/build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_cli"
+ASSETS_ROOT="$ROOT"
+CLI="$REPO/Chronon3d/build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_cli"
 EMITTER="$ROOT/build/release-fast/chronontemplate_emit_important_phrase_plans"
 [[ -x "$EMITTER" ]] || EMITTER="$ROOT/build/dev-fast/chronontemplate_emit_important_phrase_plans"
 
