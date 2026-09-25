@@ -79,6 +79,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/ImportantPhrasePack.cpp
         src/chronontemplate/ClassicPhrasePack.cpp
         src/chronontemplate/TypewriterPhrasePack.cpp
+        src/chronontemplate/Typewriter3DPhrasePack.cpp
         src/chronontemplate/ApplePhrasePack.cpp
         # the packs a template author starts from
         src/chronontemplate/templates/YouTubeSubscribe.cpp
@@ -187,6 +188,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_typewriter_phrase_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_typewriter_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_typewriter_phrase_pack_test COMMAND chronontemplate_typewriter_phrase_pack_test)
+
+    add_executable(chronontemplate_typewriter_3d_pack_test tests/typewriter_3d_pack.cpp)
+    target_link_libraries(chronontemplate_typewriter_3d_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_typewriter_3d_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_typewriter_3d_pack_test COMMAND chronontemplate_typewriter_3d_pack_test)
 
     add_executable(chronontemplate_apple_phrase_pack_test tests/apple_phrase_pack.cpp)
     target_link_libraries(chronontemplate_apple_phrase_pack_test PRIVATE chronontemplate)
