@@ -24,7 +24,11 @@ namespace chronontemplate {
         DocSearchBar,
         DocQuoteSerif,
         DocLowerThird,
-        DocStatCard
+        DocStatCard,
+        DocUnderlineDraw,
+        DocWordStage,
+        DocTrailerScale,
+        DocCountUpStat
     };
 
     struct Typewriter3DStyle {
@@ -51,6 +55,10 @@ namespace chronontemplate {
     [[nodiscard]] Typewriter3DStyle docQuoteSerifStyle();
     [[nodiscard]] Typewriter3DStyle docLowerThirdStyle();
     [[nodiscard]] Typewriter3DStyle docStatCardStyle();
+    [[nodiscard]] Typewriter3DStyle docUnderlineDrawStyle();
+    [[nodiscard]] Typewriter3DStyle docWordStageStyle();
+    [[nodiscard]] Typewriter3DStyle docTrailerScaleStyle();
+    [[nodiscard]] Typewriter3DStyle docCountUpStatStyle();
     [[nodiscard]] const char* name(Typewriter3DPhraseAnimation animation);
     [[nodiscard]] PhraseAnimationDefinition definition(Typewriter3DPhraseAnimation animation);
     [[nodiscard]] std::vector<Typewriter3DPhraseAnimation> typewriter3DPhraseAnimations();
