@@ -28,7 +28,7 @@ namespace {
     void theTypewriterAnimationsAreWellFormed() {
         section("typewriter phrase animations");
         const auto animations = typewriter3DPhraseAnimations();
-        check(animations.size() == 11, "the Typewriter pack publishes eleven animations");
+        check(animations.size() == 15, "the Typewriter pack publishes fifteen animations");
 
         std::set<std::string> ids;
         for (const Typewriter3DPhraseAnimation animation : animations) {
@@ -82,6 +82,20 @@ namespace {
         const auto statStyle = docStatCardStyle();
         check(statStyle.has_card, "stat card style has card");
         check(statStyle.font_size == 64.f, "stat card uses prominent number");
+
+        const auto underlineStyle = docUnderlineDrawStyle();
+        check(!underlineStyle.has_card, "underline style has no card");
+        check(underlineStyle.font.find("Poppins") != std::string::npos, "underline style uses Poppins font");
+
+        const auto wordStyle = docWordStageStyle();
+        check(wordStyle.font_size == 96.f, "word stage uses large 96px display font");
+
+        const auto trailerStyle = docTrailerScaleStyle();
+        check(trailerStyle.font.find("Montserrat") != std::string::npos, "trailer style uses Montserrat-Bold");
+
+        const auto countStyle = docCountUpStatStyle();
+        check(countStyle.has_card, "count-up stat has card");
+        check(countStyle.font.find("Sora") != std::string::npos, "count-up stat uses Sora font");
     }
 
 } // namespace

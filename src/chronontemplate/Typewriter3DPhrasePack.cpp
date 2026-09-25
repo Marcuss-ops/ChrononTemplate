@@ -141,6 +141,66 @@ namespace chronontemplate {
         return s;
     }
 
+    Typewriter3DStyle docUnderlineDrawStyle() {
+        Typewriter3DStyle s;
+        s.font = "assets/fonts/Poppins-Bold.ttf";
+        s.font_size = 52.f;
+        s.box = {1200.f, 100.f};
+        s.position = {960.f, 510.f};
+        s.fill = "#FFFFFF";
+        s.glow = "#000000";
+        s.glow_radius = 10.f;
+        s.glow_intensity = 0.28f;
+        s.has_card = false;
+        return s;
+    }
+
+    Typewriter3DStyle docWordStageStyle() {
+        Typewriter3DStyle s;
+        s.font = "assets/fonts/Poppins-Bold.ttf";
+        s.font_size = 96.f;
+        s.box = {800.f, 140.f};
+        s.position = {960.f, 540.f};
+        s.fill = "#FFFFFF";
+        s.glow = "#000000";
+        s.glow_radius = 12.f;
+        s.glow_intensity = 0.25f;
+        s.has_card = false;
+        return s;
+    }
+
+    Typewriter3DStyle docTrailerScaleStyle() {
+        Typewriter3DStyle s;
+        s.font = "assets/fonts/Montserrat-Bold.ttf";
+        s.font_size = 60.f;
+        s.box = {1400.f, 120.f};
+        s.position = {960.f, 540.f};
+        s.fill = "#FFFFFF";
+        s.glow = "#000000";
+        s.glow_radius = 10.f;
+        s.glow_intensity = 0.35f;
+        s.has_card = false;
+        return s;
+    }
+
+    Typewriter3DStyle docCountUpStatStyle() {
+        Typewriter3DStyle s;
+        s.font = "assets/fonts/Sora.ttf";
+        s.font_size = 76.f;
+        s.box = {600.f, 100.f};
+        s.position = {960.f, 520.f};
+        s.fill = "#0F172A";
+        s.glow = "#000000";
+        s.glow_radius = 8.f;
+        s.glow_intensity = 0.22f;
+        s.has_card = true;
+        s.card_size = {760.f, 240.f};
+        s.card_radius = 24.f;
+        s.card_stroke = "#E2E8F0";
+        s.card_stroke_width = 1.5f;
+        return s;
+    }
+
     const char* name(Typewriter3DPhraseAnimation animation) {
         switch (animation) {
             case Typewriter3DPhraseAnimation::OrbitGlow: return "typewriter_3d_orbit_glow";
@@ -154,6 +214,10 @@ namespace chronontemplate {
             case Typewriter3DPhraseAnimation::DocQuoteSerif: return "typewriter_doc_quote_serif";
             case Typewriter3DPhraseAnimation::DocLowerThird: return "typewriter_doc_lower_third";
             case Typewriter3DPhraseAnimation::DocStatCard: return "typewriter_doc_stat_card";
+            case Typewriter3DPhraseAnimation::DocUnderlineDraw: return "typewriter_doc_underline_draw";
+            case Typewriter3DPhraseAnimation::DocWordStage: return "typewriter_doc_word_stage";
+            case Typewriter3DPhraseAnimation::DocTrailerScale: return "typewriter_doc_trailer_scale";
+            case Typewriter3DPhraseAnimation::DocCountUpStat: return "typewriter_doc_count_up_stat";
         }
         throw std::invalid_argument("chronontemplate::name: unknown 3D typewriter animation");
     }
@@ -170,7 +234,11 @@ namespace chronontemplate {
             Typewriter3DPhraseAnimation::DocSearchBar,
             Typewriter3DPhraseAnimation::DocQuoteSerif,
             Typewriter3DPhraseAnimation::DocLowerThird,
-            Typewriter3DPhraseAnimation::DocStatCard
+            Typewriter3DPhraseAnimation::DocStatCard,
+            Typewriter3DPhraseAnimation::DocUnderlineDraw,
+            Typewriter3DPhraseAnimation::DocWordStage,
+            Typewriter3DPhraseAnimation::DocTrailerScale,
+            Typewriter3DPhraseAnimation::DocCountUpStat
         };
     }
 
@@ -265,6 +333,37 @@ namespace chronontemplate {
             case Typewriter3DPhraseAnimation::DocStatCard:
                 return {"typewriter_doc_stat_card", "Documentary Stat Callout Card",
                         "73% of all digital interactions are now automated.", enter,
+                        {track("opacity", {{0, 0.f}, {10, 1.f}, {enter + 50, 1.f}, {enter + 65, 0.f}}, "linear"),
+                         track("position_y", {{0, 16.f}, {12, 0.f}}, "out_cubic")},
+                        {typedReveal("ramp", typing)},
+                        PhraseCursor{}};
+
+            case Typewriter3DPhraseAnimation::DocUnderlineDraw:
+                return {"typewriter_doc_underline_draw", "Documentary Underline Draw-On",
+                        "PRECISION OVER PERFECTION", enter,
+                        {track("opacity", {{0, 0.f}, {8, 1.f}, {enter + 45, 1.f}, {enter + 60, 0.f}}, "linear")},
+                        {typedReveal("ramp", typing)},
+                        PhraseCursor{}};
+
+            case Typewriter3DPhraseAnimation::DocWordStage:
+                return {"typewriter_doc_word_stage", "Kinetic Minimal Word Stage",
+                        "IDEAS SHAPE OUR REALITY", enter,
+                        {track("opacity", {{0, 0.f}, {4, 1.f}, {enter + 50, 1.f}, {enter + 60, 0.f}}, "linear"),
+                         track("scale", {{0, 1.08f}, {18, 1.0f}}, "out_cubic")},
+                        {typedReveal("ramp", typing)},
+                        PhraseCursor{}};
+
+            case Typewriter3DPhraseAnimation::DocTrailerScale:
+                return {"typewriter_doc_trailer_scale", "Cinematic Trailer Scale Extrude",
+                        "BEYOND THE SURFACE", enter,
+                        {track("opacity", {{0, 0.f}, {8, 1.f}, {enter + 40, 1.f}, {enter + 55, 0.f}}, "linear"),
+                         track("scale", {{0, 1.32f}, {45, 1.0f}}, "out_cubic")},
+                        {typedReveal("ramp", typing)},
+                        PhraseCursor{}};
+
+            case Typewriter3DPhraseAnimation::DocCountUpStat:
+                return {"typewriter_doc_count_up_stat", "Documentary Stepped Count-Up",
+                        "99.9% SYSTEM AVAILABILITY", enter,
                         {track("opacity", {{0, 0.f}, {10, 1.f}, {enter + 50, 1.f}, {enter + 65, 0.f}}, "linear"),
                          track("position_y", {{0, 16.f}, {12, 0.f}}, "out_cubic")},
                         {typedReveal("ramp", typing)},
