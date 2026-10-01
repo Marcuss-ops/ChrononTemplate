@@ -100,6 +100,9 @@ add_library(chronontemplate STATIC
 
 add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 
+add_executable(chronontemplate_dump_title_camera_poses tools/dump_title_camera_poses.cpp)
+target_link_libraries(chronontemplate_dump_title_camera_poses PRIVATE chronontemplate)
+
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.
 target_include_directories(chronontemplate PUBLIC
