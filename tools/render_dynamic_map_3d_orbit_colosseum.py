@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 import cv2
 
-BASE_DIR = Path("/home/pierone/src/go-master/projects/Pyt/VeloxEditing")
+BASE_DIR = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(BASE_DIR / "Chronon3d/tools/cartography"))
 
 from dynamic_tile_pyramid import DynamicTilePyramid, draw_hud_overlay, compute_altitude_km, latlon_to_global_px
