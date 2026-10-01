@@ -83,6 +83,14 @@ class EntityPresentationCatalogTests(unittest.TestCase):
         self.assertIn("$3.4B", BUILDER.METRIC_SAMPLES)
         self.assertIn("1,250,000", BUILDER.METRIC_SAMPLES)
         self.assertIn("Q4 2026", BUILDER.DATE_SAMPLES)
+        self.assertIn("42%", BUILDER.METRIC_SAMPLES)
+        self.assertIn("42.5", BUILDER.METRIC_SAMPLES)
+        self.assertIn("-12", BUILDER.METRIC_SAMPLES)
+        self.assertIn("+18.7", BUILDER.METRIC_SAMPLES)
+        self.assertIn("€12.5M", BUILDER.METRIC_SAMPLES)
+        self.assertIn("30 September 2026", BUILDER.DATE_SAMPLES)
+        self.assertIn("2010–2020", BUILDER.DATE_SAMPLES)
+        self.assertIn("1999/2000", BUILDER.DATE_SAMPLES)
 
     def test_golden_plans_are_deterministic_and_cover_all_presets(self):
         first = BUILDER.build_plans()
@@ -98,6 +106,21 @@ class EntityPresentationCatalogTests(unittest.TestCase):
             joined = json.dumps(plan, ensure_ascii=False)
             for preset_id in ids:
                 self.assertIn(preset_id, joined)
+            if family_id == "metric_v1":
+                counter = next(layer for layer in plan["layers"] if layer["id"] == "metric_counter_rise-value")
+                self.assertEqual(counter["text_counter"]["counter"]["from"], 0)
+                self.assertEqual(counter["text_counter"]["counter"]["to"], 0.42)
+                self.assertEqual(counter["text_counter"]["counter"]["format"], "percent")
+            if family_id == "date_v1":
+                range_date = next(layer for layer in plan["layers"] if layer["id"] == "date_range_draw-date")
+                self.assertEqual(range_date["text_counter"]["counter"]["from"], 2010)
+                self.assertEqual(range_date["text_counter"]["counter"]["to"], 2020)
+                range_path = next(layer for layer in plan["layers"] if layer["id"] == "date_range_draw-trim")
+                trim = range_path["shape"]["operators"][0]["params"]
+                self.assertEqual(trim["start"], 0)
+                self.assertEqual(trim["end"], 1)
+                self.assertEqual(trim["animation"]["keyframes"][0]["value"], [0, 0, 0])
+                self.assertEqual(trim["animation"]["keyframes"][-1]["value"], [0, 1, 0])
         entity_plan = first["entity_card_v1_gallery_10x6"]
         captions = [layer for layer in entity_plan["layers"] if layer["type"] == "text" and "-name-" in layer["id"]]
         self.assertEqual(len(captions), 60)
@@ -110,6 +133,16 @@ class EntityPresentationCatalogTests(unittest.TestCase):
             self.assertLessEqual(x + width / 2, 1920)
             self.assertGreaterEqual(y - height / 2, 0)
             self.assertLessEqual(y + height / 2, 1080)
+
+    def test_entity_family_presets_keep_shared_image_caption_lifetimes(self):
+        plan = BUILDER.build_entity_gallery(self.families["entity_card_v1"])
+        images = {layer["id"].replace("-portrait-", "-name-"): layer for layer in plan["layers"] if layer["type"] == "image"}
+        captions = [layer for layer in plan["layers"] if layer["type"] == "text" and "-name-" in layer["id"]]
+        self.assertEqual(len(captions), 60)
+        for caption in captions:
+            image = images[caption["id"]]
+            self.assertEqual(image["start_frame"], caption["start_frame"])
+            self.assertEqual(image["duration_frames"], caption["duration_frames"])
 
     def test_two_entities_share_one_scene_and_captions_remain(self):
         plan = BUILDER.build_two_entity_canary()
@@ -132,6 +165,13 @@ class EntityPresentationCatalogTests(unittest.TestCase):
             self.assertIn(name, texts)
         self.assertTrue(images)
         self.assertEqual(set(images), {BUILDER.CANARY_IMAGE})
+        for layer in (layer for layer in plan["layers"] if layer["type"] == "image"):
+            image_w, image_h = layer["size"]
+            self.assertEqual(layer["radius"], 24)
+            frame = layer["style"]["background"]
+            self.assertEqual(frame["padding"], [4, 4])
+            self.assertEqual(frame["radius"], layer["radius"] + 4)
+            self.assertLessEqual(frame["radius"], min(image_w + 8, image_h + 8) / 2)
 
     def test_entity_captions_lay_out_below_and_beside_images(self):
         plan = BUILDER.build_entity_gallery(self.families["entity_card_v1"])
@@ -171,10 +211,14 @@ class EntityPresentationCatalogTests(unittest.TestCase):
         cjk = fonts["李小龍"].pop()
         arabic = fonts["محمد علي"].pop()
         self.assertIn("CJK", cjk)
-        self.assertIn("Arabic", arabic)
+        self.assertEqual(arabic, BUILDER.ARABIC_FONT)
         self.assertNotEqual(cjk, arabic)
         self.assertEqual(BUILDER.caption_font("李小龍"), cjk)
         self.assertEqual(BUILDER.caption_font("محمد علي"), arabic)
+
+    def test_arabic_caption_uses_the_bundled_shaping_face(self):
+        self.assertEqual(BUILDER.caption_font("محمد علي"), BUILDER.ARABIC_FONT)
+        self.assertEqual(BUILDER.caption_font("李小龍"), "assets/fonts/NotoSansCJK-Regular.ttc")
 
     def test_long_names_shrink_instead_of_overflowing(self):
         plan = BUILDER.build_entity_gallery(self.families["entity_card_v1"])

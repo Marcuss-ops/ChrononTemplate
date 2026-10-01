@@ -29,9 +29,8 @@ ENTITY_SAMPLES = (
 CJK_PATTERN = tuple(range(0x2E80, 0x9FFF + 1))
 ARABIC_PATTERN = tuple(range(0x0600, 0x06FF + 1))
 CJK_FONT = "assets/fonts/NotoSansCJK-Regular.ttc"
-# The asset bundle ships DejaVuSans, whose Arabic block (165 codepoints,
-# verified via cmap) covers the sample names; no separate Arabic face is
-# bundled, so the mapping must stay inside the shipped set.
+# DejaVuSans is the renderer bundle's Arabic-capable fallback and keeps the
+# canary renderable in isolated job workspaces without an extra font asset.
 ARABIC_FONT = SMALL_FONT
 
 
@@ -96,6 +95,50 @@ def color_layer(layer_id: str, size: list[int], position: list[int], start: int,
     return value
 
 
+def ring_path_layer(layer_id: str, diameter: int, position: list[int], start: int, duration: int) -> dict:
+    radius = diameter * 0.42
+    handle = radius * 0.55228475
+    path = [
+        {"type": "move_to", "point": [0, -radius]},
+        {"type": "cubic_to", "control1": [handle, -radius], "control2": [radius, -handle], "point": [radius, 0]},
+        {"type": "cubic_to", "control1": [radius, handle], "control2": [handle, radius], "point": [0, radius]},
+        {"type": "cubic_to", "control1": [-handle, radius], "control2": [-radius, handle], "point": [-radius, 0]},
+        {"type": "cubic_to", "control1": [-radius, -handle], "control2": [-handle, -radius], "point": [0, -radius]},
+    ]
+    return {
+        "id": layer_id, "type": "shape", "size": [diameter, diameter], "position": position,
+        "start_frame": start, "duration_frames": duration,
+        "shape": {"type": "path", "path": path, "stroke": {"color": "#6ED6C3", "width": 8},
+                  "operators": [{"kind": "trim", "params": {"start": 0, "end": 1,
+                      "animation": {"keyframes": [{"frame": 0, "value": [0, 0, 0]},
+                                                       {"frame": 48, "value": [0, 1, 0]}]}}}]},
+    }
+
+
+def trim_path_layer(layer_id: str, width: int, position: list[int], start: int, duration: int) -> dict:
+    """Native Chronon stroked path with a frame-zero-to-one Trim Paths draw."""
+    half_width = width / 2
+    return {
+        "id": layer_id, "type": "shape", "size": [width, 8], "position": position,
+        "start_frame": start, "duration_frames": duration,
+        "shape": {
+            "type": "path",
+            "path": [
+                {"type": "move_to", "point": [-half_width, 0]},
+                {"type": "line_to", "point": [half_width, 0]},
+            ],
+            "stroke": {"color": "#6ED6C3", "width": 4},
+            "operators": [{"kind": "trim", "params": {
+                "start": 0, "end": 1,
+                "animation": {"keyframes": [
+                    {"frame": 0, "value": [0, 0, 0]},
+                    {"frame": 34, "value": [0, 1, 0]},
+                ]},
+            }}],
+        },
+    }
+
+
 def scene_plan(job_id: str, layers: list[dict], frames: int) -> dict:
     return {"schema": "chronon.render-plan.v3", "version": 3, "job_id": job_id,
             "canvas": {"width": 1920, "height": 1080, "fps_num": 30, "fps_den": 1, "duration_frames": frames},
@@ -127,29 +170,34 @@ def build_metric_gallery(family: dict) -> dict:
     for index, preset in enumerate(presets):
         start = index * duration
         sample = METRIC_SAMPLES[index % len(METRIC_SAMPLES)]
-        layers.append(layer_text(f"{preset['id']}-eyebrow", "KEY METRIC", [760, 42], [960, 330], start, duration, font=SMALL_FONT, font_size=24, fill="#91A5AD", tracks=[track("opacity", [(0, 0), (18, 1), (71, 1)], "out_cubic")]))
+        layers.append(layer_text(f"{preset['id']}-eyebrow", "METRIC V1 MOTION GALLERY", [760, 42], [960, 330], start, duration, font=SMALL_FONT, font_size=24, fill="#91A5AD", tracks=[track("opacity", [(0, 0), (18, 1), (71, 1)], "out_cubic")]))
         # Discrete deterministic counter values keep the render-plan text static
         # per layer while implementing a visible count-up in the renderer.
         if index == 0:
-            values = ("0%", "14%", "28%", "42%")
-            for digit_index, value in enumerate(values):
-                begin = digit_index * 16
-                end = min(71, begin + 15)
-                opacity = [(0, 0), (begin, 0), (min(71, begin + 2), 1), (end, 0)]
-                if digit_index == len(values) - 1:
-                    opacity = [(0, 0), (begin, 0), (begin + 2, 1), (71, 1)]
-                opacity = unique_frames(opacity)
-                layers.append(layer_text(f"{preset['id']}-counter-{digit_index}", value, [900, 150], [960, 515], start, duration, font_size=88, tracks=[track("opacity", opacity)]))
+            value_layer = layer_text(f"{preset['id']}-value", "{{value}}", [900, 150], [960, 515], start, duration, font_size=88, tracks=with_motion_tracks(preset["tracks"], duration))
+            value_layer["text_counter"] = {"token": "{{value}}", "counter": {"from": 0, "to": 0.42, "start_frame": 0, "duration_frames": 48, "format": "percent", "decimals": 0}}
+            layers.append(value_layer)
+        elif preset["id"] == "metric_multi_stat_focus":
+            for stat_index, (label, value) in enumerate((("REVENUE", "$3.4B"), ("USERS", "2.1M"), ("GROWTH", "42%"))):
+                cx = 600 + stat_index * 360
+                emphasis = [(0, 1), (12 + stat_index * 16, 1.045), (26 + stat_index * 16, 1), (71, 1)]
+                layers.append(layer_text(f"{preset['id']}-label-{stat_index}", label, [300, 40], [cx, 410], start, duration, font=SMALL_FONT, font_size=22, fill="#91A5AD", tracks=[track("opacity", [(0, 1), (71, 1)], "linear")]))
+                layers.append(layer_text(f"{preset['id']}-value-{stat_index}", value, [320, 100], [cx, 520], start, duration, font_size=58, tracks=[track("opacity", [(0, 1), (71, 1)], "linear"), track("scale", emphasis)]))
         else:
-            display = sample if index != 8 else "$2.1B   →   $3.4B"
+            display = sample if preset["id"] != "metric_before_after" else "$2.1B   →   $3.4B"
+            if preset["id"] == "metric_ring_draw":
+                display = "72%"
+                layers.append(ring_path_layer("metric-ring-draw-arc", 250, [960, 725], start, duration))
             layers.append(layer_text(f"{preset['id']}-value", display, [1060, 150], [960, 515], start, duration, font_size=82, min_font_size=46, tracks=with_motion_tracks(preset["tracks"], duration)))
         layers.append(layer_text(f"{preset['id']}-label", "REVENUE GROWTH", [820, 56], [960, 630], start, duration, font=SMALL_FONT, font_size=27, fill="#A8BAC0", tracks=[track("opacity", [(0, 0), (25, 1), (71, 1)], "out_cubic")]))
-        if preset["id"] in {"metric_bar_grow", "metric_multi_stat_focus"}:
+        if preset["id"] == "metric_bar_grow":
             layers.extend([color_layer(f"{preset['id']}-bar-track", [560, 9], [960, 710], start, duration, [0.20, 0.26, 0.30, 1]), color_layer(f"{preset['id']}-bar-fill", [403, 9], [881, 710], start, duration, [0.43, 0.84, 0.76, 1], [track("scale_x", [(0, 0.01), (35, 0.72), (71, 1)], "out_cubic")])])
         if preset["id"] == "metric_delta_reveal":
             layers.append(layer_text("metric-delta-badge", "+12.8%", [220, 60], [1420, 450], start + 20, duration - 20, font_size=30, fill="#6ED6C3", tracks=[track("opacity", [(0, 0), (12, 1), (51, 1)], "out_cubic")]))
         if preset["id"] == "metric_before_after":
-            layers.append(layer_text("metric-before-secondary", "$2.1B", [240, 54], [735, 680], start, duration, font_size=28, fill="#91A5AD", tracks=[track("opacity", [(0, 0), (18, 0.65), (71, 0.65)], "out_cubic")]))
+            layers.append(layer_text("metric-before-value", "$2.1B", [360, 100], [660, 540], start, duration, font_size=52, fill="#91A5AD", tracks=[track("opacity", [(0, 1), (71, 0.65)], "out_cubic"), track("scale", [(0, 1), (40, 0.92), (71, 0.92)], "out_cubic")]))
+            layers.append(layer_text("metric-before-after-arrow", "→", [100, 80], [960, 540], start, duration, font_size=48, fill="#6ED6C3", tracks=[track("opacity", [(0, 0), (20, 1), (71, 1)], "out_cubic")]))
+            layers.append(layer_text("metric-after-value", "$3.4B", [360, 100], [1260, 540], start, duration, font_size=58, tracks=[track("opacity", [(0, 0), (22, 1), (71, 1)], "out_cubic"), track("scale", [(0, 0.94), (30, 1), (71, 1)], "out_cubic")]))
     return scene_plan("metric_v1_gallery_10", layers, len(presets) * duration)
 
 
@@ -159,22 +207,53 @@ def build_date_gallery(family: dict) -> dict:
     for index, preset in enumerate(presets):
         start = index * duration
         sample = DATE_SAMPLES[index % len(DATE_SAMPLES)]
-        layers.append(layer_text(f"{preset['id']}-eyebrow", "TIMELINE  /  PRODUCT HISTORY", [900, 42], [960, 330], start, duration, font=SMALL_FONT, font_size=22, fill="#B4A99B", tracks=[track("opacity", [(0, 0), (18, 1), (71, 1)], "out_cubic")]))
-        layers.append(layer_text(f"{preset['id']}-date", sample.upper(), [1040, 132], [960, 505], start, duration, font_size=66, min_font_size=40, fill="#F3EFE7", tracks=with_motion_tracks(preset["tracks"], duration)))
+        if preset["id"] == "date_year_count":
+            sample = "2026"
+        elif preset["id"] == "date_range_draw":
+            sample = "2010–2020"
+        layers.append(layer_text(f"{preset['id']}-eyebrow", "DATE MOTION GALLERY", [900, 42], [960, 330], start, duration, font=SMALL_FONT, font_size=22, fill="#B4A99B", tracks=[track("opacity", [(0, 0), (18, 1), (71, 1)], "out_cubic")]))
+        date_tracks = with_motion_tracks(preset["tracks"], duration)
+        date_layer = layer_text(f"{preset['id']}-date", sample.upper(), [1040, 132], [960, 505], start, duration, font_size=66, min_font_size=40, fill="#F3EFE7", tracks=date_tracks)
+        if preset["id"] == "date_year_count":
+            date_layer["text_counter"] = {"token": "{{value}}", "counter": {"from": 1990, "to": 2026, "start_frame": 0, "duration_frames": 34, "format": "plain", "decimals": 0}}
+            date_layer["text"] = "{{value}}"
+        elif preset["id"] == "date_range_draw":
+            date_layer["text_counter"] = {"token": "{{value}}", "counter": {"from": 2010, "to": 2020, "start_frame": 0, "duration_frames": 34, "format": "plain", "decimals": 0}}
+            date_layer["text"] = "{{value}}"
+            # The renderer's native Trim Paths operator owns the line draw;
+            # labels mark the actual start/end year of this range.
+            layers.append(trim_path_layer("date_range_draw-trim", 680, [960, 735], start, duration))
+            for year, x in ((2010, 620), (2020, 1300)):
+                layers.append(layer_text(f"date_range_draw-endpoint-{year}", str(year), [160, 34], [x, 785], start, duration, font=SMALL_FONT, font_size=18, fill="#BEB4A6", tracks=[track("opacity", [(0, 0), (34, 1), (71, 1)], "out_cubic")]))
+        layers.append(date_layer)
         layers.append(layer_text(f"{preset['id']}-event", "PRODUCT LAUNCH", [700, 48], [960, 615], start, duration, font=SMALL_FONT, font_size=25, fill="#BEB4A6", tracks=[track("opacity", [(0, 0), (25, 1), (71, 1)], "out_cubic")]))
         if preset["id"] in {"date_timeline_tick", "date_range_draw", "date_chronology_focus", "date_history_stack"}:
             layers.append(color_layer(f"{preset['id']}-timeline", [680, 4], [960, 735], start, duration, [0.38, 0.34, 0.29, 1], [track("scale_x", [(0, 0.01), (32, 1), (71, 1)], "out_cubic")]))
-            for tick_index, year in enumerate((1990, 2000, 2010, 2020)):
-                x = 620 + tick_index * 226
+            if preset["id"] == "date_range_draw":
+                layers.append(color_layer("date_range_draw-range", [680, 16], [960, 735], start, duration, [0.43, 0.84, 0.76, 1], [track("scale_x", [(0, 0.01), (34, 1), (71, 1)], "out_cubic")]))
+            years = (2010, 2020) if preset["id"] == "date_range_draw" else (1990, 2000, 2010, 2020)
+            for tick_index, year in enumerate(years):
+                x = 620 + tick_index * (680 / max(1, len(years) - 1))
                 layers.append(color_layer(f"{preset['id']}-tick-{year}", [8, 20], [x, 735], start, duration, [0.51, 0.79, 0.91, 1], [track("scale_y", [(0, 0.01), (24 + tick_index * 3, 1), (71, 1)], "out_cubic")]))
                 layers.append(layer_text(f"{preset['id']}-year-{year}", str(year), [160, 34], [x, 785], start, duration, font=SMALL_FONT, font_size=18, fill="#BEB4A6", tracks=[track("opacity", [(0, 0), (24 + tick_index * 3, 1), (71, 1)], "out_cubic")]))
     return scene_plan("date_v1_gallery_10", layers, len(presets) * duration)
 
 
+def add_entity_image_frame(layer: dict, *, image_radius: int = 24, stroke_width: int = 4) -> dict:
+    """Add a rounded image mask and an exactly aligned padded frame plate."""
+    layer["radius"] = image_radius
+    layer["style"] = {"background": {
+        "color": "#D8E1EA",
+        "radius": image_radius + stroke_width,
+        "padding": [stroke_width, stroke_width],
+    }}
+    return layer
+
+
 def build_entity_gallery(family: dict) -> dict:
     presets, duration = family["presets"], 72
     layers = [color_layer("gallery-background", [1920, 1080], [960, 540], 0, len(presets) * duration, [0.035, 0.047, 0.067, 1])]
-    # Row 1 exercises the bottom-caption layout with four cards (short, long
+        # Row 1 exercises the bottom-caption layout with four cards (short, long
     # and two Latin-Unicode names); row 2 exercises the side-caption layout
     # with two cards (CJK caption right of its image, Arabic caption left of
     # its image — mirrored around the canvas centre). Positions are computed,
@@ -196,10 +275,10 @@ def build_entity_gallery(family: dict) -> dict:
         start = index * duration
         for card_index, name in enumerate(bottom_names):
             cx = bottom_start_x + card_index * (image_w + 140)
-            layers.append({"id": f"{preset['id']}-portrait-{card_index}", "type": "image", "asset": CANARY_IMAGE,
+            layers.append(add_entity_image_frame({"id": f"{preset['id']}-portrait-{card_index}", "type": "image", "asset": CANARY_IMAGE,
                            "size": [image_w, image_h], "fit": "cover", "position": [int(cx), bottom_y - 105], "start_frame": start,
                            "duration_frames": duration, "enable_3d": any(t["property"] in {"position_z", "rotation_x", "rotation_y"} for t in preset["tracks"]),
-                           "animation": {"tracks": with_motion_tracks(preset["tracks"], duration)}})
+                           "animation": {"tracks": with_motion_tracks(preset["tracks"], duration)}}))
             caption_tracks = [track("opacity", [(0, 0), (22 + (card_index % 3) * 3, 1), (71, 1)], "out_cubic"),
                              track("position_y", [(0, 18), (28 + (card_index % 3) * 3, 0), (71, 0)], "out_cubic")]
             if preset["id"] in {"entity_depth_caption", "entity_yaw_caption", "entity_split_side", "entity_name_pill"}:
@@ -213,10 +292,10 @@ def build_entity_gallery(family: dict) -> dict:
                 image_x = side_start_x + image_w + (gutter + caption_w) + 60 + image_w + (gutter + caption_w) - image_w / 2
                 caption_side = -1
             caption_x = image_x + caption_side * (image_w / 2 + gutter + caption_w / 2)
-            layers.append({"id": f"{preset['id']}-portrait-{card_index}", "type": "image", "asset": CANARY_IMAGE,
+            layers.append(add_entity_image_frame({"id": f"{preset['id']}-portrait-{card_index}", "type": "image", "asset": CANARY_IMAGE,
                            "size": [image_w, image_h], "fit": "cover", "position": [int(image_x), side_y - 60], "start_frame": start,
                            "duration_frames": duration, "enable_3d": any(t["property"] in {"position_z", "rotation_x", "rotation_y"} for t in preset["tracks"]),
-                           "animation": {"tracks": with_motion_tracks(preset["tracks"], duration)}})
+                           "animation": {"tracks": with_motion_tracks(preset["tracks"], duration)}}))
             layers.append(caption_text_layer(f"{preset['id']}-name-{card_index}", name, [caption_w, caption_h], [int(caption_x), side_y - 60], start, duration, tracks=caption_tracks))
         layers.append(layer_text(f"{preset['id']}-preset", preset["id"], [700, 32], [960, 1010], start + 5, duration - 5, font=SMALL_FONT, font_size=18, fill="#9FB0C2", tracks=[track("opacity", [(0, 0), (12, 1), (66, 1)], "out_cubic")]))
     return scene_plan("entity_card_v1_gallery_10x6", layers, len(presets) * duration)
@@ -226,9 +305,9 @@ def build_two_entity_canary() -> dict:
     duration = 120
     layers = [color_layer("background", [1920, 1080], [960, 540], 0, duration, [0.035, 0.047, 0.067, 1])]
     for index, (name, cx) in enumerate((("PERSON A", 480), ("PERSON B", 1440))):
-        layers.append({"id": f"entity-{index}-image", "type": "image", "asset": CANARY_IMAGE,
+        layers.append(add_entity_image_frame({"id": f"entity-{index}-image", "type": "image", "asset": CANARY_IMAGE,
                        "size": [500, 590], "fit": "cover", "position": [cx, 485], "start_frame": 0,
-                       "duration_frames": duration, "animation": {"tracks": [track("opacity", [(0, 0), (24, 1), (119, 1)]), track("scale", [(0, 0.94), (30, 1), (119, 1)])]}})
+                       "duration_frames": duration, "animation": {"tracks": [track("opacity", [(0, 0), (24, 1), (119, 1)]), track("scale", [(0, 0.94), (30, 1), (119, 1)])]}}))
         layers.append(layer_text(f"entity-{index}-caption", name, [460, 72], [cx, 835], 0, duration, font_size=34,
                                  tracks=[track("opacity", [(0, 0), (28, 1), (119, 1)]), track("position_y", [(0, 22), (32, 0), (119, 0)])]))
     return scene_plan("entity_card_v1_two_entities_one_scene", layers, duration)
