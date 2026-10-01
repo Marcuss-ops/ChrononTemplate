@@ -302,6 +302,47 @@ RenderingGen reads it through
 `renderinggen/internal/motion/catalog/chronontemplate_catalog.v1.json` and
 refreshes it with `RenderingGen/scripts/sync_motion_catalog.sh`.
 
+### Entity presentation V1 — the registry flow
+
+`catalog/entity_presentation.v1.json` is the single motion source of truth for
+the three certified editorial families — `metric_v1`, `date_v1` and
+`entity_card_v1`, ten presets each. Nothing else republishes those lists: the
+legacy `catalog/entity_motion_families.v1.json` is marked legacy and feeds only
+the exploratory people/location render scripts.
+
+```text
+ChrononTemplate/catalog/entity_presentation.v1.json   authored 3x10 vocabulary
+ChrononTemplate/tools/emit_catalog.cpp                validation + merge
+                 │  chronontemplate_emit_catalog
+                 ▼
+catalog/chronontemplate_catalog.v1.json   (entity_presentation + 30 motions)
+                 │  RenderingGen/scripts/sync_motion_catalog.sh
+                 ▼
+RenderingGen/renderinggen/internal/motion/catalog/   embedded, fail-closed
+                 │  internal/motion Registry.Resolve(preset_id)
+                 ▼
+Chronon3D  chronon.render-plan.v2/v3
+```
+
+Every preset carries its certification metadata in the emitted motions:
+`id`, `family` (category), `supported_template`, `duration_bounds`,
+`required_properties` (one per track, in track order), `requires_3d`,
+`requires_camera`, `seeded` and `render_safe`. The gates that keep it honest:
+
+- `ChrononTemplate/tools/test_entity_presentation_v1.py` — catalog contract,
+  deterministic golden plans, layout/Unicode/safe-area, multi-entity duo
+- `RenderingGen .../internal/motion/presentation_catalog_test.go` — catalog
+  parity, 10/10 per family, unknown-preset fail-closed, exact final pose
+- `RenderingGen .../internal/motion/presentation_pose_certification_test.go`
+  — start/mid/end poses for all 30 presets, the `entity_yaw_caption`
+  scenario, counter no-overshoot, sampling determinism
+- `RenderingGen .../internal/motion/presentation_multi_entity_test.go` — one
+  scene for two entities, captions remain visible, focus A→B, no overlap
+
+`tools/build_entity_presentation_v1.py` regenerates the four golden plans into
+`golden_plans/entity_presentation_v1/`; `--cli` additionally validates each
+plan through `chronon3d_cli validate --plan` when the Chronon3D CLI is built.
+
 ## Boundary
 
 This module owns recipes. The motion core owns space/time evaluation, and
@@ -389,3 +430,50 @@ window that pulses the held value through the run (lift, wave), and `full`
 selects the whole run at once. Every definition stays inside Chronon3D's
 canonical GPU text contract (glyph windows and single-word run emphasis), which
 is what keeps the whole pack on the GPU instead of the software text fallback.
+
+### Multi-image duo v1
+
+`catalog/multi_entity_layout.v1.json` and
+`tools/render_multi_entity_layout_v1.py` define the two-image, one-scene pack.
+It keeps both 620×720 cards in fixed left/right slots on a 1920×1080 canvas for
+150 frames (5 seconds at 30 fps), and provides five motions:
+`duo_split_reveal`, `duo_depth_stagger`, `duo_cross_focus`,
+`duo_parallax_balance`, and `duo_compare_hold`. The authoring contract enforces
+both cards in the same scene, a visible reveal by 45%, persistent opacity, a
+maximum 1.05× focus scale, safe-area bounds, and a reciprocal left/right focus
+exchange; the image cards have a six-pixel minimum center gap at peak scale.
+
+The generator is repository-relative and local-only by default. It validates
+and renders all five presets plus people, brand, and generic-image canaries;
+Google Drive upload requires an explicit `--upload` opt-in and uses
+RenderingGen's `drive-upload` CLI with the configured OAuth files. Use
+`--upload-only` to revalidate the complete eight-video suite and publish its MP4s
+without rerendering; only those eight MP4s are sent, not posters, plans, or the
+verification manifest. With the repository Chronon CLI available, run:
+
+```shell
+python3 tools/render_multi_entity_layout_v1.py \
+  --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli \
+  --assets-root ../Chronon3d --validate-only
+python3 tools/render_multi_entity_layout_v1.py \
+  --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli \
+  --assets-root ../Chronon3d
+python3 tools/verify_multi_image_duo_v1.py out/multi_image_duo_v1 --canaries
+# After the suite has been rendered and verified, upload the exact eight MP4s:
+python3 tools/render_multi_entity_layout_v1.py \\
+  --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli \\
+  --assets-root ../Chronon3d --upload-only \\
+  --drive-credentials /home/pierone/.config/velox/credentials.json \\
+  --drive-token /home/pierone/.config/velox/token.json
+```
+
+The default upload destination is the configured multi-image-duo Google Drive
+folder; override `--drive-folder`, `--drive-uploader`, `--drive-credentials`, or
+`--drive-token` when needed. RenderingGen verifies each file's SHA-256 and byte
+count and reports a `DRIVE_UPLOAD_PASS` line on success. The verifier checks
+1920×1080, 30 fps, 150 frames, five-second duration,
+left/right visibility in an encoded frame, and safe-area clipping; it writes
+`out/multi_image_duo_v1/multi_image_duo_v1_manifest.json` with coverage and
+SHA-256 evidence. Fast contract checks run as part of CTest when Python 3 is
+available, and can also be run directly with
+`python3 tools/test_multi_image_duo_v1.py`.

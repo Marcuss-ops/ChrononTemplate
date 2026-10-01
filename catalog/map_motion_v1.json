@@ -1,0 +1,73 @@
+{
+  "schema": "chronontemplate.map-motion-family.v1",
+  "version": 1,
+  "catalog_id": "map_motion_v1",
+  "canvas": {"width": 1280, "height": 720, "fps_num": 24, "fps_den": 1, "duration_frames": 72},
+  "provenance": {
+    "natural_earth": "ChrononTemplate/catalog/MAP_DATA_SOURCES.md; Natural Earth public-domain basemaps and Admin 0 1:50m country boundaries",
+    "nasa": "ChrononTemplate/catalog/MAP_DATA_SOURCES.md; NASA Blue Marble Next Generation, August 2004",
+    "license_note": "See MAP_DATA_SOURCES.md for source URLs, licenses and geographic extents.",
+    "data_limitations": "No verified DEM, historical boundary time series, or authoritative socioeconomic metrics are bundled. Terrain and historical/data variants are labeled as illustrative design studies, not factual geospatial analyses."
+  },
+  "families": [
+    {"id":"map_basic_v1","items":[
+      {"id":"map_world_to_country","title":"WORLD → FRANCE","source":"natural_earth"},
+      {"id":"map_country_outline_draw","title":"FRANCE · OUTLINE","source":"natural_earth"},
+      {"id":"map_country_pop_focus","title":"EUROPE · FOCUS","source":"natural_earth"},
+      {"id":"map_country_lift_25d","title":"FRANCE · LIFT STUDY","source":"natural_earth","note":"2.5D editorial approximation; no extruded country mesh."},
+      {"id":"map_country_pulse","title":"FRANCE · PULSE","source":"natural_earth"},
+      {"id":"map_city_fly_to","title":"LONDON · FLY TO","source":"nasa"},
+      {"id":"map_city_pin_drop","title":"PARIS · PIN DROP","source":"nasa"},
+      {"id":"map_city_radar_ping","title":"LONDON · RADAR","source":"nasa"},
+      {"id":"map_city_spotlight","title":"PARIS · SPOTLIGHT","source":"nasa"},
+      {"id":"map_city_label_track","title":"LONDON · ANCHORED LABEL","source":"nasa"}
+    ]},
+    {"id":"map_routes_v1","items":[
+      {"id":"map_route_draw","title":"NEW YORK → LONDON","source":"nasa"},
+      {"id":"map_route_camera_follow","title":"ROUTE · CAMERA FOLLOW","source":"nasa"},
+      {"id":"map_route_air_arc","title":"TRANSATLANTIC · AIR ARC","source":"nasa"},
+      {"id":"map_route_multi_destination","title":"LONDON → THREE CITIES","source":"nasa"},
+      {"id":"map_route_reverse","title":"ROUTE · RETURN","source":"nasa"}
+    ]},
+    {"id":"map_multi_location_v1","items":[
+      {"id":"map_multi_pin_stagger","title":"EUROPE · STAGGERED PINS","source":"natural_earth"},
+      {"id":"map_multi_focus_cycle","title":"LONDON → PARIS → ROME","source":"natural_earth"},
+      {"id":"map_cluster_expand","title":"EUROPE · CLUSTER EXPANSION","source":"natural_earth"},
+      {"id":"map_city_comparison","title":"LONDON | PARIS","source":"natural_earth"},
+      {"id":"map_location_stack","title":"LOCATION STACK","source":"natural_earth"},
+      {"id":"location_duo_split_map","title":"TWO CITIES · SPLIT","source":"natural_earth"},
+      {"id":"location_duo_route","title":"TWO CITIES · ROUTE","source":"natural_earth"},
+      {"id":"location_trio_pin_focus","title":"THREE CITIES · FOCUS","source":"natural_earth"},
+      {"id":"location_trio_route_chain","title":"THREE CITIES · ROUTE CHAIN","source":"natural_earth"},
+      {"id":"location_quad_focus_cycle","title":"FOUR CITIES · FOCUS CYCLE","source":"natural_earth"}
+    ]},
+    {"id":"map_data_v1","items":[
+      {"id":"map_region_fill_reveal","title":"FRANCE · REGION REVEAL","source":"natural_earth"},
+      {"id":"map_region_expand","title":"FRANCE · EXPANDING AREA","source":"natural_earth"},
+      {"id":"map_region_scan","title":"FRANCE · SCAN STUDY","source":"natural_earth"},
+      {"id":"map_choropleth_reveal","title":"CHOROPLETH · ILLUSTRATIVE","source":"natural_earth","note":"Synthetic values for layout demonstration only; not empirical data."},
+      {"id":"map_metric_bubbles","title":"CITY BUBBLES · ILLUSTRATIVE","source":"natural_earth","note":"Synthetic values for layout demonstration only; not empirical data."}
+    ]},
+    {"id":"map_satellite_v1","items":[
+      {"id":"map_satellite_dolly_in","title":"SATELLITE · DOLLY IN","source":"nasa"},
+      {"id":"map_satellite_tilt_in","title":"SATELLITE · TILT STUDY","source":"nasa","note":"Editorial perspective transform, not a 3D terrain camera."},
+      {"id":"map_satellite_orbit_target","title":"SATELLITE · ORBIT STUDY","source":"nasa","note":"Small 2D bearing-style turn, not an Earth-orbit simulation."},
+      {"id":"map_satellite_altitude_drop","title":"SATELLITE · ALTITUDE DROP","source":"nasa"},
+      {"id":"map_satellite_pin_reveal","title":"SATELLITE · PIN REVEAL","source":"nasa"}
+    ]},
+    {"id":"map_terrain_v1","items":[
+      {"id":"map_terrain_rise","title":"RELIEF · RISE STUDY","source":"natural_earth","note":"Shaded-relief raster treatment; no elevation model or geometry displacement."},
+      {"id":"map_terrain_flyover","title":"RELIEF · FLYOVER STUDY","source":"natural_earth","note":"Editorial pan/tilt approximation; no DEM-backed camera."},
+      {"id":"map_terrain_peak_focus","title":"ALPS · PEAK FOCUS","source":"natural_earth","note":"Peak location is an editorial target on shaded relief; no elevation sampled."},
+      {"id":"map_terrain_route","title":"ALPINE ROUTE STUDY","source":"natural_earth","note":"Route is illustrative and not terrain-following."},
+      {"id":"map_terrain_depth_reveal","title":"RELIEF · DEPTH STUDY","source":"natural_earth","note":"2.5D visual treatment; no DEM-backed depth."}
+    ]},
+    {"id":"map_historical_v1","items":[
+      {"id":"map_historical_parchment_reveal","title":"PARCHMENT · MAP REVEAL","source":"natural_earth","note":"Contemporary geography with paper styling, not a historical source map."},
+      {"id":"map_historical_route_ink","title":"INK · ROUTE DRAW","source":"natural_earth","note":"Editorial ink styling on contemporary geography."},
+      {"id":"map_historical_zoom","title":"PAPER · SLOW ZOOM","source":"natural_earth","note":"Contemporary source geography with paper styling."},
+      {"id":"map_historical_year_transition","title":"YEAR TRANSITION · CONCEPT","source":"natural_earth","note":"Typography-only year transition; no historical boundary time series bundled."},
+      {"id":"map_historical_border_change","title":"BORDER CHANGE · CONCEPT","source":"natural_earth","note":"Conceptual comparison using contemporary outlines; no historical boundaries bundled."}
+    ]}
+  ]
+}

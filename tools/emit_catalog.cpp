@@ -460,7 +460,62 @@ int main(int argc, char** argv) {
         if (!data.contains("overlay_presets")) fail("catalog needs `overlay_presets`");
         if (!data.contains("selections")) fail("catalog needs `selections`");
 
+        json entityPresentation = json::parse(readFile(CHRONONTEMPLATE_ENTITY_PRESENTATION_FILE));
+        requireObject(entityPresentation, "entity_presentation");
+        if (entityPresentation.value("schema", "") != "chronontemplate.entity-presentation.v1" ||
+            entityPresentation.value("version", 0) != 1 || !entityPresentation.contains("families") ||
+            !entityPresentation["families"].is_array()) {
+            fail("entity presentation catalog has an unsupported schema or missing families");
+        }
+        std::set<std::string> presentationFamilies;
+        std::set<std::string> presentationMotionIDs;
+        for (const auto& family : entityPresentation["families"]) {
+            requireObject(family, "entity_presentation family");
+            const std::string familyID = family.value("id", "");
+            if (familyID != "metric_v1" && familyID != "date_v1" && familyID != "entity_card_v1") {
+                fail("entity presentation catalog declares unknown family " + familyID);
+            }
+            if (!presentationFamilies.insert(familyID).second) fail("duplicate entity presentation family " + familyID);
+            if (!family.contains("presets") || !family["presets"].is_array() || family["presets"].size() != 10) {
+                fail("entity presentation family " + familyID + " must define exactly 10 presets");
+            }
+            for (const auto& preset : family["presets"]) {
+                requireObject(preset, "entity_presentation preset");
+                const std::string id = preset.value("id", "");
+                if (id.empty() || !presentationMotionIDs.insert(id).second) fail("empty or duplicate entity presentation motion id " + id);
+                if (!preset.contains("tracks") || !preset["tracks"].is_array() || preset["tracks"].empty()) fail("entity presentation motion " + id + " has no tracks");
+                for (const auto& track : preset["tracks"]) validateTrack(track, "entity presentation motion " + id + ".tracks");
+            }
+        }
+        if (presentationFamilies.size() != 3) fail("entity presentation catalog must contain exactly the three V1 families");
+
         json motions = data["motions"];
+        for (const auto& family : entityPresentation["families"]) {
+            const std::string familyID = family["id"].get<std::string>();
+            const json bounds = family["duration_bounds"];
+            for (const auto& preset : family["presets"]) {
+                json tracks = preset["tracks"];
+                if (familyID == "entity_card_v1") {
+                    const json fadeTrack = {{"property", "opacity"}, {"easing", "out_cubic"},
+                                            {"keyframes", json::array({{{"frame", 0}, {"value", 0.0}}, {{"frame", 22}, {"value", 1.0}}, {{"frame", 72}, {"value", 1.0}}})}};
+                    if (tracks.empty() || tracks[0].value("property", "") != "opacity") tracks.insert(tracks.begin(), fadeTrack);
+                }
+                bool requires3D = false;
+                json requiredProperties = json::array();
+                for (const auto& track : tracks) {
+                    const std::string property = track.value("property", "");
+                    requiredProperties.push_back(property);
+                    requires3D = requires3D || property == "position_z" || property == "rotation_x" || property == "rotation_y";
+                }
+                const json targets = family["supported_content"].get<json>();
+                motions.push_back({{"id", preset["id"]}, {"category", familyID},
+                                   {"supported_template", family["supported_template"]},
+                                   {"targets", targets}, {"supported_content", targets}, {"unit", "layer"},
+                                   {"duration_bounds", bounds}, {"required_properties", requiredProperties},
+                                   {"render_safe", true}, {"requires_3d", requires3D}, {"requires_camera", requires3D},
+                                   {"seeded", false}, {"enter", 48}, {"tracks", tracks}});
+            }
+        }
         const json appleMotions = applePhraseMotions();
         for (const auto& row : appleMotions) motions.push_back(row);
         const std::set<std::string> motionIDs = validateMotions(motions);
@@ -484,6 +539,7 @@ int main(int argc, char** argv) {
         emitted["templates"] = packRows;
         emitted["final3d_presets"] = presetRows;
         emitted["native_phrase_style"] = nativePhraseStyle();
+        emitted["entity_presentation"] = entityPresentation;
         emitted["motions"] = motions;
         emitted["overlay_presets"] = data["overlay_presets"];
         emitted["selections"] = data["selections"];

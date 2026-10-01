@@ -1,0 +1,141 @@
+{
+  "schema": "chronontemplate.multi-entity-layout.v1",
+  "version": 1,
+  "description": "Multi-Entity Layout & Simultaneous Entity/Phrase Scheduling System for ChrononTemplate",
+  "primitives": {
+    "entity_group": {
+      "fields": ["items", "group_type", "count", "total_duration", "timing_mode", "focus_strategy"],
+      "group_types": ["image", "person", "location", "phrase", "mixed"],
+      "focus_strategies": ["sequential_highlight", "cross_focus", "all_balanced", "stagger_reveal"]
+    },
+    "layout_resolver": {
+      "layouts": {
+        "count_2": {
+          "name": "multi_image_duo",
+          "canvas": [1920, 1080],
+          "duration_seconds": 5.0,
+          "fps": 30,
+          "safe_inset": 40,
+          "slots": [
+            {"id": "left", "center": [-480, 0], "size": [620, 720], "radius": 24, "safe_bounds": [154, 162, 806, 918]},
+            {"id": "right", "center": [480, 0], "size": [620, 720], "radius": 24, "safe_bounds": [1114, 162, 1766, 918]}
+          ],
+          "simultaneous_images": 2,
+          "reveal_deadline_ratio": 0.45,
+          "minimum_persistent_opacity": 0.75,
+          "maximum_focus_scale": 1.05
+        },
+        "count_3": {
+          "name": "multi_image_trio",
+          "canvas": [1920, 1080],
+          "templates": ["tri_fan", "tri_grid", "hero_center_two_side", "top_one_bottom_two", "arc_layout"]
+        },
+        "count_4": {
+          "name": "multi_image_quad",
+          "canvas": [1920, 1080],
+          "templates": ["grid_2x2", "row_4", "two_top_two_bottom", "center_cluster", "comparison_grid"]
+        },
+        "count_5": {
+          "name": "multi_image_penta",
+          "canvas": [1920, 1080],
+          "templates": ["hero_plus_four", "carousel_focus", "cluster_expand", "strip_wave", "priority_cycle"]
+        },
+        "phrases": {
+          "name": "multi_phrase_layout",
+          "canvas": [1920, 1080],
+          "templates": ["vertical_stack", "timeline_strip", "quote_ladder", "two_column_split", "focus_panel"]
+        }
+      }
+    },
+    "focus_scheduler": {
+      "states": {
+        "primary": {
+          "scale_multiplier": 1.04,
+          "z_push": 25.0,
+          "opacity": 1.0,
+          "glow_intensity": 0.35
+        },
+        "secondary": {
+          "scale_multiplier": 0.96,
+          "z_push": -15.0,
+          "opacity": 0.75,
+          "glow_intensity": 0.0
+        },
+        "history": {
+          "scale_multiplier": 0.92,
+          "z_push": -35.0,
+          "opacity": 0.50,
+          "glow_intensity": 0.0
+        },
+        "balanced": {
+          "scale_multiplier": 1.0,
+          "z_push": 0.0,
+          "opacity": 1.0,
+          "glow_intensity": 0.15
+        }
+      }
+    }
+  },
+  "motion_presets": {
+    "multi_image_duo_v1": [
+      {
+        "id": "duo_split_reveal",
+        "description": "Lateral left/right ingress, settle, then alternate primary focus before final balance",
+        "timeline_stages": ["0.0-0.8s reveal", "0.8-1.6s settle", "1.6-2.8s focus left", "2.8-4.0s focus right", "4.0-5.0s balanced"]
+      },
+      {
+        "id": "duo_depth_stagger",
+        "description": "3D Z-depth entrance with staggered arrival, smooth focus exchange and calm settle",
+        "timeline_stages": ["0.0-0.7s left in", "0.2-0.9s right in", "1.0-2.1s left focus", "2.1-3.3s right focus", "3.3-5.0s both calm"]
+      },
+      {
+        "id": "duo_cross_focus",
+        "description": "Both cards reveal simultaneously, focus wave sweeps across left to right without jarring movement",
+        "timeline_stages": ["0.0-0.9s both reveal", "0.9-2.0s left highlighted", "2.0-3.1s transition", "3.1-4.2s right highlighted", "4.2-5.0s both normalize"]
+      },
+      {
+        "id": "duo_parallax_balance",
+        "description": "Continuous subtle 2.5D parallax drift with sequential entity priority and balanced hold",
+        "timeline_stages": ["0.0-0.8s both in", "0.8-2.0s left focus", "2.0-3.2s right focus", "3.2-5.0s balanced state"]
+      },
+      {
+        "id": "duo_compare_hold",
+        "description": "Rapid bilateral reveal, left priority, right priority, settling into extended stable dual presentation",
+        "timeline_stages": ["0.0-0.7s reveal both", "0.7-1.8s left priority", "1.8-2.9s right priority", "2.9-5.0s equal weight"]
+      }
+    ],
+    "multi_image_trio_v1": [
+      {"id": "trio_fan_reveal", "description": "Radial fan-out from center stack with sequential focus Left -> Mid -> Right and balanced settle"},
+      {"id": "trio_center_priority", "description": "Hero center card dominant with 1.08x scale and elevated Z; contextual flanking cards"},
+      {"id": "trio_ladder_stagger", "description": "Staggered diagonal ladder ingress with focus traversal wave"},
+      {"id": "trio_arc_focus", "description": "Parabolic arc disposition with dynamic sliding focus scan"},
+      {"id": "trio_depth_peel", "description": "3-tier Z depth peeling successively into foreground prominence"}
+    ],
+    "multi_image_quad_v1": [
+      {"id": "quad_grid_assemble", "description": "Simultaneous 2x2 grid assembly sliding in from canvas borders"},
+      {"id": "quad_corner_converge", "description": "Dynamic convergence from 4 canvas corners with fluid damping"},
+      {"id": "quad_pair_focus", "description": "Pairwise priority focus: top row, then bottom row, then balanced quad"},
+      {"id": "quad_mosaic_spotlight", "description": "Clockwise spotlight traversal across the 4 quadrant positions"},
+      {"id": "quad_crossflow", "description": "Dual diagonal sweep across TL-BR followed by TR-BL"}
+    ],
+    "multi_image_penta_v1": [
+      {"id": "penta_hero_plus_four", "description": "Center card 3 as dominant hero with 4 symmetrical satellite cards"},
+      {"id": "penta_carousel_focus", "description": "All 5 cards on screen; focus steps forward in 20-frame sequential cycles"},
+      {"id": "penta_cluster_expand", "description": "Tight central cluster ingress blossoming into full horizontal strip"},
+      {"id": "penta_strip_wave", "description": "Continuous elevation and scale wave traversing from card 1 to 5"},
+      {"id": "penta_priority_cycle", "description": "Cascaded entry and cyclical prioritization with 100% screen retention"}
+    ],
+    "multi_phrase_layout_v1": [
+      {"id": "phrase_vertical_focus_stack", "description": "3-phrase vertical stack: active phrase in primary focus, previous phrases scale to history"},
+      {"id": "phrase_ladder_priority", "description": "Stepped staircase layout with progressive horizontal sweep and priority traversal"},
+      {"id": "phrase_dual_side_compare", "description": "Two-column statement vs counterstatement with alternate focus and comparison hold"},
+      {"id": "phrase_stagger_keep_alive", "description": "Sequential cascaded entries where every phrase remains alive and visible on screen"},
+      {"id": "phrase_center_with_history", "description": "Active hero statement occupies center stage; previous statements ascend into upper history stack"},
+      {"id": "phrase_quote_strip", "description": "3 horizontal quote blocks across canvas with progressive focus sweep and unified hold"},
+      {"id": "phrase_timeline_reveal", "description": "3 chronological milestone statements revealing in progression with history retention"},
+      {"id": "phrase_marker_highlight_cycle", "description": "3 phrases with clean visual highlight / glow accent cycle and persistent visibility"},
+      {"id": "phrase_compact_columns", "description": "4 concise points in a balanced 2-column matrix with sequential activation"},
+      {"id": "phrase_focus_swap_hold", "description": "Two major thesis statements swapping hero focus and settling into extended comparison hold"}
+    ]
+  }
+}
