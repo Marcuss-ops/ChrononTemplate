@@ -192,6 +192,13 @@ def geocode(place: Place, language: str = "it") -> Place:
     return place
 
 
+def _format_wgs84(lat: float, lon: float) -> str:
+    """Format coordinates without assuming the northern/eastern hemispheres."""
+    lat_hemi = "N" if lat >= 0.0 else "S"
+    lon_hemi = "E" if lon >= 0.0 else "W"
+    return f"WGS84 {abs(lat):.6f} {lat_hemi} {abs(lon):.6f} {lon_hemi}"
+
+
 def _smootherstep(p: float) -> float:
     """Module-level smootherstep: the C2 law, shared by the builders (and
     mirrored, not imported, inside the dependency-free self-test)."""
@@ -211,12 +218,16 @@ class _ShotBuilder:
     """Duck-types the fast_geo_camera builder contract for one shot."""
 
     def __init__(self, place: Place, preset: str, frames: int):
+        if frames < 2:
+            raise ValueError("a shot requires at least two frames")
         self.place = place
         self.preset = preset
         # The fast_geo_camera harness contract (attribute names included).
         self.WIDTH, self.HEIGHT, self.FPS = WIDTH, HEIGHT, FPS
         self.TOTAL_FRAMES = frames
         self.FRAMES_TOTAL = frames          # legacy alias
+        self.ZOOM_INDEX = 0                 # pose = (zoom, pitch, yaw, roll)
+        self.allow_zoom_hold = preset == "metric"
         self.end_zoom = {"dive": 17.8, "tilt": 17.3, "orbit": 17.5,
                          "metric": 17.5}.get(preset, 17.5)
         self.ANCHORS = ((place.lat, place.lon),)
@@ -283,7 +294,7 @@ class _ShotBuilder:
                 frame, (WIDTH / 2, HEIGHT / 2), progress,
                 title=self.place.short_name,
                 sub=self.place.subtitle,
-                metric=f"WGS84 {self.place.lat:.6f} N {self.place.lon:.6f} E",
+                metric=_format_wgs84(self.place.lat, self.place.lon),
             )
         draw_hud_overlay(frame, self.place.lat, self.place.lon, zoom, progress,
                          target_title=f"{self.place.short_name} (GEO CAMERA V1)")
@@ -300,7 +311,11 @@ class TourBuilder:
 
     def __init__(self, stops: list[Place], seconds_per_stop: float = 5.0,
                  travel_seconds: float = 3.0, end_zoom: float = 16.5):
+        if seconds_per_stop <= 0.0 or travel_seconds <= 0.0:
+            raise ValueError("tour stop and travel durations must be positive")
         self.stops = [s for s in stops if s.ok]
+        if not self.stops:
+            raise ValueError("a tour requires at least one geocoded stop")
         self.sps = seconds_per_stop
         self.travel = travel_seconds
         self.end_zoom = end_zoom
@@ -309,6 +324,7 @@ class TourBuilder:
         self.TOTAL_FRAMES = max(2, int(seconds_per_stop * FPS) * len(self.stops)
                                 + leg * (len(self.stops) - 1))
         self.FRAMES_TOTAL = self.TOTAL_FRAMES  # legacy alias
+        self.ZOOM_INDEX = 2                    # pose = (lat, lon, zoom)
         self.ANCHORS = tuple((s.lat, s.lon) for s in self.stops)
         span = max(abs(self.stops[0].lat - s.lat) + abs(self.stops[0].lon - s.lon)
                    for s in self.stops)
@@ -337,7 +353,7 @@ class TourBuilder:
                 if len(m) == 3:  # dive/hold on stop i
                     i = m[2]
                     s = self.stops[i]
-                    e = smootherstep((f - m[0]) / max(1, m[1] - m[0]))
+                    e = smootherstep((f - m[0]) / max(1, m[1] - m[0] - 1))
                     z_start = 5.2 if i == 0 else self.end_zoom - 1.2
                     return (s.lat, s.lon,
                             z_start + (self.end_zoom - z_start) * e)
@@ -348,7 +364,7 @@ class TourBuilder:
                 # snap past the gate.
                 i, j = m[2], m[3]
                 a, b = self.stops[i], self.stops[j]
-                raw = (f - m[0]) / max(1, m[1] - m[0])
+                raw = (f - m[0]) / max(1, m[1] - m[0] - 1)
                 p = smootherstep(raw)
                 lat = a.lat + (b.lat - a.lat) * p
                 lon = a.lon + (b.lon - a.lon) * p
@@ -426,6 +442,15 @@ def _zoom_tv(zooms: list[float], s0: int, s1: int) -> float:
                if (d := abs(zooms[g] - zooms[g - 1])) > 1e-9)
 
 
+def _pose_zoom(builder, frame: int) -> float:  # noqa: ANN001 - duck-typed builder
+    """Read zoom from the explicitly documented pose layout of each builder."""
+    pose = builder.pose(frame)
+    zoom_index = getattr(builder, "ZOOM_INDEX", None)
+    if zoom_index is None:
+        raise TypeError(f"{type(builder).__name__} must declare ZOOM_INDEX")
+    return float(pose[zoom_index])
+
+
 def check_velocity_strict(builder) -> int:  # noqa: ANN001 - duck-typed builder
     """Strict zoom-velocity continuity, phase-aware.
 
@@ -441,10 +466,11 @@ def check_velocity_strict(builder) -> int:  # noqa: ANN001 - duck-typed builder
     segmentation, where each run is exactly one law. Returns the phase count.
     """
     n = builder.TOTAL_FRAMES
-    zooms = [builder.pose(f)[-1] for f in range(n)]
+    zooms = [_pose_zoom(builder, f) for f in range(n)]
+
     schedule = getattr(builder, "_schedule", None)
     if schedule is not None:
-        spans = [(m[0], m[1]) for m in schedule() if m[1] - m[0] >= 4]
+        spans = [(m[0], m[1] - 1) for m in schedule() if m[1] - m[0] >= 4]
         for (a0, a1), (b0, b1) in zip(spans, spans[1:]):
             step = abs(zooms[b0] - zooms[a1 - 1])
             lim = min(0.5 * _zoom_tv(zooms, a0, a1) / max(1, a1 - a0),
@@ -465,6 +491,8 @@ def check_velocity_strict(builder) -> int:  # noqa: ANN001 - duck-typed builder
             else:
                 f += 1
     if not spans:
+        if getattr(builder, "allow_zoom_hold", False):
+            return 0
         raise RuntimeError("the shot never moves")
     for s0, s1 in spans:
         tv = _zoom_tv(zooms, s0, s1)
@@ -500,6 +528,8 @@ class GeoRuntime:
                  crf: int = 18, keep_individual: bool = False,
                  upload: bool = False):
         # Canonical output home, next to every other camera_motion_v2 render.
+        if workers < 1 or block < 1:
+            raise ValueError("workers and block must be positive integers")
         self.out_root = Path(out_root or (HERE.parent / "out/camera_motion_v2/geo_runtime"))
         self.out_root.mkdir(parents=True, exist_ok=True)
         self.workers = workers
@@ -524,6 +554,8 @@ class GeoRuntime:
     # -- one place -> one shot mp4 --------------------------------------------
     def render_place(self, place: Place, frames: int = 120,
                      out: Path | None = None, verify: bool = False) -> dict:
+        if not place.ok:
+            raise ValueError(f"place is not geocoded: {place.query}")
         import fast_geo_camera as harness
         builder = _ShotBuilder(place, place.preset, frames)
         sampler = harness.build_sampler(builder)
@@ -531,8 +563,9 @@ class GeoRuntime:
         if verify:
             if not harness.verify_against_engine(builder, sampler):
                 raise RuntimeError(f"verify failed for {place.query}")
-        out = Path(out or (self.out_root / f"{place.query.replace(' ', '_')}_"
-                                        f"{place.preset}.mp4"))
+        safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", place.query).strip("._") or "place"
+        out = Path(out or (self.out_root / f"{safe_name}_{place.preset}.mp4"))
+        out.parent.mkdir(parents=True, exist_ok=True)
         stats = harness.encode_with_pool(builder, sampler, out,
                                          self.workers, self.block,
                                          self.preset_x264, self.crf)
@@ -546,6 +579,10 @@ class GeoRuntime:
         stops = [s for s in tour.stops if s.ok]
         if not stops:
             raise RuntimeError("no geocodable stops")
+        if len(stops) != len(tour.stops):
+            unresolved = [s.query for s in tour.stops if not s.ok]
+            raise RuntimeError("could not geocode every requested stop: "
+                               + ", ".join(unresolved))
 
         if len(stops) == 1:
             builder = _ShotBuilder(stops[0], stops[0].preset, 120)
@@ -566,6 +603,7 @@ class GeoRuntime:
 
         stamp = time.strftime("%Y%m%d_%H%M%S")
         out = Path(out or (self.out_root / f"tour_{stamp}.mp4"))
+        out.parent.mkdir(parents=True, exist_ok=True)
         tour.stats.append(harness.encode_with_pool(
             builder, sampler, out, self.workers, self.block,
             self.preset_x264, self.crf))
@@ -625,6 +663,7 @@ def self_test() -> int:
         ("Machu Picchu con orbita e poi Giza",
          [("Machu Picchu", "orbit"), ("Giza", "dive")]),
         ("Venezia con tilt", [("Venezia", "tilt")]),
+
         ("\"Piazza dei Miracoli\" con metric",
          [("Piazza dei Miracoli", "metric")]),
         ("Piazza dei Miracoli, Pisa",
@@ -635,6 +674,9 @@ def self_test() -> int:
     for text, expected in cases:
         got = [(p.query, p.preset) for p in extract_places(text)]
         check(got == expected, f"extract {text!r} -> {got}")
+    check(_format_wgs84(-33.8688, -151.2093)
+          == "WGS84 33.868800 S 151.209300 W",
+          "coordinate overlay formats southern and western hemispheres")
 
     # 2. Tour schedule: every frame belongs to exactly one phase; the last
     #    frame lands on the final stop at the landing zoom.
@@ -643,6 +685,7 @@ def self_test() -> int:
              Place(query="C", display_name="C", lat=45.44, lon=12.33, ok=True)]
     tb = TourBuilder(stops)
     phases = tb._schedule()
+
     covered = sum(m[1] - m[0] for m in phases)
     contiguous = (phases[0][0] == 0 and phases[-1][1] == tb.TOTAL_FRAMES
                   and all(a[1] == b[0] for a, b in zip(phases, phases[1:])))
@@ -650,11 +693,14 @@ def self_test() -> int:
           f"tour phases cover the timeline without gaps/overlaps "
           f"({covered} == {tb.TOTAL_FRAMES})")
     last = tb.pose(tb.TOTAL_FRAMES - 1)
-    check(abs(last[0] - stops[-1].lat) < 1e-9 and abs(last[1] - stops[-1].lon) < 1e-9,
-          "the tour ends framed on its final stop")
+    check(abs(last[0] - stops[-1].lat) < 1e-9 and abs(last[1] - stops[-1].lon) < 1e-9
+          and abs(last[2] - tb.end_zoom) < 1e-9,
+          "the tour ends framed on its final stop at landing zoom")
 
     # 3. Pose continuity: the same phase-aware strict bound the render gate
     #    enforces, checked offline on the schedule and every single-shot preset.
+    #    A pure dive/metric shot exposes one phase without a schedule; verify
+    #    its own zoom trace, not pitch/yaw/roll.
     try:
         n_seg = check_velocity_strict(tb)
         check(True, f"tour zoom velocity strictly continuous in all {n_seg} phases")
@@ -664,6 +710,15 @@ def self_test() -> int:
         try:
             single = _ShotBuilder(stops[0], preset, 120)
             n_seg = check_velocity_strict(single)
+            zoom_trace = [_pose_zoom(single, f) for f in range(single.TOTAL_FRAMES)]
+            if preset in ("tilt", "orbit"):
+                zoom_holds = all(abs(z - single.end_zoom) <= 1e-9
+                                 for z in zoom_trace[round(single.TOTAL_FRAMES * 0.62):])
+                check(zoom_holds,
+                      f"{preset} preserves the landing zoom during tilt/orbit")
+            else:
+                check(abs(zoom_trace[-1] - single.end_zoom) < 1e-9,
+                      f"{preset} reaches the authored landing zoom")
             check(True, f"{preset} shot zoom is continuous in {n_seg} phase(s)")
         except RuntimeError as exc:
             check(False, f"{preset} shot zoom continuity: {exc}")
@@ -678,7 +733,7 @@ def main() -> None:
     import argparse
     ap = argparse.ArgumentParser(description="geo_runtime: text -> places -> mp4")
     ap.add_argument("text", nargs="*", help="e.g. 'Roma poi il Colosseo e Venezia'")
-    ap.add_argument("--out", default=None, help="output mp4 or directory")
+    ap.add_argument("--out", default=None, help="output MP4 path")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--block", type=int, default=10)
     ap.add_argument("--preset", default="veryfast")
@@ -691,10 +746,10 @@ def main() -> None:
                     help="offline: extraction table, tour schedule, pose continuity")
     args = ap.parse_args()
 
-    rt = GeoRuntime(workers=args.workers, block=args.block,
-                    preset_x264=args.preset, crf=args.crf, upload=args.upload)
     if args.self_test:
         sys.exit(self_test())
+    rt = GeoRuntime(workers=args.workers, block=args.block,
+                    preset_x264=args.preset, crf=args.crf, upload=args.upload)
     if args.repl or not args.text:
         rt.repl()
         return

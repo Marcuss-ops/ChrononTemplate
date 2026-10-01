@@ -31,7 +31,7 @@ from pathlib import Path
 import numpy as np
 import cv2
 
-BASE_DIR = Path("/home/pierone/src/go-master/projects/Pyt/VeloxEditing")
+BASE_DIR = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(BASE_DIR / "Chronon3d/tools/cartography"))
 sys.path.insert(0, str(BASE_DIR / "ChrononTemplate/tools"))
 
