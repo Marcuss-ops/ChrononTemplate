@@ -23,10 +23,14 @@ public:
 };
 Vector3 euler(const Quaternion& q) {
     constexpr float radToDeg = 57.29577951308232f;
-    const float x = std::atan2(2.f*(q.w*q.x-q.y*q.z), 1.f-2.f*(q.x*q.x+q.y*q.y));
-    const float s = std::clamp(2.f*(q.w*q.y+q.z*q.x), -1.f, 1.f);
+    // RenderPlan's camera looks along +Z, while CameraRig poses look along -Z.
+    // Lower the inverse camera orientation before extracting XYZ Euler angles.
+    Quaternion camera = q;
+    camera.invert();
+    const float x = std::atan2(2.f*(camera.w*camera.x-camera.y*camera.z), 1.f-2.f*(camera.x*camera.x+camera.y*camera.y));
+    const float s = std::clamp(2.f*(camera.w*camera.y+camera.z*camera.x), -1.f, 1.f);
     const float y = std::asin(s);
-    const float z = std::atan2(2.f*(q.w*q.z-q.x*q.y), 1.f-2.f*(q.y*q.y+q.z*q.z));
+    const float z = std::atan2(2.f*(camera.w*camera.z-camera.x*camera.y), 1.f-2.f*(camera.y*camera.y+camera.z*camera.z));
     return Vector3(x*radToDeg,y*radToDeg,z*radToDeg);
 }
 }
