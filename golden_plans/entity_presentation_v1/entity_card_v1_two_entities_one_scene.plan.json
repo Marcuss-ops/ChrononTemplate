@@ -7,7 +7,7 @@
     "height": 1080,
     "fps_num": 30,
     "fps_den": 1,
-    "duration_frames": 120
+    "duration_frames": 150
   },
   "layers": [
     {
@@ -24,11 +24,11 @@
         1080
       ],
       "position": [
-        960,
-        540
+        0.0,
+        0.0
       ],
       "start_frame": 0,
-      "duration_frames": 120
+      "duration_frames": 150
     },
     {
       "id": "entity-0-image",
@@ -40,11 +40,11 @@
       ],
       "fit": "cover",
       "position": [
-        480,
-        485
+        -480.0,
+        -55.0
       ],
       "start_frame": 0,
-      "duration_frames": 120,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
@@ -55,11 +55,11 @@
                 "value": 0
               },
               {
-                "frame": 24,
+                "frame": 50,
                 "value": 1
               },
               {
-                "frame": 119,
+                "frame": 149,
                 "value": 1
               }
             ],
@@ -73,17 +73,28 @@
                 "value": 0.94
               },
               {
-                "frame": 30,
+                "frame": 62,
                 "value": 1
               },
               {
-                "frame": 119,
+                "frame": 149,
                 "value": 1
               }
             ],
             "easing": "out_cubic"
           }
         ]
+      },
+      "radius": 24,
+      "style": {
+        "background": {
+          "color": "#D8E1EA",
+          "radius": 28,
+          "padding": [
+            4,
+            4
+          ]
+        }
       }
     },
     {
@@ -99,7 +110,7 @@
         835
       ],
       "start_frame": 0,
-      "duration_frames": 120,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 34,
@@ -116,11 +127,11 @@
                 "value": 0
               },
               {
-                "frame": 28,
+                "frame": 54,
                 "value": 1
               },
               {
-                "frame": 119,
+                "frame": 149,
                 "value": 1
               }
             ],
@@ -134,11 +145,11 @@
                 "value": 22
               },
               {
-                "frame": 32,
+                "frame": 60,
                 "value": 0
               },
               {
-                "frame": 119,
+                "frame": 149,
                 "value": 0
               }
             ],
@@ -157,11 +168,11 @@
       ],
       "fit": "cover",
       "position": [
-        1440,
-        485
+        480.0,
+        -55.0
       ],
       "start_frame": 0,
-      "duration_frames": 120,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
@@ -172,11 +183,11 @@
                 "value": 0
               },
               {
-                "frame": 24,
+                "frame": 50,
                 "value": 1
               },
               {
-                "frame": 119,
+                "frame": 149,
                 "value": 1
               }
             ],
@@ -190,17 +201,28 @@
                 "value": 0.94
               },
               {
-                "frame": 30,
+                "frame": 62,
                 "value": 1
               },
               {
-                "frame": 119,
+                "frame": 149,
                 "value": 1
               }
             ],
             "easing": "out_cubic"
           }
         ]
+      },
+      "radius": 24,
+      "style": {
+        "background": {
+          "color": "#D8E1EA",
+          "radius": 28,
+          "padding": [
+            4,
+            4
+          ]
+        }
       }
     },
     {
@@ -216,7 +238,7 @@
         835
       ],
       "start_frame": 0,
-      "duration_frames": 120,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 34,
@@ -233,11 +255,11 @@
                 "value": 0
               },
               {
-                "frame": 28,
+                "frame": 54,
                 "value": 1
               },
               {
-                "frame": 119,
+                "frame": 149,
                 "value": 1
               }
             ],
@@ -251,11 +273,11 @@
                 "value": 22
               },
               {
-                "frame": 32,
+                "frame": 60,
                 "value": 0
               },
               {
-                "frame": 119,
+                "frame": 149,
                 "value": 0
               }
             ],

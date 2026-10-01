@@ -33,6 +33,44 @@ tests/youtube_subscribe.cpp               the pack's composition and timing
 
 ## Packs
 
+### `blackboard_torture_v1`
+
+`include/chronontemplate/NativePrimitives.hpp` exposes reusable C++ `Geometry`,
+`Material`, `Effects`, `Paths`, `Camera`, `Motion`, `Particles`, `Text`, and
+`TemplateComposition` builders. They produce ordinary V3 RenderPlan data,
+validate authoring-time dimensions and timing, and leave evaluation and
+rendering with Chronon3D. The canary emitter composes these builders instead
+of carrying its own mesh, stroke, camera, or particle encoders.
+
+This ten-second RenderPlan V3 canary composes six procedural inline meshes for
+the green board slab, four wooden rails and chalk tray. It writes `CHRONON` as
+sixteen native path strokes revealed by the V3 Trim operator, emits seeded chalk
+dust, draws an underline/arrow/circle, erases the right-hand strokes while
+keeping low-opacity residue, then writes `NEXT`. A perspective camera pushes
+in and drifts across the same interval. No browser, external model, or JS
+renderer is involved.
+
+Build and generate the plan in C++, then run the primitive contract and live
+RenderPlan validation:
+
+```shell
+cmake --build build/dev --target chronontemplate_emit_blackboard_torture_v1 chronontemplate_native_primitives_test
+build/dev/chronontemplate_emit_blackboard_torture_v1 golden_plans/blackboard_torture_v1.plan.json
+ctest --test-dir build/dev -R chronontemplate_native_primitives_test --output-on-failure
+../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli \
+  validate --plan golden_plans/blackboard_torture_v1.plan.json
+```
+
+The CLI check validates all 47 layers against the live RenderPlan contract. To
+render a frame or the full clip, pass
+`golden_plans/blackboard_torture_v1.plan.json` to `chronon3d_cli render --plan`.
+The existing RenderPlan material contract currently gives inline meshes a
+lit base color and basic specular parameters. `Effects::noise` is available on
+layer types that accept post effects; inline mesh plans currently reject layer
+effects. Per-pixel roughness maps and a world-space chalk-head-follow emitter
+are not representable yet. Dust therefore uses the engine's
+deterministic bounded emitter over the writing interval.
+
 A pack is composition and timing on top of `TemplateScene`; it owns no bytes, no
 font and no matrix. The subscribe card is the first one: avatar, channel name,
 subscriber count, button with its label, and the bell.
@@ -305,17 +343,17 @@ refreshes it with `RenderingGen/scripts/sync_motion_catalog.sh`.
 ### Entity presentation V1 — the registry flow
 
 `catalog/entity_presentation.v1.json` is the single motion source of truth for
-the three certified editorial families — `metric_v1`, `date_v1` and
-`entity_card_v1`, ten presets each. Nothing else republishes those lists: the
+the three certified editorial families — `metric_v1` and `date_v1` with 20
+distinct presets each, and `entity_card_v1` with 10. Nothing else republishes those lists: the
 legacy `catalog/entity_motion_families.v1.json` is marked legacy and feeds only
 the exploratory people/location render scripts.
 
 ```text
-ChrononTemplate/catalog/entity_presentation.v1.json   authored 3x10 vocabulary
+ChrononTemplate/catalog/entity_presentation.v1.json   authored 20/20/10 vocabulary
 ChrononTemplate/tools/emit_catalog.cpp                validation + merge
                  │  chronontemplate_emit_catalog
                  ▼
-catalog/chronontemplate_catalog.v1.json   (entity_presentation + 30 motions)
+catalog/chronontemplate_catalog.v1.json   (entity_presentation + 50 motions)
                  │  RenderingGen/scripts/sync_motion_catalog.sh
                  ▼
 RenderingGen/renderinggen/internal/motion/catalog/   embedded, fail-closed
@@ -332,16 +370,76 @@ Every preset carries its certification metadata in the emitted motions:
 - `ChrononTemplate/tools/test_entity_presentation_v1.py` — catalog contract,
   deterministic golden plans, layout/Unicode/safe-area, multi-entity duo
 - `RenderingGen .../internal/motion/presentation_catalog_test.go` — catalog
-  parity, 10/10 per family, unknown-preset fail-closed, exact final pose
+  parity, 20/20/10 presets, unknown-preset fail-closed, exact final pose
 - `RenderingGen .../internal/motion/presentation_pose_certification_test.go`
-  — start/mid/end poses for all 30 presets, the `entity_yaw_caption`
+  — start/mid/end poses for all 50 presets, the `entity_yaw_caption`
   scenario, counter no-overshoot, sampling determinism
 - `RenderingGen .../internal/motion/presentation_multi_entity_test.go` — one
   scene for two entities, captions remain visible, focus A→B, no overlap
 
-`tools/build_entity_presentation_v1.py` regenerates the four golden plans into
+`tools/build_entity_presentation_v1.py` regenerates seven golden plans (metric
+five-value canary, metric 4×5 gallery, metric 20-preset timeline, date 4×5 gallery,
+date 20-preset gallery, entity gallery and entity duo) into
 `golden_plans/entity_presentation_v1/`; `--cli` additionally validates each
 plan through `chronon3d_cli validate --plan` when the Chronon3D CLI is built.
+
+## Kinetic Type Editorial V1
+
+`tools/build_kinetic_type_editorial_v1.py` authors the reference-inspired
+editorial type family from reusable Chronon3D render-plan primitives. It emits a
+single manifest plus 10 text-motion canaries, eight seeded aurora look canaries,
+five compositional scene-recipe canaries and the 13-scene
+`editorial_typography_gallery_v1`. The authored tokens define a near-black
+canvas, magenta/purple/red/coral aurora colors, bright text and three editorial
+accents. Presets cover a hero scale burst and zoom exit, phrase rise, accented
+word swap, semantic keyword emphasis, luminous underline, same-line slide
+replacement, hero-to-statement handoff, staggered segments, trailing-word
+reveal and scale/blur phrase transitions.
+
+The producer lowers them to ordinary `chronon.render-plan.v3` documents:
+ChrononTemplate owns composition and recipe vocabulary; Chronon3D still owns
+semantic-span layout, text shaping and rasterization. The aurora fields use
+six broad, irregular soft-alpha emitters as moving native image layers.
+`tools/generate_kinetic_type_editorial_textures.py` recreates the deterministic
+palette and accent-light textures. Native per-glyph animators combine scale,
+blur, tracking and fill color; semantic accent spans drive a synchronized
+colored light layer. The `Design` gallery beat uses three animated color spans
+to approximate a red-to-magenta gradient while staying on the Vulkan text
+path. Underlines use a Vulkan-native rounded stroke with an overshoot draw and
+soft afterglow. Hero words may crop intentionally, while sentence lines retain
+the native shrink-only fit contract.
+
+Generate plans and run the deterministic/safe-area contract tests:
+
+```shell
+python3 tools/generate_kinetic_type_editorial_textures.py
+python3 tools/build_kinetic_type_editorial_v1.py --out build/kinetic_type_editorial_v1
+python3 tools/test_kinetic_type_editorial_v1.py
+```
+
+Validate all generated plans with the local Chronon3D CLI, or render a single
+scene with Vulkan to raw NV12 frames, then encode the final MP4 with NVIDIA
+NVENC (preview profile and a 512 MiB framebuffer-pool retention budget):
+
+```shell
+python3 tools/build_kinetic_type_editorial_v1.py \
+  --out build/kinetic_type_editorial_v1 --validate-only \
+  --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli
+python3 tools/build_kinetic_type_editorial_v1.py \
+  --out build/kinetic_type_editorial_v1 --render --scene canary_text_word_pop_focus \
+  --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli
+```
+
+Use `--render-all` for the complete 24-plan canary set. Vulkan exports start in
+sequential bounded-frame renderer processes; a failed range is bisected until
+it passes. Raw frame ranges are joined and encoded once with NVENC at constant
+30 fps. Use `--render-from <plan>`
+to resume a stopped batch after the last verified plan. The
+pack's contract verifies stable ids, finite bounded
+parameters, keyframe/lifetime integrity, UTF-8 semantic spans, safe-area bounds,
+scene handoff overlap, palette/type/background coverage and renderer-native
+plan schemas. A renderer validation or canary establishes contract support,
+not pixel equivalence to an unprovided reference-video frame.
 
 ## Boundary
 
@@ -430,6 +528,85 @@ window that pulses the held value through the run (lift, wave), and `full`
 selects the whole run at once. Every definition stays inside Chronon3D's
 canonical GPU text contract (glyph windows and single-word run emphasis), which
 is what keeps the whole pack on the GPU instead of the software text fallback.
+
+### Title-camera documentary family — `camera_title_documentary_v1`
+
+Twenty editorial title moves as recipes over six camera primitives (dolly, pan,
+orbit, tilt, roll, FOV plus target lock and focus distance). The family exists
+for one grammar: **the title never animates**. The layer keeps an empty
+transform — no position, scale, rotation or opacity keys — and the camera is
+the only thing that tells the story. That separation is a tested contract, not
+a convention.
+
+Every preset receives a `TitleShotAnchor` (the title's optical centre and a
+conservative bound) plus `TitleFraming` (Hero / Medium / Wide / ExtremeClose)
+and `TitleCameraIntensity` (Subtle / Editorial / Cinematic), so the same move
+frames "ROME", "2008", "$4.5 BILLION" or "THE STORY OF APPLE" without any of
+them carrying coordinates. Framings share one optical law
+(`titleCameraDistance`): a 900-unit reference subject fills the framing's
+coverage fraction of the frame width at the delivery aspect.
+
+```cpp
+#include "chronontemplate/TitleCameraPack.hpp"
+
+TemplateScene scene("title_card", 30.f, host, 1920.f, 1080.f);
+LayerHandle& title = scene.text({.text = "THE STORY OF APPLE",
+                                 .font = "Inter-Bold.ttf", .fontSize = 180.f});
+title.position(960.f, 540.f);
+
+applyTitleCameraShot(scene, TitleCameraMove::LowAnglePush,
+                     TitleCameraShot{.anchor = {.center = chrononmotion::Vector3(960.f, 540.f, 0.f)},
+                                     .framing = TitleFraming::Medium,
+                                     .intensity = TitleCameraIntensity::Cinematic,
+                                     .inFrame = 0, .duration = 135});
+```
+
+The twenty ids, in canonical order (`titleCameraMoveIds()`, stable and
+append-only): `title_camera_slow_push`, `title_camera_slow_pull_out`,
+`title_camera_left_drift`, `title_camera_right_drift`,
+`title_camera_vertical_rise`, `title_camera_vertical_descend`,
+`title_camera_micro_orbit_left`, `title_camera_micro_orbit_right`,
+`title_camera_arc_push`, `title_camera_arc_pull`, `title_camera_low_angle_push`,
+`title_camera_high_angle_settle`, `title_camera_roll_settle`,
+`title_camera_roll_pass`, `title_camera_dolly_zoom_subtle`,
+`title_camera_focus_push`, `title_camera_parallax_side`,
+`title_camera_parallax_push`, `title_camera_whip_settle`,
+`title_camera_corner_reveal`.
+
+They are recipes, not implementations: `arc_push` is dolly + pan + target lock,
+`dolly_zoom_subtle` is dolly + FOV compensation (the exact tan ratio, so the
+projected title width stays constant while the background perspective changes),
+`focus_push` is dolly + focus/aperture keys. The pure numeric plan each preset
+lowers onto the rig is exposed by `titleCameraPlanFor` for catalogs and tests.
+
+Every application ends with a settle beat (the last 6–12 frames decelerate into
+the hold) and verifies the framing law — the projected anchor stays inside the
+5%/8% safe area for the whole window — throwing instead of authoring an
+unreadable title. The `whip_settle` acquisition is the declared loud exception:
+fast but continuous.
+
+The acceptance suite (`tests/title_camera_pack.cpp`, one scene per preset on a
+fixed anchor — the `title_camera_documentary_gallery_v1` grammar, where only
+the camera differs between shots) pins eight gates across all twenty presets:
+
+1. **P0** — the title never animates: empty layer tracks, and
+   `titleTransform(frame0) == titleTransform(frameEnd)`;
+2. the camera really animates — no preset samples to a single pose;
+3. the framing holds — the projected anchor stays in the safe area;
+4. hero occupancy — a push grows the projected title width;
+5. target lock — the projected centre tracks the frame centre during
+   orbit/pan/whip;
+6. quaternion continuity — `dot(q[n], q[n+1]) >= 0` between neighbors;
+7. velocity continuity — no channel teleports between frames (whip exempted
+   on loudness, not on continuity);
+8. end settle — `velocity(end) < velocity(mid)`.
+
+A torture-test composition (six consecutive title beats, each a static title
+moved only by its camera) is authored by chaining `applyTitleCameraShot` over
+adjacent frame windows on the same scene. A canary gallery
+(`title_camera_documentary_gallery_v1`: 1920×1080, 30 fps, one title, one
+background, twenty clips — one per camera) renders through the regular scene
+submission path; the C++ contract above is the gate, the render is the exhibit.
 
 ### Multi-image duo v1
 

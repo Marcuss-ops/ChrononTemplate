@@ -1,13 +1,13 @@
 {
   "schema": "chronon.render-plan.v3",
   "version": 3,
-  "job_id": "metric_v1_gallery_10",
+  "job_id": "metric_v1_gallery_20",
   "canvas": {
     "width": 1920,
     "height": 1080,
     "fps_num": 30,
     "fps_den": 1,
-    "duration_frames": 1500
+    "duration_frames": 3000
   },
   "layers": [
     {
@@ -28,7 +28,7 @@
         0.0
       ],
       "start_frame": 0,
-      "duration_frames": 1500
+      "duration_frames": 3000
     },
     {
       "id": "metric_counter_rise-eyebrow",
@@ -1245,7 +1245,7 @@
       }
     },
     {
-      "id": "metric-ring-draw-72-label",
+      "id": "metric-ring-draw-label",
       "type": "text",
       "text": "72%",
       "size": [
@@ -2567,10 +2567,1847 @@
           }
         ]
       }
+    },
+    {
+      "id": "metric_count_flip-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 1500,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 0
+              },
+              {
+                "frame": 1538,
+                "value": 1
+              },
+              {
+                "frame": 1649,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_count_flip-value",
+      "type": "text",
+      "text": "{{value}}",
+      "size": [
+        1060,
+        150
+      ],
+      "position": [
+        960,
+        515
+      ],
+      "start_frame": 1500,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 82,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only",
+        "min_font_size": 46,
+        "max_font_size": 82
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 0
+              },
+              {
+                "frame": 1546,
+                "value": 0.7
+              },
+              {
+                "frame": 1592,
+                "value": 1
+              },
+              {
+                "frame": 1649,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "rotation_x",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 18
+              },
+              {
+                "frame": 1555,
+                "value": 3
+              },
+              {
+                "frame": 1601,
+                "value": 0
+              },
+              {
+                "frame": 1649,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 0.88
+              },
+              {
+                "frame": 1563,
+                "value": 1.02
+              },
+              {
+                "frame": 1605,
+                "value": 1
+              },
+              {
+                "frame": 1649,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "enable_3d": true,
+      "text_counter": {
+        "token": "{{value}}",
+        "counter": {
+          "from": 0,
+          "to": 8200000.0,
+          "format": "compact",
+          "decimals": 1,
+          "start_frame": 1500,
+          "duration_frames": 150
+        }
+      }
+    },
+    {
+      "id": "metric_count_flip-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 1500,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 0
+              },
+              {
+                "frame": 1552,
+                "value": 1
+              },
+              {
+                "frame": 1649,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_slide_left-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 1650,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": 0
+              },
+              {
+                "frame": 1688,
+                "value": 1
+              },
+              {
+                "frame": 1799,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_slide_left-value",
+      "type": "text",
+      "text": "42.5",
+      "size": [
+        1060,
+        150
+      ],
+      "position": [
+        960,
+        515
+      ],
+      "start_frame": 1650,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 82,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only",
+        "min_font_size": 46,
+        "max_font_size": 82
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": 0
+              },
+              {
+                "frame": 1688,
+                "value": 1
+              },
+              {
+                "frame": 1799,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": -84
+              },
+              {
+                "frame": 1700,
+                "value": -18
+              },
+              {
+                "frame": 1751,
+                "value": 0
+              },
+              {
+                "frame": 1799,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_slide_left-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 1650,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": 0
+              },
+              {
+                "frame": 1702,
+                "value": 1
+              },
+              {
+                "frame": 1799,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_ribbon_unfold-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 1800,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1800,
+                "value": 0
+              },
+              {
+                "frame": 1838,
+                "value": 1
+              },
+              {
+                "frame": 1949,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_ribbon_unfold-value",
+      "type": "text",
+      "text": "-12",
+      "size": [
+        1060,
+        150
+      ],
+      "position": [
+        960,
+        515
+      ],
+      "start_frame": 1800,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 82,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only",
+        "min_font_size": 46,
+        "max_font_size": 82
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1800,
+                "value": 0
+              },
+              {
+                "frame": 1842,
+                "value": 1
+              },
+              {
+                "frame": 1949,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale_y",
+            "keyframes": [
+              {
+                "frame": 1800,
+                "value": 0.02
+              },
+              {
+                "frame": 1834,
+                "value": 0.35
+              },
+              {
+                "frame": 1880,
+                "value": 1
+              },
+              {
+                "frame": 1949,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_ribbon_unfold-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 1800,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1800,
+                "value": 0
+              },
+              {
+                "frame": 1852,
+                "value": 1
+              },
+              {
+                "frame": 1949,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_split_odometer-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 1950,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1950,
+                "value": 0
+              },
+              {
+                "frame": 1988,
+                "value": 1
+              },
+              {
+                "frame": 2099,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_split_odometer-value",
+      "type": "text",
+      "text": "{{value}}",
+      "size": [
+        1060,
+        150
+      ],
+      "position": [
+        960,
+        515
+      ],
+      "start_frame": 1950,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 82,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only",
+        "min_font_size": 46,
+        "max_font_size": 82
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1950,
+                "value": 0
+              },
+              {
+                "frame": 2000,
+                "value": 1
+              },
+              {
+                "frame": 2099,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 1950,
+                "value": 42
+              },
+              {
+                "frame": 1988,
+                "value": 12
+              },
+              {
+                "frame": 2030,
+                "value": -4
+              },
+              {
+                "frame": 2059,
+                "value": 0
+              },
+              {
+                "frame": 2099,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "text_counter": {
+        "token": "{{value}}",
+        "counter": {
+          "from": 0,
+          "to": 18420,
+          "format": "plain",
+          "decimals": 0,
+          "start_frame": 1950,
+          "duration_frames": 150
+        }
+      }
+    },
+    {
+      "id": "metric_split_odometer-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 1950,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1950,
+                "value": 0
+              },
+              {
+                "frame": 2002,
+                "value": 1
+              },
+              {
+                "frame": 2099,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_bounce_settle-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2100,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2100,
+                "value": 0
+              },
+              {
+                "frame": 2138,
+                "value": 1
+              },
+              {
+                "frame": 2249,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_bounce_settle-value",
+      "type": "text",
+      "text": "{{value}}",
+      "size": [
+        1060,
+        150
+      ],
+      "position": [
+        960,
+        515
+      ],
+      "start_frame": 2100,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 82,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only",
+        "min_font_size": 46,
+        "max_font_size": 82
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2100,
+                "value": 0
+              },
+              {
+                "frame": 2138,
+                "value": 1
+              },
+              {
+                "frame": 2249,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 2100,
+                "value": 0.72
+              },
+              {
+                "frame": 2146,
+                "value": 1.09
+              },
+              {
+                "frame": 2176,
+                "value": 0.97
+              },
+              {
+                "frame": 2205,
+                "value": 1.02
+              },
+              {
+                "frame": 2249,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "text_counter": {
+        "token": "{{value}}",
+        "counter": {
+          "from": 0,
+          "to": 0.68,
+          "format": "percent",
+          "decimals": 0,
+          "start_frame": 2100,
+          "duration_frames": 150
+        }
+      }
+    },
+    {
+      "id": "metric_bounce_settle-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 2100,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2100,
+                "value": 0
+              },
+              {
+                "frame": 2152,
+                "value": 1
+              },
+              {
+                "frame": 2249,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_arc_sweep-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2250,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0
+              },
+              {
+                "frame": 2288,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_arc_sweep-value",
+      "type": "text",
+      "text": "−$12.4M",
+      "size": [
+        1060,
+        150
+      ],
+      "position": [
+        960,
+        515
+      ],
+      "start_frame": 2250,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 82,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only",
+        "min_font_size": 46,
+        "max_font_size": 82
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0
+              },
+              {
+                "frame": 2296,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "rotation_y",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": -22
+              },
+              {
+                "frame": 2300,
+                "value": -8
+              },
+              {
+                "frame": 2347,
+                "value": 0
+              },
+              {
+                "frame": 2399,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale_x",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0.86
+              },
+              {
+                "frame": 2317,
+                "value": 1.04
+              },
+              {
+                "frame": 2359,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "enable_3d": true
+    },
+    {
+      "id": "metric-arc-sweep-arc",
+      "type": "shape",
+      "size": [
+        250,
+        250
+      ],
+      "position": [
+        960,
+        725
+      ],
+      "start_frame": 2250,
+      "duration_frames": 150,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              0,
+              -105.0
+            ]
+          },
+          {
+            "type": "cubic_to",
+            "control1": [
+              57.98989875,
+              -105.0
+            ],
+            "control2": [
+              105.0,
+              -57.98989875
+            ],
+            "point": [
+              105.0,
+              0
+            ]
+          },
+          {
+            "type": "cubic_to",
+            "control1": [
+              105.0,
+              57.98989875
+            ],
+            "control2": [
+              57.98989875,
+              105.0
+            ],
+            "point": [
+              0,
+              105.0
+            ]
+          },
+          {
+            "type": "cubic_to",
+            "control1": [
+              -57.98989875,
+              105.0
+            ],
+            "control2": [
+              -105.0,
+              57.98989875
+            ],
+            "point": [
+              -105.0,
+              0
+            ]
+          },
+          {
+            "type": "cubic_to",
+            "control1": [
+              -105.0,
+              -57.98989875
+            ],
+            "control2": [
+              -57.98989875,
+              -105.0
+            ],
+            "point": [
+              0,
+              -105.0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#6ED6C3",
+          "width": 8
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0,
+              "end": 1,
+              "animation": {
+                "keyframes": [
+                  {
+                    "frame": 2250,
+                    "value": [
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  {
+                    "frame": 2351,
+                    "value": [
+                      0,
+                      1,
+                      0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric-arc-sweep-label",
+      "type": "text",
+      "text": "1.8x",
+      "size": [
+        170,
+        44
+      ],
+      "position": [
+        960,
+        725
+      ],
+      "start_frame": 2250,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 34,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0
+              },
+              {
+                "frame": 2296,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "rotation_y",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": -22
+              },
+              {
+                "frame": 2300,
+                "value": -8
+              },
+              {
+                "frame": 2347,
+                "value": 0
+              },
+              {
+                "frame": 2399,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale_x",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0.86
+              },
+              {
+                "frame": 2317,
+                "value": 1.04
+              },
+              {
+                "frame": 2359,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "enable_3d": true
+    },
+    {
+      "id": "metric_arc_sweep-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 2250,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0
+              },
+              {
+                "frame": 2302,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_digit_cascade-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2400,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2400,
+                "value": 0
+              },
+              {
+                "frame": 2438,
+                "value": 1
+              },
+              {
+                "frame": 2549,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_digit_cascade-value",
+      "type": "text",
+      "text": "{{value}}",
+      "size": [
+        1060,
+        150
+      ],
+      "position": [
+        960,
+        515
+      ],
+      "start_frame": 2400,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 82,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only",
+        "min_font_size": 46,
+        "max_font_size": 82
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2400,
+                "value": 0
+              },
+              {
+                "frame": 2459,
+                "value": 1
+              },
+              {
+                "frame": 2549,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 2400,
+                "value": 38
+              },
+              {
+                "frame": 2434,
+                "value": 14
+              },
+              {
+                "frame": 2480,
+                "value": 0
+              },
+              {
+                "frame": 2549,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 2400,
+                "value": 0.9
+              },
+              {
+                "frame": 2471,
+                "value": 1
+              },
+              {
+                "frame": 2549,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "text_counter": {
+        "token": "{{value}}",
+        "counter": {
+          "from": 0,
+          "to": 1250000,
+          "format": "compact",
+          "decimals": 2,
+          "start_frame": 2400,
+          "duration_frames": 150
+        }
+      }
+    },
+    {
+      "id": "metric_digit_cascade-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 2400,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2400,
+                "value": 0
+              },
+              {
+                "frame": 2452,
+                "value": 1
+              },
+              {
+                "frame": 2549,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_compare_wipe-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2550,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2550,
+                "value": 0
+              },
+              {
+                "frame": 2588,
+                "value": 1
+              },
+              {
+                "frame": 2699,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_compare_wipe-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 2550,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2550,
+                "value": 0
+              },
+              {
+                "frame": 2602,
+                "value": 1
+              },
+              {
+                "frame": 2699,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_pulse_hold-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2700,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2700,
+                "value": 0
+              },
+              {
+                "frame": 2738,
+                "value": 1
+              },
+              {
+                "frame": 2849,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_pulse_hold-value",
+      "type": "text",
+      "text": "{{value}}",
+      "size": [
+        1060,
+        150
+      ],
+      "position": [
+        960,
+        515
+      ],
+      "start_frame": 2700,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 82,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only",
+        "min_font_size": 46,
+        "max_font_size": 82
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2700,
+                "value": 1
+              },
+              {
+                "frame": 2849,
+                "value": 1
+              }
+            ],
+            "easing": "linear"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 2700,
+                "value": 1
+              },
+              {
+                "frame": 2734,
+                "value": 1.08
+              },
+              {
+                "frame": 2763,
+                "value": 1
+              },
+              {
+                "frame": 2801,
+                "value": 1.035
+              },
+              {
+                "frame": 2826,
+                "value": 1
+              },
+              {
+                "frame": 2849,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "text_counter": {
+        "token": "{{value}}",
+        "counter": {
+          "from": 0,
+          "to": 3.7,
+          "format": "plain",
+          "decimals": 1,
+          "suffix": "x",
+          "start_frame": 2700,
+          "duration_frames": 150
+        }
+      }
+    },
+    {
+      "id": "metric_pulse_hold-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 2700,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2700,
+                "value": 0
+              },
+              {
+                "frame": 2752,
+                "value": 1
+              },
+              {
+                "frame": 2849,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_debt_flip-eyebrow",
+      "type": "text",
+      "text": "METRIC V1 MOTION GALLERY",
+      "size": [
+        760,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2850,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 24,
+        "fill": "#91A5AD",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": 0
+              },
+              {
+                "frame": 2888,
+                "value": 1
+              },
+              {
+                "frame": 2999,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "metric_debt_flip-value",
+      "type": "text",
+      "text": "{{value}}",
+      "size": [
+        1060,
+        150
+      ],
+      "position": [
+        960,
+        515
+      ],
+      "start_frame": 2850,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 82,
+        "fill": "#F5F7FA",
+        "fit_mode": "shrink_only",
+        "min_font_size": 46,
+        "max_font_size": 82
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": 0
+              },
+              {
+                "frame": 2900,
+                "value": 1
+              },
+              {
+                "frame": 2999,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "rotation_x",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": -76
+              },
+              {
+                "frame": 2900,
+                "value": -18
+              },
+              {
+                "frame": 2947,
+                "value": 0
+              },
+              {
+                "frame": 2999,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": 28
+              },
+              {
+                "frame": 2913,
+                "value": 0
+              },
+              {
+                "frame": 2999,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "enable_3d": true,
+      "text_counter": {
+        "token": "{{value}}",
+        "counter": {
+          "from": 0,
+          "to": 12400000.0,
+          "format": "compact",
+          "decimals": 1,
+          "prefix": "−$",
+          "start_frame": 2850,
+          "duration_frames": 150
+        }
+      }
+    },
+    {
+      "id": "metric_debt_flip-label",
+      "type": "text",
+      "text": "REVENUE GROWTH",
+      "size": [
+        820,
+        56
+      ],
+      "position": [
+        960,
+        630
+      ],
+      "start_frame": 2850,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 27,
+        "fill": "#A8BAC0",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": 0
+              },
+              {
+                "frame": 2902,
+                "value": 1
+              },
+              {
+                "frame": 2999,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
     }
   ],
   "output": {
-    "path": "metric_v1_gallery_10.mp4",
+    "path": "metric_v1_gallery_20.mp4",
     "format": "mp4",
     "codec": "h264"
   }

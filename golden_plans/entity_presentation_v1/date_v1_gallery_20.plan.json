@@ -1,13 +1,13 @@
 {
   "schema": "chronon.render-plan.v3",
   "version": 3,
-  "job_id": "date_v1_gallery_10",
+  "job_id": "date_v1_gallery_20",
   "canvas": {
     "width": 1920,
     "height": 1080,
     "fps_num": 30,
     "fps_den": 1,
-    "duration_frames": 1500
+    "duration_frames": 3000
   },
   "layers": [
     {
@@ -28,7 +28,7 @@
         0.0
       ],
       "start_frame": 0,
-      "duration_frames": 1500
+      "duration_frames": 3000
     },
     {
       "id": "date_fade_rise-eyebrow",
@@ -3408,10 +3408,2105 @@
           }
         ]
       }
+    },
+    {
+      "id": "date_page_turn-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 1500,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 0
+              },
+              {
+                "frame": 1538,
+                "value": 1
+              },
+              {
+                "frame": 1649,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_page_turn-date",
+      "type": "text",
+      "text": "30 SEPTEMBER 2026",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 1500,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 0
+              },
+              {
+                "frame": 1550,
+                "value": 1
+              },
+              {
+                "frame": 1649,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "rotation_y",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 64
+              },
+              {
+                "frame": 1546,
+                "value": 14
+              },
+              {
+                "frame": 1592,
+                "value": 0
+              },
+              {
+                "frame": 1649,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "enable_3d": true
+    },
+    {
+      "id": "date_page_turn-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 1500,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 0
+              },
+              {
+                "frame": 1552,
+                "value": 1
+              },
+              {
+                "frame": 1649,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_page_turn-calendar-plate",
+      "type": "color",
+      "color": [
+        0.075,
+        0.095,
+        0.12,
+        1
+      ],
+      "size": [
+        390,
+        150
+      ],
+      "position": [
+        0.0,
+        150.0
+      ],
+      "start_frame": 1500,
+      "duration_frames": 150,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale_y",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 0.01
+              },
+              {
+                "frame": 1550,
+                "value": 0.76
+              },
+              {
+                "frame": 1592,
+                "value": 1
+              },
+              {
+                "frame": 1649,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_page_turn-calendar-caption",
+      "type": "text",
+      "text": "EDITORIAL DATE",
+      "size": [
+        300,
+        34
+      ],
+      "position": [
+        960,
+        690
+      ],
+      "start_frame": 1500,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 18,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1500,
+                "value": 0
+              },
+              {
+                "frame": 1563,
+                "value": 1
+              },
+              {
+                "frame": 1649,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_calendar_drop-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 1650,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": 0
+              },
+              {
+                "frame": 1688,
+                "value": 1
+              },
+              {
+                "frame": 1799,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_calendar_drop-date",
+      "type": "text",
+      "text": "12 OCTOBER 2026",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 1650,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": 0
+              },
+              {
+                "frame": 1692,
+                "value": 1
+              },
+              {
+                "frame": 1799,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": -54
+              },
+              {
+                "frame": 1692,
+                "value": -8
+              },
+              {
+                "frame": 1730,
+                "value": 0
+              },
+              {
+                "frame": 1799,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_calendar_drop-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 1650,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": 0
+              },
+              {
+                "frame": 1702,
+                "value": 1
+              },
+              {
+                "frame": 1799,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_calendar_drop-calendar-plate",
+      "type": "color",
+      "color": [
+        0.075,
+        0.095,
+        0.12,
+        1
+      ],
+      "size": [
+        390,
+        150
+      ],
+      "position": [
+        0.0,
+        150.0
+      ],
+      "start_frame": 1650,
+      "duration_frames": 150,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale_y",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": 0.01
+              },
+              {
+                "frame": 1700,
+                "value": 0.76
+              },
+              {
+                "frame": 1742,
+                "value": 1
+              },
+              {
+                "frame": 1799,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_calendar_drop-calendar-caption",
+      "type": "text",
+      "text": "EDITORIAL DATE",
+      "size": [
+        300,
+        34
+      ],
+      "position": [
+        960,
+        690
+      ],
+      "start_frame": 1650,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 18,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1650,
+                "value": 0
+              },
+              {
+                "frame": 1713,
+                "value": 1
+              },
+              {
+                "frame": 1799,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_month_wipe-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 1800,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1800,
+                "value": 0
+              },
+              {
+                "frame": 1838,
+                "value": 1
+              },
+              {
+                "frame": 1949,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_month_wipe-date",
+      "type": "text",
+      "text": "JULY · 2026",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 1800,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1800,
+                "value": 0
+              },
+              {
+                "frame": 1846,
+                "value": 1
+              },
+              {
+                "frame": 1949,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale_x",
+            "keyframes": [
+              {
+                "frame": 1800,
+                "value": 0.05
+              },
+              {
+                "frame": 1838,
+                "value": 0.62
+              },
+              {
+                "frame": 1884,
+                "value": 1
+              },
+              {
+                "frame": 1949,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_month_wipe-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 1800,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1800,
+                "value": 0
+              },
+              {
+                "frame": 1852,
+                "value": 1
+              },
+              {
+                "frame": 1949,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_month_wipe-accent-trim",
+      "type": "shape",
+      "size": [
+        520,
+        8
+      ],
+      "position": [
+        960,
+        620
+      ],
+      "start_frame": 1800,
+      "duration_frames": 150,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -260.0,
+              0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              260.0,
+              0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#6ED6C3",
+          "width": 4
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0,
+              "end": 1,
+              "animation": {
+                "keyframes": [
+                  {
+                    "frame": 1800,
+                    "value": [
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  {
+                    "frame": 1871,
+                    "value": [
+                      0,
+                      1,
+                      0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_timeline_sweep-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 1950,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1950,
+                "value": 0
+              },
+              {
+                "frame": 1988,
+                "value": 1
+              },
+              {
+                "frame": 2099,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_timeline_sweep-date",
+      "type": "text",
+      "text": "1990 → 2026",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 1950,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1950,
+                "value": 0
+              },
+              {
+                "frame": 2005,
+                "value": 1
+              },
+              {
+                "frame": 2099,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 1950,
+                "value": -92
+              },
+              {
+                "frame": 2000,
+                "value": -20
+              },
+              {
+                "frame": 2047,
+                "value": 0
+              },
+              {
+                "frame": 2099,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_timeline_sweep-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 1950,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1950,
+                "value": 0
+              },
+              {
+                "frame": 2002,
+                "value": 1
+              },
+              {
+                "frame": 2099,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_timeline_sweep-rail",
+      "type": "color",
+      "color": [
+        0.38,
+        0.34,
+        0.29,
+        1
+      ],
+      "size": [
+        680,
+        5
+      ],
+      "position": [
+        0.0,
+        195.0
+      ],
+      "start_frame": 1950,
+      "duration_frames": 150,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale_x",
+            "keyframes": [
+              {
+                "frame": 1950,
+                "value": 0.01
+              },
+              {
+                "frame": 2009,
+                "value": 0.42
+              },
+              {
+                "frame": 2059,
+                "value": 1
+              },
+              {
+                "frame": 2099,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_marker_pop-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2100,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2100,
+                "value": 0
+              },
+              {
+                "frame": 2138,
+                "value": 1
+              },
+              {
+                "frame": 2249,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_marker_pop-date",
+      "type": "text",
+      "text": "18 MAY 2026",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 2100,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2100,
+                "value": 0
+              },
+              {
+                "frame": 2138,
+                "value": 1
+              },
+              {
+                "frame": 2249,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 2100,
+                "value": 0.38
+              },
+              {
+                "frame": 2142,
+                "value": 1.16
+              },
+              {
+                "frame": 2171,
+                "value": 0.96
+              },
+              {
+                "frame": 2201,
+                "value": 1
+              },
+              {
+                "frame": 2249,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_marker_pop-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 2100,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2100,
+                "value": 0
+              },
+              {
+                "frame": 2152,
+                "value": 1
+              },
+              {
+                "frame": 2249,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_marker_pop-marker",
+      "type": "color",
+      "color": [
+        0.43,
+        0.84,
+        0.76,
+        1
+      ],
+      "size": [
+        26,
+        26
+      ],
+      "position": [
+        0.0,
+        160.0
+      ],
+      "start_frame": 2100,
+      "duration_frames": 150,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 2100,
+                "value": 0.25
+              },
+              {
+                "frame": 2146,
+                "value": 1.18
+              },
+              {
+                "frame": 2180,
+                "value": 0.96
+              },
+              {
+                "frame": 2209,
+                "value": 1
+              },
+              {
+                "frame": 2249,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_split_year-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2250,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0
+              },
+              {
+                "frame": 2288,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_split_year-date",
+      "type": "text",
+      "text": "2024 / 2026",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 2250,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0
+              },
+              {
+                "frame": 2302,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 76
+              },
+              {
+                "frame": 2288,
+                "value": 30
+              },
+              {
+                "frame": 2334,
+                "value": 0
+              },
+              {
+                "frame": 2399,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_split_year-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 2250,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0
+              },
+              {
+                "frame": 2302,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_split_year-baseline",
+      "type": "text",
+      "text": "Q1                    Q4",
+      "size": [
+        420,
+        36
+      ],
+      "position": [
+        960,
+        690
+      ],
+      "start_frame": 2250,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 20,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2250,
+                "value": 0
+              },
+              {
+                "frame": 2309,
+                "value": 1
+              },
+              {
+                "frame": 2399,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_bracket_draw-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2400,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2400,
+                "value": 0
+              },
+              {
+                "frame": 2438,
+                "value": 1
+              },
+              {
+                "frame": 2549,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_bracket_draw-date",
+      "type": "text",
+      "text": "2001–2025",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 2400,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2400,
+                "value": 0
+              },
+              {
+                "frame": 2442,
+                "value": 1
+              },
+              {
+                "frame": 2549,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale_y",
+            "keyframes": [
+              {
+                "frame": 2400,
+                "value": 0.03
+              },
+              {
+                "frame": 2446,
+                "value": 0.58
+              },
+              {
+                "frame": 2488,
+                "value": 1
+              },
+              {
+                "frame": 2549,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_bracket_draw-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 2400,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2400,
+                "value": 0
+              },
+              {
+                "frame": 2452,
+                "value": 1
+              },
+              {
+                "frame": 2549,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_bracket_draw-accent-trim",
+      "type": "shape",
+      "size": [
+        520,
+        8
+      ],
+      "position": [
+        960,
+        620
+      ],
+      "start_frame": 2400,
+      "duration_frames": 150,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -260.0,
+              0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              260.0,
+              0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#6ED6C3",
+          "width": 4
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0,
+              "end": 1,
+              "animation": {
+                "keyframes": [
+                  {
+                    "frame": 2400,
+                    "value": [
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  {
+                    "frame": 2471,
+                    "value": [
+                      0,
+                      1,
+                      0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_stamp_reveal-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2550,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2550,
+                "value": 0
+              },
+              {
+                "frame": 2588,
+                "value": 1
+              },
+              {
+                "frame": 2699,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_stamp_reveal-date",
+      "type": "text",
+      "text": "12 DEC 2025",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 2550,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2550,
+                "value": 0
+              },
+              {
+                "frame": 2600,
+                "value": 1
+              },
+              {
+                "frame": 2699,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 2550,
+                "value": 1.24
+              },
+              {
+                "frame": 2592,
+                "value": 0.96
+              },
+              {
+                "frame": 2630,
+                "value": 1.02
+              },
+              {
+                "frame": 2659,
+                "value": 1
+              },
+              {
+                "frame": 2699,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_stamp_reveal-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 2550,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2550,
+                "value": 0
+              },
+              {
+                "frame": 2602,
+                "value": 1
+              },
+              {
+                "frame": 2699,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_stamp_reveal-stamp",
+      "type": "color",
+      "color": [
+        0.43,
+        0.84,
+        0.76,
+        1
+      ],
+      "size": [
+        430,
+        6
+      ],
+      "position": [
+        0.0,
+        90.0
+      ],
+      "start_frame": 2550,
+      "duration_frames": 150
+    },
+    {
+      "id": "date_era_zoom-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2700,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2700,
+                "value": 0
+              },
+              {
+                "frame": 2738,
+                "value": 1
+              },
+              {
+                "frame": 2849,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_era_zoom-date",
+      "type": "text",
+      "text": "FY 2026",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 2700,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2700,
+                "value": 0
+              },
+              {
+                "frame": 2759,
+                "value": 1
+              },
+              {
+                "frame": 2849,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 2700,
+                "value": 0.68
+              },
+              {
+                "frame": 2755,
+                "value": 1.08
+              },
+              {
+                "frame": 2792,
+                "value": 1
+              },
+              {
+                "frame": 2849,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_era_zoom-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 2700,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2700,
+                "value": 0
+              },
+              {
+                "frame": 2752,
+                "value": 1
+              },
+              {
+                "frame": 2849,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_era_zoom-caption",
+      "type": "text",
+      "text": "FISCAL YEAR",
+      "size": [
+        300,
+        34
+      ],
+      "position": [
+        960,
+        690
+      ],
+      "start_frame": 2700,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 18,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2700,
+                "value": 0
+              },
+              {
+                "frame": 2763,
+                "value": 1
+              },
+              {
+                "frame": 2849,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_digit_flip-eyebrow",
+      "type": "text",
+      "text": "DATE MOTION GALLERY",
+      "size": [
+        900,
+        42
+      ],
+      "position": [
+        960,
+        330
+      ],
+      "start_frame": 2850,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 22,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": 0
+              },
+              {
+                "frame": 2888,
+                "value": 1
+              },
+              {
+                "frame": 2999,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_digit_flip-date",
+      "type": "text",
+      "text": "31/12/2026",
+      "size": [
+        1040,
+        132
+      ],
+      "position": [
+        960,
+        505
+      ],
+      "start_frame": 2850,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 66,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only",
+        "min_font_size": 40,
+        "max_font_size": 66
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": 0
+              },
+              {
+                "frame": 2896,
+                "value": 1
+              },
+              {
+                "frame": 2999,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "rotation_x",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": -82
+              },
+              {
+                "frame": 2888,
+                "value": -24
+              },
+              {
+                "frame": 2934,
+                "value": 0
+              },
+              {
+                "frame": 2999,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "enable_3d": true
+    },
+    {
+      "id": "date_digit_flip-event",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        700,
+        48
+      ],
+      "position": [
+        960,
+        615
+      ],
+      "start_frame": 2850,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 25,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": 0
+              },
+              {
+                "frame": 2902,
+                "value": 1
+              },
+              {
+                "frame": 2999,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_digit_flip-alt",
+      "type": "text",
+      "text": "31 DEC · MIDNIGHT",
+      "size": [
+        460,
+        36
+      ],
+      "position": [
+        960,
+        690
+      ],
+      "start_frame": 2850,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 20,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 2850,
+                "value": 0
+              },
+              {
+                "frame": 2905,
+                "value": 1
+              },
+              {
+                "frame": 2999,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
     }
   ],
   "output": {
-    "path": "date_v1_gallery_10.mp4",
+    "path": "date_v1_gallery_20.mp4",
     "format": "mp4",
     "codec": "h264"
   }

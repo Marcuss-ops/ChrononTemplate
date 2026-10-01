@@ -22,7 +22,15 @@ endif()
 option(CHRONONTEMPLATE_BUILD_TESTS "Build the ChrononTemplate test binaries" ${PROJECT_IS_TOP_LEVEL})
 option(CHRONONTEMPLATE_WERROR "Turn compiler warnings into errors" OFF)
 option(CHRONONTEMPLATE_BUILD_LIVE_ADAPTER_TEST "Link the live adapter test against Chronon3D" OFF)
-set(CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_cli"
+set(CHRONONTEMPLATE_NLOHMANN_JSON_INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/vcpkg_installed/linux-fast-dev/x64-linux/include"
+    CACHE PATH "Directory containing nlohmann/json.hpp")
+find_path(CHRONONTEMPLATE_NLOHMANN_JSON_DIR nlohmann/json.hpp
+          HINTS "${CHRONONTEMPLATE_NLOHMANN_JSON_INCLUDE_DIR}")
+if(NOT CHRONONTEMPLATE_NLOHMANN_JSON_DIR)
+    message(FATAL_ERROR "ChrononTemplate native plan builders require nlohmann/json.hpp")
+endif()
+set(CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/build/chronon/linux-video-test/apps/chronon3d_cli/chronon3d_cli"
     CACHE FILEPATH "Chronon3D CLI used to validate the editorial benchmark plans")
 set(CHRONONTEMPLATE_CHRONON3D_LIBRARY "" CACHE FILEPATH
     "Chronon3D library used by the optional live adapter test")
@@ -71,6 +79,7 @@ endif()
 add_library(chronontemplate STATIC
         # composition recipes on top of the motion primitives
         src/chronontemplate/Presets.cpp
+        src/chronontemplate/NativePrimitives.cpp
         # the orchestration layer: bindings, the bridge, the template API
         src/chronontemplate/ContentBinding.cpp
         src/chronontemplate/MotionBridge.cpp
@@ -78,6 +87,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/ChrononRenderAdapter.cpp
         src/chronontemplate/TemplateScene.cpp
         src/chronontemplate/ImageAnimationPack.cpp
+        src/chronontemplate/TitleCameraPack.cpp
         src/chronontemplate/ImportantPhrasePack.cpp
         src/chronontemplate/ClassicPhrasePack.cpp
         src/chronontemplate/TypewriterPhrasePack.cpp
@@ -95,6 +105,7 @@ add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 target_include_directories(chronontemplate PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include>
+        $<BUILD_INTERFACE:${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}>
         $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(chronontemplate PUBLIC ChrononMotion::chrononmotion)
@@ -116,19 +127,8 @@ endif()
 # what a consumer reads — so a checkout without the parser can still build the
 # library by switching CHRONONTEMPLATE_BUILD_CATALOG_TOOL off.
 option(CHRONONTEMPLATE_BUILD_CATALOG_TOOL "Build the canonical catalog emitter" ON)
-set(CHRONONTEMPLATE_NLOHMANN_JSON_INCLUDE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/vcpkg_installed/linux-fast-dev/x64-linux/include"
-    CACHE PATH "Directory containing nlohmann/json.hpp (catalog emitter only)")
 
 if(CHRONONTEMPLATE_BUILD_CATALOG_TOOL)
-    find_path(CHRONONTEMPLATE_NLOHMANN_JSON_DIR nlohmann/json.hpp
-              HINTS "${CHRONONTEMPLATE_NLOHMANN_JSON_INCLUDE_DIR}")
-    if(NOT CHRONONTEMPLATE_NLOHMANN_JSON_DIR)
-        message(FATAL_ERROR
-                "chronontemplate_emit_catalog needs nlohmann/json.hpp. Set "
-                "CHRONONTEMPLATE_NLOHMANN_JSON_INCLUDE_DIR to a directory containing it, "
-                "or configure with -DCHRONONTEMPLATE_BUILD_CATALOG_TOOL=OFF.")
-    endif()
     add_executable(chronontemplate_emit_catalog tools/emit_catalog.cpp)
     target_link_libraries(chronontemplate_emit_catalog PRIVATE chronontemplate)
     target_include_directories(chronontemplate_emit_catalog PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
@@ -154,6 +154,14 @@ if(CHRONONTEMPLATE_BUILD_CATALOG_TOOL)
 
 endif()
 
+add_executable(chronontemplate_emit_blackboard_torture_v1
+        tools/emit_blackboard_torture_v1.cpp)
+target_link_libraries(chronontemplate_emit_blackboard_torture_v1 PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_blackboard_torture_v1 PRIVATE -Wall -Wextra)
+if(CHRONONTEMPLATE_WERROR)
+    target_compile_options(chronontemplate_emit_blackboard_torture_v1 PRIVATE -Werror)
+endif()
+
 if(CHRONONTEMPLATE_BUILD_TESTS)
     enable_testing()
 
@@ -165,6 +173,9 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         add_test(NAME chronontemplate_entity_presentation_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_entity_presentation_v1.py")
+        add_test(NAME chronontemplate_kinetic_type_editorial_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_kinetic_type_editorial_v1.py")
     endif()
     if(Python3_Interpreter_FOUND AND EXISTS "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}")
         add_test(NAME chronontemplate_editorial_benchmark_contract
@@ -173,12 +184,22 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
                     --validate-only
                     --cli "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}"
                     --output-dir "${CMAKE_CURRENT_BINARY_DIR}/editorial_benchmark_contract")
+        add_test(NAME chronontemplate_kinetic_type_editorial_renderer_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/build_kinetic_type_editorial_v1.py"
+                    --validate-only
+                    --cli "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}"
+                    --out "${CMAKE_CURRENT_BINARY_DIR}/kinetic_type_editorial_contract")
     endif()
 
     add_executable(chronontemplate_templates_test tests/motion_templates.cpp)
     target_link_libraries(chronontemplate_templates_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_templates_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_templates_test COMMAND chronontemplate_templates_test)
+
+    add_executable(chronontemplate_native_primitives_test tests/native_primitives.cpp)
+    target_link_libraries(chronontemplate_native_primitives_test PRIVATE chronontemplate)
+    add_test(NAME chronontemplate_native_primitives_test COMMAND chronontemplate_native_primitives_test)
 
     add_executable(chronontemplate_presets_test tests/presets.cpp)
     target_link_libraries(chronontemplate_presets_test PRIVATE chronontemplate)
@@ -196,6 +217,14 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_image_animation_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_image_animation_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_image_animation_pack_test COMMAND chronontemplate_image_animation_pack_test)
+
+    # The title-camera documentary family: the title never animates, the camera
+    # is the only authored motion, and the eight family gates hold for all
+    # twenty title_camera_* presets.
+    add_executable(chronontemplate_title_camera_pack_test tests/title_camera_pack.cpp)
+    target_link_libraries(chronontemplate_title_camera_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_title_camera_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_title_camera_pack_test COMMAND chronontemplate_title_camera_pack_test)
 
     # The important-phrase families, one file per family: the shared
     # white-on-black look + fourteen Classic definitions, and the fifteen
