@@ -1,5 +1,6 @@
 #include "chronontemplate/NativePrimitives.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -35,9 +36,25 @@ int main() {
     check(plan.at("layers").size()==47,"blackboard composes 47 native plan layers");
     check(plan.at("camera_animation").at("tracks").size()==2,"blackboard includes camera push and drift");
     check(plan.at("canvas").at("duration_frames")==240,"blackboard duration is ten seconds at 24 fps");
+    const auto circle=std::find_if(plan.at("layers").begin(),plan.at("layers").end(),
+        [](const Json& layer) { return layer.value("id","")=="chalk_circle"; });
+    check(circle!=plan.at("layers").end(),"blackboard includes the chalk circle");
+    if (circle!=plan.at("layers").end()) {
+        const auto& tracks=circle->at("animation").at("tracks");
+        check(std::count_if(tracks.begin(),tracks.end(),[](const Json& track) {
+            return track.value("property","")=="opacity";
+        })==1,"chalk circle composes entrance and erase into one opacity track");
+        const auto& keys=tracks.front().at("keyframes");
+        check(keys.back().at("frame")==239 && keys.back().at("value")==0.f,
+              "chalk circle opacity closes exactly at the final frame");
+    }
     throws([] { (void)Geometry::box(0,1,1); },"zero-sized mesh is rejected");
     throws([] { (void)Motion::track("opacity",{{2,0},{1,1}}); },"unordered motion keys are rejected");
     throws([] { (void)Motion::track("opacity",{{0,"not-a-number"}}); },"non-numeric motion values are rejected");
     throws([&] { (void)TemplateComposition::renderPlan("dup",320,180,24,1,{stroke,stroke}); },"duplicate composition ids are rejected");
+    auto duplicateTracks=stroke;
+    duplicateTracks["animation"]["tracks"].push_back(Motion::track("opacity",{{0,1},{4,0}}));
+    throws([&] { (void)TemplateComposition::renderPlan("duplicate-track",320,180,24,12,{duplicateTracks}); },
+           "duplicate per-layer animation properties are rejected before RenderPlan emission");
     return failures==0 ? 0 : 1;
 }

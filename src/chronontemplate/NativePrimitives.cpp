@@ -210,6 +210,20 @@ Json TemplateComposition::renderPlan(const std::string& jobId, int width, int he
     for (const Json& layer : layers) {
         if (!layer.is_object() || !layer.contains("id")) throw std::invalid_argument("each layer needs an id");
         if (!ids.insert(layer.at("id").get<std::string>()).second) throw std::invalid_argument("layer ids must be unique");
+        if (layer.contains("animation")) {
+            const Json& animation = layer.at("animation");
+            if (!animation.is_object() || !animation.contains("tracks") ||
+                !animation.at("tracks").is_array())
+                throw std::invalid_argument("layer animation must contain a tracks array");
+            std::set<std::string> properties;
+            for (const Json& track : animation.at("tracks")) {
+                if (!track.is_object() || !track.contains("property") ||
+                    !track.at("property").is_string())
+                    throw std::invalid_argument("animation tracks need a property name");
+                if (!properties.insert(track.at("property").get<std::string>()).second)
+                    throw std::invalid_argument("layer animation properties must be unique");
+            }
+        }
     }
     Json plan={{"schema","chronon.render-plan.v3"},{"version",3},{"job_id",jobId},
         {"canvas",{{"width",width},{"height",height},{"fps_num",fps},{"fps_den",1},{"duration_frames",durationFrames}}},
@@ -261,14 +275,14 @@ Json buildBlackboardTortureV1() {
         {{"type","cubic_to"},{"point",{480,680}},{"control1",{1300,740}},{"control2",{650,750}}},
         {{"type","cubic_to"},{"point",{480,420}},{"control1",{360,560}},{"control2",{370,440}}}});
     layers.push_back(Paths::strokeLayer("chalk_circle",circle,144,164,duration,"#F7F2DE",6.f,width,height,
-        Json::array({{0,0},{144,1},{163,1},{180,0.12f},{239,0.12f}})));
+        Json::array({{0,0},{144,1},{163,1},{180,0.12f},{204,0.f},{239,0.f}})));
     layers.push_back(Particles::emitterLayer("chalk_dust",84,7319,114,{10,8},{-8,-18},{8,-3},{0.25f,0.8f},{1,4},
         Json::array({{{"position",0},{"color",{0.9f,0.88f,0.8f,0.f}}},{{"position",1},{"color",{0.9f,0.88f,0.8f,0.45f}}}}),
         {960,540,20},24,24.f,0.2f));
     for (Json& layer : layers) {
         const std::string id=layer.value("id","");
         const bool erasedStroke=id.rfind("chalk_stroke_",0)==0 && id>="chalk_stroke_10" && id<="chalk_stroke_16";
-        if (erasedStroke || id=="chalk_circle" || id=="underline") {
+        if (erasedStroke || id=="underline") {
             layer["animation"]["tracks"].push_back(Motion::track("opacity",{{0,1},{168,1},{204,0},{239,0}},"in_out_cubic"));
         }
     }
