@@ -64,12 +64,12 @@
     {
       "name": "dev-fast",
       "configurePreset": "dev-fast",
-      "jobs": 16
+      "jobs": 8
     },
     {
       "name": "release-fast",
       "configurePreset": "release-fast",
-      "jobs": 16
+      "jobs": 8
     }
   ],
   "testPresets": [

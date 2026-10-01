@@ -476,8 +476,9 @@ int main(int argc, char** argv) {
                 fail("entity presentation catalog declares unknown family " + familyID);
             }
             if (!presentationFamilies.insert(familyID).second) fail("duplicate entity presentation family " + familyID);
-            if (!family.contains("presets") || !family["presets"].is_array() || family["presets"].size() != 10) {
-                fail("entity presentation family " + familyID + " must define exactly 10 presets");
+            const std::size_t expectedPresets = familyID == "entity_card_v1" ? 10 : 20;
+            if (!family.contains("presets") || !family["presets"].is_array() || family["presets"].size() != expectedPresets) {
+                fail("entity presentation family " + familyID + " must define exactly " + std::to_string(expectedPresets) + " presets");
             }
             for (const auto& preset : family["presets"]) {
                 requireObject(preset, "entity_presentation preset");

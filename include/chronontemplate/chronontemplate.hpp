@@ -16,10 +16,12 @@
 #include "chronontemplate/ContentHost.hpp"
 #include "chronontemplate/FrameSubmission.hpp"
 #include "chronontemplate/MotionBridge.hpp"
+#include "chronontemplate/NativePrimitives.hpp"
 #include "chronontemplate/Presets.hpp"
 #include "chronontemplate/StyleTokens.hpp"
 #include "chronontemplate/TemplateScene.hpp"
 #include "chronontemplate/ImageAnimationPack.hpp"
+#include "chronontemplate/TitleCameraPack.hpp"
 #include "chronontemplate/UiPrimitives.hpp"
 #include "chronontemplate/templates/YouTubeSubscribe.hpp"
 

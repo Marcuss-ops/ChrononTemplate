@@ -7,7 +7,7 @@
     "height": 1080,
     "fps_num": 30,
     "fps_den": 1,
-    "duration_frames": 720
+    "duration_frames": 1500
   },
   "layers": [
     {
@@ -24,11 +24,11 @@
         1080
       ],
       "position": [
-        960,
-        540
+        0.0,
+        0.0
       ],
       "start_frame": 0,
-      "duration_frames": 720
+      "duration_frames": 1500
     },
     {
       "id": "date_fade_rise-eyebrow",
@@ -43,7 +43,7 @@
         330
       ],
       "start_frame": 0,
-      "duration_frames": 72,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -60,11 +60,11 @@
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 38,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 149,
                 "value": 1
               }
             ],
@@ -76,7 +76,7 @@
     {
       "id": "date_fade_rise-date",
       "type": "text",
-      "text": "2026",
+      "text": "MARCH 2024",
       "size": [
         1040,
         132
@@ -86,7 +86,7 @@
         505
       ],
       "start_frame": 0,
-      "duration_frames": 72,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -105,11 +105,11 @@
                 "value": 0
               },
               {
-                "frame": 22,
+                "frame": 46,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 149,
                 "value": 1
               }
             ],
@@ -123,15 +123,15 @@
                 "value": 20
               },
               {
-                "frame": 22,
+                "frame": 46,
                 "value": 0
               },
               {
-                "frame": 48,
+                "frame": 101,
                 "value": 0
               },
               {
-                "frame": 71,
+                "frame": 149,
                 "value": 0
               }
             ],
@@ -153,7 +153,7 @@
         615
       ],
       "start_frame": 0,
-      "duration_frames": 72,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -170,11 +170,11 @@
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 52,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 149,
                 "value": 1
               }
             ],
@@ -195,8 +195,8 @@
         960,
         330
       ],
-      "start_frame": 72,
-      "duration_frames": 72,
+      "start_frame": 150,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -209,15 +209,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 150,
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 188,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 299,
                 "value": 1
               }
             ],
@@ -238,8 +238,8 @@
         960,
         505
       ],
-      "start_frame": 72,
-      "duration_frames": 72,
+      "start_frame": 150,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -254,15 +254,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 150,
                 "value": 0
               },
               {
-                "frame": 22,
+                "frame": 196,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 299,
                 "value": 1
               }
             ],
@@ -272,19 +272,19 @@
             "property": "position_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 150,
                 "value": 16
               },
               {
-                "frame": 24,
+                "frame": 200,
                 "value": 0
               },
               {
-                "frame": 48,
+                "frame": 251,
                 "value": 0
               },
               {
-                "frame": 71,
+                "frame": 299,
                 "value": 0
               }
             ],
@@ -297,8 +297,8 @@
         "counter": {
           "from": 1990,
           "to": 2026,
-          "start_frame": 0,
-          "duration_frames": 34,
+          "start_frame": 150,
+          "duration_frames": 150,
           "format": "plain",
           "decimals": 0
         }
@@ -316,8 +316,8 @@
         960,
         615
       ],
-      "start_frame": 72,
-      "duration_frames": 72,
+      "start_frame": 150,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -330,15 +330,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 150,
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 202,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 299,
                 "value": 1
               }
             ],
@@ -359,8 +359,8 @@
         960,
         330
       ],
-      "start_frame": 144,
-      "duration_frames": 72,
+      "start_frame": 300,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -373,15 +373,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 300,
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 338,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 449,
                 "value": 1
               }
             ],
@@ -402,8 +402,8 @@
         960,
         505
       ],
-      "start_frame": 144,
-      "duration_frames": 72,
+      "start_frame": 300,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -418,15 +418,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 300,
                 "value": 0
               },
               {
-                "frame": 22,
+                "frame": 346,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 449,
                 "value": 1
               }
             ],
@@ -436,19 +436,19 @@
             "property": "rotation_x",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 300,
                 "value": -68
               },
               {
-                "frame": 24,
+                "frame": 350,
                 "value": -12
               },
               {
-                "frame": 48,
+                "frame": 401,
                 "value": 0
               },
               {
-                "frame": 71,
+                "frame": 449,
                 "value": 0
               }
             ],
@@ -470,8 +470,8 @@
         960,
         615
       ],
-      "start_frame": 144,
-      "duration_frames": 72,
+      "start_frame": 300,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -484,15 +484,58 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 300,
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 352,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 449,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date-calendar-quarter-sample",
+      "type": "text",
+      "text": "Q4 2025",
+      "size": [
+        360,
+        44
+      ],
+      "position": [
+        960,
+        700
+      ],
+      "start_frame": 346,
+      "duration_frames": 104,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 28,
+        "fill": "#B4A99B",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 346,
+                "value": 0
+              },
+              {
+                "frame": 382,
+                "value": 1
+              },
+              {
+                "frame": 449,
                 "value": 1
               }
             ],
@@ -513,8 +556,8 @@
         960,
         330
       ],
-      "start_frame": 216,
-      "duration_frames": 72,
+      "start_frame": 450,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -527,15 +570,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 450,
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 488,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 599,
                 "value": 1
               }
             ],
@@ -547,7 +590,7 @@
     {
       "id": "date_segment_stagger-date",
       "type": "text",
-      "text": "Q4 2026",
+      "text": "12 JAN 2026",
       "size": [
         1040,
         132
@@ -556,8 +599,8 @@
         960,
         505
       ],
-      "start_frame": 216,
-      "duration_frames": 72,
+      "start_frame": 450,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -572,15 +615,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 450,
                 "value": 0
               },
               {
-                "frame": 24,
+                "frame": 500,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 599,
                 "value": 1
               }
             ],
@@ -590,19 +633,19 @@
             "property": "position_x",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 450,
                 "value": 18
               },
               {
-                "frame": 24,
+                "frame": 500,
                 "value": 0
               },
               {
-                "frame": 48,
+                "frame": 551,
                 "value": 0
               },
               {
-                "frame": 71,
+                "frame": 599,
                 "value": 0
               }
             ],
@@ -623,8 +666,8 @@
         960,
         615
       ],
-      "start_frame": 216,
-      "duration_frames": 72,
+      "start_frame": 450,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -637,15 +680,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 450,
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 502,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 599,
                 "value": 1
               }
             ],
@@ -666,8 +709,8 @@
         960,
         330
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -680,15 +723,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 638,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -700,7 +743,7 @@
     {
       "id": "date_timeline_tick-date",
       "type": "text",
-      "text": "2010–2020",
+      "text": "2026",
       "size": [
         1040,
         132
@@ -709,8 +752,8 @@
         960,
         505
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -725,15 +768,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0
               },
               {
-                "frame": 20,
+                "frame": 642,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -743,19 +786,19 @@
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0.01
               },
               {
-                "frame": 22,
+                "frame": 646,
                 "value": 1
               },
               {
-                "frame": 48,
+                "frame": 701,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -776,8 +819,8 @@
         960,
         615
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -790,15 +833,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 652,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -821,26 +864,26 @@
         4
       ],
       "position": [
-        960,
-        735
+        0.0,
+        195.0
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_x",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0.01
               },
               {
-                "frame": 32,
+                "frame": 667,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -863,26 +906,26 @@
         20
       ],
       "position": [
-        620.0,
-        735
+        -340.0,
+        195.0
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0.01
               },
               {
-                "frame": 24,
+                "frame": 650,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -903,8 +946,8 @@
         620.0,
         785
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -917,15 +960,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0
               },
               {
-                "frame": 24,
+                "frame": 650,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -948,26 +991,26 @@
         20
       ],
       "position": [
-        846.6666666666666,
-        735
+        -113.33333333333337,
+        195.0
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0.01
               },
               {
-                "frame": 27,
+                "frame": 657,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -988,8 +1031,8 @@
         846.6666666666666,
         785
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -1002,15 +1045,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0
               },
               {
-                "frame": 27,
+                "frame": 657,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -1033,26 +1076,26 @@
         20
       ],
       "position": [
-        1073.3333333333333,
-        735
+        113.33333333333326,
+        195.0
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0.01
               },
               {
-                "frame": 30,
+                "frame": 663,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -1073,8 +1116,8 @@
         1073.3333333333333,
         785
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -1087,15 +1130,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0
               },
               {
-                "frame": 30,
+                "frame": 663,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -1118,26 +1161,26 @@
         20
       ],
       "position": [
-        1300.0,
-        735
+        340.0,
+        195.0
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0.01
               },
               {
-                "frame": 33,
+                "frame": 669,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -1158,8 +1201,8 @@
         1300.0,
         785
       ],
-      "start_frame": 288,
-      "duration_frames": 72,
+      "start_frame": 600,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -1172,15 +1215,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 600,
                 "value": 0
               },
               {
-                "frame": 33,
+                "frame": 669,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 749,
                 "value": 1
               }
             ],
@@ -1201,8 +1244,8 @@
         960,
         330
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -1215,15 +1258,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 788,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1243,8 +1286,8 @@
         960,
         735
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "shape": {
         "type": "path",
         "path": [
@@ -1276,7 +1319,7 @@
               "animation": {
                 "keyframes": [
                   {
-                    "frame": 0,
+                    "frame": 750,
                     "value": [
                       0,
                       0,
@@ -1284,7 +1327,7 @@
                     ]
                   },
                   {
-                    "frame": 34,
+                    "frame": 821,
                     "value": [
                       0,
                       1,
@@ -1310,8 +1353,8 @@
         620,
         785
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -1324,15 +1367,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0
               },
               {
-                "frame": 34,
+                "frame": 821,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1353,8 +1396,8 @@
         1300,
         785
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -1367,15 +1410,58 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0
               },
               {
-                "frame": 34,
+                "frame": 821,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_range_draw-normalized-sample",
+      "type": "text",
+      "text": "2010–2020",
+      "size": [
+        260,
+        38
+      ],
+      "position": [
+        960,
+        845
+      ],
+      "start_frame": 750,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/DejaVuSans.ttf",
+        "font_size": 20,
+        "fill": "#BEB4A6",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 750,
+                "value": 0
+              },
+              {
+                "frame": 826,
+                "value": 1
+              },
+              {
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1396,8 +1482,8 @@
         960,
         505
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -1412,15 +1498,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0
               },
               {
-                "frame": 20,
+                "frame": 792,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1430,19 +1516,19 @@
             "property": "scale_x",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0.01
               },
               {
-                "frame": 34,
+                "frame": 821,
                 "value": 1
               },
               {
-                "frame": 48,
+                "frame": 851,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1455,8 +1541,8 @@
         "counter": {
           "from": 2010,
           "to": 2020,
-          "start_frame": 0,
-          "duration_frames": 34,
+          "start_frame": 750,
+          "duration_frames": 150,
           "format": "plain",
           "decimals": 0
         }
@@ -1474,8 +1560,8 @@
         960,
         615
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -1488,15 +1574,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 802,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1519,26 +1605,26 @@
         4
       ],
       "position": [
-        960,
-        735
+        0.0,
+        195.0
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_x",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0.01
               },
               {
-                "frame": 32,
+                "frame": 817,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1561,26 +1647,26 @@
         16
       ],
       "position": [
-        960,
-        735
+        0.0,
+        195.0
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_x",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0.01
               },
               {
-                "frame": 34,
+                "frame": 821,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1603,26 +1689,26 @@
         20
       ],
       "position": [
-        620.0,
-        735
+        -340.0,
+        195.0
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0.01
               },
               {
-                "frame": 24,
+                "frame": 800,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1643,8 +1729,8 @@
         620.0,
         785
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -1657,15 +1743,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0
               },
               {
-                "frame": 24,
+                "frame": 800,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1688,26 +1774,26 @@
         20
       ],
       "position": [
-        1300.0,
-        735
+        340.0,
+        195.0
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0.01
               },
               {
-                "frame": 27,
+                "frame": 807,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1728,8 +1814,8 @@
         1300.0,
         785
       ],
-      "start_frame": 360,
-      "duration_frames": 72,
+      "start_frame": 750,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -1742,15 +1828,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 750,
                 "value": 0
               },
               {
-                "frame": 27,
+                "frame": 807,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 899,
                 "value": 1
               }
             ],
@@ -1771,8 +1857,8 @@
         960,
         330
       ],
-      "start_frame": 432,
-      "duration_frames": 72,
+      "start_frame": 900,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -1785,15 +1871,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 900,
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 938,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1049,
                 "value": 1
               }
             ],
@@ -1805,7 +1891,7 @@
     {
       "id": "date_marker_drop-date",
       "type": "text",
-      "text": "2026",
+      "text": "2024",
       "size": [
         1040,
         132
@@ -1814,8 +1900,8 @@
         960,
         505
       ],
-      "start_frame": 432,
-      "duration_frames": 72,
+      "start_frame": 900,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -1830,15 +1916,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 900,
                 "value": 0
               },
               {
-                "frame": 22,
+                "frame": 946,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1049,
                 "value": 1
               }
             ],
@@ -1848,19 +1934,19 @@
             "property": "position_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 900,
                 "value": -36
               },
               {
-                "frame": 28,
+                "frame": 959,
                 "value": -3
               },
               {
-                "frame": 48,
+                "frame": 1001,
                 "value": 0
               },
               {
-                "frame": 71,
+                "frame": 1049,
                 "value": 0
               }
             ],
@@ -1881,8 +1967,8 @@
         960,
         615
       ],
-      "start_frame": 432,
-      "duration_frames": 72,
+      "start_frame": 900,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -1895,16 +1981,108 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 900,
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 952,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1049,
                 "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_marker_drop-stem",
+      "type": "color",
+      "color": [
+        0.38,
+        0.34,
+        0.29,
+        1
+      ],
+      "size": [
+        4,
+        72
+      ],
+      "position": [
+        0.0,
+        150.0
+      ],
+      "start_frame": 900,
+      "duration_frames": 150,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 900,
+                "value": -36
+              },
+              {
+                "frame": 959,
+                "value": -3
+              },
+              {
+                "frame": 1001,
+                "value": 0
+              },
+              {
+                "frame": 1049,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_marker_drop-dot",
+      "type": "color",
+      "color": [
+        0.43,
+        0.84,
+        0.76,
+        1
+      ],
+      "size": [
+        22,
+        22
+      ],
+      "position": [
+        0.0,
+        195.0
+      ],
+      "start_frame": 900,
+      "duration_frames": 150,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 900,
+                "value": -36
+              },
+              {
+                "frame": 959,
+                "value": -3
+              },
+              {
+                "frame": 1001,
+                "value": 0
+              },
+              {
+                "frame": 1049,
+                "value": 0
               }
             ],
             "easing": "out_cubic"
@@ -1924,8 +2102,8 @@
         960,
         330
       ],
-      "start_frame": 504,
-      "duration_frames": 72,
+      "start_frame": 1050,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -1938,15 +2116,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1050,
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 1088,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1199,
                 "value": 1
               }
             ],
@@ -1958,7 +2136,7 @@
     {
       "id": "date_underline_focus-date",
       "type": "text",
-      "text": "MARCH 2026",
+      "text": "SEPTEMBER 2008",
       "size": [
         1040,
         132
@@ -1967,8 +2145,8 @@
         960,
         505
       ],
-      "start_frame": 504,
-      "duration_frames": 72,
+      "start_frame": 1050,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -1983,15 +2161,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1050,
                 "value": 0
               },
               {
-                "frame": 20,
+                "frame": 1092,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1199,
                 "value": 1
               }
             ],
@@ -2001,19 +2179,19 @@
             "property": "scale_x",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1050,
                 "value": 0.01
               },
               {
-                "frame": 26,
+                "frame": 1105,
                 "value": 1
               },
               {
-                "frame": 48,
+                "frame": 1151,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1199,
                 "value": 1
               }
             ],
@@ -2034,8 +2212,8 @@
         960,
         615
       ],
-      "start_frame": 504,
-      "duration_frames": 72,
+      "start_frame": 1050,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -2048,19 +2226,85 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1050,
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 1102,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1199,
                 "value": 1
               }
             ],
             "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_underline_focus-trim",
+      "type": "shape",
+      "size": [
+        680,
+        8
+      ],
+      "position": [
+        960,
+        600
+      ],
+      "start_frame": 1050,
+      "duration_frames": 150,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -340.0,
+              0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              340.0,
+              0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#6ED6C3",
+          "width": 4
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0,
+              "end": 1,
+              "animation": {
+                "keyframes": [
+                  {
+                    "frame": 1050,
+                    "value": [
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  {
+                    "frame": 1121,
+                    "value": [
+                      0,
+                      1,
+                      0
+                    ]
+                  }
+                ]
+              }
+            }
           }
         ]
       }
@@ -2077,8 +2321,8 @@
         960,
         330
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -2091,15 +2335,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1200,
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 1238,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
               }
             ],
@@ -2111,7 +2355,7 @@
     {
       "id": "date_history_stack-date",
       "type": "text",
-      "text": "30 SEPTEMBER 2026",
+      "text": "1998",
       "size": [
         1040,
         132
@@ -2120,8 +2364,8 @@
         960,
         505
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -2136,15 +2380,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1200,
                 "value": 0
               },
               {
-                "frame": 22,
+                "frame": 1246,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
               }
             ],
@@ -2154,19 +2398,19 @@
             "property": "position_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1200,
                 "value": 18
               },
               {
-                "frame": 26,
+                "frame": 1255,
                 "value": 0
               },
               {
-                "frame": 48,
+                "frame": 1301,
                 "value": 0
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 0
               }
             ],
@@ -2187,8 +2431,8 @@
         960,
         615
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -2201,15 +2445,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1200,
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 1252,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
               }
             ],
@@ -2219,103 +2463,80 @@
       }
     },
     {
-      "id": "date_history_stack-timeline",
-      "type": "color",
-      "color": [
-        0.38,
-        0.34,
-        0.29,
-        1
-      ],
-      "size": [
-        680,
-        4
-      ],
-      "position": [
-        960,
-        735
-      ],
-      "start_frame": 576,
-      "duration_frames": 72,
-      "animation": {
-        "tracks": [
-          {
-            "property": "scale_x",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.01
-              },
-              {
-                "frame": 32,
-                "value": 1
-              },
-              {
-                "frame": 71,
-                "value": 1
-              }
-            ],
-            "easing": "out_cubic"
-          }
-        ]
-      }
-    },
-    {
-      "id": "date_history_stack-tick-1990",
-      "type": "color",
-      "color": [
-        0.51,
-        0.79,
-        0.91,
-        1
-      ],
-      "size": [
-        8,
-        20
-      ],
-      "position": [
-        620.0,
-        735
-      ],
-      "start_frame": 576,
-      "duration_frames": 72,
-      "animation": {
-        "tracks": [
-          {
-            "property": "scale_y",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.01
-              },
-              {
-                "frame": 24,
-                "value": 1
-              },
-              {
-                "frame": 71,
-                "value": 1
-              }
-            ],
-            "easing": "out_cubic"
-          }
-        ]
-      }
-    },
-    {
-      "id": "date_history_stack-year-1990",
+      "id": "date_history_stack-event-1998",
       "type": "text",
-      "text": "1990",
+      "text": "1998",
       "size": [
-        160,
-        34
+        180,
+        52
       ],
       "position": [
-        620.0,
-        785
+        780,
+        470
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 34,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 1200,
+                "value": 0
+              },
+              {
+                "frame": 1238,
+                "value": 1
+              },
+              {
+                "frame": 1349,
+                "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 1200,
+                "value": -18
+              },
+              {
+                "frame": 1252,
+                "value": 0
+              },
+              {
+                "frame": 1349,
+                "value": 0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "date_history_stack-label-1998",
+      "type": "text",
+      "text": "PRODUCT LAUNCH",
+      "size": [
+        380,
+        40
+      ],
+      "position": [
+        1070,
+        470
+      ],
+      "start_frame": 1200,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -2328,15 +2549,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1200,
                 "value": 0
               },
               {
-                "frame": 24,
+                "frame": 1246,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
               }
             ],
@@ -2346,40 +2567,59 @@
       }
     },
     {
-      "id": "date_history_stack-tick-2000",
-      "type": "color",
-      "color": [
-        0.51,
-        0.79,
-        0.91,
-        1
-      ],
+      "id": "date_history_stack-event-2005",
+      "type": "text",
+      "text": "2005",
       "size": [
-        8,
-        20
+        180,
+        52
       ],
       "position": [
-        846.6666666666666,
-        735
+        780,
+        548
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 34,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only"
+      },
       "animation": {
         "tracks": [
           {
-            "property": "scale_y",
+            "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
-                "value": 0.01
+                "frame": 1200,
+                "value": 0
               },
               {
-                "frame": 27,
+                "frame": 1255,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 1200,
+                "value": -18
+              },
+              {
+                "frame": 1269,
+                "value": 0
+              },
+              {
+                "frame": 1349,
+                "value": 0
               }
             ],
             "easing": "out_cubic"
@@ -2388,19 +2628,19 @@
       }
     },
     {
-      "id": "date_history_stack-year-2000",
+      "id": "date_history_stack-label-2005",
       "type": "text",
-      "text": "2000",
+      "text": "PRODUCT LAUNCH",
       "size": [
-        160,
-        34
+        380,
+        40
       ],
       "position": [
-        846.6666666666666,
-        785
+        1070,
+        548
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -2413,15 +2653,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1200,
                 "value": 0
               },
               {
-                "frame": 27,
+                "frame": 1263,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
               }
             ],
@@ -2431,40 +2671,59 @@
       }
     },
     {
-      "id": "date_history_stack-tick-2010",
-      "type": "color",
-      "color": [
-        0.51,
-        0.79,
-        0.91,
-        1
-      ],
+      "id": "date_history_stack-event-2012",
+      "type": "text",
+      "text": "2012",
       "size": [
-        8,
-        20
+        180,
+        52
       ],
       "position": [
-        1073.3333333333333,
-        735
+        780,
+        626
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 34,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only"
+      },
       "animation": {
         "tracks": [
           {
-            "property": "scale_y",
+            "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
-                "value": 0.01
+                "frame": 1200,
+                "value": 0
               },
               {
-                "frame": 30,
+                "frame": 1271,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 1200,
+                "value": -18
+              },
+              {
+                "frame": 1286,
+                "value": 0
+              },
+              {
+                "frame": 1349,
+                "value": 0
               }
             ],
             "easing": "out_cubic"
@@ -2473,19 +2732,19 @@
       }
     },
     {
-      "id": "date_history_stack-year-2010",
+      "id": "date_history_stack-label-2012",
       "type": "text",
-      "text": "2010",
+      "text": "PRODUCT LAUNCH",
       "size": [
-        160,
-        34
+        380,
+        40
       ],
       "position": [
-        1073.3333333333333,
-        785
+        1070,
+        626
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -2498,15 +2757,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1200,
                 "value": 0
               },
               {
-                "frame": 30,
+                "frame": 1280,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
               }
             ],
@@ -2516,40 +2775,59 @@
       }
     },
     {
-      "id": "date_history_stack-tick-2020",
-      "type": "color",
-      "color": [
-        0.51,
-        0.79,
-        0.91,
-        1
-      ],
+      "id": "date_history_stack-event-2026",
+      "type": "text",
+      "text": "2026",
       "size": [
-        8,
-        20
+        180,
+        52
       ],
       "position": [
-        1300.0,
-        735
+        780,
+        704
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
+      "style": {
+        "font": "assets/fonts/Poppins-Bold.ttf",
+        "font_size": 34,
+        "fill": "#F3EFE7",
+        "fit_mode": "shrink_only"
+      },
       "animation": {
         "tracks": [
           {
-            "property": "scale_y",
+            "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
-                "value": 0.01
+                "frame": 1200,
+                "value": 0
               },
               {
-                "frame": 33,
+                "frame": 1288,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 1200,
+                "value": -18
+              },
+              {
+                "frame": 1303,
+                "value": 0
+              },
+              {
+                "frame": 1349,
+                "value": 0
               }
             ],
             "easing": "out_cubic"
@@ -2558,19 +2836,19 @@
       }
     },
     {
-      "id": "date_history_stack-year-2020",
+      "id": "date_history_stack-label-2026",
       "type": "text",
-      "text": "2020",
+      "text": "PRODUCT LAUNCH",
       "size": [
-        160,
-        34
+        380,
+        40
       ],
       "position": [
-        1300.0,
-        785
+        1070,
+        704
       ],
-      "start_frame": 576,
-      "duration_frames": 72,
+      "start_frame": 1200,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -2583,15 +2861,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1200,
                 "value": 0
               },
               {
-                "frame": 33,
+                "frame": 1297,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1349,
                 "value": 1
               }
             ],
@@ -2612,8 +2890,8 @@
         960,
         330
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 22,
@@ -2626,15 +2904,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0
               },
               {
-                "frame": 18,
+                "frame": 1388,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -2646,7 +2924,7 @@
     {
       "id": "date_chronology_focus-date",
       "type": "text",
-      "text": "Q4 2026",
+      "text": "1990–2020",
       "size": [
         1040,
         132
@@ -2655,8 +2933,8 @@
         960,
         505
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/Poppins-Bold.ttf",
         "font_size": 66,
@@ -2671,11 +2949,11 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -2685,19 +2963,19 @@
             "property": "scale",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0.97
               },
               {
-                "frame": 32,
+                "frame": 1417,
                 "value": 1.04
               },
               {
-                "frame": 52,
+                "frame": 1459,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -2718,8 +2996,8 @@
         960,
         615
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 25,
@@ -2732,15 +3010,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0
               },
               {
-                "frame": 25,
+                "frame": 1402,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -2763,26 +3041,26 @@
         4
       ],
       "position": [
-        960,
-        735
+        0.0,
+        195.0
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_x",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0.01
               },
               {
-                "frame": 32,
+                "frame": 1417,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -2805,26 +3083,26 @@
         20
       ],
       "position": [
-        620.0,
-        735
+        -340.0,
+        195.0
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0.01
               },
               {
-                "frame": 24,
+                "frame": 1400,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -2845,8 +3123,8 @@
         620.0,
         785
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -2859,15 +3137,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0
               },
               {
-                "frame": 24,
+                "frame": 1400,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -2890,26 +3168,26 @@
         20
       ],
       "position": [
-        846.6666666666666,
-        735
+        -113.33333333333337,
+        195.0
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0.01
               },
               {
-                "frame": 27,
+                "frame": 1407,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -2930,8 +3208,8 @@
         846.6666666666666,
         785
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -2944,15 +3222,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0
               },
               {
-                "frame": 27,
+                "frame": 1407,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -2975,26 +3253,26 @@
         20
       ],
       "position": [
-        1073.3333333333333,
-        735
+        113.33333333333326,
+        195.0
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0.01
               },
               {
-                "frame": 30,
+                "frame": 1413,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -3015,8 +3293,8 @@
         1073.3333333333333,
         785
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -3029,15 +3307,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0
               },
               {
-                "frame": 30,
+                "frame": 1413,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -3060,26 +3338,26 @@
         20
       ],
       "position": [
-        1300.0,
-        735
+        340.0,
+        195.0
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "animation": {
         "tracks": [
           {
             "property": "scale_y",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0.01
               },
               {
-                "frame": 33,
+                "frame": 1419,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
@@ -3100,8 +3378,8 @@
         1300.0,
         785
       ],
-      "start_frame": 648,
-      "duration_frames": 72,
+      "start_frame": 1350,
+      "duration_frames": 150,
       "style": {
         "font": "assets/fonts/DejaVuSans.ttf",
         "font_size": 18,
@@ -3114,15 +3392,15 @@
             "property": "opacity",
             "keyframes": [
               {
-                "frame": 0,
+                "frame": 1350,
                 "value": 0
               },
               {
-                "frame": 33,
+                "frame": 1419,
                 "value": 1
               },
               {
-                "frame": 71,
+                "frame": 1499,
                 "value": 1
               }
             ],
