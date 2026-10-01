@@ -1,0 +1,105 @@
+{
+  "schema": "chronontemplate.entity-motion-families.v1",
+  "version": 1,
+  "status": "legacy",
+  "deprecated_by": "catalog/entity_presentation.v1.json",
+  "note": "The PERSON, METRIC and DATE families here were superseded by the canonical catalog-driven entity presentation V1 (metric_v1, date_v1, entity_card_v1 in catalog/entity_presentation.v1.json, merged into the emitted catalog by tools/emit_catalog.cpp and embedded by RenderingGen). This file remains only for the exploratory people/location/map render scripts; do not extend it and do not use it as a motion source of truth.", 
+  "families": [
+    {
+      "entity_type": "PERSON",
+      "visual_template": "entity_card_person",
+      "template_layout": "person_card_bottom_caption",
+      "template_layouts": [
+        "person_card_bottom_caption",
+        "person_card_side_caption",
+        "person_card_top_caption"
+      ],
+      "motion_family": "people_family_v1",
+      "presets": [
+        "people_caption_rise",
+        "people_depth_caption",
+        "people_yaw_reveal",
+        "people_split_side_reveal",
+        "people_card_float_settle",
+        "people_underline_identity",
+        "people_focus_frame",
+        "people_name_pill_pop",
+        "people_stack_reveal",
+        "people_portrait_parallax",
+        "people_side_left_text_right",
+        "people_side_right_text_left",
+        "people_split_left_to_right",
+        "people_split_right_to_left",
+        "people_caption_over_portrait_lower"
+      ],
+      "preset_layouts": {
+        "people_caption_rise": "person_card_bottom_caption",
+        "people_depth_caption": "person_card_bottom_caption",
+        "people_yaw_reveal": "person_card_bottom_caption",
+        "people_split_side_reveal": "person_card_bottom_caption",
+        "people_card_float_settle": "person_card_bottom_caption",
+        "people_underline_identity": "person_card_bottom_caption",
+        "people_focus_frame": "person_card_bottom_caption",
+        "people_name_pill_pop": "person_card_bottom_caption",
+        "people_stack_reveal": "person_card_bottom_caption",
+        "people_portrait_parallax": "person_card_bottom_caption",
+        "people_side_left_text_right": "person_card_side_caption",
+        "people_side_right_text_left": "person_card_side_caption",
+        "people_split_left_to_right": "person_card_side_caption",
+        "people_split_right_to_left": "person_card_side_caption",
+        "people_caption_over_portrait_lower": "person_card_top_caption"
+      }
+    },
+    {
+      "entity_type": "METRIC",
+      "visual_template": "metric_stat_card",
+      "template_layout": "metric_stat_card",
+      "motion_family": "metric_family_v1",
+      "presets": ["metric_counter_rise", "metric_counter_punch", "metric_vertical_flip_count", "metric_split_digits", "metric_stat_card_reveal", "metric_delta_highlight", "metric_bar_support", "metric_ring_support", "metric_focus_swap", "metric_card_stack_sequence"]
+    },
+    {
+      "entity_type": "MONEY",
+      "visual_template": "money_stat_card",
+      "template_layout": "money_stat_card",
+      "motion_family": "money_family_v1",
+      "presets": ["money_currency_counter", "money_odometer_lux", "money_delta_badge", "money_ledger_reveal", "money_card_depth", "money_compare_before_after", "money_growth_bar", "money_compact_ticker", "money_spotlight_focus", "money_stat_grid"]
+    },
+    {
+      "entity_type": "DATE",
+      "visual_template": "date_card",
+      "template_layout": "timeline_date_card",
+      "template_layouts": ["date_card", "timeline_date_card"],
+      "motion_family": "date_family_v1",
+      "presets": ["date_tick_reveal", "date_flip_calendar", "date_timeline_pop", "date_range_draw", "date_year_counter", "date_stagger_segments", "date_card_slide", "date_underline_focus", "date_marker_drop", "date_chronology_stack"]
+    },
+    {
+      "entity_type": "LOCATION",
+      "visual_template": "map_location_card",
+      "template_layout": "location_pin_card",
+      "template_layouts": ["location_pin_card", "location_route_card", "location_region_focus"],
+      "motion_family": "location_family_v1",
+      "presets": ["location_map_pin_reveal", "location_map_fly_pin", "location_region_highlight", "location_route_draw", "location_tilt_focus", "location_radar_ping", "location_cluster_reveal", "location_marker_drop", "location_geo_card_split", "location_follow_route_push"]
+    },
+    {
+      "entity_type": "DUAL_ENTITY",
+      "visual_template": "dual_card_split",
+      "template_layout": "dual_lateral_split",
+      "template_layouts": [
+        "dual_lateral_split",
+        "dual_stagger_depth",
+        "dual_unfold_book",
+        "dual_diagonal_sweep",
+        "dual_versus_impact"
+      ],
+      "motion_family": "dual_image_family_v1",
+      "max_entities": 2,
+      "presets": [
+        "dual_split_converge",
+        "dual_depth_stagger",
+        "dual_flip_unfold",
+        "dual_cascade_diagonal",
+        "dual_compare_versus"
+      ]
+    }
+  ]
+}

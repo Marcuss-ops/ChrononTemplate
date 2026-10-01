@@ -22,6 +22,8 @@ endif()
 option(CHRONONTEMPLATE_BUILD_TESTS "Build the ChrononTemplate test binaries" ${PROJECT_IS_TOP_LEVEL})
 option(CHRONONTEMPLATE_WERROR "Turn compiler warnings into errors" OFF)
 option(CHRONONTEMPLATE_BUILD_LIVE_ADAPTER_TEST "Link the live adapter test against Chronon3D" OFF)
+set(CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_cli"
+    CACHE FILEPATH "Chronon3D CLI used to validate the editorial benchmark plans")
 set(CHRONONTEMPLATE_CHRONON3D_LIBRARY "" CACHE FILEPATH
     "Chronon3D library used by the optional live adapter test")
 set(CHRONONTEMPLATE_CHRONONMOTION_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ChrononMotion3D"
@@ -131,7 +133,8 @@ if(CHRONONTEMPLATE_BUILD_CATALOG_TOOL)
     target_link_libraries(chronontemplate_emit_catalog PRIVATE chronontemplate)
     target_include_directories(chronontemplate_emit_catalog PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
     target_compile_definitions(chronontemplate_emit_catalog PRIVATE
-            CHRONONTEMPLATE_CATALOG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/motion_catalog.v1.json")
+            CHRONONTEMPLATE_CATALOG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/motion_catalog.v1.json"
+            CHRONONTEMPLATE_ENTITY_PRESENTATION_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/entity_presentation.v1.json")
     target_compile_options(chronontemplate_emit_catalog PRIVATE -Wall -Wextra)
     if(CHRONONTEMPLATE_WERROR)
         target_compile_options(chronontemplate_emit_catalog PRIVATE -Werror)
@@ -153,6 +156,24 @@ endif()
 
 if(CHRONONTEMPLATE_BUILD_TESTS)
     enable_testing()
+
+    find_package(Python3 COMPONENTS Interpreter QUIET)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME chronontemplate_multi_image_duo_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_multi_image_duo_v1.py")
+        add_test(NAME chronontemplate_entity_presentation_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_entity_presentation_v1.py")
+    endif()
+    if(Python3_Interpreter_FOUND AND EXISTS "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}")
+        add_test(NAME chronontemplate_editorial_benchmark_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/editorial_benchmark_suite.py"
+                    --validate-only
+                    --cli "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}"
+                    --output-dir "${CMAKE_CURRENT_BINARY_DIR}/editorial_benchmark_contract")
+    endif()
 
     add_executable(chronontemplate_templates_test tests/motion_templates.cpp)
     target_link_libraries(chronontemplate_templates_test PRIVATE chronontemplate)

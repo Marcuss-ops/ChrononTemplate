@@ -64,6 +64,7 @@ namespace chronontemplate_test {
 
             ct::ContentHandle handle;
             handle.id = id;
+            handle.wireId = m_nextWireId++;
             handle.kind = kind;
             handle.metrics.naturalSize = size;
             handle.metrics.anchor = chrononmotion::Vector2(0.5f, 0.5f);
@@ -73,6 +74,7 @@ namespace chronontemplate_test {
         }
 
         std::unordered_map<std::string, std::string> m_fingerprints{};
+        std::uint64_t m_nextWireId{1};
     };
 
     /// A host that forgets to measure: the template must refuse its content.
