@@ -3,6 +3,7 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -10,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE = ROOT.parent
 OUT = ROOT / "out/camera_title_documentary_v1"
 POSE_DUMPER = ROOT / "build/titlecam-verify/chronontemplate_dump_title_camera_poses"
-CLI = WORKSPACE / "Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
+CLI = Path(os.environ.get("CHRONON_CLI", WORKSPACE /
+          "Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"))
 ASSETS = WORKSPACE / "RenderingGen/testdata/golden"
 FPS, WIDTH, HEIGHT, DURATION = 30, 1920, 1080, 136
 TITLES = {"simplicity": "THE ART OF SIMPLICITY", "rome": "ROME"}
@@ -64,7 +66,6 @@ def plan_for(move, title_id, title, rows):
     channels[0] = [x - WIDTH / 2 for x in channels[0]]
     channels[1] = [y - HEIGHT / 2 for y in channels[1]]
     channels[2] = [-z for z in channels[2]]
-    first = rows[0]
     short = title == "ROME"
     title_size = 188 if short else 112
     subtitle = move.removeprefix("title_camera_").replace("_", " ").upper()
@@ -90,7 +91,7 @@ def plan_for(move, title_id, title, rows):
         "canvas": {"width": WIDTH, "height": HEIGHT, "fps_num": FPS, "fps_den": 1,
                    "duration_frames": DURATION},
         "camera": {"type": "perspective", "position": [round(channels[i][0], 6) for i in range(3)],
-                   "rotation_deg": [round(x, 6) for x in first[4:7]], "fov_deg": round(first[7], 6),
+                   "rotation_deg": [round(x, 6) for x in rows[0][4:7]], "fov_deg": round(rows[0][7], 6),
                    "near": 1, "far": 10000, "zoom": 1},
         "camera_animation": {"tracks": [track(p, c) for p, c in zip(properties, channels)]},
         "layers": [bg, title_layer, caption],
