@@ -175,6 +175,7 @@ namespace chronontemplate {
         [[nodiscard]] chrononmotion::Vector2 canvas() const { return chrononmotion::Vector2(m_width, m_height); }
 
         [[nodiscard]] chrononmotion::motion::MotionScene& motion() { return m_scene; }
+        [[nodiscard]] chrononmotion::motion::CameraRig& cameraRig() { return m_camera; }
         [[nodiscard]] const BindingRegistry& bindings() const { return m_bindings; }
         [[nodiscard]] MotionBridge& bridge() { return m_bridge; }
 

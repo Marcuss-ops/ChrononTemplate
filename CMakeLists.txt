@@ -34,7 +34,7 @@ set(CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI "${CMAKE_CURRENT_SOURCE_DIR}/../Chron
     CACHE FILEPATH "Chronon3D CLI used to validate the editorial benchmark plans")
 set(CHRONONTEMPLATE_CHRONON3D_LIBRARY "" CACHE FILEPATH
     "Chronon3D library used by the optional live adapter test")
-set(CHRONONTEMPLATE_CHRONONMOTION_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ChrononMotion3D"
+set(CHRONONTEMPLATE_CHRONONMOTION_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ChrononMotion3d"
     CACHE PATH "ChrononMotion checkout used when the chrononmotion target is not already defined")
 set(CHRONONTEMPLATE_CHRONONMOTION_PREBUILT_LIBRARY "" CACHE FILEPATH
     "Prebuilt libchrononmotion.a; when set, the core is not rebuilt from source")
@@ -86,6 +86,9 @@ add_library(chronontemplate STATIC
         src/chronontemplate/ChrononMotionContract.cpp
         src/chronontemplate/ChrononRenderAdapter.cpp
         src/chronontemplate/TemplateScene.cpp
+        src/chronontemplate/PlanLowering.cpp
+        # Optional offline RenderPlan bridge lives outside the Motion core.
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
         src/chronontemplate/ImageAnimationPack.cpp
         src/chronontemplate/TitleCameraPack.cpp
         src/chronontemplate/ImportantPhrasePack.cpp
@@ -215,6 +218,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_scene_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_scene_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_scene_test COMMAND chronontemplate_scene_test)
+
+    add_executable(chronontemplate_plan_lowering_test tests/plan_lowering.cpp)
+    target_link_libraries(chronontemplate_plan_lowering_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_plan_lowering_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_plan_lowering_test COMMAND chronontemplate_plan_lowering_test)
 
     add_executable(chronontemplate_image_animation_pack_test tests/image_animation_pack.cpp)
     target_link_libraries(chronontemplate_image_animation_pack_test PRIVATE chronontemplate)
