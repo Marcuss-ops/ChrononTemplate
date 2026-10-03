@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import math
+import os
 import unittest
 from pathlib import Path
 
@@ -365,7 +366,15 @@ class EntityPresentationCatalogTests(unittest.TestCase):
         self.assertEqual(BUILDER.caption_font("محمد علي"), arabic)
 
     def test_script_faces_exist_in_the_renderer_asset_bundle(self):
-        assets_root = TEMPLATE.parent / "RenderingGen/renderinggen/out/editorial_v1"
+        configured_root = os.environ.get("CHRONON_TEMPLATE_RENDERER_ASSETS")
+        candidates = [Path(configured_root)] if configured_root else []
+        candidates.append(TEMPLATE.parent / "RenderingGen/renderinggen/out/editorial_v1")
+        assets_root = next((path for path in candidates if path.is_dir()), None)
+        if assets_root is None:
+            self.skipTest(
+                "optional RenderingGen sibling asset bundle is unavailable; "
+                "set CHRONON_TEMPLATE_RENDERER_ASSETS to verify bundled fonts"
+            )
         for name in BUILDER.ENTITY_SAMPLES:
             font = assets_root / BUILDER.caption_font(name)
             self.assertTrue(font.is_file(), f"missing bundled font for {name}: {font}")

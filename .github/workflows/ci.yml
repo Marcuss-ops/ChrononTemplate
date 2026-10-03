@@ -1,0 +1,46 @@
+name: Template contract
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out ChrononTemplate
+        uses: actions/checkout@v4
+        with:
+          path: ChrononTemplate
+      - name: Check out ChrononMotion3d
+        uses: actions/checkout@v4
+        with:
+          repository: Marcuss-ops/ChrononMotion3d
+          ref: 06e8604f8736ac2a1b16f29fa5f2fc1b7167fc55
+          path: ChrononMotion3d
+      - name: Check out Chronon3d RenderPlan headers
+        uses: actions/checkout@v4
+        with:
+          repository: Marcuss-ops/Chronon3d
+          ref: 5d960421dd1bb88f920cc6103cb15d0835502933
+          path: Chronon3d
+      - name: Install JSON headers
+        run: sudo apt-get update && sudo apt-get install --yes nlohmann-json3-dev ninja-build
+      - name: Configure release with warnings as errors
+        run: >-
+          cmake -S ChrononTemplate -B build/template-ci -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCHRONONTEMPLATE_BUILD_TESTS=ON
+          -DCHRONONTEMPLATE_WERROR=ON
+          -DCHRONONMOTION_WERROR=OFF
+          -DCHRONONTEMPLATE_CHRONONMOTION_DIR=${{ github.workspace }}/ChrononMotion3d
+          -DCHRONONTEMPLATE_NLOHMANN_JSON_INCLUDE_DIR=/usr/include
+      - name: Build
+        run: cmake --build build/template-ci --parallel 2
+      - name: Test
+        run: ctest --test-dir build/template-ci --output-on-failure
