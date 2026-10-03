@@ -19,12 +19,11 @@ namespace {
 
     PhraseAnimationDefinition make(const char* id, const char* title, const char* phrase,
                                    std::vector<PhraseAccent> accents, int enter = 78) {
-        // Give the full phrase a slow, understated rise while the underline
-        // arrives later, so the graphic reads as emphasis rather than a banner.
+        // Keep the phrase's vertical placement fixed. The GPU text path can
+        // collapse animated position_y updates into a thin strip on frame boundaries.
         return PhraseAnimationDefinition{
             id, title, phrase, enter,
-            {track("position_y", {{0, 24.f}, {48, 0.f}, {enter, 0.f}}),
-             track("opacity", {{0, 0.f}, {22, 1.f}, {enter, 1.f}}, "linear")},
+            {track("opacity", {{0, 0.f}, {22, 1.f}, {enter, 1.f}}, "linear")},
             {}, {}, std::move(accents), 94.f
         };
     }
@@ -33,9 +32,9 @@ namespace {
                        float y, float opacity = 1.f, int start = 32, int finish = 62) {
         const int hold = finish >= 78 ? finish + 1 : 78;
         return accent(id, color, width, height, y, height * .5f, opacity,
-                      {track("scale_x", {{0, 0.f}, {start, 0.f}, {finish, 1.f}, {hold, 1.f}}),
+                      {track("scale_x", {{0, 0.f}, {start, 0.f}, {finish, 1.f}, {hold, 1.f}}, "linear"),
                        track("position_x", {{0, -width * .5f}, {start, -width * .5f},
-                                             {finish, 0.f}, {hold, 0.f}})});
+                                             {finish, 0.f}, {hold, 0.f}}, "linear")});
     }
 
 }// namespace
