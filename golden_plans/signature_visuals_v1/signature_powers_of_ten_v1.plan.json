@@ -1,0 +1,897 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "signature_powers_of_ten_v1",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 300
+  },
+  "camera": {
+    "type": "perspective",
+    "position": [
+      0.0,
+      0.0,
+      -1000.0
+    ],
+    "rotation_deg": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "fov_deg": 45.0,
+    "near": 1.0,
+    "far": 20000.0,
+    "zoom": 1.0
+  },
+  "camera_animation": {
+    "tracks": [
+      {
+        "property": "camera_position_z",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": -1000.0
+          },
+          {
+            "frame": 20,
+            "value": -1000.0
+          },
+          {
+            "frame": 30,
+            "value": 400.0
+          },
+          {
+            "frame": 50,
+            "value": 400.0
+          },
+          {
+            "frame": 60,
+            "value": 1800.0
+          },
+          {
+            "frame": 80,
+            "value": 1800.0
+          },
+          {
+            "frame": 90,
+            "value": 3200.0
+          },
+          {
+            "frame": 110,
+            "value": 3200.0
+          },
+          {
+            "frame": 120,
+            "value": 4600.0
+          },
+          {
+            "frame": 140,
+            "value": 4600.0
+          },
+          {
+            "frame": 150,
+            "value": 6000.0
+          },
+          {
+            "frame": 170,
+            "value": 6000.0
+          },
+          {
+            "frame": 180,
+            "value": 7400.0
+          },
+          {
+            "frame": 200,
+            "value": 7400.0
+          },
+          {
+            "frame": 210,
+            "value": 8800.0
+          },
+          {
+            "frame": 230,
+            "value": 8800.0
+          },
+          {
+            "frame": 240,
+            "value": 10200.0
+          },
+          {
+            "frame": 260,
+            "value": 10200.0
+          },
+          {
+            "frame": 270,
+            "value": 11600.0
+          },
+          {
+            "frame": 290,
+            "value": 11600.0
+          },
+          {
+            "frame": 299,
+            "value": 11600.0
+          }
+        ]
+      }
+    ]
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "color",
+      "color": [
+        0.012,
+        0.018,
+        0.032,
+        1.0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "screen_space": true,
+      "start_frame": 0,
+      "duration_frames": 300
+    },
+    {
+      "id": "scale-band-00-title",
+      "type": "text",
+      "text": "ATOMIC SPACING",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        0.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 0,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-00-magnitude",
+      "type": "text",
+      "text": "10⁻¹⁰ m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        0.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 0,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-00-detail",
+      "type": "text",
+      "text": "distance between atoms",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        0.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 0,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-01-title",
+      "type": "text",
+      "text": "TRANSISTOR",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        1400.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 30,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-01-magnitude",
+      "type": "text",
+      "text": "10⁻⁷ m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        1400.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 30,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-01-detail",
+      "type": "text",
+      "text": "feature scale in modern silicon",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        1400.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 30,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-02-title",
+      "type": "text",
+      "text": "SAND GRAIN",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        2800.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 60,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-02-magnitude",
+      "type": "text",
+      "text": "10⁻³ m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        2800.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 60,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-02-detail",
+      "type": "text",
+      "text": "a millimetre across",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        2800.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 60,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-03-title",
+      "type": "text",
+      "text": "HAND",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        4200.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 90,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-03-magnitude",
+      "type": "text",
+      "text": "10⁻¹ m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        4200.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 90,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-03-detail",
+      "type": "text",
+      "text": "a familiar human measure",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        4200.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 90,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-04-title",
+      "type": "text",
+      "text": "HUMAN",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        5600.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 120,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-04-magnitude",
+      "type": "text",
+      "text": "10⁰ m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        5600.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 120,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-04-detail",
+      "type": "text",
+      "text": "one metre",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        5600.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 120,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-05-title",
+      "type": "text",
+      "text": "ROOM",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        7000.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 150,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-05-magnitude",
+      "type": "text",
+      "text": "10¹ m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        7000.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 150,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-05-detail",
+      "type": "text",
+      "text": "interior architecture",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        7000.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 150,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-06-title",
+      "type": "text",
+      "text": "BUILDING",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        8400.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 180,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-06-magnitude",
+      "type": "text",
+      "text": "10² m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        8400.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 180,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-06-detail",
+      "type": "text",
+      "text": "urban structure",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        8400.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 180,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-07-title",
+      "type": "text",
+      "text": "CITY",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        9800.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 210,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-07-magnitude",
+      "type": "text",
+      "text": "10⁴ m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        9800.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 210,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-07-detail",
+      "type": "text",
+      "text": "district to district",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        9800.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 210,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-08-title",
+      "type": "text",
+      "text": "EARTH",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        11200.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 240,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-08-magnitude",
+      "type": "text",
+      "text": "10⁷ m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        11200.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 240,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-08-detail",
+      "type": "text",
+      "text": "planetary diameter scale",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        11200.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 240,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-09-title",
+      "type": "text",
+      "text": "SOLAR SYSTEM",
+      "size": [
+        1500,
+        193.60000000000002
+      ],
+      "position": [
+        960.0,
+        700.0,
+        12600.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 88,
+        "min_font_size": 88,
+        "max_font_size": 88,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 270,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-09-magnitude",
+      "type": "text",
+      "text": "10¹³ m",
+      "size": [
+        1500,
+        145.20000000000002
+      ],
+      "position": [
+        960.0,
+        520.0,
+        12600.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 66,
+        "min_font_size": 66,
+        "max_font_size": 66,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 270,
+      "duration_frames": 30
+    },
+    {
+      "id": "scale-band-09-detail",
+      "type": "text",
+      "text": "outer planetary distances",
+      "size": [
+        1500,
+        74.80000000000001
+      ],
+      "position": [
+        960.0,
+        340.0,
+        12600.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 34,
+        "min_font_size": 34,
+        "max_font_size": 34,
+        "fit_mode": "shrink_only",
+        "fill": "#AAB5C5"
+      },
+      "start_frame": 270,
+      "duration_frames": 30
+    }
+  ],
+  "output": {
+    "path": "signature_powers_of_ten_v1.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "chronontemplate.signature-visuals.v1",
+  "family": "signature_visuals_v1",
+  "renderer_contract": "Chronon RenderPlan V3; 3D text layers and deterministic camera tracks",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30
+  },
+  "scenes": [
+    {
+      "id": "signature_anamorphic_typography_v1",
+      "plan": "signature_anamorphic_typography_v1.plan.json",
+      "duration_frames": 240
+    },
+    {
+      "id": "signature_powers_of_ten_v1",
+      "plan": "signature_powers_of_ten_v1.plan.json",
+      "duration_frames": 300
+    }
+  ]
+}
