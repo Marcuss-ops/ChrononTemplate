@@ -164,7 +164,7 @@ def make_scene1_plan():
             "duration_frames": DURATION_FRAMES,
             "shape": {
                 "type": "rect",
-                "fill": [0.009, 0.007, 0.006, 1.0]
+                "fill": [0.05, 0.05, 0.06, 1.0]
             },
             "effects": [
                 {"type": "vignette", "radius": 0.58, "softness": 0.55, "amount": 0.30},
@@ -210,7 +210,7 @@ def make_scene1_plan():
             "line0", "Non poteva accettare", [1850, 220], [center_x, line0_y],
             FONT_BLACK_REL, fs0, WHITE_CREAM_HEX, tracking=-8.0,
             effects=[
-                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+                {"type": "bloom", "threshold": 0.90, "radius": 42.0, "intensity": 0.12},
             ],
             animation={
                 "tracks": [
@@ -232,7 +232,7 @@ def make_scene1_plan():
             "line1", "ciò che era", [1850, 360], [center_x, line1_y],
             FONT_BLACK_REL, fs1, WHITE_CREAM_HEX, tracking=tracking1,
             effects=[
-                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+                {"type": "bloom", "threshold": 0.90, "radius": 42.0, "intensity": 0.12},
             ],
             animation={
                 "tracks": [
@@ -445,7 +445,7 @@ def make_scene3_plan():
             "duration_frames": DURATION_FRAMES,
             "shape": {
                 "type": "rect",
-                "fill": [0.009, 0.007, 0.006, 1.0]
+                "fill": [0.05, 0.05, 0.06, 1.0]
             },
             "effects": [
                 {"type": "vignette", "radius": 0.58, "softness": 0.55, "amount": 0.30},
@@ -457,7 +457,7 @@ def make_scene3_plan():
             "line0_non", "Non", [1850, 280], [x0_non, line0_y],
             FONT_BLACK_REL, font_size, WHITE_CREAM_HEX, tracking=-8.0,
             effects=[
-                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+                {"type": "bloom", "threshold": 0.90, "radius": 42.0, "intensity": 0.12},
             ],
             animation={
                 "tracks": [
@@ -499,7 +499,7 @@ def make_scene3_plan():
             "line1", "la propria", [1850, 280], [960, line1_y],
             FONT_BLACK_REL, font_size, WHITE_CREAM_HEX, tracking=-8.0,
             effects=[
-                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+                {"type": "bloom", "threshold": 0.90, "radius": 42.0, "intensity": 0.12},
             ],
             animation={
                 "tracks": [
@@ -523,7 +523,7 @@ def make_scene3_plan():
             "line2", "condizione.", [1850, 280], [960, line2_y],
             FONT_BLACK_REL, font_size, WHITE_CREAM_HEX, tracking=-8.0,
             effects=[
-                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+                {"type": "bloom", "threshold": 0.90, "radius": 42.0, "intensity": 0.12},
             ],
             animation={
                 "tracks": [
@@ -605,19 +605,30 @@ def make_scene4_plan():
             "duration_frames": DURATION_FRAMES,
             "shape": {
                 "type": "rect",
-                "fill": [0.009, 0.007, 0.006, 1.0]
+                "fill": [0.05, 0.05, 0.06, 1.0]
             },
             "effects": [
                 {"type": "vignette", "radius": 0.60, "softness": 0.55, "amount": 0.30},
                 {"type": "noise", "amount": 0.008, "size": 1.0, "color_mode": "monochrome"}
             ]
         },
+        # A soft warm light source to the right, matching the reference atmosphere.
+        {
+            "id": "warm_atmosphere",
+            "type": "shape",
+            "size": [1300, 900],
+            "position": [1530, 500],
+            "start_frame": 0,
+            "duration_frames": DURATION_FRAMES,
+            "shape": {"type": "ellipse", "fill": [0.12, 0.085, 0.06, 0.42]},
+            "effects": [{"type": "gaussian_blur", "radius": 180.0}]
+        },
         # Line 0: "è il valore più grande" (oversized, white cream with bloom)
         make_text_layer(
             "line0", "è il valore più grande", [1880, 260], [960, line0_y],
             FONT_BLACK_REL, fs0, WHITE_CREAM_HEX, tracking=-8.0,
             effects=[
-                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12}
+                {"type": "bloom", "threshold": 0.90, "radius": 42.0, "intensity": 0.12}
             ],
             animation={
                 "tracks": [
@@ -639,7 +650,7 @@ def make_scene4_plan():
             "line1_di", "di", [1880, 280], [x1_di, line1_y],
             FONT_BLACK_REL, fs1, WHITE_CREAM_HEX, tracking=-8.0,
             effects=[
-                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12}
+                {"type": "bloom", "threshold": 0.90, "radius": 42.0, "intensity": 0.12}
             ],
             animation={
                 "tracks": [
