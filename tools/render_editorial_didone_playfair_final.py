@@ -864,6 +864,25 @@ def concat_master_video(video_files, out_master_path):
     return out_master_path
 
 
+def transcode_video_nvenc(video_path):
+    """Encode the completed Vulkan render with NVENC in a separate process.
+
+    Keeping FFmpeg outside the Vulkan device context avoids the native
+    Vulkan/NVENC interop path that loses the device on this host.
+    """
+    temp_path = video_path + ".nvenc.mp4"
+    cmd = [
+        "ffmpeg", "-hide_banner", "-y", "-i", video_path,
+        "-an", "-c:v", "h264_nvenc", "-preset", "p5", "-tune", "hq",
+        "-rc", "vbr", "-cq", "19", "-b:v", "0", "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart", temp_path
+    ]
+    print(f"[*] GPU-encoding {os.path.basename(video_path)} with NVENC...")
+    subprocess.run(cmd, capture_output=True, text=True, check=True)
+    os.replace(temp_path, video_path)
+    print(f"[+] NVENC complete: {os.path.getsize(video_path)} bytes")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Render and locally verify the Didone reference canary")
     parser.add_argument("--upload", action="store_true",
@@ -886,6 +905,7 @@ def main():
 
     for idx, plan, ref_path, name in scenes:
         mp4_path, step_frames = render_scene(plan, idx, name)
+        transcode_video_nvenc(mp4_path)
         video_files.append(mp4_path)
 
         final_frame = step_frames["100pct"]
