@@ -110,6 +110,20 @@ namespace chronontemplate {
         std::vector<PhraseTrack> tracks{};
     };
 
+    /// A restrained colored underline/highlight drawn below a showcase phrase.
+    /// Accents are ordinary GPU shape layers; their scale/opacity tracks share
+    /// the phrase's local timeline and remain editable by the consuming tool.
+    struct PhraseAccent {
+        std::string id{};
+        std::string color{"#FF1018"};
+        float width{1500.f};
+        float height{8.f};
+        float y_offset{118.f};
+        float radius{4.f};
+        float opacity{1.f};
+        std::vector<PhraseTrack> tracks{};
+    };
+
     /// One animation of any family: entrance keyframes in `enter` frames of
     /// local time (60 — a two-second entrance at the pack fps — so the motion
     /// and the glow read on camera), on the layer and/or on text units. The
@@ -123,6 +137,8 @@ namespace chronontemplate {
         std::vector<PhraseTrack> tracks{};              ///< layer-level motion
         std::vector<PhraseTextAnimator> textAnimators{};///< per-unit motion
         PhraseCursor cursor{};                          ///< the `_` cursor layer
+        std::vector<PhraseAccent> accents{};             ///< under-phrase animated marks
+        float font_size{0.f};                            ///< optional per-recipe size override
     };
 
 }// namespace chronontemplate

@@ -18,6 +18,7 @@
 #include "chronontemplate/MotionBridge.hpp"
 #include "chronontemplate/NativePrimitives.hpp"
 #include "chronontemplate/PlanLowering.hpp"
+#include "chronontemplate/PhraseHighlightPack.hpp"
 #include "chronontemplate/Presets.hpp"
 #include "chronontemplate/StyleTokens.hpp"
 #include "chronontemplate/TemplateScene.hpp"

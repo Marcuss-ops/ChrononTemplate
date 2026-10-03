@@ -22,6 +22,7 @@
 #include "chronontemplate/ImportantPhrasePack.hpp"
 #include "chronontemplate/TypewriterPhrasePack.hpp"
 #include "chronontemplate/ApplePhrasePack.hpp"
+#include "chronontemplate/PhraseHighlightPack.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -205,13 +206,21 @@ namespace {
             animators.push_back(lowerAnimator(definition.textAnimators[i], enter, definition.id));
         }
 
-        const json textStyle = json{{"font", style.font},
-                                    {"font_size", style.font_size * canvasScale},
-                                    {"fill", style.fill},
-                                    {"stroke", json{{"color", style.stroke}, {"width", style.stroke_width}}},
-                                    {"glow", json{{"radius", style.glow_radius},
-                                                  {"intensity", style.glow_intensity},
-                                                  {"color", style.glow}}}};
+        const float phraseFontSize = definition.font_size > 0.f ? definition.font_size : style.font_size;
+        json textStyle{{"font", style.font},
+                       {"font_size", phraseFontSize * canvasScale},
+                       {"fill", style.fill},
+                       {"stroke", json{{"color", style.stroke}, {"width", style.stroke_width}}},
+                       {"glow", json{{"radius", style.glow_radius},
+                                     {"intensity", style.glow_intensity},
+                                     {"color", style.glow}}}};
+        if (!definition.accents.empty()) {
+            textStyle["fit_mode"] = "shrink_only";
+            textStyle["min_font_size"] = 68.f * canvasScale;
+            textStyle["max_font_size"] = phraseFontSize * canvasScale;
+            textStyle["glow"]["radius"] = 16.f * canvasScale;
+            textStyle["glow"]["intensity"] = .12f;
+        }
         json phrase = json{
                 {"id", "phrase"},
                 {"type", "text"},
@@ -227,13 +236,54 @@ namespace {
         if (!animators.empty()) phrase["text_animators"] = animators;
 
         json layers = json::array();
-        layers.push_back(json{{"id", "background"},
-                              {"type", "color"},
-                              {"color", json::array({style.background[0], style.background[1],
-                                                     style.background[2], style.background[3]})},
-                              {"size", json::array({kWidth * canvasScale, kHeight * canvasScale})},
-                              {"start_frame", 0},
-                              {"duration_frames", kDurationFrames}});
+        if (definition.accents.empty()) {
+            layers.push_back(json{{"id", "background"},
+                                  {"type", "color"},
+                                  {"color", json::array({style.background[0], style.background[1],
+                                                         style.background[2], style.background[3]})},
+                                  {"size", json::array({kWidth * canvasScale, kHeight * canvasScale})},
+                                  {"start_frame", 0},
+                                  {"duration_frames", kDurationFrames}});
+        } else {
+            // Flat charcoal documentary background with native Chronon grain and vignette.
+            layers.push_back(json{{"id", "documentary_atmosphere"},
+                                  {"type", "shape"},
+                                  {"size", json::array({kWidth * canvasScale, kHeight * canvasScale})},
+                                  {"position", json::array({kWidth * .5f * canvasScale,
+                                                             kHeight * .5f * canvasScale})},
+                                  {"start_frame", 0},
+                                  {"duration_frames", kDurationFrames},
+                                  {"shape", json{{"type", "rect"},
+                                                  {"fill", json::array({.042f, .038f, .034f, 1.f})}}},
+                                  {"effects", json::array({
+                                      json{{"type", "vignette"}, {"radius", .58f}, {"softness", .55f}, {"amount", .38f}},
+                                      json{{"type", "noise"}, {"amount", .018f}, {"size", 1.f}, {"color_mode", "monochrome"}}
+                                  })}});
+        }
+        for (const auto& accent : definition.accents) {
+            if (accent.color.size() != 7 || accent.color.front() != '#')
+                fail(definition.id + ": accent color must be #RRGGBB");
+            const auto channel = [&](std::size_t offset) {
+                return std::stoi(accent.color.substr(offset, 2), nullptr, 16) / 255.f;
+            };
+            json tracks = json::array();
+            for (const auto& accentTrack : accent.tracks) {
+                validateTrack(accentTrack, definition.id + "." + accent.id + "." + accentTrack.property);
+                tracks.push_back(makeTrack(accentTrack, enter));
+            }
+            layers.push_back(json{{"id", accent.id},
+                                  {"type", "shape"},
+                                  {"shape", json{{"type", "rounded_rect"},
+                                                  {"fill", json::array({channel(1), channel(3), channel(5), 1.f})},
+                                                  {"radius", accent.radius * canvasScale}}},
+                                  {"size", json::array({accent.width * canvasScale, accent.height * canvasScale})},
+                                  {"position", json::array({style.position[0] * canvasScale,
+                                                             (style.position[1] + accent.y_offset) * canvasScale})},
+                                  {"opacity", accent.opacity},
+                                  {"start_frame", 0},
+                                  {"duration_frames", kDurationFrames},
+                                  {"animation", json{{"tracks", tracks}}}});
+        }
         layers.push_back(phrase);
 
         // The Typewriter family types with a `_` cursor layer: same face, its
@@ -257,8 +307,9 @@ namespace {
                                   {"animation", json{{"tracks", cursorTracks}}}});
         }
 
-        return json{{"schema", "chronon.render-plan.v2"},
-                    {"version", 2},
+        return json{{"schema", definition.accents.empty() ? "chronon.render-plan.v2"
+                                                         : "chronon.render-plan.v3"},
+                    {"version", definition.accents.empty() ? 2 : 3},
                     {"job_id", "chronontemplate_" + definition.id},
                     {"canvas", json{{"width", kWidth * canvasScale},
                                     {"height", kHeight * canvasScale},
@@ -339,6 +390,7 @@ int main(int argc, char** argv) try {
     if (!staticOnly) {
         emitFamily(chronontemplate::classicPhraseAnimations(), "classic");
         emitFamily(chronontemplate::typewriterPhraseAnimations(), "typewriter");
+        emitFamily(chronontemplate::phraseHighlightAnimations(), "phrase_highlight");
         emitFamily(chronontemplate::applePhraseAnimations(), "apple");
     }
     if (mode == "--editorial-static" || mode == "--editorial-word-reveal" ||

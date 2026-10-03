@@ -96,6 +96,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/TypewriterPhrasePack.cpp
         src/chronontemplate/Typewriter3DPhrasePack.cpp
         src/chronontemplate/ApplePhrasePack.cpp
+        src/chronontemplate/PhraseHighlightPack.cpp
         # the packs a template author starts from
         src/chronontemplate/templates/YouTubeSubscribe.cpp
         # the template catalog that used to live inside the motion core
