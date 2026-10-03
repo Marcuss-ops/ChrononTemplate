@@ -220,7 +220,7 @@ def make_scene1_plan():
                         {"frame": DURATION_FRAMES - 1, "value": 0.0}
                     ]),
                     make_track("opacity", "out_cubic", [
-                        {"frame": 0, "value": 0.0},
+                        {"frame": 0, "value": 0.22},
                         {"frame": 18, "value": 1.0},
                         {"frame": DURATION_FRAMES - 1, "value": 1.0}
                     ])
@@ -337,8 +337,8 @@ def make_scene2_plan():
                             {"frame": DURATION_FRAMES - 1, "value": 0.0}
                         ]),
                         make_track("opacity", "out_cubic", [
-                            {"frame": 0, "value": 0.0},
-                            {"frame": t_start, "value": 0.0},
+                            {"frame": 0, "value": 0.22},
+                            {"frame": t_start, "value": 0.22},
                             {"frame": t_end, "value": 1.0},
                             {"frame": DURATION_FRAMES - 1, "value": 1.0}
                         ])
@@ -467,7 +467,7 @@ def make_scene3_plan():
                         {"frame": DURATION_FRAMES - 1, "value": 0.0}
                     ]),
                     make_track("opacity", "out_cubic", [
-                        {"frame": 0, "value": 0.0},
+                        {"frame": 0, "value": 0.22},
                         {"frame": 20, "value": 1.0},
                         {"frame": DURATION_FRAMES - 1, "value": 1.0}
                     ])
@@ -487,7 +487,7 @@ def make_scene3_plan():
                         {"frame": DURATION_FRAMES - 1, "value": 0.0}
                     ]),
                     make_track("opacity", "out_cubic", [
-                        {"frame": 0, "value": 0.0},
+                        {"frame": 0, "value": 0.22},
                         {"frame": 20, "value": 1.0},
                         {"frame": DURATION_FRAMES - 1, "value": 1.0}
                     ])
@@ -638,7 +638,7 @@ def make_scene4_plan():
                         {"frame": DURATION_FRAMES - 1, "value": 0.0}
                     ]),
                     make_track("opacity", "out_cubic", [
-                        {"frame": 0, "value": 0.0},
+                        {"frame": 0, "value": 0.22},
                         {"frame": 22, "value": 1.0},
                         {"frame": DURATION_FRAMES - 1, "value": 1.0}
                     ])
@@ -855,7 +855,9 @@ def concat_master_video(video_files, out_master_path):
         "-f", "concat",
         "-safe", "0",
         "-i", concat_list,
-        "-c", "copy",
+        "-an", "-c:v", "h264_nvenc", "-preset", "p5", "-tune", "hq",
+        "-rc", "vbr", "-cq", "19", "-b:v", "0", "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart",
         out_master_path
     ]
     print(f"[*] Assembling master video: {out_master_path}...")
