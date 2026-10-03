@@ -245,7 +245,9 @@ namespace {
                                   {"start_frame", 0},
                                   {"duration_frames", kDurationFrames}});
         } else {
-            // Flat charcoal documentary background with native Chronon grain and vignette.
+            // Use one stable Chronon-native charcoal layer. Animated noise
+            // caused visible background flicker and made these short clips
+            // unnecessarily expensive to encode.
             layers.push_back(json{{"id", "documentary_atmosphere"},
                                   {"type", "shape"},
                                   {"size", json::array({kWidth * canvasScale, kHeight * canvasScale})},
@@ -256,8 +258,7 @@ namespace {
                                   {"shape", json{{"type", "rect"},
                                                   {"fill", json::array({.042f, .038f, .034f, 1.f})}}},
                                   {"effects", json::array({
-                                      json{{"type", "vignette"}, {"radius", .58f}, {"softness", .55f}, {"amount", .38f}},
-                                      json{{"type", "noise"}, {"amount", .018f}, {"size", 1.f}, {"color_mode", "monochrome"}}
+                                      json{{"type", "vignette"}, {"radius", .58f}, {"softness", .55f}, {"amount", .24f}}
                                   })}});
         }
         for (const auto& accent : definition.accents) {
