@@ -111,7 +111,13 @@ def make_text_layer(layer_id, text, size, pos, font_path, font_size, fill_color,
         "style": {
             "font": font_path,
             "font_size": font_size,
-            "fill": fill_color
+            "fill": fill_color,
+            "shadow": {
+                "color": "#000000",
+                "opacity": 0.72,
+                "blur": 5.0,
+                "offset": [1.0, 2.0]
+            }
         },
         "spans": [
             {"start": 0, "end": byte_len, "style": {"tracking": tracking}}
