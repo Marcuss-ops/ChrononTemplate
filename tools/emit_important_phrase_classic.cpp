@@ -245,21 +245,14 @@ namespace {
                                   {"start_frame", 0},
                                   {"duration_frames", kDurationFrames}});
         } else {
-            // Use one stable Chronon-native charcoal layer. Animated noise
-            // caused visible background flicker and made these short clips
-            // unnecessarily expensive to encode.
-            layers.push_back(json{{"id", "documentary_atmosphere"},
-                                  {"type", "shape"},
+            // One flat Chronon-native charcoal layer avoids background
+            // effect passes that can flicker or leave stale pixels on GPU.
+            layers.push_back(json{{"id", "documentary_background"},
+                                  {"type", "color"},
+                                  {"color", json::array({.042f, .038f, .034f, 1.f})},
                                   {"size", json::array({kWidth * canvasScale, kHeight * canvasScale})},
-                                  {"position", json::array({kWidth * .5f * canvasScale,
-                                                             kHeight * .5f * canvasScale})},
                                   {"start_frame", 0},
-                                  {"duration_frames", kDurationFrames},
-                                  {"shape", json{{"type", "rect"},
-                                                  {"fill", json::array({.042f, .038f, .034f, 1.f})}}},
-                                  {"effects", json::array({
-                                      json{{"type", "vignette"}, {"radius", .58f}, {"softness", .55f}, {"amount", .24f}}
-                                  })}});
+                                  {"duration_frames", kDurationFrames}});
         }
         for (const auto& accent : definition.accents) {
             if (accent.color.size() != 7 || accent.color.front() != '#')
