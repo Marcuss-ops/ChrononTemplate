@@ -137,8 +137,8 @@ def make_scene1_plan():
     font_path = FONT_BLACK_ABS
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Pinned Didone font is missing: {font_path}")
-    target_w0 = WIDTH * 0.77
-    target_w1 = WIDTH * 0.81
+    target_w0 = WIDTH * 0.90
+    target_w1 = WIDTH * 0.90
     fs0 = compute_autofit_font_size(font_path, "Non poteva accettare", target_w0)
     fs1 = compute_autofit_font_size(font_path, "ciò che era", target_w1)
 
@@ -148,9 +148,10 @@ def make_scene1_plan():
 
     font1 = ImageFont.truetype(font_path, fs1)
     actual_w1 = font1.getlength("ciò che era")
-    bar_w = actual_w1 + 50.0
-    bar_h = fs1 * 0.38
-    bar_y = line1_y + fs1 * 0.12
+    tracking1 = -8.0
+    bar_w = actual_w1 + tracking1 * (len("ciò che era") - 1) + 70.0
+    bar_h = fs1 * 0.46
+    bar_y = line1_y + fs1 * 0.40
 
     layers = [
         # Background: Atmospheric dark charcoal with film grain and radial vignette
@@ -163,7 +164,7 @@ def make_scene1_plan():
             "duration_frames": DURATION_FRAMES,
             "shape": {
                 "type": "rect",
-                "fill": [0.004, 0.004, 0.005, 1.0]
+                "fill": [0.009, 0.007, 0.006, 1.0]
             },
             "effects": [
                 {"type": "vignette", "radius": 0.58, "softness": 0.55, "amount": 0.30},
@@ -207,8 +208,10 @@ def make_scene1_plan():
         # Top Line: "Non poteva accettare" (white cream with restrained bloom)
         make_text_layer(
             "line0", "Non poteva accettare", [1850, 220], [center_x, line0_y],
-            FONT_BLACK_REL, fs0, WHITE_CREAM_HEX, tracking=-2.5,
-            effects=[{"type": "bloom", "threshold": 0.90, "radius": 14.0, "intensity": 0.16}],
+            FONT_BLACK_REL, fs0, WHITE_CREAM_HEX, tracking=-8.0,
+            effects=[
+                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+            ],
             animation={
                 "tracks": [
                     make_track("position_y", "out_cubic", [
@@ -227,8 +230,10 @@ def make_scene1_plan():
         # Hero Line: "ciò che era" (oversized, lowercase accent with restrained bloom)
         make_text_layer(
             "line1", "ciò che era", [1850, 360], [center_x, line1_y],
-            FONT_BLACK_REL, fs1, WHITE_CREAM_HEX, tracking=-2.0,
-            effects=[{"type": "bloom", "threshold": 0.90, "radius": 16.0, "intensity": 0.16}],
+            FONT_BLACK_REL, fs1, WHITE_CREAM_HEX, tracking=tracking1,
+            effects=[
+                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+            ],
             animation={
                 "tracks": [
                     make_track("position_y", "out_cubic", [
@@ -279,7 +284,7 @@ def make_scene2_plan():
     font_path = FONT_BLACK_ABS
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Pinned Didone font is missing: {font_path}")
-    font_size = 158
+    font_size = 205
     font = ImageFont.truetype(font_path, font_size)
 
     w_fer = font.getlength("Ferrovie")
@@ -320,8 +325,9 @@ def make_scene2_plan():
         layers.append(
             make_text_layer(
                 f"text_{i}", text_str, [1000, 220], [tx, ty],
-                FONT_BLACK_REL, font_size, RED_HEX, tracking=-2.5,
-                effects=[{"type": "glow", "radius": 24.0, "intensity": 0.08, "color": [1.0, 0.06, 0.09, 1.0]}],
+                FONT_BLACK_REL, font_size, RED_HEX, tracking=-8.0,
+                # Broad, low-strength diffusion stays behind the sharp Playfair glyphs.
+                effects=[{"type": "glow", "radius": 48.0, "intensity": 0.22, "color": [1.0, 0.06, 0.09, 1.0]}],
                 animation={
                     "tracks": [
                         make_track("position_y", "out_cubic", [
@@ -355,7 +361,7 @@ def make_scene2_plan():
                 "path": CHECK_PATH,
                 "fill": [1.0, 0.063, 0.094, 1.0]
             },
-            "effects": [{"type": "glow", "radius": 22.0, "intensity": 0.07, "color": [1.0, 0.06, 0.09, 1.0]}],
+            "effects": [{"type": "glow", "radius": 42.0, "intensity": 0.18, "color": [1.0, 0.06, 0.09, 1.0]}],
             "animation": {
                 "tracks": [
                     make_track("scale_x", "out_back", [
@@ -411,7 +417,7 @@ def make_scene3_plan():
     font_path = FONT_BLACK_ABS
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Pinned Didone font is missing: {font_path}")
-    target_w = WIDTH * 0.82
+    target_w = WIDTH * 0.84
     font_size = compute_autofit_font_size(font_path, "Non accettare", target_w)
     font = ImageFont.truetype(font_path, font_size)
 
@@ -439,7 +445,7 @@ def make_scene3_plan():
             "duration_frames": DURATION_FRAMES,
             "shape": {
                 "type": "rect",
-                "fill": [0.004, 0.004, 0.005, 1.0]
+                "fill": [0.009, 0.007, 0.006, 1.0]
             },
             "effects": [
                 {"type": "vignette", "radius": 0.58, "softness": 0.55, "amount": 0.30},
@@ -449,8 +455,10 @@ def make_scene3_plan():
         # Line 0 - Part 1: "Non" (white cream with bloom)
         make_text_layer(
             "line0_non", "Non", [1850, 280], [x0_non, line0_y],
-            FONT_BLACK_REL, font_size, WHITE_CREAM_HEX, tracking=-2.5,
-            effects=[{"type": "bloom", "threshold": 0.90, "radius": 14.0, "intensity": 0.16}],
+            FONT_BLACK_REL, font_size, WHITE_CREAM_HEX, tracking=-8.0,
+            effects=[
+                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+            ],
             animation={
                 "tracks": [
                     make_track("position_y", "out_cubic", [
@@ -469,7 +477,8 @@ def make_scene3_plan():
         # Line 0 - Part 2: "accettare" (editorial red with rich glow)
         make_text_layer(
             "line0_acc", "accettare", [1850, 280], [x0_acc, line0_y],
-            FONT_BLACK_REL, font_size, RED_HEX, tracking=-2.5,
+            FONT_BLACK_REL, font_size, RED_HEX, tracking=-8.0,
+            effects=[{"type": "glow", "radius": 48.0, "intensity": 0.22, "color": [1.0, 0.06, 0.09, 1.0]}],
                         animation={
                 "tracks": [
                     make_track("position_y", "out_cubic", [
@@ -488,8 +497,10 @@ def make_scene3_plan():
         # Line 1: "la propria" (white cream with bloom)
         make_text_layer(
             "line1", "la propria", [1850, 280], [960, line1_y],
-            FONT_BLACK_REL, font_size, WHITE_CREAM_HEX, tracking=-2.5,
-            effects=[{"type": "bloom", "threshold": 0.90, "radius": 14.0, "intensity": 0.16}],
+            FONT_BLACK_REL, font_size, WHITE_CREAM_HEX, tracking=-8.0,
+            effects=[
+                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+            ],
             animation={
                 "tracks": [
                     make_track("position_y", "out_cubic", [
@@ -510,8 +521,10 @@ def make_scene3_plan():
         # Line 2: "condizione." (white cream with bloom)
         make_text_layer(
             "line2", "condizione.", [1850, 280], [960, line2_y],
-            FONT_BLACK_REL, font_size, WHITE_CREAM_HEX, tracking=-2.5,
-            effects=[{"type": "bloom", "threshold": 0.90, "radius": 14.0, "intensity": 0.16}],
+            FONT_BLACK_REL, font_size, WHITE_CREAM_HEX, tracking=-8.0,
+            effects=[
+                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12},
+            ],
             animation={
                 "tracks": [
                     make_track("position_y", "out_cubic", [
@@ -563,8 +576,8 @@ def make_scene4_plan():
     font_path = FONT_BLACK_ABS
     if not os.path.isfile(font_path):
         raise FileNotFoundError(f"Pinned Didone font is missing: {font_path}")
-    target_w0 = WIDTH * 0.87
-    target_w1 = WIDTH * 0.84
+    target_w0 = WIDTH * 0.89
+    target_w1 = WIDTH * 0.89
     fs0 = compute_autofit_font_size(font_path, "è il valore più grande", target_w0)
     fs1 = compute_autofit_font_size(font_path, "di ogni business", target_w1)
 
@@ -592,7 +605,7 @@ def make_scene4_plan():
             "duration_frames": DURATION_FRAMES,
             "shape": {
                 "type": "rect",
-                "fill": [0.004, 0.004, 0.005, 1.0]
+                "fill": [0.009, 0.007, 0.006, 1.0]
             },
             "effects": [
                 {"type": "vignette", "radius": 0.60, "softness": 0.55, "amount": 0.30},
@@ -602,8 +615,10 @@ def make_scene4_plan():
         # Line 0: "è il valore più grande" (oversized, white cream with bloom)
         make_text_layer(
             "line0", "è il valore più grande", [1880, 260], [960, line0_y],
-            FONT_BLACK_REL, fs0, WHITE_CREAM_HEX, tracking=-2.5,
-            effects=[{"type": "bloom", "threshold": 0.90, "radius": 14.0, "intensity": 0.16}],
+            FONT_BLACK_REL, fs0, WHITE_CREAM_HEX, tracking=-8.0,
+            effects=[
+                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12}
+            ],
             animation={
                 "tracks": [
                     make_track("position_y", "out_cubic", [
@@ -622,8 +637,10 @@ def make_scene4_plan():
         # Line 1 - Part 1: "di" (white cream with bloom)
         make_text_layer(
             "line1_di", "di", [1880, 280], [x1_di, line1_y],
-            FONT_BLACK_REL, fs1, WHITE_CREAM_HEX, tracking=-2.5,
-            effects=[{"type": "bloom", "threshold": 0.90, "radius": 14.0, "intensity": 0.16}],
+            FONT_BLACK_REL, fs1, WHITE_CREAM_HEX, tracking=-8.0,
+            effects=[
+                {"type": "bloom", "threshold": 0.95, "radius": 42.0, "intensity": 0.12}
+            ],
             animation={
                 "tracks": [
                     make_track("position_y", "out_cubic", [
@@ -644,7 +661,8 @@ def make_scene4_plan():
         # Line 1 - Part 2: "ogni business" (editorial red with rich optical glow)
         make_text_layer(
             "line1_ob", "ogni business", [1880, 280], [x1_ob, line1_y],
-            FONT_BLACK_REL, fs1, RED_HEX, tracking=-2.5,
+            FONT_BLACK_REL, fs1, RED_HEX, tracking=-8.0,
+            effects=[{"type": "glow", "radius": 48.0, "intensity": 0.22, "color": [1.0, 0.06, 0.09, 1.0]}],
                         animation={
                 "tracks": [
                     make_track("position_y", "out_cubic", [
@@ -708,6 +726,7 @@ def render_scene(plan, scene_idx, scene_name):
         "--backend", "vulkan",
         "--gpu-hot-path-mode", "auto",
         "--hardware", "none",
+        "--preset", "ultrafast",
         "--encoder-backend", "pipe",
         "-o", mp4_path
     ]
