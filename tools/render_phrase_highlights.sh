@@ -29,7 +29,9 @@ for plan in "${plans[@]}"; do
     --assets-root "$REPO/Chronon3d" \
     --backend vulkan \
     --hardware none \
-    --preset ultrafast \
+    --rate-control crf \
+    --crf 21 \
+    --preset medium \
     --encoder-backend pipe \
     --gpu-hot-path-mode auto \
     -o "$OUT/$name.mp4"
