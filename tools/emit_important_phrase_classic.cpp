@@ -28,6 +28,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -353,23 +354,32 @@ int main(int argc, char** argv) try {
         editorialStyle.glow_intensity = 0.045f;
         const bool wordReveal = mode == "--editorial-word-reveal";
         const bool layerRise = mode == "--editorial-layer-rise";
+        std::vector<PhraseTrack> stillTracks;
+        if (layerRise) {
+            stillTracks = {
+                PhraseTrack{"position_y", "out_cubic", {{0, 28.f}, {36, 0.f}}},
+                PhraseTrack{"scale", "out_cubic", {{0, 0.985f}, {36, 1.f}}},
+                PhraseTrack{"opacity", "out_cubic", {{0, 0.f}, {36, 1.f}}}};
+        } else {
+            stillTracks = {
+                PhraseTrack{"opacity", "linear", {{0, 1.f}, {1, 1.f}}}};
+        }
+        std::vector<PhraseTextAnimator> stillTextAnimators;
+        if (wordReveal) {
+            PhraseTextAnimator animator;
+            animator.selector = PhraseSelector{"word", "forward", "reveal_soft"};
+            animator.properties = {
+                PhraseTrack{"position_y", "out_cubic", {{0, 18.f}, {36, 0.f}}},
+                PhraseTrack{"opacity", "linear", {{0, 0.f}, {36, 0.f}}}};
+            stillTextAnimators.push_back(std::move(animator));
+        }
         const PhraseAnimationDefinition still{
             wordReveal ? "editorial_words_appear_reveal" :
                 (layerRise ? "editorial_words_appear_layer_rise" : "editorial_words_appear"),
             wordReveal ? "Editorial Word Reveal" :
                 (layerRise ? "Editorial Layer Rise" : "Editorial Static"),
             "Words appear at the right time", (wordReveal || layerRise) ? 36 : 1,
-            layerRise
-                ? std::vector<PhraseTrack>{
-                    PhraseTrack{"position_y", "out_cubic", {{0, 28.f}, {36, 0.f}}},
-                    PhraseTrack{"scale", "out_cubic", {{0, 0.985f}, {36, 1.f}}},
-                    PhraseTrack{"opacity", "out_cubic", {{0, 0.f}, {36, 1.f}}}}
-                : std::vector<PhraseTrack>{PhraseTrack{"opacity", "linear", {{0, 1.f}, {1, 1.f}}}},
-            wordReveal ? std::vector<PhraseTextAnimator>{PhraseTextAnimator{
-                PhraseSelector{"word", "forward", "reveal_soft"},
-                {PhraseTrack{"position_y", "out_cubic", {{0, 18.f}, {36, 0.f}}},
-                 PhraseTrack{"opacity", "linear", {{0, 0.f}, {36, 0.f}}}}}}
-                : std::vector<PhraseTextAnimator>{}, {}};
+            stillTracks, stillTextAnimators, {}};
         const json plan = makePlan(still, editorialStyle);
         const std::string file = still.id + ".plan.json";
         writeFile(outDir / file, plan.dump(2) + "\n");

@@ -110,9 +110,10 @@ target_link_libraries(chronontemplate_dump_title_camera_poses PRIVATE chronontem
 # owned here, while `chrononmotion/motion/` comes from the core.
 target_include_directories(chronontemplate PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include>
         $<BUILD_INTERFACE:${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}>
         $<INSTALL_INTERFACE:include>)
+target_include_directories(chronontemplate SYSTEM PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include>)
 
 target_link_libraries(chronontemplate PUBLIC ChrononMotion::chrononmotion)
 target_compile_features(chronontemplate PUBLIC cxx_std_20)
