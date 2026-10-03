@@ -21,16 +21,26 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Marcuss-ops/ChrononMotion3d
-          ref: 06e8604f8736ac2a1b16f29fa5f2fc1b7167fc55
+          ref: a9cf7ddb8ce3162bb30258e9fd6ae1d72338f8f9
+          token: ${{ secrets.CHRONON_PRIVATE_REPO_READ_TOKEN }}
           path: ChrononMotion3d
       - name: Check out Chronon3d RenderPlan headers
         uses: actions/checkout@v4
         with:
           repository: Marcuss-ops/Chronon3d
-          ref: 5d960421dd1bb88f920cc6103cb15d0835502933
+          ref: 36a44629c369ac13e4befe5e29b93e762fda7e09
+          token: ${{ secrets.CHRONON_PRIVATE_REPO_READ_TOKEN }}
           path: Chronon3d
+      - name: Verify same-SHA dependency checkouts
+        env:
+          EXPECTED_MOTION_SHA: a9cf7ddb8ce3162bb30258e9fd6ae1d72338f8f9
+          EXPECTED_CHRONON3D_SHA: 36a44629c369ac13e4befe5e29b93e762fda7e09
+        run: |
+          test "$(git -C ChrononTemplate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C ChrononMotion3d rev-parse HEAD)" = "$EXPECTED_MOTION_SHA"
+          test "$(git -C Chronon3d rev-parse HEAD)" = "$EXPECTED_CHRONON3D_SHA"
       - name: Install JSON headers
-        run: sudo apt-get update && sudo apt-get install --yes nlohmann-json3-dev ninja-build
+        run: sudo apt-get update && sudo apt-get install --yes nlohmann-json3-dev libglm-dev ninja-build
       - name: Configure release with warnings as errors
         run: >-
           cmake -S ChrononTemplate -B build/template-ci -G Ninja
@@ -40,6 +50,8 @@ jobs:
           -DCHRONONMOTION_WERROR=OFF
           -DCHRONONTEMPLATE_CHRONONMOTION_DIR=${{ github.workspace }}/ChrononMotion3d
           -DCHRONONTEMPLATE_NLOHMANN_JSON_INCLUDE_DIR=/usr/include
+          -DCHRONON3D_INCLUDE_DIR=${{ github.workspace }}/Chronon3d/include
+          -DCHRONON3D_DEPENDENCY_INCLUDE_DIR=/usr/include
       - name: Build
         run: cmake --build build/template-ci --parallel 2
       - name: Test
