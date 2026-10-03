@@ -1,0 +1,98 @@
+{
+  "method": "camera-relative coordinate bands with content handoff",
+  "coordinate_spacing": 1400.0,
+  "camera_depth_to_band": 1000.0,
+  "physical_scale_is_metadata": true,
+  "stages": [
+    {
+      "index": 0,
+      "title": "ATOMIC SPACING",
+      "magnitude": "10⁻¹⁰ m",
+      "detail": "distance between atoms",
+      "frame_start": 0,
+      "frame_end": 29,
+      "coordinate_band_z": 0.0
+    },
+    {
+      "index": 1,
+      "title": "TRANSISTOR",
+      "magnitude": "10⁻⁷ m",
+      "detail": "feature scale in modern silicon",
+      "frame_start": 30,
+      "frame_end": 59,
+      "coordinate_band_z": 1400.0
+    },
+    {
+      "index": 2,
+      "title": "SAND GRAIN",
+      "magnitude": "10⁻³ m",
+      "detail": "a millimetre across",
+      "frame_start": 60,
+      "frame_end": 89,
+      "coordinate_band_z": 2800.0
+    },
+    {
+      "index": 3,
+      "title": "HAND",
+      "magnitude": "10⁻¹ m",
+      "detail": "a familiar human measure",
+      "frame_start": 90,
+      "frame_end": 119,
+      "coordinate_band_z": 4200.0
+    },
+    {
+      "index": 4,
+      "title": "HUMAN",
+      "magnitude": "10⁰ m",
+      "detail": "one metre",
+      "frame_start": 120,
+      "frame_end": 149,
+      "coordinate_band_z": 5600.0
+    },
+    {
+      "index": 5,
+      "title": "ROOM",
+      "magnitude": "10¹ m",
+      "detail": "interior architecture",
+      "frame_start": 150,
+      "frame_end": 179,
+      "coordinate_band_z": 7000.0
+    },
+    {
+      "index": 6,
+      "title": "BUILDING",
+      "magnitude": "10² m",
+      "detail": "urban structure",
+      "frame_start": 180,
+      "frame_end": 209,
+      "coordinate_band_z": 8400.0
+    },
+    {
+      "index": 7,
+      "title": "CITY",
+      "magnitude": "10⁴ m",
+      "detail": "district to district",
+      "frame_start": 210,
+      "frame_end": 239,
+      "coordinate_band_z": 9800.0
+    },
+    {
+      "index": 8,
+      "title": "EARTH",
+      "magnitude": "10⁷ m",
+      "detail": "planetary diameter scale",
+      "frame_start": 240,
+      "frame_end": 269,
+      "coordinate_band_z": 11200.0
+    },
+    {
+      "index": 9,
+      "title": "SOLAR SYSTEM",
+      "magnitude": "10¹³ m",
+      "detail": "outer planetary distances",
+      "frame_start": 270,
+      "frame_end": 299,
+      "coordinate_band_z": 12600.0
+    }
+  ]
+}

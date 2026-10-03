@@ -1,39 +1,43 @@
 #!/usr/bin/env python3
 """
-Comprehensive Chronon Background Showcase Suite - V2 (Certified)
-Updated with:
-1. Dynamic, smooth looping animation on ALL procedural backgrounds.
-2. Perfect mathematical centering for all shape and device mockup elements.
-3. Native Chronon position_x / position_y additive offset keyframes.
-4. Clean, non-intrusive top-left corner HUD badges so the center showcase is 100% visible.
-5. Correct 2D/3D schema compliance (rotation_z scalar, shaft/head ratio for arrow).
-6. Automatic render to 1080p MP4 + PNG snapshots, followed by direct Google Drive upload.
+Generate a local catalog of GPU-rendered Chronon backgrounds.
+
+Each catalog item uses a Chronon Vulkan color layer. The reusable palette
+catalog is encoded as 10-second loops; the Vox-inspired set animates its color
+palette over the full duration. A poster and SHA-256 manifest are written too.
 """
 
-import os
-import sys
+import argparse
+import colorsys
+import copy
+import hashlib
 import json
 import math
 import time
 import subprocess
-import urllib.request
-import urllib.parse
 from pathlib import Path
 
 BASE_DIR = Path("/home/pierone/src/go-master/projects/Pyt/VeloxEditing")
 CHRONON_CLI = BASE_DIR / "Chronon3d/build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_cli"
+GPU_CLI_CANDIDATES = [
+    BASE_DIR / "Chronon3d/.tmp/chronon-builds/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli",
+    BASE_DIR / "Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli",
+]
+for candidate in GPU_CLI_CANDIDATES:
+    if candidate.is_file():
+        CHRONON_CLI = candidate
+        break
+if not CHRONON_CLI.is_file():
+    CHRONON_CLI = BASE_DIR / "Chronon3d/build/chronon/linux-release-validation/apps/chronon3d_cli/chronon3d_cli"
 ASSETS_ROOT = BASE_DIR / "Chronon3d"
 OUT_DIR = BASE_DIR / "ChrononTemplate" / "out" / "background_showcase"
-TOKEN_PATH = BASE_DIR / "refactored" / "token.json"
-CREDS_PATH = BASE_DIR / "refactored" / "credentials.json"
-DRIVE_FOLDER_ID = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 WIDTH = 1920
 HEIGHT = 1080
 FPS = 30
-DURATION_FRAMES = 60  # 2.0 seconds: optimal for seamless looping and fast execution
+DURATION_FRAMES = 300  # 10 seconds at 30fps
 
 def loop_cos(min_val, max_val, frame, total_frames=DURATION_FRAMES):
     """Seamless cosine loop: frame 0 == frame total_frames == min_val, frame total_frames/2 == max_val"""
@@ -879,64 +883,6 @@ def build_plan_12_polygon_prism():
     return plan
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DRIVE UPLOAD HELPERS
-# ─────────────────────────────────────────────────────────────────────────────
-def get_drive_access_token():
-    with open(TOKEN_PATH) as f:
-        tok_data = json.load(f)
-    with open(CREDS_PATH) as f:
-        creds = json.load(f)
-    client_info = creds.get("installed") or creds.get("web")
-    params = {
-        "client_id": client_info["client_id"],
-        "client_secret": client_info["client_secret"],
-        "refresh_token": tok_data.get("refresh_token"),
-        "grant_type": "refresh_token"
-    }
-    data = urllib.parse.urlencode(params).encode()
-    req = urllib.request.Request("https://oauth2.googleapis.com/token", data=data)
-    with urllib.request.urlopen(req) as resp:
-        res = json.load(resp)
-        new_token = res["access_token"]
-        tok_data["access_token"] = new_token
-        with open(TOKEN_PATH, "w") as f:
-            json.dump(tok_data, f, indent=2)
-        return new_token
-
-def upload_to_drive(token, file_path, folder_id):
-    boundary = "-------314159265358979323846"
-    fname = file_path.name
-    metadata = {
-        "name": fname,
-        "parents": [folder_id]
-    }
-    meta_json = json.dumps(metadata)
-    file_bytes = file_path.read_bytes()
-    
-    mime_type = "video/mp4" if fname.endswith(".mp4") else "image/png"
-    
-    body = (
-        f"--{boundary}\r\n"
-        f"Content-Type: application/json; charset=UTF-8\r\n\r\n"
-        f"{meta_json}\r\n"
-        f"--{boundary}\r\n"
-        f"Content-Type: {mime_type}\r\n\r\n"
-    ).encode("utf-8") + file_bytes + f"\r\n--{boundary}--\r\n".encode("utf-8")
-    
-    url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink"
-    req = urllib.request.Request(
-        url,
-        data=body,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": f"multipart/related; boundary={boundary}",
-            "Content-Length": str(len(body))
-        }
-    )
-    with urllib.request.urlopen(req) as resp:
-        return json.load(resp)
-
-# ─────────────────────────────────────────────────────────────────────────────
 # MAIN EXECUTION
 # ─────────────────────────────────────────────────────────────────────────────
 SUITE = [
@@ -954,62 +900,177 @@ SUITE = [
     ("bg_12_procedural_polygon_prism", build_plan_12_polygon_prism),
 ]
 
+def rotate_color(value, amount):
+    if isinstance(value, list) and len(value) in (3, 4) and all(isinstance(v, (int, float)) for v in value[:3]):
+        r, g, b = (max(0.0, min(1.0, float(v))) for v in value[:3])
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        nr, ng, nb = colorsys.hsv_to_rgb((h + amount) % 1.0, s, v)
+        return [nr, ng, nb, *value[3:]]
+    if isinstance(value, str) and len(value) == 7 and value.startswith("#"):
+        try:
+            r, g, b = (int(value[i:i + 2], 16) / 255 for i in (1, 3, 5))
+            h, s, v = colorsys.rgb_to_hsv(r, g, b)
+            nr, ng, nb = colorsys.hsv_to_rgb((h + amount) % 1.0, s, v)
+            return "#%02X%02X%02X" % (round(nr * 255), round(ng * 255), round(nb * 255))
+        except ValueError:
+            return value
+    return value
+
+def palette_variant(plan, item_id, hue_shift):
+    variant = copy.deepcopy(plan)
+    variant["job_id"] = item_id
+    variant["output"]["path"] = str(OUT_DIR / f"{item_id}.mp4")
+    def visit(node):
+        if isinstance(node, dict):
+            for key, value in list(node.items()):
+                if key in {"color", "fill", "bg_color", "grid_color", "background_color"}:
+                    node[key] = rotate_color(value, hue_shift)
+                else:
+                    visit(value)
+        elif isinstance(node, list):
+            for value in node:
+                visit(value)
+    visit(variant["layers"])
+    variant["layers"][-2]["text"] = "CHRONON PALETTE EDITION"
+    variant["layers"][-1]["text"] = f"Hue variation {hue_shift:.2f}"
+    return variant
+
+def catalog_plans():
+    palettes = [
+        ("noir_cyan", (0.008, 0.018, 0.040), (0.020, 0.090, 0.150), (0.035, 0.260, 0.340)),
+        ("midnight_blue", (0.008, 0.015, 0.055), (0.025, 0.060, 0.180), (0.100, 0.170, 0.400)),
+        ("deep_violet", (0.025, 0.008, 0.055), (0.090, 0.025, 0.180), (0.300, 0.080, 0.380)),
+        ("forest_teal", (0.005, 0.030, 0.028), (0.015, 0.100, 0.085), (0.040, 0.280, 0.210)),
+        ("charcoal_amber", (0.025, 0.018, 0.012), (0.120, 0.060, 0.018), (0.420, 0.200, 0.045)),
+        ("ocean_slate", (0.010, 0.025, 0.040), (0.035, 0.110, 0.170), (0.130, 0.320, 0.400)),
+        ("burgundy_rose", (0.035, 0.006, 0.020), (0.150, 0.020, 0.060), (0.420, 0.080, 0.160)),
+        ("indigo_ice", (0.008, 0.012, 0.050), (0.035, 0.045, 0.180), (0.180, 0.300, 0.520)),
+        ("olive_gold", (0.025, 0.025, 0.006), (0.120, 0.100, 0.020), (0.360, 0.280, 0.060)),
+        ("graphite_mint", (0.010, 0.020, 0.025), (0.035, 0.100, 0.105), (0.120, 0.380, 0.300)),
+        ("plum_copper", (0.025, 0.008, 0.030), (0.110, 0.025, 0.075), (0.420, 0.160, 0.090)),
+        ("arctic_navy", (0.005, 0.020, 0.045), (0.015, 0.090, 0.200), (0.180, 0.420, 0.580)),
+        ("red_noir", (0.025, 0.006, 0.008), (0.120, 0.015, 0.020), (0.400, 0.055, 0.035)),
+        ("lavender_ink", (0.018, 0.012, 0.040), (0.070, 0.045, 0.160), (0.260, 0.180, 0.420)),
+        ("cobalt_steel", (0.008, 0.018, 0.040), (0.025, 0.070, 0.150), (0.100, 0.240, 0.460)),
+        ("pine_sand", (0.010, 0.035, 0.025), (0.045, 0.130, 0.075), (0.320, 0.240, 0.090)),
+        ("smoke_coral", (0.025, 0.018, 0.025), (0.100, 0.045, 0.065), (0.380, 0.120, 0.110)),
+        ("teal_ink", (0.004, 0.025, 0.035), (0.010, 0.110, 0.135), (0.030, 0.340, 0.360)),
+        ("warm_slate", (0.025, 0.020, 0.018), (0.100, 0.070, 0.045), (0.330, 0.190, 0.090)),
+        ("blue_hour", (0.005, 0.012, 0.040), (0.020, 0.045, 0.140), (0.110, 0.180, 0.400)),
+    ]
+    plans = []
+    for index, (name, first, middle, last) in enumerate(palettes, start=1):
+        item_id = f"bg_{index:02d}_{name}"
+        # Chronon's Vulkan raw-frame path currently treats structured gradient
+        # fills as white. Keep the catalog on its verified GPU-native color
+        # layer until gradient support is available in that path.
+        base_color = [first[channel] * 0.25 + middle[channel] * 0.50 + last[channel] * 0.25 for channel in range(3)]
+        plan = {
+            "schema": "chronon.render-plan.v3", "version": 3, "job_id": item_id,
+            "canvas": {"width": WIDTH, "height": HEIGHT, "fps_num": FPS, "fps_den": 1, "duration_frames": DURATION_FRAMES},
+            "output": {"path": str(OUT_DIR / f"{item_id}.mp4"), "format": "mp4", "codec": "h264"},
+            "layers": [{
+                "id": "background_color", "type": "color", "size": [WIDTH, HEIGHT],
+                "color": [*base_color, 1.0], "start_frame": 0, "duration_frames": DURATION_FRAMES,
+            }],
+        }
+        plans.append((item_id, plan, False))
+
+    # Vox-style explainer palettes: restrained editorial colors with slow,
+    # seamless shifts, intended to sit behind maps, footage, and typography.
+    vox_palettes = [
+        ("vox_doc_ocean_signal", (0.012, 0.030, 0.070), (0.015, 0.110, 0.155)),
+        ("vox_doc_atlas", (0.035, 0.055, 0.090), (0.105, 0.135, 0.160)),
+        ("vox_doc_climate", (0.018, 0.055, 0.050), (0.130, 0.180, 0.105)),
+        ("vox_doc_archive", (0.070, 0.045, 0.025), (0.180, 0.105, 0.045)),
+        ("vox_doc_culture", (0.065, 0.020, 0.045), (0.175, 0.055, 0.080)),
+        ("vox_doc_technology", (0.020, 0.035, 0.090), (0.075, 0.105, 0.205)),
+        ("vox_doc_space", (0.012, 0.018, 0.055), (0.060, 0.045, 0.145)),
+        ("vox_doc_economics", (0.045, 0.055, 0.045), (0.145, 0.115, 0.045)),
+    ]
+    for name, base, accent in vox_palettes:
+        item_id = name
+        plan = {
+            "schema": "chronon.render-plan.v3", "version": 3, "job_id": item_id,
+            "canvas": {"width": WIDTH, "height": HEIGHT, "fps_num": FPS, "fps_den": 1, "duration_frames": DURATION_FRAMES},
+            "output": {"path": str(OUT_DIR / f"{item_id}.mp4"), "format": "mp4", "codec": "h264"},
+            "layers": [{
+                "id": "editorial_color", "type": "color", "size": [WIDTH, HEIGHT],
+                "color": [*base, 1.0], "start_frame": 0, "duration_frames": DURATION_FRAMES,
+                "animation": {"tracks": [{"property": "fill_color", "easing": "in_out_sine", "keyframes": [
+                    {"frame": 0, "value": [*base, 1.0]},
+                    {"frame": DURATION_FRAMES // 2, "value": [*accent, 1.0]},
+                    {"frame": DURATION_FRAMES - 1, "value": [*base, 1.0]},
+                ]}]},
+            }],
+        }
+        plans.append((item_id, plan, True))
+    return plans
+
+def sha256_file(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
 def main():
-    print(f"=== Starting Chronon Background Showcase Suite V2 (Certified) ({len(SUITE)} items) ===", flush=True)
-    
-    # 1. Write all plan files
-    plan_files = []
-    for item_id, builder in SUITE:
-        plan_data = builder()
+    parser = argparse.ArgumentParser(description="Generate a local Chronon procedural background catalog")
+    parser.add_argument("--plans-only", action="store_true", help="write plans and index without rendering")
+    parser.add_argument("--force", action="store_true", help="rerender backgrounds even if MP4s already exist")
+    args = parser.parse_args()
+    if not CHRONON_CLI.is_file() and not args.plans_only:
+        raise SystemExit(f"Chronon CLI not found: {CHRONON_CLI}")
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    entries = []
+    plans = catalog_plans()
+    print(f"=== Local Chronon background catalog ({len(plans)} entries, Vulkan GPU) ===", flush=True)
+    for item_id, plan_data, animated in plans:
         plan_path = OUT_DIR / f"{item_id}.plan.json"
-        plan_path.write_text(json.dumps(plan_data, indent=2))
-        plan_files.append((item_id, plan_path))
-        print(f"  [Plan] Wrote {plan_path.name}")
-        
-    # 2. Render each plan to MP4
-    rendered_videos = []
-    for item_id, plan_path in plan_files:
         out_mp4 = OUT_DIR / f"{item_id}.mp4"
-        cmd = [
-            str(CHRONON_CLI),
-            "render",
-            "--plan", str(plan_path),
-            "--assets-root", str(ASSETS_ROOT),
-            "--backend", "software",
-            "--hardware", "none",
-            "--encoder-backend", "pipe",
-            "-o", str(out_mp4)
-        ]
-        print(f"\n[Rendering] {item_id} -> {out_mp4.name}...", flush=True)
-        t0 = time.time()
-        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        dt = time.time() - t0
-        if res.returncode != 0:
-            print(f"  [ERROR] {res.stderr}\n{res.stdout}")
-        else:
-            sz = out_mp4.stat().st_size if out_mp4.exists() else 0
-            print(f"  ✓ Rendered in {dt:.1f}s ({sz:,} bytes)")
-            rendered_videos.append(out_mp4)
-            # Generate still PNG poster at 1.0s
-            out_png = OUT_DIR / f"{item_id}.png"
-            subprocess.run(["ffmpeg", "-y", "-ss", "00:00:01", "-i", str(out_mp4), "-vframes", "1", str(out_png)],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            if out_png.exists():
-                rendered_videos.append(out_png)
-
-    # 3. Upload to Google Drive
-    print(f"\n=== Uploading {len(rendered_videos)} media files to Google Drive ({DRIVE_FOLDER_ID}) ===", flush=True)
-    token = get_drive_access_token()
-    uploads = []
-    for fpath in rendered_videos:
-        print(f"Uploading {fpath.name} ({fpath.stat().st_size:,} bytes)...", flush=True)
-        meta = upload_to_drive(token, fpath, DRIVE_FOLDER_ID)
-        uploads.append(meta)
-        print(f"  ✓ Uploaded! ID: {meta.get('id')}")
-
-    print("\n=== SUMMARY OF COMPLETED UPLOADS ===")
-    for u in uploads:
-        print(f"- {u.get('name')}: {u.get('id')} ({u.get('webViewLink')})")
+        poster = OUT_DIR / f"{item_id}.png"
+        plan_data["output"]["path"] = str(out_mp4)
+        # The showcase titles are useful for the demo but must not be baked
+        # into reusable runtime backgrounds.
+        plan_data["layers"] = [layer for layer in plan_data["layers"] if layer.get("type") != "text"]
+        plan_path.write_text(json.dumps(plan_data, indent=2))
+        if not args.plans_only and (args.force or not out_mp4.is_file() or out_mp4.stat().st_size == 0):
+            raw_frame = OUT_DIR / f".{item_id}.rgba"
+            cmd = [str(CHRONON_CLI), "render", "--plan", str(plan_path), "--assets-root", str(ASSETS_ROOT), "--backend", "vulkan", "--video-sink", "raw", "--start-frame", "0", "--end-frame", "0", "--output", str(raw_frame)]
+            print(f"[Chronon GPU frame] {item_id}", flush=True)
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode != 0:
+                print((result.stderr + result.stdout)[-4000:], flush=True)
+                raise SystemExit(f"Chronon failed while rendering {item_id}")
+            expected_bytes = WIDTH * HEIGHT * 4
+            if not raw_frame.is_file() or raw_frame.stat().st_size != expected_bytes:
+                raise SystemExit(f"Chronon raw frame has unexpected size for {item_id}; wanted {expected_bytes} RGBA bytes")
+            png = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s:v", f"{WIDTH}x{HEIGHT}", "-i", str(raw_frame), "-frames:v", "1", str(poster)]
+            converted = subprocess.run(png, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            raw_frame.unlink(missing_ok=True)
+            if converted.returncode != 0:
+                print(converted.stderr[-4000:], flush=True)
+                raise SystemExit(f"FFmpeg failed to materialize the Chronon frame for {item_id}")
+            if animated:
+                video_cmd = [str(CHRONON_CLI), "render", "--plan", str(plan_path), "--assets-root", str(ASSETS_ROOT), "--backend", "vulkan", "--video-sink", "ffmpeg", "--start-frame", "0", "--end-frame", str(DURATION_FRAMES - 1), "--fps", str(FPS), "--codec", "h264", "--preset", "fast", "--output", str(out_mp4)]
+                print(f"[Chronon GPU video] {item_id}", flush=True)
+                encoded = subprocess.run(video_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            else:
+                encode = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-loop", "1", "-framerate", str(FPS), "-i", str(poster), "-t", f"{DURATION_FRAMES / FPS:.3f}", "-an", "-c:v", "libx264", "-preset", "fast", "-crf", "19", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(out_mp4)]
+                encoded = subprocess.run(encode, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if encoded.returncode != 0:
+                print(encoded.stderr[-4000:], flush=True)
+                raise SystemExit(f"Video encoding failed for {item_id}")
+        entry = {"asset_id": item_id, "name": item_id, "kind": "video", "media_type": "video/mp4", "fit": "cover", "loop": True, "render_mode": "chronon_vulkan_video" if animated else "chronon_vulkan_frame_loop", "path": out_mp4.name, "local_path": str(out_mp4), "plan": plan_path.name, "poster": poster.name, "width": WIDTH, "height": HEIGHT, "fps": FPS, "duration_frames": DURATION_FRAMES}
+        if out_mp4.is_file() and out_mp4.stat().st_size > 0:
+            entry["sha256"] = sha256_file(out_mp4)
+            entry["size_bytes"] = out_mp4.stat().st_size
+        entries.append(entry)
+    manifest = {"schema_version": "chronon.background-catalog.v1", "generated_by": "render_background_showcase_suite.py", "entries": entries}
+    manifest_path = OUT_DIR / "backgrounds.v1.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    print(f"Catalog written to {manifest_path}", flush=True)
 
 if __name__ == "__main__":
     main()

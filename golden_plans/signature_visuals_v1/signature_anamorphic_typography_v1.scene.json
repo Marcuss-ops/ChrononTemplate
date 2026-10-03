@@ -1,0 +1,91 @@
+{
+  "anchor_frame": 110,
+  "anchor_camera": {
+    "position": [
+      0,
+      0,
+      -1000
+    ],
+    "rotation_deg": [
+      0,
+      0,
+      0
+    ],
+    "fov_deg": 45.0
+  },
+  "word": "CHRONON",
+  "projection": "perspective camera; glyphs solved along individual view rays",
+  "glyphs": [
+    {
+      "glyph": "C",
+      "world_position": [
+        894.5641,
+        0.0,
+        -740.0
+      ],
+      "camera_depth": 260.0,
+      "target_screen_x_px": -328.104
+    },
+    {
+      "glyph": "H",
+      "world_position": [
+        890.7458,
+        0.0,
+        -590.0
+      ],
+      "camera_depth": 410.0,
+      "target_screen_x_px": -220.207
+    },
+    {
+      "glyph": "R",
+      "world_position": [
+        908.6814,
+        0.0,
+        -410.0
+      ],
+      "camera_depth": 590.0,
+      "target_screen_x_px": -113.395
+    },
+    {
+      "glyph": "O",
+      "world_position": [
+        955.2132,
+        0.0,
+        -210.0
+      ],
+      "camera_depth": 790.0,
+      "target_screen_x_px": -7.899
+    },
+    {
+      "glyph": "N",
+      "world_position": [
+        1039.6011,
+        0.0,
+        10.0
+      ],
+      "camera_depth": 1010.0,
+      "target_screen_x_px": 102.747
+    },
+    {
+      "glyph": "O",
+      "world_position": [
+        1166.2434,
+        0.0,
+        260.0
+      ],
+      "camera_depth": 1260.0,
+      "target_screen_x_px": 213.392
+    },
+    {
+      "glyph": "N",
+      "world_position": [
+        1335.3218,
+        0.0,
+        510.0
+      ],
+      "camera_depth": 1510.0,
+      "target_screen_x_px": 324.038
+    }
+  ],
+  "breakup": "camera passes forward after frame 145"
+}

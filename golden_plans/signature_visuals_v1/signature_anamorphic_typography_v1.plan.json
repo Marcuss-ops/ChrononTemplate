@@ -1,0 +1,316 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "signature_anamorphic_typography_v1",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 240
+  },
+  "camera": {
+    "type": "perspective",
+    "position": [
+      0.0,
+      10.0,
+      -1000.0
+    ],
+    "rotation_deg": [
+      0.0,
+      8.0,
+      0.0
+    ],
+    "fov_deg": 45.0,
+    "near": 1.0,
+    "far": 10000.0,
+    "zoom": 1.0
+  },
+  "camera_animation": {
+    "tracks": [
+      {
+        "property": "camera_position_x",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": 0.0
+          },
+          {
+            "frame": 80,
+            "value": 0.0
+          },
+          {
+            "frame": 145,
+            "value": 0.0
+          },
+          {
+            "frame": 239,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "property": "camera_position_y",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": 10.0
+          },
+          {
+            "frame": 80,
+            "value": 0.0
+          },
+          {
+            "frame": 239,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "property": "camera_rotation_y",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": 8.0
+          },
+          {
+            "frame": 80,
+            "value": 0.0
+          },
+          {
+            "frame": 145,
+            "value": 0.0
+          },
+          {
+            "frame": 239,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "property": "camera_position_z",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": -1000.0
+          },
+          {
+            "frame": 80,
+            "value": -1000.0
+          },
+          {
+            "frame": 145,
+            "value": -1000.0
+          },
+          {
+            "frame": 239,
+            "value": -925.0
+          }
+        ]
+      }
+    ]
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "color",
+      "color": [
+        0.012,
+        0.018,
+        0.032,
+        1.0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "screen_space": true,
+      "start_frame": 0,
+      "duration_frames": 240
+    },
+    {
+      "id": "glyph-0-c",
+      "type": "text",
+      "text": "C",
+      "size": [
+        90.0,
+        61.02746485630267
+      ],
+      "position": [
+        894.5641260735199,
+        540.0,
+        -740.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 33.90414714239037,
+        "min_font_size": 33.90414714239037,
+        "max_font_size": 33.90414714239037,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 0,
+      "duration_frames": 240
+    },
+    {
+      "id": "glyph-1-h",
+      "type": "text",
+      "text": "H",
+      "size": [
+        90.0,
+        96.23561765801576
+      ],
+      "position": [
+        890.7458023759202,
+        540.0,
+        -590.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 53.464232032230974,
+        "min_font_size": 53.464232032230974,
+        "max_font_size": 53.464232032230974,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 0,
+      "duration_frames": 240
+    },
+    {
+      "id": "glyph-2-r",
+      "type": "text",
+      "text": "R",
+      "size": [
+        90.0,
+        138.48540102007144
+      ],
+      "position": [
+        908.6813823381215,
+        540.0,
+        -410.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 76.93633390003968,
+        "min_font_size": 76.93633390003968,
+        "max_font_size": 76.93633390003968,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 0,
+      "duration_frames": 240
+    },
+    {
+      "id": "glyph-3-o",
+      "type": "text",
+      "text": "O",
+      "size": [
+        112.6671521580292,
+        185.4296047556889
+      ],
+      "position": [
+        955.2131949484734,
+        540.0,
+        -210.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 103.01644708649383,
+        "min_font_size": 103.01644708649383,
+        "max_font_size": 103.01644708649383,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 0,
+      "duration_frames": 240
+    },
+    {
+      "id": "glyph-4-n",
+      "type": "text",
+      "text": "N",
+      "size": [
+        147.40843840001278,
+        237.06822886486808
+      ],
+      "position": [
+        1039.6011174492469,
+        540.0,
+        10.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 131.70457159159338,
+        "min_font_size": 131.70457159159338,
+        "max_font_size": 131.70457159159338,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 0,
+      "duration_frames": 240
+    },
+    {
+      "id": "glyph-5-o",
+      "type": "text",
+      "text": "O",
+      "size": [
+        179.6969768596415,
+        295.7484835343899
+      ],
+      "position": [
+        1166.2433797800895,
+        540.0,
+        260.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 164.30471307466104,
+        "min_font_size": 164.30471307466104,
+        "max_font_size": 164.30471307466104,
+        "fit_mode": "shrink_only",
+        "fill": "#66E3D0"
+      },
+      "start_frame": 0,
+      "duration_frames": 240
+    },
+    {
+      "id": "glyph-6-n",
+      "type": "text",
+      "text": "N",
+      "size": [
+        220.38291285546467,
+        354.4287382039117
+      ],
+      "position": [
+        1335.3217593480217,
+        540.0,
+        510.0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 196.9048545577287,
+        "min_font_size": 196.9048545577287,
+        "max_font_size": 196.9048545577287,
+        "fit_mode": "shrink_only",
+        "fill": "#F5F3F7"
+      },
+      "start_frame": 0,
+      "duration_frames": 240
+    }
+  ],
+  "output": {
+    "path": "signature_anamorphic_typography_v1.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

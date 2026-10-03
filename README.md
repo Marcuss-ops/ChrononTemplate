@@ -654,3 +654,65 @@ left/right visibility in an encoded frame, and safe-area clipping; it writes
 SHA-256 evidence. Fast contract checks run as part of CTest when Python 3 is
 available, and can also be run directly with
 `python3 tools/test_multi_image_duo_v1.py`.
+
+### Responsive Social Motion V1
+
+`tools/build_social_motion_pack_v1.py` creates eighteen five-second, 30 fps
+Chronon3D plans: five image-count layouts (one through five images) for each
+1920×1080 landscape, 1080×1080 square and 1080×1920 vertical canvas, plus a
+three-phrase English web/editorial reel in each format. Image cards animate
+with staggered reveals, measured focus pulses and format-specific safe-area
+slots; phrase cards use Inter Bold, shrink-only fitting and animated rise/fade
+handoffs. Assets are the existing local Chronon3D image library and font.
+
+Validate the complete plan set without rendering, or render and verify all MP4s
+locally:
+
+```shell
+python3 tools/test_social_motion_pack_v1.py
+python3 tools/build_social_motion_pack_v1.py --validate-only
+python3 tools/build_social_motion_pack_v1.py --render
+```
+
+The render directory is `out/social_motion_pack_v1/`. When the host's standard
+RenderingGen OAuth files are available, publish only the eighteen verified MP4s
+to the requested Drive folder with explicit opt-in:
+
+```shell
+python3 tools/build_social_motion_pack_v1.py --upload \\
+  --drive-credentials ~/.config/velox/credentials.json \\
+  --drive-token ~/.config/velox/token.json \\
+  --drive-folder 1ATL0bnJXijNqFlKkgWye3PEAdAuQa1HI
+```
+
+Upload validates every MP4's encoded dimensions, 30 fps and five-second
+runtime and records provider-confirmed byte counts and SHA-256 hashes in
+`out/social_motion_pack_v1/social_motion_pack_v1_upload_manifest.json`. It
+does not upload plans, timing sidecars or source assets. The rounded-alpha PNG
+cards retain their baked corner coverage (`radius: 0`) and remain flat
+(`enable_3d: false`) so the renderer does not apply a second mask or 3D depth
+grading at their edges.
+
+### Text Depth Focus V1
+
+`tools/build_text_depth_focus_v1.py` generates eight five-second 1920×1080,
+30 fps word-focus plans from stable semantic word spans: static editorial
+focus, continuous focus travel, near/far traversal, center-out and edges-in
+travel, duo rack focus, and a true-Z depth cascade. The first seven use the
+renderer-native per-word blur, opacity and scale animator; `text_focus_depth_cascade`
+also places each word on a separate 3D plane and enables the existing camera
+DOF path. RenderPlan currently exposes camera pose tracks but no animated
+focus-distance track, so traveling focus is baked as deterministic linear
+word-blur samples while true camera DOF is used on the static focus plane.
+
+```shell
+python3 tools/test_text_depth_focus_v1.py
+python3 tools/build_text_depth_focus_v1.py --validate-only \\
+  --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli
+python3 tools/build_text_depth_focus_v1.py --render-all \\
+  --mirror-output-dir ../RenderingGen/UploadDrive/text_depth_focus_v1
+```
+
+Plans, MP4s, frame timing sidecars and `manifest.json` are written under
+`out/text_depth_focus_v1/`; only the plans/MP4s/timing files are mirrored into
+the delivery staging directory.
