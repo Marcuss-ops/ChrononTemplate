@@ -12,6 +12,7 @@ import json
 import math
 import os
 import sys
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -24,7 +25,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--summary-output", type=Path)
     args = parser.parse_args()
+    if args.summary_output is None:
+        args.summary_output = args.output.with_suffix(".telemetry.json")
+    render_started = time.perf_counter()
     payload = json.loads(args.input.read_text(encoding="utf-8"))
     width, height = int(payload["width"]), int(payload["height"])
     fps_num, fps_den = int(payload["fps_num"]), int(payload["fps_den"])
@@ -114,41 +119,92 @@ def main() -> int:
         raise ValueError("Chronon geo camera output dimensions do not match the overlay canvas")
     pyramid = dyn.DynamicTilePyramid(provider="esri_sat")
     anchors = list(builder.ANCHORS)
-    # Warm one coarse bridge plate per leg before worker processes fork. Tour
-    # movement pulls out to this scale before crossing the map.
+    # The camera pans through each route midpoint. Include each midpoint in the
+    # plate union so every camera center on a linearly interpolated route is
+    # covered by the coarse leg plate.
     for index in range(len(stops) - 1):
         a, b = stops[index], stops[index + 1]
         anchors.append(((a.lat + b.lat) / 2, (a.lon + b.lon) / 2))
     # Only prepare levels the animation can sample. Fractional zoom blends
     # z and z+1, so include the next integer above the deepest stop.
+    prepare_zmin = min(builder.PREPARE_ZMIN, max(0, math.floor(min(stop_zooms))))
+    # The current frame sampler cannot consume zooms below its historic z=5
+    # floor; clamp the authored flight to that certified floor instead of
+    # allocating world-sized plates or falling back during a coarse shot.
+    if prepare_zmin < 5:
+        if len(stops) == 1:
+            builder.end_zoom = max(5.0, builder.end_zoom)
+        else:
+            builder.stop_end_zooms = [max(5.0, zoom) for zoom in builder.stop_end_zooms]
+            builder.end_zoom = max(builder.stop_end_zooms)
+        stop_zooms = [max(5.0, zoom) for zoom in stop_zooms]
+        prepare_zmin = 5
     prepare_zmax = min(builder.PREPARE_ZMAX,
                        max(6, math.ceil(max(stop_zooms)) + 1))
-    for index, (lat, lon) in enumerate(anchors):
-        zmax = prepare_zmax
-        if index >= len(stops):
-            leg = index - len(stops)
-            a, b = stops[leg], stops[leg + 1]
-            ax, ay = dyn.latlon_to_global_px(a.lat, a.lon, 5)
-            bx, by = dyn.latlon_to_global_px(b.lat, b.lon, 5)
-            leg_zoom = 5.0 + math.log2((0.72 * width) / max(math.hypot(bx - ax, by - ay), 1.0))
-            zmax = min(zmax, max(6, math.ceil(leg_zoom) + 1))
-        print(f"[dynamic-map] prefetch anchor {index + 1}/{len(anchors)} z=5..{zmax}", flush=True)
-        radius = 6 if index >= len(stops) else 4
-        pyramid.prefetch_pyramid(lat, lon, min_zoom=5, max_zoom=zmax,
-                                 tile_radius_x=radius, tile_radius_y=max(4, radius - 1))
+    if prepare_zmax < prepare_zmin:
+        prepare_zmax = prepare_zmin
 
-    # Compose each zoom plate once, then render frames as crops/resizes. The
-    # previous sampler rebuilt the same tile mosaic for every frame.
+    # The camera may zoom out to show an entire route leg. Validate its actual
+    # frame trajectory at the integer-sampling boundary before encoding; never
+    # rely on the sampler's slow fallback to hide an undersized plate.
+    for leg_index in range(len(stops) - 1):
+        a, b = stops[leg_index], stops[leg_index + 1]
+        ax, ay = dyn.latlon_to_global_px(a.lat, a.lon, 5)
+        bx, by = dyn.latlon_to_global_px(b.lat, b.lon, 5)
+        leg_zoom = max(5.2, min(max(stop_zooms), 5.0 + math.log2(
+            (0.72 * width) / max(math.hypot(bx - ax, by - ay), 1.0))))
+        prepare_zmax = max(prepare_zmax, math.ceil(leg_zoom) + 1)
+
     sampler = fast.FastPlateSampler(pyramid, width, height)
-    sampler.prepare(builder.ANCHORS, builder.PREPARE_ZMIN, prepare_zmax)
+    sampler.prepare(anchors, prepare_zmin, prepare_zmax)
+    for frame_idx in range(total_frames):
+        if len(stops) > 1:
+            lat, lon, zoom = builder.pose(frame_idx)
+        else:
+            lat, lon = stops[0].lat, stops[0].lon
+            zoom = builder.pose(frame_idx)[0]
+        if not sampler.can_sample(lat, lon, zoom, width, height):
+            raise RuntimeError(
+                f"prepared map plates do not cover camera frame {frame_idx} "
+                f"at zoom {zoom:.3f}; refusing slow fallback")
+    if sampler.fallback_count != 0:
+        raise RuntimeError("geometry-only sampler coverage check invoked the slow renderer")
     print(f"[dynamic-map] prepared zooms {sampler.z_min}..{sampler.z_max}", flush=True)
+    if pyramid.telemetry["late_tile_fetches"] != 0:
+        raise RuntimeError(f"plate composition performed {pyramid.telemetry['late_tile_fetches']} late tile fetches")
+    if pyramid.telemetry["tile_fallbacks"] != 0:
+        raise RuntimeError(f"tile prefetch produced {pyramid.telemetry['tile_fallbacks']} fallback tiles")
+    gate_started = time.perf_counter()
     geo.gate_builder(builder, sampler, "production-map-overlay")
+    gate_ms = (time.perf_counter() - gate_started) * 1000.0
+    if sampler.fallback_count != 0:
+        raise RuntimeError(f"map acceptance gate used {sampler.fallback_count} slow-engine fallback frames")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     stats = harness.encode_with_pool(builder, sampler, args.output,
                                      workers=min(8, max(1, (os.cpu_count() or 2) // 2)),
                                      block=2, preset="veryfast", crf=18)
     if stats.get("engine_fallback_frames", 0):
         raise RuntimeError(f"map sampler used fallback imagery in {stats['engine_fallback_frames']} frames")
+    summary = {
+        "schema": "chronon.dynamic-map-telemetry.v1",
+        "frames": total_frames,
+        "dimensions": {"width": width, "height": height},
+        "fps": {"num": fps_num, "den": fps_den},
+        "tile": dict(pyramid.telemetry),
+        "plates": dict(sampler.prepare_telemetry),
+        "gate_ms": gate_ms,
+        "frame_pipeline_s": stats["production_s"],
+        "render_encode_wall_s": stats["total_s"],
+        "post_frame_tail_s": stats["post_frame_tail_s"],
+        "engine_fallback_frames": stats["engine_fallback_frames"],
+        "output_bytes": stats["bytes"],
+        "renderer_wall_s": time.perf_counter() - render_started,
+    }
+    args.summary_output.parent.mkdir(parents=True, exist_ok=True)
+    args.summary_output.write_text(
+        json.dumps(summary, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
     print(f"DYNAMIC_MAP_PASS frames={total_frames} provider=esri_sat output={args.output}", flush=True)
     return 0
 
