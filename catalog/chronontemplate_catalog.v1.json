@@ -2751,6 +2751,24 @@
       "tech_duotone_blob"
     ]
   },
+  "rgb_motion": {
+    "schema": "chronontemplate.rgb-motion.v1",
+    "version": 1,
+    "family_id": "rgb_motion_v1",
+    "category": "rgb_motion_v1",
+    "recipes": [
+      "rgb_wave_in",
+      "rgb_slice_break",
+      "rgb_vertical_trail",
+      "rgb_velocity_snap",
+      "rgb_temporal_split",
+      "rgb_prism_smear",
+      "rgb_ghost_echo",
+      "rgb_spectrum_drop",
+      "rgb_block_shuffle",
+      "rgb_radial_burst"
+    ]
+  },
   "motions": [
     {
       "id": "air_rise_type_on",

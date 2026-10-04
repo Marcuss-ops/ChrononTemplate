@@ -539,6 +539,26 @@ int main(int argc, char** argv) {
                 fail("tech_backgrounds.recipes must contain unique non-empty ids");
             }
         }
+        if (!data.contains("rgb_motion")) fail("catalog needs `rgb_motion`");
+        const json& rgbMotion = data["rgb_motion"];
+        requireObject(rgbMotion, "rgb_motion");
+        if (rgbMotion.value("schema", "") != "chronontemplate.rgb-motion.v1" ||
+            rgbMotion.value("version", 0) != 1 ||
+            rgbMotion.value("family_id", "") != "rgb_motion_v1" ||
+            rgbMotion.value("category", "") != "rgb_motion_v1" ||
+            !rgbMotion.contains("recipes")) {
+            fail("rgb_motion has an unsupported schema or missing family/recipes");
+        }
+        requireArray(rgbMotion["recipes"], "rgb_motion.recipes");
+        if (rgbMotion["recipes"].size() != 10)
+            fail("rgb_motion must define exactly 10 V1 recipe ids");
+        std::set<std::string> rgbRecipeIDs;
+        for (const auto& recipe : rgbMotion["recipes"]) {
+            if (!recipe.is_string() || recipe.get<std::string>().empty() ||
+                !rgbRecipeIDs.insert(recipe.get<std::string>()).second) {
+                fail("rgb_motion.recipes must contain unique non-empty ids");
+            }
+        }
 
         json entityPresentation = json::parse(readFile(CHRONONTEMPLATE_ENTITY_PRESENTATION_FILE));
         requireObject(entityPresentation, "entity_presentation");
@@ -626,6 +646,7 @@ int main(int argc, char** argv) {
         emitted["abstract_backgrounds"] = abstractBackgrounds;
         emitted["photo_motion"] = photoMotion;
         emitted["tech_backgrounds"] = techBackgrounds;
+        emitted["rgb_motion"] = rgbMotion;
         emitted["motions"] = motions;
         emitted["overlay_presets"] = data["overlay_presets"];
         emitted["selections"] = data["selections"];

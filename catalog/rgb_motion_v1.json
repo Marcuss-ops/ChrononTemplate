@@ -1,0 +1,26 @@
+{
+  "schema": "chronontemplate.rgb-motion.v1",
+  "version": 1,
+  "family_id": "rgb_motion_v1",
+  "canvas": {"width": 960, "height": 540, "fps": 30},
+  "composition": "template_layer_expansion",
+  "recipes": [
+    {"id": "rgb_wave_in", "operator": "rgb_channel_transform", "warp": "wave_warp"},
+    {"id": "rgb_slice_break", "operator": "slice_transform", "orientation": "horizontal"},
+    {"id": "rgb_vertical_trail", "operator": "multi_tap_trail", "axis": "vertical"},
+    {"id": "rgb_velocity_snap", "operator": "rgb_channel_transform", "driver": "screen_velocity"},
+    {"id": "rgb_temporal_split", "operator": "rgb_channel_transform", "driver": "analytic_transform_sample"},
+    {"id": "rgb_prism_smear", "operator": "multi_tap_trail", "palette": "spectrum"},
+    {"id": "rgb_ghost_echo", "operator": "multi_tap_trail", "palette": "rgb"},
+    {"id": "rgb_spectrum_drop", "operator": "multi_tap_trail", "axis": "vertical", "palette": "spectrum"},
+    {"id": "rgb_block_shuffle", "operator": "slice_transform", "orientation": "horizontal", "mode": "posterized"},
+    {"id": "rgb_radial_burst", "operator": "rgb_channel_transform", "effect": "radial_blur"}
+  ],
+  "limits": {
+    "channel_mode": "additive_tint",
+    "component_recombination": "rgb_channel_transform_effect",
+    "temporal_sampling": "analytic_transform_only_no_frame_history",
+    "maximum_slices": 32,
+    "maximum_taps": 24
+  }
+}
