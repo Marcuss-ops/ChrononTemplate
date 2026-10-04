@@ -205,14 +205,69 @@ WEB_MOTIONS = [
         track("opacity", [(0, 0), (20, 1), (46, 1)])]),
 ]
 
+def caption_motion(mid, unit, enter, tracks, animators=None):
+    m = {"id": mid, "category": "entity_caption_v1", "targets": ["text"],
+         "unit": unit, "enter": enter, "tracks": tracks}
+    if animators is not None:
+        m["text_animators"] = animators
+    return m
+
+
+CAPTION_MOTIONS = [
+    caption_motion("entity_caption_blur_reveal", "layer", 48, [
+        track("position_y", [(0, 26), (48, 0)]),
+        track("opacity", [(0, 0), (20, 1), (48, 1)])]),
+    caption_motion("entity_caption_tracking_snap", "layer", 44, [
+        track("scale_x", [(0, 0.78), (26, 1.04), (44, 1)]),
+        track("opacity", [(0, 0), (16, 1), (44, 1)])]),
+    caption_motion("entity_caption_word_spring", "word", 56, [
+        track("scale", [(0, 0.92), (32, 1.02), (56, 1)]),
+        track("opacity", [(0, 0), (18, 1), (56, 1)])], [
+            animator("entity_caption_word_spring_text", "word", [
+                track("position_y", [(0, 28), (32, -3), (48, 0)]),
+                track("opacity", [(0, 0), (14, 1)])], stagger=2)]),
+    caption_motion("entity_caption_glyph_rise", "glyph", 54, [
+        track("opacity", [(0, 0), (20, 1), (54, 1)])], [
+            animator("entity_caption_glyph_rise_text", "glyph", [
+                track("position_y", [(0, 22), (36, 0)]),
+                track("scale", [(0, 0.82), (30, 1.03), (42, 1)]),
+                track("opacity", [(0, 0), (12, 1)])], stagger=1)]),
+    caption_motion("entity_caption_side_glide", "layer", 42, [
+        track("position_x", [(0, -96), (30, 4), (42, 0)]),
+        track("opacity", [(0, 0), (16, 1), (42, 1)])]),
+    caption_motion("entity_caption_warm_reveal", "layer", 48, [
+        track("scale", [(0, 0.88), (30, 1.02), (48, 1)], "out_back"),
+        track("position_y", [(0, 14), (38, 0)]),
+        track("opacity", [(0, 0), (16, 1), (48, 1)])]),
+    caption_motion("entity_caption_flip_settle", "layer", 48, [
+        track("rotation_z", [(0, -5), (30, 1), (48, 0)], "out_cubic"),
+        track("position_x", [(0, 42), (38, 0)]),
+        track("opacity", [(0, 0), (14, 1), (48, 1)])]),
+    caption_motion("entity_caption_word_drop", "word", 58, [
+        track("position_y", [(0, -18), (42, 0)]),
+        track("opacity", [(0, 0), (20, 1), (58, 1)])], [
+            animator("entity_caption_word_drop_text", "word", [
+                track("position_y", [(0, -36), (30, 4), (44, 0)]),
+                track("opacity", [(0, 0), (14, 1)])], stagger=3)]),
+    caption_motion("entity_caption_focus_punch", "layer", 46, [
+        track("scale", [(0, 1.18), (22, 0.97), (46, 1)], "out_back"),
+        track("opacity", [(0, 0), (12, 1), (46, 1)])]),
+    caption_motion("entity_caption_neon_breathe", "glyph", 54, [
+        track("opacity", [(0, 0), (24, 1), (54, 1)])], [
+            animator("entity_caption_neon_breathe_text", "glyph", [
+                track("scale", [(0, 0.88), (28, 1.05), (46, 1)]),
+                track("tracking", [(0, 3), (48, 0)]),
+                track("opacity", [(0, 0), (16, 1)])], stagger=1)]),
+]
+
 CAPTION_MOTION_IDS = [
     "text_depth_in", "text_fade_up", "text_scale_punch",
     "text_word_rise", "text_word_stagger", "text_yaw_in",
-]
+] + [m["id"] for m in CAPTION_MOTIONS]
 
 
 def expected_motions() -> list[dict]:
-    motions = IMAGE_MOTIONS + TEXT_3D_MOTIONS + WEB_MOTIONS
+    motions = IMAGE_MOTIONS + TEXT_3D_MOTIONS + WEB_MOTIONS + CAPTION_MOTIONS
     for m in motions:
         validate_motion(m)
     return motions

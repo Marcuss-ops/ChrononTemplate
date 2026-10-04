@@ -130,7 +130,7 @@ scene.camera().orbit(-0.35f, 0.05f).between(0, 90);
 FrameSubmission frame = scene.submit(12);
 ```
 
-`ContentHost` is the whole Chronon-side dependency: create text/image/video and
+`ContentHost` is the whole Chronon-side dependency: create text/image/video/shape and
 measure them. It is abstract on purpose, so this module keeps compiling without
 the renderer and the real host can be the Chronon engine, the C ABI or a test
 double. `FrameSubmission` is the whole render-side output: per layer, the matrix
@@ -383,6 +383,29 @@ date 20-preset gallery, entity gallery and entity duo) into
 `golden_plans/entity_presentation_v1/`; `--cli` additionally validates each
 plan through `chronon3d_cli validate --plan` when the Chronon3D CLI is built.
 
+## SaaS Kinetic Typography V1
+
+`tools/build_saas_kinetic_typography_v1.py` authors six renderer-native
+reference-inspired beats: per-grapheme vertical drop with velocity blur, staggered
+word reveal with tracking stretch, a split-mask decapitation, spring-drawn
+underline, glossy gradient/shimmer, and a rotation snap. It writes six 3-second
+canaries plus a 18-second `saas_kinetic_typography_gallery_v1` plan. The text
+remains a single renderer-owned run per phrase; there is no manually positioned
+glyph mesh or custom shader. Linear/gloss gradients use native shape fills
+clipped by a text mask, while motion and per-glyph treatment use V3 layer tracks
+and text animators.
+
+```shell
+python3 tools/test_saas_kinetic_typography_v1.py
+python3 tools/build_saas_kinetic_typography_v1.py \\
+  --out out/saas_kinetic_typography_v1
+python3 tools/build_saas_kinetic_typography_v1.py --validate-only \\
+  --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli
+```
+
+Each canary is 1920×1080 at 30 fps. Native plan validation and deterministic
+contract tests are included in the module's Python CTest suite.
+
 ## Kinetic Type Editorial V1
 
 `tools/build_kinetic_type_editorial_v1.py` authors the reference-inspired
@@ -607,6 +630,58 @@ adjacent frame windows on the same scene. A canary gallery
 (`title_camera_documentary_gallery_v1`: 1920×1080, 30 fps, one title, one
 background, twenty clips — one per camera) renders through the regular scene
 submission path; the C++ contract above is the gate, the render is the exhibit.
+
+### Documentary title-to-snapshot family — `documentary_title_snapshot_v1`
+
+`DocumentarySnapshotPack` authors the title and photos as ordinary scene layers,
+then resolves the selected story recipe onto the shared `CameraRig`. The twelve
+recipes are `doc_title_snap_down`, `doc_title_pullback_photo_reveal`,
+`doc_title_push_through_snapshot`, `doc_title_whip_to_photo`,
+`doc_title_focus_drop`, `doc_title_90_reveal`, `doc_title_corner_turn`,
+`doc_title_foreground_photo_pass`, `doc_title_photo_stack`,
+`doc_title_filmstrip_handoff`, `doc_title_split_depth`, and
+`doc_archive_crane_reveal`.
+
+```cpp
+#include "chronontemplate/DocumentarySnapshotPack.hpp"
+
+DocumentaryShot shot;
+shot.title = {{960.f, 280.f, 0.f}, 520.f, 100.f};
+shot.snapshots = {{.path = "archive/rome.jpg",
+                   .anchor = {{960.f, 960.f, -60.f}, 620.f, 350.f},
+                   .caption = "ROME, 1960",
+                   .fit = SnapshotFit::Fill}};
+shot.recipe = DocumentaryRecipe::SnapDown;
+shot.style = SnapshotStyle::Archive;
+shot.titleHoldFrames = 48;
+shot.transitionFrames = 8;
+
+addDocumentarySnapshot(scene,
+    TextSpec{.text = "THE STORY OF ROME", .font = "Playfair Display Italic",
+             .fontSize = 138.f, .color = "#F1EBDD"}, shot);
+```
+
+The seven catalogued looks are Clean, Archive, Polaroid, Filmstrip, Evidence,
+Newspaper, and Black-and-white Documentary. `SnapshotFit::Fit`, `Fill`, and
+`Crop` map to the existing image placement request; Crop carries an explicit
+normalized rectangle. Frame, color grade, grain, vignette, and stable grain seed
+travel through `ImageRequest`, so the connected `ContentHost` can route them to
+Chronon3D's existing image and effect path. `doc_title_push_through_snapshot`
+also adds a native `ShapeRequest` red portal as an ordinary animated scene
+layer: it covers the photo at the push peak, then fades to reveal it. The host
+maps `ShapeRequest` to a Chronon3D Shape LayerPlan. The C++ contracts verify the
+requested values and camera geometry; rendered fit/style verification remains
+part of the open canary checklist.
+
+Render the title handoff or red portal with the native camera pose dumper and
+Chronon3D CLI:
+
+```sh
+python3 tools/render_documentary_snapshot_canary.py --render
+python3 tools/render_documentary_snapshot_canary.py \
+  --recipe doc_title_push_through_snapshot --render
+python3 tools/render_documentary_snapshot_canary.py --style-gallery --render
+```
 
 ### Multi-image duo v1
 

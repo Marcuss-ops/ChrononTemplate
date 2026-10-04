@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 #include <cmath>
+#include <algorithm>
 
 namespace chronontemplate {
 
@@ -49,6 +50,38 @@ namespace chronontemplate {
             throw std::logic_error("LayerHandle: layer " + std::to_string(m_id) + " is not in the scene");
         }
         return *found;
+    }
+
+    const Layer& LayerHandle::layer() const {
+
+        const Layer* found = m_scene->motion().findLayer(m_id);
+        if (found == nullptr) {
+            throw std::logic_error("LayerHandle: layer " + std::to_string(m_id) + " is not in the scene");
+        }
+        return *found;
+    }
+
+    LayerHandle& LayerHandle::animatePosition(int inFrame, int duration,
+                                             const Vector3& startOffset,
+                                             const chrononmotion::motion::Easing& easing) {
+        const float fps = m_scene->fps();
+        const float t0 = static_cast<float>(inFrame) / fps;
+        const float t1 = static_cast<float>(inFrame + duration) / fps;
+        const Vector3 rest = layer().transform.position;
+        layer().tracks.position.add(t0, rest + startOffset, easing);
+        layer().tracks.position.add(t1, rest, easing);
+        return *this;
+    }
+
+    LayerHandle& LayerHandle::animateOpacity(int inFrame, int duration,
+                                            float from, float to,
+                                            const chrononmotion::motion::Easing& easing) {
+        const float fps = m_scene->fps();
+        const float t0 = static_cast<float>(inFrame) / fps;
+        const float t1 = static_cast<float>(inFrame + duration) / fps;
+        layer().tracks.opacity.add(t0, from, easing);
+        layer().tracks.opacity.add(t1, to, easing);
+        return *this;
     }
 
     const std::string& LayerHandle::name() const {
@@ -266,8 +299,34 @@ namespace chronontemplate {
         if (spec.path.empty()) throw std::invalid_argument("TemplateScene::image: the path is required");
         if (!std::isfinite(spec.frame.cornerRadius) || spec.frame.cornerRadius < 0.f ||
             !std::isfinite(spec.frame.borderWidth) || spec.frame.borderWidth < 0.f ||
-            (spec.frame.borderWidth > 0.f && spec.frame.borderColor.empty())) {
-            throw std::invalid_argument("TemplateScene::image: invalid image frame style");
+            (spec.frame.borderWidth > 0.f && spec.frame.borderColor.empty()) ||
+            !std::isfinite(spec.frame.saturation) || spec.frame.saturation < 0.f || spec.frame.saturation > 4.f ||
+            !std::isfinite(spec.frame.contrast) || spec.frame.contrast < 0.f || spec.frame.contrast > 16.f ||
+            !std::isfinite(spec.frame.grain) || spec.frame.grain < 0.f || spec.frame.grain > 1.f ||
+            !std::isfinite(spec.frame.vignette) || spec.frame.vignette < 0.f || spec.frame.vignette > 1.f) {
+            throw std::invalid_argument("TemplateScene::image: invalid image frame or look style");
+        }
+        const bool noTargetSize = spec.targetSize.x == 0.f && spec.targetSize.y == 0.f;
+        if (!std::isfinite(spec.targetSize.x) || !std::isfinite(spec.targetSize.y) ||
+            (noTargetSize ? false : (spec.targetSize.x <= 0.f || spec.targetSize.y <= 0.f))) {
+            throw std::invalid_argument("TemplateScene::image: target size must be positive or unset");
+        }
+        switch (spec.fit) {
+            case ImageFitMode::Contain:
+            case ImageFitMode::Cover:
+            case ImageFitMode::Stretch:
+            case ImageFitMode::None:
+                break;
+            default:
+                throw std::invalid_argument("TemplateScene::image: unsupported fit mode");
+        }
+        if (spec.crop.enabled && (!std::isfinite(spec.crop.origin.x) || !std::isfinite(spec.crop.origin.y) ||
+                                  !std::isfinite(spec.crop.size.x) || !std::isfinite(spec.crop.size.y) ||
+                                  spec.crop.origin.x < 0.f || spec.crop.origin.y < 0.f ||
+                                  spec.crop.size.x <= 0.f || spec.crop.size.y <= 0.f ||
+                                  spec.crop.origin.x + spec.crop.size.x > 1.f ||
+                                  spec.crop.origin.y + spec.crop.size.y > 1.f)) {
+            throw std::invalid_argument("TemplateScene::image: crop must be a normalized positive rectangle");
         }
 
         ImageRequest request;
@@ -275,6 +334,14 @@ namespace chronontemplate {
         request.cornerRadius = spec.frame.cornerRadius;
         request.borderColor = spec.frame.borderColor;
         request.borderWidth = spec.frame.borderWidth;
+        request.fit = spec.fit;
+        request.targetSize = spec.targetSize;
+        request.crop = spec.crop;
+        request.saturation = spec.frame.saturation;
+        request.contrast = spec.frame.contrast;
+        request.grain = spec.frame.grain;
+        request.vignette = spec.frame.vignette;
+        request.grainSeed = spec.frame.grainSeed;
 
         ContentHandle handle = m_host.createImage(request);
         return adopt(std::move(handle), derivedName(spec.name, spec.path), Layer::kRoot);
@@ -291,6 +358,23 @@ namespace chronontemplate {
         return adopt(std::move(handle), derivedName(spec.name, spec.path), Layer::kRoot);
     }
 
+    LayerHandle& TemplateScene::shape(const ShapeSpec& spec) {
+
+        if (!std::isfinite(spec.size.x) || !std::isfinite(spec.size.y) ||
+            spec.size.x <= 0.f || spec.size.y <= 0.f || spec.fillColor.empty() ||
+            !std::isfinite(spec.cornerRadius) || spec.cornerRadius < 0.f ||
+            spec.cornerRadius > std::min(spec.size.x, spec.size.y) * 0.5f)
+            throw std::invalid_argument("TemplateScene::shape: positive finite size and fill color are required");
+
+        ShapeRequest request;
+        request.size = spec.size;
+        request.fillColor = spec.fillColor;
+        request.name = spec.name;
+        request.cornerRadius = spec.cornerRadius;
+        ContentHandle handle = m_host.createShape(request);
+        return adopt(std::move(handle), derivedName(spec.name, "Shape"), Layer::kRoot);
+    }
+
     LayerHandle& TemplateScene::group(const std::string& name, MotionLayerId parentId) {
 
         if (name.empty()) throw std::invalid_argument("TemplateScene::group: the name is required");
@@ -300,6 +384,16 @@ namespace chronontemplate {
     CameraHandle& TemplateScene::camera() {
 
         return m_cameraHandle;
+    }
+
+    TemplateScene& TemplateScene::setTemporalMotionBlur(float shutterAngle,
+                                                        std::uint32_t samples) {
+        if (!std::isfinite(shutterAngle) || shutterAngle <= 0.f || shutterAngle > 360.f)
+            throw std::invalid_argument("TemplateScene::setTemporalMotionBlur: shutter angle must be in (0, 360]");
+        if (samples < 2 || samples > 64)
+            throw std::invalid_argument("TemplateScene::setTemporalMotionBlur: samples must be in [2, 64]");
+        m_temporalMotionBlur = TemporalMotionBlurSettings{shutterAngle, samples};
+        return *this;
     }
 
     FrameSubmission TemplateScene::submit(int frame) {

@@ -1,0 +1,4709 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "documentary_map_route_draw_v1",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 150
+  },
+  "layers": [
+    {
+      "id": "night-field",
+      "type": "color",
+      "color": [
+        0.025,
+        0.043,
+        0.057,
+        1
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "screen_space": true,
+      "start_frame": 0,
+      "duration_frames": 150
+    },
+    {
+      "id": "relief-map",
+      "type": "image",
+      "asset": "ChrononTemplate/assets/documentary_map_v1/map_plate.png",
+      "size": [
+        1480,
+        630
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "fit": "contain",
+      "start_frame": 0,
+      "duration_frames": 150,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 1,
+                "value": 1.0
+              },
+              {
+                "frame": 149,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 1,
+                "value": 0.0
+              },
+              {
+                "frame": 149,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 1,
+                "value": 0.0
+              },
+              {
+                "frame": 149,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "top-rule",
+      "type": "shape",
+      "size": [
+        78,
+        2
+      ],
+      "position": [
+        960.0,
+        112
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "shape": {
+        "type": "rect",
+        "fill": [
+          0.953,
+          0.722,
+          0.357,
+          1.0
+        ]
+      }
+    },
+    {
+      "id": "section-kicker",
+      "type": "text",
+      "text": "FIELD NOTES   /   GEOGRAPHIC EXPLAINER",
+      "size": [
+        1000,
+        30
+      ],
+      "position": [
+        960.0,
+        79
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 17,
+        "fill": "#71D8D0"
+      }
+    },
+    {
+      "id": "scene-caption",
+      "type": "text",
+      "text": "02   /   A line turns distance into a story.",
+      "size": [
+        1450,
+        42
+      ],
+      "position": [
+        960.0,
+        985
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 20,
+        "fill": "#EEE9DB"
+      }
+    },
+    {
+      "id": "route-core-00",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        29.067,
+        5.0
+      ],
+      "position": [
+        484.757,
+        551.736
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        29.67334796184012
+      ],
+      "start_frame": 40,
+      "duration_frames": 110,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 109,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 109,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 109,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 109,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-01",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        28.907,
+        5.0
+      ],
+      "position": [
+        501.324,
+        561.012
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        28.813104776929606
+      ],
+      "start_frame": 41,
+      "duration_frames": 109,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 108,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 108,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 108,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 108,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-02",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        28.752,
+        5.0
+      ],
+      "position": [
+        517.891,
+        569.961
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        27.938415397836653
+      ],
+      "start_frame": 42,
+      "duration_frames": 108,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 107,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 107,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 107,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 107,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-03",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        28.601,
+        5.0
+      ],
+      "position": [
+        534.457,
+        578.584
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        27.0493308285133
+      ],
+      "start_frame": 43,
+      "duration_frames": 107,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 106,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 106,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 106,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 106,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-04",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        28.455,
+        5.0
+      ],
+      "position": [
+        551.024,
+        586.88
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        26.145931485903095
+      ],
+      "start_frame": 44,
+      "duration_frames": 106,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 105,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 105,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 105,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 105,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-05",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        28.313,
+        5.0
+      ],
+      "position": [
+        567.591,
+        594.849
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        25.228328856071695
+      ],
+      "start_frame": 45,
+      "duration_frames": 105,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 104,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 104,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 104,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 104,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-06",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        28.177,
+        5.0
+      ],
+      "position": [
+        584.157,
+        602.491
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        24.296667088557605
+      ],
+      "start_frame": 47,
+      "duration_frames": 103,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 102,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 102,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 102,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 102,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-07",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        28.045,
+        5.0
+      ],
+      "position": [
+        600.724,
+        609.807
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        23.35112450728456
+      ],
+      "start_frame": 48,
+      "duration_frames": 102,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 101,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 101,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 101,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 101,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-08",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.918,
+        5.0
+      ],
+      "position": [
+        617.291,
+        616.795
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        22.391915014975467
+      ],
+      "start_frame": 49,
+      "duration_frames": 101,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 100,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 100,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 100,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 100,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-09",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.796,
+        5.0
+      ],
+      "position": [
+        633.858,
+        623.458
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        21.419289367008002
+      ],
+      "start_frame": 50,
+      "duration_frames": 100,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 99,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 99,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 99,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 99,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-10",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.679,
+        5.0
+      ],
+      "position": [
+        650.424,
+        629.793
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        20.433536289798507
+      ],
+      "start_frame": 51,
+      "duration_frames": 99,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 98,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 98,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 98,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 98,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-11",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.568,
+        5.0
+      ],
+      "position": [
+        666.991,
+        635.802
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        19.434983418529253
+      ],
+      "start_frame": 52,
+      "duration_frames": 98,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 97,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 97,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 97,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 97,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-12",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.462,
+        5.0
+      ],
+      "position": [
+        683.558,
+        641.484
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        18.42399802900902
+      ],
+      "start_frame": 53,
+      "duration_frames": 97,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 96,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 96,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 96,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 96,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-13",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.361,
+        5.0
+      ],
+      "position": [
+        700.124,
+        646.839
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        17.400987539108485
+      ],
+      "start_frame": 54,
+      "duration_frames": 96,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 95,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 95,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 95,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 95,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-14",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.266,
+        5.0
+      ],
+      "position": [
+        716.691,
+        651.868
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        16.366399756298858
+      ],
+      "start_frame": 55,
+      "duration_frames": 95,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 94,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 94,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 94,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 94,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-15",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.177,
+        5.0
+      ],
+      "position": [
+        733.258,
+        656.57
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        15.3207228495679
+      ],
+      "start_frame": 56,
+      "duration_frames": 94,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 93,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 93,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 93,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 93,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-16",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.094,
+        5.0
+      ],
+      "position": [
+        749.824,
+        660.945
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        14.264485026310844
+      ],
+      "start_frame": 57,
+      "duration_frames": 93,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 92,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 92,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 92,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 92,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-17",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.016,
+        5.0
+      ],
+      "position": [
+        766.391,
+        664.994
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        13.198253897777144
+      ],
+      "start_frame": 59,
+      "duration_frames": 91,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 90,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 90,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 90,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 90,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-18",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.945,
+        5.0
+      ],
+      "position": [
+        782.958,
+        668.715
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        12.122635520198369
+      ],
+      "start_frame": 60,
+      "duration_frames": 90,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 89,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 89,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 89,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 89,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-19",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.879,
+        5.0
+      ],
+      "position": [
+        799.524,
+        672.11
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        11.038273102911125
+      ],
+      "start_frame": 61,
+      "duration_frames": 89,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 88,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 88,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 88,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-20",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.819,
+        5.0
+      ],
+      "position": [
+        816.091,
+        675.179
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        9.945845379410654
+      ],
+      "start_frame": 62,
+      "duration_frames": 88,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 87,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 87,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 87,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 87,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-21",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.766,
+        5.0
+      ],
+      "position": [
+        832.658,
+        677.921
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        8.846064642413701
+      ],
+      "start_frame": 63,
+      "duration_frames": 87,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 86,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 86,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 86,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 86,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-22",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.719,
+        5.0
+      ],
+      "position": [
+        849.224,
+        680.335
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        7.739674449413256
+      ],
+      "start_frame": 64,
+      "duration_frames": 86,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 85,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 85,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 85,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 85,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-23",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.678,
+        5.0
+      ],
+      "position": [
+        865.791,
+        682.424
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        6.627447010864003
+      ],
+      "start_frame": 65,
+      "duration_frames": 85,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 84,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 84,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 84,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 84,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-24",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.644,
+        5.0
+      ],
+      "position": [
+        882.358,
+        684.185
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        5.510180278834544
+      ],
+      "start_frame": 66,
+      "duration_frames": 84,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 83,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 83,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 83,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 83,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-25",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.615,
+        5.0
+      ],
+      "position": [
+        898.924,
+        685.62
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        4.388694759582005
+      ],
+      "start_frame": 67,
+      "duration_frames": 83,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 82,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 82,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 82,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 82,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-26",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.594,
+        5.0
+      ],
+      "position": [
+        915.491,
+        686.728
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        3.2638300788550176
+      ],
+      "start_frame": 68,
+      "duration_frames": 82,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 81,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 81,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 81,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 81,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-27",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.578,
+        5.0
+      ],
+      "position": [
+        932.058,
+        687.509
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        2.1364413337040706
+      ],
+      "start_frame": 69,
+      "duration_frames": 81,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 80,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 80,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 80,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 80,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-28",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.569,
+        5.0
+      ],
+      "position": [
+        948.624,
+        687.964
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        1.0073952689321792
+      ],
+      "start_frame": 71,
+      "duration_frames": 79,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 78,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 78,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 78,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 78,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-29",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.567,
+        5.0
+      ],
+      "position": [
+        965.191,
+        688.092
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -0.12243367998860771
+      ],
+      "start_frame": 72,
+      "duration_frames": 78,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 77,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 77,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 77,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 77,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-30",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.571,
+        5.0
+      ],
+      "position": [
+        981.758,
+        687.893
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -1.252167432884749
+      ],
+      "start_frame": 73,
+      "duration_frames": 77,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 76,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 76,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 76,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 76,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-31",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.581,
+        5.0
+      ],
+      "position": [
+        998.324,
+        687.368
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -2.3809283531719356
+      ],
+      "start_frame": 74,
+      "duration_frames": 76,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 75,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 75,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 75,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 75,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-32",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.598,
+        5.0
+      ],
+      "position": [
+        1014.891,
+        686.516
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -3.5078433309817902
+      ],
+      "start_frame": 75,
+      "duration_frames": 75,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 74,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 74,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 74,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 74,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-33",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.621,
+        5.0
+      ],
+      "position": [
+        1031.458,
+        685.337
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -4.63204781377199
+      ],
+      "start_frame": 76,
+      "duration_frames": 74,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 73,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 73,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 73,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 73,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-34",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.651,
+        5.0
+      ],
+      "position": [
+        1048.024,
+        683.831
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -5.752689738177206
+      ],
+      "start_frame": 77,
+      "duration_frames": 73,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 72,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 72,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 72,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 72,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-35",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.686,
+        5.0
+      ],
+      "position": [
+        1064.591,
+        681.999
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -6.86893331898999
+      ],
+      "start_frame": 78,
+      "duration_frames": 72,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 71,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 71,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 71,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 71,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-36",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.729,
+        5.0
+      ],
+      "position": [
+        1081.158,
+        679.84
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -7.979962654181487
+      ],
+      "start_frame": 79,
+      "duration_frames": 71,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 70,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 70,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 70,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 70,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-37",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.777,
+        5.0
+      ],
+      "position": [
+        1097.724,
+        677.354
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -9.084985108717191
+      ],
+      "start_frame": 80,
+      "duration_frames": 70,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 69,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 69,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 69,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 69,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-38",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.832,
+        5.0
+      ],
+      "position": [
+        1114.291,
+        674.542
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -10.183234444416659
+      ],
+      "start_frame": 81,
+      "duration_frames": 69,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 68,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 68,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 68,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 68,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-39",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.893,
+        5.0
+      ],
+      "position": [
+        1130.858,
+        671.402
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -11.273973668190612
+      ],
+      "start_frame": 83,
+      "duration_frames": 67,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 66,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 66,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 66,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 66,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-40",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        26.96,
+        5.0
+      ],
+      "position": [
+        1147.424,
+        667.937
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -12.356497576398937
+      ],
+      "start_frame": 84,
+      "duration_frames": 66,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 65,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 65,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 65,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 65,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-41",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.032,
+        5.0
+      ],
+      "position": [
+        1163.991,
+        664.144
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -13.43013497871795
+      ],
+      "start_frame": 85,
+      "duration_frames": 65,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 64,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 64,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 64,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 64,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-42",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.111,
+        5.0
+      ],
+      "position": [
+        1180.558,
+        660.025
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -14.494250590627194
+      ],
+      "start_frame": 86,
+      "duration_frames": 64,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 63,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 63,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 63,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 63,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-core-43",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.09803921568627451,
+          0.4980392156862745,
+          0.4823529411764706,
+          1.0
+        ],
+        "radius": 2.5
+      },
+      "size": [
+        27.196,
+        5.0
+      ],
+      "position": [
+        1197.124,
+        655.579
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -15.548246589217998
+      ],
+      "start_frame": 87,
+      "duration_frames": 63,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 62,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 62,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 62,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 62,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-arrow-arm--1",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.44313725490196076,
+          0.8470588235294118,
+          0.8156862745098039,
+          1.0
+        ],
+        "radius": 1.5
+      },
+      "size": [
+        30.0,
+        3.0
+      ],
+      "position": [
+        1216.975,
+        656.469
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -164.5585947319466
+      ],
+      "start_frame": 87,
+      "duration_frames": 63,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 62,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 62,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 62,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 62,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "route-arrow-arm-1",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.44313725490196076,
+          0.8470588235294118,
+          0.8156862745098039,
+          1.0
+        ],
+        "radius": 1.5
+      },
+      "size": [
+        30.0,
+        3.0
+      ],
+      "position": [
+        1213.502,
+        644.415
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        132.416047803663
+      ],
+      "start_frame": 87,
+      "duration_frames": 63,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 62,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 62,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -0.0
+              },
+              {
+                "frame": 62,
+                "value": -0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 62,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "new-york-pin",
+      "type": "shape",
+      "size": [
+        14,
+        14
+      ],
+      "position": [
+        476.4741333333333,
+        532.983375
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.9333333333333333,
+          0.9137254901960784,
+          0.8588235294117647,
+          1.0
+        ],
+        "stroke": {
+          "color": "#142332",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 28,
+                "value": 0
+              },
+              {
+                "frame": 36,
+                "value": 1
+              },
+              {
+                "frame": 149,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "new-york-label",
+      "type": "text",
+      "text": "NEW YORK",
+      "size": [
+        360,
+        50.599999999999994
+      ],
+      "position": [
+        476.4741333333333,
+        496.983375
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 22,
+        "min_font_size": 22,
+        "max_font_size": 22,
+        "fit_mode": "shrink_only",
+        "fill": "#EEE9DB",
+        "stroke": {
+          "color": "#10202B",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 28,
+                "value": 0
+              },
+              {
+                "frame": 40,
+                "value": 1
+              },
+              {
+                "frame": 149,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "london-pin",
+      "type": "shape",
+      "size": [
+        14,
+        14
+      ],
+      "position": [
+        1205.4076799999998,
+        426.726
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.44313725490196076,
+          0.8470588235294118,
+          0.8156862745098039,
+          1.0
+        ],
+        "stroke": {
+          "color": "#142332",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 91,
+                "value": 0
+              },
+              {
+                "frame": 99,
+                "value": 1
+              },
+              {
+                "frame": 149,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "london-label",
+      "type": "text",
+      "text": "LONDON",
+      "size": [
+        360,
+        50.599999999999994
+      ],
+      "position": [
+        1205.4076799999998,
+        390.726
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 22,
+        "min_font_size": 22,
+        "max_font_size": 22,
+        "fit_mode": "shrink_only",
+        "fill": "#71D8D0",
+        "stroke": {
+          "color": "#10202B",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 91,
+                "value": 0
+              },
+              {
+                "frame": 103,
+                "value": 1
+              },
+              {
+                "frame": 149,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "documentary_map_route_draw_v1.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

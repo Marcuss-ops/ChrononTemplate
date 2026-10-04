@@ -29,6 +29,7 @@
 #include "chrononmotion/templates/Templates.hpp"
 #include "chronontemplate/Presets.hpp"
 #include "chronontemplate/ApplePhrasePack.hpp"
+#include "chronontemplate/DocumentarySnapshotPack.hpp"
 #include "chronontemplate/ImportantPhrasePack.hpp"
 
 #include <cstdint>
@@ -82,6 +83,28 @@ namespace {
                             {"unit", definition.textAnimators.empty() ? "glyph" : definition.textAnimators.front().selector.unit},
                             {"enter", definition.enter}, {"tracks", tracks},
                             {"text_animators", animators}});
+        }
+        return rows;
+    }
+
+    json documentarySnapshotRecipes() {
+        json rows = json::array();
+        for (const auto& id : chronontemplate::documentaryRecipeIds()) {
+            const bool cameraOnly = id != "doc_title_foreground_photo_pass";
+            const bool multiImage = id == "doc_title_photo_stack" ||
+                                    id == "doc_title_filmstrip_handoff" ||
+                                    id == "doc_archive_crane_reveal";
+            rows.push_back({{"id", id}, {"family", "documentary_title_snapshot_v1"},
+                            {"requires_camera", true}, {"camera_only", cameraOnly},
+                            {"minimum_snapshots", multiImage ? 3 : 1}});
+        }
+        return rows;
+    }
+
+    json documentarySnapshotStyles() {
+        json rows = json::array();
+        for (const auto& id : chronontemplate::snapshotStyleIds()) {
+            rows.push_back({{"id", id}, {"implementation", "image_frame_and_grade"}});
         }
         return rows;
     }
@@ -540,6 +563,8 @@ int main(int argc, char** argv) {
         emitted["templates"] = packRows;
         emitted["final3d_presets"] = presetRows;
         emitted["native_phrase_style"] = nativePhraseStyle();
+        emitted["documentary_snapshot_recipes"] = documentarySnapshotRecipes();
+        emitted["documentary_snapshot_styles"] = documentarySnapshotStyles();
         emitted["entity_presentation"] = entityPresentation;
         emitted["motions"] = motions;
         emitted["overlay_presets"] = data["overlay_presets"];

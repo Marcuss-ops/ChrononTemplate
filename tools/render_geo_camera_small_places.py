@@ -132,6 +132,97 @@ def draw_spring_pin(frame: np.ndarray, point: tuple[int, int], progress: float,
         cv2.circle(frame, (cx, cy), r, (int(0 * a), int(240 * a), int(255 * a)), 2, cv2.LINE_AA)
 
 
+def draw_location_glow(frame: np.ndarray, point: tuple[int, int], progress: float,
+                       area_radius_px: int = 0) -> None:
+    """Soft cyan location beacon with an optional geographic-area halo."""
+    import cv2
+    import numpy as np
+    cx, cy = point
+    t = max(0.0, min(1.0, progress))
+    pulse = 0.5 + 0.5 * math.sin(t * math.tau * 1.7)
+    # Draw light on a separate layer so the core stays crisp while its glow is soft.
+    light = np.zeros_like(frame)
+    cv2.circle(light, (cx, cy), 30 + int(7 * pulse), (255, 190, 70), -1, cv2.LINE_AA)
+    light = cv2.GaussianBlur(light, (0, 0), 14)
+    cv2.addWeighted(frame, 1.0, light, 0.36, 0, dst=frame)
+    if area_radius_px > 2:
+        ring = np.zeros_like(frame)
+        cv2.circle(ring, (cx, cy), area_radius_px, (180, 110, 30), 3, cv2.LINE_AA)
+        cv2.circle(ring, (cx, cy), area_radius_px, (255, 150, 45), 3, cv2.LINE_AA)
+        ring = cv2.GaussianBlur(ring, (0, 0), 10)
+        cv2.addWeighted(frame, 1.0, ring, 0.22, 0, dst=frame)
+        cv2.circle(frame, (cx, cy), area_radius_px, (255, 175, 70), 2, cv2.LINE_AA)
+    # Small luminous center with a white-hot center and restrained cyan edge.
+    cv2.circle(frame, (cx, cy), 11, (255, 170, 45), -1, cv2.LINE_AA)
+    cv2.circle(frame, (cx, cy), 7, (255, 245, 225), -1, cv2.LINE_AA)
+    cv2.circle(frame, (cx, cy), 3, (255, 255, 255), -1, cv2.LINE_AA)
+
+
+MAP_LABEL_ANIMATIONS = (
+    "gentle_fade", "soft_glow", "clean_fade", "word_soft_fade",
+    "slow_fade", "quiet_bloom", "quick_fade", "silky_fade",
+    "subtle_halo", "cinematic_fade",
+)
+
+
+def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
+                          progress: float, animation: str = "gentle_fade") -> None:
+    """Draw a fixed, centered map label with a restrained animated entrance."""
+    import cv2
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFont
+    label = " ".join(str(text or "").split()).upper()
+    if not label or animation == "none":
+        return
+    if animation not in MAP_LABEL_ANIMATIONS:
+        raise ValueError(f"unknown map label animation: {animation}")
+    h, w = frame.shape[:2]
+    cx, cy = point
+    # Each treatment changes only the opacity/glow timing. The type remains
+    # the same size and at the same screen coordinate for every frame.
+    timing = {
+        "gentle_fade": (0.50, 0.23, 0.28), "soft_glow": (0.52, 0.18, 0.32),
+        "clean_fade": (0.49, 0.24, 0.22), "word_soft_fade": (0.51, 0.26, 0.30),
+        "slow_fade": (0.50, 0.20, 0.26), "quiet_bloom": (0.48, 0.22, 0.34),
+        "quick_fade": (0.53, 0.18, 0.24), "silky_fade": (0.50, 0.25, 0.28),
+        "subtle_halo": (0.51, 0.22, 0.30), "cinematic_fade": (0.49, 0.20, 0.26),
+    }
+    start, duration, glow_strength = timing[animation]
+    t = max(0.0, min(1.0, (progress - start) / duration))
+    ease = t * t * (3.0 - 2.0 * t)
+    alpha = ease
+    glow_pulse = 0.85 + 0.15 * math.sin(math.pi * ease)
+    if not label or alpha <= 0.005:
+        return
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 68)
+    bbox = font.getbbox(label, stroke_width=3)
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    # Anchor the label under the beacon, center aligned, with no per-frame
+    # position or scale changes.
+    x = max(22, min(w - tw - 22, cx - tw // 2))
+    y = min(h - th - 12, cy + 70)
+    pad = 34
+    x0, y0 = max(0, x - pad), max(0, y - pad)
+    x1, y1 = min(w, x + tw + pad), min(h, y + th + pad)
+    roi = frame[y0:y1, x0:x1]
+    if roi.size == 0:
+        return
+    label_image = Image.new("RGBA", (roi.shape[1], roi.shape[0]), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(label_image)
+    local = (x - x0 - bbox[0], y - y0 - bbox[1])
+    draw.text(local, label, font=font, fill=(255, 255, 255, 255),
+              stroke_width=4, stroke_fill=(0, 0, 0, 255))
+    alpha_mask = np.asarray(label_image)[:, :, 3]
+    glow_layer = np.zeros_like(roi)
+    glow_layer[alpha_mask > 0] = (255, 185, 95)
+    blur = cv2.GaussianBlur(glow_layer, (0, 0), 7)
+    cv2.addWeighted(roi, 1.0, blur, glow_strength * glow_pulse * alpha, 0, dst=roi)
+    overlay = np.asarray(label_image)[:, :, :3][:, :, ::-1].copy()
+    mask = (alpha_mask.astype(np.float32) / 255.0 * alpha)[:, :, None]
+    roi[:] = np.clip(roi.astype(np.float32) * (1.0 - mask) + overlay * mask,
+                     0, 255).astype(np.uint8)
+
+
 def draw_route_glow(frame: np.ndarray, frm: tuple[float, float], to: tuple[float, float],
                     anchor: tuple[float, float], zoom: float, reveal: float) -> None:
     """Glow sprites walking the straight mercator line from frm to to."""
