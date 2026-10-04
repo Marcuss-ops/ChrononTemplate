@@ -315,7 +315,9 @@ namespace chronontemplate {
                 // Keep text in front of the image plane. Equal-depth native
                 // text and image quads can z-fight or let the image cover the
                 // caption when perspective makes their projections overlap.
-                Vector3 captionOffset(0.f, snapshot.anchor.halfHeight + title.fontSize * 0.62f,
+                const float captionClearance = shot.recipe == DocumentaryRecipe::PhotoStack
+                                                   ? 1.30f : 0.62f;
+                Vector3 captionOffset(0.f, snapshot.anchor.halfHeight + title.fontSize * captionClearance,
                                       4.f);
                 captionOffset.applyQuaternion(cardAnchor.orientation);
                 caption.position(cardAnchor.center.x + captionOffset.x,
@@ -475,7 +477,7 @@ namespace chronontemplate {
             const float captionHalfWidth = captionSize * 0.65f *
                 static_cast<float>(snapshot.caption.size()) * 0.5f;
             const float captionCenterY = snapshot.anchor.center.y +
-                snapshot.anchor.halfHeight + title.fontSize * 0.62f;
+                snapshot.anchor.halfHeight + title.fontSize * 1.30f;
             const float left = std::min(snapshot.anchor.center.x - snapshot.anchor.halfWidth,
                                         snapshot.anchor.center.x - captionHalfWidth);
             const float right = std::max(snapshot.anchor.center.x + snapshot.anchor.halfWidth,
@@ -493,7 +495,7 @@ namespace chronontemplate {
             const float verticalDistance = finalAnchor.halfHeight / tanHalfFov;
             const float horizontalDistance = finalAnchor.halfWidth /
                 (tanHalfFov * canvas.x / canvas.y);
-            finalDistance = std::max(shot.cameraDistance,
+            finalDistance = std::max(shot.cameraDistance * 1.25f,
                                      std::max(verticalDistance, horizontalDistance) * 1.10f);
         }
         const Vector3 titleCam = cameraAt(shot.title, shot.cameraDistance);
