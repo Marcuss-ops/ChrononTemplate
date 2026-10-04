@@ -107,107 +107,54 @@ def make_plate(kind: str, index: int, portrait: Image.Image) -> Path:
     pdir = ASSET_ROOT / "assets/plates"
     pdir.mkdir(parents=True, exist_ok=True)
     plate = pdir / f"plate-{index:02d}.jpg"
-    im = dark_board(30 + index, green=kind in {"map", "map_portrait"}).convert("RGBA")
+    # Keep the reference's editorial photo + name idea, with all decorative
+    # plate copy removed so the person's name is the only text in the frame.
+    palettes = [
+        ((235, 233, 223), (32, 33, 34)), ((9, 12, 16), (218, 224, 230)),
+        ((8, 8, 9), (92, 169, 245)), ((11, 20, 17), (192, 213, 193)),
+        ((17, 18, 20), (224, 226, 219)), ((15, 15, 16), (182, 180, 173)),
+        ((224, 222, 214), (32, 33, 34)), ((10, 10, 11), (241, 212, 207)),
+        ((14, 15, 16), (183, 181, 172)), ((9, 24, 17), (189, 211, 195)),
+    ]
+    idx = index - 1
+    bg, accent = palettes[idx]
+    im = Image.new("RGBA", (W, H), (*bg, 255))
     d = ImageDraw.Draw(im, "RGBA")
-    # The portrait remains image content, while all captions stay as editable Chronon text.
-    if kind == "paper":
-        shot = cover_portrait(portrait, (830, H), .48)
-        im.alpha_composite(shot, (0, 0))
-        d.rectangle((830, 0, 842, H), fill=(226, 223, 213, 255))
-        torn_strip(d, (838, 394, 1919, 672), PAPER, 104)
-        title_for(d, "U.S. PRESIDENT / PROFILE", (920, 274), font("Space-Grotesk.ttf", 28), (225, 223, 214, 230))
-        title_for(d, "THE AMERICAN PROFILE", (980, 713), font("Space-Grotesk.ttf", 24), (188, 186, 177, 235))
-    elif kind == "newsroom":
-        # Layered paper desks and soft monochrome newsroom silhouettes evoke a wire-service still.
-        d.rectangle((0, 0, W, H), fill=(12, 12, 12, 215))
-        for y in (90, 250, 410, 555):
-            d.rectangle((90, y, 1820, y + 92), fill=(38, 38, 36, 255), outline=(78, 77, 72, 255), width=2)
-            for x in range(130, 1750, 135):
-                d.line((x, y + 28, x + 90, y + 28), fill=(95, 92, 85, 255), width=3)
-        shot = cover_portrait(portrait, (430, 560), .52)
-        im.alpha_composite(shot, (745, 75))
-        d.rounded_rectangle((735, 65, 1185, 645), radius=9, outline=(245, 243, 230, 185), width=4)
-        title_for(d, "THE PUBLIC RECORD", (960, 32), font("Space-Grotesk.ttf", 22), (220, 217, 207, 245), "mm")
-        d.line((500, 812, 1420, 812), fill=(235, 232, 222, 145), width=2)
-    elif kind == "card":
-        d.rectangle((0, 0, W, H), fill=(6, 6, 7, 255))
-        for x in range(12, W, 8):
-            for y in range(12, H, 8):
-                d.ellipse((x, y, x + 1, y + 1), fill=(170, 170, 170, 32))
-        d.rounded_rectangle((104, 71, 780, 1010), radius=40, fill=(211, 210, 201, 255))
-        shot = cover_portrait(portrait, (650, 920), .52)
-        im.alpha_composite(shot, (117, 80))
-        d.line((925, 518, 1665, 518), fill=(85, 163, 241, 250), width=10)
-        title_for(d, "PROFILE / 01", (930, 290), font("Space-Grotesk.ttf", 25), (187, 187, 179, 240))
-        title_for(d, "UNITED STATES", (930, 600), font("Space-Grotesk.ttf", 26), (196, 196, 188, 230))
-    elif kind in {"map", "map_portrait"}:
-        # A restrained locator map with New York called out (Trump's birthplace); no invented case marker.
-        d.rectangle((0, 0, W, H), fill=(7, 31, 20, 255))
-        for x in range(0, W, 80):
-            d.line((x, 0, x, H), fill=(164, 191, 161, 22), width=1)
-        for y in range(0, H, 80):
-            d.line((0, y, W, y), fill=(164, 191, 161, 22), width=1)
-        usa = [(174,330),(285,245),(418,265),(510,223),(676,263),(782,300),(900,265),(1000,330),(1112,330),(1226,280),(1370,325),(1484,356),(1585,380),(1675,438),(1610,532),(1534,562),(1462,640),(1380,670),(1270,732),(1150,722),(1075,644),(950,602),(857,555),(770,610),(690,580),(610,620),(518,543),(420,525),(340,466),(250,465)]
-        d.polygon(usa, fill=(32, 62, 40, 255), outline=(151, 178, 144, 180))
-        for i in range(3):
-            d.line([(235+i*24, 377+i*13),(460+i*12, 326+i*20),(718,343+i*8),(1010,384+i*5),(1320,421+i*9),(1550-i*25,472+i*8)], fill=(180, 202, 161, 35), width=2)
-        d.ellipse((1470, 366, 1500, 396), fill=(220, 75, 66, 230))
-        d.ellipse((1458, 354, 1512, 408), outline=(230, 112, 92, 150), width=3)
-        d.line((1490, 382, 1590, 290), fill=(221, 219, 207, 200), width=2)
-        title_for(d, "QUEENS, NEW YORK", (1600, 266), font("Space-Grotesk.ttf", 22), (230, 228, 217, 240))
-        if kind == "map_portrait":
-            shot = cover_portrait(portrait, (350, 460), .52)
-            im.alpha_composite(shot, (1220, 568))
-            d.rectangle((1205, 553, 1580, 1040), outline=(232, 231, 219, 160), width=3)
-    elif kind == "split":
-        d.rectangle((0, 0, 959, H), fill=(7, 8, 9, 255))
-        d.rectangle((960, 0, W, H), fill=(7, 39, 24, 255))
-        shot_a = cover_portrait(portrait, (725, 550), .45)
-        shot_b = cover_portrait(portrait, (725, 550), .66).transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-        im.alpha_composite(shot_a, (115, 115))
-        im.alpha_composite(shot_b, (1080, 115))
-        title_for(d, "ARCHIVE / A", (478, 62), font("Space-Grotesk.ttf", 24), (241, 238, 226, 250), "mm")
-        title_for(d, "ARCHIVE / B", (1435, 62), font("Space-Grotesk.ttf", 24), (241, 238, 226, 250), "mm")
-        d.line((960, 0, 960, H), fill=(232, 231, 223, 70), width=2)
-    elif kind == "chalk":
-        shot = cover_portrait(portrait, (900, H), .51)
-        im.alpha_composite(shot, (0, 0))
-        for i in range(6):
-            y = 198 + i * 118
-            d.line((980, y, 1770, y), fill=(201, 198, 185, 24 + i * 3), width=2)
-        title_for(d, "CASE NOTES / PROFILE", (1010, 249), font("Space-Grotesk.ttf", 25), (202, 200, 189, 245))
-    elif kind == "frontpage":
-        im = Image.new("RGBA", (W, H), (202, 199, 188, 255))
-        d = ImageDraw.Draw(im, "RGBA")
-        d.rectangle((0, 0, W, 120), fill=(20, 21, 22, 255))
-        for x in range(60, W - 40, 44):
-            d.line((x, 180, x, 1025), fill=(33, 32, 29, 24), width=1)
-        shot = cover_portrait(portrait, (670, 840), .5)
-        im.alpha_composite(shot, (1140, 166))
-        torn_strip(d, (0, 590, 1920, 865), PAPER, 241)
-        title_for(d, "THE AMERICAN PROFILE", (85, 132), font("Space-Grotesk.ttf", 28), (229, 226, 216, 235))
-        title_for(d, "PERSONALITY / PUBLIC RECORD", (105, 920), font("Space-Grotesk.ttf", 23), (55, 53, 50, 220))
-    elif kind == "ink":
-        d.rectangle((0, 0, W, H), fill=(9, 9, 10, 255))
-        shot = cover_portrait(portrait, (980, H), .5)
-        # A low-strength red/cyan offset keeps the reference's analog registration fringe restrained.
-        warm = shot.copy(); warm.putalpha(warm.getchannel("A").point(lambda v: v * 35 // 255))
-        im.alpha_composite(warm, (-12, 0)); im.alpha_composite(shot, (0, 0))
-        d.rectangle((0, 0, 960, H), fill=(0, 0, 0, 42))
-        d.rectangle((970, 0, 980, H), fill=(173, 55, 60, 255))
-        for x in range(1040, W, 12):
-            d.line((x, 0, x, H), fill=(230, 230, 220, 10), width=1)
-    elif kind == "dossier":
-        d.rectangle((0, 0, W, H), fill=(13, 14, 15, 255))
-        d.rounded_rectangle((115, 126, 1145, 953), radius=8, fill=(190, 187, 176, 24), outline=(226, 223, 211, 90), width=2)
-        d.rounded_rectangle((145, 156, 1175, 983), radius=8, fill=(226, 224, 215, 255))
-        shot = cover_portrait(portrait, (1000, 810), .5)
-        im.alpha_composite(shot, (160, 164))
-        d.rectangle((1240, 140, 1248, 900), fill=(175, 54, 59, 235))
-        title_for(d, "BIOGRAPHICAL FILE", (1285, 198), font("Space-Grotesk.ttf", 24), (190, 188, 179, 240))
-        title_for(d, "45 / 47", (1285, 827), font("Space-Grotesk.ttf", 74), (233, 230, 218, 245))
+    photo_left = idx % 2 == 0
+    # Two centered portrait studies place the name directly beneath the photo.
+    if idx in (2, 6):
+        size = (660, 760)
+        shot = cover_portrait(portrait, size, .5)
+        im.alpha_composite(shot, ((W-size[0])//2, 74))
+        d.rectangle((590, 865, 1330, 872), fill=(*accent, 225))
     else:
-        raise ValueError(kind)
+        photo_x = 108 if photo_left else 1152
+        size = (660, 900)
+        shot = cover_portrait(portrait, size, .5)
+        im.alpha_composite(shot, (photo_x, 90))
+        if idx in (0, 1):
+            d.rectangle((photo_x + size[0] + (20 if photo_left else -30), 90,
+                         photo_x + size[0] + (30 if photo_left else -20), 990), fill=(*accent, 255))
+        elif idx in (4, 5):
+            d.rounded_rectangle((photo_x-12, 78, photo_x+size[0]+12, 1002), radius=12,
+                                outline=(*accent, 175), width=3)
+        elif idx == 7:
+            d.rectangle((photo_x + size[0] + (18 if photo_left else -28), 90,
+                         photo_x + size[0] + (28 if photo_left else -18), 990), fill=(*accent, 240))
+        elif idx == 8:
+            d.rectangle((photo_x-18, 90, photo_x+size[0]+18, 990), outline=(*accent, 130), width=2)
+        # restrained background texture and a small color cue, with no labels
+        # or biographical copy baked into the image.
+        if idx == 3:
+            for y in range(90, 990, 42):
+                d.line((photo_x + size[0] + 110 if photo_left else 120,
+                        y, 960 if photo_left else photo_x-110, y), fill=(*accent, 24), width=1)
+        elif idx == 9:
+            d.ellipse((photo_x + size[0]//2-5, 528, photo_x + size[0]//2+5, 538), fill=(*accent, 220))
+    if idx == 2:
+        for x in range(0, W, 12):
+            for y in range(0, H, 12):
+                d.ellipse((x, y, x+1, y+1), fill=(170, 170, 170, 22))
     # Film grain and vignette bind the styles into one archival package.
     im = grain(im, 4, 90 + index)
     im.convert("RGB").save(plate, quality=93, subsampling=0, optimize=True)
@@ -251,12 +198,12 @@ def build_plan(index: int) -> dict:
     motion_id, label, fontname, fill, secondary, kind = MOTIONS[index]
     plate = make_plate(kind, index + 1, grayscale_photo())
     screen_titles = [
-        (1374, 526, 1080, 180), (960, 760, 1390, 145), (1375, 496, 1030, 150),
-        (760, 720, 1060, 160), (960, 780, 1500, 120), (1390, 554, 1030, 180),
-        (930, 715, 1760, 200), (1425, 532, 880, 180), (1510, 544, 830, 150),
-        (730, 787, 950, 156),
+        (1300, 500, 1000, 180), (620, 500, 1000, 145), (960, 930, 1000, 150),
+        (620, 500, 1000, 160), (1300, 500, 1000, 150), (620, 500, 1000, 160),
+        (960, 930, 1000, 170), (620, 500, 1000, 160), (1300, 500, 1000, 160),
+        (620, 500, 1000, 160),
     ]
-    title_sizes = [104, 118, 110, 112, 104, 92, 122, 110, 108, 110]
+    title_sizes = [90, 90, 96, 94, 90, 88, 98, 92, 92, 90]
     x, screen_y, tw, th = screen_titles[index]
     y = H - screen_y
     # Headline fill is ink on torn newsprint, warm white on charcoal elsewhere.
@@ -285,9 +232,6 @@ def build_plan(index: int) -> dict:
                        title_sizes[index], fill,
                        MOTION_TRACKS[index], glow=BLUE if index == 2 else None,
                        text_animators=title_animators),
-            text_layer("profile-role", "45TH & 47TH U.S. PRESIDENT", (x, y - 160),
-                       (tw, 60), "Space-Grotesk.ttf", 27, subfill,
-                       [kf("opacity", [(0, 0), (16 + index % 5, 1)])]),
         ],
         "output": {"path": f"entity_caption_{motion_id}.mp4", "format": "mp4", "codec": "h264"},
     }
@@ -357,7 +301,7 @@ def contact_sheet() -> Path:
     sheet = Image.new("RGB", (1940, 5 * 572 + 75), (8, 9, 10))
     draw = ImageDraw.Draw(sheet)
     title_font = ImageFont.truetype(str(ASSET_ROOT / "assets/fonts/Space-Grotesk.ttf"), 22)
-    draw.text((28, 18), "CHRONONTEMPLATE / DONALD TRUMP PROFILE — ARCHIVAL MOTION STUDIES", font=title_font, fill=(238, 235, 224))
+    draw.text((28, 18), "DONALD TRUMP · 10 VARIANTI MODERNE", font=title_font, fill=(238, 235, 224))
     for i, (motion_id, label, *_rest) in enumerate(MOTIONS):
         clip = OUT / f"entity_caption_{motion_id}.mp4"
         raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", "2.0", "-i", str(clip), "-frames:v", "1", "-f", "image2pipe", "-vcodec", "png", "-"], check=True, stdout=subprocess.PIPE).stdout

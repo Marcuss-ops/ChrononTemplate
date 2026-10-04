@@ -117,9 +117,13 @@ narrative handoff while ChrononMotion3D evaluates the camera path.
   and reverse-facing caption from the frame-49 turn sample; the photo is inside
   the viewport and the frame-53 settle is sharp. PhotoStack now crossfades one
   caption per camera waypoint and its final camera target includes the caption
-  envelope; the latest connected frame-120 render still does not show that
-  caption, so its final visual placement remains open. Continue sampling all
-  other recipe transitions.
+  envelope; the no-shutter connected frame-120 diagnostic now shows the final
+  `ROME, 1986` caption fully legible above the last card, with the card and text
+  inside the viewport (`out/documentary_snapshot_v1/photo_stack_caption_fit_v5.png`).
+  The full temporal-shutter Vulkan render is still pending: Chronon3D currently
+  rejects a native SourceOver composite during this recipe, and the error path
+  is being instrumented to expose the backend's specific failure. Continue
+  sampling all other recipe transitions.
   Earlier frame-53 sheet is under
   `out/documentary_snapshot_v1/recipe_handoff_v1/`. Split-depth focus endpoints
   and the Motion→RenderPlan DOF mapping have been corrected. Focus-drop opening
@@ -221,11 +225,14 @@ narrative handoff while ChrononMotion3D evaluates the camera path.
     truth: `out/documentary_snapshot_v1/reveal90_caption_timing_v2/`. PhotoStack
     caption handoff is checked at its second waypoint (1,594 documentary
     checks pass); connected frame 80 shows one active label. Its frame-120
-    caption is still absent despite the expanded camera target, so final
-    PhotoStack caption visibility must be corrected before review closes.
+    caption is still absent in the earlier v3 diagnostic; the updated v5
+    no-shutter connected frame now confirms it is legible and within frame.
+    Full-shutter Vulkan visual review remains open while the native composite
+    failure is diagnosed.
     Artifacts: `out/documentary_snapshot_v1/photo_stack_caption_handoff_v1/`,
     `out/documentary_snapshot_v1/photo_stack_caption_fit_v2/`, and the
-    no-shutter diagnostic `out/documentary_snapshot_v1/photo_stack_caption_fit_v3.png`.
+    no-shutter diagnostics `out/documentary_snapshot_v1/photo_stack_caption_fit_v3.png`
+    and `out/documentary_snapshot_v1/photo_stack_caption_fit_v5.png`.
 16. [ ] Run the V1 verification suite across all recipes: static title
     transforms, anchor framing, exact transition boundaries, deterministic
     direct/sequential frame sampling, safe frame, image aspect ratio/crop,
@@ -238,6 +245,16 @@ narrative handoff while ChrononMotion3D evaluates the camera path.
 17. [ ] Retry the full 20-second torture render on a performant multi-layer
     render path, then inspect the opening, all handoffs, and final archive
     layout. The current 601-frame, 68-layer plan validates in Chronon3D.
+18. [ ] Make the connected documentary render produce visible pixels through
+    the strict Vulkan path, then inspect and publish a GPU-rendered frame/video.
+    The current 1920x1080 PhotoStack plan can lose the Vulkan device when its
+    radial light-leak shape or image EffectStack falls back through CPU readback.
+    With those optional effects removed, a raw Vulkan job exits successfully but
+    its output is fully transparent (all RGBA bytes are zero); do not treat that
+    output as visual evidence. The debug trace identifies the unsupported radial
+    Rect as `ShapeType::Rect` (type 1), while `synchronize_native_output` sees
+    no retained surface handle on the frame output. Investigate native output
+    residency/readback and unsupported-effect policy before the Drive upload.
 
 ### Completed actions
 
@@ -298,6 +315,7 @@ narrative handoff while ChrononMotion3D evaluates the camera path.
 - Snap-down contact sheet around the handoff: `out/documentary_snapshot_v1/doc_title_snap_down_review_v1.png`
 - Focus-drop render: `out/documentary_snapshot_v1/doc_title_focus_drop_canary_v1.mp4`
 - Native focus-drop review (frames 0, 45, 53, 120): `out/documentary_snapshot_v1/doc_title_focus_drop_review_native_focus_v1.png`
+- GPU diagnostic artifacts (not visual deliverables): `out/documentary_snapshot_v1/photo_stack_gpu_*`, `out/documentary_snapshot_v1/snap_down_gpu_native_minimal_*`. Vulkan build succeeds; full-quality GPU frames remain unverified because device-loss/transparent-output cases are reproduced.
 - Connected adapter canary RenderPlan: `out/documentary_snapshot_v1/adapter_canary/documentary_snapshot_adapter_canary_v1.plan.json`
 - Connected adapter pixel-truth frames 0, 45, 53, and 120: `out/documentary_snapshot_v1/adapter_canary/documentary_snapshot_adapter_frame_*.png`
 - Connected Fill frames: `out/documentary_snapshot_v1/adapter_fill/documentary_snapshot_adapter_frame_*.png`

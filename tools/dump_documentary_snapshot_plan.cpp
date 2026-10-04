@@ -143,6 +143,44 @@ void addCameraSynchronizedLeak(RenderPlan& plan, int durationFrames) {
     leak.animation = std::move(animation);
     plan.layers.push_back(std::move(leak));
 }
+
+void finalizeTortureFocusTrack(TemplateScene& scene, int durationFrames,
+                               int focusDropStart, int focusDropEnd) {
+    auto& rig = scene.camera().rig();
+    const Track<float> authoredFocus = rig.focusDistanceTrack();
+    std::vector<std::pair<float, float>> samples;
+    samples.reserve(static_cast<std::size_t>(durationFrames + 1));
+    for (int frame = 0; frame <= durationFrames; ++frame) {
+        const float time = static_cast<float>(frame) / scene.fps();
+        const CameraPose pose = rig.sample(time);
+        // FocusDrop intentionally racks across the title and photo depth
+        // planes. Other shots focus on their resolved camera target. Rebuild
+        // after all twelve camera paths have been authored so later paths
+        // cannot leave stale focus samples at shared shot boundaries.
+        float distance = frame >= focusDropStart && frame <= focusDropEnd
+            ? authoredFocus.sample(time)
+            : pose.position.distanceTo(pose.target);
+        Vector3 forward(0.f, 0.f, -1.f);
+        forward.applyQuaternion(pose.orientation);
+        forward.normalize();
+        const float focusPlaneZ = pose.position.z + forward.z * distance;
+        if (focusPlaneZ > 0.f) {
+            if (std::fabs(forward.z) <= 1e-4f)
+                throw std::runtime_error("documentary torture focus cannot reach the supported scene depth");
+            // RenderPlan's current DOF contract models a non-negative world-Z
+            // focus plane. The title is authored on z=0, so keep tiny camera
+            // target overshoot on the visible side of that title plane.
+            distance = (-0.001f - pose.position.z) / forward.z;
+        }
+        if (!std::isfinite(distance) || distance <= 0.f)
+            throw std::runtime_error("documentary torture sequence produced an invalid focus distance");
+        samples.emplace_back(time, distance);
+    }
+    auto& focus = rig.focusDistanceTrack();
+    focus.clear();
+    for (const auto& [time, distance] : samples)
+        focus.add(time, distance, Easing::linear());
+}
 } // namespace
 
 int main(int argc, char** argv) {
@@ -300,6 +338,7 @@ int main(int argc, char** argv) {
         }
         recipeId = "documentary_title_snapshot_torture";
         styleId = "seven_styles";
+        finalizeTortureFocusTrack(scene, duration, 4 * 50, 4 * 50 + 50);
     } else {
         shot.duration = duration;
         shot.titleHoldFrames = 45;

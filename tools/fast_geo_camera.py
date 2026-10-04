@@ -26,7 +26,9 @@ import math
 import os
 import subprocess
 import sys
+import threading
 import time
+from collections import deque
 from multiprocessing import get_context
 from pathlib import Path
 
@@ -97,25 +99,63 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
            "-r", str(builder.FPS), "-i", "-",
            "-c:v", "libx264", "-preset", preset, "-crf", str(crf),
            "-pix_fmt", "yuv420p", str(out)]
-    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
     total = builder.TOTAL_FRAMES
     blocks = [(f0, min(f0 + block, total)) for f0 in range(0, total, block)]
     ctx = get_context("fork")
     globals()["_S"] = {"builder": builder, "sampler": sampler}
-    t0 = time.time()
+    t0 = time.perf_counter()
     fallback_frames = 0
-    with ctx.Pool(processes=workers, initializer=_worker_init) as pool:
-        for data, fb in pool.imap(_render_block, blocks):  # submission order
-            proc.stdin.write(data)
-            fallback_frames += fb
-    produced = time.time() - t0
-    proc.stdin.close()
-    proc.wait()
-    elapsed = time.time() - t0
+    stderr_tail = deque(maxlen=2)
+
+    def drain_stderr() -> None:
+        while True:
+            chunk = proc.stderr.read(4096)
+            if not chunk:
+                return
+            stderr_tail.append(chunk)
+
+    stderr_thread = threading.Thread(target=drain_stderr, daemon=True)
+    stderr_thread.start()
+    try:
+        with ctx.Pool(processes=workers, initializer=_worker_init) as pool:
+            for data, fb in pool.imap(_render_block, blocks):  # submission order
+                proc.stdin.write(data)
+                fallback_frames += fb
+        produced = time.perf_counter() - t0
+        try:
+            proc.stdin.close()
+        except BrokenPipeError:
+            # FFmpeg may exit before consuming all frames; preserve its
+            # diagnostic/status as the primary failure below.
+            pass
+        stderr_thread.join()
+        return_code = proc.wait()
+    except BaseException:
+        if proc.stdin and not proc.stdin.closed:
+            try:
+                proc.stdin.close()
+            except BrokenPipeError:
+                pass
+        proc.kill()
+        proc.wait()
+        stderr_thread.join()
+        raise
+    elapsed = time.perf_counter() - t0
+    if return_code != 0:
+        raise RuntimeError(
+            f"ffmpeg exited with status {return_code}: "
+            f"{b''.join(stderr_tail).decode('utf-8', errors='replace')}"
+        )
+    if not out.is_file() or out.stat().st_size <= 0:
+        raise RuntimeError("ffmpeg reported success but produced no non-empty output")
     stats = {"frames": total, "production_s": produced, "total_s": elapsed,
              "production_fps": total / produced, "total_fps": total / elapsed,
              "bytes": out.stat().st_size, "out": str(out),
+             # Rendering and encoding overlap while raw frames are streamed;
+             # this is only the post-production tail, not exclusive encoder CPU.
+             "post_frame_tail_s": max(0.0, elapsed - produced),
              "engine_fallback_frames": fallback_frames}
     print(f"frame production: {produced:.2f}s ({stats['production_fps']:.1f} FPS) | "
           f"total incl. encode: {elapsed:.2f}s ({stats['total_fps']:.1f} FPS, "
