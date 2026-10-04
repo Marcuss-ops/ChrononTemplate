@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <deque>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -74,17 +75,37 @@ namespace chronontemplate {
         float cornerRadius{0.f};
         std::string borderColor{};
         float borderWidth{0.f};
+        float saturation{1.f};
+        float contrast{1.f};
+        float grain{0.f};
+        float vignette{0.f};
+        std::uint32_t grainSeed{0};
     };
 
     struct ImageSpec {
         std::string path{};
         std::string name{};
         ImageFrameStyle frame{};
+        ImageFitMode fit{ImageFitMode::Contain};
+        chrononmotion::Vector2 targetSize{};
+        ImageCrop crop{};
+    };
+
+    struct ShapeSpec {
+        chrononmotion::Vector2 size{};
+        std::string fillColor{"#FFFFFF"};
+        std::string name{};
+        float cornerRadius{0.f};
     };
 
     struct VideoSpec {
         std::string path{};
         std::string name{};
+    };
+
+    struct TemporalMotionBlurSettings {
+        float shutterAngle{180.f};
+        std::uint32_t samples{4};
     };
 
     class TemplateScene;
@@ -112,9 +133,17 @@ namespace chronontemplate {
         LayerHandle& animate(const SlideIn& motion);
         LayerHandle& animate(const SpinXYZ& motion);
 
-    private:
         [[nodiscard]] chrononmotion::motion::Layer& layer();
+        [[nodiscard]] const chrononmotion::motion::Layer& layer() const;
 
+        LayerHandle& animatePosition(int inFrame, int duration,
+                                     const chrononmotion::Vector3& startOffset,
+                                     const chrononmotion::motion::Easing& easing = chrononmotion::motion::Easing::easeOut());
+        LayerHandle& animateOpacity(int inFrame, int duration,
+                                    float from, float to,
+                                    const chrononmotion::motion::Easing& easing = chrononmotion::motion::Easing::easeOut());
+
+    private:
         TemplateScene* m_scene{nullptr};
         MotionLayerId m_id{0};
     };
@@ -159,6 +188,7 @@ namespace chronontemplate {
 
         [[nodiscard]] LayerHandle& text(const TextSpec& spec);
         [[nodiscard]] LayerHandle& image(const ImageSpec& spec);
+        [[nodiscard]] LayerHandle& shape(const ShapeSpec& spec);
         [[nodiscard]] LayerHandle& video(const VideoSpec& spec);
 
         /// A null/controller layer: it owns no content and animates its children.
@@ -176,6 +206,11 @@ namespace chronontemplate {
 
         [[nodiscard]] chrononmotion::motion::MotionScene& motion() { return m_scene; }
         [[nodiscard]] chrononmotion::motion::CameraRig& cameraRig() { return m_camera; }
+        TemplateScene& setTemporalMotionBlur(float shutterAngle = 180.f,
+                                             std::uint32_t samples = 4);
+        [[nodiscard]] const std::optional<TemporalMotionBlurSettings>& temporalMotionBlur() const {
+            return m_temporalMotionBlur;
+        }
         [[nodiscard]] const BindingRegistry& bindings() const { return m_bindings; }
         [[nodiscard]] MotionBridge& bridge() { return m_bridge; }
 
@@ -200,6 +235,7 @@ namespace chronontemplate {
 
         chrononmotion::motion::MotionScene m_scene;
         chrononmotion::motion::CameraRig m_camera;
+        std::optional<TemporalMotionBlurSettings> m_temporalMotionBlur;
         BindingRegistry m_bindings{};
         MotionBridge m_bridge;
 

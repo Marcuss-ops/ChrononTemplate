@@ -12,6 +12,15 @@
 
 namespace chronontemplate {
 
+    /// Map a measured host image request to the native image layer payload.
+    /// The Motion lowerer supplies transform, identity and camera animation.
+    [[nodiscard]] chronon3d::render_plan::LayerPlan makeImageLayerPlan(
+            const ImageRequest& request, const ContentHandle& handle);
+
+    /// Map a measured host shape request to a native procedural rectangle.
+    [[nodiscard]] chronon3d::render_plan::LayerPlan makeShapeLayerPlan(
+            const ShapeRequest& request, const ContentHandle& handle);
+
     /// The content owner supplies renderer-facing style/asset data by template
     /// layer id. Motion and camera data are lowered from the scene itself.
     /// Every bound content layer must have exactly one entry; controller layers

@@ -34,7 +34,12 @@ set(CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI "${CMAKE_CURRENT_SOURCE_DIR}/../Chron
     CACHE FILEPATH "Chronon3D CLI used to validate the editorial benchmark plans")
 set(CHRONONTEMPLATE_CHRONON3D_LIBRARY "" CACHE FILEPATH
     "Chronon3D library used by the optional live adapter test")
-set(CHRONONTEMPLATE_CHRONONMOTION_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ChrononMotion3d"
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ChrononMotion3D")
+    set(CHRONONTEMPLATE_CHRONONMOTION_DEFAULT "${CMAKE_CURRENT_SOURCE_DIR}/../ChrononMotion3D")
+else()
+    set(CHRONONTEMPLATE_CHRONONMOTION_DEFAULT "${CMAKE_CURRENT_SOURCE_DIR}/../ChrononMotion3d")
+endif()
+set(CHRONONTEMPLATE_CHRONONMOTION_DIR "${CHRONONTEMPLATE_CHRONONMOTION_DEFAULT}"
     CACHE PATH "ChrononMotion checkout used when the chrononmotion target is not already defined")
 set(CHRONONTEMPLATE_CHRONONMOTION_PREBUILT_LIBRARY "" CACHE FILEPATH
     "Prebuilt libchrononmotion.a; when set, the core is not rebuilt from source")
@@ -87,16 +92,19 @@ add_library(chronontemplate STATIC
         src/chronontemplate/ChrononRenderAdapter.cpp
         src/chronontemplate/TemplateScene.cpp
         src/chronontemplate/PlanLowering.cpp
+        src/chronontemplate/RenderPlanContentHost.cpp
         # Optional offline RenderPlan bridge lives outside the Motion core.
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
         src/chronontemplate/ImageAnimationPack.cpp
         src/chronontemplate/TitleCameraPack.cpp
+        src/chronontemplate/DocumentarySnapshotPack.cpp
         src/chronontemplate/ImportantPhrasePack.cpp
         src/chronontemplate/ClassicPhrasePack.cpp
         src/chronontemplate/TypewriterPhrasePack.cpp
         src/chronontemplate/Typewriter3DPhrasePack.cpp
         src/chronontemplate/ApplePhrasePack.cpp
         src/chronontemplate/PhraseHighlightPack.cpp
+        src/chronontemplate/DidoneTitlesPack.cpp
         # the packs a template author starts from
         src/chronontemplate/templates/YouTubeSubscribe.cpp
         # the template catalog that used to live inside the motion core
@@ -107,14 +115,25 @@ add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 add_executable(chronontemplate_dump_title_camera_poses tools/dump_title_camera_poses.cpp)
 target_link_libraries(chronontemplate_dump_title_camera_poses PRIVATE chronontemplate)
 
+add_executable(chronontemplate_dump_documentary_snapshot_pose
+        tools/dump_documentary_snapshot_pose.cpp)
+target_link_libraries(chronontemplate_dump_documentary_snapshot_pose PRIVATE chronontemplate)
+
+# The full native CLI canary needs ChrononMotion's optional typed JSON writer.
+if(TARGET chrononmotion_chronon3d_adapter)
+    add_executable(chronontemplate_dump_documentary_snapshot_plan
+            tools/dump_documentary_snapshot_plan.cpp)
+    target_link_libraries(chronontemplate_dump_documentary_snapshot_plan
+            PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
+endif()
+
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.
 target_include_directories(chronontemplate PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include>
         $<BUILD_INTERFACE:${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}>
         $<INSTALL_INTERFACE:include>)
-target_include_directories(chronontemplate SYSTEM PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include>)
 
 target_link_libraries(chronontemplate PUBLIC ChrononMotion::chrononmotion)
 target_compile_features(chronontemplate PUBLIC cxx_std_20)
@@ -178,6 +197,9 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         add_test(NAME chronontemplate_multi_image_duo_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_multi_image_duo_v1.py")
+        add_test(NAME chronontemplate_kit_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_kit_contract.py")
         add_test(NAME chronontemplate_entity_presentation_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_entity_presentation_v1.py")
@@ -190,6 +212,9 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         add_test(NAME chronontemplate_text_depth_focus_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_text_depth_focus_v1.py")
+        add_test(NAME chronontemplate_saas_kinetic_typography_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_saas_kinetic_typography_v1.py")
     endif()
     if(Python3_Interpreter_FOUND AND EXISTS "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}")
         add_test(NAME chronontemplate_editorial_benchmark_contract
@@ -245,6 +270,15 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_title_camera_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_title_camera_pack_test COMMAND chronontemplate_title_camera_pack_test)
 
+    # Title-to-snapshot documentary scenes are ordinary text/image layers with
+    # narrative recipes resolved onto the shared CameraRig.
+    add_executable(chronontemplate_documentary_snapshot_pack_test
+            tests/documentary_snapshot_pack.cpp)
+    target_link_libraries(chronontemplate_documentary_snapshot_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_documentary_snapshot_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_documentary_snapshot_pack_test
+            COMMAND chronontemplate_documentary_snapshot_pack_test)
+
     # The important-phrase families, one file per family: the shared
     # white-on-black look + fourteen Classic definitions, and the fifteen
     # Typewriter definitions with their underscore cursor.
@@ -279,6 +313,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_chronon_motion_contract_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_chronon_motion_contract_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_chronon_motion_contract_test COMMAND chronontemplate_chronon_motion_contract_test)
+
+    add_executable(chronontemplate_didone_titles_pack_test tests/didone_titles_pack.cpp)
+    target_link_libraries(chronontemplate_didone_titles_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_didone_titles_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_didone_titles_pack_test COMMAND chronontemplate_didone_titles_pack_test)
 
     if(CHRONONTEMPLATE_BUILD_LIVE_ADAPTER_TEST)
         if(NOT EXISTS "${CHRONONTEMPLATE_CHRONON3D_LIBRARY}")

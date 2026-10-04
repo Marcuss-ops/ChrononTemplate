@@ -37,7 +37,7 @@ namespace chronontemplate_test {
 
             m_lastImageRequest = request;
             return measure("image/" + request.path, chrononmotion::motion::ContentKind::Image,
-                           chrononmotion::Vector2(640.f, 360.f));
+                           imageNaturalSize);
         }
 
         [[nodiscard]] const ct::ImageRequest& lastImageRequest() const { return m_lastImageRequest; }
@@ -47,6 +47,16 @@ namespace chronontemplate_test {
             return measure("video/" + request.path, chrononmotion::motion::ContentKind::Video,
                            chrononmotion::Vector2(1920.f, 1080.f));
         }
+
+        ct::ContentHandle createShape(const ct::ShapeRequest& request) override {
+            m_lastShapeRequest = request;
+            return measure("shape/" + request.name + "/" + request.fillColor,
+                           chrononmotion::motion::ContentKind::Image, request.size);
+        }
+
+        [[nodiscard]] const ct::ShapeRequest& lastShapeRequest() const { return m_lastShapeRequest; }
+
+        chrononmotion::Vector2 imageNaturalSize{640.f, 360.f};
 
         std::string currentFingerprint(const ct::ContentId& content) const override {
 
@@ -59,6 +69,7 @@ namespace chronontemplate_test {
 
     private:
         ct::ImageRequest m_lastImageRequest{};
+        ct::ShapeRequest m_lastShapeRequest{};
         ct::ContentHandle measure(const std::string& id, chrononmotion::motion::ContentKind kind,
                                   const chrononmotion::Vector2& size) {
 
@@ -90,6 +101,7 @@ namespace chronontemplate_test {
 
         ct::ContentHandle createImage(const ct::ImageRequest&) override { return ct::ContentHandle{}; }
         ct::ContentHandle createVideo(const ct::VideoRequest&) override { return ct::ContentHandle{}; }
+        ct::ContentHandle createShape(const ct::ShapeRequest&) override { return ct::ContentHandle{}; }
         std::string currentFingerprint(const ct::ContentId&) const override { return {}; }
     };
 

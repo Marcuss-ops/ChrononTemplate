@@ -1,0 +1,2857 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "documentary_map_country_focus_v1",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 150
+  },
+  "layers": [
+    {
+      "id": "night-field",
+      "type": "color",
+      "color": [
+        0.025,
+        0.043,
+        0.057,
+        1
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "screen_space": true,
+      "start_frame": 0,
+      "duration_frames": 150
+    },
+    {
+      "id": "relief-map",
+      "type": "image",
+      "asset": "ChrononTemplate/assets/documentary_map_v1/map_plate.png",
+      "size": [
+        1480,
+        630
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "fit": "contain",
+      "start_frame": 0,
+      "duration_frames": 150,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 76,
+                "value": 2.05
+              },
+              {
+                "frame": 149,
+                "value": 2.05
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 76,
+                "value": -550.1653
+              },
+              {
+                "frame": 149,
+                "value": -550.1653
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 76,
+                "value": 129.15
+              },
+              {
+                "frame": 149,
+                "value": 129.15
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "top-rule",
+      "type": "shape",
+      "size": [
+        78,
+        2
+      ],
+      "position": [
+        960.0,
+        112
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "shape": {
+        "type": "rect",
+        "fill": [
+          0.953,
+          0.722,
+          0.357,
+          1.0
+        ]
+      }
+    },
+    {
+      "id": "section-kicker",
+      "type": "text",
+      "text": "FIELD NOTES   /   GEOGRAPHIC EXPLAINER",
+      "size": [
+        1000,
+        30
+      ],
+      "position": [
+        960.0,
+        79
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 17,
+        "fill": "#71D8D0"
+      }
+    },
+    {
+      "id": "scene-caption",
+      "type": "text",
+      "text": "01   /   A country takes shape through its borders.",
+      "size": [
+        1450,
+        42
+      ],
+      "position": [
+        960.0,
+        985
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 20,
+        "fill": "#EEE9DB"
+      }
+    },
+    {
+      "id": "france-border-edge-00",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        13.953,
+        4.5
+      ],
+      "position": [
+        1300.463,
+        565.153
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -84.04534050932017
+      ],
+      "start_frame": 58,
+      "duration_frames": 92,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 91,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -131.1001
+              },
+              {
+                "frame": 18,
+                "value": -192.6792
+              },
+              {
+                "frame": 91,
+                "value": -192.6792
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -80.1343
+              },
+              {
+                "frame": 18,
+                "value": -102.7395
+              },
+              {
+                "frame": 91,
+                "value": -102.7395
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.9012027992418719
+              },
+              {
+                "frame": 18,
+                "value": 2.05
+              },
+              {
+                "frame": 91,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-01",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        13.777,
+        4.5
+      ],
+      "position": [
+        1300.101,
+        560.383
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -105.01067433119847
+      ],
+      "start_frame": 60,
+      "duration_frames": 90,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 89,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -142.4643
+              },
+              {
+                "frame": 16,
+                "value": -193.0593
+              },
+              {
+                "frame": 89,
+                "value": -193.0593
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -88.7354
+              },
+              {
+                "frame": 16,
+                "value": -107.7481
+              },
+              {
+                "frame": 89,
+                "value": -107.7481
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.9299825047383
+              },
+              {
+                "frame": 16,
+                "value": 2.05
+              },
+              {
+                "frame": 89,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-02",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        13.949,
+        4.5
+      ],
+      "position": [
+        1298.391,
+        555.855
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -116.17707805367856
+      ],
+      "start_frame": 62,
+      "duration_frames": 88,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 87,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -154.5379
+              },
+              {
+                "frame": 14,
+                "value": -194.8548
+              },
+              {
+                "frame": 87,
+                "value": -194.8548
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -97.0762
+              },
+              {
+                "frame": 14,
+                "value": -112.5022
+              },
+              {
+                "frame": 87,
+                "value": -112.5022
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.9562363318267968
+              },
+              {
+                "frame": 14,
+                "value": 2.05
+              },
+              {
+                "frame": 87,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-03",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        13.775,
+        4.5
+      ],
+      "position": [
+        1295.326,
+        554.977
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        145.77387736130467
+      ],
+      "start_frame": 63,
+      "duration_frames": 87,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 86,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -162.4594
+              },
+              {
+                "frame": 13,
+                "value": -198.073
+              },
+              {
+                "frame": 86,
+                "value": -198.073
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -99.8588
+              },
+              {
+                "frame": 13,
+                "value": -113.4237
+              },
+              {
+                "frame": 86,
+                "value": -113.4237
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.9683442830587548
+              },
+              {
+                "frame": 13,
+                "value": 2.05
+              },
+              {
+                "frame": 86,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-04",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        13.953,
+        4.5
+      ],
+      "position": [
+        1292.607,
+        558.682
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        107.49237436826445
+      ],
+      "start_frame": 65,
+      "duration_frames": 85,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 84,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -174.4267
+              },
+              {
+                "frame": 11,
+                "value": -200.928
+              },
+              {
+                "frame": 84,
+                "value": -200.928
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -99.7714
+              },
+              {
+                "frame": 11,
+                "value": -109.5339
+              },
+              {
+                "frame": 84,
+                "value": -109.5339
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.9903787450794574
+              },
+              {
+                "frame": 11,
+                "value": 2.05
+              },
+              {
+                "frame": 84,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-05",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        13.113,
+        4.5
+      ],
+      "position": [
+        1292.557,
+        562.98
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        70.29451832177357
+      ],
+      "start_frame": 67,
+      "duration_frames": 83,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 82,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -182.6965
+              },
+              {
+                "frame": 9,
+                "value": -200.9805
+              },
+              {
+                "frame": 82,
+                "value": -200.9805
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -98.4875
+              },
+              {
+                "frame": 9,
+                "value": -105.021
+              },
+              {
+                "frame": 82,
+                "value": -105.021
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.009313265417699
+              },
+              {
+                "frame": 9,
+                "value": 2.05
+              },
+              {
+                "frame": 82,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-06",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        13.953,
+        4.5
+      ],
+      "position": [
+        1295.16,
+        566.492
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        39.529027821309725
+      ],
+      "start_frame": 69,
+      "duration_frames": 81,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 80,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -186.9412
+              },
+              {
+                "frame": 7,
+                "value": -198.2473
+              },
+              {
+                "frame": 80,
+                "value": -198.2473
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -97.37
+              },
+              {
+                "frame": 7,
+                "value": -101.333
+              },
+              {
+                "frame": 80,
+                "value": -101.333
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.024918218763668
+              },
+              {
+                "frame": 7,
+                "value": 2.05
+              },
+              {
+                "frame": 80,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-07",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        12.169,
+        4.5
+      ],
+      "position": [
+        1298.638,
+        567.842
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -8.211454447954035
+      ],
+      "start_frame": 70,
+      "duration_frames": 80,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 79,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -186.2452
+              },
+              {
+                "frame": 6,
+                "value": -194.5954
+              },
+              {
+                "frame": 79,
+                "value": -194.5954
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -96.9948
+              },
+              {
+                "frame": 6,
+                "value": -99.9157
+              },
+              {
+                "frame": 79,
+                "value": -99.9157
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.0314003499052338
+              },
+              {
+                "frame": 6,
+                "value": 2.05
+              },
+              {
+                "frame": 79,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-08",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        25.791,
+        4.5
+      ],
+      "position": [
+        1276.146,
+        608.542
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -132.4077629365975
+      ],
+      "start_frame": 72,
+      "duration_frames": 78,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 77,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -214.2208
+              },
+              {
+                "frame": 4,
+                "value": -218.212
+              },
+              {
+                "frame": 77,
+                "value": -218.212
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -56.1962
+              },
+              {
+                "frame": 4,
+                "value": -57.1809
+              },
+              {
+                "frame": 77,
+                "value": -57.1809
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.0415804053068958
+              },
+              {
+                "frame": 4,
+                "value": 2.05
+              },
+              {
+                "frame": 77,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-09",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        25.293,
+        4.5
+      ],
+      "position": [
+        1273.01,
+        594.598
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -71.9374588180232
+      ],
+      "start_frame": 74,
+      "duration_frames": 76,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 75,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -220.4787
+              },
+              {
+                "frame": 2,
+                "value": -221.5048
+              },
+              {
+                "frame": 75,
+                "value": -221.5048
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -71.5409
+              },
+              {
+                "frame": 2,
+                "value": -71.8222
+              },
+              {
+                "frame": 75,
+                "value": -71.8222
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.0478568304417553
+              },
+              {
+                "frame": 2,
+                "value": 2.05
+              },
+              {
+                "frame": 75,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-10",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        24.736,
+        4.5
+      ],
+      "position": [
+        1272.985,
+        579.41
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -108.91773633054319
+      ],
+      "start_frame": 76,
+      "duration_frames": 74,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 73,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -221.5311
+              },
+              {
+                "frame": 73,
+                "value": -221.5311
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -87.7699
+              },
+              {
+                "frame": 73,
+                "value": -87.7699
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 73,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-11",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        35.201,
+        4.5
+      ],
+      "position": [
+        1257.389,
+        573.179
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        174.6911696362548
+      ],
+      "start_frame": 77,
+      "duration_frames": 73,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 72,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -237.9069
+              },
+              {
+                "frame": 72,
+                "value": -237.9069
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -94.3125
+              },
+              {
+                "frame": 72,
+                "value": -94.3125
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 72,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-12",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        30.575,
+        4.5
+      ],
+      "position": [
+        1235.015,
+        568.977
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -149.8770413031431
+      ],
+      "start_frame": 79,
+      "duration_frames": 71,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 70,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -261.3996
+              },
+              {
+                "frame": 70,
+                "value": -261.3996
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -98.7242
+              },
+              {
+                "frame": 70,
+                "value": -98.7242
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 70,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-13",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        35.507,
+        4.5
+      ],
+      "position": [
+        1212.633,
+        565.868
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        169.98463014414966
+      ],
+      "start_frame": 81,
+      "duration_frames": 69,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 68,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -284.9007
+              },
+              {
+                "frame": 68,
+                "value": -284.9007
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -101.9884
+              },
+              {
+                "frame": 68,
+                "value": -101.9884
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 68,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-14",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        27.749,
+        4.5
+      ],
+      "position": [
+        1197.81,
+        577.379
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        100.89189961631114
+      ],
+      "start_frame": 83,
+      "duration_frames": 67,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 66,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -300.4648
+              },
+              {
+                "frame": 66,
+                "value": -300.4648
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -89.9023
+              },
+              {
+                "frame": 66,
+                "value": -89.9023
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 66,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-15",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        21.163,
+        4.5
+      ],
+      "position": [
+        1195.555,
+        592.647
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        94.56211945891219
+      ],
+      "start_frame": 84,
+      "duration_frames": 66,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 65,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -302.8326
+              },
+              {
+                "frame": 65,
+                "value": -302.8326
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -73.871
+              },
+              {
+                "frame": 65,
+                "value": -73.871
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 65,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-16",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        26.308,
+        4.5
+      ],
+      "position": [
+        1189.683,
+        605.481
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        128.50986406659254
+      ],
+      "start_frame": 86,
+      "duration_frames": 64,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 63,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -308.9982
+              },
+              {
+                "frame": 63,
+                "value": -308.9982
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -60.3952
+              },
+              {
+                "frame": 63,
+                "value": -60.3952
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 63,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-17",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        32.249,
+        4.5
+      ],
+      "position": [
+        1173.396,
+        616.297
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        159.64035061949315
+      ],
+      "start_frame": 88,
+      "duration_frames": 62,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 61,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -326.0995
+              },
+              {
+                "frame": 61,
+                "value": -326.0995
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -49.0382
+              },
+              {
+                "frame": 61,
+                "value": -49.0382
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 61,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-18",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        25.201,
+        4.5
+      ],
+      "position": [
+        1170.217,
+        622.797
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        17.646244288495296
+      ],
+      "start_frame": 90,
+      "duration_frames": 60,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 59,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -329.4375
+              },
+              {
+                "frame": 59,
+                "value": -329.4375
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -42.2133
+              },
+              {
+                "frame": 59,
+                "value": -42.2133
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 59,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-19",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        23.875,
+        4.5
+      ],
+      "position": [
+        1183.412,
+        630.287
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        42.60149134956335
+      ],
+      "start_frame": 91,
+      "duration_frames": 59,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 58,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -315.5827
+              },
+              {
+                "frame": 58,
+                "value": -315.5827
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -34.3486
+              },
+              {
+                "frame": 58,
+                "value": -34.3486
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 58,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-20",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        28.662,
+        4.5
+      ],
+      "position": [
+        1198.717,
+        635.425
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        0.6051085141959526
+      ],
+      "start_frame": 93,
+      "duration_frames": 57,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 56,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -299.5125
+              },
+              {
+                "frame": 56,
+                "value": -299.5125
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -28.9533
+              },
+              {
+                "frame": 56,
+                "value": -28.9533
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 56,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-21",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        33.384,
+        4.5
+      ],
+      "position": [
+        1218.831,
+        642.078
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        32.48702395653019
+      ],
+      "start_frame": 95,
+      "duration_frames": 55,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 54,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -278.3928
+              },
+              {
+                "frame": 54,
+                "value": -278.3928
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -21.9686
+              },
+              {
+                "frame": 54,
+                "value": -21.9686
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 54,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-22",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        33.165,
+        4.5
+      ],
+      "position": [
+        1240.215,
+        643.852
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -23.273005186853087
+      ],
+      "start_frame": 97,
+      "duration_frames": 53,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 52,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -255.9396
+              },
+              {
+                "frame": 52,
+                "value": -255.9396
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -20.1056
+              },
+              {
+                "frame": 52,
+                "value": -20.1056
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 52,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-23",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        33.553,
+        4.5
+      ],
+      "position": [
+        1262.886,
+        634.978
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -19.508495394766594
+      ],
+      "start_frame": 98,
+      "duration_frames": 52,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 51,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -232.135
+              },
+              {
+                "frame": 51,
+                "value": -232.135
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -29.4231
+              },
+              {
+                "frame": 51,
+                "value": -29.4231
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 51,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "france-border-edge-24",
+      "type": "shape",
+      "shape": {
+        "type": "rounded_rect",
+        "fill": [
+          0.6627450980392157,
+          0.42745098039215684,
+          0.19607843137254902,
+          1.0
+        ],
+        "radius": 2.25
+      },
+      "size": [
+        26.732,
+        4.5
+      ],
+      "position": [
+        1278.133,
+        622.81
+      ],
+      "enable_3d": true,
+      "rotation": [
+        0.0,
+        0.0,
+        -65.51446551731723
+      ],
+      "start_frame": 100,
+      "duration_frames": 50,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 2,
+                "value": 1.0
+              },
+              {
+                "frame": 49,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -216.1257
+              },
+              {
+                "frame": 49,
+                "value": -216.1257
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -42.1999
+              },
+              {
+                "frame": 49,
+                "value": -42.1999
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 2.05
+              },
+              {
+                "frame": 49,
+                "value": 2.05
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "paris-marker",
+      "type": "shape",
+      "size": [
+        22,
+        22
+      ],
+      "position": [
+        1229.87504,
+        452.81784375
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.9529411764705882,
+          0.7215686274509804,
+          0.3568627450980392,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFF0CB",
+          "width": 3
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 92,
+                "value": 0
+              },
+              {
+                "frame": 105,
+                "value": 1
+              },
+              {
+                "frame": 149,
+                "value": 1
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 78,
+                "value": -266.7965
+              },
+              {
+                "frame": 149,
+                "value": -266.7965
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 78,
+                "value": 37.6087
+              },
+              {
+                "frame": 149,
+                "value": 37.6087
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 78,
+                "value": 0.48780487804878053
+              },
+              {
+                "frame": 149,
+                "value": 0.48780487804878053
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "paris-label",
+      "type": "text",
+      "text": "PARIS",
+      "size": [
+        360,
+        55.199999999999996
+      ],
+      "position": [
+        1229.87504,
+        416.81784375
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 24,
+        "min_font_size": 24,
+        "max_font_size": 24,
+        "fit_mode": "shrink_only",
+        "fill": "#EEE9DB",
+        "stroke": {
+          "color": "#10202B",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 101,
+                "value": 0
+              },
+              {
+                "frame": 113,
+                "value": 1
+              },
+              {
+                "frame": 149,
+                "value": 1
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 78,
+                "value": -266.7965
+              },
+              {
+                "frame": 149,
+                "value": -266.7965
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 78,
+                "value": -0.1913
+              },
+              {
+                "frame": 149,
+                "value": -0.1913
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 78,
+                "value": 0.48780487804878053
+              },
+              {
+                "frame": 149,
+                "value": 0.48780487804878053
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "documentary_map_country_focus_v1.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

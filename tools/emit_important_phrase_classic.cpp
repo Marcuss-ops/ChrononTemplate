@@ -29,7 +29,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace {
@@ -38,6 +37,7 @@ namespace {
     using chronontemplate::ClassicPhraseAnimation;
     using chronontemplate::ClassicPhraseStyle;
     using chronontemplate::PhraseAnimationDefinition;
+    using chronontemplate::PhraseHighlightAnimation;
     using chronontemplate::PhraseKeyframe;
     using chronontemplate::PhraseSelector;
     using chronontemplate::PhraseTextAnimator;
@@ -208,12 +208,12 @@ namespace {
 
         const float phraseFontSize = definition.font_size > 0.f ? definition.font_size : style.font_size;
         json textStyle{{"font", style.font},
-                       {"font_size", phraseFontSize * canvasScale},
-                       {"fill", style.fill},
-                       {"stroke", json{{"color", style.stroke}, {"width", style.stroke_width}}},
-                       {"glow", json{{"radius", style.glow_radius},
-                                     {"intensity", style.glow_intensity},
-                                     {"color", style.glow}}}};
+                                    {"font_size", phraseFontSize * canvasScale},
+                                    {"fill", style.fill},
+                                    {"stroke", json{{"color", style.stroke}, {"width", style.stroke_width}}},
+                                    {"glow", json{{"radius", style.glow_radius},
+                                                  {"intensity", style.glow_intensity},
+                                                  {"color", style.glow}}}};
         if (!definition.accents.empty()) {
             textStyle["fit_mode"] = "shrink_only";
             textStyle["min_font_size"] = 68.f * canvasScale;
@@ -254,29 +254,35 @@ namespace {
                                   {"start_frame", 0},
                                   {"duration_frames", kDurationFrames}});
         }
+
+        // The independent accent layers sit between the background and the
+        // phrase. Keeping them as ordinary vector shapes preserves GPU-only
+        // rendering and makes their timing/position tunable in emitted plans.
         for (const auto& accent : definition.accents) {
-            if (accent.color.size() != 7 || accent.color.front() != '#')
+            const auto hex = accent.color;
+            if (hex.size() != 7 || hex.front() != '#')
                 fail(definition.id + ": accent color must be #RRGGBB");
             const auto channel = [&](std::size_t offset) {
-                return std::stoi(accent.color.substr(offset, 2), nullptr, 16) / 255.f;
+                return std::stoi(hex.substr(offset, 2), nullptr, 16) / 255.f;
             };
             json tracks = json::array();
             for (const auto& accentTrack : accent.tracks) {
                 validateTrack(accentTrack, definition.id + "." + accent.id + "." + accentTrack.property);
                 tracks.push_back(makeTrack(accentTrack, enter));
             }
-            layers.push_back(json{{"id", accent.id},
-                                  {"type", "shape"},
-                                  {"shape", json{{"type", "rounded_rect"},
-                                                  {"fill", json::array({channel(1), channel(3), channel(5), 1.f})},
-                                                  {"radius", accent.radius * canvasScale}}},
-                                  {"size", json::array({accent.width * canvasScale, accent.height * canvasScale})},
-                                  {"position", json::array({style.position[0] * canvasScale,
-                                                             (style.position[1] + accent.y_offset) * canvasScale})},
-                                  {"opacity", accent.opacity},
-                                  {"start_frame", 0},
-                                  {"duration_frames", kDurationFrames},
-                                  {"animation", json{{"tracks", tracks}}}});
+            json accentLayer{{"id", accent.id},
+                             {"type", "shape"},
+                             {"shape", json{{"type", "rounded_rect"},
+                                             {"fill", json::array({channel(1), channel(3), channel(5), 1.f})},
+                                             {"radius", accent.radius * canvasScale}}},
+                             {"size", json::array({accent.width * canvasScale, accent.height * canvasScale})},
+                             {"position", json::array({style.position[0] * canvasScale,
+                                                        (style.position[1] + accent.y_offset) * canvasScale})},
+                             {"opacity", accent.opacity},
+                             {"start_frame", 0},
+                             {"duration_frames", kDurationFrames},
+                             {"animation", json{{"tracks", tracks}}}};
+            layers.push_back(std::move(accentLayer));
         }
         layers.push_back(phrase);
 
@@ -400,32 +406,23 @@ int main(int argc, char** argv) try {
         editorialStyle.glow_intensity = 0.045f;
         const bool wordReveal = mode == "--editorial-word-reveal";
         const bool layerRise = mode == "--editorial-layer-rise";
-        std::vector<PhraseTrack> stillTracks;
-        if (layerRise) {
-            stillTracks = {
-                PhraseTrack{"position_y", "out_cubic", {{0, 28.f}, {36, 0.f}}},
-                PhraseTrack{"scale", "out_cubic", {{0, 0.985f}, {36, 1.f}}},
-                PhraseTrack{"opacity", "out_cubic", {{0, 0.f}, {36, 1.f}}}};
-        } else {
-            stillTracks = {
-                PhraseTrack{"opacity", "linear", {{0, 1.f}, {1, 1.f}}}};
-        }
-        std::vector<PhraseTextAnimator> stillTextAnimators;
-        if (wordReveal) {
-            PhraseTextAnimator animator;
-            animator.selector = PhraseSelector{"word", "forward", "reveal_soft"};
-            animator.properties = {
-                PhraseTrack{"position_y", "out_cubic", {{0, 18.f}, {36, 0.f}}},
-                PhraseTrack{"opacity", "linear", {{0, 0.f}, {36, 0.f}}}};
-            stillTextAnimators.push_back(std::move(animator));
-        }
         const PhraseAnimationDefinition still{
             wordReveal ? "editorial_words_appear_reveal" :
                 (layerRise ? "editorial_words_appear_layer_rise" : "editorial_words_appear"),
             wordReveal ? "Editorial Word Reveal" :
                 (layerRise ? "Editorial Layer Rise" : "Editorial Static"),
             "Words appear at the right time", (wordReveal || layerRise) ? 36 : 1,
-            stillTracks, stillTextAnimators, {}};
+            layerRise
+                ? std::vector<PhraseTrack>{
+                    PhraseTrack{"position_y", "out_cubic", {{0, 28.f}, {36, 0.f}}},
+                    PhraseTrack{"scale", "out_cubic", {{0, 0.985f}, {36, 1.f}}},
+                    PhraseTrack{"opacity", "out_cubic", {{0, 0.f}, {36, 1.f}}}}
+                : std::vector<PhraseTrack>{PhraseTrack{"opacity", "linear", {{0, 1.f}, {1, 1.f}}}},
+            wordReveal ? std::vector<PhraseTextAnimator>{PhraseTextAnimator{
+                PhraseSelector{"word", "forward", "reveal_soft"},
+                {PhraseTrack{"position_y", "out_cubic", {{0, 18.f}, {36, 0.f}}},
+                 PhraseTrack{"opacity", "linear", {{0, 0.f}, {36, 0.f}}}}}}
+                : std::vector<PhraseTextAnimator>{}, {}};
         const json plan = makePlan(still, editorialStyle);
         const std::string file = still.id + ".plan.json";
         writeFile(outDir / file, plan.dump(2) + "\n");

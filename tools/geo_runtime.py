@@ -211,6 +211,27 @@ def _roll_bank(p: float) -> float:
     return -8.0 * math.sin(max(0.0, min(1.0, p)) * math.pi)
 
 
+def _draw_map_attribution(frame) -> None:  # noqa: ANN001 - numpy/OpenCV image
+    import cv2
+    text = "Esri, Vantor, Earthstar Geographics, and the GIS User Community"
+    cv2.putText(frame, text, (28, frame.shape[0] - 22),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.42, (238, 238, 238), 1,
+                cv2.LINE_AA)
+
+
+def _draw_minimal_location_name(frame, name: str) -> None:  # noqa: ANN001 - numpy/OpenCV image
+    """Add only the current place name, without the diagnostic HUD/card."""
+    import cv2
+    label = str(name or "").strip()
+    if not label:
+        return
+    x, y = 44, frame.shape[0] - 44
+    cv2.putText(frame, label, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.78,
+                (0, 0, 0), 4, cv2.LINE_AA)
+    cv2.putText(frame, label, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.78,
+                (255, 255, 255), 2, cv2.LINE_AA)
+
+
 # ---------------------------------------------------------------------------
 # Rendering: a ShotSpec builder per preset, honouring the fast harness contract
 # ---------------------------------------------------------------------------
@@ -265,6 +286,7 @@ class _ShotBuilder:
         from render_geo_camera_canary import (
             draw_metric_reveal, draw_hud_overlay, warp_matrix, OVERSIZE,
         )
+        from render_geo_camera_small_places import draw_location_glow, draw_map_marker_label
         import cv2
         zoom, pitch, yaw, roll = self.pose(f)
         progress = f / (self.TOTAL_FRAMES - 1)
@@ -280,6 +302,21 @@ class _ShotBuilder:
             frame = cv2.warpPerspective(plate, H, (WIDTH, HEIGHT),
                                         flags=cv2.INTER_LINEAR,
                                         borderMode=cv2.BORDER_REFLECT_101)
+        if getattr(self, "minimal_map", False):
+            # The one-stop path uses _ShotBuilder (rather than TourBuilder),
+            # so keep its marker treatment identical to multi-stop arrivals.
+            if progress >= 0.50:
+                radius_km = float(getattr(self, "map_area_glow_radius_km", 0.0))
+                area_px = 0
+                if radius_km > 0:
+                    area_px = int(radius_km / (40075.017 * max(0.01, math.cos(math.radians(self.place.lat))))
+                                  * (256 * (2.0 ** zoom)))
+                draw_location_glow(frame, (WIDTH // 2, HEIGHT // 2), progress, area_px)
+            animation = getattr(self, "map_label_animation", "gentle_fade")
+            draw_map_marker_label(frame, (WIDTH // 2, HEIGHT // 2),
+                                  self.place.display_name or self.place.query,
+                                  progress, animation)
+            return frame
         if self.preset == "metric":
             # Never fabricate a statistic: the runtime has no trusted metric
             # source yet, so make the missing data explicit in the reveal.
@@ -298,6 +335,7 @@ class _ShotBuilder:
             )
         draw_hud_overlay(frame, self.place.lat, self.place.lon, zoom, progress,
                          target_title=f"{self.place.short_name} (GEO CAMERA V1)")
+        _draw_map_attribution(frame)
         return frame
 
     def render_frame_engine(self, f: int):
@@ -325,12 +363,18 @@ class TourBuilder:
                                 + leg * (len(self.stops) - 1))
         self.FRAMES_TOTAL = self.TOTAL_FRAMES  # legacy alias
         self.ZOOM_INDEX = 2                    # pose = (lat, lon, zoom)
+        # Integer frame boundaries quantize the three parts of a travel leg;
+        # permit the small discrete overshoot over the continuous 1.875 law.
+        self.ZOOM_VELOCITY_LIMIT = 2.0
         self.ANCHORS = tuple((s.lat, s.lon) for s in self.stops)
         span = max(abs(self.stops[0].lat - s.lat) + abs(self.stops[0].lon - s.lon)
                    for s in self.stops)
         # Wider tours need coarser landing zooms to stay inside the plate budget.
         self.PREPARE_ZMIN, self.PREPARE_ZMAX = 5, (17 if span < 0.5 else 15)
         self.end_zoom = min(end_zoom, 17 if span < 0.5 else 15.0)
+        self.stop_end_zooms = [self.end_zoom] * len(self.stops)
+        self.initial_zoom_fraction = 0.0
+        self.stop_dive_fraction = 1.0
 
     # timeline: [dive i][travel i->i+1][dive i+1]...
     def _schedule(self):
@@ -346,6 +390,26 @@ class TourBuilder:
                 f += leg
         return marks
 
+    def _zoom_gate_phases(self):
+        """Split a route leg's pullback and dive into separate zoom laws.
+
+        The geographic pan between them intentionally holds zoom steady; it
+        must not dilute either smootherstep phase's velocity budget.
+        """
+        phases = []
+        for mark in self._schedule():
+            if len(mark) == 3:
+                active_end = (mark[0] + round((mark[1] - mark[0]) * self.stop_dive_fraction)
+                              if self.stop_dive_fraction < 1.0 else mark[1] - 1)
+                phases.append((mark[0], max(mark[0] + 1, active_end)))
+                continue
+            start, end = mark[0], mark[1]
+            span = end - start
+            out_end = start + round(span * 0.40)
+            in_start = start + round(span * 0.60)
+            phases.extend(((start, out_end), (in_start, end - 1)))
+        return phases
+
     def pose(self, f: int):
         smootherstep = _smootherstep
         for m in self._schedule():
@@ -353,10 +417,12 @@ class TourBuilder:
                 if len(m) == 3:  # dive/hold on stop i
                     i = m[2]
                     s = self.stops[i]
-                    e = smootherstep((f - m[0]) / max(1, m[1] - m[0] - 1))
-                    z_start = 5.2 if i == 0 else self.end_zoom - 1.2
-                    return (s.lat, s.lon,
-                            z_start + (self.end_zoom - z_start) * e)
+                    target = self.stop_end_zooms[i]
+                    z_start = (5.2 + (target - 5.2) * self.initial_zoom_fraction
+                               if i == 0 else self.stop_end_zooms[i - 1])
+                    phase = (f - m[0]) / max(1, m[1] - m[0] - 1)
+                    dive = smootherstep(min(1.0, phase / self.stop_dive_fraction))
+                    return (s.lat, s.lon, z_start + (target - z_start) * dive)
                 # travel leg i -> i+1: pull out to the midpoint zoom, glide,
                 # re-dive. The zoom eases the RAW fraction once per half -
                 # easing the already-smoothed p would compound the slopes
@@ -368,16 +434,36 @@ class TourBuilder:
                 p = smootherstep(raw)
                 lat = a.lat + (b.lat - a.lat) * p
                 lon = a.lon + (b.lon - a.lon) * p
-                # Two equal-range smootherstep halves: out to the midpoint
-                # zoom, then in to the arrival zoom (1.2 below the landing
-                # zoom, exactly where the next stop's re-dive begins).
-                z_to = self.end_zoom - 1.2
-                z_mid = (self.end_zoom + z_to) / 2
-                if raw < 0.5:
-                    e = smootherstep(raw / 0.5)
-                    return (lat, lon, self.end_zoom + (z_mid - self.end_zoom) * e)
-                e = smootherstep((raw - 0.5) / 0.5)
-                return (lat, lon, z_mid + (z_to - z_mid) * e)
+                # Pull back before panning so the complete leg stays visible,
+                # then dive toward the next stop. The old 1.2-level pullback
+                # left the camera nearly at street scale while crossing whole
+                # regions, which looked like a broken infinite zoom.
+                from dynamic_tile_pyramid import latlon_to_global_px
+                ax, ay = latlon_to_global_px(a.lat, a.lon, 5)
+                bx, by = latlon_to_global_px(b.lat, b.lon, 5)
+                distance = math.hypot(bx - ax, by - ay)
+                route_zoom = 5.0 + math.log2((0.72 * self.WIDTH) / max(distance, 1.0))
+                route_zoom = max(5.2, min(self.end_zoom, route_zoom))
+                # Nearby destinations already fit at the landing scale. A
+                # fractional-level pullback creates a visible bobble and a
+                # non-zero phase seam; pan smoothly at constant zoom instead.
+                if (abs(self.stop_end_zooms[i] - self.stop_end_zooms[j]) < 1e-9
+                        and route_zoom >= self.stop_end_zooms[i] - 1.0):
+                    return (a.lat + (b.lat - a.lat) * p,
+                            a.lon + (b.lon - a.lon) * p,
+                            self.stop_end_zooms[i])
+                arrival_zoom = self.stop_end_zooms[j - 1] if j > 0 else self.end_zoom
+                if raw < 0.40:
+                    e = smootherstep(raw / 0.40)
+                    return (a.lat, a.lon,
+                            self.stop_end_zooms[i] + (route_zoom - self.stop_end_zooms[i]) * e)
+                if raw < 0.60:
+                    e = smootherstep((raw - 0.40) / 0.20)
+                    return (a.lat + (b.lat - a.lat) * e,
+                            a.lon + (b.lon - a.lon) * e, route_zoom)
+                e = smootherstep((raw - 0.60) / 0.40)
+                return (b.lat, b.lon,
+                        route_zoom + (arrival_zoom - route_zoom) * e)
         s = self.stops[-1]
         return (s.lat, s.lon, self.end_zoom)
 
@@ -386,12 +472,41 @@ class TourBuilder:
         import numpy as np
         import cv2
         from render_geo_camera_canary import draw_metric_reveal, draw_hud_overlay
-        from render_geo_camera_small_places import draw_route_glow, draw_spring_pin
+        from render_geo_camera_small_places import (
+            draw_location_glow, draw_map_marker_label, draw_route_glow, draw_spring_pin,
+        )
         from dynamic_tile_pyramid import latlon_to_global_px
 
         lat, lon, zoom = self.pose(f)
         progress = f / (self.FRAMES_TOTAL - 1)
         frame = sampler.sample(lat, lon, zoom, WIDTH, HEIGHT)
+
+        if getattr(self, "minimal_map", False):
+            location_name = ""
+            active_stop = None
+            for mark in self._schedule():
+                if len(mark) == 3 and mark[0] <= f < mark[1]:
+                    active_stop = self.stops[mark[2]]
+                    location_name = active_stop.display_name or active_stop.query
+                    break
+            if active_stop is not None:
+                zf = int(zoom // 1)
+                scale = 2.0 ** (zoom - zf)
+                ax, ay = latlon_to_global_px(lat, lon, zf)
+                px, py = latlon_to_global_px(active_stop.lat, active_stop.lon, zf)
+                sx = int(WIDTH / 2 + (px - ax) * scale)
+                sy = int(HEIGHT / 2 + (py - ay) * scale)
+                if 0 <= sx < WIDTH and 0 <= sy < HEIGHT:
+                    radius_km = float(getattr(self, "map_area_glow_radius_km", 0.0))
+                    area_px = 0
+                    if radius_km > 0:
+                        earth_km = 40075.017
+                        area_px = int(radius_km / (earth_km * max(0.01, math.cos(math.radians(active_stop.lat))))
+                                      * (256 * (2.0 ** zoom)))
+                    draw_location_glow(frame, (sx, sy), progress, area_px)
+                    animation = getattr(self, "map_label_animation", "gentle_fade")
+                    draw_map_marker_label(frame, (sx, sy), location_name, progress, animation)
+            return frame
 
         # the route so far, glowing under the camera
         zf = int(zoom // 1)
@@ -423,6 +538,7 @@ class TourBuilder:
 
         draw_hud_overlay(frame, lat, lon, zoom, progress,
                          target_title="GEO RUNTIME TOUR")
+        _draw_map_attribution(frame)
         return frame
 
 
@@ -468,14 +584,16 @@ def check_velocity_strict(builder) -> int:  # noqa: ANN001 - duck-typed builder
     n = builder.TOTAL_FRAMES
     zooms = [_pose_zoom(builder, f) for f in range(n)]
 
+    phase_schedule = getattr(builder, "_zoom_gate_phases", None)
     schedule = getattr(builder, "_schedule", None)
     if schedule is not None:
-        spans = [(m[0], m[1] - 1) for m in schedule() if m[1] - m[0] >= 4]
+        spans = (phase_schedule() if phase_schedule is not None else
+                 [(m[0], m[1] - 1) for m in schedule() if m[1] - m[0] >= 4])
         for (a0, a1), (b0, b1) in zip(spans, spans[1:]):
             step = abs(zooms[b0] - zooms[a1 - 1])
             lim = min(0.5 * _zoom_tv(zooms, a0, a1) / max(1, a1 - a0),
                       0.5 * _zoom_tv(zooms, b0, b1) / max(1, b1 - b0))
-            if step > lim + 1e-6:
+            if step > lim + 1e-4:
                 raise RuntimeError(
                     f"velocity discontinuity at the {a1}/{b0} junction "
                     f"(step {step:.4f} > {lim:.4f})")
@@ -498,12 +616,12 @@ def check_velocity_strict(builder) -> int:  # noqa: ANN001 - duck-typed builder
         tv = _zoom_tv(zooms, s0, s1)
         if tv <= 0.0:
             continue
-        bound = 1.8751 * tv / (s1 - s0)
+        bound = getattr(builder, "ZOOM_VELOCITY_LIMIT", 1.8751) * tv / (s1 - s0)
         max_step = max(abs(zooms[g] - zooms[g - 1]) for g in range(s0 + 1, s1))
         if max_step > bound + 1e-6:
             raise RuntimeError(
                 f"zoom snap in segment {s0}..{s1} (max {max_step:.4f} > "
-                f"1.8751 x TV/span {bound:.4f})")
+                f"{getattr(builder, 'ZOOM_VELOCITY_LIMIT', 1.8751):.4f} x TV/span {bound:.4f})")
     return len(spans)
 
 

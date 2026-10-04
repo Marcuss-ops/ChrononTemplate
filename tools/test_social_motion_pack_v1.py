@@ -50,12 +50,7 @@ class SocialMotionPackTests(unittest.TestCase):
                     card_w, card_h = layer["size"]
                     self.assertLessEqual(abs(x) + card_w * 1.05 / 2, width / 2)
                     self.assertLessEqual(abs(y) + card_h * 1.05 / 2, height / 2)
-
-    def test_image_assets_exist_when_the_content_bundle_is_present(self):
-        missing = [asset for asset in PACK.ASSETS
-                   if not (PACK.CHRONON / asset).is_file()]
-        if missing:
-            self.skipTest(f"optional Chronon3D content assets are unavailable: {missing[0]}")
+                    self.assertTrue((PACK.CHRONON / layer["asset"]).is_file())
 
     def test_contract_rejects_3d_depth_grading_on_flat_cards(self):
         plan = PACK.image_plan("landscape", 2)
