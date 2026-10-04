@@ -22547,5 +22547,67 @@
       "kinetic_keyword_lock"
     ]
   },
-  "source": "ChrononTemplate"
+  "source": "ChrononTemplate",
+  "abstract_backgrounds": {
+    "schema": "chronontemplate.abstract-backgrounds.v1",
+    "version": 1,
+    "category": "abstract_background_v1",
+    "recipes": [
+      "aurora_horizon",
+      "liquid_neon",
+      "liquid_magenta",
+      "liquid_cyan",
+      "metaball_soft",
+      "metaball_neon",
+      "glass_orb",
+      "dual_orbs",
+      "plasma_orb",
+      "topographic_contours",
+      "flowlines_vertical",
+      "flowlines_mesh",
+      "folded_ribbon",
+      "gradient_fan",
+      "blue_atmosphere",
+      "mega_mix"
+    ]
+  },
+  "photo_motion": {
+    "schema": "chronontemplate.photo-motion.v1",
+    "version": 1,
+    "family_id": "photo_motion_v1",
+    "recipes": [
+      "photo_polaroid_drop_settle",
+      "photo_polaroid_rotate_in",
+      "photo_polaroid_push_focus",
+      "photo_polaroid_slide_swap",
+      "photo_stack_vertical_cycle",
+      "photo_stack_depth_cycle",
+      "photo_stack_focus_handoff",
+      "photo_stack_browser_shuffle",
+      "photo_pile_drop",
+      "photo_pile_top_slide",
+      "photo_pile_top_flip",
+      "photo_pile_top_throw",
+      "photo_capsule_zoom_reveal",
+      "photo_slit_reveal",
+      "photo_circle_focus",
+      "photo_diagonal_wipe",
+      "photo_radial_burst",
+      "photo_mask_expand"
+    ]
+  },
+  "tech_backgrounds": {
+    "schema": "chronontemplate.tech-backgrounds.v1",
+    "version": 1,
+    "family_id": "tech_background_v1",
+    "category": "tech_background_v1",
+    "recipes": [
+      "tech_blue_horizon",
+      "tech_aqua_horizon",
+      "tech_magenta_cone",
+      "tech_arc_green",
+      "tech_arc_red",
+      "tech_duotone_blob"
+    ]
+  }
 }

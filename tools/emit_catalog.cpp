@@ -482,6 +482,63 @@ int main(int argc, char** argv) {
         if (!data.contains("motions")) fail("catalog needs `motions`");
         if (!data.contains("overlay_presets")) fail("catalog needs `overlay_presets`");
         if (!data.contains("selections")) fail("catalog needs `selections`");
+        if (!data.contains("abstract_backgrounds")) fail("catalog needs `abstract_backgrounds`");
+        const json& abstractBackgrounds = data["abstract_backgrounds"];
+        requireObject(abstractBackgrounds, "abstract_backgrounds");
+        if (abstractBackgrounds.value("schema", "") != "chronontemplate.abstract-backgrounds.v1" ||
+            abstractBackgrounds.value("version", 0) != 1 ||
+            abstractBackgrounds.value("category", "") != "abstract_background_v1" ||
+            !abstractBackgrounds.contains("recipes")) {
+            fail("abstract_backgrounds has an unsupported schema or missing category/recipes");
+        }
+        requireArray(abstractBackgrounds["recipes"], "abstract_backgrounds.recipes");
+        if (abstractBackgrounds["recipes"].empty()) fail("abstract_backgrounds.recipes must not be empty");
+        std::set<std::string> abstractRecipeIDs;
+        for (const auto& recipe : abstractBackgrounds["recipes"]) {
+            if (!recipe.is_string() || recipe.get<std::string>().empty() ||
+                !abstractRecipeIDs.insert(recipe.get<std::string>()).second) {
+                fail("abstract_backgrounds.recipes must contain unique non-empty ids");
+            }
+        }
+        if (!data.contains("photo_motion")) fail("catalog needs `photo_motion`");
+        const json& photoMotion = data["photo_motion"];
+        requireObject(photoMotion, "photo_motion");
+        if (photoMotion.value("schema", "") != "chronontemplate.photo-motion.v1" ||
+            photoMotion.value("version", 0) != 1 ||
+            photoMotion.value("family_id", "") != "photo_motion_v1" ||
+            !photoMotion.contains("recipes")) {
+            fail("photo_motion has an unsupported schema or missing family/recipes");
+        }
+        requireArray(photoMotion["recipes"], "photo_motion.recipes");
+        if (photoMotion["recipes"].size() != 18)
+            fail("photo_motion must define exactly 18 V1 recipe ids");
+        std::set<std::string> photoRecipeIDs;
+        for (const auto& recipe : photoMotion["recipes"]) {
+            if (!recipe.is_string() || recipe.get<std::string>().empty() ||
+                !photoRecipeIDs.insert(recipe.get<std::string>()).second) {
+                fail("photo_motion.recipes must contain unique non-empty ids");
+            }
+        }
+        if (!data.contains("tech_backgrounds")) fail("catalog needs `tech_backgrounds`");
+        const json& techBackgrounds = data["tech_backgrounds"];
+        requireObject(techBackgrounds, "tech_backgrounds");
+        if (techBackgrounds.value("schema", "") != "chronontemplate.tech-backgrounds.v1" ||
+            techBackgrounds.value("version", 0) != 1 ||
+            techBackgrounds.value("family_id", "") != "tech_background_v1" ||
+            techBackgrounds.value("category", "") != "tech_background_v1" ||
+            !techBackgrounds.contains("recipes")) {
+            fail("tech_backgrounds has an unsupported schema or missing family/recipes");
+        }
+        requireArray(techBackgrounds["recipes"], "tech_backgrounds.recipes");
+        if (techBackgrounds["recipes"].size() != 6)
+            fail("tech_backgrounds must define exactly 6 V1 recipe ids");
+        std::set<std::string> techRecipeIDs;
+        for (const auto& recipe : techBackgrounds["recipes"]) {
+            if (!recipe.is_string() || recipe.get<std::string>().empty() ||
+                !techRecipeIDs.insert(recipe.get<std::string>()).second) {
+                fail("tech_backgrounds.recipes must contain unique non-empty ids");
+            }
+        }
 
         json entityPresentation = json::parse(readFile(CHRONONTEMPLATE_ENTITY_PRESENTATION_FILE));
         requireObject(entityPresentation, "entity_presentation");
@@ -566,6 +623,9 @@ int main(int argc, char** argv) {
         emitted["documentary_snapshot_recipes"] = documentarySnapshotRecipes();
         emitted["documentary_snapshot_styles"] = documentarySnapshotStyles();
         emitted["entity_presentation"] = entityPresentation;
+        emitted["abstract_backgrounds"] = abstractBackgrounds;
+        emitted["photo_motion"] = photoMotion;
+        emitted["tech_backgrounds"] = techBackgrounds;
         emitted["motions"] = motions;
         emitted["overlay_presets"] = data["overlay_presets"];
         emitted["selections"] = data["selections"];
