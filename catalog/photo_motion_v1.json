@@ -1,0 +1,40 @@
+{
+  "schema": "chronontemplate.photo-motion.v1",
+  "version": 1,
+  "family_id": "photo_motion_v1",
+  "canvas": {"width": 1920, "height": 1080, "fps_num": 30, "fps_den": 1},
+  "recipe_groups": [
+    {"id": "photo_cards", "recipes": [
+      "photo_polaroid_drop_settle",
+      "photo_polaroid_rotate_in",
+      "photo_polaroid_push_focus",
+      "photo_polaroid_slide_swap"
+    ]},
+    {"id": "depth_stack", "recipes": [
+      "photo_stack_vertical_cycle",
+      "photo_stack_depth_cycle",
+      "photo_stack_focus_handoff",
+      "photo_stack_browser_shuffle"
+    ]},
+    {"id": "photo_pile", "recipes": [
+      "photo_pile_drop",
+      "photo_pile_top_slide",
+      "photo_pile_top_flip",
+      "photo_pile_top_throw"
+    ]},
+    {"id": "mask_reveals", "recipes": [
+      "photo_capsule_zoom_reveal",
+      "photo_slit_reveal",
+      "photo_circle_focus",
+      "photo_diagonal_wipe",
+      "photo_radial_burst",
+      "photo_mask_expand"
+    ]}
+  ],
+  "style_tokens": {
+    "archive": {"paper": "#F4F0E7", "ink": "#242627", "accent": "#C08D4E", "shadow": "#080B10"},
+    "browser": {"paper": "#F7F8FA", "ink": "#222832", "accent": "#697586", "shadow": "#080B10"},
+    "tabletop": {"paper": "#F2EEE5", "ink": "#25221E", "accent": "#C19054", "shadow": "#090806"},
+    "darkroom": {"paper": "#E7E9EE", "ink": "#18202A", "accent": "#83B9D4", "shadow": "#02040A"}
+  }
+}

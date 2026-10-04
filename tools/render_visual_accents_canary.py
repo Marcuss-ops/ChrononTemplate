@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Visual Accents V1 — the four family galleries and the mega canary.
+"""Visual Accents V1 — family galleries and their sequential canaries.
 
-Emits five self-contained chronon.render-plan.v3 documents (1920x1080, 30fps)
+Emits seven self-contained chronon.render-plan.v3 documents (1920x1080, 30fps)
 that exercise the whole 48-motion vocabulary plus the supporting primitives:
 
     canary_brush_v1        12 brush traits over a document scene
     canary_web_rect_v1     12 web cards over a browser scene
     canary_paint_v1        12 field-mask reveals over a photo scene
     canary_light_leak_v1   12 leak plates over a mixed-content scene
+    canary_abstract_background_v1  10 procedural field backgrounds
+    canary_abstract_background_torture_v1  continuous cross-fade stress plan
     canary_visual_accents_mega  the 15-20s mega canary (48 motions across scenes)
 
 The galleries write plans only; rendering happens through chronon3d_cli
@@ -15,7 +17,7 @@ The galleries write plans only; rendering happens through chronon3d_cli
 deterministic software rasterizer the certified batches use.
 
 Usage:
-    tools/render_visual_accents_canary.py --plans      write the five plans
+    tools/render_visual_accents_canary.py --plans      write the plans
     tools/render_visual_accents_canary.py --validate   write + validate plans
     tools/render_visual_accents_canary.py --render     write + validate + render
 """
@@ -29,7 +31,11 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-CLI = REPO / "Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
+CLI_CANDIDATES = (
+    REPO / "Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli",
+    REPO / "Chronon3d/build/chronon/linux-fast-dev/apps/chronon3d_cli/chronon3d_cli",
+)
+CLI = next((candidate for candidate in CLI_CANDIDATES if candidate.is_file()), CLI_CANDIDATES[0])
 ASSETS = REPO / "Chronon3d"
 OUT = REPO / "ChrononTemplate/out/visual_accents_v1"
 
@@ -234,6 +240,19 @@ def field_mask(seed, generator, feather, enter, hold, frequency=3.0, octaves=4,
             {"frame": 0, "value": 0.0},
             {"frame": enter, "value": 1.0},
             {"frame": enter + hold, "value": 1.0}]},
+    }
+
+
+def abstract_neon_ramp():
+    return {
+        "type": "linear", "start": [0.0, 0.5], "end": [1.0, 0.5],
+        "color_stops": [
+            {"position": 0.0, "color": [0.015, 0.025, 0.16, 1.0]},
+            {"position": 0.32, "color": [0.24, 0.035, 0.58, 1.0]},
+            {"position": 0.62, "color": [0.88, 0.055, 0.68, 1.0]},
+            {"position": 0.82, "color": [0.12, 0.7, 0.94, 1.0]},
+            {"position": 1.0, "color": [1.0, 0.68, 0.92, 1.0]},
+        ],
     }
 
 
@@ -468,6 +487,88 @@ def light_leak_gallery():
     return base_plan("canary_light_leak_v1", frames, layers, "canary_light_leak_v1.mp4")
 
 
+def abstract_background_gallery():
+    frames = 10 * FPS
+    layers = [rect_layer("abstract_backplate", [W, H], [W / 2, H / 2],
+                         [0.008, 0.01, 0.024, 1.0], frames)]
+    scenes = [
+        ("aurora", "fractal", 2.4, [0.34, 0.08, 0.72, 0.9],
+         [{"kind": "warp", "amount": 0.12}]),
+        ("liquid", "fractal", 3.2, [0.82, 0.08, 0.62, 0.82],
+         [{"kind": "warp", "amount": 0.2}]),
+        ("metaball", "cellular", 3.0, [0.52, 0.14, 0.86, 0.8],
+         [{"kind": "smoothstep", "edge": 0.44, "softness": 0.22}]),
+        ("glass", "radial", 1.0, [0.7, 0.22, 1.0, 0.68], []),
+        ("contours", "rings", 10.0, [0.86, 0.92, 1.0, 0.7],
+         [{"kind": "warp", "amount": 0.1},
+          {"kind": "smoothstep", "edge": 0.94, "softness": 0.08}]),
+        ("flowlines", "stripes", 72.0, [0.58, 0.76, 1.0, 0.62],
+         [{"kind": "warp", "amount": 0.004}]),
+        ("folded", "stripes", 6.0, [0.62, 0.3, 0.94, 0.82],
+         [{"kind": "warp", "amount": 0.06}]),
+        ("fan", "conic", 1.0, [0.7, 0.48, 0.96, 0.56], []),
+        ("blue_atmosphere", "radial", 1.0, [0.05, 0.32, 0.72, 0.72], []),
+        ("mega_mix", "fractal", 2.0, [0.72, 0.18, 0.9, 0.74],
+         [{"kind": "warp", "amount": 0.16}]),
+    ]
+    for index, (name, generator, frequency, color, operators) in enumerate(scenes):
+        layer = rect_layer(f"abstract_{name}", [W, H], [W / 2, H / 2], color, frames,
+                           blend="screen", effects=[{"type": "gaussian_blur", "radius": 18}])
+        layer["start_frame"] = index * FPS
+        layer["duration_frames"] = FPS
+        layer["shape"]["field"] = {
+            "generator": generator, "seed": 101 + index,
+            "frequency": frequency, "octaves": 5,
+            "operators": operators,
+        }
+        layer["shape"]["field_render_scale"] = 4
+        layer["shape"]["field_drift"] = [0.008, -0.004]
+        if name in {"liquid", "mega_mix"}:
+            layer["shape"]["field_ramp"] = abstract_neon_ramp()
+        layer["animation"] = {"tracks": [{"property": "opacity", "easing": "linear",
+            "keyframes": [{"frame": index * FPS, "value": 0.0},
+                          {"frame": index * FPS + 4, "value": 1.0},
+                          {"frame": (index + 1) * FPS - 4, "value": 1.0},
+                          {"frame": (index + 1) * FPS, "value": 0.0}]}]}
+        layers.append(layer)
+    return base_plan("canary_abstract_background_v1", frames, layers,
+                     "canary_abstract_background_v1.mp4")
+
+
+def abstract_background_torture():
+    frames = 13 * FPS
+    layers = [rect_layer("abstract_torture_backplate", [W, H], [W / 2, H / 2],
+                         [0.005, 0.008, 0.02, 1.0], frames)]
+    stages = [
+        ("aurora", "fractal", 2.0, [0.38, 0.08, 0.84, 0.8], 0),
+        ("liquid", "fractal", 3.5, [0.92, 0.08, 0.62, 0.72], 2),
+        ("metaball", "cellular", 3.0, [0.4, 0.1, 0.9, 0.7], 4),
+        ("contours", "rings", 9.0, [0.86, 0.92, 1.0, 0.62], 6),
+        ("flow", "stripes", 64.0, [0.16, 0.55, 1.0, 0.62], 8),
+        ("fold", "stripes", 6.0, [0.9, 0.34, 0.12, 0.7], 10),
+    ]
+    for name, generator, frequency, color, start_seconds in stages:
+        start = start_seconds * FPS
+        layer = rect_layer(f"torture_{name}", [W, H], [W / 2, H / 2], color, frames,
+                           blend="screen")
+        layer["shape"]["field"] = {"generator": generator, "seed": 211 + start,
+            "frequency": frequency, "octaves": 5,
+            "operators": ([{"kind": "warp", "amount": 0.09}]
+                          if generator in {"fractal", "rings", "stripes"} else [])}
+        layer["shape"]["field_render_scale"] = 4
+        layer["shape"]["field_drift"] = [-0.006, 0.005]
+        if name == "liquid":
+            layer["shape"]["field_ramp"] = abstract_neon_ramp()
+        layer["animation"] = {"tracks": [{"property": "opacity", "easing": "in_out_sine",
+            "keyframes": [{"frame": start, "value": 0.0},
+                          {"frame": start + 30, "value": 1.0},
+                          {"frame": start + 60, "value": 1.0},
+                          {"frame": start + 90, "value": 0.0}]}]}
+        layers.append(layer)
+    return base_plan("canary_abstract_background_torture", frames, layers,
+                     "canary_abstract_background_torture_v1.mp4")
+
+
 # ── Mega canary ─────────────────────────────────────────────────────────────
 
 
@@ -570,6 +671,8 @@ PLANS = {
     "canary_web_rect_v1.plan.json": web_rect_gallery,
     "canary_paint_v1.plan.json": paint_gallery,
     "canary_light_leak_v1.plan.json": light_leak_gallery,
+    "canary_abstract_background_v1.plan.json": abstract_background_gallery,
+    "canary_abstract_background_torture_v1.plan.json": abstract_background_torture,
     "canary_visual_accents_mega.plan.json": mega_canary,
 }
 

@@ -1,0 +1,24 @@
+{
+  "schema": "chronontemplate.tech-backgrounds.v1",
+  "version": 1,
+  "family_id": "tech_background_v1",
+  "canvas": {"width": 960, "height": 540, "fps_num": 30, "fps_den": 1},
+  "recipes": [
+    {"id": "tech_blue_horizon", "layers": ["field_gradient", "soft_beam", "horizon_glow"], "seed": 1201},
+    {"id": "tech_aqua_horizon", "layers": ["aqua_band", "directional_halo"], "seed": 1202},
+    {"id": "tech_magenta_cone", "layers": ["cone_path", "light_rays", "bloom"], "seed": 1203},
+    {"id": "tech_arc_green", "layers": ["offscreen_arc", "soft_halo", "bloom"], "seed": 1204},
+    {"id": "tech_arc_red", "layers": ["offscreen_arc", "soft_halo", "bloom"], "seed": 1205},
+    {"id": "tech_duotone_blob", "layers": ["radial_fields", "screen_blend", "bloom"], "seed": 1206}
+  ],
+  "style_tokens": {
+    "navy": [0.012, 0.018, 0.075, 1.0],
+    "aqua": [0.06, 0.82, 0.72, 1.0],
+    "cyan": [0.12, 0.82, 1.0, 1.0],
+    "magenta": [0.98, 0.12, 0.7, 1.0],
+    "green": [0.18, 1.0, 0.55, 1.0],
+    "red": [1.0, 0.12, 0.2, 1.0],
+    "violet": [0.52, 0.22, 0.98, 1.0],
+    "title": [0.94, 0.97, 1.0, 1.0]
+  }
+}
