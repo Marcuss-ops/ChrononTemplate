@@ -403,7 +403,7 @@ def main() -> int:
             return 0
         for frame in args.frames:
             raw = args.out / f"documentary_snapshot_adapter{style_suffix}{recipe_suffix}_frame_{frame:03d}.rgba"
-            subprocess.run([str(args.cli), "render", "--backend", "software", "--plan", str(plan_path),
+            subprocess.run([str(args.cli), "render", "--backend", args.backend, "--plan", str(plan_path),
                             "--assets-root", str(WORKSPACE), "--video-sink", "raw", "--pipe-pixfmt", "rgba",
                             "--start-frame", str(frame), "--end-frame", str(frame), "-o", str(raw)],
                            check=True, cwd=WORKSPACE)

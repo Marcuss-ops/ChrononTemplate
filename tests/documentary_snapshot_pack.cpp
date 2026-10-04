@@ -305,7 +305,7 @@ namespace {
                 const float captionHalfWidth = captionSize * 0.65f *
                     static_cast<float>(snapshot.caption.size()) * 0.5f;
                 const float captionCenterY = snapshot.anchor.center.y +
-                    snapshot.anchor.halfHeight + 144.f * 0.62f;
+                    snapshot.anchor.halfHeight + 144.f * 1.30f;
                 const float left = std::min(snapshot.anchor.center.x - snapshot.anchor.halfWidth,
                                             snapshot.anchor.center.x - captionHalfWidth);
                 const float right = std::max(snapshot.anchor.center.x + snapshot.anchor.halfWidth,
