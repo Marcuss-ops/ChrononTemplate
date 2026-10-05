@@ -97,6 +97,7 @@ add_library(chronontemplate STATIC
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
         src/chronontemplate/ImageAnimationPack.cpp
         src/chronontemplate/TitleCameraPack.cpp
+        src/chronontemplate/SceneCameraPack.cpp
         src/chronontemplate/DocumentarySnapshotPack.cpp
         src/chronontemplate/ImportantPhrasePack.cpp
         src/chronontemplate/ClassicPhrasePack.cpp
@@ -114,6 +115,13 @@ add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 
 add_executable(chronontemplate_dump_title_camera_poses tools/dump_title_camera_poses.cpp)
 target_link_libraries(chronontemplate_dump_title_camera_poses PRIVATE chronontemplate)
+
+add_executable(chronontemplate_dump_scene_camera_poses tools/dump_scene_camera_poses.cpp)
+target_link_libraries(chronontemplate_dump_scene_camera_poses PRIVATE chronontemplate)
+
+add_executable(chronontemplate_sequence_from_json tools/sequence_from_json.cpp)
+target_link_libraries(chronontemplate_sequence_from_json PRIVATE chronontemplate)
+target_include_directories(chronontemplate_sequence_from_json PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 
 add_executable(chronontemplate_dump_documentary_snapshot_pose
         tools/dump_documentary_snapshot_pose.cpp)
@@ -197,9 +205,15 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         add_test(NAME chronontemplate_multi_image_duo_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_multi_image_duo_v1.py")
+        add_test(NAME chronontemplate_named_multi_entity_duo_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_named_multi_entity_duo_v1.py")
         add_test(NAME chronontemplate_kit_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_kit_contract.py")
+        add_test(NAME chronontemplate_multi_image_trio_v2_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_multi_image_trio_v2.py")
         add_test(NAME chronontemplate_entity_presentation_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_entity_presentation_v1.py")
@@ -269,6 +283,21 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_title_camera_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_title_camera_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_title_camera_pack_test COMMAND chronontemplate_title_camera_pack_test)
+
+    # The scene-camera sequencer family: the subjects never animate, the camera
+    # carries the frame from hold to hold, every leg lands exactly on the next
+    # rest, and the framing gate holds for all eight scene_camera_* transitions.
+    add_executable(chronontemplate_scene_camera_pack_test tests/scene_camera_pack.cpp)
+    target_link_libraries(chronontemplate_scene_camera_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_scene_camera_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_scene_camera_pack_test COMMAND chronontemplate_scene_camera_pack_test)
+
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME chronontemplate_scene_sequence_json_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_scene_sequence_json.py"
+                    --tool "$<TARGET_FILE:chronontemplate_sequence_from_json>")
+    endif()
 
     # Title-to-snapshot documentary scenes are ordinary text/image layers with
     # narrative recipes resolved onto the shared CameraRig.

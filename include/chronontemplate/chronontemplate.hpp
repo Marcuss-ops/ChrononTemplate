@@ -25,6 +25,7 @@
 #include "chronontemplate/TemplateScene.hpp"
 #include "chronontemplate/ImageAnimationPack.hpp"
 #include "chronontemplate/TitleCameraPack.hpp"
+#include "chronontemplate/SceneCameraPack.hpp"
 #include "chronontemplate/DocumentarySnapshotPack.hpp"
 #include "chronontemplate/UiPrimitives.hpp"
 #include "chronontemplate/templates/YouTubeSubscribe.hpp"

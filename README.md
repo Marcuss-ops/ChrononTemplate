@@ -683,6 +683,71 @@ python3 tools/render_documentary_snapshot_canary.py \
 python3 tools/render_documentary_snapshot_canary.py --style-gallery --render
 ```
 
+### Scene-camera sequencer — `scene_camera_sequencer_v1`
+
+Where the title-camera pack frames one title, the scene-camera pack frames the
+whole edit: a chain of subjects — a phrase, an image, a text, a stat card —
+each holding its own framing (the *stacco*), with the camera itself carrying
+the audience from hold to hold. One call authors the chain; the subjects never
+animate (the P0 contract), and every travel leg starts exactly on hold A's
+rest and lands exactly on hold B's rest, so any length of sequence is
+continuous at every boundary by construction. The rest framing of each beat is
+derived from the beat's own half-extents through one framing law
+(`sceneFramingDistance`) and the kind's lens (`sceneSubjectFov`: Phrase 50°,
+Image 62°, Text 44°, Card 56°).
+
+```cpp
+#include "chronontemplate/SceneCameraPack.hpp"
+
+applySceneCameraSequence(scene, SceneCameraSequence{
+    .beats = {{{SubjectKind::Phrase, {960.f, 540.f, 0.f}, 520.f, 110.f}, 60},
+              {{SubjectKind::Image,  {960.f, 540.f, -80.f}, 460.f, 260.f}, 60},
+              {{SubjectKind::Text,   {960.f, 540.f, 0.f}, 620.f, 150.f}, 60}},
+    .transition = SceneCameraTransition::ArcCarry,
+    .intensity = 1.f,          // 0.55 subtle · 1 editorial · 1.9 cinematic
+    .travelFrames = 24,
+    .inFrame = 0});
+```
+
+The eight transition ids, in canonical order (`sceneCameraTransitionIds()`,
+stable and append-only): `scene_camera_push_through`,
+`scene_camera_lateral_swipe`, `scene_camera_arc_carry`,
+`scene_camera_orbit_handoff`, `scene_camera_rise_and_land`,
+`scene_camera_focus_rack`, `scene_camera_pull_back_reveal`,
+`scene_camera_whip_reframe`.
+
+The acceptance suite (`tests/scene_camera_pack.cpp`) pins eight gates across
+all eight transitions on the fixed frase → immagine → testo canary: the
+subjects never animate (empty tracks and a bit-identical transform at frame 0
+and frame end); the camera really carries the frame; every leg departs and
+lands exactly on the two rests it joins; every hold holds its rest for its
+whole window; the end settles (landing slower than mid-travel); velocity
+continuity with no channel teleports (the whip's loud acquisition is the
+declared exception on loudness, not on continuity); the safe-area gate; and
+loud authoring failures on empty, one-beat, short-travel, tiny-hold and
+negative-intensity sequences.
+
+Render the nine-clip gallery and the 14-second five-stacco master with the
+native pose dumper and Chronon3D CLI:
+
+```sh
+cmake --build --preset dev --target chronontemplate_dump_scene_camera_poses
+python3 tools/render_scene_camera_sequencer_v1.py            # plans + renders
+python3 tools/render_scene_camera_sequencer_v1.py --generate-only
+```
+
+The renders land in `out/scene_camera_sequencer_v1/` (plans, MP4s and
+per-frame timing sidecars); the Drive publication path is
+`RenderingGen/UploadDrive/upload_scene_camera_sequencer_v1.sh`.
+
+Pre-configured maps are data, not code:
+`catalog/scene_camera_sequences_v1/*.json` names the beats and the transition
+(one `chronontemplate.scene-camera-sequence.v1` document each), the
+`chronontemplate_sequence_from_json` tool authors them fail-closed, and
+`render_scene_camera_sequencer_v1.py --sequence-json <map.json>` renders one
+end to end — camera keys from the rig, layers from each beat's `content`
+block, which the lens never reads. See `docs/SCENE_CAMERA_PACK.md`.
+
 ### Multi-image duo v1
 
 `catalog/multi_entity_layout.v1.json` and

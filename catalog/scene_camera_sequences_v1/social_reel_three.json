@@ -1,0 +1,53 @@
+{
+  "schema": "chronontemplate.scene-camera-sequence.v1",
+  "name": "social_reel_three",
+  "description": "reel veloce: WhipReframe a intensità cinematica tra tre stacchi corti",
+  "transition": "scene_camera_whip_reframe",
+  "intensity": 1.4,
+  "travel_frames": 18,
+  "in_frame": 0,
+  "beats": [
+    {
+      "kind": "phrase",
+      "center": [960, 540, 0],
+      "half_width": 480,
+      "half_height": 110,
+      "hold": 45,
+      "content": {
+        "type": "text",
+        "text": "SMETTI DI SCORRERE",
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 110,
+        "fill": "#F2F0E8",
+        "size": [1400, 180]
+      }
+    },
+    {
+      "kind": "image",
+      "center": [960, 540, -60],
+      "half_width": 430,
+      "half_height": 260,
+      "hold": 45,
+      "content": {
+        "type": "image",
+        "asset": "assets/images/camera_reference.jpg",
+        "size": [900, 540]
+      }
+    },
+    {
+      "kind": "text",
+      "center": [960, 540, 0],
+      "half_width": 560,
+      "half_height": 130,
+      "hold": 45,
+      "content": {
+        "type": "text",
+        "text": "GUARDA QUESTO",
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 128,
+        "fill": "#F2F0E8",
+        "size": [1300, 210]
+      }
+    }
+  ]
+}

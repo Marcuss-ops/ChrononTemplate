@@ -1,0 +1,53 @@
+{
+  "schema": "chronontemplate.scene-camera-sequence.v1",
+  "name": "editorial_three",
+  "description": "frase 1 -> immagine -> testo: la mappa editoriale di base, ArcCarry tra gli stacchi",
+  "transition": "scene_camera_arc_carry",
+  "intensity": 1.0,
+  "travel_frames": 24,
+  "in_frame": 0,
+  "beats": [
+    {
+      "kind": "phrase",
+      "center": [960, 540, 0],
+      "half_width": 520,
+      "half_height": 110,
+      "hold": 60,
+      "content": {
+        "type": "text",
+        "text": "LA STORIA COMINCIA QUI",
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 96,
+        "fill": "#F2F0E8",
+        "size": [1420, 170]
+      }
+    },
+    {
+      "kind": "image",
+      "center": [960, 540, -80],
+      "half_width": 460,
+      "half_height": 260,
+      "hold": 60,
+      "content": {
+        "type": "image",
+        "asset": "assets/images/camera_reference.jpg",
+        "size": [920, 520]
+      }
+    },
+    {
+      "kind": "text",
+      "center": [960, 540, 0],
+      "half_width": 620,
+      "half_height": 150,
+      "hold": 60,
+      "content": {
+        "type": "text",
+        "text": "IL SECONDO ATTO",
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 120,
+        "fill": "#F2F0E8",
+        "size": [1240, 200]
+      }
+    }
+  ]
+}
