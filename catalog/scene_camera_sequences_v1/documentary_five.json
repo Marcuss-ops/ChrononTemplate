@@ -1,0 +1,82 @@
+{
+  "schema": "chronontemplate.scene-camera-sequence.v1",
+  "name": "documentary_five",
+  "description": "cinque stacchi documentari con PullBackReveal: parte stretta su ogni soggetto, atterra largo sul successivo",
+  "transition": "scene_camera_pull_back_reveal",
+  "intensity": 1.0,
+  "travel_frames": 30,
+  "in_frame": 0,
+  "beats": [
+    {
+      "kind": "phrase",
+      "center": [960, 540, 0],
+      "half_width": 500,
+      "half_height": 100,
+      "hold": 66,
+      "content": {
+        "type": "text",
+        "text": "TUTTO COMINCIA DA UN LUOGO",
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 84,
+        "fill": "#F2F0E8",
+        "size": [1420, 170]
+      }
+    },
+    {
+      "kind": "image",
+      "center": [960, 540, -80],
+      "half_width": 460,
+      "half_height": 260,
+      "hold": 66,
+      "content": {
+        "type": "image",
+        "asset": "assets/images/camera_reference.jpg",
+        "size": [920, 520]
+      }
+    },
+    {
+      "kind": "text",
+      "center": [960, 540, -40],
+      "half_width": 560,
+      "half_height": 110,
+      "hold": 66,
+      "content": {
+        "type": "text",
+        "text": "IL CORAGGIO DI CAMBIARE",
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 72,
+        "fill": "#92B4A6",
+        "size": [1240, 150]
+      }
+    },
+    {
+      "kind": "card",
+      "center": [960, 540, -120],
+      "half_width": 460,
+      "half_height": 260,
+      "hold": 66,
+      "content": {
+        "type": "shape",
+        "size": [920, 520],
+        "radius": 18,
+        "fill": "#101820",
+        "stroke": {"color": "#4AB5FA", "width": 2}
+      }
+    },
+    {
+      "kind": "text",
+      "center": [960, 540, 0],
+      "half_width": 640,
+      "half_height": 150,
+      "hold": 66,
+      "content": {
+        "type": "text",
+        "text": "E FINISCE COME UNA DOMANDA",
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 108,
+        "fill": "#F2F0E8",
+        "size": [1500, 190]
+      }
+    }
+  ]
+}
