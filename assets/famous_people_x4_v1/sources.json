@@ -1,0 +1,66 @@
+{
+  "schema": "chronontemplate.famous-people-x4-sources.v1",
+  "source_policy": "Wikimedia Commons file pages are the provenance and license records. Preserve creator and institution attribution when publishing each render.",
+  "people": [
+    {
+      "id": "einstein",
+      "name": "Albert Einstein",
+      "years": "1879–1955",
+      "asset_filename": "albert_einstein_1947.jpg",
+      "asset_path": "Chronon3d/assets/images/famous_people_x4_v1/albert_einstein_1947.jpg",
+      "dimensions": [4517, 5522],
+      "sha256": "77fd7fe864b59cb6dca0b372adb57387fb9f12c20c2b44719f14cc33bcab6162",
+      "download_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Albert_Einstein_1947.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Albert_Einstein_1947.jpg",
+      "creator": "Oren Jack Turner",
+      "collection": "Library of Congress, Prints and Photographs Division, digital ID cph.3b46036",
+      "license": "Public domain according to Wikimedia Commons; Commons notes possible country-specific term exceptions.",
+      "attribution": "Albert Einstein, photograph by Oren Jack Turner, 1947; Library of Congress, Prints and Photographs Division, cph.3b46036."
+    },
+    {
+      "id": "marie_curie",
+      "name": "Marie Curie",
+      "years": "1867–1934",
+      "asset_filename": "marie_curie_portrait_1900.jpg",
+      "asset_path": "Chronon3d/assets/images/famous_people_x4_v1/marie_curie_portrait_1900.jpg",
+      "dimensions": [609, 894],
+      "sha256": "21cde71d47011ef1ea6c80e87a956f1bccf90ab74e80ae38d515efbf3d52ab39",
+      "download_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Marie_Curie,_portrait,_1900.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Marie_Curie,_portrait,_1900.jpg",
+      "creator": "Unknown author",
+      "collection": "Collection Guy et Marie José Pallardy; source page: Bibliothèque interuniversitaire de santé",
+      "license": "Public Domain Mark 1.0 on Wikimedia Commons; note the source collection's reuse request to retain its provenance credit.",
+      "attribution": "Portrait of Marie Skłodowska-Curie, circa 1900; Collection Guy et Marie José Pallardy."
+    },
+    {
+      "id": "nikola_tesla",
+      "name": "Nikola Tesla",
+      "years": "1856–1943",
+      "asset_filename": "nikola_tesla_sarony_c1893.jpg",
+      "asset_path": "Chronon3d/assets/images/famous_people_x4_v1/nikola_tesla_sarony_c1893.jpg",
+      "dimensions": [585, 885],
+      "sha256": "6983f30373ea79701d3a48844446dca1993e2a58c462f828084ba7557f795d16",
+      "download_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Nikola_Tesla_by_Sarony_c1893.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Nikola_Tesla_by_Sarony_c1893.jpg",
+      "creator": "Napoleon Sarony",
+      "collection": "Harvard Art Museums, Special Collections, Fine Arts Library, object 119.1976.4699",
+      "license": "Public Domain Mark 1.0 on Wikimedia Commons; the Commons file page identifies no known copyright restrictions.",
+      "attribution": "Nikola Tesla, photograph by Napoleon Sarony, circa 1890–1896; Harvard Art Museums, object 119.1976.4699."
+    },
+    {
+      "id": "abraham_lincoln",
+      "name": "Abraham Lincoln",
+      "years": "1809–1865",
+      "asset_filename": "abraham_lincoln_gardner_1863.jpg",
+      "asset_path": "Chronon3d/assets/images/famous_people_x4_v1/abraham_lincoln_gardner_1863.jpg",
+      "dimensions": [1332, 1644],
+      "sha256": "8c65ed6f824264c23cd4d97c7355f25ece8bcfa2d4e1b0009c23a5fed53e5c5a",
+      "download_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Abraham_Lincoln_November_1863.jpg",
+      "file_page": "https://commons.wikimedia.org/wiki/File:Abraham_Lincoln_November_1863.jpg",
+      "creator": "Alexander Gardner",
+      "collection": "Archival portrait dated 8 November 1863",
+      "license": "Public Domain Mark 1.0 on Wikimedia Commons; public domain in the United States and stated source country.",
+      "attribution": "Abraham Lincoln, photograph by Alexander Gardner, 8 November 1863."
+    }
+  ]
+}

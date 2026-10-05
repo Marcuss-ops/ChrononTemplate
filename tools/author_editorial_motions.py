@@ -244,6 +244,7 @@ WEB_MOTIONS = [
         track("opacity", [(0, 0), (20, 1), (46, 1)])]),
 ]
 
+
 def caption_motion(mid, unit, enter, tracks, animators=None):
     m = {"id": mid, "category": "trump_entity_text_v1", "targets": ["text"],
          "unit": unit, "enter": enter, "tracks": tracks, "render_safe": True}

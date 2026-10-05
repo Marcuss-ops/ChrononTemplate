@@ -13,7 +13,7 @@ Presets (1920x1080, 5.0s @ 30fps, 500x680 cards @ X = -540 / 0 / +540):
   4. trio_arc_focus
   5. trio_depth_peel
 
-Target Google Drive Folder: 1X0nyiF82tMihNfRTAlij__bv7LwzZJ75
+Target Google Drive Folder: 1SXQQaEwJ2mk9_u0T2Fl15DQ1C6_A8kcX
 """
 
 from __future__ import annotations
@@ -27,14 +27,14 @@ from kit import Canvas, Plan, Suite, SuiteItem, fade, track
 
 CANVAS = Canvas(width=1920, height=1080, fps=30, duration_frames=150)
 OUT_DIR = Path(__file__).resolve().parents[1] / "out" / "multi_image_trio_v1"
-DRIVE_FOLDER_ID = "1X0nyiF82tMihNfRTAlij__bv7LwzZJ75"
+DRIVE_FOLDER_ID = "1SXQQaEwJ2mk9_u0T2Fl15DQ1C6_A8kcX"
 
 CARD_SIZE = (500, 680)
 LEFT_X, MID_X, RIGHT_X = -540, 0, 540  # ints: the originals' plan bytes encode positions as ints
 
-IMG_1 = "assets/images/card_trio_1.png"
-IMG_2 = "assets/images/card_trio_2.png"
-IMG_3 = "assets/images/card_trio_3.png"
+IMG_1 = "assets/famous_people_trio_v1/neil_armstrong.png"
+IMG_2 = "assets/famous_people_trio_v1/sally_ride.png"
+IMG_3 = "assets/famous_people_trio_v1/john_glenn.png"
 
 END = CANVAS.duration_frames - 1  # 149
 
@@ -243,6 +243,7 @@ SUITE = Suite(
     name="multi_image_trio_v1",
     out_dir=OUT_DIR,
     drive_folder=DRIVE_FOLDER_ID,
+    assets_root=Path(__file__).resolve().parents[1],
     items=[
         SuiteItem("trio_fan_reveal", build_01_trio_fan_reveal),
         SuiteItem("trio_center_priority", build_02_trio_center_priority),

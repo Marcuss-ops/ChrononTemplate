@@ -25,7 +25,7 @@ GEO=json.loads((TEMPLATE/'catalog/ne_50m_admin_0_countries.geojson').read_text()
 GEO1=json.loads((TEMPLATE/'catalog/ne_10m_admin_1_gujarat.geojson').read_text())
 SCENES=[
  ('brazil','Brazil','Brazil','Brasilia',(-17.0,-54.5),(-47.9,-15.8),'#52E2D5','glow_reveal',5.0),
- ('usa','United States','United States of America','Washington D.C.',(38.5,-97.0),(-77.04,38.9),'#72D7FF','sweep_in',5.3),
+ ('usa','United States','United States of America','Washington D.C.',(38.5,-97.0),(-77.04,38.9),'#52E2D5','sweep_in',5.3),
  ('iran','Iran','Iran','Tehran',(32.0,53.7),(51.39,35.69),'#F4C264','gold_focus',6.0),
  ('india','India','India','New Delhi',(22.5,79.0),(77.21,28.61),'#5BE1D0','contour_draw',5.4),
  ('gujarat','Gujarat','Gujarat','Ahmedabad',(22.5,71.6),(72.57,23.02),'#F263D5','detail_push',7.0),
@@ -99,7 +99,8 @@ class Builder:
    reveal=int(W*min(1.,progress*1.65));cv2.fillPoly(mask,[p for p in pts if len(p)>=3],255);mask[:,reveal:]=0
   else:cv2.fillPoly(mask,[p for p in pts if len(p)>=3],255)
   alpha=self._reveal(f)
-  if self.motion=='contour_draw':alpha*=.34+.22*progress
+  if self.slug=='usa':alpha*=.64
+  elif self.motion=='contour_draw':alpha*=.34+.22*progress
   elif self.motion=='gold_focus':alpha*=.62
   elif self.motion=='detail_push':alpha*=.3
   else:alpha*=.46
@@ -121,7 +122,8 @@ class Builder:
   if self.motion=='sweep_in':edge[:,int(W*min(1.,progress*1.65)):]=0
   # Bright, layered neon rim: broad aura, tight glow, then a clean saturated edge.
   reveal=self._reveal(f);base=frame.astype(np.float32);color=np.asarray(self.accent,dtype=np.float32)[None,None,:]
-  for sigma,strength in ((22,.50),(11,.62),(4,.52)):
+  glow_layers=((30,.78),(15,.82),(5,.72)) if self.slug=='usa' else ((22,.50),(11,.62),(4,.52))
+  for sigma,strength in glow_layers:
    halo=cv2.GaussianBlur(edge,(0,0),sigma).astype(np.float32)/255.0
    a=(halo*(strength*reveal))[:,:,None]
    base=base*(1.-a)+color*a
@@ -145,16 +147,38 @@ class Builder:
   radius=8 if self.slug=='iran' else 10
   cv2.circle(frame,(cx,cy),radius,(250,250,248),-1,cv2.LINE_AA)
   cv2.circle(frame,(cx,cy),radius+5,(250,250,248),2,cv2.LINE_AA)
-  self._text(frame,label,(cx+22,cy+9),27,(250,250,248),bold=True,shadow=True)
- def _text(self,frame,text,xy,size,color,bold=False,shadow=False,center=False):
+  font=ImageFont.truetype(str(ROOT/'Chronon3d/assets/fonts/Inter-SemiBold.ttf'),25)
+  image=Image.fromarray(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB));draw=ImageDraw.Draw(image)
+  box=draw.textbbox((0,0),label,font=font);tw,th=box[2]-box[0],box[3]-box[1]
+  card_w,card_h=tw+36,th+24
+  left=max(18,min(W-card_w-18,cx-card_w//2));top=max(18,min(H-card_h-18,cy+radius+30))
+  draw.rounded_rectangle((left,top,left+card_w,top+card_h),radius=card_h//2,
+                         fill=(8,17,26),outline=self.hex,width=2)
+  draw.text((left+(card_w-tw)//2-box[0],top+(card_h-th)//2-box[1]),label,
+            font=font,fill=(250,250,248))
+  frame[:]=cv2.cvtColor(np.asarray(image),cv2.COLOR_RGB2BGR)
+ def _text(self,frame,text,xy,size,color,bold=False,shadow=False,center=False,opacity=1.0,
+           font_file=None,tracking=0.0,stroke_width=0,stroke_fill=(7,35,40)):
   canvas=Image.fromarray(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB));draw=ImageDraw.Draw(canvas)
-  path='/home/pierone/.local/share/fonts/Montserrat-Black.ttf' if bold else '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+  path=str(font_file) if font_file else (str(ROOT/'Chronon3d/assets/fonts/Montserrat-Bold.ttf') if bold else str(ROOT/'Chronon3d/assets/fonts/Inter-Bold.ttf'))
   font=ImageFont.truetype(path,size=size)
   x,y=xy;box=draw.textbbox((0,0),text,font=font,stroke_width=0);w=box[2]-box[0];h=box[3]-box[1]
+  if tracking: w=max(0,round(sum(font.getlength(ch) for ch in text)+tracking*(len(text)-1)))
   if center:x-=w//2;y-=h//2
-  if shadow:draw.text((x,y),text,font=font,fill=color,stroke_width=2,stroke_fill=(8,16,22))
-  draw.text((x,y),text,font=font,fill=color,stroke_width=0)
-  frame[:]=cv2.cvtColor(np.asarray(canvas),cv2.COLOR_RGB2BGR)
+  if tracking:
+   cursor=x
+   for char in text:
+    draw.text((cursor,y),char,font=font,fill=color,stroke_width=stroke_width,
+              stroke_fill=stroke_fill)
+    cursor+=font.getlength(char)+tracking
+  else:
+   if shadow:draw.text((x,y),text,font=font,fill=color,stroke_width=2,stroke_fill=(8,16,22))
+   draw.text((x,y),text,font=font,fill=color,stroke_width=stroke_width,
+             stroke_fill=stroke_fill)
+  rendered=cv2.cvtColor(np.asarray(canvas),cv2.COLOR_RGB2BGR)
+  opacity=max(0.,min(1.,opacity))
+  if opacity>=.999:frame[:]=rendered
+  else:cv2.addWeighted(rendered,opacity,frame,1.-opacity,0,dst=frame)
  def _draw_context_labels(self,frame,zoom):
   if self.slug=='iran':
    labels=[('TÜRKİYE',39,35),('SYRIA',35.2,38),('IRAQ',33,44),('TURKMENISTAN',39,59),('AFGHANISTAN',34,66),('KUWAIT',29.5,47.5),('PAKISTAN',29,68),('SAUDI\nARABIA',24,45),('QATAR',25.3,51.2),('U.A.E.',24.4,54.4),('OMAN',21,57),('Caspian\nSea',40.5,51),('Persian\nGulf',26.5,51),('Gulf of\nOman',24.5,59)]
@@ -168,13 +192,14 @@ class Builder:
  def _draw_title(self,frame,f,progress,pts):
   alpha=ease((progress-.13)/.16)
   if alpha<=0:return
-  title={'brazil':'BRASIL','usa':'UNITED STATES','iran':'IRAN','india':'INDIA','gujarat':'Gujarat','italy':'ITALY','nigeria':'NIGERIA','china':'CHINA','korea':'SOUTH KOREA','australia':'AUSTRALIA'}[self.slug]
+  title={'brazil':'BRASIL','usa':'UNITED STATES','iran':'IRAN','india':'INDIA','gujarat':'GUJARAT','italy':'ITALY','nigeria':'NIGERIA','china':'CHINA','korea':'SOUTH KOREA','australia':'AUSTRALIA'}[self.slug]
   mask=np.zeros((H,W),np.uint8);cv2.fillPoly(mask,[p for p in pts if len(p)>=3],255)
   dist=cv2.distanceTransform(mask,cv2.DIST_L2,5);_,radius,_,(safe_x,safe_y)=cv2.minMaxLoc(dist)
   pose_zoom=self.pose(f)[2]
   title_lat,title_lon=(43.25,12.5) if self.slug=='italy' else self.anchor
   cx,cy=self._screen(title_lon,title_lat,pose_zoom)
   if not (0<=cx<W and 0<=cy<H and mask[cy,cx]):cx,cy=safe_x,safe_y
+  if self.slug=='usa':cx,cy=safe_x,safe_y
   if self.slug=='korea':
    # The reference places its title outside the peninsula with a fine leader.
    px,py=self._screen(126.98,37.57,self.pose(f)[2]);tx=min(W-400,px+110);ty=py-75
@@ -182,24 +207,35 @@ class Builder:
    cv2.line(frame,(px,py),(tx-14,ty+43),(250,250,248),2,cv2.LINE_AA)
    self._text(frame,title,(tx,ty),28,(250,250,248),bold=True)
    cv2.line(frame,(tx,ty+40),(tx+260,ty+40),(250,250,248),2,cv2.LINE_AA);return
-  size=104 if self.slug in ('brazil','usa','iran','india','china','australia') else (88 if self.slug in ('italy','nigeria') else 60)
+  size=84 if self.slug in ('brazil','usa','iran','india','china','australia') else (84 if self.slug in ('italy','nigeria') else 68)
   row=np.flatnonzero(mask[cy]);segment=[]
   if row.size:
    cuts=np.where(np.diff(row)>1)[0]+1
    for group in np.split(row,cuts):
     if group.size and group[0]<=cx<=group[-1]:segment=group;break
   max_width=max(120,(int(segment[-1]-segment[0]+1)*.84) if len(segment) else radius*2.0)
-  font_path='/home/pierone/.local/share/fonts/Montserrat-Black.ttf'
+  font_path=str(ROOT/'Chronon3d/assets/fonts/Montserrat-ExtraBold.ttf')
   while size>38 and ImageFont.truetype(font_path,size=size).getbbox(title)[2]>max_width:size-=2
+  if self.slug=='usa':
+   font=ImageFont.truetype(font_path,size=size)
+   # The left-to-right country reveal must pass under the complete title first.
+   text_right=cx+font.getlength(title)/2+20
+   reveal_complete=min(1.,text_right/(W*1.65))
+   alpha*=ease((progress-reveal_complete)/.08)
+   if alpha<=.005:return
   if self.slug=='gujarat':
    # The reference uses a single map tag instead of a centered country title.
-   tag='Gujarat';font=ImageFont.truetype('/home/pierone/.local/share/fonts/Montserrat-Black.ttf',34)
+   tag='Gujarat';font=ImageFont.truetype(font_path,34)
    image=Image.fromarray(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB));draw=ImageDraw.Draw(image);b=draw.textbbox((0,0),tag,font=font);tw=b[2]-b[0]
    x=cx-tw//2-20;y=cy-30;draw.rectangle((x,y,x+tw+40,y+66),fill=(250,250,248));draw.text((x+20,y+8),tag,font=font,fill=(15,18,20));draw.polygon([(cx-15,y+66),(cx+15,y+66),(cx,y+91)],fill=(250,250,248));frame[:]=cv2.cvtColor(np.asarray(image),cv2.COLOR_RGB2BGR);return
-  self._text(frame,title,(cx,cy),size,(250,248,244),bold=True,shadow=False,center=True)
+  self._text(frame,title,(cx,cy),size,(255,255,255),bold=False,shadow=False,center=True,
+            opacity=alpha,font_file=font_path,tracking=-1.2,
+            stroke_width=2 if self.slug=='usa' else 0,stroke_fill=(5,65,67))
  def render_frame_fast(self,sampler,f):
   lat,lon,zoom=self.pose(f);self.current_center=(lat,lon);frame=sampler.sample(lat,lon,zoom,W,H)
-  prog=f/(N-1);pts=self._draw_country(frame,f,zoom,prog);self._draw_context_labels(frame,zoom);self._draw_pin(frame,f,zoom,prog);self._draw_title(frame,f,prog,pts)
+  prog=f/(N-1);pts=self._draw_country(frame,f,zoom,prog);self._draw_context_labels(frame,zoom)
+  if self.slug!='italy':self._draw_pin(frame,f,zoom,prog)
+  self._draw_title(frame,f,prog,pts)
   return frame
 
 def render_one(scene,out,workers,block):
