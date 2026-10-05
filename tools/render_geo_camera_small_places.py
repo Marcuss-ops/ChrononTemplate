@@ -134,17 +134,21 @@ def draw_spring_pin(frame: np.ndarray, point: tuple[int, int], progress: float,
 
 def draw_location_glow(frame: np.ndarray, point: tuple[int, int], progress: float,
                        area_radius_px: int = 0) -> None:
-    """Soft cyan location beacon with an optional geographic-area halo."""
+    """Pulsing cyan ring and bright center point with an optional area halo."""
     import cv2
     import numpy as np
     cx, cy = point
     t = max(0.0, min(1.0, progress))
     pulse = 0.5 + 0.5 * math.sin(t * math.tau * 1.7)
-    # Draw light on a separate layer so the core stays crisp while its glow is soft.
+    radius = 40 + int(6 * pulse)
+    cyan = (213, 226, 82)
+    # Keep the ring crisp while adding a soft halo in the same map accent.
     light = np.zeros_like(frame)
-    cv2.circle(light, (cx, cy), 30 + int(7 * pulse), (255, 190, 70), -1, cv2.LINE_AA)
-    light = cv2.GaussianBlur(light, (0, 0), 14)
-    cv2.addWeighted(frame, 1.0, light, 0.36, 0, dst=frame)
+    cv2.circle(light, (cx, cy), radius, cyan, 4, cv2.LINE_AA)
+    cv2.circle(light, (cx, cy), radius + 12, cyan, 2, cv2.LINE_AA)
+    light = cv2.GaussianBlur(light, (0, 0), 16)
+    cv2.addWeighted(frame, 1.0, light, 0.66, 0, dst=frame)
+    cv2.circle(frame, (cx, cy), radius, cyan, 3, cv2.LINE_AA)
     if area_radius_px > 2:
         ring = np.zeros_like(frame)
         cv2.circle(ring, (cx, cy), area_radius_px, (180, 110, 30), 3, cv2.LINE_AA)
@@ -152,10 +156,9 @@ def draw_location_glow(frame: np.ndarray, point: tuple[int, int], progress: floa
         ring = cv2.GaussianBlur(ring, (0, 0), 10)
         cv2.addWeighted(frame, 1.0, ring, 0.22, 0, dst=frame)
         cv2.circle(frame, (cx, cy), area_radius_px, (255, 175, 70), 2, cv2.LINE_AA)
-    # Small luminous center with a white-hot center and restrained cyan edge.
-    cv2.circle(frame, (cx, cy), 11, (255, 170, 45), -1, cv2.LINE_AA)
-    cv2.circle(frame, (cx, cy), 7, (255, 245, 225), -1, cv2.LINE_AA)
-    cv2.circle(frame, (cx, cy), 3, (255, 255, 255), -1, cv2.LINE_AA)
+    # Bright center dot reads clearly against both the imagery and the ring.
+    cv2.circle(frame, (cx, cy), 10, (8, 30, 36), -1, cv2.LINE_AA)
+    cv2.circle(frame, (cx, cy), 7, (248, 252, 250), -1, cv2.LINE_AA)
 
 
 MAP_LABEL_ANIMATIONS = (
@@ -167,11 +170,11 @@ MAP_LABEL_ANIMATIONS = (
 
 def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
                           progress: float, animation: str = "gentle_fade") -> None:
-    """Draw a fixed, centered map label with a restrained animated entrance."""
+    """Draw the city name directly below its animated beacon."""
     import cv2
     import numpy as np
     from PIL import Image, ImageDraw, ImageFont
-    label = " ".join(str(text or "").split()).upper()
+    label = " ".join(str(text or "").split())
     if not label or animation == "none":
         return
     if animation not in MAP_LABEL_ANIMATIONS:
@@ -181,42 +184,41 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     # Each treatment changes only the opacity/glow timing. The type remains
     # the same size and at the same screen coordinate for every frame.
     timing = {
-        "gentle_fade": (0.50, 0.23, 0.28), "soft_glow": (0.52, 0.18, 0.32),
-        "clean_fade": (0.49, 0.24, 0.22), "word_soft_fade": (0.51, 0.26, 0.30),
-        "slow_fade": (0.50, 0.20, 0.26), "quiet_bloom": (0.48, 0.22, 0.34),
-        "quick_fade": (0.53, 0.18, 0.24), "silky_fade": (0.50, 0.25, 0.28),
-        "subtle_halo": (0.51, 0.22, 0.30), "cinematic_fade": (0.49, 0.20, 0.26),
+        "gentle_fade": (0.50, 0.23), "soft_glow": (0.52, 0.18),
+        "clean_fade": (0.49, 0.24), "word_soft_fade": (0.51, 0.26),
+        "slow_fade": (0.50, 0.20), "quiet_bloom": (0.48, 0.22),
+        "quick_fade": (0.53, 0.18), "silky_fade": (0.50, 0.25),
+        "subtle_halo": (0.51, 0.22), "cinematic_fade": (0.49, 0.20),
     }
-    start, duration, glow_strength = timing[animation]
+    start, duration = timing[animation]
     t = max(0.0, min(1.0, (progress - start) / duration))
     ease = t * t * (3.0 - 2.0 * t)
     alpha = ease
-    glow_pulse = 0.85 + 0.15 * math.sin(math.pi * ease)
     if not label or alpha <= 0.005:
         return
-    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 68)
-    bbox = font.getbbox(label, stroke_width=3)
+    font_path = BASE_DIR / "Chronon3d/assets/fonts/Inter-SemiBold.ttf"
+    font = ImageFont.truetype(str(font_path), 42)
+    bbox = font.getbbox(label)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    # Anchor the label under the beacon, center aligned, with no per-frame
-    # position or scale changes.
-    x = max(22, min(w - tw - 22, cx - tw // 2))
-    y = min(h - th - 12, cy + 70)
-    pad = 34
-    x0, y0 = max(0, x - pad), max(0, y - pad)
-    x1, y1 = min(w, x + tw + pad), min(h, y + th + pad)
+    # Keep the name centered below the ring with a short connector to its point.
+    text_x = max(20, min(w - tw - 20, cx - tw // 2))
+    text_y = max(20, min(h - th - 20, cy + 68))
+    connector = np.zeros_like(frame)
+    connector_top = text_y - 6
+    if connector_top > cy + 53:
+        cv2.line(connector, (cx, cy + 53), (cx, connector_top), (213, 226, 82), 2, cv2.LINE_AA)
+        cv2.addWeighted(frame, 1.0, connector, alpha * 0.8, 0, dst=frame)
+    x0, y0 = max(0, text_x - 8), max(0, text_y - 8)
+    x1, y1 = min(w, text_x + tw + 8), min(h, text_y + th + 8)
     roi = frame[y0:y1, x0:x1]
     if roi.size == 0:
         return
     label_image = Image.new("RGBA", (roi.shape[1], roi.shape[0]), (0, 0, 0, 0))
     draw = ImageDraw.Draw(label_image)
-    local = (x - x0 - bbox[0], y - y0 - bbox[1])
+    local = (text_x - x0 - bbox[0], text_y - y0 - bbox[1])
     draw.text(local, label, font=font, fill=(255, 255, 255, 255),
-              stroke_width=4, stroke_fill=(0, 0, 0, 255))
+              stroke_width=2, stroke_fill=(6, 20, 28, 240))
     alpha_mask = np.asarray(label_image)[:, :, 3]
-    glow_layer = np.zeros_like(roi)
-    glow_layer[alpha_mask > 0] = (255, 185, 95)
-    blur = cv2.GaussianBlur(glow_layer, (0, 0), 7)
-    cv2.addWeighted(roi, 1.0, blur, glow_strength * glow_pulse * alpha, 0, dst=roi)
     overlay = np.asarray(label_image)[:, :, :3][:, :, ::-1].copy()
     mask = (alpha_mask.astype(np.float32) / 255.0 * alpha)[:, :, None]
     roi[:] = np.clip(roi.astype(np.float32) * (1.0 - mask) + overlay * mask,

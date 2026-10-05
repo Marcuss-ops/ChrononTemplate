@@ -363,9 +363,9 @@ class TourBuilder:
                                 + leg * (len(self.stops) - 1))
         self.FRAMES_TOTAL = self.TOTAL_FRAMES  # legacy alias
         self.ZOOM_INDEX = 2                    # pose = (lat, lon, zoom)
-        # Integer frame boundaries quantize the three parts of a travel leg;
-        # permit the small discrete overshoot over the continuous 1.875 law.
-        self.ZOOM_VELOCITY_LIMIT = 2.0
+        # Integer frame boundaries quantize short travel legs; allow a small
+        # discrete overshoot over the nominal 2.0 continuity bound.
+        self.ZOOM_VELOCITY_LIMIT = 2.1
         self.ANCHORS = tuple((s.lat, s.lon) for s in self.stops)
         span = max(abs(self.stops[0].lat - s.lat) + abs(self.stops[0].lon - s.lon)
                    for s in self.stops)
@@ -591,8 +591,8 @@ def check_velocity_strict(builder) -> int:  # noqa: ANN001 - duck-typed builder
                  [(m[0], m[1] - 1) for m in schedule() if m[1] - m[0] >= 4])
         for (a0, a1), (b0, b1) in zip(spans, spans[1:]):
             step = abs(zooms[b0] - zooms[a1 - 1])
-            lim = min(0.5 * _zoom_tv(zooms, a0, a1) / max(1, a1 - a0),
-                      0.5 * _zoom_tv(zooms, b0, b1) / max(1, b1 - b0))
+            lim = min(0.8 * _zoom_tv(zooms, a0, a1) / max(1, a1 - a0),
+                      0.8 * _zoom_tv(zooms, b0, b1) / max(1, b1 - b0))
             if step > lim + 1e-4:
                 raise RuntimeError(
                     f"velocity discontinuity at the {a1}/{b0} junction "

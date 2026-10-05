@@ -3,7 +3,7 @@
 
 Single committed writer of the four official V1 families:
 
-    brush_v1       12 vector-trait motions (path + stroke + trim)
+    brush_v1       12 document traits + 11 phrase-ready path/stroke variants
     web_rect_v1    12 browser-card / UI-panel motions (2.5D rounded rect)
     paint_v1       12 area/matte reveal motions (field mask recipes)
     light_leak_v1  12 luminous overlay motions (screen/add light recipes)
@@ -37,6 +37,7 @@ CAMERA_BACKED = {"position_z", "rotation_x", "rotation_y"}
 BRUSH_PATH_KINDS = {
     "line", "ellipse", "check", "cross", "arrow",
     "scribble", "wave", "corner_marks", "double_line", "rounded_rect",
+    "underline", "underline_double", "underline_wave",
 }
 
 
@@ -191,7 +192,7 @@ def brush_family():
     marker = {"color": "#FACC15", "width": 56}
     ink = {"color": "#0F172A", "width": 5}
     chalk = {"color": "#F8FAFC", "width": 9}
-    return [
+    original = [
         brush_motion("brush_marker_highlight", 36, "line", marker),
         brush_motion("brush_dynamic_underline", 30, "line", ink),
         brush_motion("brush_circle_focus", 40, "ellipse", ink),
@@ -205,6 +206,24 @@ def brush_family():
         brush_motion("brush_chalk_reveal", 44, "scribble", chalk),
         brush_motion("brush_pencil_circle", 40, "ellipse", ink),
     ]
+    # Phrase variants adapted from the approved Brush reference examples.
+    # Their strokes use bright ink so they remain legible on dark editorial
+    # plates, while the original document-oriented Brush motions stay intact.
+    phrase_specs = [
+        ("brush_phrase_red_underline", "underline", {"color": "#E12636", "width": 12}, 34),
+        ("brush_phrase_white_underline", "underline", {"color": "#F1F0EB", "width": 4}, 30),
+        ("brush_phrase_lower_rule", "underline", {"color": "#E12636", "width": 6}, 32),
+        ("brush_phrase_circle_focus", "ellipse", {"color": "#F1F0EB", "width": 5}, 40),
+        ("brush_phrase_white_light_sweep", "underline_wave", {"color": "#E8E7E2", "width": 3}, 36),
+        ("brush_phrase_arrow_point", "arrow", {"color": "#F1F0EB", "width": 4}, 36),
+        ("brush_phrase_red_brush_underline", "underline_wave", {"color": "#E12636", "width": 15}, 42),
+        ("brush_phrase_signature_flourish", "underline_wave", {"color": "#E8E7E2", "width": 3}, 42),
+        ("brush_phrase_gold_marker", "line", {"color": "#D9A64E", "width": 28}, 34),
+        ("brush_phrase_red_endpoint_rule", "underline", {"color": "#E12636", "width": 5}, 36),
+        ("brush_phrase_white_double_underline", "underline_double", {"color": "#E8E7E2", "width": 3}, 40),
+    ]
+    variants = [brush_motion(mid, enter, path_kind, stroke) for mid, path_kind, stroke, enter in phrase_specs]
+    return original + variants
 
 
 # ── 2. WEB RECT V1 — browser cards and UI panels ────────────────────────────
@@ -448,13 +467,16 @@ FAMILIES = {
     "light_leak_v1": light_leak_family,
 }
 
+FAMILY_COUNTS = {"brush_v1": 23, "web_rect_v1": 12, "paint_v1": 12, "light_leak_v1": 12}
+
 
 def build_all() -> dict:
     motions = {}
     for family, builder in FAMILIES.items():
         rows = builder()
-        if len(rows) != 12:
-            raise SystemExit(f"{family}: built {len(rows)} motions, want 12")
+        expected = FAMILY_COUNTS[family]
+        if len(rows) != expected:
+            raise SystemExit(f"{family}: built {len(rows)} motions, want {expected}")
         for row in rows:
             if row["id"] in motions:
                 raise SystemExit(f"duplicate motion id {row['id']}")
@@ -487,7 +509,7 @@ def main() -> None:
         if missing:
             print(f"missing {len(missing)} visual accents motions: {missing}", file=sys.stderr)
             raise SystemExit(1)
-        print("visual accents V1: all 48 motions present")
+        print("visual accents V1: all 59 motions present (brush_v1=23, other families=12 each)")
         return
 
     added = [m for mid, m in motions.items() if mid not in existing_ids]
@@ -495,7 +517,7 @@ def main() -> None:
     catalog["motions"].sort(key=lambda m: m["id"])
     CATALOG.write_text(json.dumps(catalog, indent=2) + "\n")
     print(f"visual accents V1: added {len(added)} motions "
-          f"({', '.join(f'{k}=12' for k in FAMILIES)})")
+          f"({', '.join(f'{k}={FAMILY_COUNTS[k]}' for k in FAMILIES)})")
 
 
 if __name__ == "__main__":

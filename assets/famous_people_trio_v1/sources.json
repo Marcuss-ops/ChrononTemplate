@@ -1,0 +1,73 @@
+{
+  "suite": "multi_image_trio_v1",
+  "canvas_use": "Three simultaneous image cards; NASA historical portraits; editorial motion study.",
+  "sources": [
+    {
+      "id": "neil_armstrong",
+      "name": "Neil Armstrong",
+      "nasa_id": "9018112",
+      "url": "https://images-assets.nasa.gov/image/9018112/9018112~large.jpg",
+      "record": "https://images-api.nasa.gov/search?q=Neil%20Armstrong%20portrait&media_type=image",
+      "credit": "NASA/MSFC",
+      "source_file": "sources/neil_armstrong.jpg",
+      "source_sha256": "e2df27af1485952c26d4db3743932acfd5fbe083730c7fc36d2600dd128a009b",
+      "source_bytes": 225760,
+      "source_dimensions": [
+        1708,
+        1920
+      ],
+      "prepared_asset": "neil_armstrong.png",
+      "prepared_dimensions": [
+        1000,
+        1360
+      ],
+      "prepared_sha256": "f3264b4554ce95c0912e1c1646d8f2b521071083a875da473099cafa2d4df1ce",
+      "license_note": "NASA-created public information/editorial image; retain NASA credit; no NASA endorsement implied. Identifiable-person commercial/publicity rights may require permission."
+    },
+    {
+      "id": "sally_ride",
+      "name": "Sally Ride",
+      "nasa_id": "S84-37256",
+      "url": "https://images-assets.nasa.gov/image/S84-37256/S84-37256~large.jpg",
+      "record": "https://images-api.nasa.gov/search?q=Sally%20Ride%20portrait&media_type=image",
+      "credit": "NASA/JSC",
+      "source_file": "sources/sally_ride.jpg",
+      "source_sha256": "3d4b3ae84d47445366b9a95396aeae56b9eae30567d6132083fa1ab019f4469a",
+      "source_bytes": 229283,
+      "source_dimensions": [
+        1536,
+        1920
+      ],
+      "prepared_asset": "sally_ride.png",
+      "prepared_dimensions": [
+        1000,
+        1360
+      ],
+      "prepared_sha256": "efc3d9e89e7a3569d585512dc9f7617a891b9c1d8f1dd263be37cc13860df432",
+      "license_note": "NASA-created public information/editorial image; retain NASA credit; no NASA endorsement implied. Identifiable-person commercial/publicity rights may require permission."
+    },
+    {
+      "id": "john_glenn",
+      "name": "John Glenn",
+      "nasa_id": "S62-05540",
+      "url": "https://images-assets.nasa.gov/image/S62-05540/S62-05540~large.jpg",
+      "record": "https://images-api.nasa.gov/search?q=John%20Glenn%20portrait&media_type=image",
+      "credit": "NASA/JSC",
+      "source_file": "sources/john_glenn.jpg",
+      "source_sha256": "9293416ff041d5ddc553235752397ad31d1fed1799cc30af3a9d14f1dea71314",
+      "source_bytes": 274426,
+      "source_dimensions": [
+        1509,
+        1920
+      ],
+      "prepared_asset": "john_glenn.png",
+      "prepared_dimensions": [
+        1000,
+        1360
+      ],
+      "prepared_sha256": "5b674ae9d4ef1a54f1faf2ff900059b8690d0342fe89cbc0808f4a0b88c0d9f9",
+      "license_note": "NASA-created public information/editorial image; retain NASA credit; no NASA endorsement implied. Identifiable-person commercial/publicity rights may require permission."
+    }
+  ],
+  "usage_guidelines": "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+}
