@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and optionally render ten 5-second entity-caption motion studies.
+"""Build and optionally render fifteen 5-second Trump entity-caption studies.
 
 The motion recipes are owned by ``author_editorial_motions.py`` and its
 ChrononTemplate catalog. This tool resolves those recipes into native V3
@@ -24,13 +24,7 @@ OUTPUT = TEMPLATE / "out/entity_caption_premium_v2"
 ASSET_ROOT = OUTPUT
 PORTRAIT = ROOT / "RenderingGen/renderinggen/out/editorial_v1/assets/canary/people-demo-portrait.png"
 CLI = CHRONON / "build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
-MOTION_IDS = [
-    "entity_caption_blur_reveal", "entity_caption_tracking_snap",
-    "entity_caption_word_spring", "entity_caption_glyph_rise",
-    "entity_caption_side_glide", "entity_caption_warm_reveal",
-    "entity_caption_flip_settle", "entity_caption_word_drop",
-    "entity_caption_focus_punch", "entity_caption_neon_breathe",
-]
+MOTION_IDS = [f"trump_entity_text_{index:02d}" for index in range(1, 16)]
 PALETTES = [
     ("#F5F8FF", "#77E8FF", "assets/fonts/Montserrat-Bold.ttf"),
     ("#F6F1FF", "#B38AFF", "assets/fonts/Space-Grotesk.ttf"),
@@ -61,7 +55,7 @@ def track(raw: dict) -> dict:
 
 
 def build_plan(motion: dict, index: int) -> dict:
-    white, accent, font = PALETTES[index]
+    white, accent, font = PALETTES[index % len(PALETTES)]
     duration = 48
     caption_tracks = [track(item) for item in motion["tracks"]]
     return {
@@ -93,8 +87,9 @@ def prepare_assets() -> None:
     portrait = Image.open(PORTRAIT).convert("RGB")
     kicker_font = ImageFont.truetype(str(ASSET_ROOT / "assets/fonts/Space-Grotesk.ttf"), 28)
     label_font = ImageFont.truetype(str(ASSET_ROOT / "assets/fonts/Inter-SemiBold.ttf"), 22)
-    for index, (white, accent, _) in enumerate(PALETTES, start=1):
-        font_path = ASSET_ROOT / PALETTES[index - 1][2]
+    for index in range(1, len(MOTION_IDS) + 1):
+        white, accent, font_name = PALETTES[(index - 1) % len(PALETTES)]
+        font_path = ASSET_ROOT / font_name
         title_font = ImageFont.truetype(str(font_path), 94)
         title = Image.new("RGBA", (1200, 240), (0, 0, 0, 0))
         mask = Image.new("L", title.size, 0)
@@ -133,15 +128,15 @@ def prepare_assets() -> None:
         draw.text((870, 325), "SYNTHETIC PORTRAIT  /  MOTION STUDY", font=kicker_font, fill="#91A3B8")
         draw.rounded_rectangle((870, 718, 1330, 724), radius=3, fill=accent)
         draw.text((870, 784), "CHRONONTEMPLATE  ·  EDITORIAL ENTITY SERIES", font=label_font, fill="#718299")
-        draw.text((870, 855), f"MOTION {index:02d}  /  10", font=label_font, fill=accent)
+        draw.text((870, 855), f"MOTION {index:02d}  /  15", font=label_font, fill=accent)
         plate.save(ASSET_ROOT / f"assets/canary/plate-{index:02d}.png", optimize=True)
 
 
 def make_contact_sheet() -> Path:
-    sheet = Image.new("RGB", (1940, 5 * 572 + 60), "#080D16")
+    sheet = Image.new("RGB", (1940, ((len(MOTION_IDS) + 1) // 2) * 572 + 60), "#080D16")
     draw = ImageDraw.Draw(sheet)
     label_font = ImageFont.truetype(str(ASSET_ROOT / "assets/fonts/Inter-SemiBold.ttf"), 22)
-    draw.text((28, 18), "CHRONONTEMPLATE  /  ENTITY TEXT MOTION V2", font=label_font, fill="#F3F6FB")
+    draw.text((28, 18), "CHRONONTEMPLATE  /  TRUMP ENTITY TEXT V1", font=label_font, fill="#F3F6FB")
     for index, motion_id in enumerate(MOTION_IDS):
         clip = OUTPUT / f"{motion_id}.mp4"
         frame = subprocess.run(["ffmpeg", "-v", "error", "-ss", "1.2", "-i", str(clip),
@@ -151,7 +146,7 @@ def make_contact_sheet() -> Path:
         col, row = index % 2, index // 2
         x, y = 20 + col * 960, 54 + row * 572
         sheet.paste(image, (x, y))
-        draw.text((x + 8, y + 534), motion_id.replace("entity_caption_", "").replace("_", " ").upper(),
+        draw.text((x + 8, y + 534), motion_id.replace("trump_entity_text_", "TRUMP TEXT ").replace("_", " ").upper(),
                   font=label_font, fill="#E7EDF6")
     path = OUTPUT / "entity_caption_premium_v2_contact_sheet.png"
     sheet.save(path, optimize=True)
@@ -160,7 +155,7 @@ def make_contact_sheet() -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--render", action="store_true", help="render all ten MP4 previews with Chronon3D")
+    parser.add_argument("--render", action="store_true", help="render all fifteen MP4 previews with Chronon3D")
     parser.add_argument("--contact-only", action="store_true", help="build the contact sheet from existing MP4 renders")
     parser.add_argument("--cli", type=Path, default=CLI)
     args = parser.parse_args()

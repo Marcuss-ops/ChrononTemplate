@@ -1,0 +1,12 @@
+{
+  "frame": 75,
+  "software": {
+    "status": "PASS",
+    "rgba_bytes": 8294400
+  },
+  "vulkan": {
+    "status": "FAIL",
+    "reason": "CompositeNode native SourceOver composite failed; CPU fallback forbidden"
+  },
+  "parity": "BLOCKED: Vulkan did not produce a frame"
+}

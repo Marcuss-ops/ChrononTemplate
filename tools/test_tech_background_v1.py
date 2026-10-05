@@ -53,6 +53,27 @@ class TechBackgroundTests(unittest.TestCase):
                 blobs = [layer for layer in layers if layer.get("shape", {}).get("type") == "ellipse"]
                 self.assertEqual(len(blobs), 3)
 
+    def test_field_seed_and_absolute_drift_are_explicit_and_repeatable(self):
+        ramp = [{"position": 0, "color": [0, 0, 0, 1]},
+                {"position": 1, "color": [1, 1, 1, 1]}]
+        first = tech.field_layer("field", 0, 90, 42, "perlin", ramp,
+                                 frequency=3, drift=(.02, -.01))
+        same = tech.field_layer("field", 0, 90, 42, "perlin", ramp,
+                                frequency=3, drift=(.02, -.01))
+        different = tech.field_layer("field", 0, 90, 43, "perlin", ramp,
+                                     frequency=3, drift=(.02, -.01))
+        self.assertEqual(first, same)
+        self.assertNotEqual(first["shape"]["field"]["seed"],
+                            different["shape"]["field"]["seed"])
+        self.assertEqual(first["shape"]["field_drift"], [.02, -.01])
+
+    def test_animation_tracks_have_absolute_sorted_unique_frame_keys(self):
+        plan = tech.build_gallery(self.family)
+        for item in plan["layers"]:
+            for track in item.get("animation", {}).get("tracks", []):
+                frames = [key["frame"] for key in track["keyframes"]]
+                self.assertEqual(frames, sorted(set(frames)), item["id"])
+
 
 if __name__ == "__main__":
     unittest.main()
