@@ -1,0 +1,112 @@
+{
+  "suite": "premium_visual_fx_canaries_5s",
+  "format": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "frames": 150,
+    "duration_seconds": 5.0,
+    "checkpoint_frames": [
+      0,
+      30,
+      60,
+      90,
+      120,
+      149
+    ]
+  },
+  "plans_and_mp4": "ChrononTemplate/out/premium_fx_canaries_5s/",
+  "goldens": "ChrononTemplate/tests/visual/",
+  "plan_validation": {
+    "status": "PASS",
+    "validated_plans": 5
+  },
+  "video_probe": {
+    "status": "PASS",
+    "all_videos_match_format": true
+  },
+  "random_access": {
+    "background": {
+      "status": "PASS",
+      "frames": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        149
+      ]
+    },
+    "light_leak": {
+      "status": "PASS",
+      "frames": [
+        0,
+        30,
+        60,
+        90,
+        120,
+        149
+      ]
+    },
+    "rgb": {
+      "status": "FAIL",
+      "frames": [
+        90,
+        120
+      ],
+      "details": {
+        "f90_max_abs_delta": 255,
+        "f120_max_abs_delta": 255
+      }
+    },
+    "bloom": {
+      "status": "FAIL",
+      "frames": [
+        90
+      ],
+      "details": {
+        "max_abs_delta": 98,
+        "diff_bbox": [
+          620,
+          525,
+          1300,
+          742
+        ]
+      }
+    },
+    "premium_torture": {
+      "status": "FAIL",
+      "frames": [
+        90
+      ],
+      "details": {
+        "max_abs_delta": 251,
+        "diff_bbox": [
+          387,
+          444,
+          1495,
+          620
+        ]
+      }
+    }
+  },
+  "rgb_settle": {
+    "f0_equals_f149": true
+  },
+  "bloom_bounds": {
+    "status": "FAIL",
+    "observation": "f120 shows a clipped rectangular halo around the text/rectangle layer"
+  },
+  "cpu_vulkan_bloom_f75": {
+    "status": "BLOCKED",
+    "software": "PASS",
+    "vulkan": "FAIL: native SourceOver composite failed; CPU fallback forbidden"
+  },
+  "coverage_limits": [
+    "CLI RenderPlan schema rejects the Field2D fields field_ramp, field_drift, and field_render_scale; background canary uses radial gradients and turbulent_displace instead.",
+    "HDR values above 1 are not represented by this SDR H.264 canary path.",
+    "Premultiplied-alpha/transparent-background certification is not covered by these opaque video canaries.",
+    "Internal floating-point NaN/Inf and temporal flicker amplitudes are not independently measured by the raw RGBA frame comparison."
+  ],
+  "overall_certification": "FAIL: do not certify PREMIUM VISUAL FX V1 until random-access and Bloom bounds/Vulkan failures are resolved."
+}

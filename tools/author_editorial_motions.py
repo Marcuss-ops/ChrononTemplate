@@ -4,15 +4,16 @@
 This script is the single committed writer of the V1 milestone motion
 vocabulary added on top of the hand-authored catalog:
 
-    entity_caption_v1   6 caption motions (image + animated name)
+    entity_caption_v1   6 shared legacy-safe text motions
+    trump_entity_text_v1 15 premium Trump entity-name motions
     editorial_image_v1  14 editorial image motions
-    text_3d_v1           8 text 2.5D/3D motions
+    text_3d_v1          10 premium text 2.5D/3D motions
     web                  +2 web focus motions (cursor focus, section spotlight)
 
-It is idempotent: every motion is inserted only when absent, every existing
-motion is left byte-identical, and the result is validated against the same
-rules the C++ emitter enforces (resting entrances, neutral 3D resting poses,
-keyframe monotonicity). Re-running after a catalog refresh is a no-op.
+It is idempotent: missing motions are inserted, authored changes replace their
+matching catalog rows, and the result is validated against the same rules the
+C++ emitter enforces (resting entrances, neutral 3D resting poses, keyframe
+monotonicity). Re-running after a catalog refresh is a no-op.
 
 Usage:
     tools/author_editorial_motions.py            apply the V1 families
@@ -29,6 +30,15 @@ from pathlib import Path
 CATALOG = Path(__file__).resolve().parents[1] / "catalog/motion_catalog.v1.json"
 
 CAMERA_BACKED = {"position_z", "rotation_x", "rotation_y"}
+REMOVED_MOTION_IDS = {
+    "text_3d_character_wave", "text_3d_depth_float", "text_3d_depth_push",
+    "text_3d_glyph_depth_wave", "text_3d_word_yaw_cascade",
+    "entity_caption_blur_reveal", "entity_caption_tracking_snap",
+    "entity_caption_word_spring", "entity_caption_glyph_rise",
+    "entity_caption_side_glide", "entity_caption_warm_reveal",
+    "entity_caption_flip_settle", "entity_caption_word_drop",
+    "entity_caption_focus_punch", "entity_caption_neon_breathe",
+}
 
 
 def track(prop, keys, easing="out_cubic"):
@@ -73,6 +83,15 @@ def editorial_image(mid, enter, tracks, *, bounds=(40, 240)):
 
 
 def text_3d(mid, unit, enter, tracks, animators=None):
+    # Tighten the whole entrance by 15% while keeping all authored holds,
+    # fades, and transforms synchronized on the same frame grid.
+    enter = max(1, round(enter * 0.85))
+    tracks = [
+        {**t, "keyframes": [
+            {**k, "frame": round(k["frame"] * 0.85)} for k in t["keyframes"]
+        ]}
+        for t in tracks
+    ]
     m = {"id": mid, "category": "text_3d_v1", "targets": ["text"], "unit": unit,
          "enter": enter, "tracks": tracks,
          "duration_bounds": {"minimum_frames": 30, "maximum_frames": 240},
@@ -156,42 +175,62 @@ IMAGE_MOTIONS = [
 
 TEXT_3D_MOTIONS = [
     text_3d("text_3d_camera_push", "layer", 46, [
-        track("position_z", [(0, 200), (46, 0)], "in_out_sine"),
-        track("scale", [(0, 0.8), (46, 1.0)], "in_out_sine"),
-        track("opacity", [(0, 0), (18, 1), (46, 1)])]),
-    text_3d("text_3d_character_wave", "glyph", 60, [
-        track("position_z", [(0, 40), (60, 0)]),
-        track("opacity", [(0, 0), (16, 1), (60, 1)])],
-        [animator("text_3d_character_wave_text", "glyph", [
-            track("position_y", [(0, -18), (30, 10), (60, 0)], "in_out_sine"),
-            track("opacity", [(0, 0), (14, 1)])], stagger=1)]),
-    text_3d("text_3d_depth_push", "layer", 40, [
-        track("position_z", [(0, 260), (40, 0)]),
-        track("opacity", [(0, 0), (20, 1), (40, 1)])]),
+        track("position_z", [(0, 54), (46, 0)], "in_out_sine"),
+        track("rotation_x", [(0, 7), (46, 0)], "in_out_cubic"),
+        track("rotation_y", [(0, -10), (46, 0)], "in_out_cubic"),
+        track("scale", [(0, 0.975), (46, 1.0)], "in_out_sine"),
+        track("opacity", [(0, 0), (28, 1), (46, 1)])]),
     text_3d("text_3d_perspective_drop", "layer", 48, [
-        track("rotation_x", [(0, -24), (48, 0)], "in_out_cubic"),
-        track("position_y", [(0, -40), (48, 0)]),
-        track("position_z", [(0, 120), (48, 0)]),
-        track("opacity", [(0, 0), (20, 1), (48, 1)])]),
-    text_3d("text_3d_roll_depth", "layer", 44, [
-        track("rotation_z", [(0, -10), (44, 0)], "in_out_cubic"),
-        track("position_z", [(0, 180), (44, 0)]),
-        track("opacity", [(0, 0), (18, 1), (44, 1)])]),
-    text_3d("text_3d_tilt_rise", "layer", 44, [
-        track("rotation_x", [(0, 18), (44, 0)], "in_out_cubic"),
-        track("position_y", [(0, 30), (44, 0)]),
-        track("opacity", [(0, 0), (18, 1), (44, 1)])]),
-    text_3d("text_3d_word_cascade", "word", 60, [
-        track("position_z", [(0, 80), (60, 0)]),
-        track("rotation_y", [(0, -14), (60, 0)], "in_out_cubic"),
-        track("opacity", [(0, 0), (18, 1), (60, 1)])],
-        [animator("text_3d_word_cascade_text", "word", [
-            track("position_y", [(0, 24), (44, 0)]),
-            track("opacity", [(0, 0), (18, 1)])], stagger=3)]),
-    text_3d("text_3d_yaw_flip_in", "layer", 30, [
-        track("rotation_y", [(0, -70), (30, 0)], "in_out_cubic"),
-        track("position_z", [(0, -120), (30, 0)]),
-        track("opacity", [(0, 0), (18, 1), (30, 1)])]),
+        track("rotation_x", [(0, -9), (48, 0)], "in_out_cubic"),
+        track("rotation_y", [(0, 7), (48, 0)], "in_out_cubic"),
+        track("position_y", [(0, -14), (48, 0)]),
+        track("position_z", [(0, 44), (48, 0)], "out_cubic"),
+        track("opacity", [(0, 0), (28, 1), (48, 1)])]),
+    text_3d("text_3d_roll_depth", "layer", 46, [
+        track("rotation_z", [(0, -2), (46, 0)], "in_out_cubic"),
+        track("rotation_x", [(0, 7), (46, 0)], "in_out_cubic"),
+        track("rotation_y", [(0, -8), (46, 0)], "in_out_cubic"),
+        track("position_z", [(0, 36), (46, 0)], "in_out_sine"),
+        track("opacity", [(0, 0), (28, 1), (46, 1)])]),
+    text_3d("text_3d_tilt_rise", "layer", 46, [
+        track("rotation_x", [(0, 8), (46, 0)], "in_out_cubic"),
+        track("rotation_y", [(0, -6), (46, 0)], "in_out_cubic"),
+        track("position_y", [(0, 12), (46, 0)]),
+        track("position_z", [(0, 26), (46, 0)], "out_cubic"),
+        track("opacity", [(0, 0), (28, 1), (46, 1)])]),
+    text_3d("text_3d_word_cascade", "layer", 52, [
+        track("position_y", [(0, 14), (52, 0)]),
+        track("position_z", [(0, 38), (52, 0)], "out_cubic"),
+        track("rotation_y", [(0, -8), (52, 0)], "in_out_cubic"),
+        track("rotation_x", [(0, 6), (52, 0)], "in_out_cubic"),
+        track("opacity", [(0, 0), (30, 1), (52, 1)])]),
+    text_3d("text_3d_yaw_flip_in", "layer", 46, [
+        track("rotation_y", [(0, -14), (46, 0)], "in_out_cubic"),
+        track("rotation_x", [(0, 7), (46, 0)], "in_out_cubic"),
+        track("position_z", [(0, 36), (46, 0)], "in_out_sine"),
+        track("opacity", [(0, 0), (28, 1), (46, 1)])]),
+    text_3d("text_3d_pitch_lift", "layer", 48, [
+        track("rotation_x", [(0, 10), (48, 0)], "in_out_cubic"),
+        track("rotation_y", [(0, -8), (48, 0)], "in_out_cubic"),
+        track("position_y", [(0, 10), (48, 0)]),
+        track("position_z", [(0, 32), (48, 0)], "out_cubic"),
+        track("opacity", [(0, 0), (30, 1), (48, 1)])]),
+    text_3d("text_3d_yaw_sweep", "layer", 48, [
+        track("rotation_y", [(0, 12), (48, 0)], "in_out_cubic"),
+        track("rotation_x", [(0, -6), (48, 0)], "in_out_cubic"),
+        track("position_x", [(0, 34), (48, 0)]),
+        track("position_z", [(0, 30), (48, 0)], "out_cubic"),
+        track("opacity", [(0, 0), (30, 1), (48, 1)])]),
+    text_3d("text_3d_double_axis_reveal", "layer", 48, [
+        track("rotation_x", [(0, -9), (48, 0)], "in_out_cubic"),
+        track("rotation_y", [(0, 11), (48, 0)], "in_out_cubic"),
+        track("position_z", [(0, 46), (48, 0)], "in_out_sine"),
+        track("opacity", [(0, 0), (30, 1), (48, 1)])]),
+    text_3d("text_3d_orbit_lock", "layer", 50, [
+        track("rotation_x", [(0, 9), (50, 0)], "in_out_cubic"),
+        track("rotation_y", [(0, -12), (50, 0)], "in_out_cubic"),
+        track("position_z", [(0, 52), (50, 0)], "in_out_sine"),
+        track("opacity", [(0, 0), (30, 1), (50, 1)])]),
 ]
 
 WEB_MOTIONS = [
@@ -206,58 +245,63 @@ WEB_MOTIONS = [
 ]
 
 def caption_motion(mid, unit, enter, tracks, animators=None):
-    m = {"id": mid, "category": "entity_caption_v1", "targets": ["text"],
-         "unit": unit, "enter": enter, "tracks": tracks}
+    m = {"id": mid, "category": "trump_entity_text_v1", "targets": ["text"],
+         "unit": unit, "enter": enter, "tracks": tracks, "render_safe": True}
+    if any(t["property"] in CAMERA_BACKED for t in tracks):
+        m["requires_3d"] = True
     if animators is not None:
         m["text_animators"] = animators
     return m
 
 
 CAPTION_MOTIONS = [
-    caption_motion("entity_caption_blur_reveal", "layer", 48, [
-        track("position_y", [(0, 26), (48, 0)]),
-        track("opacity", [(0, 0), (20, 1), (48, 1)])]),
-    caption_motion("entity_caption_tracking_snap", "layer", 44, [
-        track("scale_x", [(0, 0.78), (26, 1.04), (44, 1)]),
-        track("opacity", [(0, 0), (16, 1), (44, 1)])]),
-    caption_motion("entity_caption_word_spring", "word", 56, [
-        track("scale", [(0, 0.92), (32, 1.02), (56, 1)]),
-        track("opacity", [(0, 0), (18, 1), (56, 1)])], [
-            animator("entity_caption_word_spring_text", "word", [
-                track("position_y", [(0, 28), (32, -3), (48, 0)]),
-                track("opacity", [(0, 0), (14, 1)])], stagger=2)]),
-    caption_motion("entity_caption_glyph_rise", "glyph", 54, [
-        track("opacity", [(0, 0), (20, 1), (54, 1)])], [
-            animator("entity_caption_glyph_rise_text", "glyph", [
-                track("position_y", [(0, 22), (36, 0)]),
-                track("scale", [(0, 0.82), (30, 1.03), (42, 1)]),
-                track("opacity", [(0, 0), (12, 1)])], stagger=1)]),
-    caption_motion("entity_caption_side_glide", "layer", 42, [
-        track("position_x", [(0, -96), (30, 4), (42, 0)]),
-        track("opacity", [(0, 0), (16, 1), (42, 1)])]),
-    caption_motion("entity_caption_warm_reveal", "layer", 48, [
-        track("scale", [(0, 0.88), (30, 1.02), (48, 1)], "out_back"),
-        track("position_y", [(0, 14), (38, 0)]),
-        track("opacity", [(0, 0), (16, 1), (48, 1)])]),
-    caption_motion("entity_caption_flip_settle", "layer", 48, [
-        track("rotation_z", [(0, -5), (30, 1), (48, 0)], "out_cubic"),
-        track("position_x", [(0, 42), (38, 0)]),
-        track("opacity", [(0, 0), (14, 1), (48, 1)])]),
-    caption_motion("entity_caption_word_drop", "word", 58, [
-        track("position_y", [(0, -18), (42, 0)]),
-        track("opacity", [(0, 0), (20, 1), (58, 1)])], [
-            animator("entity_caption_word_drop_text", "word", [
-                track("position_y", [(0, -36), (30, 4), (44, 0)]),
-                track("opacity", [(0, 0), (14, 1)])], stagger=3)]),
-    caption_motion("entity_caption_focus_punch", "layer", 46, [
-        track("scale", [(0, 1.18), (22, 0.97), (46, 1)], "out_back"),
-        track("opacity", [(0, 0), (12, 1), (46, 1)])]),
-    caption_motion("entity_caption_neon_breathe", "glyph", 54, [
-        track("opacity", [(0, 0), (24, 1), (54, 1)])], [
-            animator("entity_caption_neon_breathe_text", "glyph", [
-                track("scale", [(0, 0.88), (28, 1.05), (46, 1)]),
-                track("tracking", [(0, 3), (48, 0)]),
-                track("opacity", [(0, 0), (16, 1)])], stagger=1)]),
+    caption_motion("trump_entity_text_01", "layer", 38, [
+        track("position_x", [(0, 34), (38, 0)]), track("opacity", [(0, 0), (15, 1), (38, 1)])]),
+    caption_motion("trump_entity_text_02", "layer", 40, [
+        track("position_y", [(0, 24), (40, 0)]), track("opacity", [(0, 0), (16, 1), (40, 1)])]),
+    caption_motion("trump_entity_text_03", "layer", 36, [
+        track("scale", [(0, 0.90), (27, 1.015), (36, 1)], "out_cubic"),
+        track("opacity", [(0, 0), (13, 1), (36, 1)])]),
+    caption_motion("trump_entity_text_04", "layer", 42, [
+        track("blur", [(0, 12), (24, 0), (42, 0)], "out_cubic"),
+        track("opacity", [(0, 0), (14, 1), (42, 1)])]),
+    caption_motion("trump_entity_text_05", "layer", 40, [
+        track("rotation_z", [(0, -3), (40, 0)], "out_cubic"),
+        track("position_y", [(0, 12), (40, 0)]), track("opacity", [(0, 0), (14, 1), (40, 1)])]),
+    caption_motion("trump_entity_text_06", "layer", 42, [
+        track("position_z", [(0, 48), (42, 0)], "in_out_sine"),
+        track("rotation_y", [(0, -8), (42, 0)], "in_out_cubic"),
+        track("opacity", [(0, 0), (18, 1), (42, 1)])]),
+    caption_motion("trump_entity_text_07", "layer", 38, [
+        track("position_x", [(0, -42), (38, 0)]), track("rotation_z", [(0, 2), (38, 0)]),
+        track("opacity", [(0, 0), (14, 1), (38, 1)])]),
+    caption_motion("trump_entity_text_08", "layer", 42, [
+        track("rotation_y", [(0, 9), (42, 0)], "in_out_cubic"),
+        track("position_z", [(0, 34), (42, 0)], "out_cubic"),
+        track("opacity", [(0, 0), (17, 1), (42, 1)])]),
+    caption_motion("trump_entity_text_09", "layer", 36, [
+        track("scale_x", [(0, 0.76), (22, 1.02), (36, 1)]),
+        track("opacity", [(0, 0), (12, 1), (36, 1)])]),
+    caption_motion("trump_entity_text_10", "layer", 40, [
+        track("position_x", [(0, 46), (40, 0)]), track("position_y", [(0, -12), (40, 0)]),
+        track("opacity", [(0, 0), (16, 1), (40, 1)])]),
+    caption_motion("trump_entity_text_11", "layer", 42, [
+        track("rotation_x", [(0, -7), (42, 0)], "in_out_cubic"),
+        track("position_y", [(0, 18), (42, 0)]), track("opacity", [(0, 0), (16, 1), (42, 1)])]),
+    caption_motion("trump_entity_text_12", "layer", 38, [
+        track("rotation_z", [(0, 4), (26, -1), (38, 0)], "in_out_cubic"),
+        track("scale", [(0, 0.94), (38, 1)]), track("opacity", [(0, 0), (13, 1), (38, 1)])]),
+    caption_motion("trump_entity_text_13", "layer", 44, [
+        track("position_y", [(0, -22), (44, 0)]), track("position_z", [(0, 26), (44, 0)]),
+        track("opacity", [(0, 0), (18, 1), (44, 1)])]),
+    caption_motion("trump_entity_text_14", "layer", 40, [
+        track("rotation_x", [(0, 5), (40, 0)], "in_out_cubic"),
+        track("rotation_y", [(0, 7), (40, 0)], "in_out_cubic"),
+        track("scale", [(0, 0.96), (40, 1)]), track("opacity", [(0, 0), (15, 1), (40, 1)])]),
+    caption_motion("trump_entity_text_15", "layer", 42, [
+        track("position_x", [(0, -25), (42, 0)]), track("position_z", [(0, 42), (42, 0)]),
+        track("rotation_y", [(0, -6), (42, 0)], "in_out_cubic"),
+        track("opacity", [(0, 0), (18, 1), (42, 1)])]),
 ]
 
 CAPTION_MOTION_IDS = [
@@ -284,33 +328,36 @@ def main() -> int:
     expected = expected_motions()
     missing = [m for m in expected if m["id"] not in existing]
     stale = [m for m in expected if m["id"] in existing and existing[m["id"]] != m]
+    removed = [mid for mid in sorted(REMOVED_MOTION_IDS) if mid in existing]
     missing_captions = [mid for mid in CAPTION_MOTION_IDS if mid not in existing]
 
     if args.check:
-        if missing or stale or missing_captions:
+        if missing or stale or missing_captions or removed:
             for m in missing:
                 print(f"missing: {m['id']}", file=sys.stderr)
             for m in stale:
                 print(f"drifted: {m['id']}", file=sys.stderr)
             for mid in missing_captions:
                 print(f"missing caption motion: {mid}", file=sys.stderr)
+            for mid in removed:
+                print(f"must be removed: {mid}", file=sys.stderr)
             return 1
-        print(f"editorial V1 motions present and identical ({len(expected)} + {len(CAPTION_MOTION_IDS)} captions)")
+        print(f"editorial V1 motions present and identical ({len(expected)} authored + 6 shared captions)")
         return 0
 
-    if not missing and not stale and not missing_captions:
+    if not missing and not stale and not missing_captions and not removed:
         print("nothing to do: all V1 motions already present")
         return 0
 
     raw = CATALOG.read_text()
-    to_add = missing
-    if to_add:
-        block = ",\n".join(
-            "\n".join("    " + line for line in json.dumps(m, indent=2, ensure_ascii=False).split("\n"))
-            for m in to_add)
+    to_write = missing + stale
+    if removed:
+        doc["motions"] = [m for m in doc["motions"] if m["id"] not in REMOVED_MOTION_IDS]
+        raw = json.dumps(doc, indent=2, ensure_ascii=False) + "\n"
+    if missing:
         # Insert each motion before the first motion that sorts after it, so
         # the file keeps its alphabetical-by-id layout.
-        for m in to_add:
+        for m in missing:
             ids = sorted(x["id"] for x in doc["motions"])
             following = next((i for i in ids if i > m["id"]), None)
             marker = ('    {\n      "id": "%s",' % following) if following else None
@@ -318,6 +365,8 @@ def main() -> int:
                 raw = raw.replace(marker, block_for(m) + ",\n" + marker)
             else:
                 raise SystemExit(f"no unique insertion anchor for {m['id']}")
+    for m in stale:
+        raw = replace_motion_block(raw, m)
     CATALOG.write_text(raw)
 
     # Re-verify from disk.
@@ -326,12 +375,45 @@ def main() -> int:
     for m in expected:
         if have.get(m["id"]) != m:
             raise SystemExit(f"post-write verification failed for {m['id']}")
-    print(f"applied: {[m['id'] for m in to_add]}")
+    print(f"applied: {[m['id'] for m in to_write]}")
     return 0
 
 
 def block_for(m: dict) -> str:
     return "\n".join("    " + line for line in json.dumps(m, indent=2, ensure_ascii=False).split("\n"))
+
+
+def replace_motion_block(raw: str, motion: dict) -> str:
+    marker = '    {\n      "id": "%s",' % motion["id"]
+    if raw.count(marker) != 1:
+        raise SystemExit(f"no unique replacement block for {motion['id']}")
+    start = raw.index(marker)
+    depth = 0
+    in_string = False
+    escaped = False
+    end = None
+    for i in range(start, len(raw)):
+        char = raw[i]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                end = i + 1
+                break
+    if end is None:
+        raise SystemExit(f"unterminated replacement block for {motion['id']}")
+    return raw[:start] + block_for(motion) + raw[end:]
 
 
 if __name__ == "__main__":

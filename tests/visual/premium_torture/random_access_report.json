@@ -1,0 +1,39 @@
+{
+  "0": {
+    "exact": true,
+    "direct_bytes": 8294400,
+    "sequence_bytes": 8294400
+  },
+  "30": {
+    "exact": true,
+    "direct_bytes": 8294400,
+    "sequence_bytes": 8294400
+  },
+  "60": {
+    "exact": true,
+    "direct_bytes": 8294400,
+    "sequence_bytes": 8294400
+  },
+  "90": {
+    "exact": false,
+    "direct_bytes": 8294400,
+    "sequence_bytes": 8294400,
+    "max_abs_delta": 251,
+    "diff_bbox": [
+      387,
+      444,
+      1495,
+      620
+    ]
+  },
+  "120": {
+    "exact": true,
+    "direct_bytes": 8294400,
+    "sequence_bytes": 8294400
+  },
+  "149": {
+    "exact": true,
+    "direct_bytes": 8294400,
+    "sequence_bytes": 8294400
+  }
+}
