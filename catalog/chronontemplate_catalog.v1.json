@@ -2931,6 +2931,42 @@
         "implementation": "OpacityPlate"
       },
       {
+        "id": "transition_barn_doors",
+        "timing_class": "legacy",
+        "minimum_frames": 2,
+        "maximum_frames": 0,
+        "recommended_frames": 24,
+        "weight_percent": 0,
+        "implementation": "ShapePlateDoors"
+      },
+      {
+        "id": "transition_curtain_lift",
+        "timing_class": "legacy",
+        "minimum_frames": 2,
+        "maximum_frames": 0,
+        "recommended_frames": 24,
+        "weight_percent": 0,
+        "implementation": "ShapePlateDoors"
+      },
+      {
+        "id": "transition_diamond_iris",
+        "timing_class": "legacy",
+        "minimum_frames": 2,
+        "maximum_frames": 0,
+        "recommended_frames": 24,
+        "weight_percent": 0,
+        "implementation": "ShapePolygonIris"
+      },
+      {
+        "id": "transition_four_way_doors",
+        "timing_class": "legacy",
+        "minimum_frames": 2,
+        "maximum_frames": 0,
+        "recommended_frames": 24,
+        "weight_percent": 0,
+        "implementation": "ShapePlateDoors"
+      },
+      {
         "id": "lightleak_flash_sweep",
         "timing_class": "normal",
         "minimum_frames": 6,
@@ -33114,19 +33150,6 @@
       "typewriter_slide_in",
       "typewriter_soft_lift",
       "typewriter_tracking",
-      "typewriter_modern_01_monospace_block_cursor",
-      "typewriter_modern_02_kinetic_scramble",
-      "typewriter_modern_04_character_bounce",
-      "typewriter_modern_05_backspace_correction",
-      "typewriter_modern_06_glow_beam_sweep",
-      "typewriter_modern_07_word_snap",
-      "typewriter_modern_08_mechanical_y_shift",
-      "typewriter_modern_09_highlighter_expansion",
-      "typewriter_modern_10_weight_ramp",
-      "typewriter_modern_11_dynamic_auto_wrap",
-      "typewriter_modern_12_glitch_pop",
-      "typewriter_modern_13_elastic_leading_cursor",
-      "typewriter_modern_15_paper_punch_stencil",
       "apple_focus_rise",
       "apple_soft_scale",
       "apple_word_cascade",

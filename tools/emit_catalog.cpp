@@ -554,11 +554,12 @@ int main(int argc, char** argv) {
         validateFrameRange("micro_frames", 4, 6);
         validateFrameRange("normal_frames", 7, 10);
         validateFrameRange("hero_frames", 11, 16);
-        if (!transitions.contains("recipes") || !transitions["recipes"].is_array() || transitions["recipes"].size() != 16)
-            fail("transitions.recipes must define exactly eight legacy and eight rapid looks");
+        if (!transitions.contains("recipes") || !transitions["recipes"].is_array() || transitions["recipes"].size() != 20)
+            fail("transitions.recipes must define exactly twelve legacy and eight rapid looks");
         const std::set<std::string> expectedTransitionIDs{
             "transition_wipe", "transition_push_through", "transition_dip_to_black", "transition_dip_to_color",
             "transition_blinds", "transition_iris_circle", "transition_glitch_slices", "transition_light_leak",
+            "transition_barn_doors", "transition_curtain_lift", "transition_diamond_iris", "transition_four_way_doors",
             "lightleak_flash_sweep", "lightleak_corner_burn", "lightleak_whiteout", "lightleak_diagonal_cut",
             "lightleak_double_pass", "lightleak_film_burn", "lightleak_center_burst", "lightleak_horizontal_whip"};
         std::set<std::string> transitionIDs;

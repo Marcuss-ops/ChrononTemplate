@@ -30,10 +30,12 @@ namespace {
     void everyLookHasAStableCatalogId() {
         section("transitions expose stable catalog ids");
         const std::vector<TransitionLook> looks = transitionLooks();
-        check(looks.size() == 16, "the pack ships eight legacy and eight rapid looks");
+        check(looks.size() == 20, "the pack ships twelve legacy and eight rapid looks");
         const char* known[] = {"transition_wipe", "transition_push_through", "transition_dip_to_black",
                                "transition_dip_to_color", "transition_blinds", "transition_iris_circle",
                                "transition_glitch_slices", "transition_light_leak",
+                               "transition_barn_doors", "transition_curtain_lift",
+                               "transition_diamond_iris", "transition_four_way_doors",
                                "lightleak_flash_sweep", "lightleak_corner_burn", "lightleak_whiteout",
                                "lightleak_diagonal_cut", "lightleak_double_pass", "lightleak_film_burn",
                                "lightleak_center_burst", "lightleak_horizontal_whip"};

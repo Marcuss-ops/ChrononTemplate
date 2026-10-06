@@ -129,6 +129,32 @@ namespace chronontemplate {
     /// count mismatch, or degenerate fractions.
     [[nodiscard]] DataVizComposition addDataVizChart(TemplateScene& scene, const DataVizSpec& spec);
 
+    // ── The step-line half ──────────────────────────────────────────────────
+
+    /// What the step-line chart authored: axis-aligned runs and risers plus one
+    /// dot per value. The line walks left-to-right in reading order — a flat
+    /// run at each value's level, then a riser to the next level — so the
+    /// whole trace is rectangles, never a rotated plate.
+    struct DataVizLineComposition {
+        std::vector<LayerHandle*> runs{};
+        std::vector<LayerHandle*> risers{};
+        std::vector<LayerHandle*> dots{};
+        std::vector<LayerHandle*> valueLabels{};
+        LayerHandle* title{nullptr};
+        int inFrame{0};
+        int endFrame{0};
+        int peakFrame{0};
+    };
+
+    /// Author a step-line chart over `spec`'s values into `scene`. Runs draw
+    /// themselves left-to-right on staggered anchored scale tracks and land by
+    /// the midpoint; each dot pops exactly when its run lands and each label
+    /// fades in with its dot. Shares `DataVizSpec` validation with the bar
+    /// chart (1..24 values, positive max, highlight selects the emphasized dot,
+    /// which carries the slow opacity pulse). Deterministic: no RNG anywhere.
+    [[nodiscard]] DataVizLineComposition addDataVizLineChart(TemplateScene& scene,
+                                                             const DataVizSpec& spec);
+
 }// namespace chronontemplate
 
 #endif//CHRONONTEMPLATE_CAPTIONS_DATAVIZ_CAPTIONS_DATAVIZ_PACK_HPP

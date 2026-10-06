@@ -60,8 +60,9 @@ backgrounds/                BackgroundPack — editorial documentary/grid/scan/d
 entities_with_text/         DocumentarySnapshotPack + YouTubeSubscribe
 map/                        ModernMapPack — styled plate, labels and camera beat
 camera_roll/                TitleCameraPack + SceneCameraPack — camera-only motion
-transitions/                TransitionPack — declarative wipe/dip/blinds/iris/glitch/leak cuts
-captions_dataviz/           CaptionsDataVizPack — PCM beat grid, beat-timed captions, bar charts
+transitions/                TransitionPack — twelve legacy + eight rapid looks
+captions_dataviz/           CaptionsDataVizPack — PCM beat grid, beat-timed captions, bar + step-line charts
+composers/                  LayoutComposer — flex row/column/grid boards plus FLIP moves
 ```
 
 ## Tools layout
@@ -369,7 +370,8 @@ const TransitionComposition cut = addTransition(scene, spec);
 `transitionId` names each look (`transition_wipe`, `transition_push_through`,
 `transition_dip_to_black`, `transition_dip_to_color`, `transition_blinds`,
 `transition_iris_circle`, `transition_glitch_slices`,
-`transition_light_leak`, `lightleak_flash_sweep`, `lightleak_corner_burn`,
+`transition_light_leak`, `transition_barn_doors`, `transition_curtain_lift`,
+`transition_diamond_iris`, `transition_four_way_doors`, `lightleak_flash_sweep`, `lightleak_corner_burn`,
 `lightleak_whiteout`, `lightleak_diagonal_cut`, `lightleak_double_pass`,
 `lightleak_film_burn`, `lightleak_center_burst`, and
 `lightleak_horizontal_whip`); `coverFrame` is the authored peak/cover point.

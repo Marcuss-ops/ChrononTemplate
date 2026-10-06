@@ -350,6 +350,104 @@ namespace chronontemplate {
             return out;
         }
 
+        // ── BarnDoors / CurtainLift: paired plates meeting at the cover ────
+
+        TransitionComposition addPairedDoors(TemplateScene& scene, const TransitionSpec& spec,
+                                             bool vertical) {
+            const Vector2 canvas = scene.canvas();
+            const float fps = scene.fps();
+            const int cover = spec.duration / 2;
+            TransitionComposition out = rangeOf(spec, cover);
+            const float half = vertical ? canvas.x * 0.5f : canvas.y * 0.5f;
+            const Vector2 size = vertical ? Vector2(half + 1.f, canvas.y)
+                                          : Vector2(canvas.x, half + 1.f);
+            const float span = vertical ? canvas.x : canvas.y;
+            const float fixed = vertical ? canvas.y * 0.5f : canvas.x * 0.5f;
+            for (int i = 0; i < 2; ++i) {
+                const float sign = i == 0 ? -1.f : 1.f;
+                LayerHandle& door = scene.shape(ShapeSpec{.size = size,
+                                                           .fillColor = spec.plateColor,
+                                                           .name = spec.name + "_door_" + std::to_string(i)});
+                // Closed: the pair tiles the frame (centres at 1/4 and 3/4).
+                // Open: parked fully off-screen on its own side.
+                const float closedAlong = span * 0.5f + sign * span * 0.25f;
+                const float openAlong = sign < 0.f ? -(half + 1.f) * 0.5f
+                                                   : span + (half + 1.f) * 0.5f;
+                auto at = [&](float along) -> Vector3 {
+                    return vertical ? Vector3(along, fixed, kPlateZ)
+                                    : Vector3(fixed, along, kPlateZ);
+                };
+                door.position(at(openAlong).x, at(openAlong).y, kPlateZ)
+                    .anchor(size.x * 0.5f, size.y * 0.5f)
+                    .alive(spec.inFrame, out.endFrame);
+                Track<Vector3>& pos = door.layer().tracks.position;
+                pos.add(frameTime(spec.inFrame, fps), at(openAlong), Easing::easeInOut());
+                pos.add(frameTime(spec.inFrame + cover, fps), at(closedAlong), Easing::easeInOut());
+                pos.add(frameTime(out.endFrame, fps), at(openAlong), Easing::easeInOut());
+                out.plates.push_back(&door);
+            }
+            return out;
+        }
+
+        // ── DiamondIris: a diamond plate growing over the cut, like IrisCircle
+
+        TransitionComposition addDiamondIris(TemplateScene& scene, const TransitionSpec& spec) {
+            const Vector2 canvas = scene.canvas();
+            const float fps = scene.fps();
+            const float d = std::max(canvas.x, canvas.y);
+            const int cover = spec.duration / 2;
+            TransitionComposition out = rangeOf(spec, cover);
+            ShapeSpec diamond{.size = Vector2(d, d),
+                              .fillColor = spec.plateColor,
+                              .name = spec.name + "_diamond"};
+            diamond.geometry = ShapeGeometry::Polygon;
+            diamond.polygonPoints = 4;
+            diamond.polygonRotationDegrees = 45.f;
+            LayerHandle& plate = scene.shape(diamond);
+            plate.position(canvas.x * 0.5f, canvas.y * 0.5f, kPlateZ)
+                 .anchor(d * 0.5f, d * 0.5f)
+                 .alive(spec.inFrame, out.endFrame);
+            const Vector3 shut(1.05f, 1.05f, 1.f);
+            const Vector3 open(0.02f, 0.02f, 1.f);
+            Track<Vector3>& scale = plate.layer().tracks.scale;
+            scale.add(frameTime(spec.inFrame, fps), open, Easing::easeInOut());
+            scale.add(frameTime(spec.inFrame + cover, fps), shut, Easing::easeInOut());
+            scale.add(frameTime(out.endFrame, fps), open, Easing::easeInOut());
+            out.plates.push_back(&plate);
+            return out;
+        }
+
+        // ── FourWayDoors: four plates converging on the centre at the cover ──
+
+        TransitionComposition addFourWayDoors(TemplateScene& scene, const TransitionSpec& spec) {
+            const Vector2 canvas = scene.canvas();
+            const float fps = scene.fps();
+            const int cover = spec.duration / 2;
+            TransitionComposition out = rangeOf(spec, cover);
+            const Vector2 hSize(canvas.x * 0.5f + 1.f, canvas.y * 0.5f + 1.f);
+            const float cx = canvas.x * 0.5f;
+            const float cy = canvas.y * 0.5f;
+            for (int i = 0; i < 4; ++i) {
+                LayerHandle& door = scene.shape(ShapeSpec{.size = hSize,
+                                                           .fillColor = spec.plateColor,
+                                                           .name = spec.name + "_four_" + std::to_string(i)});
+                const float qx = (i % 2 == 0) ? -1.f : 1.f;
+                const float qy = (i < 2) ? -1.f : 1.f;
+                const Vector3 closed(cx + qx * hSize.x * 0.5f, cy + qy * hSize.y * 0.5f, kPlateZ);
+                const Vector3 open(cx + qx * (hSize.x * 0.5f + canvas.x * 0.5f),
+                                   cy + qy * (hSize.y * 0.5f + canvas.y * 0.5f), kPlateZ);
+                door.position(open.x, open.y, open.z)
+                    .anchor(hSize.x * 0.5f, hSize.y * 0.5f)
+                    .alive(spec.inFrame, out.endFrame);
+                Track<Vector3>& pos = door.layer().tracks.position;
+                pos.add(frameTime(spec.inFrame, fps), open, Easing::easeInOut());
+                pos.add(frameTime(spec.inFrame + cover, fps), closed, Easing::easeInOut());
+                pos.add(frameTime(out.endFrame, fps), open, Easing::easeInOut());
+                out.plates.push_back(&door);
+            }
+            return out;
+        }
+
         // ── GlitchSlices: bands that flash and shift, deterministically ──────
 
 
@@ -416,6 +514,10 @@ namespace chronontemplate {
             case TransitionLook::IrisCircle: return "transition_iris_circle";
             case TransitionLook::GlitchSlices: return "transition_glitch_slices";
             case TransitionLook::LightLeak: return "transition_light_leak";
+            case TransitionLook::BarnDoors: return "transition_barn_doors";
+            case TransitionLook::CurtainLift: return "transition_curtain_lift";
+            case TransitionLook::DiamondIris: return "transition_diamond_iris";
+            case TransitionLook::FourWayDoors: return "transition_four_way_doors";
             case TransitionLook::LightLeakFlashSweep: return "lightleak_flash_sweep";
             case TransitionLook::LightLeakCornerBurn: return "lightleak_corner_burn";
             case TransitionLook::LightLeakWhiteout: return "lightleak_whiteout";
@@ -432,6 +534,8 @@ namespace chronontemplate {
         return {TransitionLook::Wipe, TransitionLook::PushThrough, TransitionLook::DipToBlack,
                 TransitionLook::DipToColor, TransitionLook::Blinds, TransitionLook::IrisCircle,
                 TransitionLook::GlitchSlices, TransitionLook::LightLeak,
+                TransitionLook::BarnDoors, TransitionLook::CurtainLift,
+                TransitionLook::DiamondIris, TransitionLook::FourWayDoors,
                 TransitionLook::LightLeakFlashSweep, TransitionLook::LightLeakCornerBurn,
                 TransitionLook::LightLeakWhiteout, TransitionLook::LightLeakDiagonalCut,
                 TransitionLook::LightLeakDoublePass, TransitionLook::LightLeakFilmBurn,
@@ -528,6 +632,18 @@ namespace chronontemplate {
 
             case TransitionLook::GlitchSlices:
                 return addGlitch(scene, spec);
+
+            case TransitionLook::BarnDoors:
+                return addPairedDoors(scene, spec, true);
+
+            case TransitionLook::CurtainLift:
+                return addPairedDoors(scene, spec, false);
+
+            case TransitionLook::DiamondIris:
+                return addDiamondIris(scene, spec);
+
+            case TransitionLook::FourWayDoors:
+                return addFourWayDoors(scene, spec);
 
             case TransitionLook::LightLeak: {
                 TransitionComposition out = rangeOf(spec, spec.duration / 2);

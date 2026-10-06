@@ -295,4 +295,141 @@ namespace chronontemplate {
         return out;
     }
 
+    // ── The step-line half ──────────────────────────────────────────────────
+
+    DataVizLineComposition addDataVizLineChart(TemplateScene& scene, const DataVizSpec& spec) {
+        if (spec.values.empty() || spec.values.size() > 24) {
+            throw std::invalid_argument("addDataVizLineChart: expected between 1 and 24 values");
+        }
+        if (!(spec.chartHeightFraction > 0.f) || spec.chartHeightFraction > 1.f ||
+            !(spec.marginX >= 0.f) || spec.marginX >= 0.5f) {
+            throw std::invalid_argument("addDataVizLineChart: degenerate chart fractions");
+        }
+        if (!spec.labels.empty() && spec.labels.size() != spec.values.size()) {
+            throw std::invalid_argument("addDataVizLineChart: the label count must match the value count");
+        }
+        if (spec.highlightIndex >= static_cast<int>(spec.values.size())) {
+            throw std::invalid_argument("addDataVizLineChart: the highlight index is out of range");
+        }
+        const float max = *std::max_element(spec.values.begin(), spec.values.end());
+        if (!(max > 0.f) || !std::isfinite(max)) {
+            throw std::invalid_argument("addDataVizLineChart: values must be finite with a positive max");
+        }
+
+        const Vector2 canvas = scene.canvas();
+        const float fps = scene.fps();
+        const int inFrame = spec.inFrame;
+        const int peak = inFrame + std::max(1, spec.duration / 2);
+        const int endFrame = inFrame + spec.duration;
+        const float chartH = canvas.y * spec.chartHeightFraction;
+        const float floorY = canvas.y * 0.82f;
+        const float left = canvas.x * spec.marginX;
+        const float width = canvas.x * (1.f - 2.f * spec.marginX);
+        const std::size_t n = spec.values.size();
+        const float step = n > 1 ? width / static_cast<float>(n - 1) : 0.f;
+        const float thickness = std::max(2.f, canvas.y * 0.004f);
+        const float dotR = std::max(4.f, canvas.y * 0.008f);
+        const int grow = std::max(6, (peak - inFrame) / 2);
+        const float fontSize = std::max(18.f, canvas.y * 0.024f);
+
+        DataVizLineComposition out;
+        out.inFrame = inFrame;
+        out.endFrame = endFrame;
+        out.peakFrame = peak;
+
+        const auto levelY = [&](std::size_t i) {
+            return floorY - chartH * (spec.values[i] / max);
+        };
+        const auto valueText = [&](std::size_t i) {
+            if (i < spec.labels.size() && !spec.labels[i].empty()) return spec.labels[i];
+            char buffer[32];
+            std::snprintf(buffer, sizeof(buffer), "%.4g", static_cast<double>(spec.values[i]));
+            return std::string(buffer);
+        };
+
+        // One dot per value; the first dot is the run-zero landmark.
+        for (std::size_t i = 0; i < n; ++i) {
+            const float x = left + step * static_cast<float>(i);
+            const float y = levelY(i);
+            const bool hot = static_cast<int>(i) == spec.highlightIndex;
+            LayerHandle& dot = scene.shape(ShapeSpec{.size = Vector2(dotR * 2.f, dotR * 2.f),
+                                                     .fillColor = hot ? spec.accentColor : spec.barColor,
+                                                     .name = spec.name + "_line_dot_" + std::to_string(i),
+                                                     .cornerRadius = dotR});
+            const int land = inFrame + static_cast<int>(i) * 3 + grow;
+            dot.position(x, y, 0.f)
+               .anchor(dotR, dotR)
+               .alive(inFrame, endFrame);
+            Track<Vector3>& scale = dot.layer().tracks.scale;
+            scale.add(frameTime(land - grow, fps), Vector3(0.02f, 0.02f, 1.f), Easing::overshoot());
+            scale.add(frameTime(land, fps), Vector3(1.f, 1.f, 1.f), Easing::overshoot());
+            if (hot) {
+                pm::pulseOpacity(dot.layer(), land, std::max(1, endFrame - land), 3, fps, 0.35f);
+            }
+            out.dots.push_back(&dot);
+
+            LayerHandle& label = scene.text(TextSpec{.text = valueText(i),
+                                                     .font = spec.labelFont,
+                                                     .fontSize = fontSize,
+                                                     .color = spec.labelColor,
+                                                     .name = spec.name + "_line_label_" + std::to_string(i)});
+            label.position(x, y - fontSize * 1.1f, 0.f)
+                 .alive(land, endFrame);
+            label.animateOpacity(land, std::max(1, grow / 2), 0.f, 1.f, Easing::easeOut());
+            out.valueLabels.push_back(&label);
+        }
+
+        // Runs and risers between consecutive values, drawn left-to-right with
+        // the same anchored-scale vocabulary as the bar chart and trend rule.
+        for (std::size_t i = 0; i + 1 < n; ++i) {
+            const float x0 = left + step * static_cast<float>(i);
+            const float x1 = left + step * static_cast<float>(i + 1);
+            const float y0 = levelY(i);
+            const float y1 = levelY(i + 1);
+            const int start = inFrame + static_cast<int>(i) * 3;
+            const float runW = x1 - x0;
+
+            LayerHandle& run = scene.shape(ShapeSpec{.size = Vector2(runW, thickness),
+                                                     .fillColor = spec.accentColor,
+                                                     .name = spec.name + "_line_run_" + std::to_string(i)});
+            run.position(x0 + runW * 0.5f, y0, 0.f)
+               .anchor(runW * 0.5f, 0.f)
+               .alive(inFrame, endFrame);
+            Track<Vector3>& runScale = run.layer().tracks.scale;
+            runScale.add(frameTime(start, fps), Vector3(0.02f, 1.f, 1.f), Easing::easeInOut());
+            runScale.add(frameTime(start + grow, fps), Vector3(1.f, 1.f, 1.f), Easing::easeInOut());
+            out.runs.push_back(&run);
+
+            const float rise = y0 - y1;
+            if (std::fabs(rise) >= 0.5f) {
+                const float top = std::min(y0, y1);
+                LayerHandle& riser = scene.shape(ShapeSpec{.size = Vector2(thickness, std::fabs(rise)),
+                                                           .fillColor = spec.accentColor,
+                                                           .name = spec.name + "_line_riser_" + std::to_string(i)});
+                riser.position(x1, top + std::fabs(rise) * 0.5f, 0.f)
+                     .anchor(0.f, std::fabs(rise) * 0.5f)
+                     .alive(inFrame, endFrame);
+                Track<Vector3>& riseScale = riser.layer().tracks.scale;
+                riseScale.add(frameTime(start + grow / 2, fps), Vector3(1.f, 0.02f, 1.f),
+                              Easing::easeInOut());
+                riseScale.add(frameTime(start + grow, fps), Vector3(1.f, 1.f, 1.f),
+                              Easing::easeInOut());
+                out.risers.push_back(&riser);
+            }
+        }
+
+        if (!spec.title.empty()) {
+            LayerHandle& title = scene.text(TextSpec{.text = spec.title,
+                                                     .font = spec.titleFont,
+                                                     .fontSize = fontSize * 1.6f,
+                                                     .color = spec.labelColor,
+                                                     .name = spec.name + "_line_title"});
+            title.position(canvas.x * 0.5f, canvas.y * 0.10f, 0.f)
+                 .alive(inFrame, endFrame);
+            title.animate(FadeIn{.inFrame = inFrame, .duration = 12});
+            out.title = &title;
+        }
+        return out;
+    }
+
 }// namespace chronontemplate

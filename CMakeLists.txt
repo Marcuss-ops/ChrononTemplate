@@ -139,6 +139,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/short_phrases/animations/ShapeBlur.cpp
         # the packs a template author starts from
         src/chronontemplate/entities_with_text/YouTubeSubscribe.cpp
+        # native layout composers: flex rows, columns and grids plus FLIP moves
+        src/chronontemplate/composers/LayoutComposer.cpp
         # declarative transitions (BACKLOG item 4): sweep/dip/blinds/iris/glitch/leak
         src/chronontemplate/transitions/TransitionPack.cpp
         # captions + data-viz (BACKLOG item 5): PCM beat grid, captions, bar chart
@@ -483,7 +485,10 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_transitions_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_transitions_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_transitions_pack_test COMMAND chronontemplate_transitions_pack_test)
-
+    add_executable(chronontemplate_composer_pack_test tests/composer_pack.cpp)
+    target_link_libraries(chronontemplate_composer_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_composer_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_composer_pack_test COMMAND chronontemplate_composer_pack_test)
     # The caption/data-viz family: the PCM beat grid is deterministic, captions
     # line up one per beat, the chart grows staggered and lands on its peak.
     add_executable(chronontemplate_captions_dataviz_pack_test tests/captions_dataviz_pack.cpp)

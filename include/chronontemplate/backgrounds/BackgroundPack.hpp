@@ -65,7 +65,7 @@ namespace chronontemplate {
         float dotSize{16.f};
         float gap{32.f};
         float dotRadius{1.5f};
-        float dotSpacing{14.f};
+        float dotSpacing{32.f};  ///< validated against the 4096-dot native budget
         float waveAmplitude{0.f};
         float glowRadius{160.f};
         float bulgeStrength{67.f};
@@ -166,7 +166,7 @@ namespace chronontemplate {
         int particleCount{36};     ///< ArchiveDust dots, validated in [0, 256]
         std::string particleColor{"#FFFFFF"}; ///< Particle and ArchiveDust fill color
         float particleSize{0.4f};  ///< Particles base diameter in logical pixels
-        int particleQuantity{100}; ///< Particles count, validated in [0, 256]
+        int particleQuantity{96};  ///< Particles count, validated in [0, 96]
         float particleVx{0.f};     ///< Particles horizontal velocity in px/frame
         float particleVy{0.f};     ///< Particles vertical velocity in px/frame
         float particleSpread{10.f};
