@@ -1,0 +1,4 @@
+#include "RecipeSupport.hpp"
+namespace chronontemplate::modern_short_phrase {
+ShortPhraseDefinition kineticCenterBuild(){using namespace detail;auto d=make("short_phrase_product_kinetic_center_build","Kinetic Center Build","Words push left.",90,{}, {},100.f);d.drawMainPhrase=false;d.textOverlays={overlay("kcb_word_0","Words","#F7F8FA",0.f,0.f,1.f,{t("position_x",{{0,0.f},{45,-150.f},{90,-300.f},{194,-300.f},{209,-440.f}},"kcb_entry"),t("opacity",{{0,0.f},{8,1.f},{194,1.f},{209,0.f}},"linear")}),overlay("kcb_word_1","push","#F7F8FA",0.f,0.f,1.f,{t("position_x",{{0,600.f},{35,600.f},{65,0.f},{90,0.f},{194,0.f},{209,-140.f}},"kcb_entry"),t("opacity",{{0,0.f},{38,0.f},{65,1.f},{194,1.f},{209,0.f}},"linear")}),overlay("kcb_word_2","left.","#F7F8FA",0.f,0.f,1.f,{t("position_x",{{0,600.f},{62,600.f},{90,300.f},{194,300.f},{209,440.f}},"kcb_entry"),t("opacity",{{0,0.f},{66,0.f},{90,1.f},{194,1.f},{209,0.f}},"linear")})};return d;}
+}

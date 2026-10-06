@@ -13,8 +13,10 @@
 
 #include "chrononmotion/math/Matrix4.hpp"
 
+#include <algorithm>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace chronontemplate_test {
 
@@ -50,11 +52,17 @@ namespace chronontemplate_test {
 
         ct::ContentHandle createShape(const ct::ShapeRequest& request) override {
             m_lastShapeRequest = request;
+            m_shapeRequests.push_back(request);
             return measure("shape/" + request.name + "/" + request.fillColor,
                            chrononmotion::motion::ContentKind::Image, request.size);
         }
 
         [[nodiscard]] const ct::ShapeRequest& lastShapeRequest() const { return m_lastShapeRequest; }
+        [[nodiscard]] const ct::ShapeRequest* findShapeRequest(const std::string& name) const {
+            const auto found = std::find_if(m_shapeRequests.begin(), m_shapeRequests.end(),
+                [&](const ct::ShapeRequest& request) { return request.name == name; });
+            return found == m_shapeRequests.end() ? nullptr : &*found;
+        }
 
         chrononmotion::Vector2 imageNaturalSize{640.f, 360.f};
 
@@ -70,6 +78,7 @@ namespace chronontemplate_test {
     private:
         ct::ImageRequest m_lastImageRequest{};
         ct::ShapeRequest m_lastShapeRequest{};
+        std::vector<ct::ShapeRequest> m_shapeRequests{};
         ct::ContentHandle measure(const std::string& id, chrononmotion::motion::ContentKind kind,
                                   const chrononmotion::Vector2& size) {
 

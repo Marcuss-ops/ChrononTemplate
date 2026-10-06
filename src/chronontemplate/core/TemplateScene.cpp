@@ -287,6 +287,10 @@ namespace chronontemplate {
         request.fontSize = spec.fontSize;
         request.color = spec.color;
         request.canvas = canvas();
+        request.stroke = spec.stroke;
+        request.shadow = spec.shadow;
+        request.glow = spec.glow;
+        request.background = spec.background;
 
         // Chronon creates and measures; the rectangle and its fingerprint come
         // back neutral, so the motion side can anchor without knowing a font.
@@ -361,16 +365,112 @@ namespace chronontemplate {
     LayerHandle& TemplateScene::shape(const ShapeSpec& spec) {
 
         if (!std::isfinite(spec.size.x) || !std::isfinite(spec.size.y) ||
-            spec.size.x <= 0.f || spec.size.y <= 0.f || spec.fillColor.empty() ||
+            spec.size.x <= 0.f || spec.size.y <= 0.f ||
+            (spec.fillEnabled && spec.fillColor.empty()) ||
             !std::isfinite(spec.cornerRadius) || spec.cornerRadius < 0.f ||
-            spec.cornerRadius > std::min(spec.size.x, spec.size.y) * 0.5f)
-            throw std::invalid_argument("TemplateScene::shape: positive finite size and fill color are required");
+            spec.cornerRadius > std::min(spec.size.x, spec.size.y) * 0.5f ||
+            (spec.geometry != ShapeGeometry::Rectangle && spec.geometry != ShapeGeometry::Ellipse &&
+             spec.geometry != ShapeGeometry::Grid && spec.geometry != ShapeGeometry::DotGrid &&
+             spec.geometry != ShapeGeometry::Polygon))
+            throw std::invalid_argument("TemplateScene::shape: positive finite size and supported geometry are required");
+        const bool gridGeometry = spec.geometry == ShapeGeometry::Grid;
+        const bool dotGridGeometry = spec.geometry == ShapeGeometry::DotGrid;
+        const bool polygonGeometry = spec.geometry == ShapeGeometry::Polygon;
+        if (gridGeometry || dotGridGeometry) {
+            if (!std::isfinite(spec.gridSpacing) || spec.gridSpacing < 4.f || spec.gridSpacing > 512.f ||
+                (dotGridGeometry && (!std::isfinite(spec.dotRadius) || spec.dotRadius < 0.5f || spec.dotRadius > 64.f)) ||
+                (gridGeometry && (spec.strokeColor.empty() || !std::isfinite(spec.strokeWidth) ||
+                                  spec.strokeWidth < 0.25f || spec.strokeWidth > 32.f)))
+                throw std::invalid_argument("TemplateScene::shape: grid spacing, radius or stroke is outside supported bounds");
+        }
+        if (!spec.strokeColor.empty() &&
+            (spec.strokeColor.size() != 7 || spec.strokeColor.front() != '#' ||
+             !std::all_of(spec.strokeColor.begin() + 1, spec.strokeColor.end(), [](unsigned char c) {
+                 return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
+                        (c >= 'A' && c <= 'F');
+             }) || !std::isfinite(spec.strokeWidth) || spec.strokeWidth < 0.25f ||
+             spec.strokeWidth > 10000.f))
+            throw std::invalid_argument("TemplateScene::shape: stroke color and width are outside supported bounds");
+        if (polygonGeometry && (spec.polygonPoints < 3 || spec.polygonPoints > 64 ||
+                                !std::isfinite(spec.polygonRotationDegrees) ||
+                                !std::isfinite(spec.strokeWidth) || spec.strokeWidth < 0.25f ||
+                                spec.strokeWidth > 10000.f ||
+                                (!spec.strokeColor.empty() && !std::all_of(
+                                    spec.strokeColor.begin(), spec.strokeColor.end(), [](unsigned char c) {
+                                        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
+                                               (c >= 'A' && c <= 'F') || c == '#';
+                                    }))))
+            throw std::invalid_argument("TemplateScene::shape: polygon points or rotation is outside supported bounds");
+        if (!std::isfinite(spec.noiseAmount) || spec.noiseAmount < 0.f || spec.noiseAmount > 1.f ||
+            !std::isfinite(spec.noiseSize) || spec.noiseSize <= 0.f || spec.noiseSize > 256.f ||
+            !std::isfinite(spec.contrast) || spec.contrast < 0.f || spec.contrast > 4.f)
+            throw std::invalid_argument("TemplateScene::shape: noise, size and contrast are outside supported bounds");
+        if (spec.field) {
+            const auto& field = *spec.field;
+            if (gridGeometry || dotGridGeometry || polygonGeometry ||
+                !std::isfinite(field.frequency) || field.frequency <= 0.f || field.frequency > 4096.f ||
+                field.octaves < 1 || field.octaves > 16 ||
+                !std::isfinite(field.persistence) || field.persistence < 0.f || field.persistence > 1.f ||
+                !std::isfinite(field.lacunarity) || field.lacunarity <= 0.f || field.lacunarity > 8.f ||
+                field.operators.size() > 8)
+                throw std::invalid_argument("TemplateScene::shape: native field is invalid for this geometry");
+        }
+        if (spec.fieldRamp && !spec.field)
+            throw std::invalid_argument("TemplateScene::shape: a field ramp requires a native field");
+        if (spec.gradientMesh && (spec.field || spec.radialGradient || spec.gradientMesh->nodes.empty() ||
+                                  spec.gradientMesh->nodes.size() > 256))
+            throw std::invalid_argument("TemplateScene::shape: mesh fill conflicts with another fill or exceeds node budget");
+        if (spec.fieldRenderScale != 1 && spec.fieldRenderScale != 2 && spec.fieldRenderScale != 4)
+            throw std::invalid_argument("TemplateScene::shape: field render scale must be 1, 2 or 4");
+        if (spec.radialGradient) {
+            const auto& gradient = *spec.radialGradient;
+            if (spec.geometry != ShapeGeometry::Ellipse ||
+                !std::isfinite(gradient.center.x) || !std::isfinite(gradient.center.y) ||
+                gradient.center.x < 0.f || gradient.center.x > 1.f ||
+                gradient.center.y < 0.f || gradient.center.y > 1.f ||
+                !std::isfinite(gradient.radius) || gradient.radius <= 0.f ||
+                gradient.radius > 2.f || gradient.stops.size() < 2 || gradient.stops.size() > 16)
+                throw std::invalid_argument("TemplateScene::shape: radial gradients require an ellipse and bounded geometry/stops");
+            float previousPosition = -1.f;
+            for (const auto& stop : gradient.stops) {
+                const bool validHex = stop.color.size() == 7 && stop.color.front() == '#' &&
+                    std::all_of(stop.color.begin() + 1, stop.color.end(), [](unsigned char digit) {
+                        return (digit >= '0' && digit <= '9') ||
+                               (digit >= 'a' && digit <= 'f') ||
+                               (digit >= 'A' && digit <= 'F');
+                    });
+                if (!std::isfinite(stop.position) || stop.position < previousPosition ||
+                    stop.position < 0.f || stop.position > 1.f || !validHex || !std::isfinite(stop.opacity) ||
+                    stop.opacity < 0.f || stop.opacity > 1.f)
+                    throw std::invalid_argument("TemplateScene::shape: radial gradient stops must be ordered, colored and bounded");
+                previousPosition = stop.position;
+            }
+        }
 
         ShapeRequest request;
         request.size = spec.size;
         request.fillColor = spec.fillColor;
         request.name = spec.name;
         request.cornerRadius = spec.cornerRadius;
+        request.fillEnabled = spec.fillEnabled;
+        request.geometry = spec.geometry;
+        request.radialGradient = spec.radialGradient;
+        request.gridSpacing = spec.gridSpacing;
+        request.dotRadius = spec.dotRadius;
+        request.strokeColor = spec.strokeColor;
+        request.strokeWidth = spec.strokeWidth;
+        request.polygonPoints = spec.polygonPoints;
+        request.polygonRotationDegrees = spec.polygonRotationDegrees;
+        request.field = spec.field;
+        request.fieldRamp = spec.fieldRamp;
+        request.fieldRenderScale = spec.fieldRenderScale;
+        request.fieldDrift = spec.fieldDrift;
+        request.gradientMesh = spec.gradientMesh;
+        request.noiseAmount = spec.noiseAmount;
+        request.noiseSeed = spec.noiseSeed;
+        request.animatedNoise = spec.animatedNoise;
+        request.noiseSize = spec.noiseSize;
+        request.contrast = spec.contrast;
         ContentHandle handle = m_host.createShape(request);
         return adopt(std::move(handle), derivedName(spec.name, "Shape"), Layer::kRoot);
     }

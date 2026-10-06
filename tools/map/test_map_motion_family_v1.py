@@ -63,6 +63,27 @@ class MapMotionFamilyTests(unittest.TestCase):
         self.assertEqual(point, maps.projected(-0.128, 51.507))
         self.assertTrue(all(abs(value) < 1000 for value in point))
 
+    def test_gallery_uses_distinct_text_roles_and_map_labels_use_professional_effects(self):
+        plans = list(self.plans.values())
+        title = next(layer for layer in plans[0]["layers"] if layer["id"].endswith("-title"))
+        eyebrow = next(layer for layer in plans[0]["layers"] if layer["id"].endswith("-eyebrow"))
+        self.assertGreater(title["style"]["font_size"], eyebrow["style"]["font_size"])
+        self.assertNotEqual(title["style"]["fill"], eyebrow["style"]["fill"])
+        labels = [layer for plan in plans for layer in plan["layers"]
+                  if layer["type"] == "text" and "-label" in layer["id"]]
+        self.assertTrue(labels)
+        for label in labels:
+            style = label["style"]
+            self.assertEqual(style["stroke"]["color"], "#06131D")
+            self.assertGreater(style["stroke"]["width"], 0)
+            self.assertGreater(style["shadow"]["blur"], 0)
+            self.assertIn("background", style)
+        self.assertFalse((maps.ROOT / "include/chronontemplate/map/MapPack.hpp").exists())
+        self.assertFalse((maps.ROOT / "src/chronontemplate/map/MapPack.cpp").exists())
+        self.assertFalse((maps.ROOT / "tests/map_pack.cpp").exists())
+        modern_header = (maps.ROOT / "include/chronontemplate/map/ModernMapPack.hpp").read_text()
+        self.assertIn("composeModernMap", modern_header)
+
 
 if __name__ == "__main__":
     unittest.main()

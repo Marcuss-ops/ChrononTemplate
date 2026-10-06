@@ -539,6 +539,59 @@ int main(int argc, char** argv) {
                 fail("tech_backgrounds.recipes must contain unique non-empty ids");
             }
         }
+        if (!data.contains("transitions")) fail("catalog needs `transitions`");
+        const json& transitions = data["transitions"];
+        if (!transitions.is_object() || transitions.value("schema", "") != "chronontemplate.transitions.v1" ||
+            transitions.value("version", 0) != 1 || transitions.value("family_id", "") != "transitions_v1") {
+            fail("transitions has an unsupported schema or missing family id");
+        }
+        const auto validateFrameRange = [&](const char* key, int lower, int upper) {
+            if (!transitions.contains(key) || !transitions[key].is_array() || transitions[key].size() != 2 ||
+                !transitions[key][0].is_number_integer() || !transitions[key][1].is_number_integer() ||
+                transitions[key][0].get<int>() != lower || transitions[key][1].get<int>() != upper)
+                fail(std::string("transitions.") + key + " must be [" + std::to_string(lower) + "," + std::to_string(upper) + "]");
+        };
+        validateFrameRange("micro_frames", 4, 6);
+        validateFrameRange("normal_frames", 7, 10);
+        validateFrameRange("hero_frames", 11, 16);
+        if (!transitions.contains("recipes") || !transitions["recipes"].is_array() || transitions["recipes"].size() != 16)
+            fail("transitions.recipes must define exactly eight legacy and eight rapid looks");
+        const std::set<std::string> expectedTransitionIDs{
+            "transition_wipe", "transition_push_through", "transition_dip_to_black", "transition_dip_to_color",
+            "transition_blinds", "transition_iris_circle", "transition_glitch_slices", "transition_light_leak",
+            "lightleak_flash_sweep", "lightleak_corner_burn", "lightleak_whiteout", "lightleak_diagonal_cut",
+            "lightleak_double_pass", "lightleak_film_burn", "lightleak_center_burst", "lightleak_horizontal_whip"};
+        std::set<std::string> transitionIDs;
+        int rapidWeightTotal = 0;
+        for (const auto& recipe : transitions["recipes"]) {
+            requireObject(recipe, "transitions recipe");
+            const std::string id = recipe.value("id", "");
+            if (id.empty() || !transitionIDs.insert(id).second || expectedTransitionIDs.find(id) == expectedTransitionIDs.end())
+                fail("transitions contains an empty, duplicate, or unknown id " + id);
+            const int minimum = recipe.value("minimum_frames", 0);
+            const int maximum = recipe.value("maximum_frames", 0);
+            const int recommended = recipe.value("recommended_frames", 0);
+            const int weight = recipe.value("weight_percent", -1);
+            const std::string timing = recipe.value("timing_class", "");
+            if (minimum < 2 || weight < 0 || weight > 100 || recipe.value("implementation", "").empty())
+                fail("transition " + id + " has invalid timing, weight, or implementation metadata");
+            if (timing == "legacy") {
+                if (maximum != 0 || recommended < minimum || weight != 0)
+                    fail("legacy transition " + id + " must have unbounded maximum and zero weight");
+            } else {
+                if (maximum < minimum || recommended < minimum || recommended > maximum ||
+                    (timing != "micro" && timing != "normal" && timing != "hero"))
+                    fail("rapid transition " + id + " has an invalid timing range");
+                rapidWeightTotal += weight;
+            }
+        }
+        if (transitionIDs != expectedTransitionIDs || rapidWeightTotal != 100)
+            fail("transition IDs must match the C++ contract and rapid weights must sum to 100");
+        if (!transitions.contains("capability_gaps") || !transitions["capability_gaps"].is_array() ||
+            transitions["capability_gaps"].get<std::vector<std::string>>() !=
+                std::vector<std::string>{"WarpedLightLeak", "ChannelSplit", "ChannelTrail", "SliceDisplace"})
+            fail("transitions.capability_gaps must list the four unsupported renderer primitives");
+
         if (!data.contains("rgb_motion")) fail("catalog needs `rgb_motion`");
         const json& rgbMotion = data["rgb_motion"];
         requireObject(rgbMotion, "rgb_motion");
@@ -559,6 +612,36 @@ int main(int argc, char** argv) {
                 fail("rgb_motion.recipes must contain unique non-empty ids");
             }
         }
+        if (!rgbMotion.contains("rapid_transitions"))
+            fail("rgb_motion needs `rapid_transitions`");
+        requireArray(rgbMotion["rapid_transitions"], "rgb_motion.rapid_transitions");
+        const std::map<std::string, std::pair<int, int>> expectedRgbTransitions{
+            {"rgb_split_whip", {5, 8}}, {"rgb_snap", {4, 6}},
+            {"rgb_zoom_punch", {6, 10}}, {"rgb_horizontal_tear", {6, 10}},
+            {"rgb_glitch_cut", {4, 8}}, {"rgb_lens_snap", {6, 9}},
+            {"rgb_spin_blur", {6, 10}}, {"prismatic_flash", {6, 10}},
+            {"lightleak_rgb_combo", {8, 12}}, {"film_burn_rgb", {8, 12}}};
+        std::set<std::string> emittedRgbTransitionIDs;
+        if (rgbMotion["rapid_transitions"].size() != expectedRgbTransitions.size())
+            fail("rgb_motion.rapid_transitions must define exactly the ten published rapid presets");
+        for (const auto& transition : rgbMotion["rapid_transitions"]) {
+            requireObject(transition, "rgb_motion rapid transition");
+            const std::string id = transition.value("id", "");
+            const auto expected = expectedRgbTransitions.find(id);
+            if (id.empty() || expected == expectedRgbTransitions.end() ||
+                !emittedRgbTransitionIDs.insert(id).second)
+                fail("rgb_motion.rapid_transitions contains an empty, unknown, or duplicate id " + id);
+            const int minimum = transition.value("minimum_frames", 0);
+            const int maximum = transition.value("maximum_frames", 0);
+            const int recommended = transition.value("recommended_frames", 0);
+            const std::string timing = transition.value("timing_class", "");
+            const std::string expectedTiming = recommended <= 6 ? "micro" : "normal";
+            if (minimum != expected->second.first || maximum != expected->second.second ||
+                recommended < minimum || recommended > maximum || timing != expectedTiming)
+                fail("rgb transition " + id + " has timing metadata outside its published contract");
+        }
+        if (emittedRgbTransitionIDs.size() != expectedRgbTransitions.size())
+            fail("rgb_motion.rapid_transitions omits a published rapid preset");
 
         json entityPresentation = json::parse(readFile(CHRONONTEMPLATE_ENTITY_PRESENTATION_FILE));
         requireObject(entityPresentation, "entity_presentation");
@@ -647,6 +730,7 @@ int main(int argc, char** argv) {
         emitted["photo_motion"] = photoMotion;
         emitted["tech_backgrounds"] = techBackgrounds;
         emitted["rgb_motion"] = rgbMotion;
+        emitted["transitions"] = transitions;
         emitted["motions"] = motions;
         emitted["overlay_presets"] = data["overlay_presets"];
         emitted["selections"] = data["selections"];
@@ -656,7 +740,9 @@ int main(int argc, char** argv) {
         }
         for (const auto& motion : motions) {
             const std::string id = motion.value("id", "");
-            if (id.rfind("typewriter_", 0) == 0 || motion.value("category", "") == "apple_phrase_v1") {
+            const std::string category = motion.value("category", "");
+            if ((id.rfind("typewriter_", 0) == 0 && category != "typewriter_modern_v1") ||
+                category == "apple_phrase_v1") {
                 phraseCandidates.insert(id);
             }
         }

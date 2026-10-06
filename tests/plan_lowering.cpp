@@ -126,6 +126,50 @@ int main() {
           shapePlan.size == std::array<float, 2>{640.f, 360.f},
           "shape ContentHost adapter maps a native filled rectangle");
 
+    ShapeRequest radialRequest{{64.f, 64.f}, "#FFFFFF", "RadialGlow"};
+    radialRequest.geometry = ShapeGeometry::Ellipse;
+    radialRequest.radialGradient = ShapeRadialGradient{
+        .center = {0.5f, 0.5f}, .radius = 0.5f,
+        .stops = {{0.f, "#38BDF8", 0.85f}, {1.f, "#38BDF8", 0.f}}};
+    const auto radialHandle = host.createShape(radialRequest);
+    const auto radialPlan = makeShapeLayerPlan(radialRequest, radialHandle);
+    check(radialPlan.shape && radialPlan.shape->type == ShapeContentTypePlan::Ellipse &&
+          radialPlan.shape->gradient && !radialPlan.shape->fill_color &&
+          radialPlan.shape->gradient->opacity_stops.size() == 2 &&
+          radialPlan.shape->gradient->opacity_stops.back().opacity == 0.f,
+          "native ellipses preserve radial color and opacity stops in RenderPlan lowering");
+
+    ShapeRequest nativeField{{640.f, 360.f}, "#0B0E14", "Field"};
+    nativeField.field = chronon3d::graphics::Field2D{
+        .generator = chronon3d::graphics::Field2DGenerator::Fractal,
+        .seed = 73, .frequency = 4.f, .octaves = 5};
+    nativeField.fieldRamp = chronon3d::graphics::GradientDefinition::linear(
+        {0.f, 0.5f}, {1.f, 0.5f}, {{0.f, {0.1f, 0.05f, 0.2f, 0.2f}},
+                                  {0.5f, {0.6f, 0.2f, 0.8f, 0.8f}},
+                                  {1.f, {0.9f, 0.8f, 1.f, 1.f}}});
+    nativeField.fieldRenderScale = 2;
+    nativeField.fieldDrift = chronon3d::Vec2{0.02f, -0.01f};
+    nativeField.noiseAmount = 0.12f;
+    nativeField.noiseSeed = 1986;
+    nativeField.animatedNoise = true;
+    nativeField.noiseSize = 2.5f;
+    const auto fieldHandle = host.createShape(nativeField);
+    const auto fieldLayer = makeShapeLayerPlan(nativeField, fieldHandle);
+    check(fieldLayer.shape && fieldLayer.shape->field && fieldLayer.shape->field_ramp &&
+          fieldLayer.shape->field_render_scale == 2 && fieldLayer.shape->field_drift &&
+          fieldLayer.effects.size() == 1 && fieldLayer.effects.front().kind == LayerPlan::EffectKindPlan::Noise &&
+          fieldLayer.effects.front().noise_size == 2.5f && fieldLayer.effects.front().animated,
+          "shape lowering retains native field/ramp/drift and seeded animated grain controls");
+
+    ShapeRequest nativeMesh{{640.f, 360.f}, "#0B0E14", "Mesh"};
+    nativeMesh.gradientMesh = chronon3d::graphics::GradientMesh::four_corner(
+        {0.1f, 0.1f, 0.2f, 1.f}, {0.8f, 0.1f, 0.3f, 1.f},
+        {0.1f, 0.7f, 0.8f, 1.f}, {0.9f, 0.8f, 1.f, 1.f});
+    const auto meshLayer = makeShapeLayerPlan(nativeMesh, host.createShape(nativeMesh));
+    check(meshLayer.shape && meshLayer.shape->gradient_mesh &&
+          meshLayer.shape->gradient_mesh->nodes.size() == 4 && !meshLayer.shape->fill_color,
+          "shape lowering retains native GradientMesh nodes without a solid-color alias");
+
     FakeContentHost assetBackend;
     RenderPlanContentHost connectedHost(RenderPlanContentBackend{
         .createText = [&](const TextRequest& request) { return assetBackend.createText(request); },
@@ -152,6 +196,28 @@ int main() {
           "TemplateScene lowers temporal shutter blur as a native RenderPlan setting");
     check(connectedPlan.layers.size() == 3,
           "ContentHost callback adapter lowers every created content binding");
+
+    TemplateScene styledScene("styled-map-label", 24.f, connectedHost, 640.f, 360.f);
+    const TextSpec styledSpec{
+        .text = "ROME", .font = "Inter.ttf", .fontSize = 30.f, .color = "#F8F5EA",
+        .name = "map_label", .stroke = TextStrokeStyle{"#07121A", 2.f},
+        .shadow = TextShadowStyle{"#000000", 0.7f, 8.f, {1.f, 3.f}},
+        .glow = TextGlowStyle{"#68E1FD", 18.f, 0.2f},
+        .background = TextBackgroundStyle{"#07121A", 0.65f, 10.f, {8.f, 5.f}}};
+    (void)styledScene.text(styledSpec);
+    const auto styledPlan = lowerToRenderPlan(styledScene, connectedHost);
+    check(styledPlan.layers.size() == 1 && styledPlan.layers.front().style &&
+          styledPlan.layers.front().style->stroke && styledPlan.layers.front().style->shadow &&
+          styledPlan.layers.front().style->glow && styledPlan.layers.front().style->background,
+          "map typography controls lower to Chronon's native stroke, shadow, glow, and chip fields");
+    if (styledPlan.layers.size() == 1 && styledPlan.layers.front().style) {
+        const auto& style = *styledPlan.layers.front().style;
+        check(style.stroke && style.stroke->width && *style.stroke->width == 2.f &&
+              style.shadow && style.shadow->opacity && *style.shadow->opacity == 0.7f &&
+              style.glow && style.glow->radius == 18.f &&
+              style.background && style.background->opacity && *style.background->opacity == 0.65f,
+              "text effects preserve caller-authored values across the connected RenderPlan boundary");
+    }
     const auto connectedImagePlan = std::find_if(connectedPlan.layers.begin(), connectedPlan.layers.end(),
         [](const LayerPlan& layer) { return layer.type == LayerType::Image; });
     const auto connectedShapePlan = std::find_if(connectedPlan.layers.begin(), connectedPlan.layers.end(),

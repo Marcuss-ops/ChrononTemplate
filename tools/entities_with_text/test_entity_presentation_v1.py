@@ -5,8 +5,10 @@ from __future__ import annotations
 import importlib.util
 import json
 import math
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 def _numeric_values(value):
     if isinstance(value, bool):
@@ -371,6 +373,54 @@ class EntityPresentationCatalogTests(unittest.TestCase):
             self.assertTrue(font.is_file(), f"missing bundled font for {name}: {font}")
         self.assertEqual(BUILDER.caption_font("محمد علي"), BUILDER.ARABIC_FONT)
         self.assertEqual(BUILDER.caption_font("李小龍"), BUILDER.CJK_FONT)
+
+    def test_drive_publication_verifies_and_uploads_only_the_40_catalogued_metric_date_mp4s(self):
+        preview_ids = BUILDER.expected_preview_ids()
+        self.assertEqual(len(preview_ids), 40)
+        self.assertEqual(len(preview_ids), len(set(preview_ids)))
+        self.assertEqual(set(preview_ids), EXPECTED["metric_v1"] | EXPECTED["date_v1"])
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            previews = root / "previews"
+            previews.mkdir()
+            for motion_id in preview_ids:
+                (previews / f"{motion_id}.mp4").write_bytes(b"preview")
+            (previews / "not-a-catalogued-motion.mp4").write_bytes(b"do not upload")
+            uploader, credentials, token = (root / name for name in ("drive-upload", "credentials.json", "token.json"))
+            for path in (uploader, credentials, token):
+                path.touch()
+
+            def run(command, **kwargs):
+                if command[0] == "ffprobe":
+                    return mock.Mock(stdout=json.dumps({
+                        "streams": [{"codec_name": "h264", "width": 1280,
+                                     "height": 720, "r_frame_rate": "24/1", "nb_frames": "48"}],
+                        "format": {"duration": "2.0"},
+                    }))
+                return mock.Mock(stdout=f"DRIVE_UPLOAD_PASS id=fake link=https://drive.example/fake parent=folder-123 sha256={command[-1]} bytes=7")
+
+            with mock.patch.object(BUILDER.subprocess, "run", side_effect=run) as run_command:
+                manifest = BUILDER.upload_previews(
+                    previews, uploader=uploader, credentials=credentials, token=token,
+                    drive_folder="folder-123", ffprobe="ffprobe")
+
+            upload_calls = [call for call in run_command.call_args_list
+                            if call.args[0][0] != "ffprobe"]
+            self.assertEqual(len(upload_calls), 40)
+            self.assertEqual({Path(call.args[0][call.args[0].index("-file") + 1]).name
+                              for call in upload_calls}, {f"{motion_id}.mp4" for motion_id in preview_ids})
+            self.assertEqual(len(manifest), 40)
+            self.assertTrue(all(item["drive_folder_id"] == "folder-123" for item in manifest))
+            written = json.loads((previews / "entity_presentation_v1_upload_manifest.json").read_text())
+            self.assertEqual(written["schema"], "chronontemplate.drive-upload.v1")
+            self.assertEqual(len(written["files"]), 40)
+
+    def test_drive_publication_refuses_an_incomplete_preview_set_before_upload(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with self.assertRaisesRegex(FileNotFoundError, "missing 40 metric/date previews"):
+                BUILDER.verified_preview_files(root, ffprobe="ffprobe")
 
     def test_preset_visuals_use_native_renderer_primitives(self):
         plans = BUILDER.build_plans()

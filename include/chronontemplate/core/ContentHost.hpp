@@ -12,11 +12,17 @@
 #include "chrononmotion/motion/Content.hpp"
 #include "chrononmotion/math/Vector2.hpp"
 
+#include <chronon3d/graphics/field2d.hpp>
+#include <chronon3d/graphics/gradient_mesh.hpp>
+#include <chronon3d/graphics/gradient.hpp>
+
 #include "chronontemplate/core/ContentBinding.hpp"
 
 #include <cstdint>
+#include <optional>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace chronontemplate {
 
@@ -29,6 +35,34 @@ namespace chronontemplate {
         bool flipX{false};
     };
 
+    /// Explicit renderer-facing text treatments. ChrononTemplate keeps these
+    /// values declarative; the connected RenderPlan host serializes them into
+    /// Chronon's canonical text-style contract.
+    struct TextStrokeStyle {
+        std::string color{"#111827"};
+        float width{0.f};
+    };
+
+    struct TextShadowStyle {
+        std::string color{"#000000"};
+        float opacity{0.68f};
+        float blur{8.f};
+        chrononmotion::Vector2 offset{0.f, 3.f};
+    };
+
+    struct TextGlowStyle {
+        std::string color{"#FFFFFF"};
+        float radius{0.f};
+        float intensity{0.25f};
+    };
+
+    struct TextBackgroundStyle {
+        std::string color{"#07121A"};
+        float opacity{0.8f};
+        float radius{12.f};
+        chrononmotion::Vector2 padding{12.f, 8.f};
+    };
+
     /// What the template wants written. The fields mirror Chronon's authoring
     /// vocabulary; the module keeps them as data and hands them over untouched.
     struct TextRequest {
@@ -37,6 +71,10 @@ namespace chronontemplate {
         float fontSize{48.f};
         std::string color{"#FFFFFF"};
         chrononmotion::Vector2 canvas{1920.f, 1080.f};
+        std::optional<TextStrokeStyle> stroke{};
+        std::optional<TextShadowStyle> shadow{};
+        std::optional<TextGlowStyle> glow{};
+        std::optional<TextBackgroundStyle> background{};
     };
 
     struct ImageRequest {
@@ -59,14 +97,49 @@ namespace chronontemplate {
         std::uint32_t grainSeed{0};
     };
 
-    /// Native procedural rectangle owned by Chronon. It is still exposed to
-    /// Motion as ordinary measured content, so its transform and opacity use
-    /// the same animation path as image layers.
+    enum class ShapeGeometry : std::uint8_t { Rectangle, Ellipse, Grid, DotGrid, Polygon };
+
+    struct ShapeGradientStop {
+        float position{0.f};
+        std::string color{"#FFFFFF"};
+        float opacity{1.f};
+    };
+
+    /// Renderer-neutral radial fill, lowered to Chronon's native shape gradient.
+    struct ShapeRadialGradient {
+        chrononmotion::Vector2 center{0.5f, 0.5f};
+        float radius{0.5f};
+        std::vector<ShapeGradientStop> stops{};
+    };
+
+    /// Native procedural shape owned by Chronon. It is still exposed to Motion
+    /// as ordinary measured content, so transform and opacity use the same path
+    /// as image layers.
     struct ShapeRequest {
         chrononmotion::Vector2 size{};
         std::string fillColor{"#FFFFFF"};
         std::string name{};
         float cornerRadius{0.f};
+        bool fillEnabled{true};
+        ShapeGeometry geometry{ShapeGeometry::Rectangle};
+        std::optional<ShapeRadialGradient> radialGradient{};
+        // Additive native procedural-geometry inputs. Defaults preserve existing aggregates.
+        float gridSpacing{24.f};
+        float dotRadius{3.f};
+        std::string strokeColor{};
+        float strokeWidth{1.f};
+        int polygonPoints{6};
+        float polygonRotationDegrees{0.f};
+        std::optional<chronon3d::graphics::Field2D> field{};
+        std::optional<chronon3d::graphics::GradientDefinition> fieldRamp{};
+        std::uint32_t fieldRenderScale{1};
+        std::optional<chronon3d::Vec2> fieldDrift{};
+        std::optional<chronon3d::graphics::GradientMesh> gradientMesh{};
+        float noiseAmount{0.f};
+        std::uint32_t noiseSeed{0};
+        bool animatedNoise{false};
+        float noiseSize{1.f};
+        float contrast{1.f};
     };
 
     struct VideoRequest {

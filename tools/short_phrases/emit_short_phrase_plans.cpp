@@ -2,7 +2,7 @@
 //
 // Lowers the C++-owned ShortPhrasePack to the Chronon3D render-plan contract,
 // one plan per archetype, so the family can be rendered on the GPU lane. It is
-// deliberately thin: the twelve recipes live in
+// deliberately thin: the ShortPhrasePack recipes live in
 // include/chronontemplate/short_phrases/ShortPhrasePack.hpp and this program
 // only projects them — extended keyframes (hold + synthesised exit) and the
 // lowered selector window, the same canonical lowering the Classic emitter and
@@ -53,9 +53,9 @@ namespace {
     constexpr int kWidth = 1920;
     constexpr int kHeight = 1080;
     constexpr int kFps = 30;
-    constexpr int kDurationFrames = 150;// 5 s showcase timeline
-    /// The last nine frames are the synthesised exit.
-    constexpr int kExitFrames = 9;
+    constexpr int kDurationFrames = 210;// 7 s showcase: 3 s reveal, readable hold, exit
+    /// The last fifteen frames are the synthesised exit.
+    constexpr int kExitFrames = 15;
 
     [[noreturn]] void fail(const std::string& message) {
         throw std::runtime_error("emit_short_phrase_plans: " + message);
@@ -80,10 +80,14 @@ namespace {
     /// the way it came in. The final authored value is the resting one.
     json extendedKeyframes(const PhraseTrack& track, int enter) {
         const bool sequence = track.keyframes.back().frame >= 120;
-        const int hold = sequence ? 120 : (enter > (kDurationFrames - kExitFrames) ? enter : (kDurationFrames - kExitFrames));
+        const int hold = sequence ? (kDurationFrames - kExitFrames)
+                                  : (enter > (kDurationFrames - kExitFrames) ? enter : (kDurationFrames - kExitFrames));
         const int end = kDurationFrames - 1;
         const float first = track.keyframes.front().value;
-        const float last = track.keyframes.back().value;
+        float last = first;
+        for (const PhraseKeyframe& key : track.keyframes) {
+            if (key.frame <= hold) last = key.value;
+        }
 
         json keys = json::array();
         for (const PhraseKeyframe& key : track.keyframes) {
@@ -115,6 +119,30 @@ namespace {
         if (t <= 0.f) return 0.f;
         if (t >= 1.f) return 1.f;
         constexpr float kPi = 3.14159265358979323846f;
+        if (easing == "kcb_entry") {
+            constexpr float x1=.2f, y1=.8f, x2=.2f, y2=1.f;
+            float lo=0.f, hi=1.f, u=.5f;
+            for (int i=0;i<28;++i) {
+                u=(lo+hi)*.5f;
+                const float v=3.f*(1.f-u)*(1.f-u)*u*x1+3.f*(1.f-u)*u*u*x2+u*u*u;
+                if (v<t) lo=u; else hi=u;
+            }
+            u=(lo+hi)*.5f;
+            return 3.f*(1.f-u)*(1.f-u)*u*y1+3.f*(1.f-u)*u*u*y2+u*u*u;
+        }
+        if (easing == "per_word_land") {
+            constexpr float split=.78f, residual=.07f;
+            constexpr float slope=((1.f-residual)/split)*.5f;
+            if (t<split) {
+                const float x=t/split, inv=1.f-x;
+                return (1.f-residual)*(.5f*(1.f-inv*inv*inv)+.5f*x);
+            }
+            const float u=(t-split)/(1.f-split);
+            const float b=slope*(1.f-split);
+            const float c=3.f*residual-2.f*b;
+            const float d=b-2.f*residual;
+            return 1.f-residual+b*u+c*u*u+d*u*u*u;
+        }
         if (easing == "linear") return t;
         if (easing == "smoothstep") return t * t * (3.f - 2.f * t);
         if (easing == "in_quad") return t * t;
@@ -176,9 +204,14 @@ namespace {
     }
 
     json makeTrack(const PhraseTrack& track, int enter) {
-        return json{{"property", track.property},
+        json result{{"property", track.property},
                     {"keyframes", extendedKeyframes(track, enter)},
                     {"easing", track.easing}};
+        if (track.easing == "kcb_entry") {
+            result["easing"] = "bezier";
+            result["bezier_curve"] = json::array({0.2f, 0.8f, 0.2f, 1.f});
+        }
+        return result;
     }
 
     /// A selector is a window over the units; on the GPU lane the unit-level
@@ -284,13 +317,24 @@ namespace {
     json makePlan(const ShortPhraseDefinition& definition, const ClassicPhraseStyle& style) {
         const int enter = definition.enter;
         const bool editorial = definition.id.rfind("short_phrase_editorial_", 0) == 0;
+        const bool product = definition.id.rfind("short_phrase_product_", 0) == 0;
+        const bool modern = editorial || product;
         if (enter <= 0 || enter >= kDurationFrames) {
             fail(definition.id + ": enter must land inside the showcase timeline");
         }
-        if (definition.tracks.empty() && definition.textAnimators.empty()) {
+        if (definition.tracks.empty() && definition.textAnimators.empty() &&
+            definition.textOverlays.empty()) {
             fail(definition.id + ": an animation with neither tracks nor text animators renders a static phrase");
         }
 
+        const auto setBezier = [](json& tracks, const std::string& property,
+                                  const std::array<float, 4>& curve) {
+            for (auto& item : tracks) {
+                if (item.value("property", std::string{}) != property) continue;
+                item["easing"] = "bezier";
+                item["bezier_curve"] = curve;
+            }
+        };
         json layerTracks = json::array();
         bool hasLayerOpacity = false;
         for (std::size_t i = 0; i < definition.tracks.size(); ++i) {
@@ -299,6 +343,8 @@ namespace {
             hasLayerOpacity = hasLayerOpacity || definition.tracks[i].property == "opacity";
             layerTracks.push_back(makeTrack(definition.tracks[i], enter));
         }
+        if (definition.id == "short_phrase_product_text_match_cut")
+            setBezier(layerTracks, "scale", {0.85f, 0.f, 0.15f, 1.f});
 
         // Every phrase needs a real layer-level entrance/hold/exit. An animator
         // reveals the units, but without this safety net a unit-less frame
@@ -307,7 +353,7 @@ namespace {
             layerTracks.push_back(json{
                     {"property", "opacity"},
                     {"keyframes", json::array({{{"frame", 0}, {"value", 0.0}},
-                                               {{"frame", 8}, {"value", 1.0}},
+                                               {{"frame", enter}, {"value", 1.0}},
                                                {{"frame", kDurationFrames - kExitFrames}, {"value", 1.0}},
                                                {{"frame", kDurationFrames - 1}, {"value", 0.0}}})},
                     {"easing", "linear"}});
@@ -330,7 +376,11 @@ namespace {
             PhraseTextAnimator emphasis{
                     PhraseSelector{"word", "forward", "pick:" + std::to_string(word) + ":" + std::to_string(words)},
                     {PhraseTrack{"fill_blue", "linear",
-                                 {{0, 1.f}, {enter + 6, 1.f}, {enter + 18, 0.f}}}}};
+                                 definition.id == "short_phrase_product_dual_tone_reveal"
+                                     ? std::vector<PhraseKeyframe>{{0, 0.f}, {enter + 8, 0.f},
+                                                                   {enter + 16, 1.f}, {120, 1.f}}
+                                     : std::vector<PhraseKeyframe>{{0, 1.f}, {enter + 6, 1.f},
+                                                                   {enter + 18, 0.f}}}}};
             animators.push_back(lowerAnimator(emphasis, enter,
                                               definition.id + "_emph" + std::to_string(word),
                                               definition.light));
@@ -343,20 +393,15 @@ namespace {
                               definition.id.find("progressive") != std::string::npos ||
                               definition.id.find("write_on") != std::string::npos ||
                               definition.id.find("cascade_sentence") != std::string::npos;
-        const std::string fontPath = editorial ? "assets/fonts/Bricolage-Grotesque.ttf"
+        const std::string fontPath = modern ? "assets/fonts/Bricolage-Grotesque.ttf"
                                    : sentence ? "assets/fonts/DMSans-Bold.ttf"
                                               : "assets/fonts/Inter-Bold.ttf";
         json textStyle{{"font", fontPath},
                        {"font_size", phraseFontSize},
-                       {"fill", style.fill},
+                       {"fill", definition.fill_color.empty() ? style.fill : definition.fill_color},
                        {"stroke", json{{"color", "#000000"}, {"width", 0}}},
                        {"glow", json{{"radius", 0}, {"intensity", 0}, {"color", "#000000"}}}};
         if (definition.light) textStyle["fill"] = "#080808";
-        if (editorial) {
-            textStyle["fit_mode"] = "shrink_only";
-            textStyle["min_font_size"] = 60;
-            textStyle["max_font_size"] = phraseFontSize;
-        }
         json phrase = json{
                 {"id", "phrase"},
                 {"type", "text"},
@@ -369,7 +414,16 @@ namespace {
                 {"animation", json{{"tracks", layerTracks}}},
         };
         if (!animators.empty()) phrase["text_animators"] = animators;
-
+        if (definition.id == "short_phrase_product_blur_out_up") {
+            phrase["masks"] = json::array({json{{"type", "rect"}, {"mode", "intersect"},
+                {"position", json::array({0, 0})}, {"size", json::array({1760, 260})}}});
+        }
+        if (definition.id == "short_phrase_product_depth_parallax") {
+            phrase.erase("text_animators");
+            phrase["animation"]["tracks"] = json::array({json{{"property", "opacity"}, {"easing", "linear"},
+                {"keyframes", json::array({{{"frame", 0}, {"value", 0.0}},
+                                           {{"frame", kDurationFrames-1}, {"value", 0.0}}})}}});
+        }
         json layers = json::array();
         layers.push_back(json{{"id", "background"},
                               {"type", "image"},
@@ -380,10 +434,13 @@ namespace {
                               {"position", json::array({0, 0})},
                               {"start_frame", 0},
                               {"duration_frames", kDurationFrames}});
-        if (editorial) {
+        if (modern) {
+            const auto bg = definition.light ? json::array({0.96, 0.95, 0.93, 1.0})
+                : definition.id == "short_phrase_product_text_match_cut"
+                    ? json::array({0.0, 0.0, 0.035, 1.0})
+                    : json::array({0.025, 0.032, 0.045, 1.0});
             layers[0] = json{{"id", "background"}, {"type", "color"},
-                             {"color", definition.light ? json::array({0.96, 0.95, 0.93, 1.0})
-                                                         : json::array({0.025, 0.032, 0.045, 1.0})},
+                             {"color", bg},
                              {"start_frame", 0}, {"duration_frames", kDurationFrames}};
         }
         for (const auto& accent : definition.accents) {
@@ -414,10 +471,57 @@ namespace {
                                   {"opacity", accent.opacity}, {"start_frame", 0},
                                   {"duration_frames", kDurationFrames}, {"animation", {{"tracks", tracks}}}});
         }
-        layers.push_back(phrase);
+        if (definition.drawMainPhrase) layers.push_back(phrase);
+        for (const auto& overlay : definition.textOverlays) {
+            json copy = phrase;
+            copy["id"] = overlay.id;
+            copy["text"] = overlay.text.empty() ? definition.phrase : overlay.text;
+            copy["position"][0] = style.position[0] + overlay.offset_x;
+            copy["position"][1] = style.position[1] + overlay.offset_y;
+            copy["opacity"] = overlay.opacity;
+            copy["style"]["fill"] = overlay.fill;
+            json overlayTracks = json::array();
+            for (const auto& t : overlay.tracks) {
+                validateTrack(t, definition.id + "." + overlay.id);
+                overlayTracks.push_back(makeTrack(t, enter));
+            }
+            if (!overlayTracks.empty()) copy["animation"]["tracks"] = std::move(overlayTracks);
+            if (definition.id == "short_phrase_product_text_match_cut")
+                setBezier(copy["animation"]["tracks"], "scale", {0.85f, 0.f, 0.15f, 1.f});
+            if (!overlay.textAnimators.empty()) {
+                json overlayAnimators = json::array();
+                for (std::size_t i = 0; i < overlay.textAnimators.size(); ++i)
+                    overlayAnimators.push_back(lowerAnimator(overlay.textAnimators[i], enter,
+                        definition.id + "_" + overlay.id + "_anim" + std::to_string(i), definition.light));
+                copy["text_animators"] = std::move(overlayAnimators);
+            } else {
+                copy.erase("text_animators");
+            }
+            layers.push_back(std::move(copy));
+        }
 
-        return json{{"schema", editorial ? "chronon.render-plan.v3" : "chronon.render-plan.v2"},
-                    {"version", editorial ? 3 : 2},
+        if (definition.id == "short_phrase_product_depth_parallax") {
+            json upper = phrase;
+            upper["id"] = "parallax_upper";
+            upper["text"] = "Clarity";
+            upper["position"][1] = style.position[1] - 72;
+            upper["animation"]["tracks"] = json::array({
+                json{{"property", "position_x"}, {"easing", "out_cubic"},
+                     {"keyframes", json::array({{{"frame", 0}, {"value", -42}}, {{"frame", enter}, {"value", 0}}, {{"frame", kDurationFrames-kExitFrames}, {"value", 0}}, {{"frame", kDurationFrames-1}, {"value", 0}}})}},
+                json{{"property", "opacity"}, {"easing", "linear"},
+                     {"keyframes", json::array({{{"frame", 0}, {"value", 0}}, {{"frame", enter}, {"value", 1}}, {{"frame", kDurationFrames-kExitFrames}, {"value", 1}}, {{"frame", kDurationFrames-1}, {"value", 0}}})}}});
+            json lower = upper;
+            lower["id"] = "parallax_lower";
+            lower["text"] = "with purpose";
+            lower["position"][1] = style.position[1] + 72;
+            lower["animation"]["tracks"][0]["keyframes"] = json::array({{{"frame", 0}, {"value", 42}}, {{"frame", enter + 4}, {"value", 0}}, {{"frame", kDurationFrames-kExitFrames}, {"value", 0}}, {{"frame", kDurationFrames-1}, {"value", 0}}});
+            lower["animation"]["tracks"][1]["keyframes"] = json::array({{{"frame", 0}, {"value", 0}}, {{"frame", enter + 4}, {"value", 1}}, {{"frame", kDurationFrames-kExitFrames}, {"value", 1}}, {{"frame", kDurationFrames-1}, {"value", 0}}});
+            layers.push_back(upper);
+            layers.push_back(lower);
+        }
+
+        json result{{"schema", modern ? "chronon.render-plan.v3" : "chronon.render-plan.v2"},
+                    {"version", modern ? 3 : 2},
                     {"job_id", "chronontemplate_" + definition.id},
                     {"canvas", json{{"width", kWidth},
                                     {"height", kHeight},
@@ -426,6 +530,27 @@ namespace {
                                     {"duration_frames", kDurationFrames}}},
                     {"layers", layers},
                     {"output", json{{"path", definition.id + ".mp4"}, {"format", "mp4"}, {"codec", "h264"}}}};
+        if (definition.id == "short_phrase_product_fold_text") {
+            for (auto& layer : result["layers"]) {
+                if (layer.value("type", std::string{}) == "text") layer["enable_3d"] = true;
+            }
+            result["camera"] = json{{"type", "perspective"}, {"position", json::array({0,0,-1700})},
+                                    {"rotation_deg", json::array({0,0,0})}, {"fov_deg", 45},
+                                    {"near", 0.1}, {"far", 10000}};
+        }
+        if (definition.id == "short_phrase_product_perspective_marquee") {
+            for (auto& layer : result["layers"]) {
+                if (layer.value("type", std::string{}) == "text") layer["enable_3d"] = true;
+            }
+            result["camera"] = json{{"type", "perspective"}, {"position", json::array({0,0,-1700})},
+                                    {"rotation_deg", json::array({0,0,0})}, {"fov_deg", 45},
+                                    {"near", 0.1}, {"far", 10000}};
+            result["camera_animation"] = json{{"tracks", json::array({
+                json{{"property", "camera_position_x"}, {"easing", "in_out_cubic"},
+                     {"keyframes", json::array({{{"frame",0},{"value",-320}},{{"frame",99},{"value",320}},{{"frame",209},{"value",320}}})}}
+            })}};
+        }
+        return result;
     }
 
     void writeFile(const std::filesystem::path& path, const std::string& contents) {
@@ -456,8 +581,10 @@ namespace {
 }// namespace
 
 int main(int argc, char** argv) try {
-    if (argc < 2 || argc > 3 || (argc == 3 && std::string(argv[2]) != "--editorial-only")) {
-        std::cerr << "usage: chronontemplate_emit_short_phrase_plans <output-directory> [--editorial-only]\n";
+    if (argc < 2 || argc > 3 || (argc == 3 && std::string(argv[2]) != "--editorial-only" &&
+                                std::string(argv[2]) != "--product-only" &&
+                                std::string(argv[2]) != "--react-text-only")) {
+        std::cerr << "usage: chronontemplate_emit_short_phrase_plans <output-directory> [--editorial-only|--product-only|--react-text-only]\n";
         return 2;
     }
     const std::filesystem::path outDir = argv[1];
@@ -476,7 +603,18 @@ int main(int argc, char** argv) try {
 
     for (const ShortPhraseAnimation animation : chronontemplate::shortPhraseAnimations()) {
         const ShortPhraseDefinition definition = chronontemplate::definition(animation);
-        if (argc == 3 && definition.id.rfind("short_phrase_editorial_", 0) != 0) continue;
+        if (argc == 3 && std::string(argv[2]) == "--editorial-only" &&
+            definition.id.rfind("short_phrase_editorial_", 0) != 0) continue;
+        if (argc == 3 && std::string(argv[2]) == "--product-only" &&
+            definition.id.rfind("short_phrase_product_", 0) != 0) continue;
+        if (argc == 3 && std::string(argv[2]) == "--react-text-only" &&
+            definition.id != "short_phrase_product_masked_heading" &&
+            definition.id != "short_phrase_product_split_flap_text" &&
+            definition.id != "short_phrase_product_warp_text" &&
+            definition.id != "short_phrase_product_fold_text" &&
+            definition.id != "short_phrase_product_decrypted_text" &&
+            definition.id != "short_phrase_product_scroll_reveal" &&
+            definition.id != "short_phrase_product_scrambled_text") continue;
         const std::string expected = chronontemplate::name(animation);
         if (definition.id != expected) {
             fail("definition id \"" + definition.id + "\" is published as \"" + expected + "\"");
@@ -497,6 +635,7 @@ int main(int argc, char** argv) try {
                                                           : definition.textAnimators.front().selector.unit},
                 {"exit", exitId(definition.exit)},
                 {"decor", decorName(definition.decor)},
+                {"adaptation_note", definition.adaptation_note},
                 {"emphasis", emphasis},
                 {"plan", planName},
                 {"render", definition.id + ".mp4"}});

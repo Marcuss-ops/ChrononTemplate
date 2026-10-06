@@ -106,14 +106,43 @@ add_library(chronontemplate STATIC
         src/chronontemplate/important_phrases/apple/ApplePhrasePack.cpp
         src/chronontemplate/important_phrases/highlight/PhraseHighlightPack.cpp
         src/chronontemplate/important_phrases/didone/DidoneTitlesPack.cpp
-        # the category packs: many images in one scene, full-frame backgrounds, map beats
+        # the category packs: many images in one scene, full-frame backgrounds, modern map compositions
         src/chronontemplate/multiple_images/MultiImagePack.cpp
         src/chronontemplate/backgrounds/BackgroundPack.cpp
-        src/chronontemplate/map/MapPack.cpp
+        src/chronontemplate/map/ModernMapPack.cpp
         # the short-phrase family: one vocabulary, twelve archetypes, plus the star bumper
         src/chronontemplate/short_phrases/ShortPhrasePack.cpp
+        src/chronontemplate/short_phrases/animations/BlurOutUp.cpp
+        src/chronontemplate/short_phrases/animations/BottomUpLetters.cpp
+        src/chronontemplate/short_phrases/animations/FocusBlurResolve.cpp
+        src/chronontemplate/short_phrases/animations/KineticCenterBuild.cpp
+        src/chronontemplate/short_phrases/animations/LineByLineSlide.cpp
+        src/chronontemplate/short_phrases/animations/PerWordRise.cpp
+        src/chronontemplate/short_phrases/animations/PerspectiveMarquee.cpp
+        src/chronontemplate/short_phrases/animations/ScanBand.cpp
+        src/chronontemplate/short_phrases/animations/ScrambleReveal.cpp
+        src/chronontemplate/short_phrases/animations/StrikethroughReplace.cpp
+        src/chronontemplate/short_phrases/animations/TextMatchCut.cpp
+        src/chronontemplate/short_phrases/animations/TextShimmer.cpp
+        src/chronontemplate/short_phrases/animations/WeightWave.cpp
+        src/chronontemplate/short_phrases/animations/ChromaticFringeTitle.cpp
+        src/chronontemplate/short_phrases/animations/MaskedHeading.cpp
+        src/chronontemplate/short_phrases/animations/SplitFlapText.cpp
+        src/chronontemplate/short_phrases/animations/WarpText.cpp
+        src/chronontemplate/short_phrases/animations/FoldText.cpp
+        src/chronontemplate/short_phrases/animations/DecryptedText.cpp
+        src/chronontemplate/short_phrases/animations/ScrollReveal.cpp
+        src/chronontemplate/short_phrases/animations/ScrambledText.cpp
+        src/chronontemplate/short_phrases/animations/GlareHover.cpp
+        src/chronontemplate/short_phrases/animations/GlowCursor.cpp
+        src/chronontemplate/short_phrases/animations/GradualBlur.cpp
+        src/chronontemplate/short_phrases/animations/ShapeBlur.cpp
         # the packs a template author starts from
         src/chronontemplate/entities_with_text/YouTubeSubscribe.cpp
+        # declarative transitions (BACKLOG item 4): sweep/dip/blinds/iris/glitch/leak
+        src/chronontemplate/transitions/TransitionPack.cpp
+        # captions + data-viz (BACKLOG item 5): PCM beat grid, captions, bar chart
+        src/chronontemplate/captions_dataviz/CaptionsDataVizPack.cpp
         # the template catalog that used to live inside the motion core
         src/chrononmotion/templates/Templates.cpp)
 
@@ -227,6 +256,43 @@ if(CHRONONTEMPLATE_WERROR)
     target_compile_options(chronontemplate_emit_blackboard_torture_v1 PRIVATE -Werror)
 endif()
 
+# Optional native-plan canary for deterministic BackgroundPack V3 emission.
+add_executable(chronontemplate_background_canary_v1 tools/backgrounds/background_canary_v1.cpp)
+target_link_libraries(chronontemplate_background_canary_v1 PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_background_canary_v1 PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_background_canary_v1 PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_background_canary_v1 PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_background_canary_v1 PRIVATE -Wall -Wextra)
+
+# Optional native-plan canary for rapid transition frame-range validation.
+add_executable(chronontemplate_transition_canary_v1 tools/transitions/transition_canary_v1.cpp)
+target_link_libraries(chronontemplate_transition_canary_v1 PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_transition_canary_v1 PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_transition_canary_v1 PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_transition_canary_v1 PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+
 if(CHRONONTEMPLATE_BUILD_TESTS)
     enable_testing()
 
@@ -259,6 +325,12 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         add_test(NAME chronontemplate_saas_kinetic_typography_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/test_saas_kinetic_typography_v1.py")
+        add_test(NAME chronontemplate_rgb_motion_v1_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/backgrounds/test_rgb_motion_v1.py")
+        add_test(NAME chronontemplate_map_motion_family_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/map/test_map_motion_family_v1.py")
     endif()
     if(Python3_Interpreter_FOUND AND EXISTS "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}")
         add_test(NAME chronontemplate_editorial_benchmark_contract
@@ -388,8 +460,8 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_didone_titles_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_didone_titles_pack_test COMMAND chronontemplate_didone_titles_pack_test)
 
-    # The category packs: the multi-image board, the full-frame background looks
-    # and the map beats (plate + markers + a camera move).
+    # The category packs: the multi-image board, full-frame backgrounds and the
+    # replacement modern map composition API (styled labels + camera movement).
     add_executable(chronontemplate_multi_image_pack_test tests/multi_image_pack.cpp)
     target_link_libraries(chronontemplate_multi_image_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_multi_image_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -399,11 +471,30 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_background_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_background_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_background_pack_test COMMAND chronontemplate_background_pack_test)
+        add_test(NAME chronontemplate_background_plan_contract
+            COMMAND $<TARGET_FILE:chronontemplate_background_canary_v1>
+                    "${CMAKE_CURRENT_BINARY_DIR}/background-canary")
 
-    add_executable(chronontemplate_map_pack_test tests/map_pack.cpp)
-    target_link_libraries(chronontemplate_map_pack_test PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_map_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    add_test(NAME chronontemplate_map_pack_test COMMAND chronontemplate_map_pack_test)
+
+    # The declarative transition family: every look covers or washes its cut on
+    # the authored midpoint, clears by the end, and stays a pure function of
+    # (scene, frame).
+    add_executable(chronontemplate_transitions_pack_test tests/transitions_pack.cpp)
+    target_link_libraries(chronontemplate_transitions_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_transitions_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_transitions_pack_test COMMAND chronontemplate_transitions_pack_test)
+
+    # The caption/data-viz family: the PCM beat grid is deterministic, captions
+    # line up one per beat, the chart grows staggered and lands on its peak.
+    add_executable(chronontemplate_captions_dataviz_pack_test tests/captions_dataviz_pack.cpp)
+    target_link_libraries(chronontemplate_captions_dataviz_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_captions_dataviz_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_captions_dataviz_pack_test COMMAND chronontemplate_captions_dataviz_pack_test)
+
+    add_executable(chronontemplate_modern_map_pack_test tests/modern_map_pack.cpp)
+    target_link_libraries(chronontemplate_modern_map_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_modern_map_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_modern_map_pack_test COMMAND chronontemplate_modern_map_pack_test)
 
     # The short-phrase family: the twelve archetypes, the semantic emphasis, the
     # exit modes and the star decor bumper.

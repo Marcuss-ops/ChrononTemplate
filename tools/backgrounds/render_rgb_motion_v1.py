@@ -102,7 +102,7 @@ def resolve_rgb_channel_transform(start: int, duration: int, channels: dict,
         for channel in ("r", "g", "b"):
             options = channels.get(channel, {})
             effect[{"r":"red_transform","g":"green_transform","b":"blue_transform"}[channel]] = {
-                "translation": list(options.get("offset", (0.0, 0.0))),
+                "translation": list(options.get("effect_offset", options.get("offset", (0.0, 0.0)))),
                 "scale": [options.get("scale", 1.0), options.get("scale", 1.0)],
                 "rotation": options.get("rotation", 0.0),
                 "opacity": options.get("opacity", 1.0),
@@ -125,18 +125,25 @@ def resolve_slice_transform(start: int, duration: int, *, count=14, orientation=
         displacement = round(rng.uniform(-amplitude, amplitude), 4)
         if posterized:
             displacement = round(displacement / 18.0) * 18.0
+        hit = max(1, round((duration - 1) * .22))
+        release = max(hit + 1, round((duration - 1) * .52))
         if orientation == "horizontal":
             mask = {"type": "rect", "mode": "intersect", "position": [0, -extent/2 + slice_size*(index+.5)],
                     "size": [860, slice_size + .5]}
-            x_values = [(0, WIDTH/2), (8, WIDTH/2+displacement), (12, WIDTH/2+displacement),
-                        (17, WIDTH/2), (duration-1, WIDTH/2)]
+            x_values = [(0, WIDTH/2), (hit, WIDTH/2+displacement),
+                        (release, WIDTH/2+displacement), (duration-1, WIDTH/2)]
             y_values = [(0, HEIGHT/2), (duration-1, HEIGHT/2)]
         else:
             mask = {"type": "rect", "mode": "intersect", "position": [-extent/2 + slice_size*(index+.5), 0],
                     "size": [slice_size + .5, 190]}
             x_values = [(0, WIDTH/2), (duration-1, WIDTH/2)]
-            y_values = [(0, HEIGHT/2), (8, HEIGHT/2+displacement), (12, HEIGHT/2+displacement),
-                        (17, HEIGHT/2), (duration-1, HEIGHT/2)]
+            y_values = [(0, HEIGHT/2), (hit, HEIGHT/2+displacement),
+                        (release, HEIGHT/2+displacement), (duration-1, HEIGHT/2)]
+        # Preserve strictly increasing frame indices even for micro cuts.
+        x_values = sorted({frame: value for frame, value in x_values}.items())
+        y_values = sorted({frame: value for frame, value in y_values}.items())
+        x_values = [(frame, value) for frame, value in x_values]
+        y_values = [(frame, value) for frame, value in y_values]
         layers.append(text_layer(f"slice-{orientation}-{index:02d}-{start}", start, duration,
                                  color=SPECTRUM[index % len(SPECTRUM)], x_keys=x_values,
                                  y_keys=y_values, masks=[mask], opacity=.92))
@@ -251,6 +258,124 @@ def _recipe_layers(recipe: dict, start: int, duration: int, index: int) -> list[
     raise ValueError(f"unknown rgb recipe: {ident}")
 
 
+RAPID_TRANSITIONS = {
+    "rgb_split_whip": 7,
+    "rgb_snap": 5,
+    "rgb_zoom_punch": 8,
+    "rgb_horizontal_tear": 8,
+    "rgb_glitch_cut": 6,
+    "rgb_lens_snap": 8,
+    "rgb_spin_blur": 8,
+    "prismatic_flash": 8,
+    "lightleak_rgb_combo": 10,
+    "film_burn_rgb": 10,
+}
+
+
+def _set_track_keys(layer: dict, prop: str, keys: list[tuple[int, float]]) -> None:
+    for item in layer["animation"]["tracks"]:
+        if item["property"] == prop:
+            item["keyframes"] = [{"frame": int(frame), "value": float(value)} for frame, value in keys]
+            return
+    layer["animation"]["tracks"].append(track(prop, keys))
+
+
+def _rapid_transition_layers(ident: str, duration: int, start: int = 0) -> list[dict]:
+    end = duration - 1
+    mid = max(1, end // 2)
+    if ident == "rgb_snap":
+        peak = max(1, round(end * .35))
+        def motion(sign: float):
+            return [(frame, sign * 18.0 * (frame / peak if frame <= peak else
+                                           max(0.0, (end - frame) / (end - peak))), 0.0)
+                    for frame in range(duration)]
+        return resolve_rgb_channel_transform(start, duration, {
+            "r": {"motion": motion(-1.0), "effect_offset": (-18.0, 0.0)},
+            "g": {"motion": motion(0.0)},
+            "b": {"motion": motion(1.0), "effect_offset": (18.0, 0.0)},
+        }, component_transform=True)
+    if ident == "rgb_split_whip":
+        return resolve_velocity_rgb_channels(
+            start, duration, [(0, -190.0, 0.0), (mid, 0.0, 0.0), (end, 190.0, 0.0)],
+            split_seconds=.018)
+    if ident == "rgb_zoom_punch":
+        layers = resolve_rgb_channel_transform(start, duration, {
+            "r": {"offset": (-8, 0), "effect_offset": (-8, 0), "radial": True},
+            "g": {"radial": True},
+            "b": {"offset": (8, 0), "effect_offset": (8, 0), "radial": True},
+        }, component_transform=True)
+        for layer in layers[:3]:
+            _set_track_keys(layer, "scale", [(0, .88), (mid, 1.16), (end, 1.0)])
+        return layers
+    if ident in {"rgb_horizontal_tear", "rgb_glitch_cut"}:
+        count = 6 if ident == "rgb_horizontal_tear" else 4
+        amplitude = 48.0 if ident == "rgb_horizontal_tear" else 72.0
+        slices = resolve_slice_transform(start, duration, count=count, orientation="horizontal",
+                                         amplitude=amplitude, seed=1986)
+        split = resolve_rgb_channel_transform(start, duration, {
+            "r": {"offset": (-5, 0)}, "g": {}, "b": {"offset": (5, 0)},
+        }, component_transform=True)
+        return slices + split
+    if ident == "rgb_lens_snap":
+        def motion(offset: float):
+            return [(frame, offset * (1.0 - frame / end), 0.0) for frame in range(duration)]
+        return resolve_rgb_channel_transform(start, duration, {
+            "r": {"motion": motion(-24.0), "effect_offset": (-24.0, 0.0), "radial": True},
+            "g": {"radial": True},
+            "b": {"motion": motion(24.0), "effect_offset": (24.0, 0.0), "radial": True},
+        }, component_transform=True)
+    if ident == "rgb_spin_blur":
+        layers = resolve_rgb_channel_transform(start, duration, {
+            "r": {"offset": (-8, 0), "effect_offset": (-8, 0), "radial": True},
+            "g": {"radial": True},
+            "b": {"offset": (8, 0), "effect_offset": (8, 0), "radial": True},
+        }, component_transform=True)
+        for layer, turns in zip(layers[:3], (-.10, 0.0, .10)):
+            _set_track_keys(layer, "rotation_z", [(0, turns), (mid, 0.0), (end, -turns)])
+        return layers
+    if ident in {"prismatic_flash", "lightleak_rgb_combo", "film_burn_rgb"}:
+        channels = resolve_rgb_channel_transform(start, duration, {
+            "r": {"offset": (-12, 0), "radial": ident == "prismatic_flash"},
+            "g": {"radial": ident != "film_burn_rgb"},
+            "b": {"offset": (12, 0), "radial": ident == "prismatic_flash"},
+        })
+        if ident == "prismatic_flash":
+            # A short white core flash with rainbow channel fringes.
+            flash = text_layer(f"prismatic-whiteout-{start}", start, duration,
+                               color="#FFFFFF", blend="normal")
+            _set_track_keys(flash, "opacity", [(0, 0.0), (mid, .92), (end, 0.0)])
+            return channels[:3] + [flash]
+        if ident == "lightleak_rgb_combo":
+            # Oversized warm source crosses behind the channel fringes; the
+            # renderer's canonical color/effect pipeline supplies the bloom.
+            leak = text_layer(f"warm-leak-{start}", start, duration, color="#FF8A35",
+                              x_keys=[(0, -WIDTH*.65), (mid, WIDTH*.5), (end, WIDTH*1.65)],
+                              scale_keys=[(0, 2.4), (mid, 3.2), (end, 2.4)], opacity=.34)
+            return channels[:3] + [leak]
+        slices = resolve_slice_transform(start, duration, count=5, amplitude=44,
+                                         seed=4104, orientation="horizontal")
+        return slices + channels[:3]
+    raise ValueError(f"unknown rapid RGB transition: {ident}")
+
+
+def build_transition_plans() -> dict[str, dict]:
+    """Build the ten proposal RGB and hybrid accents as renderable short cuts."""
+    plans = {}
+    for ident, duration in RAPID_TRANSITIONS.items():
+        layers = [_backplate(0, duration),
+                  text_layer(f"transition-source-{ident}", 0, duration,
+                             color="#F8FAFF", blend="normal")]
+        layers.extend(_rapid_transition_layers(ident, duration))
+        plans[ident] = {
+            "schema": "chronon.render-plan.v3", "version": 3, "job_id": ident,
+            "canvas": {"width": WIDTH, "height": HEIGHT, "fps_num": FPS,
+                       "fps_den": 1, "duration_frames": duration},
+            "layers": layers,
+            "output": {"path": f"{ident}.mp4", "format": "mp4", "codec": "h264"},
+        }
+    return plans
+
+
 def _backplate(start: int, duration: int) -> dict:
     return {"id":f"rgb-backplate-{start}","type":"color","start_frame":start,
             "duration_frames":duration,"color":[.004,.007,.018,1],"size":[WIDTH,HEIGHT],
@@ -297,23 +422,26 @@ def main() -> int:
     mode.add_argument("--plans",action="store_true")
     mode.add_argument("--validate",action="store_true")
     mode.add_argument("--render",action="store_true")
+    parser.add_argument("--transitions",action="store_true",
+                        help="emit the ten rapid RGB transition plans instead of the long gallery")
     parser.add_argument("--cli",type=Path)
     args=parser.parse_args()
-    OUT.mkdir(parents=True,exist_ok=True)
-    plans=build_plans()
+    out_dir = OUT / "transitions" if args.transitions else OUT
+    out_dir.mkdir(parents=True,exist_ok=True)
+    plans=build_transition_plans() if args.transitions else build_plans()
     for job_id,plan in plans.items():
-        path=OUT/f"{job_id}.plan.json"
+        path=out_dir/f"{job_id}.plan.json"
         path.write_text(json.dumps(plan,indent=2)+"\n")
         print(f"wrote {path}")
     if args.validate or args.render:
         cli=args.cli or next((p for p in CLI_CANDIDATES if p.is_file()),None)
         if cli is None: parser.error("chronon3d_cli not found; pass --cli")
         for job_id in plans:
-            path=OUT/f"{job_id}.plan.json"
+            path=out_dir/f"{job_id}.plan.json"
             subprocess.run([str(cli),"validate","--plan",str(path),"--assets-root",str(WORKSPACE)],check=True)
             if args.render:
                 subprocess.run([str(cli),"render","--plan",str(path),"--assets-root",str(WORKSPACE),
-                                "--output",str(OUT/f"{job_id}.mp4"),"--backend","software"],check=True)
+                                "--output",str(out_dir/f"{job_id}.mp4"),"--backend","software"],check=True)
     return 0
 
 

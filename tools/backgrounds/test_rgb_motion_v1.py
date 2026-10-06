@@ -93,6 +93,86 @@ class RgbMotionTests(unittest.TestCase):
         self.assertEqual(x_value(layers[0], 29), x_value(layers[1], 29))
         self.assertEqual(x_value(layers[2], 29), x_value(layers[1], 29))
 
+    def test_rapid_transition_catalog_contract_matches_recipe_definitions(self):
+        expected = {
+            "rgb_split_whip": (5, 8, 7, "normal"), "rgb_snap": (4, 6, 5, "micro"),
+            "rgb_zoom_punch": (6, 10, 8, "normal"), "rgb_horizontal_tear": (6, 10, 8, "normal"),
+            "rgb_glitch_cut": (4, 8, 6, "micro"), "rgb_lens_snap": (6, 9, 8, "normal"),
+            "rgb_spin_blur": (6, 10, 8, "normal"), "prismatic_flash": (6, 10, 8, "normal"),
+            "lightleak_rgb_combo": (8, 12, 10, "normal"), "film_burn_rgb": (8, 12, 10, "normal"),
+        }
+        catalog = json.loads((ROOT / "catalog/motion_catalog.v1.json").read_text())
+        rows = catalog["rgb_motion"]["rapid_transitions"]
+        self.assertEqual(len(rows), len(expected))
+        self.assertEqual(len({row["id"] for row in rows}), len(expected))
+        for row in rows:
+            self.assertEqual((row["minimum_frames"], row["maximum_frames"],
+                              row["recommended_frames"], row["timing_class"]), expected[row["id"]])
+        emitted = json.loads((ROOT / "catalog/chronontemplate_catalog.v1.json").read_text())
+        self.assertEqual(emitted["rgb_motion"]["rapid_transitions"], rows)
+
+    def test_rapid_transition_plans_cover_the_proposal_and_frame_budgets(self):
+        expected = {
+            "rgb_split_whip": (5, 8), "rgb_snap": (4, 6),
+            "rgb_zoom_punch": (6, 10), "rgb_horizontal_tear": (6, 10),
+            "rgb_glitch_cut": (4, 8), "rgb_lens_snap": (6, 9),
+            "rgb_spin_blur": (6, 10), "prismatic_flash": (6, 10),
+            "lightleak_rgb_combo": (8, 12), "film_burn_rgb": (8, 12),
+        }
+        self.assertEqual(set(rgb.RAPID_TRANSITIONS), set(expected))
+        plans = rgb.build_transition_plans()
+        self.assertEqual(set(plans), set(expected))
+        self.assertEqual(plans, rgb.build_transition_plans())
+        for ident, bounds in expected.items():
+            plan = plans[ident]
+            frames = plan["canvas"]["duration_frames"]
+            self.assertGreaterEqual(frames, bounds[0])
+            self.assertLessEqual(frames, bounds[1])
+            self.assertEqual(plan["schema"], "chronon.render-plan.v3")
+            self.assertTrue(plan["layers"])
+            for layer in plan["layers"]:
+                for anim_track in layer.get("animation", {}).get("tracks", []):
+                    keys = anim_track["keyframes"]
+                    frame_ids = [key["frame"] for key in keys]
+                    self.assertEqual(frame_ids, sorted(set(frame_ids)))
+                    self.assertTrue(all(0 <= frame < frames for frame in frame_ids))
+
+    def test_rgb_snap_uses_native_component_channel_transform(self):
+        plan = rgb.build_transition_plans()["rgb_snap"]
+        core = next(layer for layer in plan["layers"]
+                    if any(effect.get("type") == "rgb_channel_transform"
+                           for effect in layer.get("effects", [])))
+        effect = next(effect for effect in core["effects"] if effect["type"] == "rgb_channel_transform")
+        self.assertEqual(effect["red_transform"]["translation"], [-18.0, 0.0])
+        self.assertEqual(effect["green_transform"]["translation"], [0.0, 0.0])
+        self.assertEqual(effect["blue_transform"]["translation"], [18.0, 0.0])
+
+    def test_rapid_rgb_presets_exercise_expected_primitive_combinations(self):
+        plans = rgb.build_transition_plans()
+        snap = plans["rgb_snap"]["layers"]
+        self.assertEqual([layer["style"]["fill"] for layer in snap[2:5]],
+                         [rgb.RGB["r"], rgb.RGB["g"], rgb.RGB["b"]])
+        tear = plans["rgb_horizontal_tear"]["layers"]
+        self.assertTrue(any(layer.get("masks") for layer in tear))
+        self.assertGreaterEqual(sum(layer.get("style", {}).get("fill") == rgb.RGB["r"] for layer in tear), 1)
+        zoom = [layer for layer in plans["rgb_zoom_punch"]["layers"] if "animation" in layer]
+        self.assertTrue(any(any(track["property"] == "scale" and len(track["keyframes"]) == 3
+                                for track in layer["animation"]["tracks"])
+                            for layer in zoom))
+        spin = [layer for layer in plans["rgb_spin_blur"]["layers"] if "animation" in layer]
+        self.assertTrue(any(any(track["property"] == "rotation_z" and len(track["keyframes"]) == 3
+                                for track in layer["animation"]["tracks"])
+                            for layer in spin))
+        for ident in ("rgb_snap", "rgb_zoom_punch", "rgb_horizontal_tear", "rgb_glitch_cut",
+                      "rgb_lens_snap", "rgb_spin_blur"):
+            effect_types = {effect["type"] for layer in plans[ident]["layers"]
+                            for effect in layer.get("effects", [])}
+            self.assertIn("rgb_channel_transform", effect_types, ident)
+        for ident in ("rgb_zoom_punch", "rgb_lens_snap", "rgb_spin_blur"):
+            effect_types = {effect["type"] for layer in plans[ident]["layers"]
+                            for effect in layer.get("effects", [])}
+            self.assertIn("radial_blur", effect_types, ident)
+
     def test_gallery_and_torture_are_deterministic_and_complete(self):
         first = rgb.build_plans(self.family)
         self.assertEqual(first, rgb.build_plans(self.family))

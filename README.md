@@ -34,6 +34,14 @@ tests/youtube_subscribe.cpp               the pack's composition and timing
 The pack sources are grouped by the kind of animation they author. Headers and
 sources mirror each other under `include/chronontemplate/` and
 `src/chronontemplate/`, so a pack is found by category first, family second.
+The retired map-beat API was replaced by `ModernMapPack`; callers should use
+`ModernMapSpec` and `composeModernMap()` for styled labels and authored camera
+moves. `MapTextRole` exposes title, primary/secondary location, data-value,
+legend, and attribution typography presets. `ModernMapSpec` can add independently
+revealed subtitle/attribution, data cards, legend rows, and multi-segment callout
+leaders. Geographic projection and provider attribution metadata remain owned
+by RenderingGen; ChrononTemplate accepts already-positioned editorial elements
+and does not implement geographic projection.
 
 ```text
 important_phrases/          phrasing and titling, one subdir per family
@@ -48,10 +56,12 @@ short_phrases/              ShortPhrasePack — 12 archetypes for phrases of 1�
                             (+ short_phrase.decor.star_bumper, semantic emphasis, exit modes)
 single_images/              ImageAnimationPack — one-image 2.5D entrances
 multiple_images/            MultiImagePack — duo/trio/quad/penta boards with captions
-backgrounds/                BackgroundPack — full-frame looks from shape layers
+backgrounds/                BackgroundPack — editorial documentary/grid/scan/dust looks from shape layers
 entities_with_text/         DocumentarySnapshotPack + YouTubeSubscribe
-map/                        MapPack — a plate + markers + a camera beat
+map/                        ModernMapPack — styled plate, labels and camera beat
 camera_roll/                TitleCameraPack + SceneCameraPack — camera-only motion
+transitions/                TransitionPack — declarative wipe/dip/blinds/iris/glitch/leak cuts
+captions_dataviz/           CaptionsDataVizPack — PCM beat grid, beat-timed captions, bar charts
 ```
 
 ## Tools layout
@@ -109,10 +119,11 @@ only MP4s via the existing configured Drive uploader.
 
 ## Short-phrase catalog
 
-`catalog/short_phrase_motion.v1.json` holds the twelve short-phrase archetypes
-(1–7 words), the five exit modes, the decor bumper and the selection table
-RenderingGen uses to pick a recipe by word count. It is **generated from the
-C++ pack**, not hand-maintained:
+`catalog/short_phrase_motion.v1.json` holds the short-phrase archetypes (the
+twelve originals plus the append-only editorial and product-video families),
+the five exit modes, the decor bumper and the selection table RenderingGen uses
+to pick a recipe by word count. It is **generated from the C++ pack**, not
+hand-maintained:
 
 ```shell
 cmake --build build/dev --target chronontemplate_emit_short_phrase_catalog
@@ -124,6 +135,44 @@ a catalog the consumer would reject), and
 `tools/short_phrases/test_short_phrase_catalog.py` (CTest:
 `chronontemplate_short_phrase_catalog_contract`) pins the document and fails when
 the committed file drifts from what the C++ pack emits today.
+
+### React text-effect adaptations
+
+Seven supplied React components have deterministic native short-phrase recipes:
+`short_phrase_product_masked_heading`, `short_phrase_product_split_flap_text`,
+`short_phrase_product_warp_text`, `short_phrase_product_fold_text`,
+`short_phrase_product_decrypted_text`, `short_phrase_product_scroll_reveal`,
+and `short_phrase_product_scrambled_text`. Their `adaptation_note` appears in
+the catalog and generated manifest. The video/image text fill and pointer
+parallax in MaskedHeading, live randomized split-flap tiles, WarpText's WebGL
+shader and pointer response, per-unit FoldText hinges/crease, DecryptedText's
+interactive triggers, viewport-driven ScrollReveal scrub, and pointer-distance
+ScrambledText are not capabilities of these offline RenderPlans. The C++ pack
+uses native glyph/word transforms, frame-based reveals, perspective at phrase
+level, and fixed encoded-text stages where appropriate; it does not claim those
+browser-only interactions are preserved.
+
+Build the emitters, regenerate the canonical catalog and emit only the seven
+React-derived V3 plans (1920×1080, 30 fps, 210 frames):
+
+```shell
+cmake --build build/dev --target chronontemplate_emit_short_phrase_catalog chronontemplate_emit_short_phrase_plans
+build/dev/chronontemplate_emit_short_phrase_catalog > catalog/short_phrase_motion.v1.json
+build/dev/chronontemplate_emit_short_phrase_plans out/short_phrase_react_text_v1 --react-text-only
+
+CLI=../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli
+for plan in out/short_phrase_react_text_v1/*.plan.json; do
+  "$CLI" validate --plan "$PWD/$plan" --assets-root "$PWD/../Chronon3d"
+  "$CLI" render --plan "$PWD/$plan" --output "$PWD/${plan%.plan.json}.mp4" \\
+    --assets-root "$PWD/../Chronon3d" --backend vulkan --profile preview \\
+    --hardware nvenc --fps 30
+done
+```
+
+The renders are H.264 at 1920×1080, 30 fps, seven seconds each; Chronon3D
+writes a per-frame timing sidecar beside each MP4. The short-phrase pack and Python catalog contract pin all seven stable IDs,
+well-formed native tracks/overlay text, explicit fidelity notes, deterministic
+catalog bytes and selection-table references.
 
 ## Packs
 
@@ -192,6 +241,162 @@ the entrance's last key into the punch instead of pulsing. The click holds a key
 one frame before it lands, then pokes to 1.12 and settles;
 - `Track::add` replaces a key at an equal time, which is what makes the punch
 land on the click frame instead of next to it.
+
+## Documentary backgrounds
+
+`BackgroundPack` exposes twenty append-only stable IDs. The original ten remain
+unchanged; six native editorial looks were added (`bg_documentary_grid`,
+`bg_radar_sweep`, `bg_archive_dust`, `bg_mesh_gradient`, `bg_grid_pattern`,
+and `bg_particles`). Nine React-inspired effects are available as bounded native
+approximations: `bg_aurora` (GradientMesh + drifting color field), `bg_dark_veil`
+(warped field with optional scan/grain), `bg_dot_grid` and `bg_dot_field`
+(native dot grids, seeded wave/glow accents), `bg_gradient_waves` (fractal field
+and optional grain), `bg_grainient` (seeded three-color field and noise),
+`bg_ripple_grid` (native grid and stroked ring), `bg_shape_grid` (moving
+square/hexagon/circle/triangle cells), and `bg_silk` (drifting folded-field
+approximation). The existing `bg_particles` is the tenth React port; its stable
+ID is reused rather than duplicated. Canvas pointer/mouse actions are represented
+by deterministic offline motion, not live interaction or pixel-identical shaders.
+
+The looks use Chronon's native shape, ellipse, Grid, DotGrid, Field2D,
+GradientMesh, and gradient fills plus ChrononMotion tracks. Field transforms not
+present in RenderPlan remain un-authored; bounded field operators, seeded drift,
+and temporal position tracks provide repeatable approximations. DotGrid adapts
+spacing to stay within the renderer's 4,096-dot ceiling, and compositions stay
+within a bounded layer budget. Color, timing, density, and effect-specific
+controls are checked by `addBackground`; animated looks require at least 24
+frames. `BackgroundSpec::gridSquares` selects highlighted GridPattern cells;
+`particleQuantity`, `particleColors`, `particleSpeed`, and related particle
+options tune deterministic particles.
+
+The native field/mesh contract is emitted by `chronontemplate_background_canary_v1`
+(one V3 plan per look) and checked through the renderer CLI; unit contracts are
+`chronontemplate_background_pack_test` and `chronontemplate_plan_lowering_test`.
+
+```cpp
+TemplateScene scene("doc_grid", 30.f, host, 1920.f, 1080.f);
+BackgroundSpec spec;
+spec.look = BackgroundLook::DocumentaryGrid;
+spec.ground = "#080D16";
+spec.accent = "#233247";
+spec.seam = "#62C8D6";
+spec.gridSpacing = 120.f;
+spec.majorEvery = 4;
+spec.inFrame = 0;
+spec.duration = 150;
+const BackgroundComposition plate = addBackground(scene, spec);
+FrameSubmission frame = scene.submit(48);
+```
+
+Use `BackgroundLook::RadarSweep` for technical scan motion,
+`BackgroundLook::ArchiveDust` for the quieter archival plate (`particleCount`
+0–256), `BackgroundLook::MeshGradient` for soft color drift, or the distinct
+`GridPattern` and `Particles` looks for a configurable coordinate grid and
+mouse-free deterministic particles. Contract:
+`chronontemplate_background_pack_test`.
+
+## Declarative transitions (BACKLOG item 4)
+
+`include/chronontemplate/transitions/TransitionPack.hpp` exposes eight legacy
+looks and eight rapid light-transition presets. The rapid IDs are
+`lightleak_flash_sweep` (6–10f), `lightleak_corner_burn` (8–12f),
+`lightleak_whiteout` (5–8f), `lightleak_diagonal_cut` (6–9f),
+`lightleak_double_pass` (10–14f), `lightleak_film_burn` (8–12f),
+`lightleak_center_burst` (5–8f), and `lightleak_horizontal_whip` (4–7f).
+`recommendedTransitionDuration()` provides the midpoint default; rapid durations
+outside their published range fail closed. `transitionTimingClass()` classifies
+the recommendation as MICRO (4–6), NORMAL (7–10), or HERO (11–16). The
+suggested weighted selector distribution is available as data only; this pack
+does not create or claim an existing random selector.
+
+The transition catalog is published under `transitions` in
+`catalog/motion_catalog.v1.json`, and validated by `chronontemplate_emit_catalog`;
+the generated `catalog/chronontemplate_catalog.v1.json` embeds the same rows.
+The optional offline `chronontemplate_transition_canary_v1 <out-dir>` target
+writes one native V3 plan per rapid look; the plans are suitable for
+`chronon3d_cli validate --plan`.
+The native C++ pack's light looks are deterministic shape plates/tracks; they
+are practical shape approximations, not optical light-leak shaders. The separate
+RGB RenderPlan authoring tool (`tools/backgrounds/render_rgb_motion_v1.py`)
+now publishes ten fast presets from the proposal: `rgb_split_whip` (5–8f),
+`rgb_snap` (4–6f), `rgb_zoom_punch` (6–10f), `rgb_horizontal_tear` (6–10f),
+`rgb_glitch_cut` (4–8f), `rgb_lens_snap` (6–9f), `rgb_spin_blur` (6–10f),
+`prismatic_flash` (6–10f), `lightleak_rgb_combo` (8–12f), and `film_burn_rgb`
+(8–12f). These compose existing channel-transform, deterministic slice,
+analytic velocity and blur operators without introducing another renderer or
+registry. The first seven RGB IDs and frame limits match the proposal; the
+three hybrid looks round out the same documented library.
+
+Emit and validate the short plans through the same CLI used for rendering:
+
+```shell
+python3 tools/backgrounds/render_rgb_motion_v1.py --transitions --validate
+python3 tools/backgrounds/render_rgb_motion_v1.py --transitions --render
+```
+
+Plans are written under `out/rgb_motion_v1/transitions/`; metadata and frame
+limits are published under `rgb_motion.rapid_transitions` in
+`catalog/rgb_motion_v1.json` and embedded by `chronontemplate_emit_catalog`.
+These presets are authored recipes, not a video cut-point selector or native
+`TransitionPack` enum entries. They use existing operators; native
+`WarpedLightLeak`, `ChannelSplit`, `ChannelTrail` frame-history sampling, and
+`SliceDisplace` renderer primitives remain explicit gaps rather than being
+claimed as implemented.
+
+```cpp
+TemplateScene scene("cut", 30.f, host, 1920.f, 1080.f);
+TransitionSpec spec;
+spec.look = TransitionLook::LightLeakFlashSweep;
+spec.inFrame = 30;
+spec.duration = recommendedTransitionDuration(spec.look); // 8 frames
+const TransitionComposition cut = addTransition(scene, spec);
+```
+
+When requested, scene temporal motion blur remains an opt-in declaration.
+
+
+```cpp
+TemplateScene scene("cut", 30.f, host, 1920.f, 1080.f);
+TransitionSpec spec;
+spec.look = TransitionLook::GlitchSlices;
+spec.travel = chrononmotion::motion::presets::Direction::Left;
+spec.inFrame = 30;
+spec.duration = 20;
+spec.enableMotionBlur = true;
+const TransitionComposition cut = addTransition(scene, spec);
+```
+
+`transitionId` names each look (`transition_wipe`, `transition_push_through`,
+`transition_dip_to_black`, `transition_dip_to_color`, `transition_blinds`,
+`transition_iris_circle`, `transition_glitch_slices`,
+`transition_light_leak`, `lightleak_flash_sweep`, `lightleak_corner_burn`,
+`lightleak_whiteout`, `lightleak_diagonal_cut`, `lightleak_double_pass`,
+`lightleak_film_burn`, `lightleak_center_burst`, and
+`lightleak_horizontal_whip`); `coverFrame` is the authored peak/cover point.
+Scale never reaches an exact zero (the plan lowering fails closed on singular
+transforms) and the glitch slices are deterministic by index, never by an RNG,
+so every cut is a pure function of (scene, frame). Contract:
+`chronontemplate_transitions_pack_test`.
+
+## Captions and data-viz (BACKLOG item 5)
+
+`include/chronontemplate/captions_dataviz/CaptionsDataVizPack.hpp` wires the
+two halves the backlog item asked for:
+
+- `buildBeatGrid` runs the motion core's certified PCM analyzer
+  (`analyzePcmAudio` — no decoder, no file I/O) and reduces its onsets to a
+  frame-space grid with a minimum gap between beats; deterministic by
+  construction.
+- `addCaptionTrack` authors one band + one caption per beat, each layer alive
+  exactly on its own beat interval.
+- `addDataVizChart` authors a bar chart that grows bottom-up from its anchored
+  scale (staggered, all landed by `peakFrame`), per-bar value labels that fade
+  in when their bar lands, a pulsing halo on the highlighted bar, a trend rule
+  that draws itself left-to-right and a two-pulse `radarPing` on the peak bar.
+
+Everything keys plain transform channels — no effect tracks — so the chart
+lowers through the ordinary RenderPlan path. Contract:
+`chronontemplate_captions_dataviz_pack_test`.
 
 ## Orchestration
 
@@ -476,6 +681,28 @@ five-value canary, metric 4×5 gallery, metric 20-preset timeline, date 4×5 gal
 date 20-preset gallery, entity gallery and entity duo) into
 `golden_plans/entity_presentation_v1/`; `--cli` additionally validates each
 plan through `chronon3d_cli validate --plan` when the Chronon3D CLI is built.
+
+The certified individual metric/date preview videos can be published from
+ChrononTemplate with the same verified `RenderingGen/bin/drive-upload` CLI used
+by the other packs. The upload is opt-in, requires a Drive parent folder ID,
+probes the complete 40-file H.264 set before touching Drive, uploads MP4s only
+directly into the requested Drive folder, and records provider confirmations,
+SHA-256 hashes and byte sizes in the preview directory's upload manifest:
+
+```shell
+python3 tools/entities_with_text/build_entity_presentation_v1.py \\
+  --upload-only \\
+  --preview-dir out/entity_presentation_v1_gpu_certified \\
+  --drive-folder <drive-folder-id> \\
+  --drive-credentials ~/.config/velox/credentials.json \\
+  --drive-token ~/.config/velox/token.json
+```
+
+Use `--upload` instead of `--upload-only` to regenerate the seven plans first.
+This Drive folder is a human-review/preview delivery, not a runtime dependency:
+RenderingGen consumes motion IDs and tracks from the embedded catalog, refreshed
+with `RenderingGen/scripts/sync_motion_catalog.sh`; it does not fetch preview
+MP4s from Drive to animate metric/date text.
 
 ## SaaS Kinetic Typography V1
 
