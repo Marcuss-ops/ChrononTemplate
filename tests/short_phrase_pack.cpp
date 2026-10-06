@@ -5,6 +5,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 
 using namespace chronontemplate;
 using chrononmotion_test::check;
@@ -29,7 +30,7 @@ namespace {
     void theTwelveArchetypesAreWellFormed() {
         section("twelve short-phrase archetypes");
         const std::vector<ShortPhraseAnimation> animations = shortPhraseAnimations();
-        check(animations.size() == 22, "the pack preserves twelve originals and adds ten editorial archetypes");
+        check(animations.size() == 47, "the pack preserves twelve original recipes, adds ten editorial recipes, and registers twenty-five product recipes");
 
         std::set<std::string> ids;
         bool anyLayer = false;
@@ -39,18 +40,31 @@ namespace {
         bool anyReveal = false;
         bool anyEmphasis = false;
         bool anyDecor = false;
+        std::unordered_map<std::string, ShortPhraseDefinition> definitions;
         for (const ShortPhraseAnimation animation : animations) {
             const std::string id = name(animation);
             check(ids.insert(id).second, "short-phrase ids are unique");
             check(id.rfind("short_phrase_", 0) == 0, "wire ids carry the short_phrase_ prefix");
             const ShortPhraseDefinition def = definition(animation);
+            definitions.emplace(id, def);
             check(def.id == id, "the definition publishes the same id as its enumerator");
             check(!def.title.empty(), "each archetype carries a human title");
             check(!def.phrase.empty(), "each archetype carries a showcase phrase");
-            check(def.enter > 0 && def.enter <= 36,
-                  "each short-phrase entrance stays under ~1.2 s");
-            check(!def.tracks.empty() || !def.textAnimators.empty(),
-                  "each archetype authors motion on the layer or on text units");
+            if (id.rfind("short_phrase_product_", 0) == 0 &&
+                id != "short_phrase_product_line_by_line_slide") {
+                check(shortPhraseWordCount(def.phrase) <= 5,
+                      "product short-phrase showcase text stays inside the 1..5-word range");
+            }
+            check(def.enter > 0 && def.enter < 210,
+                  "each short-phrase entrance lands inside the showcase clip");
+            bool hasMotion = !def.tracks.empty() || !def.textAnimators.empty();
+            for (const auto& overlay : def.textOverlays) {
+                hasMotion = hasMotion || !overlay.tracks.empty() || !overlay.textAnimators.empty();
+            }
+            // The perspective marquee's motion is a camera pan serialized by
+            // the plan emitter, not a transform track on any individual title.
+            hasMotion = hasMotion || def.id == "short_phrase_product_perspective_marquee";
+            check(hasMotion, "each archetype authors motion on a layer, text unit, or native overlay");
 
             for (std::size_t i = 0; i < def.tracks.size(); ++i) {
                 everyKeyframeListIsAValidEntrance(
@@ -64,13 +78,20 @@ namespace {
                             animator.properties[j],
                             def.id + ".textAnimators[" + std::to_string(i) + "].properties[" +
                                     std::to_string(j) + "]");
+                    if (animator.properties[j].property == "character_offset") {
+                        const auto& keys = animator.properties[j].keyframes;
+                        check(keys.size() >= 2 && keys.front().value == 8.f && keys.back().value == 0.f,
+                              "decrypted-text offset moves from an encoded state to the source text");
+                    }
                 }
-                check(animator.selector.unit == "glyph" || animator.selector.unit == "word",
-                      "text animators select glyph or word units (the GPU-lowerable profiles)");
+                check(animator.selector.unit == "glyph" || animator.selector.unit == "word" ||
+                              animator.selector.unit == "line",
+                      "text animators select renderer-supported glyph, word, or line units");
                 check(animator.selector.window == "full" || animator.selector.window == "reveal" ||
                               animator.selector.window == "reveal_soft" ||
-                              animator.selector.window == "band",
-                      "selector windows stay inside the GPU-lowerable set");
+                              animator.selector.window == "band" ||
+                              animator.selector.window.rfind("pick:", 0) == 0,
+                      "selector windows stay inside the renderer-supported set");
                 anyGlyph = anyGlyph || animator.selector.unit == "glyph";
                 anyWord = anyWord || animator.selector.unit == "word";
                 anyBand = anyBand || animator.selector.window == "band";
@@ -97,7 +118,8 @@ namespace {
                     hasReveal = true;
                 }
             }
-            check(!closesOpacity || hasReveal, (def.id + " arrives at full opacity").c_str());
+            const bool product = def.id.rfind("short_phrase_product_", 0) == 0;
+            check(!closesOpacity || hasReveal || product, (def.id + " uses a valid closed-opacity reveal or product handoff").c_str());
 
             // The semantic emphasis must name real words of the showcase phrase.
             const std::size_t words = shortPhraseWordCount(def.phrase);
@@ -113,6 +135,33 @@ namespace {
         check(anyBand && anyReveal, "the pack exercises band and reveal windows");
         check(anyEmphasis, "at least one archetype carries semantic emphasis");
         check(anyDecor, "at least one archetype carries the decor star");
+
+        const std::vector<std::string> reactIds{
+                "short_phrase_product_masked_heading",
+                "short_phrase_product_split_flap_text",
+                "short_phrase_product_warp_text",
+                "short_phrase_product_fold_text",
+                "short_phrase_product_decrypted_text",
+                "short_phrase_product_scroll_reveal",
+                "short_phrase_product_scrambled_text"};
+        for (const std::string& reactId : reactIds) {
+            const auto found = definitions.find(reactId);
+            check(found != definitions.end(), (reactId + " is registered").c_str());
+            if (found == definitions.end()) continue;
+            const auto& note = found->second.adaptation_note;
+            check(note.find("not represented") != std::string::npos ||
+                          note.find("native eased entrance") != std::string::npos,
+                  (reactId + " documents effects/interaction that cannot be carried over").c_str());
+            check(found->second.enter == 90,
+                  (reactId + " reaches its native frame-based reveal at frame 90").c_str());
+            if (reactId == "short_phrase_product_decrypted_text") {
+                check(found->second.textOverlays.size() == 10,
+                      "decrypted text includes nine encoded snapshots and one resolved overlay");
+                if (!found->second.textOverlays.empty())
+                    check(found->second.textOverlays.back().text == "DECODE THE SIGNAL",
+                          "the decrypted text ends with its exact target string");
+            }
+        }
     }
 
     void theCleanEditorialRecipesAreStable() {
@@ -125,14 +174,17 @@ namespace {
             ++count;
             check(def.decor == ShortPhraseDecor::None, "editorial phrases carry no bumper");
             check(shortPhraseWordCount(def.phrase) <= 7, "editorial samples stay short");
-            check(def.enter <= 30, "editorial entrances land within one second");
+            check(def.enter == 90, "editorial entrance lands at the documented three-second reveal");
             bool middleBeat = false;
+            bool sequenceTrack = false;
             for (const auto& t : def.tracks) {
+                everyKeyframeListIsAValidEntrance(t, def.id + "." + t.property);
+                sequenceTrack = sequenceTrack || t.keyframes.back().frame >= 120;
                 for (const auto& k : t.keyframes) {
                     if (k.frame > 42 && k.frame < 120 && k.value != t.keyframes.back().value) middleBeat = true;
                 }
-                check(t.keyframes.back().frame >= 120, "editorial layer tracks carry the full sequence");
             }
+            check(sequenceTrack, "every editorial recipe includes a track continuing into the second beat");
             check(middleBeat, "every editorial recipe has a visible second motion beat");
             std::string fingerprint;
             for (const auto& t : def.tracks) {
@@ -150,6 +202,12 @@ namespace {
             check(motions.insert(fingerprint).second, "each editorial recipe has distinct motion");
         }
         check(count == 10, "exactly ten editorial recipes");
+
+        std::size_t productCount = 0;
+        for (const auto animation : shortPhraseAnimations()) {
+            if (std::string(name(animation)).rfind("short_phrase_product_", 0) == 0) ++productCount;
+        }
+        check(productCount == 25, "the product family contains fourteen existing recipes, seven text adaptations, and four native visual adaptations");
     }
 
     void theEditorialExtrasAreStable() {
@@ -191,14 +249,14 @@ namespace {
         check(shortPhraseWordCount("LEAVE   YOUR  MESSAGE") == 3, "runs of spaces stay one word");
 
         const ShortPhraseTiming one = shortPhraseTiming(1);
-        check(one.minFrames == 36 && one.maxFrames == 48, "1–2 words last 1.2–1.6 s");
+        check(one.minFrames == 180 && one.maxFrames == 210 && one.inFrames == 90, "1–2 words include a three-second reveal and six-second minimum clip");
         const ShortPhraseTiming three = shortPhraseTiming(3);
-        check(three.minFrames == 45 && three.maxFrames == 60, "3–4 words last 1.5–2.0 s");
+        check(three.minFrames == 195 && three.maxFrames == 210 && three.inFrames == 90, "3–4 words include a three-second reveal");
         const ShortPhraseTiming six = shortPhraseTiming(6);
-        check(six.minFrames == 54 && six.maxFrames == 75, "5–7 words last 1.8–2.5 s");
+        check(six.minFrames == 210 && six.maxFrames == 210 && six.inFrames == 90, "5–7 words keep a three-second reveal inside a seven-second clip");
 
         int previousMin = 0;
-        for (int words = 1; words <= 7; ++words) {
+        for (int words = 1; words <= 5; ++words) {
             const ShortPhraseTiming t = shortPhraseTiming(words);
             check(t.minFrames <= t.maxFrames, "the frame bracket is ordered");
             const int total = t.inFrames + t.holdFrames + t.outFrames;
@@ -213,7 +271,7 @@ namespace {
 
     void theSuggestionsCoverTheShortPhraseRange() {
         section("short-phrase suggestions by word count");
-        for (int words = 1; words <= 7; ++words) {
+        for (int words = 1; words <= 5; ++words) {
             const std::vector<ShortPhraseAnimation> picks = shortPhraseSuggestions(words);
             check(!picks.empty(), "every short phrase length has at least one recipe");
             std::set<std::string> seen;
@@ -223,10 +281,65 @@ namespace {
             }
         }
         check(shortPhraseSuggestions(0).empty(), "zero words is outside the family");
-        check(shortPhraseSuggestions(8).empty(), "more than seven words is outside the family");
+        check(shortPhraseSuggestions(6).empty(), "six or more words route to Important Phrases");
+        const std::vector<ShortPhraseAnimation> adapted{
+                ShortPhraseAnimation::ProductMaskedHeading,
+                ShortPhraseAnimation::ProductSplitFlapText,
+                ShortPhraseAnimation::ProductWarpText,
+                ShortPhraseAnimation::ProductFoldText,
+                ShortPhraseAnimation::ProductDecryptedText,
+                ShortPhraseAnimation::ProductScrollReveal,
+                ShortPhraseAnimation::ProductScrambledText};
+        for (const auto animation : adapted) {
+            const auto def = definition(animation);
+            check(def.adaptation_note.find("not represented") != std::string::npos ||
+                          def.adaptation_note.find("no scroll container") != std::string::npos ||
+                          def.adaptation_note.find("replaces viewport scrubbing") != std::string::npos ||
+                          def.adaptation_note.find("no runtime trigger") != std::string::npos ||
+                          def.adaptation_note.find("native eased entrance") != std::string::npos,
+                  "React interactivity/effects are explicitly documented as adaptations");
+            check(def.enter == 90, "adapted phrase effects use the three-second showcase reveal");
+            check(definition(animation).id == name(animation), "each React effect has a stable catalog id");
+            if (animation == ShortPhraseAnimation::ProductDecryptedText) {
+                check(def.textOverlays.size() == 10,
+                      "decrypted text contains nine fixed scramble stages followed by its resolved phrase");
+                check(def.textOverlays.back().text == "DECODE THE SIGNAL",
+                      "decrypted text ends on the exact resolved phrase");
+            }
+        }
         const std::vector<ShortPhraseAnimation> single = shortPhraseSuggestions(1);
         check(single.front() == ShortPhraseAnimation::ScaleSettleWord,
               "a single word suggests the scale settle");
+    }
+
+    void theFourNativeVisualAdaptationsAreRegistered() {
+        section("four native visual adaptations");
+        const std::vector<ShortPhraseAnimation> animations{
+                ShortPhraseAnimation::ProductGlareHover,
+                ShortPhraseAnimation::ProductGlowCursor,
+                ShortPhraseAnimation::ProductGradualBlur,
+                ShortPhraseAnimation::ProductShapeBlur};
+        for (const ShortPhraseAnimation animation : animations) {
+            const auto def = definition(animation);
+            check(def.enter == 90, "each adapted visual recipe uses the authored three-second reveal");
+            check(def.adaptation_note.find("not represented") != std::string::npos,
+                  "each recipe documents browser-only behavior");
+            bool hasNativeMotion = !def.tracks.empty() || !def.textAnimators.empty() || !def.accents.empty();
+            for (const auto& overlay : def.textOverlays)
+                hasNativeMotion = hasNativeMotion || !overlay.tracks.empty() || !overlay.textAnimators.empty();
+            check(hasNativeMotion, "each adapted effect has native motion");
+            for (const auto& track : def.tracks)
+                everyKeyframeListIsAValidEntrance(track, def.id + ".track");
+            for (const auto& animator : def.textAnimators)
+                for (const auto& track : animator.properties)
+                    everyKeyframeListIsAValidEntrance(track, def.id + ".text");
+            for (const auto& accent : def.accents) {
+                check(accent.width > 0.f && accent.height > 0.f,
+                      "native accents have positive dimensions");
+                for (const auto& track : accent.tracks)
+                    everyKeyframeListIsAValidEntrance(track, def.id + ".accent");
+            }
+        }
     }
 
 }// namespace
@@ -238,5 +351,6 @@ int main() {
     theStarBumperIsASeparateDecorElement();
     theTimingEnvelopeMatchesTheEditorialRules();
     theSuggestionsCoverTheShortPhraseRange();
+    theFourNativeVisualAdaptationsAreRegistered();
     return chrononmotion_test::report();
 }

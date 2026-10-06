@@ -3,14 +3,24 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
+import shutil
+import subprocess
 from pathlib import Path
+
 
 ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE = ROOT / "ChrononTemplate"
 CATALOG = TEMPLATE / "catalog/entity_presentation.v1.json"
 DEFAULT_ASSETS = ROOT / "RenderingGen/renderinggen/out/editorial_v1"
 DEFAULT_OUT = TEMPLATE / "golden_plans/entity_presentation_v1"
+DEFAULT_PREVIEW_DIR = TEMPLATE / "out/entity_presentation_v1_gpu_certified"
+DEFAULT_DRIVE_UPLOADER = ROOT / "RenderingGen/bin/drive-upload"
+DEFAULT_DRIVE_CREDENTIALS = Path.home() / ".config/velox/credentials.json"
+DEFAULT_DRIVE_TOKEN = Path.home() / ".config/velox/token.json"
+UPLOAD_FAMILIES = ("metric_v1", "date_v1")
 CANARY_IMAGE = "assets/canary/people-demo-portrait.png"
 FONT = "assets/fonts/Poppins-Bold.ttf"
 SMALL_FONT = "assets/fonts/DejaVuSans.ttf"
@@ -691,6 +701,72 @@ def load_families() -> dict[str, dict]:
     return families
 
 
+def expected_preview_ids() -> list[str]:
+    """Canonical metric/date preview allowlist, sourced from the authored catalog."""
+    families = load_families()
+    return [preset["id"] for family_id in UPLOAD_FAMILIES
+            for preset in families[family_id]["presets"]]
+
+
+def verified_preview_files(directory: Path, ffprobe: str | None = None) -> list[Path]:
+    """Require and probe the complete 20-metric + 20-date H.264 preview set."""
+    ffprobe = ffprobe or shutil.which("ffprobe")
+    if not ffprobe:
+        raise FileNotFoundError("ffprobe is required to verify presentation previews before upload")
+    expected = expected_preview_ids()
+    files = [directory / f"{motion_id}.mp4" for motion_id in expected]
+    missing = [path.name for path in files if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"missing {len(missing)} metric/date previews in {directory}: {', '.join(missing)}")
+    for path in files:
+        result = subprocess.run(
+            [ffprobe, "-v", "error", "-select_streams", "v:0", "-show_entries",
+             "stream=codec_name,width,height,r_frame_rate,nb_frames", "-show_entries", "format=duration",
+             "-of", "json", str(path)], check=True, capture_output=True, text=True)
+        try:
+            metadata = json.loads(result.stdout)
+            stream = metadata["streams"][0]
+            duration = float(metadata["format"]["duration"])
+        except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as error:
+            raise ValueError(f"cannot read video metadata for {path}: {error}") from error
+        if (stream.get("codec_name") != "h264" or stream.get("width") != 1280
+                or stream.get("height") != 720 or stream.get("r_frame_rate") != "24/1"
+                or stream.get("nb_frames") != "48" or duration != 2.0):
+            raise ValueError(f"unexpected preview format for {path}: {stream}, duration={duration}")
+    return files
+
+
+def upload_previews(directory: Path, *, uploader: Path, credentials: Path,
+                    token: Path, drive_folder: str, ffprobe: str | None = None) -> list[dict]:
+    """Publish only the catalogued metric/date MP4s through RenderingGen's verified CLI."""
+    if not drive_folder.strip():
+        raise ValueError("a Drive folder ID is required for upload")
+    if not uploader.is_file() or not credentials.is_file() or not token.is_file():
+        raise FileNotFoundError("drive uploader or OAuth credentials/token are missing")
+    files = verified_preview_files(directory, ffprobe)
+    manifest = []
+    for path in files:
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        result = subprocess.run(
+            [str(uploader), "-credentials", str(credentials), "-token", str(token),
+             "-folder", drive_folder, "-file", str(path), "-name", path.name, "-sha256", digest],
+            check=True, capture_output=True, text=True)
+        output = result.stdout.strip()
+        confirmation = re.search(
+            r"DRIVE_UPLOAD_PASS id=\S+ link=\S+ parent=(\S+) sha256=([0-9a-f]{64}) bytes=(\d+)", output)
+        if not confirmation:
+            raise RuntimeError(f"Drive uploader did not confirm {path.name}: {output}")
+        uploaded_folder, uploaded_sha, uploaded_bytes = confirmation.groups()
+        if uploaded_folder != drive_folder or uploaded_sha != digest or int(uploaded_bytes) != path.stat().st_size:
+            raise RuntimeError(f"Drive uploader integrity/location confirmation differs for {path.name}: {output}")
+        manifest.append({"name": path.name, "sha256": digest, "bytes": path.stat().st_size,
+                         "drive_folder_id": uploaded_folder, "uploader_output": output})
+    manifest_path = directory / "entity_presentation_v1_upload_manifest.json"
+    manifest_path.write_text(json.dumps({"schema": "chronontemplate.drive-upload.v1",
+                                         "files": manifest}, indent=2) + "\n", encoding="utf-8")
+    return manifest
+
+
 def build_plans() -> dict[str, dict]:
     families = load_families()
     plans = {
@@ -710,16 +786,33 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--assets-root", type=Path, default=DEFAULT_ASSETS)
     parser.add_argument("--cli", type=Path, help="optional Chronon CLI to validate generated golden plans")
+    parser.add_argument("--upload", action="store_true", help="upload verified metric/date preview MP4s after writing plans")
+    parser.add_argument("--upload-only", action="store_true", help="upload existing verified metric/date previews without regenerating plans")
+    parser.add_argument("--preview-dir", type=Path, default=DEFAULT_PREVIEW_DIR, help="directory containing one certified <motion_id>.mp4 per metric/date preset")
+    parser.add_argument("--drive-uploader", type=Path, default=DEFAULT_DRIVE_UPLOADER)
+    parser.add_argument("--drive-credentials", type=Path, default=DEFAULT_DRIVE_CREDENTIALS)
+    parser.add_argument("--drive-token", type=Path, default=DEFAULT_DRIVE_TOKEN)
+    parser.add_argument("--drive-folder", help="Google Drive parent folder ID; required with --upload/--upload-only")
     args = parser.parse_args(argv)
-    plans = build_plans()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    for job_id, plan in plans.items():
-        destination = args.output_dir / f"{job_id}.plan.json"
-        destination.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        if args.cli:
-            import subprocess
-            subprocess.run([str(args.cli), "validate", "--plan", str(destination), "--assets-root", str(args.assets_root)], check=True)
-        print(destination)
+    if (args.upload or args.upload_only) and not args.drive_folder:
+        parser.error("--drive-folder is required with --upload or --upload-only")
+    if args.upload_only and args.upload:
+        parser.error("choose only one of --upload and --upload-only")
+    if not args.upload_only:
+        plans = build_plans()
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        for job_id, plan in plans.items():
+            destination = args.output_dir / f"{job_id}.plan.json"
+            destination.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            if args.cli:
+                subprocess.run([str(args.cli), "validate", "--plan", str(destination), "--assets-root", str(args.assets_root)], check=True)
+            print(destination)
+    if args.upload or args.upload_only:
+        manifest = upload_previews(args.preview_dir, uploader=args.drive_uploader,
+                                   credentials=args.drive_credentials, token=args.drive_token,
+                                   drive_folder=args.drive_folder)
+        print(f"DRIVE_UPLOAD_COMPLETE files={len(manifest)} folder={args.drive_folder} "
+              f"manifest={args.preview_dir / 'entity_presentation_v1_upload_manifest.json'}")
     return 0
 
 

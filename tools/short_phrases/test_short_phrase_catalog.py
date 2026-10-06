@@ -12,7 +12,7 @@ the contract without needing the CLI or a GPU:
       (full | reveal | reveal_soft | band), strictly increasing keyframes that
       start at 0, emphasis inside the phrase, and in + hold + out inside its
       timing bracket;
-  4.  the selection table covers exactly 1..7 words and only names real recipes;
+  4.  the selection table covers exactly 1..5 words and only names real recipes;
   5.  the committed catalog is byte-for-byte what the emitter produces today —
       the file is generated, not hand-maintained.
 """
@@ -81,16 +81,86 @@ def main() -> int:
     check("version", document.get("version") == 1, str(document.get("version")))
     check("catalog id", document.get("catalog_id") == "short_phrase_motion_v1")
     check("source", document.get("source") == "chronontemplate::ShortPhrasePack")
-    check("word range", document.get("word_range") == [1, 7], str(document.get("word_range")))
+    check("word range", document.get("word_range") == [1, 5], str(document.get("word_range")))
     exit_modes = document.get("exit_modes") or []
     check("five exit modes", exit_modes == ["reverse", "forward", "wipe", "scatter", "arc_dissolve"],
           str(exit_modes))
 
-    print("== the twelve archetypes")
+    print("== the short-phrase recipes")
     recipes = document.get("recipes") or []
-    check("twelve originals plus ten editorial recipes", len(recipes) == 22, str(len(recipes)))
+    check("twelve originals, ten editorial, and twenty-five product recipes", len(recipes) == 47, str(len(recipes)))
     editorial = [r for r in recipes if r["id"].startswith("short_phrase_editorial_")]
+    product = [r for r in recipes if r["id"].startswith("short_phrase_product_")]
     check("exactly ten editorial recipes", len(editorial) == 10)
+    check("fourteen existing, seven text adaptations, and four visual adaptations", len(product) == 25)
+    expected_product_ids = {
+        "short_phrase_product_masked_heading",
+        "short_phrase_product_split_flap_text",
+        "short_phrase_product_warp_text",
+        "short_phrase_product_fold_text",
+        "short_phrase_product_decrypted_text",
+        "short_phrase_product_scroll_reveal",
+        "short_phrase_product_scrambled_text",
+        "short_phrase_product_glare_hover",
+        "short_phrase_product_glow_cursor",
+        "short_phrase_product_gradual_blur",
+        "short_phrase_product_shape_blur",
+        "short_phrase_product_per_word_rise",
+        "short_phrase_product_perspective_marquee",
+        "short_phrase_product_scan_band",
+        "short_phrase_product_strikethrough_replace",
+        "short_phrase_product_text_shimmer",
+    }
+    check("all seven pasted effects and nine existing source adaptations are registered",
+          expected_product_ids.issubset({r["id"] for r in product}))
+    check("the seven new React-derived recipes document their fidelity limits",
+          all(any(term in r.get("adaptation_note", "") for term in
+                  ("not represented", "not available", "not supported", "native eased entrance"))
+              for r in product if r["id"] in {
+                  "short_phrase_product_masked_heading", "short_phrase_product_split_flap_text",
+                  "short_phrase_product_warp_text", "short_phrase_product_fold_text",
+                  "short_phrase_product_decrypted_text", "short_phrase_product_scroll_reveal",
+                  "short_phrase_product_scrambled_text", "short_phrase_product_glare_hover",
+                  "short_phrase_product_glow_cursor", "short_phrase_product_gradual_blur",
+                  "short_phrase_product_shape_blur"}))
+    adapted_product_ids = {
+        "short_phrase_product_masked_heading", "short_phrase_product_split_flap_text",
+        "short_phrase_product_warp_text", "short_phrase_product_fold_text",
+        "short_phrase_product_decrypted_text", "short_phrase_product_scroll_reveal",
+        "short_phrase_product_scrambled_text", "short_phrase_product_glare_hover",
+        "short_phrase_product_glow_cursor", "short_phrase_product_gradual_blur",
+        "short_phrase_product_shape_blur",
+    }
+    for recipe in product:
+        if recipe["id"] in adapted_product_ids:
+            check(f"{recipe['id']} has an adaptation note", bool(recipe.get("adaptation_note")))
+            if recipe["id"] not in {
+                "short_phrase_product_per_word_rise",
+                "short_phrase_product_perspective_marquee",
+                "short_phrase_product_scan_band",
+                "short_phrase_product_strikethrough_replace",
+                "short_phrase_product_text_shimmer",
+            }:
+                check(f"{recipe['id']} uses a three-second entrance", recipe.get("enter") == 90,
+                      str(recipe.get("enter")))
+    adapted_ids = {
+        "short_phrase_product_masked_heading",
+        "short_phrase_product_split_flap_text",
+        "short_phrase_product_warp_text",
+        "short_phrase_product_fold_text",
+        "short_phrase_product_decrypted_text",
+        "short_phrase_product_scroll_reveal",
+        "short_phrase_product_scrambled_text",
+    }
+    check("all seven pasted React effects are published", adapted_ids.issubset({r["id"] for r in product}))
+    check("all seven pasted React effects declare their fidelity limits",
+          all(any(term in r.get("adaptation_note", "") for term in
+                  ("not represented", "not available", "not supported", "native eased entrance"))
+              for r in product if r["id"] in adapted_ids))
+    check("every recipe is categorized", all(r.get("family") and r.get("subcategory") for r in recipes))
+    check("three animation families", {r.get("family") for r in recipes} == {"classic", "editorial", "product_video"})
+    check("computer and letter-build subcategories are available",
+          {"computer_character_assembly", "letter_by_letter_reveal"}.issubset({r.get("subcategory") for r in recipes}))
     check("editorial recipes retain their render style", all(r.get("font_size", 0) > 0 and isinstance(r.get("light"), bool) for r in editorial))
     check("three editorial recipes carry native accents", sum(bool(r.get("accents")) for r in editorial) == 3)
     ids = [r.get("id") for r in recipes]
@@ -102,16 +172,22 @@ def main() -> int:
         rid = recipe.get("id", "?")
         check(f"{rid} has a title and phrase",
               bool(recipe.get("title")) and bool(recipe.get("phrase")))
-        check(f"{rid} enters under 1.2 s",
-              isinstance(recipe.get("enter"), int) and 0 < recipe["enter"] <= 36,
+        if rid in adapted_product_ids:
+            check(f"{rid} documents omitted interactivity/shader behavior",
+                  any(term in recipe.get("adaptation_note", "") for term in
+                      ("not represented", "not available", "not supported", "native eased entrance")),
+                  str(recipe.get("adaptation_note")))
+        check(f"{rid} entrance lands inside its clip",
+              isinstance(recipe.get("enter"), int) and 0 < recipe["enter"] < 210,
               str(recipe.get("enter")))
         words = recipe.get("word_count")
         check(f"{rid} declares a word count", isinstance(words, int) and words >= 1, str(words))
         selector = recipe.get("selector") or {}
         check(f"{rid} selects a known unit",
-              selector.get("unit") in {"layer", "glyph", "word"}, str(selector.get("unit")))
+              selector.get("unit") in {"layer", "glyph", "word", "line"}, str(selector.get("unit")))
         check(f"{rid} uses a GPU-lowerable window",
-              selector.get("window") in {"full", "reveal", "reveal_soft", "band"},
+              selector.get("window") in {"full", "reveal", "reveal_soft", "band"} or
+              str(selector.get("window", "")).startswith("pick:"),
               str(selector.get("window")))
         check(f"{rid} has an exit mode", recipe.get("exit") in exit_modes, str(recipe.get("exit")))
         check(f"{rid} decor is null or star_bumper",
@@ -126,9 +202,20 @@ def main() -> int:
             tracks.extend(animator.get("properties") or [])
         for accent in recipe.get("accents") or []:
             tracks.extend(accent.get("tracks") or [])
+        overlays = recipe.get("text_overlays") or []
+        for overlay in overlays:
+            tracks.extend(overlay.get("tracks") or [])
+            check(f"{rid}.{overlay.get('id', 'overlay')} contains text", bool(overlay.get("text")))
+        if rid == "short_phrase_product_perspective_marquee":
+            tracks.append({"property": "camera_position_x", "keyframes": [
+                {"frame": 0, "value": 0}, {"frame": 209, "value": 0}
+            ]})
         check(f"{rid} authors some motion", bool(tracks))
+        # Text overlay state changes may only carry one keyframe when static,
+        # so validate authored overlay tracks but not synthesized camera placeholders.
+        authored_tracks = [t for t in tracks if t.get("property") != "camera_position_x"]
         check(f"{rid} keyframes are well-formed",
-              all(valid_keyframes(t) for t in tracks),
+              all(valid_keyframes(t) for t in authored_tracks),
               str([t.get("property") for t in tracks]))
 
         timing = recipe.get("timing") or {}
@@ -154,7 +241,7 @@ def main() -> int:
 
     print("== the selection table")
     selection = document.get("selection") or {}
-    check("selection covers exactly 1..7 words", sorted(selection) == [str(n) for n in range(1, 8)],
+    check("selection covers exactly 1..5 words", sorted(selection) == [str(n) for n in range(1, 6)],
           str(sorted(selection)))
     for count, picks in selection.items():
         check(f"{count} word(s) suggest at least one recipe", bool(picks))

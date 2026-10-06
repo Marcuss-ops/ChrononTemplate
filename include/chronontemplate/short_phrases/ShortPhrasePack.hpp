@@ -53,7 +53,32 @@ namespace chronontemplate {
         EditorialGlyphCurtain,
         EditorialContrastSweep,
         EditorialQuietZoom,
-        EditorialLiftAndRule    ///< ten clean editorial recipes, append-only wire ids
+        EditorialLiftAndRule,   ///< ten clean editorial recipes, append-only wire ids
+        ProductHardMaskSlideUp,
+        ProductKineticBlurIn,
+        ProductWordStagger,
+        ProductTrackingPullIn,
+        ProductGradientSweep,
+        ProductSubtitleDissolve,
+        ProductDualToneReveal,
+        ProductRollingTicker,
+        ProductScaleSnap,
+        ProductRadialExpansion,
+        ProductDepthParallax,
+        ProductGlintPass,     ///< product-motion recipes, append-only wire ids
+        ProductLetterRise,
+        ProductDigitalAssembly,
+        ProductMaskedHeading,
+        ProductSplitFlapText,
+        ProductWarpText,
+        ProductFoldText,
+        ProductDecryptedText,
+        ProductScrollReveal,
+        ProductScrambledText,
+        ProductGlareHover,
+        ProductGlowCursor,
+        ProductGradualBlur,
+        ProductShapeBlur
     };
 
     /// How the phrase leaves. The entrance is the recipe; the exit is the beat
@@ -91,6 +116,23 @@ namespace chronontemplate {
         /// recipes. Colour tracks use the pseudo properties `fill_blue` and
         /// `fill_gray`: a 0..1 amount of the accent / grey mixed over the resting fill.
         bool light{false};
+        /// Additional native text copies used by prism, cut and replacement
+        /// treatments. They are separate render-plan text layers, not DOM clones.
+        struct TextOverlay {
+            std::string id{};
+            std::string text{};
+            std::string fill{"#FFFFFF"};
+            float offset_x{0.f};
+            float offset_y{0.f};
+            float opacity{1.f};
+            std::vector<PhraseTrack> tracks{};
+            std::vector<PhraseTextAnimator> textAnimators{};
+        };
+        std::vector<TextOverlay> textOverlays{};
+        bool drawMainPhrase{true};
+        std::string fill_color{};
+        /// Explicit note when a React source interaction/effect is approximated by native RenderPlan motion.
+        std::string adaptation_note{};
     };
 
     /// The decor bumper, kept out of the text engine as its own definition.

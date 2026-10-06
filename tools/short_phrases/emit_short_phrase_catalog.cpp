@@ -40,7 +40,32 @@ namespace {
     constexpr int kWidth = 1920;
     constexpr int kHeight = 1080;
     constexpr int kFps = 30;
-    constexpr int kMaxEnterFrames = 36;// ~1.2 s: a short phrase never enters slowly
+    constexpr int kMaxEnterFrames = 150; // Product styles may spend up to 5 s on a deliberate build.
+
+    std::string familyId(const std::string& id) {
+        if (id.rfind("short_phrase_editorial_", 0) == 0) return "editorial";
+        if (id.rfind("short_phrase_product_", 0) == 0) return "product_video";
+        return "classic";
+    }
+
+    std::string subcategoryId(const std::string& id) {
+        if (id.find("digital_assembly") != std::string::npos ||
+            id.find("chromatic_fringe_title") != std::string::npos) return "computer_character_assembly";
+        if (id.find("letter_rise") != std::string::npos || id.find("weight_wave") != std::string::npos ||
+            id.find("character") != std::string::npos || id.find("glyph") != std::string::npos ||
+            id.find("typewriter") != std::string::npos || id.find("write_on") != std::string::npos) return "letter_by_letter_reveal";
+        if (id.find("word") != std::string::npos || id.find("ticker") != std::string::npos ||
+            id.find("swap") != std::string::npos || id.find("progressive") != std::string::npos ||
+            id.find("line_by_line") != std::string::npos || id.find("split_flap") != std::string::npos) return "word_sequence";
+        if (id.find("tracking") != std::string::npos || id.find("weight") != std::string::npos ||
+            id.find("color") != std::string::npos || id.find("contrast") != std::string::npos) return "typographic_motion";
+        if (id.find("glint") != std::string::npos || id.find("gradient") != std::string::npos ||
+            id.find("underline") != std::string::npos || id.find("rule") != std::string::npos) return "light_and_accent";
+        if (id.find("parallax") != std::string::npos || id.find("glide") != std::string::npos ||
+            id.find("slide") != std::string::npos || id.find("curve") != std::string::npos) return "depth_and_space";
+        if (id.find("pill") != std::string::npos || id.find("shape") != std::string::npos) return "shape_reveal";
+        return "kinetic_reveal";
+    }
 
     [[noreturn]] void fail(const std::string& message) {
         throw std::runtime_error("emit_short_phrase_catalog: " + message);
@@ -127,8 +152,9 @@ namespace {
             const std::string where = def.id + ".textAnimators[" + std::to_string(i) + "]";
             const std::string unit = animator.selector.unit;
             const std::string window = animator.selector.window;
-            if (unit != "glyph" && unit != "word") fail(where + ": unit must be glyph or word");
-            if (window != "full" && window != "reveal" && window != "reveal_soft" && window != "band") {
+            if (unit != "glyph" && unit != "word" && unit != "line") fail(where + ": unit must be glyph, word, or line");
+            const bool indexedWindow = window.rfind("pick:", 0) == 0;
+            if (window != "full" && window != "reveal" && window != "reveal_soft" && window != "band" && !indexedWindow) {
                 fail(where + ": window must be full | reveal | reveal_soft | band");
             }
             if (window == "reveal" || window == "reveal_soft") hasRevealWindow = true;
@@ -147,7 +173,15 @@ namespace {
             if (track.property == "opacity" && track.keyframes.back().value < 1.f) closesOpacity = true;
         }
         // A reveal window arrives visible by construction; anything else must end open.
-        if (closesOpacity && !hasRevealWindow) fail(def.id + ": opacity closes without a reveal window");
+        // Product videos can deliberately hand the final beat to a native
+        // text overlay (for example a line replacement), or close the layer
+        // on the exit. The reveal-window invariant applies to entrance
+        // recipes only; applying it to the product composition falsely
+        // rejected those valid handoffs.
+        const bool productVideo = def.id.rfind("short_phrase_product_", 0) == 0;
+        if (closesOpacity && !hasRevealWindow && !productVideo) {
+            fail(def.id + ": opacity closes without a reveal window");
+        }
 
         const ShortPhraseTiming timing = chronontemplate::shortPhraseTiming(static_cast<int>(words));
         const int total = timing.inFrames + timing.holdFrames + timing.outFrames;
@@ -172,9 +206,23 @@ namespace {
         }
         json emphasis = json::array();
         for (const std::size_t word : def.emphasis) emphasis.push_back(word);
+        json overlays = json::array();
+        for (const auto& overlay : def.textOverlays) {
+            json overlayTracks = json::array();
+            for (const auto& track : overlay.tracks) {
+                validateTrack(track, def.id + "." + overlay.id);
+                overlayTracks.push_back(trackJson(track));
+            }
+            overlays.push_back({{"id", overlay.id}, {"text", overlay.text},
+                                {"fill", overlay.fill}, {"offset_x", overlay.offset_x},
+                                {"offset_y", overlay.offset_y}, {"opacity", overlay.opacity},
+                                {"tracks", overlayTracks}});
+        }
 
         return json{
                 {"id", def.id},
+                {"family", familyId(def.id)},
+                {"subcategory", subcategoryId(def.id)},
                 {"title", def.title},
                 {"phrase", def.phrase},
                 {"enter", def.enter},
@@ -182,12 +230,14 @@ namespace {
                 {"selector", recipeSelector(def)},
                 {"tracks", tracks},
                 {"text_animators", animators},
+                {"text_overlays", overlays},
                 {"accents", accents},
                 {"font_size", def.font_size},
                 {"light", def.light},
                 {"emphasis", emphasis},
                 {"exit", exitId(def.exit)},
                 {"decor", def.decor == ShortPhraseDecor::None ? json(nullptr) : json(decorId(def.decor))},
+                {"adaptation_note", def.adaptation_note},
                 {"timing", {{"min_frames", timing.minFrames},
                             {"max_frames", timing.maxFrames},
                             {"in_frames", timing.inFrames},
@@ -210,7 +260,7 @@ namespace {
 
     json selectionJson() {
         json selection = json::object();
-        for (int words = 1; words <= 7; ++words) {
+        for (int words = 1; words <= 5; ++words) {
             const std::vector<ShortPhraseAnimation> picks = chronontemplate::shortPhraseSuggestions(words);
             if (picks.empty()) fail("word count " + std::to_string(words) + " has no suggested recipe");
             json ids = json::array();
@@ -225,7 +275,7 @@ namespace {
 int main() {
     try {
         const std::vector<ShortPhraseAnimation> animations = chronontemplate::shortPhraseAnimations();
-        if (animations.size() != 22) fail("expected twelve original and ten editorial short-phrase archetypes");
+        if (animations.size() != 47) fail("expected twelve original, ten modern editorial, and twenty-five product-motion short-phrase archetypes");
 
         std::set<std::string> ids;
         json recipes = json::array();
@@ -234,8 +284,8 @@ int main() {
         }
 
         if (!chronontemplate::shortPhraseSuggestions(0).empty() ||
-            !chronontemplate::shortPhraseSuggestions(8).empty()) {
-            fail("the short-phrase family must cover exactly 1..7 words");
+            !chronontemplate::shortPhraseSuggestions(6).empty()) {
+            fail("the short-phrase family must cover exactly 1..5 words");
         }
 
         json out = json::object();
@@ -244,7 +294,7 @@ int main() {
         out["catalog_id"] = "short_phrase_motion_v1";
         out["source"] = "chronontemplate::ShortPhrasePack";
         out["canvas"] = {{"width", kWidth}, {"height", kHeight}, {"fps", kFps}};
-        out["word_range"] = json::array({1, 7});
+        out["word_range"] = json::array({1, 5});
         out["exit_modes"] = json::array({"reverse", "forward", "wipe", "scatter", "arc_dissolve"});
         out["decor"] = json::array({decorJson(ShortPhraseDecor::StarBumper)});
         out["recipes"] = recipes;

@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace chronontemplate {
 
@@ -139,19 +140,145 @@ chronon3d::render_plan::LayerPlan makeShapeLayerPlan(
     if (handle.empty() || !std::isfinite(request.size.x) || !std::isfinite(request.size.y) ||
         request.size.x <= 0.f || request.size.y <= 0.f ||
         !std::isfinite(request.cornerRadius) || request.cornerRadius < 0.f ||
-        request.cornerRadius > std::min(request.size.x, request.size.y) * 0.5f)
+        request.cornerRadius > std::min(request.size.x, request.size.y) * 0.5f ||
+        (request.geometry != ShapeGeometry::Rectangle && request.geometry != ShapeGeometry::Ellipse &&
+         request.geometry != ShapeGeometry::Grid && request.geometry != ShapeGeometry::DotGrid &&
+         request.geometry != ShapeGeometry::Polygon))
         throw std::invalid_argument("makeShapeLayerPlan: a measured shape and positive finite size are required");
     const auto fill = parse_hex_color(request.fillColor);
-    if (!fill) throw std::invalid_argument("makeShapeLayerPlan: fill color must be #RRGGBB");
+    const bool grid = request.geometry == ShapeGeometry::Grid;
+    const bool dotGrid = request.geometry == ShapeGeometry::DotGrid;
+    const bool polygon = request.geometry == ShapeGeometry::Polygon;
+    if (request.fillEnabled && !fill && !request.radialGradient && !request.gradientMesh && !request.field)
+        throw std::invalid_argument("makeShapeLayerPlan: fill color must be #RRGGBB");
+    if (!std::isfinite(request.noiseAmount) || request.noiseAmount < 0.f || request.noiseAmount > 1.f ||
+        !std::isfinite(request.noiseSize) || request.noiseSize <= 0.f || request.noiseSize > 256.f ||
+        !std::isfinite(request.contrast) || request.contrast < 0.f || request.contrast > 4.f)
+        throw std::invalid_argument("makeShapeLayerPlan: native grain/contrast settings are outside supported ranges");
+    if ((grid || dotGrid) && (!std::isfinite(request.gridSpacing) ||
+        request.gridSpacing < 4.f || request.gridSpacing > 512.f))
+        throw std::invalid_argument("makeShapeLayerPlan: grid spacing must be in [4, 512]");
+    if (grid && (request.strokeColor.empty() || !std::isfinite(request.strokeWidth) ||
+                 request.strokeWidth < 0.25f || request.strokeWidth > 32.f ||
+                 !parse_hex_color(request.strokeColor)))
+        throw std::invalid_argument("makeShapeLayerPlan: grid requires a valid stroke color and width");
+    if (dotGrid && (!std::isfinite(request.dotRadius) || request.dotRadius < 0.5f || request.dotRadius > 64.f))
+        throw std::invalid_argument("makeShapeLayerPlan: dot radius must be in [0.5, 64]");
+    if (polygon && (request.polygonPoints < 3 || request.polygonPoints > 64 ||
+                    !std::isfinite(request.polygonRotationDegrees)))
+        throw std::invalid_argument("makeShapeLayerPlan: polygon points or rotation are invalid");
+    if (request.field && (request.field->operators.size() > 8 ||
+        (request.fieldRenderScale != 1 && request.fieldRenderScale != 2 && request.fieldRenderScale != 4)))
+        throw std::invalid_argument("makeShapeLayerPlan: field operator count or render scale is invalid");
+    if (request.fieldRamp && !request.field)
+        throw std::invalid_argument("makeShapeLayerPlan: field ramp requires field data");
+    if (request.gradientMesh && (request.gradientMesh->nodes.empty() || request.gradientMesh->nodes.size() > 256 ||
+                                 request.field || request.radialGradient))
+        throw std::invalid_argument("makeShapeLayerPlan: gradient mesh conflicts with another fill or exceeds node budget");
+    if ((request.radialGradient && request.gradientMesh) || (request.radialGradient && request.field))
+        throw std::invalid_argument("makeShapeLayerPlan: shape fill modes are mutually exclusive");
     LayerPlan layer;
     layer.type = LayerType::Shape;
     layer.size = {request.size.x, request.size.y};
     layer.size_dimensions = 2;
     ShapeContentPlan shape;
-    shape.type = request.cornerRadius > 0.f
-                     ? ShapeContentTypePlan::RoundedRect
-                     : ShapeContentTypePlan::Rect;
-    shape.fill_color = std::array<float, 4>{fill->r, fill->g, fill->b, fill->a};
+    switch (request.geometry) {
+        case ShapeGeometry::Ellipse: shape.type = ShapeContentTypePlan::Ellipse; break;
+        case ShapeGeometry::Grid: shape.type = ShapeContentTypePlan::Grid; break;
+        case ShapeGeometry::DotGrid: shape.type = ShapeContentTypePlan::DotGrid; break;
+        case ShapeGeometry::Polygon: shape.type = ShapeContentTypePlan::Polygon; break;
+        case ShapeGeometry::Rectangle:
+            shape.type = request.cornerRadius > 0.f
+                             ? ShapeContentTypePlan::RoundedRect
+                             : ShapeContentTypePlan::Rect;
+            break;
+    }
+    if (request.radialGradient) {
+        const auto& source = *request.radialGradient;
+        if (request.geometry != ShapeGeometry::Ellipse || !std::isfinite(source.center.x) ||
+            !std::isfinite(source.center.y) || source.center.x < 0.f || source.center.x > 1.f ||
+            source.center.y < 0.f || source.center.y > 1.f || !std::isfinite(source.radius) ||
+            source.radius <= 0.f || source.radius > 2.f || source.stops.size() < 2 ||
+            source.stops.size() > 16)
+            throw std::invalid_argument("makeShapeLayerPlan: radial gradient geometry is outside supported ranges");
+        std::vector<chronon3d::graphics::GradientStop> stops;
+        std::vector<chronon3d::graphics::OpacityStop> opacityStops;
+        stops.reserve(source.stops.size());
+        opacityStops.reserve(source.stops.size());
+        float previousPosition = -1.f;
+        for (const auto& stop : source.stops) {
+            const auto color = stop.color.size() == 7 && stop.color.front() == '#'
+                                   ? chronon3d::Color::try_from_hex(stop.color.c_str())
+                                   : std::nullopt;
+            if (!color || !std::isfinite(stop.position) || stop.position < previousPosition ||
+                stop.position < 0.f || stop.position > 1.f || !std::isfinite(stop.opacity) ||
+                stop.opacity < 0.f || stop.opacity > 1.f)
+                throw std::invalid_argument("makeShapeLayerPlan: radial gradient stops must be ordered and valid");
+            stops.push_back({stop.position, *color});
+            opacityStops.push_back({stop.position, stop.opacity});
+            previousPosition = stop.position;
+        }
+        shape.gradient = chronon3d::graphics::GradientDefinition::radial(
+            {source.center.x, source.center.y}, source.radius, std::move(stops));
+        shape.gradient->opacity_stops = std::move(opacityStops);
+        shape.fill_color.reset();
+    } else if (request.fillEnabled && fill) {
+        shape.fill_color = std::array<float, 4>{fill->r, fill->g, fill->b, fill->a};
+    }
+    if (request.geometry == ShapeGeometry::Grid) {
+        StrokeStyle stroke;
+        stroke.color = request.strokeColor;
+        stroke.width = request.strokeWidth;
+        shape.stroke = std::move(stroke);
+        shape.fill_color.reset();
+        shape.grid_spacing = request.gridSpacing;
+    } else if (request.geometry == ShapeGeometry::DotGrid) {
+        shape.grid_spacing = request.gridSpacing;
+        shape.dot_radius = request.dotRadius;
+    } else if (request.geometry == ShapeGeometry::Polygon) {
+        shape.points = request.polygonPoints;
+        shape.shape_rotation_deg = request.polygonRotationDegrees;
+    }
+    if (!request.strokeColor.empty() && !grid) {
+        if (!parse_hex_color(request.strokeColor) || !std::isfinite(request.strokeWidth) ||
+            request.strokeWidth < 0.25f || request.strokeWidth > 10000.f)
+            throw std::invalid_argument("makeShapeLayerPlan: shape stroke is invalid");
+        StrokeStyle stroke;
+        stroke.color = request.strokeColor;
+        stroke.width = request.strokeWidth;
+        shape.stroke = std::move(stroke);
+    }
+    if (request.field) {
+        shape.fill_color.reset();
+        shape.field = request.field;
+        shape.field_ramp = request.fieldRamp;
+        shape.field_render_scale = request.fieldRenderScale;
+        shape.field_drift = request.fieldDrift;
+    }
+    if (request.gradientMesh) {
+        shape.gradient_mesh = request.gradientMesh;
+        shape.fill_color.reset();
+    }
+    if (!request.fillEnabled && !request.field && !request.gradientMesh && !grid &&
+        request.strokeColor.empty()) {
+        shape.fill_color.reset();
+    }
+    if (request.noiseAmount > 0.f) {
+        LayerPlan::EffectPlan noise;
+        noise.kind = LayerPlan::EffectKindPlan::Noise;
+        noise.amount = request.noiseAmount;
+        noise.seed = request.noiseSeed;
+        noise.animated = request.animatedNoise;
+        noise.noise_size = request.noiseSize;
+        layer.effects.push_back(std::move(noise));
+    }
+    if (request.contrast != 1.f) {
+        LayerPlan::EffectPlan contrast;
+        contrast.kind = LayerPlan::EffectKindPlan::Catalog;
+        contrast.canonical_effect_id = "color.contrast";
+        contrast.canonical_params.push_back({"value", request.contrast});
+        layer.effects.push_back(std::move(contrast));
+    }
     shape.radius = request.cornerRadius;
     layer.shape = std::move(shape);
     return layer;

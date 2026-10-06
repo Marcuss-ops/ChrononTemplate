@@ -22,6 +22,21 @@ MAP_W, MAP_H = 1280.0, 545.0
 LON_MIN, LON_MAX, LAT_MIN, LAT_MAX = -100.0, 50.0, 8.0, 72.0
 ACCENTS = ("#D2B66F", "#69D7C6", "#83C8F2", "#E6B86A", "#9BC6B8", "#76CFC3", "#9BC5ED")
 FONT = "Chronon3d/assets/fonts/Poppins-Regular.ttf"
+TEXT_SHADOW = {"color": "#06131D", "opacity": 0.82, "blur": 10, "offset": [0, 3]}
+TEXT_STROKE = {"color": "#06131D", "width": 2}
+LABEL_BACKGROUND = {"color": "#07121A", "opacity": 0.72, "radius": 8, "padding": [8, 4]}
+# Role presets for authored gallery copy; map projection and attribution metadata
+# remain supplied by the georeferenced map contract.
+MAP_TEXT_ROLES = {
+    "title": {"font": FONT, "font_size": 34, "fill": "#F4F6F2", "stroke": TEXT_STROKE,
+              "shadow": TEXT_SHADOW, "fit_mode": "shrink_only", "min_font_size": 26,
+              "max_font_size": 34},
+    "eyebrow": {"font": FONT, "font_size": 15, "fill": "#D2B66F", "shadow": TEXT_SHADOW},
+    "location": {"font": FONT, "font_size": 17, "fill": "#E6B86A", "stroke": TEXT_STROKE,
+                 "shadow": TEXT_SHADOW, "background": LABEL_BACKGROUND},
+    "attribution": {"font": FONT, "font_size": 13, "fill": "#C4D0CC", "shadow": TEXT_SHADOW},
+    "data_value": {"font": FONT, "font_size": 24, "fill": "#F4F6F2", "stroke": TEXT_STROKE},
+}
 
 
 def rgba(hex_color: str, alpha: float = 1.0) -> list[float]:
@@ -46,12 +61,11 @@ def layer(id_: str, typ: str, start: int, duration: int, **kwargs) -> dict:
 
 
 def text_layer(id_: str, value: str, start: int, duration: int, y: float,
-               color: str, size: int, opacity_keys=None) -> dict:
+               color: str, size: int, opacity_keys=None, role: str = "title") -> dict:
     animations = [track("opacity", opacity_keys or [(0, 0), (8, 1), (duration-8, 1), (duration-1, 0)])]
+    style = {**MAP_TEXT_ROLES[role], "font_size": size, "fill": color}
     return layer(id_, "text", start, duration, text=value,
-                 size=[1120, max(26, size + 12)], position=[640, y],
-                 style={"font": FONT, "font_size": size, "fill": color,
-                        "fit_mode": "shrink_only", "min_font_size": max(12, size-8), "max_font_size": size},
+                 size=[1120, max(26, size + 12)], position=[640, y], style=style,
                  animation={"tracks": animations})
 
 
@@ -104,7 +118,7 @@ def city_marker(id_: str, start: int, duration: int, name: str,
                                           track("opacity", [(0, 0), (8, 1), (duration-14, 1)])]})
     label = layer(id_ + "-label", "text", start + 15, duration - 15,
                   text=name.upper(), size=[220, 34], position=[640 + px + 32, 360 + py - 26],
-                  style={"font": FONT, "font_size": 17, "fill": accent},
+                  style={**MAP_TEXT_ROLES["location"], "fill": accent},
                   animation={"tracks": [track("opacity", [(0, 0), (7, 1), (duration-16, 1)])]})
     return [marker, label]
 
@@ -154,9 +168,9 @@ def item_layers(item: dict, family: str, index: int, geo: dict) -> list[dict]:
     layers.append(layer(f"{ident}-shade", "color", start, duration, color=[.015, .029, .036, .24],
                         size=[1280, 720], position=[640, 360]))
     layers.extend([
-        text_layer(f"{ident}-eyebrow", family.replace("_", " ").upper(), start+2, duration-2, 64, accent, 15),
-        text_layer(f"{ident}-title", title, start+5, duration-5, 112, "#F4F6F2", 34),
-        text_layer(f"{ident}-id", ident, start+9, duration-9, 665, "#A8B8B6", 14),
+        text_layer(f"{ident}-eyebrow", family.replace("_", " ").upper(), start+2, duration-2, 64, accent, 15, role="eyebrow"),
+        text_layer(f"{ident}-title", title, start+5, duration-5, 112, "#F4F6F2", 34, role="title"),
+        text_layer(f"{ident}-id", ident, start+9, duration-9, 665, "#A8B8B6", 14, role="attribution"),
     ])
     lower = ident.lower()
     if any(word in lower for word in ("country", "outline", "region", "border", "historical")):

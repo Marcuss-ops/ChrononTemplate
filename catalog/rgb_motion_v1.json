@@ -16,6 +16,18 @@
     {"id": "rgb_block_shuffle", "operator": "slice_transform", "orientation": "horizontal", "mode": "posterized"},
     {"id": "rgb_radial_burst", "operator": "rgb_channel_transform", "effect": "radial_blur"}
   ],
+  "rapid_transitions": [
+    {"id": "rgb_split_whip", "minimum_frames": 5, "maximum_frames": 8, "recommended_frames": 7, "timing_class": "normal"},
+    {"id": "rgb_snap", "minimum_frames": 4, "maximum_frames": 6, "recommended_frames": 5, "timing_class": "micro"},
+    {"id": "rgb_zoom_punch", "minimum_frames": 6, "maximum_frames": 10, "recommended_frames": 8, "timing_class": "normal"},
+    {"id": "rgb_horizontal_tear", "minimum_frames": 6, "maximum_frames": 10, "recommended_frames": 8, "timing_class": "normal"},
+    {"id": "rgb_glitch_cut", "minimum_frames": 4, "maximum_frames": 8, "recommended_frames": 6, "timing_class": "micro"},
+    {"id": "rgb_lens_snap", "minimum_frames": 6, "maximum_frames": 9, "recommended_frames": 8, "timing_class": "normal"},
+    {"id": "rgb_spin_blur", "minimum_frames": 6, "maximum_frames": 10, "recommended_frames": 8, "timing_class": "normal"},
+    {"id": "prismatic_flash", "minimum_frames": 6, "maximum_frames": 10, "recommended_frames": 8, "timing_class": "normal"},
+    {"id": "lightleak_rgb_combo", "minimum_frames": 8, "maximum_frames": 12, "recommended_frames": 10, "timing_class": "normal"},
+    {"id": "film_burn_rgb", "minimum_frames": 8, "maximum_frames": 12, "recommended_frames": 10, "timing_class": "normal"}
+  ],
   "limits": {
     "channel_mode": "additive_tint",
     "component_recombination": "rgb_channel_transform_effect",

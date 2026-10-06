@@ -67,6 +67,10 @@ namespace chronontemplate {
         float fontSize{48.f};
         std::string color{"#FFFFFF"};
         std::string name{};  ///< layer name; derived from the text when empty
+        std::optional<TextStrokeStyle> stroke{};
+        std::optional<TextShadowStyle> shadow{};
+        std::optional<TextGlowStyle> glow{};
+        std::optional<TextBackgroundStyle> background{};
     };
 
     /// Per-image frame style passed to Chronon's ContentHost. Radius zero keeps
@@ -96,6 +100,25 @@ namespace chronontemplate {
         std::string fillColor{"#FFFFFF"};
         std::string name{};
         float cornerRadius{0.f};
+        bool fillEnabled{true};
+        ShapeGeometry geometry{ShapeGeometry::Rectangle};
+        std::optional<ShapeRadialGradient> radialGradient{};
+        float gridSpacing{24.f};
+        float dotRadius{3.f};
+        std::string strokeColor{};
+        float strokeWidth{1.f};
+        int polygonPoints{6};
+        float polygonRotationDegrees{0.f};
+        std::optional<chronon3d::graphics::Field2D> field{};
+        std::optional<chronon3d::graphics::GradientDefinition> fieldRamp{};
+        std::uint32_t fieldRenderScale{1};
+        std::optional<chronon3d::Vec2> fieldDrift{};
+        std::optional<chronon3d::graphics::GradientMesh> gradientMesh{};
+        float noiseAmount{0.f};
+        std::uint32_t noiseSeed{0};
+        bool animatedNoise{false};
+        float noiseSize{1.f};
+        float contrast{1.f};
     };
 
     struct VideoSpec {
