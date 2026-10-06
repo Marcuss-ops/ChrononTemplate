@@ -83,54 +83,60 @@ endif()
 
 add_library(chronontemplate STATIC
         # composition recipes on top of the motion primitives
-        src/chronontemplate/Presets.cpp
-        src/chronontemplate/NativePrimitives.cpp
+        src/chronontemplate/core/Presets.cpp
+        src/chronontemplate/core/NativePrimitives.cpp
         # the orchestration layer: bindings, the bridge, the template API
-        src/chronontemplate/ContentBinding.cpp
-        src/chronontemplate/MotionBridge.cpp
-        src/chronontemplate/ChrononMotionContract.cpp
-        src/chronontemplate/ChrononRenderAdapter.cpp
-        src/chronontemplate/TemplateScene.cpp
-        src/chronontemplate/PlanLowering.cpp
-        src/chronontemplate/RenderPlanContentHost.cpp
+        src/chronontemplate/core/ContentBinding.cpp
+        src/chronontemplate/core/MotionBridge.cpp
+        src/chronontemplate/core/ChrononMotionContract.cpp
+        src/chronontemplate/core/ChrononRenderAdapter.cpp
+        src/chronontemplate/core/TemplateScene.cpp
+        src/chronontemplate/core/PlanLowering.cpp
+        src/chronontemplate/core/RenderPlanContentHost.cpp
         # Optional offline RenderPlan bridge lives outside the Motion core.
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
-        src/chronontemplate/ImageAnimationPack.cpp
-        src/chronontemplate/TitleCameraPack.cpp
-        src/chronontemplate/SceneCameraPack.cpp
-        src/chronontemplate/DocumentarySnapshotPack.cpp
-        src/chronontemplate/ImportantPhrasePack.cpp
-        src/chronontemplate/ClassicPhrasePack.cpp
-        src/chronontemplate/TypewriterPhrasePack.cpp
-        src/chronontemplate/Typewriter3DPhrasePack.cpp
-        src/chronontemplate/ApplePhrasePack.cpp
-        src/chronontemplate/PhraseHighlightPack.cpp
-        src/chronontemplate/DidoneTitlesPack.cpp
+        src/chronontemplate/single_images/ImageAnimationPack.cpp
+        src/chronontemplate/camera_roll/TitleCameraPack.cpp
+        src/chronontemplate/camera_roll/SceneCameraPack.cpp
+        src/chronontemplate/entities_with_text/DocumentarySnapshotPack.cpp
+        src/chronontemplate/important_phrases/ImportantPhrasePack.cpp
+        src/chronontemplate/important_phrases/classic/ClassicPhrasePack.cpp
+        src/chronontemplate/important_phrases/typewriter/TypewriterPhrasePack.cpp
+        src/chronontemplate/important_phrases/typewriter_3d/Typewriter3DPhrasePack.cpp
+        src/chronontemplate/important_phrases/apple/ApplePhrasePack.cpp
+        src/chronontemplate/important_phrases/highlight/PhraseHighlightPack.cpp
+        src/chronontemplate/important_phrases/didone/DidoneTitlesPack.cpp
+        # the category packs: many images in one scene, full-frame backgrounds, map beats
+        src/chronontemplate/multiple_images/MultiImagePack.cpp
+        src/chronontemplate/backgrounds/BackgroundPack.cpp
+        src/chronontemplate/map/MapPack.cpp
+        # the short-phrase family: one vocabulary, twelve archetypes, plus the star bumper
+        src/chronontemplate/short_phrases/ShortPhrasePack.cpp
         # the packs a template author starts from
-        src/chronontemplate/templates/YouTubeSubscribe.cpp
+        src/chronontemplate/entities_with_text/YouTubeSubscribe.cpp
         # the template catalog that used to live inside the motion core
         src/chrononmotion/templates/Templates.cpp)
 
 add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 
-add_executable(chronontemplate_dump_title_camera_poses tools/dump_title_camera_poses.cpp)
+add_executable(chronontemplate_dump_title_camera_poses tools/camera_roll/dump_title_camera_poses.cpp)
 target_link_libraries(chronontemplate_dump_title_camera_poses PRIVATE chronontemplate)
 
-add_executable(chronontemplate_dump_scene_camera_poses tools/dump_scene_camera_poses.cpp)
+add_executable(chronontemplate_dump_scene_camera_poses tools/camera_roll/dump_scene_camera_poses.cpp)
 target_link_libraries(chronontemplate_dump_scene_camera_poses PRIVATE chronontemplate)
 
-add_executable(chronontemplate_sequence_from_json tools/sequence_from_json.cpp)
+add_executable(chronontemplate_sequence_from_json tools/camera_roll/sequence_from_json.cpp)
 target_link_libraries(chronontemplate_sequence_from_json PRIVATE chronontemplate)
 target_include_directories(chronontemplate_sequence_from_json PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 
 add_executable(chronontemplate_dump_documentary_snapshot_pose
-        tools/dump_documentary_snapshot_pose.cpp)
+        tools/entities_with_text/dump_documentary_snapshot_pose.cpp)
 target_link_libraries(chronontemplate_dump_documentary_snapshot_pose PRIVATE chronontemplate)
 
 # The full native CLI canary needs ChrononMotion's optional typed JSON writer.
 if(TARGET chrononmotion_chronon3d_adapter)
     add_executable(chronontemplate_dump_documentary_snapshot_plan
-            tools/dump_documentary_snapshot_plan.cpp)
+            tools/entities_with_text/dump_documentary_snapshot_plan.cpp)
     target_link_libraries(chronontemplate_dump_documentary_snapshot_plan
             PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
 endif()
@@ -178,13 +184,37 @@ if(CHRONONTEMPLATE_BUILD_CATALOG_TOOL)
     # The Classic important-phrase pack lowers its fifteen C++ animations to
     # chronon.render-plan.v2 plans; the renderer draws the glow and the glyphs.
     add_executable(chronontemplate_emit_important_phrase_plans
-            tools/emit_important_phrase_classic.cpp)
+            tools/important_phrases/emit_important_phrase_classic.cpp)
     target_link_libraries(chronontemplate_emit_important_phrase_plans PRIVATE chronontemplate)
     target_include_directories(chronontemplate_emit_important_phrase_plans PRIVATE
             "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
     target_compile_options(chronontemplate_emit_important_phrase_plans PRIVATE -Wall -Wextra)
     if(CHRONONTEMPLATE_WERROR)
         target_compile_options(chronontemplate_emit_important_phrase_plans PRIVATE -Werror)
+    endif()
+
+    # The short-phrase catalog: twelve archetypes + the decor bumper, projected
+    # from the C++ pack into catalog/short_phrase_motion.v1.json.
+    add_executable(chronontemplate_emit_short_phrase_catalog
+            tools/short_phrases/emit_short_phrase_catalog.cpp)
+    target_link_libraries(chronontemplate_emit_short_phrase_catalog PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_emit_short_phrase_catalog PRIVATE
+            "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+    target_compile_options(chronontemplate_emit_short_phrase_catalog PRIVATE -Wall -Wextra)
+    if(CHRONONTEMPLATE_WERROR)
+        target_compile_options(chronontemplate_emit_short_phrase_catalog PRIVATE -Werror)
+    endif()
+
+    # The short-phrase render plans: one chronon.render-plan.v2 per archetype,
+    # ready for the Chronon3D GPU CLI. See render_short_phrases.sh.
+    add_executable(chronontemplate_emit_short_phrase_plans
+            tools/short_phrases/emit_short_phrase_plans.cpp)
+    target_link_libraries(chronontemplate_emit_short_phrase_plans PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_emit_short_phrase_plans PRIVATE
+            "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+    target_compile_options(chronontemplate_emit_short_phrase_plans PRIVATE -Wall -Wextra)
+    if(CHRONONTEMPLATE_WERROR)
+        target_compile_options(chronontemplate_emit_short_phrase_plans PRIVATE -Werror)
     endif()
 
 endif()
@@ -204,42 +234,42 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     if(Python3_Interpreter_FOUND)
         add_test(NAME chronontemplate_multi_image_duo_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_multi_image_duo_v1.py")
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/multiple_images/test_multi_image_duo_v1.py")
         add_test(NAME chronontemplate_named_multi_entity_duo_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_named_multi_entity_duo_v1.py")
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/multiple_images/test_named_multi_entity_duo_v1.py")
         add_test(NAME chronontemplate_kit_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_kit_contract.py")
         add_test(NAME chronontemplate_multi_image_trio_v2_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_multi_image_trio_v2.py")
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/multiple_images/test_multi_image_trio_v2.py")
         add_test(NAME chronontemplate_entity_presentation_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_entity_presentation_v1.py")
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/entities_with_text/test_entity_presentation_v1.py")
         add_test(NAME chronontemplate_kinetic_type_editorial_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_kinetic_type_editorial_v1.py")
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/test_kinetic_type_editorial_v1.py")
         add_test(NAME chronontemplate_social_motion_pack_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_social_motion_pack_v1.py")
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/test_social_motion_pack_v1.py")
         add_test(NAME chronontemplate_text_depth_focus_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_text_depth_focus_v1.py")
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/test_text_depth_focus_v1.py")
         add_test(NAME chronontemplate_saas_kinetic_typography_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_saas_kinetic_typography_v1.py")
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/test_saas_kinetic_typography_v1.py")
     endif()
     if(Python3_Interpreter_FOUND AND EXISTS "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}")
         add_test(NAME chronontemplate_editorial_benchmark_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/editorial_benchmark_suite.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/editorial_benchmark_suite.py"
                     --validate-only
                     --cli "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}"
                     --output-dir "${CMAKE_CURRENT_BINARY_DIR}/editorial_benchmark_contract")
         add_test(NAME chronontemplate_kinetic_type_editorial_renderer_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/build_kinetic_type_editorial_v1.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/build_kinetic_type_editorial_v1.py"
                     --validate-only
                     --cli "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}"
                     --out "${CMAKE_CURRENT_BINARY_DIR}/kinetic_type_editorial_contract")
@@ -295,8 +325,18 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     if(Python3_Interpreter_FOUND)
         add_test(NAME chronontemplate_scene_sequence_json_contract
             COMMAND "${Python3_EXECUTABLE}"
-                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/test_scene_sequence_json.py"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/camera_roll/test_scene_sequence_json.py"
                     --tool "$<TARGET_FILE:chronontemplate_sequence_from_json>")
+    endif()
+
+    # The short-phrase catalog contract: the emitter is fail-closed and the
+    # committed catalog must be exactly what the C++ pack emits today.
+    if(Python3_Interpreter_FOUND AND TARGET chronontemplate_emit_short_phrase_catalog)
+        add_test(NAME chronontemplate_short_phrase_catalog_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/short_phrases/test_short_phrase_catalog.py"
+                    --tool "$<TARGET_FILE:chronontemplate_emit_short_phrase_catalog>"
+                    --catalog "${CMAKE_CURRENT_SOURCE_DIR}/catalog/short_phrase_motion.v1.json")
     endif()
 
     # Title-to-snapshot documentary scenes are ordinary text/image layers with
@@ -347,6 +387,30 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_didone_titles_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_didone_titles_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_didone_titles_pack_test COMMAND chronontemplate_didone_titles_pack_test)
+
+    # The category packs: the multi-image board, the full-frame background looks
+    # and the map beats (plate + markers + a camera move).
+    add_executable(chronontemplate_multi_image_pack_test tests/multi_image_pack.cpp)
+    target_link_libraries(chronontemplate_multi_image_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_multi_image_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_multi_image_pack_test COMMAND chronontemplate_multi_image_pack_test)
+
+    add_executable(chronontemplate_background_pack_test tests/background_pack.cpp)
+    target_link_libraries(chronontemplate_background_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_background_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_background_pack_test COMMAND chronontemplate_background_pack_test)
+
+    add_executable(chronontemplate_map_pack_test tests/map_pack.cpp)
+    target_link_libraries(chronontemplate_map_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_map_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_map_pack_test COMMAND chronontemplate_map_pack_test)
+
+    # The short-phrase family: the twelve archetypes, the semantic emphasis, the
+    # exit modes and the star decor bumper.
+    add_executable(chronontemplate_short_phrase_pack_test tests/short_phrase_pack.cpp)
+    target_link_libraries(chronontemplate_short_phrase_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_short_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_short_phrase_pack_test COMMAND chronontemplate_short_phrase_pack_test)
 
     if(CHRONONTEMPLATE_BUILD_LIVE_ADAPTER_TEST)
         if(NOT EXISTS "${CHRONONTEMPLATE_CHRONON3D_LIBRARY}")

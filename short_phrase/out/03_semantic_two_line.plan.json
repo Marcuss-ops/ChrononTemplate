@@ -1,0 +1,235 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "short_phrase_03_semantic_two_line",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 78
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "image",
+      "asset": "assets/images/short_phrase_dark_plate.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 78
+    },
+    {
+      "id": "phrase",
+      "type": "text",
+      "text": "Good text design is invisible\nbad text design is unforgettable",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        960,
+        540
+      ],
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 70,
+        "fill": "#FFFFFF",
+        "stroke": {
+          "color": "#000000",
+          "width": 0
+        },
+        "glow": {
+          "radius": 0,
+          "intensity": 0,
+          "color": "#000000"
+        }
+      },
+      "start_frame": 0,
+      "duration_frames": 78,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 6,
+                "value": 1.0
+              },
+              {
+                "frame": 68,
+                "value": 1.0
+              },
+              {
+                "frame": 76,
+                "value": 0.0
+              }
+            ],
+            "easing": "linear"
+          }
+        ]
+      },
+      "text_animators": [
+        {
+          "id": "words_in",
+          "selectors": [
+            {
+              "id": "words_in_sel",
+              "unit": "word",
+              "shape": "smooth",
+              "order": "forward",
+              "combine": "replace",
+              "exclude_spaces": true,
+              "start": {
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "value": 0
+                  },
+                  {
+                    "frame": 28,
+                    "value": 100
+                  }
+                ],
+                "easing": "linear"
+              },
+              "end": {
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "value": 15
+                  },
+                  {
+                    "frame": 28,
+                    "value": 100
+                  }
+                ],
+                "easing": "linear"
+              }
+            }
+          ],
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.15
+                },
+                {
+                  "frame": 28,
+                  "value": 1.0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "property": "position_y",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 8.0
+                },
+                {
+                  "frame": 28,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        },
+        {
+          "id": "emphasis_blue",
+          "selectors": [
+            {
+              "id": "emphasis_blue_sel",
+              "unit": "word",
+              "shape": "square",
+              "order": "forward",
+              "combine": "replace",
+              "exclude_spaces": true,
+              "start": {
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "value": 44
+                  }
+                ],
+                "easing": "linear"
+              },
+              "end": {
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "value": 66
+                  }
+                ],
+                "easing": "linear"
+              }
+            }
+          ],
+          "properties": [
+            {
+              "property": "fill_color",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": [
+                    0.42,
+                    0.65,
+                    1.0,
+                    1.0
+                  ]
+                },
+                {
+                  "frame": 32,
+                  "value": [
+                    0.42,
+                    0.65,
+                    1.0,
+                    1.0
+                  ]
+                },
+                {
+                  "frame": 48,
+                  "value": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                },
+                {
+                  "frame": 77,
+                  "value": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "output": {
+    "path": "short_phrase_03_semantic_two_line.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

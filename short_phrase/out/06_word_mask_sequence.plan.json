@@ -1,0 +1,289 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "short_phrase_06_word_mask_sequence",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 72
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "image",
+      "asset": "assets/images/short_phrase_dark_plate.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 72
+    },
+    {
+      "id": "word_0",
+      "type": "text",
+      "text": "leave",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        960,
+        540
+      ],
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 130,
+        "fill": "#FFFFFF",
+        "stroke": {
+          "color": "#000000",
+          "width": 0
+        },
+        "glow": {
+          "radius": 0,
+          "intensity": 0,
+          "color": "#000000"
+        }
+      },
+      "start_frame": 0,
+      "duration_frames": 72,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 4,
+                "value": 1.0
+              },
+              {
+                "frame": 18,
+                "value": 1.0
+              },
+              {
+                "frame": 23,
+                "value": 0.0
+              },
+              {
+                "frame": 71,
+                "value": 0.0
+              }
+            ],
+            "easing": "linear"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -20.0
+              },
+              {
+                "frame": 5,
+                "value": 0.0
+              },
+              {
+                "frame": 18,
+                "value": 0.0
+              },
+              {
+                "frame": 23,
+                "value": 20.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "word_1",
+      "type": "text",
+      "text": "your",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        960,
+        540
+      ],
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 130,
+        "fill": "#FFFFFF",
+        "stroke": {
+          "color": "#000000",
+          "width": 0
+        },
+        "glow": {
+          "radius": 0,
+          "intensity": 0,
+          "color": "#000000"
+        }
+      },
+      "start_frame": 0,
+      "duration_frames": 72,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 22,
+                "value": 0.0
+              },
+              {
+                "frame": 26,
+                "value": 1.0
+              },
+              {
+                "frame": 40,
+                "value": 1.0
+              },
+              {
+                "frame": 45,
+                "value": 0.0
+              },
+              {
+                "frame": 71,
+                "value": 0.0
+              }
+            ],
+            "easing": "linear"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 22,
+                "value": -20.0
+              },
+              {
+                "frame": 27,
+                "value": 0.0
+              },
+              {
+                "frame": 40,
+                "value": 0.0
+              },
+              {
+                "frame": 45,
+                "value": 20.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "word_2",
+      "type": "text",
+      "text": "message",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        960,
+        540
+      ],
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 130,
+        "fill": "#FFFFFF",
+        "stroke": {
+          "color": "#000000",
+          "width": 0
+        },
+        "glow": {
+          "radius": 0,
+          "intensity": 0,
+          "color": "#000000"
+        }
+      },
+      "start_frame": 0,
+      "duration_frames": 72,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 44,
+                "value": 0.0
+              },
+              {
+                "frame": 48,
+                "value": 1.0
+              },
+              {
+                "frame": 66,
+                "value": 1.0
+              },
+              {
+                "frame": 71,
+                "value": 0.0
+              }
+            ],
+            "easing": "linear"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 44,
+                "value": -20.0
+              },
+              {
+                "frame": 49,
+                "value": 0.0
+              },
+              {
+                "frame": 66,
+                "value": 0.0
+              },
+              {
+                "frame": 71,
+                "value": 20.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "short_phrase_06_word_mask_sequence.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

@@ -1,0 +1,32 @@
+{
+ "id": "07_character_cascade_shapes",
+ "theme": "light",
+ "font": "assets/fonts/Inter-Bold.ttf",
+ "size": 150,
+ "unit": "glyph",
+ "stagger": 1.0,
+ "enter": 8,
+ "delay": 0,
+ "easing": "out_cubic",
+ "duration": 70,
+ "out_start": 50,
+ "text": "Really smooth.",
+ "from": {
+  "opacity": 0,
+  "gray": 1,
+  "y": 18
+ },
+ "to": {
+  "opacity": 1,
+  "gray": 0,
+  "y": 0
+ },
+ "exit": {
+  "mode": "forward",
+  "stagger": 0.8,
+  "frames": 6,
+  "to": {
+   "opacity": 0
+  }
+ }
+}

@@ -1,5 +1,5 @@
-#include "chronontemplate/PlanLowering.hpp"
-#include "chronontemplate/RenderPlanContentHost.hpp"
+#include "chronontemplate/core/PlanLowering.hpp"
+#include "chronontemplate/core/RenderPlanContentHost.hpp"
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"
 

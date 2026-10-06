@@ -1,4 +1,4 @@
-#include "chronontemplate/NativePrimitives.hpp"
+#include "chronontemplate/core/NativePrimitives.hpp"
 
 #include <algorithm>
 #include <cmath>

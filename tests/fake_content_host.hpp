@@ -8,8 +8,8 @@
 #ifndef CHRONONTEMPLATE_TEST_FAKE_CONTENT_HOST_HPP
 #define CHRONONTEMPLATE_TEST_FAKE_CONTENT_HOST_HPP
 
-#include "chronontemplate/ContentHost.hpp"
-#include "chronontemplate/FrameSubmission.hpp"
+#include "chronontemplate/core/ContentHost.hpp"
+#include "chronontemplate/core/FrameSubmission.hpp"
 
 #include "chrononmotion/math/Matrix4.hpp"
 

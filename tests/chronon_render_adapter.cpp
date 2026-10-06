@@ -1,4 +1,4 @@
-#include "chronontemplate/ChrononRenderAdapter.hpp"
+#include "chronontemplate/core/ChrononRenderAdapter.hpp"
 
 #include "motion_check.hpp"
 

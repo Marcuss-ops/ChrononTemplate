@@ -1,0 +1,42 @@
+{
+ "id": "03_semantic_two_line",
+ "theme": "dark",
+ "font": "assets/fonts/DMSans-Bold.ttf",
+ "size": 82,
+ "unit": "word",
+ "stagger": 3,
+ "enter": 9,
+ "delay": 0,
+ "easing": "out_cubic",
+ "duration": 84,
+ "out_start": 62,
+ "text": "Good text design is invisible\nbad text design is unforgettable",
+ "stagger_by": "word",
+ "from": {
+  "opacity": 0.15,
+  "gray": 1,
+  "y": 6
+ },
+ "to": {
+  "opacity": 1,
+  "gray": 0,
+  "y": 0
+ },
+ "color": {
+  "tint": "blue",
+  "settle": 10,
+  "hold": 6,
+  "only": [
+   4,
+   5
+  ]
+ },
+ "exit": {
+  "mode": "forward",
+  "stagger": 2,
+  "frames": 8,
+  "to": {
+   "opacity": 0
+  }
+ }
+}

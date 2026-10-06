@@ -1,4 +1,4 @@
-#include "chronontemplate/TemplateScene.hpp"
+#include "chronontemplate/core/TemplateScene.hpp"
 
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"

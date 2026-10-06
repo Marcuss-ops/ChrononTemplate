@@ -1,0 +1,137 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "test_native_star",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 30
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "image",
+      "asset": "assets/images/short_phrase_light_plate.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 30
+    },
+    {
+      "id": "phrase",
+      "type": "text",
+      "text": "It's really easy to manage.",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        960,
+        540
+      ],
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 76,
+        "fill": "#080808",
+        "stroke": {
+          "color": "#000000",
+          "width": 0
+        },
+        "glow": {
+          "radius": 0,
+          "intensity": 0,
+          "color": "#000000"
+        }
+      },
+      "start_frame": 0,
+      "duration_frames": 30
+    },
+    {
+      "id": "star_bumper",
+      "type": "shape",
+      "shape": {
+        "type": "star",
+        "points": 4,
+        "inner_radius_ratio": 0.28
+      },
+      "size": [
+        400,
+        400
+      ],
+      "position": [
+        960,
+        540
+      ],
+      "style": {
+        "fill": "#E2E2E2",
+        "stroke": {
+          "color": "#444444",
+          "width": 3.0
+        }
+      },
+      "start_frame": 0,
+      "duration_frames": 30,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  200.0,
+                  -40.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 30,
+                "value": [
+                  -200.0,
+                  40.0,
+                  0.0
+                ]
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "rotation",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 30,
+                "value": [
+                  0.0,
+                  0.0,
+                  90.0
+                ]
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "test_native_star.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}
