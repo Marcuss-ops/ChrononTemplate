@@ -1,0 +1,31 @@
+{
+ "id": "05_character_tracking_reveal",
+ "theme": "dark",
+ "font": "assets/fonts/Inter-Bold.ttf",
+ "size": 150,
+ "unit": "glyph",
+ "stagger": 1.2,
+ "enter": 10,
+ "delay": 0,
+ "easing": "out_cubic",
+ "duration": 66,
+ "out_start": 48,
+ "text": "more expensive",
+ "tracking_px": 0,
+ "from": {
+  "opacity": 0,
+  "x": 10
+ },
+ "to": {
+  "opacity": 1,
+  "x": 0
+ },
+ "exit": {
+  "mode": "forward",
+  "stagger": 0.8,
+  "frames": 6,
+  "to": {
+   "opacity": 0
+  }
+ }
+}

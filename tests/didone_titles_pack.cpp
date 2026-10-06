@@ -1,6 +1,6 @@
 // ChrononTemplate — acceptance tests for editorial Didone titles (milestone: editorial_didone_titles_v1).
 
-#include "chronontemplate/DidoneTitlesPack.hpp"
+#include "chronontemplate/important_phrases/didone/DidoneTitlesPack.hpp"
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"
 

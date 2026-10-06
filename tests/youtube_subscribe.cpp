@@ -5,7 +5,7 @@
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"
 
-#include "chronontemplate/UiPrimitives.hpp"
+#include "chronontemplate/core/UiPrimitives.hpp"
 
 #include <array>
 #include <stdexcept>

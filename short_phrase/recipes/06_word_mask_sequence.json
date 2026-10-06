@@ -1,0 +1,32 @@
+{
+ "id": "06_word_mask_sequence",
+ "theme": "dark",
+ "font": "assets/fonts/Inter-Bold.ttf",
+ "size": 170,
+ "unit": "slot",
+ "stagger": 4,
+ "enter": 7,
+ "delay": 0,
+ "easing": "out_cubic",
+ "duration": 70,
+ "out_start": 0,
+ "text": "leave your message",
+ "slot": 18,
+ "hold_each": 10,
+ "from": {
+  "opacity": 0,
+  "x": -40
+ },
+ "to": {
+  "opacity": 1,
+  "x": 0
+ },
+ "exit": {
+  "mode": "slot",
+  "frames": 6,
+  "to": {
+   "opacity": 0,
+   "x": 40
+  }
+ }
+}

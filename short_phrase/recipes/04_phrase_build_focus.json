@@ -1,0 +1,35 @@
+{
+ "id": "04_phrase_build_focus",
+ "theme": "dark",
+ "font": "assets/fonts/DMSans-Bold.ttf",
+ "size": 96,
+ "unit": "word",
+ "stagger": 5,
+ "enter": 10,
+ "delay": 0,
+ "easing": "out_cubic",
+ "duration": 72,
+ "out_start": 52,
+ "text": "Will make your video",
+ "from": {
+  "opacity": 0.1,
+  "gray": 1
+ },
+ "to": {
+  "opacity": 1,
+  "gray": 0
+ },
+ "color": {
+  "tint": "blue",
+  "settle": 12,
+  "hold": 2
+ },
+ "exit": {
+  "mode": "reverse",
+  "stagger": 3,
+  "frames": 8,
+  "to": {
+   "opacity": 0
+  }
+ }
+}

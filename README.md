@@ -10,17 +10,15 @@ inside the ChrononMotion core: it consumes the core's `MotionScene`, `Layer`,
 CMakeLists.txt                            the module build (library + tests)
 CMakePresets.json                         dev / dev-fast / release / release-fast
 include/chronontemplate/chronontemplate.hpp     Presets + the orchestration API
-include/chronontemplate/Presets.hpp
-src/chronontemplate/Presets.cpp
-include/chronontemplate/ContentHost.hpp         what this module asks Chronon for
-include/chronontemplate/ContentBinding.hpp      layer -> content
-include/chronontemplate/FrameSubmission.hpp     what the renderer is handed
-include/chronontemplate/MotionBridge.hpp        the conversion, one direction
-include/chronontemplate/TemplateScene.hpp       the authoring API a template sees
-include/chronontemplate/UiPrimitives.hpp        validated web composition primitives
+include/chronontemplate/core/Presets.hpp
+src/chronontemplate/core/Presets.cpp
+include/chronontemplate/core/ContentHost.hpp         what this module asks Chronon for
+include/chronontemplate/core/ContentBinding.hpp      layer -> content
+include/chronontemplate/core/FrameSubmission.hpp     what the renderer is handed
+include/chronontemplate/core/MotionBridge.hpp        the conversion, one direction
+include/chronontemplate/core/TemplateScene.hpp       the authoring API a template sees
+include/chronontemplate/core/UiPrimitives.hpp        validated web composition primitives
 src/chronontemplate/{ContentBinding,MotionBridge,TemplateScene}.cpp
-include/chronontemplate/templates/YouTubeSubscribe.hpp   the first pack
-src/chronontemplate/templates/YouTubeSubscribe.cpp
 include/chrononmotion/templates/Templates.hpp   moved out of the motion core
 src/chrononmotion/templates/Templates.cpp
 tests/motion_check.hpp                    the module's own test harness
@@ -31,11 +29,107 @@ tests/template_scene.cpp                  the orchestration contract
 tests/youtube_subscribe.cpp               the pack's composition and timing
 ```
 
+## Pack layout (by animation category)
+
+The pack sources are grouped by the kind of animation they author. Headers and
+sources mirror each other under `include/chronontemplate/` and
+`src/chronontemplate/`, so a pack is found by category first, family second.
+
+```text
+important_phrases/          phrasing and titling, one subdir per family
+  ImportantPhrasePack            shared look + plan data types
+  classic/                       fourteen "normal" phrase animations
+  typewriter/                    fifteen typed animations, `_` cursor
+  typewriter_3d/                 3D typewriter + neon glow / web cards
+  apple/                         modern restrained phrase presets
+  highlight/                     long phrases with animated under-phrase accents
+  didone/                        editorial Didone title pack
+short_phrases/              ShortPhrasePack — 12 archetypes for phrases of 1–7 words
+                            (+ short_phrase.decor.star_bumper, semantic emphasis, exit modes)
+single_images/              ImageAnimationPack — one-image 2.5D entrances
+multiple_images/            MultiImagePack — duo/trio/quad/penta boards with captions
+backgrounds/                BackgroundPack — full-frame looks from shape layers
+entities_with_text/         DocumentarySnapshotPack + YouTubeSubscribe
+map/                        MapPack — a plate + markers + a camera beat
+camera_roll/                TitleCameraPack + SceneCameraPack — camera-only motion
+```
+
+## Tools layout
+
+The `tools/` scripts follow the same categories, so a generator is found the way
+its pack is. Shared scaffolding (`kit/`, `emit_catalog`, the cursor/envato/drive
+utilities) stays at the root of `tools/`.
+
+```text
+tools/
+  important_phrases/   render_/build_/test_ phrase, title and kinetic-typography suites
+  short_phrases/       the short-phrase catalog emitter + its contract test
+  single_images/       image-frame, photo-motion and 2.5D image suites
+  multiple_images/     duo/trio/quad/penta and named multi-entity boards
+  backgrounds/         cinematic light-leak, bloom, rgb, aura, tech-background suites
+  entities_with_text/  entity cards, captions and documentary snapshots
+  map/                 map plates, geo-camera flights, location and route suites
+  camera_roll/         title-camera, scene-camera and camera-motion suites
+  kit/, emit_*         shared scaffolding and the catalog emitters (root)
+```
+
+## Clean editorial short phrases
+
+The original twelve recipes are preserved; ten append-only
+`short_phrase_editorial_*` choices add Baseline Rise, Side Glide, Tracking Close,
+Focus Resolve, Underline Draw, Rule Handoff, Glyph Curtain, Contrast Sweep,
+Quiet Zoom and Lift And Rule. They use plain ink/ivory backgrounds, restrained
+motion, shrink-only text fitting and a stationary reading hold. Accent rules
+are native V3 shapes; focus blur is a native text animator, not a layer effect.
+All ten are available through `shortPhraseAnimations()` and the word-count
+suggestion table, with their style and accent tracks in the generated catalog.
+
+Generate just the new preview set (1920×1080, 30 fps, 150 frames each):
+
+```shell
+cmake --build build/dev --target chronontemplate_emit_short_phrase_plans chronontemplate_emit_short_phrase_catalog
+build/dev/chronontemplate_emit_short_phrase_catalog > catalog/short_phrase_motion.v1.json
+build/dev/chronontemplate_emit_short_phrase_plans out/short_phrase_editorial_v1 --editorial-only
+```
+
+Render the emitted plans through Chronon3D's Vulkan/native NVENC path, using
+absolute plan and asset-root paths, then verify the actual encoded frames:
+
+```shell
+python3 tools/short_phrases/verify_editorial_short_phrases.py out/short_phrase_editorial_v1
+DRIVE_FOLDER_ID=12uXxT3uTNlLFclxsDxndq9U8KhF98CN_ \\
+  tools/short_phrases/upload_short_phrases_drive.sh out/short_phrase_editorial_v1
+```
+
+The verifier checks the exact ten-file set, H.264, resolution, frame count,
+five-second duration, visible foreground inside the safe area, a moving entrance,
+a stable hold and fully disappeared first/last frames. It writes
+`verification.json` with pixel measurements and SHA-256 evidence. Upload sends
+only MP4s via the existing configured Drive uploader.
+
+## Short-phrase catalog
+
+`catalog/short_phrase_motion.v1.json` holds the twelve short-phrase archetypes
+(1–7 words), the five exit modes, the decor bumper and the selection table
+RenderingGen uses to pick a recipe by word count. It is **generated from the
+C++ pack**, not hand-maintained:
+
+```shell
+cmake --build build/dev --target chronontemplate_emit_short_phrase_catalog
+./build/dev/chronontemplate_emit_short_phrase_catalog > catalog/short_phrase_motion.v1.json
+```
+
+The emitter is fail-closed (a malformed pack aborts the emit instead of shipping
+a catalog the consumer would reject), and
+`tools/short_phrases/test_short_phrase_catalog.py` (CTest:
+`chronontemplate_short_phrase_catalog_contract`) pins the document and fails when
+the committed file drifts from what the C++ pack emits today.
+
 ## Packs
 
 ### `blackboard_torture_v1`
 
-`include/chronontemplate/NativePrimitives.hpp` exposes reusable C++ `Geometry`,
+`include/chronontemplate/core/NativePrimitives.hpp` exposes reusable C++ `Geometry`,
 `Material`, `Effects`, `Paths`, `Camera`, `Motion`, `Particles`, `Text`, and
 `TemplateComposition` builders. They produce ordinary V3 RenderPlan data,
 validate authoring-time dimensions and timing, and leave evaluation and
@@ -324,7 +418,7 @@ that publishes it as data instead of letting every consumer restate it:
 
 ```shell
 cmake --build build/verify --target chronontemplate_emit_catalog
-./build/verify/chronontemplate_emit_catalog > catalog/emitted.json
+./build/verify/chronontemplate_emit_catalog > catalog/chronontemplate_catalog.v1.json
 ```
 
 `catalog/motion_catalog.v1.json` is the authored data (motion ids, their
@@ -367,7 +461,7 @@ Every preset carries its certification metadata in the emitted motions:
 `required_properties` (one per track, in track order), `requires_3d`,
 `requires_camera`, `seeded` and `render_safe`. The gates that keep it honest:
 
-- `ChrononTemplate/tools/test_entity_presentation_v1.py` — catalog contract,
+- `ChrononTemplate/tools/entities_with_text/test_entity_presentation_v1.py` — catalog contract,
   deterministic golden plans, layout/Unicode/safe-area, multi-entity duo
 - `RenderingGen .../internal/motion/presentation_catalog_test.go` — catalog
   parity, 20/20/10 presets, unknown-preset fail-closed, exact final pose
@@ -377,7 +471,7 @@ Every preset carries its certification metadata in the emitted motions:
 - `RenderingGen .../internal/motion/presentation_multi_entity_test.go` — one
   scene for two entities, captions remain visible, focus A→B, no overlap
 
-`tools/build_entity_presentation_v1.py` regenerates seven golden plans (metric
+`tools/entities_with_text/build_entity_presentation_v1.py` regenerates seven golden plans (metric
 five-value canary, metric 4×5 gallery, metric 20-preset timeline, date 4×5 gallery,
 date 20-preset gallery, entity gallery and entity duo) into
 `golden_plans/entity_presentation_v1/`; `--cli` additionally validates each
@@ -385,7 +479,7 @@ plan through `chronon3d_cli validate --plan` when the Chronon3D CLI is built.
 
 ## SaaS Kinetic Typography V1
 
-`tools/build_saas_kinetic_typography_v1.py` authors six renderer-native
+`tools/important_phrases/build_saas_kinetic_typography_v1.py` authors six renderer-native
 reference-inspired beats: per-grapheme vertical drop with velocity blur, staggered
 word reveal with tracking stretch, a split-mask decapitation, spring-drawn
 underline, glossy gradient/shimmer, and a rotation snap. It writes six 3-second
@@ -396,10 +490,10 @@ clipped by a text mask, while motion and per-glyph treatment use V3 layer tracks
 and text animators.
 
 ```shell
-python3 tools/test_saas_kinetic_typography_v1.py
-python3 tools/build_saas_kinetic_typography_v1.py \\
+python3 tools/important_phrases/test_saas_kinetic_typography_v1.py
+python3 tools/important_phrases/build_saas_kinetic_typography_v1.py \\
   --out out/saas_kinetic_typography_v1
-python3 tools/build_saas_kinetic_typography_v1.py --validate-only \\
+python3 tools/important_phrases/build_saas_kinetic_typography_v1.py --validate-only \\
   --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli
 ```
 
@@ -408,7 +502,7 @@ contract tests are included in the module's Python CTest suite.
 
 ## Kinetic Type Editorial V1
 
-`tools/build_kinetic_type_editorial_v1.py` authors the reference-inspired
+`tools/important_phrases/build_kinetic_type_editorial_v1.py` authors the reference-inspired
 editorial type family from reusable Chronon3D render-plan primitives. It emits a
 single manifest plus 10 text-motion canaries, eight seeded aurora look canaries,
 five compositional scene-recipe canaries and the 13-scene
@@ -423,7 +517,7 @@ The producer lowers them to ordinary `chronon.render-plan.v3` documents:
 ChrononTemplate owns composition and recipe vocabulary; Chronon3D still owns
 semantic-span layout, text shaping and rasterization. The aurora fields use
 six broad, irregular soft-alpha emitters as moving native image layers.
-`tools/generate_kinetic_type_editorial_textures.py` recreates the deterministic
+`tools/important_phrases/generate_kinetic_type_editorial_textures.py` recreates the deterministic
 palette and accent-light textures. Native per-glyph animators combine scale,
 blur, tracking and fill color; semantic accent spans drive a synchronized
 colored light layer. The `Design` gallery beat uses three animated color spans
@@ -435,9 +529,9 @@ the native shrink-only fit contract.
 Generate plans and run the deterministic/safe-area contract tests:
 
 ```shell
-python3 tools/generate_kinetic_type_editorial_textures.py
-python3 tools/build_kinetic_type_editorial_v1.py --out build/kinetic_type_editorial_v1
-python3 tools/test_kinetic_type_editorial_v1.py
+python3 tools/important_phrases/generate_kinetic_type_editorial_textures.py
+python3 tools/important_phrases/build_kinetic_type_editorial_v1.py --out build/kinetic_type_editorial_v1
+python3 tools/important_phrases/test_kinetic_type_editorial_v1.py
 ```
 
 Validate all generated plans with the local Chronon3D CLI, or render a single
@@ -445,10 +539,10 @@ scene with Vulkan to raw NV12 frames, then encode the final MP4 with NVIDIA
 NVENC (preview profile and a 512 MiB framebuffer-pool retention budget):
 
 ```shell
-python3 tools/build_kinetic_type_editorial_v1.py \
+python3 tools/important_phrases/build_kinetic_type_editorial_v1.py \
   --out build/kinetic_type_editorial_v1 --validate-only \
   --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli
-python3 tools/build_kinetic_type_editorial_v1.py \
+python3 tools/important_phrases/build_kinetic_type_editorial_v1.py \
   --out build/kinetic_type_editorial_v1 --render --scene canary_text_word_pop_focus \
   --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli
 ```
@@ -529,7 +623,7 @@ font system or Windows toolchain is required.
 ## Important-phrase style families (Classic)
 
 RenderingGen names the editorial kind (IMPORTANT_PHRASE);
-`include/chronontemplate/ImportantPhrasePack.hpp` owns how such a phrase looks
+`include/chronontemplate/important_phrases/ImportantPhrasePack.hpp` owns how such a phrase looks
 and moves. `Classic` is the first family: white Montserrat Bold face with a
 soft white glow and a slight black stroke on the black canvas, fourteen
 animations — seven layer entrances, three staggered glyph windows, two
@@ -540,8 +634,8 @@ One file per family (`ClassicPhrasePack.*`, `TypewriterPhrasePack.*`) on the
 shared look and motion vocabulary of `ImportantPhrasePack.*`, so a pipeline
 can render one family while the other stays ready.
 
-The pack is data; `tools/emit_important_phrase_classic.cpp` lowers it to
-`chronon.render-plan.v2` and `tools/render_important_phrase_classic.sh` renders
+The pack is data; `tools/important_phrases/emit_important_phrase_classic.cpp` lowers it to
+`chronon.render-plan.v2` and `tools/important_phrases/render_important_phrase_classic.sh` renders
 the showcase MP4s on the Vulkan lane (GPU-native text, `require_gpu_native`).
 The GPU lane samples animator properties per run — per-glyph effect is always
 `property(t) * weight(glyph, t)` — so unit-level staging lives in the selector
@@ -570,7 +664,7 @@ them carrying coordinates. Framings share one optical law
 coverage fraction of the frame width at the delivery aspect.
 
 ```cpp
-#include "chronontemplate/TitleCameraPack.hpp"
+#include "chronontemplate/camera_roll/TitleCameraPack.hpp"
 
 TemplateScene scene("title_card", 30.f, host, 1920.f, 1080.f);
 LayerHandle& title = scene.text({.text = "THE STORY OF APPLE",
@@ -643,7 +737,7 @@ recipes are `doc_title_snap_down`, `doc_title_pullback_photo_reveal`,
 `doc_archive_crane_reveal`.
 
 ```cpp
-#include "chronontemplate/DocumentarySnapshotPack.hpp"
+#include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
 
 DocumentaryShot shot;
 shot.title = {{960.f, 280.f, 0.f}, 520.f, 100.f};
@@ -677,10 +771,10 @@ Render the title handoff or red portal with the native camera pose dumper and
 Chronon3D CLI:
 
 ```sh
-python3 tools/render_documentary_snapshot_canary.py --render
-python3 tools/render_documentary_snapshot_canary.py \
+python3 tools/entities_with_text/render_documentary_snapshot_canary.py --render
+python3 tools/entities_with_text/render_documentary_snapshot_canary.py \
   --recipe doc_title_push_through_snapshot --render
-python3 tools/render_documentary_snapshot_canary.py --style-gallery --render
+python3 tools/entities_with_text/render_documentary_snapshot_canary.py --style-gallery --render
 ```
 
 ### Scene-camera sequencer — `scene_camera_sequencer_v1`
@@ -697,7 +791,7 @@ derived from the beat's own half-extents through one framing law
 Image 62°, Text 44°, Card 56°).
 
 ```cpp
-#include "chronontemplate/SceneCameraPack.hpp"
+#include "chronontemplate/camera_roll/SceneCameraPack.hpp"
 
 applySceneCameraSequence(scene, SceneCameraSequence{
     .beats = {{{SubjectKind::Phrase, {960.f, 540.f, 0.f}, 520.f, 110.f}, 60},
@@ -732,8 +826,8 @@ native pose dumper and Chronon3D CLI:
 
 ```sh
 cmake --build --preset dev --target chronontemplate_dump_scene_camera_poses
-python3 tools/render_scene_camera_sequencer_v1.py            # plans + renders
-python3 tools/render_scene_camera_sequencer_v1.py --generate-only
+python3 tools/camera_roll/render_scene_camera_sequencer_v1.py            # plans + renders
+python3 tools/camera_roll/render_scene_camera_sequencer_v1.py --generate-only
 ```
 
 The renders land in `out/scene_camera_sequencer_v1/` (plans, MP4s and
@@ -751,7 +845,7 @@ block, which the lens never reads. See `docs/SCENE_CAMERA_PACK.md`.
 ### Multi-image duo v1
 
 `catalog/multi_entity_layout.v1.json` and
-`tools/render_multi_entity_layout_v1.py` define the two-image, one-scene pack.
+`tools/multiple_images/render_multi_entity_layout_v1.py` define the two-image, one-scene pack.
 It keeps both 620×720 cards in fixed left/right slots on a 1920×1080 canvas for
 150 frames (5 seconds at 30 fps), and provides five motions:
 `duo_split_reveal`, `duo_depth_stagger`, `duo_cross_focus`,
@@ -769,15 +863,15 @@ without rerendering; only those eight MP4s are sent, not posters, plans, or the
 verification manifest. With the repository Chronon CLI available, run:
 
 ```shell
-python3 tools/render_multi_entity_layout_v1.py \
+python3 tools/multiple_images/render_multi_entity_layout_v1.py \
   --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli \
   --assets-root ../Chronon3d --validate-only
-python3 tools/render_multi_entity_layout_v1.py \
+python3 tools/multiple_images/render_multi_entity_layout_v1.py \
   --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli \
   --assets-root ../Chronon3d
-python3 tools/verify_multi_image_duo_v1.py out/multi_image_duo_v1 --canaries
+python3 tools/multiple_images/verify_multi_image_duo_v1.py out/multi_image_duo_v1 --canaries
 # After the suite has been rendered and verified, upload the exact eight MP4s:
-python3 tools/render_multi_entity_layout_v1.py \\
+python3 tools/multiple_images/render_multi_entity_layout_v1.py \\
   --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli \\
   --assets-root ../Chronon3d --upload-only \\
   --drive-credentials /home/pierone/.config/velox/credentials.json \\
@@ -793,11 +887,11 @@ left/right visibility in an encoded frame, and safe-area clipping; it writes
 `out/multi_image_duo_v1/multi_image_duo_v1_manifest.json` with coverage and
 SHA-256 evidence. Fast contract checks run as part of CTest when Python 3 is
 available, and can also be run directly with
-`python3 tools/test_multi_image_duo_v1.py`.
+`python3 tools/multiple_images/test_multi_image_duo_v1.py`.
 
 ### Responsive Social Motion V1
 
-`tools/build_social_motion_pack_v1.py` creates eighteen five-second, 30 fps
+`tools/important_phrases/build_social_motion_pack_v1.py` creates eighteen five-second, 30 fps
 Chronon3D plans: five image-count layouts (one through five images) for each
 1920×1080 landscape, 1080×1080 square and 1080×1920 vertical canvas, plus a
 three-phrase English web/editorial reel in each format. Image cards animate
@@ -809,9 +903,9 @@ Validate the complete plan set without rendering, or render and verify all MP4s
 locally:
 
 ```shell
-python3 tools/test_social_motion_pack_v1.py
-python3 tools/build_social_motion_pack_v1.py --validate-only
-python3 tools/build_social_motion_pack_v1.py --render
+python3 tools/important_phrases/test_social_motion_pack_v1.py
+python3 tools/important_phrases/build_social_motion_pack_v1.py --validate-only
+python3 tools/important_phrases/build_social_motion_pack_v1.py --render
 ```
 
 The render directory is `out/social_motion_pack_v1/`. When the host's standard
@@ -819,7 +913,7 @@ RenderingGen OAuth files are available, publish only the eighteen verified MP4s
 to the requested Drive folder with explicit opt-in:
 
 ```shell
-python3 tools/build_social_motion_pack_v1.py --upload \\
+python3 tools/important_phrases/build_social_motion_pack_v1.py --upload \\
   --drive-credentials ~/.config/velox/credentials.json \\
   --drive-token ~/.config/velox/token.json \\
   --drive-folder 1ATL0bnJXijNqFlKkgWye3PEAdAuQa1HI
@@ -835,7 +929,7 @@ grading at their edges.
 
 ### Text Depth Focus V1
 
-`tools/build_text_depth_focus_v1.py` generates eight five-second 1920×1080,
+`tools/important_phrases/build_text_depth_focus_v1.py` generates eight five-second 1920×1080,
 30 fps word-focus plans from stable semantic word spans: static editorial
 focus, continuous focus travel, near/far traversal, center-out and edges-in
 travel, duo rack focus, and a true-Z depth cascade. The first seven use the
@@ -846,10 +940,10 @@ focus-distance track, so traveling focus is baked as deterministic linear
 word-blur samples while true camera DOF is used on the static focus plane.
 
 ```shell
-python3 tools/test_text_depth_focus_v1.py
-python3 tools/build_text_depth_focus_v1.py --validate-only \\
+python3 tools/important_phrases/test_text_depth_focus_v1.py
+python3 tools/important_phrases/build_text_depth_focus_v1.py --validate-only \\
   --cli ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli
-python3 tools/build_text_depth_focus_v1.py --render-all \\
+python3 tools/important_phrases/build_text_depth_focus_v1.py --render-all \\
   --mirror-output-dir ../RenderingGen/UploadDrive/text_depth_focus_v1
 ```
 

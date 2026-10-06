@@ -16,7 +16,7 @@
 // The whip is the declared exception on gate 7 (a loud acquisition is its
 // point), not on any other gate.
 
-#include "chronontemplate/TitleCameraPack.hpp"
+#include "chronontemplate/camera_roll/TitleCameraPack.hpp"
 
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"

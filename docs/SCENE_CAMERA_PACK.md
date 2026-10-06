@@ -10,11 +10,11 @@ animano mai: l'unica cosa che si muove è la lente (contratto P0 testato).
 
 | file | ruolo |
 |---|---|
-| `include/chronontemplate/SceneCameraPack.hpp` | il vocabolario: `SceneSubject`, `SceneBeat`, `SceneCameraSequence`, le 8 transizioni |
-| `src/chronontemplate/SceneCameraPack.cpp` | il lowering: rest pose per soggetto + piani di gamba abbassati sui canali del `CameraRig` |
+| `include/chronontemplate/camera_roll/SceneCameraPack.hpp` | il vocabolario: `SceneSubject`, `SceneBeat`, `SceneCameraSequence`, le 8 transizioni |
+| `src/chronontemplate/camera_roll/SceneCameraPack.cpp` | il lowering: rest pose per soggetto + piani di gamba abbassati sui canali del `CameraRig` |
 | `tests/scene_camera_pack.cpp` | 8 gate contrattuali × 8 transizioni (131 check) |
-| `tools/dump_scene_camera_poses.cpp` | sequenze canoniche → pose per frame |
-| `tools/render_scene_camera_sequencer_v1.py` | dump → piani `chronon.render-plan.v3` → render CLI Chronon3D |
+| `tools/camera_roll/dump_scene_camera_poses.cpp` | sequenze canoniche → pose per frame |
+| `tools/camera_roll/render_scene_camera_sequencer_v1.py` | dump → piani `chronon.render-plan.v3` → render CLI Chronon3D |
 | `../../RenderingGen/UploadDrive/upload_scene_camera_sequencer_v1.sh` | pubblicazione Drive con verifica SHA-256 |
 
 ## Le otto transizioni
@@ -36,7 +36,7 @@ vertice, senza stalli né scatti. L'intensità (`0.55 subtle / 1 editorial /
 ## Come si usa
 
 ```cpp
-#include "chronontemplate/SceneCameraPack.hpp"
+#include "chronontemplate/camera_roll/SceneCameraPack.hpp"
 
 applySceneCameraSequence(scene, SceneCameraSequence{
     .beats = {{{SubjectKind::Phrase, {960.f, 540.f, 0.f}, 520.f, 110.f}, 60},
@@ -70,7 +70,7 @@ mai. Il catalogo canonico vive in `catalog/scene_camera_sequences_v1/`:
 Render di una mappa, end-to-end senza C++:
 
 ```sh
-python3 tools/render_scene_camera_sequencer_v1.py \
+python3 tools/camera_roll/render_scene_camera_sequencer_v1.py \
   --sequence-json catalog/scene_camera_sequences_v1/editorial_three.json
 ```
 
@@ -78,13 +78,13 @@ Il tool `chronontemplate_sequence_from_json <map.json>` valida fail-closed
 (schema sconosciuto, transizione sconosciuta, kind sconosciuto, meno di due
 beat, hold < 6, geometria non finita, JSON malformato → exit 1 con messaggio
 sul stderr) e emette le stesse righe del dumper. Il contratto è fissato da
-`tools/test_scene_sequence_json.py` (CTest: `chronontemplate_scene_sequence_json_contract`).
+`tools/camera_roll/test_scene_sequence_json.py` (CTest: `chronontemplate_scene_sequence_json_contract`).
 
 ## Rigenerare e pubblicare
 
 ```sh
 cmake --build --preset dev --target chronontemplate_dump_scene_camera_poses
-python3 tools/render_scene_camera_sequencer_v1.py     # piani + render
+python3 tools/camera_roll/render_scene_camera_sequencer_v1.py     # piani + render
 ctest --preset dev -R scene_camera                    # gate contrattuale
 ../RenderingGen/UploadDrive/upload_scene_camera_sequencer_v1.sh
 ```

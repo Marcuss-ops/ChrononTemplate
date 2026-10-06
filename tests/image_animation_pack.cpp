@@ -1,4 +1,4 @@
-#include "chronontemplate/ImageAnimationPack.hpp"
+#include "chronontemplate/single_images/ImageAnimationPack.hpp"
 
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"

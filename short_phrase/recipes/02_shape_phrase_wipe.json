@@ -1,0 +1,30 @@
+{
+ "id": "02_shape_phrase_wipe",
+ "theme": "light",
+ "font": "assets/fonts/Inter-Bold.ttf",
+ "size": 110,
+ "unit": "phrase",
+ "stagger": 4,
+ "enter": 10,
+ "delay": 0,
+ "easing": "out_cubic",
+ "duration": 66,
+ "out_start": 48,
+ "text": "It's really easy to manage.",
+ "from": {
+  "opacity": 0,
+  "y": 14
+ },
+ "to": {
+  "opacity": 1,
+  "y": 0
+ },
+ "exit": {
+  "mode": "forward",
+  "stagger": 0,
+  "frames": 8,
+  "to": {
+   "opacity": 0
+  }
+ }
+}

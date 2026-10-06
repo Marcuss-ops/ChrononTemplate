@@ -27,10 +27,10 @@
 #include <nlohmann/json.hpp>
 
 #include "chrononmotion/templates/Templates.hpp"
-#include "chronontemplate/Presets.hpp"
-#include "chronontemplate/ApplePhrasePack.hpp"
-#include "chronontemplate/DocumentarySnapshotPack.hpp"
-#include "chronontemplate/ImportantPhrasePack.hpp"
+#include "chronontemplate/core/Presets.hpp"
+#include "chronontemplate/important_phrases/apple/ApplePhrasePack.hpp"
+#include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
+#include "chronontemplate/important_phrases/ImportantPhrasePack.hpp"
 
 #include <cstdint>
 #include <fstream>

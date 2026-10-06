@@ -1,0 +1,81 @@
+[2026-10-05 17:02:34.790] [info] [asset-profile] kind=3 path=assets/fonts/Inter-Bold.ttf bytes=146768 cache=miss invalidated=0 stat=0.01ms hash=3.55ms hashed_bytes=146768 total=3.68ms
+[2026-10-05 17:02:34.791] [info] [asset-profile] kind=0 path=assets/images/short_phrase_dark_plate.png bytes=254840 cache=miss invalidated=0 stat=0.01ms hash=1.19ms hashed_bytes=254840 total=1.29ms
+[2026-10-05 17:02:34.791] [info] [asset-digest-cache] hits=0 misses=2 invalidations=0 bytes_hashed=401608 lookup_ms=0.00 write_ms=0.01 full_hash_ms=4.75
+[2026-10-05 17:02:34.791] [info] [plan-profile] read=0.16ms parse=0.13ms decode=7.06ms resolver=0.02ms compile_validate=5.53ms total=12.94ms
+[2026-10-05 17:02:34.792] [info] [asset-profile] kind=3 path=assets/fonts/Inter-Bold.ttf bytes=146768 cache=hit invalidated=0 stat=0.01ms hash=0.00ms hashed_bytes=0 total=0.06ms
+[2026-10-05 17:02:34.792] [info] [asset-profile] kind=0 path=assets/images/short_phrase_dark_plate.png bytes=254840 cache=hit invalidated=0 stat=0.01ms hash=0.00ms hashed_bytes=0 total=0.06ms
+[2026-10-05 17:02:34.792] [info] [asset-digest-cache] hits=2 misses=0 invalidations=0 bytes_hashed=0 lookup_ms=0.00 write_ms=0.00 full_hash_ms=0.00
+[2026-10-05 17:02:34.792] [info] [plan-compile-profile] assets=0.21ms fingerprint=0.13ms media_resolution=0.00ms materialize=0.15ms composition_compile=0.00ms compatibility_view=0.10ms total=0.77ms
+[2026-10-05 17:02:34.793] [info] [video] Auto-selecting yuv420p pipe pixel format for 1920x1080 output
+[2026-10-05 17:02:34.793] [info] [video] execution plan resolved (reason: required_gpu_native_full_graph); decode=1 composite=2 encode=1 interop=2 handoff=1 codec=3
+[2026-10-05 17:02:34.809] [info] [video-runtime] created persistent runtime for device 0 (CUDA ordinal 0)
+[2026-10-05 17:02:34.809] [info] [video] encoder feed capability: host_frame=false direct_yuv=false native_surface=true
+[2026-10-05 17:02:35.028] [info] [native_av] CUDA context contract: native=0x5639c2eaaef0 ffmpeg=0x5639c2eaaef0
+[2026-10-05 17:02:35.040] [info] [native_av] NVENC tuning applied: rc=constqp preset=slow async_depth=4 nvenc_surfaces=8 qp=18 bitrate=0
+[h264_nvenc @ 0x5639c2ec8ec0] Defined rc_lookahead requires more surfaces, increasing used surfaces 8 -> 34
+[2026-10-05 17:02:35.124] [info] [native_av] encoder bitstream contract: codec=27 profile=100 level=-99 pix_fmt=119 parameter_sets=50 materialized=true
+[2026-10-05 17:02:35.125] [info] [native_av] Opened native encoder: 1920x1080 @ 30fps, codec=h264_nvenc, rc=constqp, preset=slow, output='out/11_single_word_swap.partial.mp4'
+[2026-10-05 17:02:36.001] [info] ImageCache: loaded 'assets/images/short_phrase_dark_plate.png' (960x540) in 117.310ms
+[2026-10-05 17:02:36.072] [info] [pool-warm] Pre-allocated and pre-imported 6 execution slots (1920x1080) for native NVENC
+[2026-10-05 17:02:37.029] [info] chronon3d::vulkan text batch formats: dst_image.format=109 atlas_image.format=44 atlas_encoding=2 (shader contract: dst rgba32f, atlas rgba8)
+[2026-10-05 17:02:37.095] [info] [temp-lifetime] frame=0 after_level=0 live=[1,2,5,8,] retired=[]
+[2026-10-05 17:02:37.095] [info] [exec-level-diag] frame=0 level=0 nodes=4 input_ms=0.001 dispatch_ms=67.673 fb_release_ms=0.003
+[2026-10-05 17:02:37.095] [info] [graph-edge] frame=0 level=1 consumer_id=3 input_index=0 producer_id=2 producer_level=0
+[2026-10-05 17:02:37.095] [info] [graph-edge] frame=0 level=1 consumer_id=6 input_index=0 producer_id=5 producer_level=0
+[2026-10-05 17:02:37.095] [info] [graph-edge] frame=0 level=1 consumer_id=9 input_index=0 producer_id=8 producer_level=0
+[2026-10-05 17:02:37.099] [info] [temp-lifetime] frame=0 after_level=1 live=[1,3,6,9,] retired=[2,5,8,]
+[2026-10-05 17:02:37.099] [info] [exec-level-diag] frame=0 level=1 nodes=3 input_ms=0.036 dispatch_ms=3.935 fb_release_ms=0.011
+[2026-10-05 17:02:37.099] [info] [graph-edge] frame=0 level=2 consumer_id=4 input_index=0 producer_id=1 producer_level=0
+[2026-10-05 17:02:37.099] [info] [graph-edge] frame=0 level=2 consumer_id=4 input_index=1 producer_id=3 producer_level=1
+[2026-10-05 17:02:37.099] [info] [temp-lifetime] frame=0 after_level=2 live=[4,6,9,] retired=[1,3,]
+[2026-10-05 17:02:37.099] [info] [exec-level-diag] frame=0 level=2 nodes=1 input_ms=0.024 dispatch_ms=0.484 fb_release_ms=0.002
+[2026-10-05 17:02:37.099] [info] [graph-edge] frame=0 level=3 consumer_id=7 input_index=0 producer_id=4 producer_level=2
+[2026-10-05 17:02:37.099] [info] [graph-edge] frame=0 level=3 consumer_id=7 input_index=1 producer_id=6 producer_level=1
+[2026-10-05 17:02:37.100] [info] [temp-lifetime] frame=0 after_level=3 live=[7,9,] retired=[4,6,]
+[2026-10-05 17:02:37.100] [info] [exec-level-diag] frame=0 level=3 nodes=1 input_ms=0.011 dispatch_ms=0.442 fb_release_ms=0.002
+[2026-10-05 17:02:37.100] [info] [graph-edge] frame=0 level=4 consumer_id=10 input_index=0 producer_id=7 producer_level=3
+[2026-10-05 17:02:37.100] [info] [graph-edge] frame=0 level=4 consumer_id=10 input_index=1 producer_id=9 producer_level=1
+[2026-10-05 17:02:37.100] [info] [temp-lifetime] frame=0 after_level=4 live=[10,] retired=[7,9,]
+[2026-10-05 17:02:37.100] [info] [exec-level-diag] frame=0 level=4 nodes=1 input_ms=0.011 dispatch_ms=0.061 fb_release_ms=0.001
+[2026-10-05 17:02:37.103] [info] [video] Exporting via Arena-backed SIMD pipeline
+[2026-10-05 17:02:49.104] [error] [native_av] CUDA/Vulkan frame handoff failed: Vulkan device lost during vkWaitForFences(CUDA export slot)
+[2026-10-05 17:02:49.104] [error] [video] Exception during render loop (frame 1): GPU worker is poisoned after a terminal device-loss failure
+[2026-10-05 17:02:49.104] [info] [video] writer join complete
+[2026-10-05 17:02:49.104] [info] [drain-debug] start drain, capacity=6
+[2026-10-05 17:02:49.104] [info] [drain-debug] slot_id=0 has completion, waiting
+[2026-10-05 17:02:49.104] [info] [drain-debug] slot_id=0 wait complete
+[2026-10-05 17:02:49.104] [info] [drain-debug] reap done, busy_count=0
+[2026-10-05 17:02:49.104] [info] [video] trimming framebuffer pool
+[2026-10-05 17:02:49.104] [info] [video] Released framebuffer pool — memory trimmed
+[2026-10-05 17:02:49.104] [info] [video] frame-loop cleanup complete
+[2026-10-05 17:02:49.105] [info] [video] Encoder write blocked duration: 0.00 ms
+[2026-10-05 17:02:49.105] [info] [video_diag] conversion_and_copy_duration_ms: 0 ms
+[2026-10-05 17:02:49.105] [info] [video_diag] conversion_bytes_written=0 encoder_staging_copy_bytes=0 encoder_slot_reuses=0
+[2026-10-05 17:02:49.105] [info] [native_av] close: sending encoder flush
+[2026-10-05 17:02:49.105] [info] [native_av] close: encoder flush accepted
+[2026-10-05 17:02:49.105] [info] [native_av] close: packets drained=true
+[2026-10-05 17:02:49.105] [info] [native_av] close: finalizing mux session
+[2026-10-05 17:02:49.105] [info] [native_av] close: mux session finalized
+[2026-10-05 17:02:49.105] [info] [native_av] Closed native encoder — 0 frames accepted, encoder_packets=0 mux_packets=0 packet_pts=-1..-1, YUV cache: 0 hits / 0 misses
+[2026-10-05 17:02:49.105] [info] [video_native] convert=0.00ms  send_frame=0.00ms  backpressure=0.00ms  flush=0.28ms  receive_packet=0.00ms  mux_write=0.00ms  trailer=0.16ms
+[2026-10-05 17:02:49.105] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.105] [error] [vulkan] native submission drain failed: Vulkan device lost during vkWaitForFences(frame batch slot)
+[2026-10-05 17:02:49.105] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.105] [error] [vulkan] transient cleanup failed: Vulkan device lost during vkWaitForFences(frame batch slot)
+[2026-10-05 17:02:49.105] [info] [video] render_ms=13006.72 encode_ms=0.75 writer_encode_ms=0.00 wall_ms=14312.40 nvml_stop_ms=0.16
+[2026-10-05 17:02:49.105] [info] [video] FFmpeg queue wait duration: 0.00 ms
+[2026-10-05 17:02:49.105] [error] [video] Export incomplete: cancelled=false render_failed=false writer_error=true exception=true
+[2026-10-05 17:02:49.105] [info] [startup-profile] total=931.84ms logger=0.04ms cli_bootstrap=2.92ms cli_parse=0.00ms composition=0.14ms plan_read=0.16ms json_parse=0.13ms plan_decode_validate=7.06ms asset_resolve=0.02ms plan_compile=5.53ms other=0.00ms
+[2026-10-05 17:02:49.107] [info] [video] Wrote exact per-frame timing sidecar: out/11_single_word_swap.mp4.timing.json
+[2026-10-05 17:02:49.196] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.196] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.196] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.196] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.196] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.196] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.196] [info] [INFO] job-lifecycle: slot_pool_close_ms=0.0 surface_release_ms=0.3
+[2026-10-05 17:02:49.215] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.216] [error] [vulkan] DEVICE LOST REPORT phase=wait_for_pending slot=0 in_flight_slots=[1,0,0,0,0,0] pending_timeline=0
+[2026-10-05 17:02:49.334] [info] [INFO] job-lifecycle: queue_close_ms=0.0 writer_join_ms=0.0 encoder_reset_ms=88.9 decoder_reset_ms=0.0 full_graph_reset_ms=137.5 sink_ctx_reset_ms=0.0 device_runtime_reset_ms=0.0 device_reservation_reset_ms=0.0
+[2026-10-05 17:02:49.334] [info] [INFO] job-lifecycle: sidecar_write_ms=1.7 session_teardown_ms=226.7
+[2026-10-05 17:02:49.343] [error] Render plan job failed: EncoderFailed: video encoder failed for composition 'short_phrase_11_single_word_swap' using codec 'h264' output 'out/11_single_word_swap.mp4'

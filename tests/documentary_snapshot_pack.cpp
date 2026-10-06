@@ -1,4 +1,4 @@
-#include "chronontemplate/DocumentarySnapshotPack.hpp"
+#include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
 
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"

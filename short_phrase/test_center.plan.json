@@ -1,0 +1,63 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "test_text_centering",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 30
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "image",
+      "asset": "assets/images/short_phrase_dark.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 30
+    },
+    {
+      "id": "phrase",
+      "type": "text",
+      "text": "Good text design is invisible\nbad text design is unforgettable",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        960,
+        540
+      ],
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 84,
+        "fill": "#FFFFFF",
+        "stroke": {
+          "color": "#000000",
+          "width": 0
+        },
+        "glow": {
+          "radius": 0,
+          "intensity": 0,
+          "color": "#000000"
+        }
+      },
+      "start_frame": 0,
+      "duration_frames": 30
+    }
+  ],
+  "output": {
+    "path": "test_center.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

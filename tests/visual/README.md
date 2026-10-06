@@ -15,7 +15,7 @@ raw bytes before H.264 encoding.
 Rebuild videos, checkpoints and CPU/Vulkan Bloom evidence with:
 
 ```sh
-python3 ChrononTemplate/tools/render_premium_fx_canaries_5s.py \
+python3 ChrononTemplate/tools/backgrounds/render_premium_fx_canaries_5s.py \
   --render --frames --cpu-vulkan
 ```
 

@@ -1,0 +1,35 @@
+{
+ "id": "01_scale_settle_word",
+ "theme": "dark",
+ "font": "assets/fonts/Inter-Bold.ttf",
+ "size": 190,
+ "unit": "phrase",
+ "stagger": 4,
+ "enter": 10,
+ "delay": 0,
+ "easing": "expo_out",
+ "duration": 54,
+ "out_start": 40,
+ "text": "Clean",
+ "from": {
+  "scale": 1.32,
+  "opacity": 0.25,
+  "blur": 7,
+  "gray": 1
+ },
+ "to": {
+  "scale": 1,
+  "opacity": 1,
+  "blur": 0,
+  "gray": 0
+ },
+ "exit": {
+  "mode": "forward",
+  "stagger": 0,
+  "frames": 8,
+  "to": {
+   "opacity": 0,
+   "scale": 0.97
+  }
+ }
+}

@@ -1,0 +1,35 @@
+{
+ "id": "12_character_write_on",
+ "theme": "dark",
+ "font": "assets/fonts/DMSans-Bold.ttf",
+ "size": 124,
+ "unit": "glyph",
+ "stagger": 1.4,
+ "enter": 9,
+ "delay": 0,
+ "easing": "out_cubic",
+ "duration": 72,
+ "out_start": 50,
+ "text": "Thanks for watching!",
+ "from": {
+  "opacity": 0,
+  "gray": 1
+ },
+ "to": {
+  "opacity": 1,
+  "gray": 0
+ },
+ "color": {
+  "tint": "blue",
+  "settle": 8,
+  "hold": 0
+ },
+ "exit": {
+  "mode": "forward",
+  "stagger": 1.2,
+  "frames": 6,
+  "to": {
+   "opacity": 0
+  }
+ }
+}

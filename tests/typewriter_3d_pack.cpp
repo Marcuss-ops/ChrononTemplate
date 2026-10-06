@@ -1,4 +1,4 @@
-#include "chronontemplate/Typewriter3DPhrasePack.hpp"
+#include "chronontemplate/important_phrases/typewriter_3d/Typewriter3DPhrasePack.hpp"
 
 #include "motion_check.hpp"
 

@@ -20,7 +20,7 @@
 // The grammar under test: frase → immagine → testo, three stacchi joined by
 // camera travel, on a fixed canary sequence only the transition id changes.
 
-#include "chronontemplate/SceneCameraPack.hpp"
+#include "chronontemplate/camera_roll/SceneCameraPack.hpp"
 
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"

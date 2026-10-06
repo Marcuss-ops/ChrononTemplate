@@ -1,4 +1,4 @@
-#include "chronontemplate/ClassicPhrasePack.hpp"
+#include "chronontemplate/important_phrases/classic/ClassicPhrasePack.hpp"
 
 #include "motion_check.hpp"
 

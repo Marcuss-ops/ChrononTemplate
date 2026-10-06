@@ -1,0 +1,228 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "short_phrase_02_shape_phrase_wipe",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 66
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "image",
+      "asset": "assets/images/short_phrase_light_plate.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 66
+    },
+    {
+      "id": "phrase",
+      "type": "text",
+      "text": "It's really easy to manage.",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        960,
+        540
+      ],
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 76,
+        "fill": "#080808",
+        "stroke": {
+          "color": "#000000",
+          "width": 0
+        },
+        "glow": {
+          "radius": 0,
+          "intensity": 0,
+          "color": "#000000"
+        }
+      },
+      "start_frame": 0,
+      "duration_frames": 66,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 10,
+                "value": 0.0
+              },
+              {
+                "frame": 18,
+                "value": 1.0
+              },
+              {
+                "frame": 52,
+                "value": 1.0
+              },
+              {
+                "frame": 62,
+                "value": 0.0
+              }
+            ],
+            "easing": "linear"
+          }
+        ]
+      }
+    },
+    {
+      "id": "star_wipe",
+      "type": "image",
+      "asset": "assets/images/star_bumper_white.png",
+      "size": [
+        600,
+        600
+      ],
+      "position": [
+        960,
+        540
+      ],
+      "start_frame": 0,
+      "duration_frames": 66,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  160.0,
+                  -60.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 18,
+                "value": [
+                  -40.0,
+                  -20.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 36,
+                "value": [
+                  -240.0,
+                  10.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 54,
+                "value": [
+                  -420.0,
+                  40.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 64,
+                "value": [
+                  -600.0,
+                  60.0,
+                  0.0
+                ]
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.25
+              },
+              {
+                "frame": 20,
+                "value": 1.1
+              },
+              {
+                "frame": 48,
+                "value": 0.95
+              },
+              {
+                "frame": 64,
+                "value": 0.7
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "rotation",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 24,
+                "value": [
+                  0.0,
+                  0.0,
+                  45.0
+                ]
+              },
+              {
+                "frame": 64,
+                "value": [
+                  0.0,
+                  0.0,
+                  110.0
+                ]
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.95
+              },
+              {
+                "frame": 48,
+                "value": 0.95
+              },
+              {
+                "frame": 64,
+                "value": 0.0
+              }
+            ],
+            "easing": "linear"
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "short_phrase_02_shape_phrase_wipe.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}
