@@ -25786,6 +25786,42 @@
         "implementation": "OpacityPlate"
       },
       {
+        "id": "transition_barn_doors",
+        "timing_class": "legacy",
+        "minimum_frames": 2,
+        "maximum_frames": 0,
+        "recommended_frames": 24,
+        "weight_percent": 0,
+        "implementation": "ShapePlateDoors"
+      },
+      {
+        "id": "transition_curtain_lift",
+        "timing_class": "legacy",
+        "minimum_frames": 2,
+        "maximum_frames": 0,
+        "recommended_frames": 24,
+        "weight_percent": 0,
+        "implementation": "ShapePlateDoors"
+      },
+      {
+        "id": "transition_diamond_iris",
+        "timing_class": "legacy",
+        "minimum_frames": 2,
+        "maximum_frames": 0,
+        "recommended_frames": 24,
+        "weight_percent": 0,
+        "implementation": "ShapePolygonIris"
+      },
+      {
+        "id": "transition_four_way_doors",
+        "timing_class": "legacy",
+        "minimum_frames": 2,
+        "maximum_frames": 0,
+        "recommended_frames": 24,
+        "weight_percent": 0,
+        "implementation": "ShapePlateDoors"
+      },
+      {
         "id": "lightleak_flash_sweep",
         "timing_class": "normal",
         "minimum_frames": 6,

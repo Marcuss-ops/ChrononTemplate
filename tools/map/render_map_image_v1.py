@@ -42,7 +42,7 @@ def main():
                             '--output',str(renders/f'{motion_id}.mp4'),'--backend','vulkan',
                             '--gpu-hot-path-mode','require_gpu_native','--hardware','nvenc',
                             '--encoder-backend','native','--fps',str(FPS),'--rate-control','qp',
-                            '--qp','20','--encode-preset','p5','--log-level','error'],check=True)
+                            '--qp','20','--encode-preset','p1','--log-level','error'],check=True)
     manifest={'family':'map_image_v1','canvas':{'width':W,'height':H,'fps':FPS,'duration_seconds':FRAMES/FPS},
               'animations':[{'id':f'map_image_{slug}_{SUFFIX[slug]}','name':name,'plan':f'plans/map_image_{slug}_{SUFFIX[slug]}.plan.json',
                              'video':f'renders/map_image_{slug}_{SUFFIX[slug]}.mp4','reference':f'assets/map_animation_refs/ref_{i:02d}.png'}

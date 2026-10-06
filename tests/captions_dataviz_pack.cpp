@@ -225,6 +225,55 @@ namespace {
         check(threw, "an out-of-range highlight index is rejected");
     }
 
+    void theLineChartWalksLeftToRightAndLandsOnThePeak() {
+        section("the step-line chart walks left-to-right and lands on the peak");
+        FakeContentHost host;
+        TemplateScene scene("line", 30.f, host, 1920.f, 1080.f);
+
+        DataVizSpec spec;
+        spec.values = {0.4f, 1.f, 0.7f, 0.2f};
+        spec.labels = {"nord", "centro", "sud", "isole"};
+        spec.highlightIndex = 1;
+        spec.title = "Vendite";
+        spec.inFrame = 10;
+        spec.duration = 120;
+        const DataVizLineComposition line = addDataVizLineChart(scene, spec);
+
+        check(line.dots.size() == 4, "one dot per value");
+        check(line.runs.size() == 3, "one run between consecutive values");
+        check(line.valueLabels.size() == 4, "one label per value");
+        check(line.title != nullptr, "the title is authored");
+        check(line.peakFrame == 70, "the trace lands halfway through the duration");
+        check(scene.validate().empty(), "the line scene validates");
+
+        const FrameSubmission landed = scene.submit(70);
+        check(findLayer(landed, line.dots[3]->id()) != nullptr,
+              "the last dot is bound on the peak frame");
+        check(findLayer(landed, line.valueLabels[3]->id()) != nullptr,
+              "the last label appears exactly when its dot lands");
+
+        const FrameSubmission a = scene.submit(40);
+        const FrameSubmission b = scene.submit(40);
+        bool identical = true;
+        for (std::size_t i = 0; i < a.layers.size() && identical; ++i) {
+            const auto& ma = a.layers[i].transform.world.elements;
+            const auto& mb = b.layers[i].transform.world.elements;
+            for (std::size_t k = 0; k < ma.size(); ++k) {
+                if (ma[k] != mb[k]) identical = false;
+            }
+        }
+        check(identical, "line evaluation is a pure function of (scene, frame)");
+
+        DataVizSpec empty;
+        bool threw = false;
+        try {
+            (void) addDataVizLineChart(scene, empty);
+        } catch (const std::invalid_argument&) {
+            threw = true;
+        }
+        check(threw, "an empty value list is rejected");
+    }
+
 }// namespace
 
 int main() {
@@ -234,5 +283,6 @@ int main() {
     captionsRejectAMismatchedLineCount();
     theChartGrowsStaggeredAndLandsOnThePeak();
     theChartRejectsBadData();
+    theLineChartWalksLeftToRightAndLandsOnThePeak();
     return chrononmotion_test::report();
 }

@@ -153,8 +153,8 @@ namespace {
                       "mesh fields lower as native radial-gradient ellipses");
             }
             if (look == BackgroundLook::Particles) {
-                check(built.accents.size() == 100,
-                      "Particles creates its default quantity of one hundred native dots");
+                check(built.accents.size() == 96,
+                      "Particles creates its default quantity of ninety-six native dots");
             }
             if (look == BackgroundLook::Aurora || look == BackgroundLook::DarkVeil ||
                 look == BackgroundLook::GradientWaves || look == BackgroundLook::Grainient ||
