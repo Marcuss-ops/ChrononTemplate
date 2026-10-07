@@ -386,6 +386,7 @@
     },
     {
       "id": "blur_focus_in",
+      "targets": ["caption"],
       "unit": "glyph",
       "enter": 72,
       "text_animators": [
@@ -2377,6 +2378,7 @@
     },
     {
       "id": "center_expansion",
+      "targets": ["caption"],
       "unit": "glyph",
       "enter": 72,
       "tracks": [
@@ -2472,6 +2474,7 @@
     },
     {
       "id": "char_wave",
+      "targets": ["caption"],
       "unit": "glyph",
       "enter": 72,
       "tracks": [
@@ -2546,6 +2549,7 @@
     },
     {
       "id": "character_cascade",
+      "targets": ["caption"],
       "unit": "glyph",
       "enter": 72,
       "tracks": [
@@ -5603,6 +5607,7 @@
     },
     {
       "id": "image_card_push",
+      "targets": ["image"],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -6314,6 +6319,7 @@
     },
     {
       "id": "image_diagonal_sweep",
+      "targets": ["image"],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -6489,6 +6495,10 @@
     {
       "id": "image_fade_reveal",
       "category": "overlay_v3_image",
+      "targets": [
+        "image",
+        "map_view"
+      ],
       "unit": "layer",
       "enter": 60,
       "tracks": [
@@ -6746,6 +6756,10 @@
     {
       "id": "image_focus_reveal",
       "category": "overlay_v3_image",
+      "targets": [
+        "image",
+        "map_view"
+      ],
       "unit": "layer",
       "enter": 60,
       "tracks": [
@@ -7531,6 +7545,7 @@
     },
     {
       "id": "image_parallax_depth_reveal",
+      "targets": ["image"],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -8067,6 +8082,10 @@
     {
       "id": "image_scale_reveal",
       "category": "overlay_v3_image",
+      "targets": [
+        "image",
+        "map_view"
+      ],
       "unit": "layer",
       "enter": 60,
       "tracks": [
@@ -8104,6 +8123,7 @@
     },
     {
       "id": "image_slide_left_reveal",
+      "targets": ["image"],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -8142,6 +8162,7 @@
     },
     {
       "id": "image_slide_right_reveal",
+      "targets": ["image"],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -8181,6 +8202,10 @@
     {
       "id": "image_soft_focus_reveal",
       "category": "overlay_v3_image",
+      "targets": [
+        "image",
+        "map_view"
+      ],
       "unit": "layer",
       "enter": 60,
       "tracks": [
@@ -8925,6 +8950,7 @@
     },
     {
       "id": "image_tilt_settle",
+      "targets": ["image"],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -11466,7 +11492,7 @@
       "id": "map_image_australia_sunset_drift",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 60,
@@ -11519,7 +11545,7 @@
       "id": "map_image_brazil_glow_reveal",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 54,
@@ -11572,7 +11598,7 @@
       "id": "map_image_china_slow_reveal",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 64,
@@ -11625,7 +11651,7 @@
       "id": "map_image_gujarat_detail_push",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 46,
@@ -11678,7 +11704,7 @@
       "id": "map_image_india_contour_draw",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 52,
@@ -11731,7 +11757,7 @@
       "id": "map_image_iran_gold_focus",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 56,
@@ -11784,7 +11810,7 @@
       "id": "map_image_italy_beacon_arrival",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 58,
@@ -11837,7 +11863,7 @@
       "id": "map_image_korea_pin_focus",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 44,
@@ -11890,7 +11916,7 @@
       "id": "map_image_nigeria_neon_bloom",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 50,
@@ -11943,7 +11969,7 @@
       "id": "map_image_usa_sweep_in",
       "category": "map_image_v1",
       "targets": [
-        "image"
+        "map_view"
       ],
       "unit": "layer",
       "enter": 48,
@@ -12364,6 +12390,7 @@
     },
     {
       "id": "opacity_wave",
+      "targets": ["caption"],
       "unit": "word",
       "enter": 72,
       "tracks": [
@@ -16961,6 +16988,7 @@
     },
     {
       "id": "scale_wave",
+      "targets": ["caption"],
       "unit": "glyph",
       "enter": 72,
       "text_animators": [
@@ -19180,6 +19208,7 @@
     },
     {
       "id": "tracking_collapse",
+      "targets": ["caption"],
       "unit": "word",
       "enter": 72,
       "text_animators": [
@@ -19225,6 +19254,7 @@
     },
     {
       "id": "tracking_expansion",
+      "targets": ["caption"],
       "unit": "word",
       "enter": 72,
       "text_animators": [
@@ -20120,6 +20150,8 @@
     },
     {
       "id": "typewriter_blur_focus",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20171,6 +20203,8 @@
     },
     {
       "id": "typewriter_clean",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20204,6 +20238,8 @@
     },
     {
       "id": "typewriter_glitch",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20277,6 +20313,8 @@
     },
     {
       "id": "typewriter_lift",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20328,6 +20366,8 @@
     },
     {
       "id": "typewriter_neon",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20393,6 +20433,8 @@
     },
     {
       "id": "typewriter_pop",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20462,6 +20504,8 @@
     },
     {
       "id": "typewriter_scale_up",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20513,6 +20557,8 @@
     },
     {
       "id": "typewriter_slide_in",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20564,6 +20610,8 @@
     },
     {
       "id": "typewriter_soft_lift",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20625,6 +20673,8 @@
     },
     {
       "id": "typewriter_tracking",
+      "category": "typewriter",
+      "targets": ["text"],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -24329,6 +24379,7 @@
     },
     {
       "id": "word_reveal",
+      "targets": ["caption"],
       "unit": "word",
       "enter": 72,
       "tracks": [
@@ -24409,6 +24460,7 @@
     },
     {
       "id": "typewriter_modern_01_monospace_block_cursor",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24481,6 +24533,7 @@
     },
     {
       "id": "typewriter_modern_02_kinetic_scramble",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24553,6 +24606,7 @@
     },
     {
       "id": "typewriter_modern_03_soft_opacity_ramp",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24625,6 +24679,7 @@
     },
     {
       "id": "typewriter_modern_04_character_bounce",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24697,6 +24752,7 @@
     },
     {
       "id": "typewriter_modern_05_backspace_correction",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24769,6 +24825,7 @@
     },
     {
       "id": "typewriter_modern_06_glow_beam_sweep",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24841,6 +24898,7 @@
     },
     {
       "id": "typewriter_modern_07_word_snap",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24913,6 +24971,7 @@
     },
     {
       "id": "typewriter_modern_08_mechanical_y_shift",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24985,6 +25044,7 @@
     },
     {
       "id": "typewriter_modern_09_highlighter_expansion",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25057,6 +25117,7 @@
     },
     {
       "id": "typewriter_modern_10_weight_ramp",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25129,6 +25190,7 @@
     },
     {
       "id": "typewriter_modern_11_dynamic_auto_wrap",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25201,6 +25263,7 @@
     },
     {
       "id": "typewriter_modern_12_glitch_pop",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25273,6 +25336,7 @@
     },
     {
       "id": "typewriter_modern_13_elastic_leading_cursor",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25345,6 +25409,7 @@
     },
     {
       "id": "typewriter_modern_14_focal_blur_dissolve",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25417,6 +25482,7 @@
     },
     {
       "id": "typewriter_modern_15_paper_punch_stencil",
+      "targets": ["text", "short_phrase"],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,

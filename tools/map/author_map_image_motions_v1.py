@@ -12,7 +12,7 @@ def t(prop, keys, easing="in_out_sine"):
 
 def motion(name, enter, scale, opacity, extra=()):
     tracks = [t("scale", scale), t("opacity", opacity, "linear"), *extra]
-    return {"id": f"map_image_{name}", "category": "map_image_v1", "targets": ["image"],
+    return {"id": f"map_image_{name}", "category": "map_image_v1", "targets": ["map_view"],
             "unit": "layer", "enter": enter, "exit": 14, "tracks": tracks,
             "duration_bounds": {"minimum_frames": 48, "maximum_frames": 240}, "render_safe": True}
 

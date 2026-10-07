@@ -82,6 +82,10 @@
       "id": "short_phrase_scale_settle_word",
       "family": "classic",
       "subcategory": "word_sequence",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Scale Settle",
       "phrase": "Clean",
       "enter": 90,
@@ -188,6 +192,10 @@
       "id": "short_phrase_shape_phrase_wipe",
       "family": "classic",
       "subcategory": "shape_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Shape Phrase Wipe",
       "phrase": "It's really easy to manage.",
       "enter": 90,
@@ -258,6 +266,10 @@
       "id": "short_phrase_semantic_two_line",
       "family": "classic",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Semantic Two Line",
       "phrase": "Good design\nfeels invisible",
       "enter": 90,
@@ -330,6 +342,10 @@
       "id": "short_phrase_phrase_build_focus",
       "family": "classic",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Phrase Build Focus",
       "phrase": "Will make your video",
       "enter": 90,
@@ -413,6 +429,10 @@
       "id": "short_phrase_character_tracking_reveal",
       "family": "classic",
       "subcategory": "letter_by_letter_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Character Tracking Reveal",
       "phrase": "more expensive",
       "enter": 90,
@@ -496,6 +516,10 @@
       "id": "short_phrase_word_mask_sequence",
       "family": "classic",
       "subcategory": "word_sequence",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Word Mask Sequence",
       "phrase": "leave your message",
       "enter": 90,
@@ -569,6 +593,10 @@
       "id": "short_phrase_character_cascade_shapes",
       "family": "classic",
       "subcategory": "letter_by_letter_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Character Cascade Shapes",
       "phrase": "Really smooth.",
       "enter": 90,
@@ -624,6 +652,10 @@
       "id": "short_phrase_word_cascade_sentence",
       "family": "classic",
       "subcategory": "word_sequence",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Word Cascade Sentence",
       "phrase": "Clean. Simple. Attractive.",
       "enter": 90,
@@ -707,6 +739,10 @@
       "id": "short_phrase_semantic_chain_curve",
       "family": "classic",
       "subcategory": "depth_and_space",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Semantic Chain Curve",
       "phrase": "we draw focus",
       "enter": 90,
@@ -792,6 +828,10 @@
       "id": "short_phrase_simple_progressive_phrase",
       "family": "classic",
       "subcategory": "word_sequence",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Simple Progressive Phrase",
       "phrase": "Just what I needed",
       "enter": 90,
@@ -861,6 +901,10 @@
       "id": "short_phrase_single_word_swap",
       "family": "classic",
       "subcategory": "word_sequence",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Single Word Swap",
       "phrase": "Intro style animation",
       "enter": 90,
@@ -932,6 +976,10 @@
       "id": "short_phrase_character_write_on",
       "family": "classic",
       "subcategory": "letter_by_letter_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Character Write On",
       "phrase": "Thanks for watching!",
       "enter": 90,
@@ -1001,6 +1049,10 @@
       "id": "short_phrase_editorial_baseline_rise",
       "family": "editorial",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Word Snap",
       "phrase": "Le idee prendono forma",
       "enter": 90,
@@ -1137,6 +1189,10 @@
       "id": "short_phrase_editorial_side_glide",
       "family": "editorial",
       "subcategory": "depth_and_space",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Split Slide",
       "phrase": "Il dettaglio fa la differenza",
       "enter": 90,
@@ -1277,6 +1333,10 @@
       "id": "short_phrase_editorial_tracking_close",
       "family": "editorial",
       "subcategory": "typographic_motion",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Type Bloom",
       "phrase": "Meno rumore. Più significato.",
       "enter": 90,
@@ -1415,6 +1475,10 @@
       "id": "short_phrase_editorial_focus_resolve",
       "family": "editorial",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Focus Lock",
       "phrase": "Un nuovo punto di vista",
       "enter": 90,
@@ -1553,6 +1617,10 @@
       "id": "short_phrase_editorial_underline_draw",
       "family": "editorial",
       "subcategory": "light_and_accent",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Accent Sweep",
       "phrase": "Semplice. Non banale.",
       "enter": 90,
@@ -1751,6 +1819,10 @@
       "id": "short_phrase_editorial_rule_handoff",
       "family": "editorial",
       "subcategory": "light_and_accent",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Color Flip",
       "phrase": "Dalle idee ai risultati",
       "enter": 90,
@@ -1929,6 +2001,10 @@
       "id": "short_phrase_editorial_glyph_curtain",
       "family": "editorial",
       "subcategory": "letter_by_letter_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Mask Reveal",
       "phrase": "Lascia parlare le immagini",
       "enter": 90,
@@ -2077,6 +2153,10 @@
       "id": "short_phrase_editorial_contrast_sweep",
       "family": "editorial",
       "subcategory": "typographic_motion",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Word Highlight",
       "phrase": "La chiarezza cambia tutto",
       "enter": 90,
@@ -2246,6 +2326,9 @@
       "id": "short_phrase_editorial_quiet_zoom",
       "family": "editorial",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase"
+      ],
       "title": "Pop Settle",
       "phrase": "Guarda oltre",
       "enter": 90,
@@ -2344,6 +2427,10 @@
       "id": "short_phrase_editorial_lift_and_rule",
       "family": "editorial",
       "subcategory": "light_and_accent",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Float Stack",
       "phrase": "Una storia da ricordare",
       "enter": 90,
@@ -2536,6 +2623,10 @@
       "id": "short_phrase_product_blur_out_up",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Blur Out Up",
       "phrase": "Words leave softly",
       "enter": 90,
@@ -2666,6 +2757,10 @@
       "id": "short_phrase_product_bottom_up_letters",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Bottom Up Letters",
       "phrase": "Build the moment",
       "enter": 90,
@@ -2796,6 +2891,10 @@
       "id": "short_phrase_product_focus_blur_resolve",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Focus Blur Resolve",
       "phrase": "Crystal clear",
       "enter": 90,
@@ -2926,6 +3025,9 @@
       "id": "short_phrase_product_kinetic_center_build",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase"
+      ],
       "title": "Kinetic Center Build",
       "phrase": "Words push left.",
       "enter": 90,
@@ -3144,6 +3246,10 @@
       "id": "short_phrase_product_line_by_line_slide",
       "family": "product_video",
       "subcategory": "word_sequence",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Line By Line Slide",
       "phrase": "Design fast\nRender clean\nShip loud",
       "enter": 90,
@@ -3274,6 +3380,10 @@
       "id": "short_phrase_product_per_word_rise",
       "family": "product_video",
       "subcategory": "word_sequence",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Per Word Rise",
       "phrase": "WORDS IN MOTION",
       "enter": 40,
@@ -3574,6 +3684,9 @@
       "id": "short_phrase_product_perspective_marquee",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase"
+      ],
       "title": "Perspective Marquee",
       "phrase": "COMPONENTS PRIMITIVES TRANSITIONS AGENTS",
       "enter": 96,
@@ -3642,6 +3755,9 @@
       "id": "short_phrase_product_scan_band",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase"
+      ],
       "title": "Scan Band",
       "phrase": "HYPERFRAMES",
       "enter": 106,
@@ -3755,6 +3871,9 @@
       "id": "short_phrase_product_scramble_reveal",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase"
+      ],
       "title": "Scramble Reveal",
       "phrase": "HYPERFRAMES",
       "enter": 90,
@@ -4255,6 +4374,9 @@
       "id": "short_phrase_product_strikethrough_replace",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase"
+      ],
       "title": "Strikethrough Replace",
       "phrase": "Everyone promised you AI.",
       "enter": 132,
@@ -4448,6 +4570,9 @@
       "id": "short_phrase_product_text_match_cut",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase"
+      ],
       "title": "Text Match Cut",
       "phrase": "Basic Interface Behavior",
       "enter": 90,
@@ -4599,6 +4724,10 @@
       "id": "short_phrase_product_text_shimmer",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Text Shimmer",
       "phrase": "Effortless",
       "enter": 42,
@@ -4689,6 +4818,10 @@
       "id": "short_phrase_product_weight_wave",
       "family": "product_video",
       "subcategory": "letter_by_letter_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Weight Wave",
       "phrase": "WEIGHT IN MOTION",
       "enter": 90,
@@ -4831,6 +4964,10 @@
       "id": "short_phrase_product_chromatic_fringe_title",
       "family": "product_video",
       "subcategory": "computer_character_assembly",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Chromatic Fringe Title",
       "phrase": "yt-prism",
       "enter": 90,
@@ -5144,6 +5281,10 @@
       "id": "short_phrase_product_masked_heading",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Masked Heading",
       "phrase": "DETAILS DEFINE DESIGN",
       "enter": 90,
@@ -5252,6 +5393,7 @@
       "id": "short_phrase_product_split_flap_text",
       "family": "product_video",
       "subcategory": "word_sequence",
+      "targets": null,
       "title": "Split Flap Text",
       "phrase": "SIGNAL LIVE",
       "enter": 90,
@@ -5390,6 +5532,7 @@
       "id": "short_phrase_product_warp_text",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": null,
       "title": "Warp Text",
       "phrase": "BEND THE MOMENT",
       "enter": 90,
@@ -5532,6 +5675,9 @@
       "id": "short_phrase_product_fold_text",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase"
+      ],
       "title": "Fold Text",
       "phrase": "UNFOLD",
       "enter": 90,
@@ -5630,6 +5776,9 @@
       "id": "short_phrase_product_decrypted_text",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase"
+      ],
       "title": "Decrypted Text",
       "phrase": "DECODE THE SIGNAL",
       "enter": 90,
@@ -6054,6 +6203,10 @@
       "id": "short_phrase_product_scroll_reveal",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Scroll Reveal",
       "phrase": "WORDS EMERGE WITH CLARITY",
       "enter": 90,
@@ -6206,6 +6359,10 @@
       "id": "short_phrase_product_scrambled_text",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Scrambled Text",
       "phrase": "THE MESSAGE RESOLVES",
       "enter": 90,
@@ -6314,6 +6471,10 @@
       "id": "short_phrase_product_glare_hover",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Glare Hover",
       "phrase": "LIGHT IN MOTION",
       "enter": 90,
@@ -6468,6 +6629,10 @@
       "id": "short_phrase_product_glow_cursor",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Glow Cursor",
       "phrase": "FOLLOW THE LIGHT",
       "enter": 90,
@@ -6708,6 +6873,10 @@
       "id": "short_phrase_product_gradual_blur",
       "family": "product_video",
       "subcategory": "kinetic_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Gradual Blur",
       "phrase": "A SOFTER ARRIVAL",
       "enter": 90,
@@ -6862,6 +7031,10 @@
       "id": "short_phrase_product_shape_blur",
       "family": "product_video",
       "subcategory": "shape_reveal",
+      "targets": [
+        "short_phrase",
+        "caption"
+      ],
       "title": "Shape Blur",
       "phrase": "SHAPE FINDS FOCUS",
       "enter": 90,

@@ -49,6 +49,47 @@ WIDTH = 1920
 HEIGHT = 1080
 FPS = 30
 FRAMES = 120  # 4.0 seconds per background loop/drift
+DEMO_FRAMES = 150  # Five-second, 30fps previews; the optical master plates stay fixed.
+DEMO_TRANSITIONS = {
+    "transition_diagonal_sweep": ("cinematic_back_04", 0),
+    "transition_double_beam": ("cinematic_back_07", 1),
+    "transition_anamorphic_flare": ("cinematic_back_15", 2),
+    "transition_light_fan": ("cinematic_back_16", 3),
+    "transition_radial_sunburst": ("cinematic_back_05", 0),
+    "transition_offcenter_sunburst": ("cinematic_back_09", 1),
+    "transition_multi_ray_burst": ("cinematic_back_11", 2),
+    "transition_warm_edge_bloom": ("cinematic_back_20", 3),
+    "transition_diagonal_sweep_drift": ("cinematic_back_04", 1),
+    "transition_double_beam_drift": ("cinematic_back_07", 2),
+    "transition_anamorphic_flare_drift": ("cinematic_back_15", 3),
+    "transition_light_fan_drift": ("cinematic_back_16", 0),
+    "transition_radial_sunburst_drift": ("cinematic_back_05", 1),
+    "transition_warm_edge_bloom_drift": ("cinematic_back_20", 2),
+}
+DEMO_TARGET_FOLDER = "19hP526NAFlu7rLbKjHqcGHi1MT7q_wtA"
+DEMO_OUT_DIR = BASE_DIR / "ChrononTemplate/out/light_beam_transition_demos_v2"
+DEMO_CREDS = BASE_DIR / "RenderingGen/UploadDrive/credentials.json"
+DEMO_TOKEN = BASE_DIR / "RenderingGen/UploadDrive/token.json"
+DEMO_DRIVE_UPLOAD = BASE_DIR / "RenderingGen/bin/drive-upload"
+
+# Previous upload receipts: IDs and names from the exact demo batch being replaced.
+# Cleanup refuses to delete anything outside the requested folder or with a different name.
+REPLACED_DRIVE_FILES = {
+    "1R7B027BZHlkTM4Lg6kuujm4D7pqAuaPf": "film_burn_rgb.mp4",
+    "1Qz6yBtT5tXQLi4eFJw_450RnHPAOKE31": "lightleak_amber_iris.mp4",
+    "1QSKUdonkUHROlOfYrwNhggfT9C4CSKNx": "lightleak_crossflare.mp4",
+    "1tB60iTc3Jo1y62IO_eNJ3zP5YJBq1vqZ": "lightleak_diagonal_double_sweep.mp4",
+    "1hOTzP5zbFZIlJlU40w4cTHuuMJKFIo7a": "lightleak_prism_burst.mp4",
+    "1xCZBLXzNOVz3RNaA__BDYDI67G_nNCgc": "lightleak_rgb_combo.mp4",
+    "1QsYqcgCmSkvHP4nmo2LRYttk0Al2f6j9": "prismatic_flash.mp4",
+    "1b9dZjIyjsCbhI15kQnCqpqG4PhqPtnHn": "rgb_glitch_cut.mp4",
+    "1ZJxmj9env6BistAwBkHohyma1GQJVsj0": "rgb_horizontal_tear.mp4",
+    "1v_cE4kjs2Vu2v91U_KaiMHtQSOzQ7Zfz": "rgb_lens_snap.mp4",
+    "1TdWLO88p4TUkC4u3g8p0My-H8zg1Emuq": "rgb_snap.mp4",
+    "1WplC9tB1shLDmnB89C3fXQMrI43J2NVM": "rgb_spin_blur.mp4",
+    "1nr78QmalRzjDMKIQvp-bYQDZuxZdV4xf": "rgb_split_whip.mp4",
+    "1K6oN7U55bFutTGEA5c5rCDjMH9RYLbys": "rgb_zoom_punch.mp4",
+}
 
 # Palette constants
 PAL_BLACK = (3, 2, 2, 255)
@@ -573,6 +614,165 @@ def make_chronon_plan(name: str, plate_filename: str) -> Dict[str, Any]:
     }
 
 
+def make_light_beam_transition_plan(name: str, plate_id: str,
+                                    motion_variant: int) -> Dict[str, Any]:
+    """Render one original light-beam plate with the suite's restrained camera drift."""
+    if not 0 <= motion_variant < 4:
+        raise ValueError("light-beam motion variant must be between 0 and 3")
+    drift_patterns = [
+        [{"property": "position_x", "easing": "in_out_sine",
+          "keyframes": [{"frame": 0, "value": -35.0},
+                        {"frame": DEMO_FRAMES // 2, "value": 35.0},
+                        {"frame": DEMO_FRAMES - 1, "value": -35.0}]},
+         {"property": "scale", "easing": "in_out_sine",
+          "keyframes": [{"frame": 0, "value": 1.0},
+                        {"frame": DEMO_FRAMES // 2, "value": 1.04},
+                        {"frame": DEMO_FRAMES - 1, "value": 1.0}]}],
+        [{"property": "position_y", "easing": "in_out_sine",
+          "keyframes": [{"frame": 0, "value": 25.0},
+                        {"frame": DEMO_FRAMES // 2, "value": -25.0},
+                        {"frame": DEMO_FRAMES - 1, "value": 25.0}]},
+         {"property": "scale", "easing": "in_out_sine",
+          "keyframes": [{"frame": 0, "value": 1.03},
+                        {"frame": DEMO_FRAMES // 2, "value": 1.0},
+                        {"frame": DEMO_FRAMES - 1, "value": 1.03}]}],
+        [{"property": "rotation_z", "easing": "linear",
+          "keyframes": [{"frame": 0, "value": -1.5},
+                        {"frame": DEMO_FRAMES - 1, "value": 1.5}]},
+         {"property": "scale", "easing": "in_out_sine",
+          "keyframes": [{"frame": 0, "value": 1.01},
+                        {"frame": DEMO_FRAMES // 2, "value": 1.05},
+                        {"frame": DEMO_FRAMES - 1, "value": 1.01}]}],
+        [{"property": "position_x", "easing": "in_out_sine",
+          "keyframes": [{"frame": 0, "value": 30.0},
+                        {"frame": DEMO_FRAMES // 2, "value": -30.0},
+                        {"frame": DEMO_FRAMES - 1, "value": 30.0}]},
+         {"property": "position_y", "easing": "in_out_sine",
+          "keyframes": [{"frame": 0, "value": -15.0},
+                        {"frame": DEMO_FRAMES // 2, "value": 15.0},
+                        {"frame": DEMO_FRAMES - 1, "value": -15.0}]}],
+    ]
+    return {
+        "schema": "chronon.render-plan.v3", "version": 3, "job_id": name,
+        "canvas": {"width": WIDTH, "height": HEIGHT, "fps_num": FPS,
+                   "fps_den": 1, "duration_frames": DEMO_FRAMES},
+        "output": {"path": str(DEMO_OUT_DIR / f"{name}.mp4"),
+                   "format": "mp4", "codec": "h264"},
+        "layers": [{
+            "id": f"{name}-optical-master", "type": "image",
+            "asset": f"{plate_id}_plate.png", "size": [WIDTH + 160, HEIGHT + 90],
+            "position": [0, 0], "start_frame": 0,
+            "duration_frames": DEMO_FRAMES, "enable_3d": True,
+            "animation": {"tracks": drift_patterns[motion_variant]},
+        }],
+    }
+
+
+def render_light_beam_demos() -> None:
+    """Render 14 five-second transitions from the suite's original optical master plates."""
+    DEMO_OUT_DIR.mkdir(parents=True, exist_ok=True)
+    PLATES_DIR.mkdir(parents=True, exist_ok=True)
+    if not CHRONON_CLI.is_file():
+        raise FileNotFoundError(f"Chronon CLI is missing: {CHRONON_CLI}")
+    for name, (plate_id, motion_variant) in DEMO_TRANSITIONS.items():
+        plate_path = PLATES_DIR / f"{plate_id}_plate.png"
+        if not plate_path.is_file():
+            plate = ALL_PLATE_BUILDERS[plate_id]()
+            plate.save(plate_path, optimize=True)
+        plan = make_light_beam_transition_plan(name, plate_id, motion_variant)
+        plan_path = DEMO_OUT_DIR / f"{name}.plan.json"
+        video_path = DEMO_OUT_DIR / f"{name}.mp4"
+        previous_plan = None
+        if plan_path.is_file():
+            try:
+                previous_plan = json.loads(plan_path.read_text())
+            except json.JSONDecodeError:
+                pass
+        plan_path.write_text(json.dumps(plan, indent=2) + "\n")
+        validate = [str(CHRONON_CLI), "validate", "--plan", str(plan_path),
+                    "--assets-root", str(PLATES_DIR)]
+        subprocess.run(validate, check=True)
+        if video_path.is_file() and video_path.stat().st_size > 0:
+            probe = subprocess.run([
+                "ffprobe", "-v", "error", "-select_streams", "v:0",
+                "-show_entries", "stream=codec_name,width,height,r_frame_rate,nb_frames",
+                "-show_entries", "format=duration", "-of", "json", str(video_path),
+            ], capture_output=True, text=True)
+            if probe.returncode == 0:
+                media = json.loads(probe.stdout)
+                streams = media.get("streams", [])
+                if previous_plan == plan and streams and (
+                        streams[0].get("codec_name"), streams[0].get("width"),
+                        streams[0].get("height"), streams[0].get("r_frame_rate"),
+                        int(streams[0].get("nb_frames", 0))) == (
+                        "h264", WIDTH, HEIGHT, "30/1", DEMO_FRAMES) and \
+                        float(media.get("format", {}).get("duration", 0)) >= 5.0:
+                    print(f"SKIPPED valid existing {video_path}")
+                    continue
+        render = [str(CHRONON_CLI), "render", "--plan", str(plan_path),
+                  "--assets-root", str(PLATES_DIR), "--backend", "software",
+                  "--output", str(video_path)]
+        subprocess.run(render, check=True)
+        print(f"RENDERED {video_path}")
+
+
+def upload_verified_light_beam_demos(folder_id: str = DEMO_TARGET_FOLDER) -> list[dict]:
+    """Upload only fully rendered H.264 1080p/5s demo files to the explicit folder."""
+    import re
+
+    if not folder_id or not DEMO_CREDS.is_file() or not DEMO_TOKEN.is_file():
+        raise RuntimeError("Drive demo upload needs the explicit destination and secure local OAuth files")
+    for secret_path in (DEMO_CREDS, DEMO_TOKEN):
+        mode = secret_path.stat().st_mode & 0o777
+        if mode & 0o077:
+            raise PermissionError(f"refusing Drive upload; {secret_path.name} must have mode 0600")
+    manifest = []
+    for name in DEMO_TRANSITIONS:
+        path = DEMO_OUT_DIR / f"{name}.mp4"
+        probe = subprocess.run([
+            "ffprobe", "-v", "error", "-select_streams", "v:0",
+            "-show_entries", "stream=codec_name,width,height,r_frame_rate,nb_frames",
+            "-show_entries", "format=duration", "-of", "json", str(path),
+        ], capture_output=True, text=True, check=True)
+        media = json.loads(probe.stdout)
+        stream = media["streams"][0]
+        if (stream["codec_name"], stream["width"], stream["height"],
+                stream["r_frame_rate"], int(stream["nb_frames"])) != (
+                "h264", WIDTH, HEIGHT, "30/1", DEMO_FRAMES) or \
+                float(media["format"]["duration"]) < 5.0:
+            raise RuntimeError(f"refusing to upload nonconforming demo: {path.name}")
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        result = subprocess.run([
+            str(DEMO_DRIVE_UPLOAD), "-credentials", str(DEMO_CREDS),
+            "-token", str(DEMO_TOKEN), "-folder", folder_id,
+            "-file", str(path), "-name", path.name, "-sha256", digest,
+        ], capture_output=True, text=True, check=True)
+        match = re.search(r"^DRIVE_UPLOAD_PASS id=(\S+) link=(\S+) parent=(\S+) sha256=(\S+) bytes=(\d+)$",
+                          result.stdout.strip())
+        if not match or match.group(3) != folder_id or match.group(4) != digest:
+            raise RuntimeError(f"Drive upload receipt failed verification for {path.name}")
+        manifest.append({"name": path.name, "id": match.group(1), "url": match.group(2),
+                         "parent": match.group(3), "sha256": digest, "bytes": int(match.group(5))})
+        print(f"UPLOADED {path.name} id={match.group(1)}")
+    manifest_path = DEMO_OUT_DIR / "drive_manifest.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    return manifest
+
+
+def delete_replaced_transition_uploads(folder_id: str = DEMO_TARGET_FOLDER) -> int:
+    """Delete only prior demo files after verifying their exact name and parent."""
+    helper = BASE_DIR / "RenderingGen/renderinggen/cmd/drive-delete-verified/main.go"
+    if not helper.is_file():
+        raise FileNotFoundError(f"verified Drive cleanup helper is missing: {helper}")
+    for file_id, expected_name in REPLACED_DRIVE_FILES.items():
+        subprocess.run([
+            "go", "run", str(helper),
+            "-credentials", str(DEMO_CREDS), "-token", str(DEMO_TOKEN),
+            "-folder", folder_id, "-id", file_id, "-name", expected_name,
+        ], cwd=BASE_DIR / "RenderingGen/renderinggen", check=True)
+    return len(REPLACED_DRIVE_FILES)
+
+
 def validate_plan(plan_file: Path) -> bool:
     """Validate plan using chronon3d_cli validate."""
     cmd = [
@@ -659,7 +859,23 @@ def main():
     parser.add_argument("--force-render", action="store_true", help="Force re-rendering existing MP4s")
     parser.add_argument("--jobs", type=int, default=2, help="Number of concurrent GPU render jobs")
     parser.add_argument("--filter", default=None, help="Filter specific background name")
+    parser.add_argument("--light-beam-demos", action="store_true",
+                        help="render 14 five-second light-beam transitions from the cinematic optical plates")
+    parser.add_argument("--demo-upload", action="store_true",
+                        help="upload only the 14 verified five-second light transitions")
+    parser.add_argument("--demo-delete-replaced", action="store_true",
+                        help="remove the exact prior demo uploads after the replacement renders are ready")
+    parser.add_argument("--demo-drive-folder", default=DEMO_TARGET_FOLDER)
     args = parser.parse_args()
+
+    if args.light_beam_demos:
+        render_light_beam_demos()
+        if args.demo_upload:
+            upload_verified_light_beam_demos(args.demo_drive_folder)
+        if args.demo_delete_replaced:
+            count = delete_replaced_transition_uploads(args.demo_drive_folder)
+            print(f"REMOVED {count} replaced Drive demos from {args.demo_drive_folder}")
+        return
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     PLATES_DIR.mkdir(parents=True, exist_ok=True)
