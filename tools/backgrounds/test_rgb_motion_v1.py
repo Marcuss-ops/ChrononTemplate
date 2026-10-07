@@ -181,6 +181,45 @@ class RgbMotionTests(unittest.TestCase):
         self.assertTrue(any(layer.get("effects", [{}])[0].get("type") == "wave_warp"
                             for layer in first["rgb_motion_torture_v1"]["layers"]))
 
+    def test_five_second_1080p_scene_transition_demos_are_deterministic(self):
+        first = rgb.build_transition_demo_plans()
+        second = rgb.build_transition_demo_plans()
+        self.assertEqual(first, second)
+        self.assertEqual(len(first), 14)
+        self.assertEqual(set(first), set(rgb.RAPID_TRANSITIONS) | set(rgb.CUSTOM_TRANSITIONS))
+        for ident, plan in first.items():
+            self.assertEqual(plan["canvas"], {
+                "width": 1920, "height": 1080, "fps_num": 30,
+                "fps_den": 1, "duration_frames": 150,
+            })
+            self.assertEqual(plan["output"]["format"], "mp4")
+            self.assertEqual(plan["output"]["codec"], "h264")
+            transition_layers = [layer for layer in plan["layers"]
+                                 if layer["id"].startswith(("rgb-", "slice-", "trail-",
+                                                            "velocity-", "temporal-",
+                                                            "custom-prismatic-"))]
+            self.assertTrue(transition_layers, ident)
+            self.assertTrue(any(layer.get("type") == "color" and layer["id"].startswith("scene-b-")
+                                for layer in plan["layers"]), ident)
+            for layer in plan["layers"]:
+                self.assertTrue(all(key["frame"] < 150
+                                    for track_ in layer.get("animation", {}).get("tracks", [])
+                                    for key in track_["keyframes"]), ident)
+
+    def test_five_second_demo_contract_rejects_short_or_wrong_size_outputs(self):
+        with self.assertRaises(ValueError):
+            rgb.build_transition_demo_plans(total_frames=149)
+        with self.assertRaises(ValueError):
+            rgb.build_transition_demo_plans(width=1280)
+
+    def test_custom_transition_combinations_use_deterministic_bounded_primitives(self):
+        for ident, duration in rgb.CUSTOM_TRANSITIONS.items():
+            first = rgb._custom_transition_layers(ident, duration, 72)
+            second = rgb._custom_transition_layers(ident, duration, 72)
+            self.assertEqual(first, second, ident)
+            self.assertLessEqual(sum(layer["id"].startswith("slice-") for layer in first), 32, ident)
+            self.assertTrue(first, ident)
+
     def test_invalid_limits_fail_closed(self):
         with self.assertRaises(ValueError):
             rgb.resolve_slice_transform(0, 60, count=33)
