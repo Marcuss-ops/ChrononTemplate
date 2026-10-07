@@ -206,6 +206,18 @@ namespace {
         }
         json emphasis = json::array();
         for (const std::size_t word : def.emphasis) emphasis.push_back(word);
+        const bool hasUnsupportedTextAnimatorRotation = std::any_of(
+                def.textAnimators.begin(), def.textAnimators.end(), [](const auto& animator) {
+                    return std::any_of(animator.properties.begin(), animator.properties.end(),
+                                       [](const PhraseTrack& track) {
+                                           return track.property == "rotation";
+                                       });
+                });
+        json targets = nullptr;
+        if (!hasUnsupportedTextAnimatorRotation) {
+            targets = json::array({"short_phrase"});
+            if (!def.textAnimators.empty()) targets.push_back("caption");
+        }
         json overlays = json::array();
         for (const auto& overlay : def.textOverlays) {
             json overlayTracks = json::array();
@@ -223,6 +235,7 @@ namespace {
                 {"id", def.id},
                 {"family", familyId(def.id)},
                 {"subcategory", subcategoryId(def.id)},
+                {"targets", targets},
                 {"title", def.title},
                 {"phrase", def.phrase},
                 {"enter", def.enter},

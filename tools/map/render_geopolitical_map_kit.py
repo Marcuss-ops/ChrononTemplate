@@ -493,8 +493,15 @@ def render_scene_2(output_mp4: Path, num_frames: int = 90):
     out = cv2.VideoWriter(str(output_mp4), fourcc, FPS, (WIDTH, HEIGHT))
 
     proj = GeoProjector(center_lon=-68.0, center_lat=2.0, zoom_scale=8.5)
+    # Render with prominent vertical/horizontal grid matching ref_1
     base = MapKit.render_plate(proj, ocean_color=COLOR_BLUE_OCEAN, land_color=(16, 14, 12),
-                               border_color=(45, 42, 40), grid_color=COLOR_GRID_BLUE, with_grid=True)
+                               border_color=(45, 42, 40), grid_color=(160, 105, 75), with_grid=True)
+
+    # Add extra dense coordinate grid like in Ref 1
+    for x in range(0, WIDTH, 75):
+        cv2.line(base, (x, 0), (x, HEIGHT), (145, 95, 65), 1, cv2.LINE_AA)
+    for y in range(0, HEIGHT, 75):
+        cv2.line(base, (0, y), (WIDTH, y), (145, 95, 65), 1, cv2.LINE_AA)
 
     mex_anchor = proj.project(-101.0, 22.0)
     col_anchor = proj.project(-73.5, 4.0)
@@ -615,27 +622,29 @@ def render_scene_6(output_mp4: Path, num_frames: int = 90):
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(str(output_mp4), fourcc, FPS, (WIDTH, HEIGHT))
 
-    proj = GeoProjector(center_lon=108.0, center_lat=16.0, zoom_scale=24.0)
-    base_2d = MapKit.render_plate(proj, ocean_color=(16, 14, 12), land_color=(24, 22, 20),
-                                  border_color=(40, 38, 34), with_grid=False)
+    # Base 2D plate with oversized dimensions to avoid black edges when transformed
+    pad = 300
+    BIG_W, BIG_H = WIDTH + pad * 2, HEIGHT + pad * 2
+    proj = GeoProjector(center_lon=108.0, center_lat=18.0, zoom_scale=22.0, w=BIG_W, h=BIG_H)
+    base_big = MapKit.render_plate(proj, ocean_color=(16, 14, 12), land_color=(24, 22, 20),
+                                   border_color=(40, 38, 34), with_grid=False)
 
-    # Add red Vietnam to 2D plate before tilt
-    MapKit.fill_country(base_2d, proj, "Vietnam", COLOR_RED_VIVID, opacity=0.98)
-    MapKit.outline_glow(base_2d, proj, "Vietnam", COLOR_RED_VIVID, thickness=2, progress=1.0)
+    # Vietnam red fill
+    MapKit.fill_country(base_big, proj, "Vietnam", COLOR_RED_VIVID, opacity=0.98)
+    MapKit.outline_glow(base_big, proj, "Vietnam", COLOR_RED_VIVID, thickness=2, progress=1.0)
 
-    # 2.5D Perspective Warp Matrix
-    src_pts = np.float32([[0, 0], [WIDTH, 0], [WIDTH, HEIGHT], [0, HEIGHT]])
-    tilt_margin = int(WIDTH * 0.16)
-    dst_pts = np.float32([[tilt_margin, int(HEIGHT * 0.12)],
-                          [WIDTH - tilt_margin, int(HEIGHT * 0.12)],
-                          [WIDTH + 60, HEIGHT],
-                          [-60, HEIGHT]])
+    # 2.5D Perspective Warp Matrix from oversized canvas down to 1920x1080
+    src_pts = np.float32([[pad, pad], [pad + WIDTH, pad], [pad + WIDTH, pad + HEIGHT], [pad, pad + HEIGHT]])
+    tilt_margin = int(WIDTH * 0.12)
+    dst_pts = np.float32([[tilt_margin, -50],
+                          [WIDTH - tilt_margin, -50],
+                          [WIDTH + 120, HEIGHT + 100],
+                          [-120, HEIGHT + 100]])
     M = cv2.getPerspectiveTransform(src_pts, dst_pts)
 
-    # Warped background plate
-    tilted_plate = cv2.warpPerspective(base_2d, M, (WIDTH, HEIGHT))
+    tilted_plate = cv2.warpPerspective(base_big, M, (WIDTH, HEIGHT), borderMode=cv2.BORDER_REPLICATE)
 
-    # Center of Vietnam on tilted plate
+    # Position of Vietnam on tilted canvas
     vn_screen_2d = proj.project(107.8, 16.0)
     v_homo = np.array([vn_screen_2d[0], vn_screen_2d[1], 1.0], dtype=np.float32)
     v_warped = M.dot(v_homo)
@@ -651,30 +660,27 @@ def render_scene_6(output_mp4: Path, num_frames: int = 90):
             cv2.ellipse(frame, ring_center, (rx, ry), -15, 0, 360, COLOR_WHITE, 4, cv2.LINE_AA)
             cv2.ellipse(frame, ring_center, (rx + 6, ry + 6), -15, 0, 360, (180, 180, 180), 1, cv2.LINE_AA)
 
-        # Diagonal accent dashes pointing outwards
+        # Diagonal accent dashes pointing upwards
         if p_ring > 0.4:
             cv2.line(frame, (ring_center[0] - 120, ring_center[1] - 120),
                      (ring_center[0] - 190, ring_center[1] - 190), COLOR_WHITE, 3, cv2.LINE_AA)
             cv2.line(frame, (ring_center[0] - 210, ring_center[1] - 210),
                      (ring_center[0] - 270, ring_center[1] - 270), COLOR_WHITE, 3, cv2.LINE_AA)
 
-        # Massive Glowing Title 'LA NUOVA CINA' (rotated ~ 25 degrees)
+        # Massive Glowing Title 'LA NUOVA CINA' (rotated ~ 22 degrees)
         p_title = ease_out((f - 18) / 30.0)
         if p_title > 0:
-            txt_layer = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
-            draw = ImageDraw.Draw(txt_layer)
-            font = ImageFont.truetype(str(FONTS_DIR / "Inter-Bold.ttf"), size=130)
+            font = ImageFont.truetype(str(FONTS_DIR / "Inter-Bold.ttf"), size=108)
 
-            # Draw rotated text on temporary canvas
-            temp_txt = Image.new("RGBA", (1400, 300), (0, 0, 0, 0))
+            temp_txt = Image.new("RGBA", (1300, 240), (0, 0, 0, 0))
             t_draw = ImageDraw.Draw(temp_txt)
-            t_draw.text((700, 150), "LA NUOVA CINA", font=font,
+            t_draw.text((650, 120), "LA NUOVA CINA", font=font,
                         fill=(255, 255, 255, int(255 * p_title)), anchor="mm")
-            # Rotate with perspective slant
             rotated = temp_txt.rotate(22, resample=Image.BICUBIC, expand=True)
 
-            txt_x = int(WIDTH * 0.10)
-            txt_y = int(HEIGHT * 0.50)
+            txt_x = int(WIDTH * 0.08)
+            txt_y = int(HEIGHT * 0.54)
+            txt_layer = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
             txt_layer.paste(rotated, (txt_x, txt_y), rotated)
 
             np_txt = np.asarray(txt_layer)
@@ -700,18 +706,13 @@ def render_scene_7(output_mp4: Path, num_frames: int = 90):
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(str(output_mp4), fourcc, FPS, (WIDTH, HEIGHT))
 
-    # Global projection centered to show both USA and Eurasia
-    proj = GeoProjector(center_lon=20.0, center_lat=30.0, zoom_scale=4.4)
+    # Global projection centered on prime meridian/Atlantic
+    proj = GeoProjector(center_lon=-10.0, center_lat=24.0, zoom_scale=4.2)
     base = MapKit.render_plate(proj, ocean_color=(15, 14, 12), land_color=(25, 22, 20),
                                border_color=(40, 38, 34), with_grid=False)
 
-    usa_pt = proj.project(-98.0, 39.0)
-    vn_pt = proj.project(107.0, 16.0)
-
-    # Flip / wrap USA into view on the left:
-    # USA coords on the left, Vietnam on the right
-    p1 = (180, 280)    # USA location
-    p2 = (1750, 850)   # Vietnam location
+    p1 = proj.project(-98.0, 39.0)  # USA
+    p2 = proj.project(107.0, 16.0)  # Vietnam
 
     # Precompute USA and Vietnam country overlays on base plate
     usa_layer = np.zeros_like(base)
@@ -723,6 +724,9 @@ def render_scene_7(output_mp4: Path, num_frames: int = 90):
     MapKit.fill_country(vn_layer, proj, "Vietnam", COLOR_RED_VIVID, opacity=0.95)
     MapKit.outline_glow(vn_layer, proj, "Vietnam", COLOR_RED_VIVID, thickness=2, progress=1.0)
     vn_mask = (vn_layer > 0).any(axis=2)
+
+    # Route control point
+    ctrl = (int((p1[0] + p2[0]) / 2.0 - 50), int((p1[1] + p2[1]) / 2.0 - 320))
 
     for f in range(num_frames):
         frame = base.copy()
@@ -736,8 +740,7 @@ def render_scene_7(output_mp4: Path, num_frames: int = 90):
         # Long curved dashed trajectory from USA across Atlantic & Europe down to Vietnam
         p_route = ease_in_out((f - 12) / 45.0)
         if p_route > 0:
-            ctrl = (int((p1[0] + p2[0]) / 2.0 + 100), int((p1[1] + p2[1]) / 2.0 - 280))
-            steps = 120
+            steps = 140
             t_vals = np.linspace(0.0, max(0.0, min(1.0, p_route)), int(steps * p_route) + 2)
             curve_pts = []
             for t in t_vals:
@@ -757,29 +760,26 @@ def render_scene_7(output_mp4: Path, num_frames: int = 90):
         # Massive floating metric '194 mld $' tilted along the route
         p_metric = ease_out((f - 30) / 25.0)
         if p_metric > 0:
-            temp_txt = Image.new("RGBA", (800, 200), (0, 0, 0, 0))
+            temp_txt = Image.new("RGBA", (700, 180), (0, 0, 0, 0))
             t_draw = ImageDraw.Draw(temp_txt)
-            f_val = ImageFont.truetype(str(FONTS_DIR / "Inter-Bold.ttf"), size=80)
-            t_draw.text((400, 100), "194 mld $", font=f_val,
+            f_val = ImageFont.truetype(str(FONTS_DIR / "Inter-Bold.ttf"), size=76)
+
+            # Subtle drop shadow
+            t_draw.text((353, 93), "194 mld $", font=f_val,
+                        fill=(0, 0, 0, int(180 * p_metric)), anchor="mm")
+            # Crisp white foreground
+            t_draw.text((350, 90), "194 mld $", font=f_val,
                         fill=(255, 255, 255, int(255 * p_metric)), anchor="mm")
 
             # Slanted rotation ~ 18 degrees matching trajectory
             rotated = temp_txt.rotate(-18, resample=Image.BICUBIC, expand=True)
 
-            txt_x = 920
+            txt_x = 940
             txt_y = 120
             pil_frame = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             pil_frame.paste(rotated, (txt_x, txt_y), rotated)
 
-            rendered = cv2.cvtColor(np.asarray(pil_frame), cv2.COLOR_RGB2BGR)
-
-            # Luminous halo around metric
-            mask = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
-            cv2.putText(mask, "194 mld $", (txt_x + 100, txt_y + 120),
-                        cv2.FONT_HERSHEY_DUPLEX, 2.5, 255, 8, cv2.LINE_AA)
-            halo = cv2.GaussianBlur(mask, (0, 0), 20).astype(np.float32) / 255.0
-            bloom = (halo * 0.70)[:, :, None] * np.array([255, 255, 255], dtype=np.float32)
-            frame[:] = np.clip(rendered.astype(np.float32) + bloom, 0, 255).astype(np.uint8)
+            frame[:] = cv2.cvtColor(np.asarray(pil_frame), cv2.COLOR_RGB2BGR)
 
         out.write(frame)
 

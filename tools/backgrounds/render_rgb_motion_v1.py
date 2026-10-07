@@ -277,106 +277,6 @@ RAPID_TRANSITIONS = {
     "film_burn_rgb": 10,
 }
 
-# Extra author-made combinations for the 5-second demo reel. These deliberately
-# compose the existing RGB/slice/analytic-motion helpers; they are not new
-# renderer primitives or catalog IDs.
-CUSTOM_TRANSITIONS = {
-    "rgb_double_tear": 10,
-    "rgb_prismatic_whip": 10,
-    "rgb_velocity_trail": 8,
-    "rgb_vertical_tear_snap": 8,
-}
-
-
-def _custom_transition_layers(ident: str, duration: int, start: int) -> list[dict]:
-    end = duration - 1
-    middle = max(1, end // 2)
-    if ident == "rgb_double_tear":
-        return (
-            resolve_slice_transform(start, duration, count=5, amplitude=42,
-                                    seed=8601, orientation="horizontal")
-            + resolve_slice_transform(start, duration, count=3, amplitude=30,
-                                      seed=8602, orientation="vertical")
-            + resolve_rgb_channel_transform(start, duration, {
-                "r": {"offset": (-7, 0)}, "g": {}, "b": {"offset": (7, 0)},
-            }, component_transform=True)
-        )
-    if ident == "rgb_prismatic_whip":
-        channels = resolve_velocity_rgb_channels(
-            start, duration,
-            [(0, -260.0, 0.0), (middle, 0.0, 0.0), (end, 260.0, 0.0)],
-            split_seconds=.022)
-        flash = text_layer(f"custom-prismatic-flash-{start}", start, duration,
-                           color="#FFFFFF", blend="normal")
-        _set_track_keys(flash, "opacity", [(0, 0.0), (middle, .72), (end, 0.0)])
-        return channels + [flash]
-    if ident == "rgb_velocity_trail":
-        return resolve_analytic_temporal_channels(
-            start, duration,
-            [(0, -180.0, 40.0), (middle, 0.0, 0.0), (end, 180.0, -40.0)],
-            offsets=(-3, 0, 3))
-    if ident == "rgb_vertical_tear_snap":
-        slices = resolve_slice_transform(start, duration, count=5, amplitude=56,
-                                         seed=8603, orientation="vertical")
-        channels = resolve_rgb_channel_transform(start, duration, {
-            "r": {"offset": (-14, 0)}, "g": {}, "b": {"offset": (14, 0)},
-        }, component_transform=True)
-        return slices + channels
-    raise ValueError(f"unknown custom RGB transition: {ident}")
-
-
-def _scene_plate(id_: str, start: int, duration: int, color: list[float]) -> dict:
-    return {"id": id_, "type": "color", "start_frame": start,
-            "duration_frames": duration, "color": color,
-            "size": [WIDTH, HEIGHT], "position": [WIDTH / 2, HEIGHT / 2],
-            "screen_space": True}
-
-
-def build_transition_demo_plans(*, width=1920, height=1080, total_frames=150,
-                                transition_start=72) -> dict[str, dict]:
-    """Build >=5s 1080p scene-cut demos with a fast accent in the middle."""
-    if width != 1920 or height != 1080 or total_frames < 150 or transition_start < 0:
-        raise ValueError("transition demos require 1920x1080 and at least 150 frames")
-    previous_width, previous_height = WIDTH, HEIGHT
-    globals()["WIDTH"], globals()["HEIGHT"] = width, height
-    try:
-        recipes = {**RAPID_TRANSITIONS, **CUSTOM_TRANSITIONS}
-        plans = {}
-        for ident, duration in recipes.items():
-            if transition_start + duration >= total_frames:
-                raise ValueError(f"transition {ident} does not fit inside the demo duration")
-            cut_frame = transition_start + duration // 2
-            layers = [
-                _scene_plate(f"scene-a-{ident}", 0, total_frames,
-                             [0.018, 0.060, 0.105, 1.0]),
-                text_layer(f"scene-a-title-{ident}", 0, total_frames,
-                           text="SCENE A", color="#F2F7FF", blend="normal"),
-                _scene_plate(f"scene-b-{ident}", cut_frame, total_frames - cut_frame,
-                             [0.115, 0.035, 0.085, 1.0]),
-                text_layer(f"scene-b-title-{ident}", cut_frame, total_frames - cut_frame,
-                           text="SCENE B", color="#FFF3EA", blend="normal"),
-                text_layer(f"demo-label-{ident}", 0, total_frames,
-                           text=ident.replace("_", " ").upper(), y=height * 0.18,
-                           color="#D5E5F6", opacity=.7, blend="normal"),
-            ]
-            if ident in RAPID_TRANSITIONS:
-                accents = _rapid_transition_layers(ident, duration, transition_start)
-            else:
-                accents = _custom_transition_layers(ident, duration, transition_start)
-            layers.extend(accents)
-            plans[ident] = {
-                "schema": "chronon.render-plan.v3", "version": 3,
-                "job_id": f"demo_{ident}",
-                "canvas": {"width": width, "height": height, "fps_num": FPS,
-                           "fps_den": 1, "duration_frames": total_frames},
-                "layers": layers,
-                "output": {"path": f"demo_{ident}.mp4", "format": "mp4", "codec": "h264"},
-            }
-        return plans
-    finally:
-        globals()["WIDTH"], globals()["HEIGHT"] = previous_width, previous_height
-
-
 def _set_track_keys(layer: dict, prop: str, keys: list[tuple[int, float]]) -> None:
     for item in layer["animation"]["tracks"]:
         if item["property"] == prop:
@@ -529,14 +429,9 @@ def main() -> int:
     mode.add_argument("--render",action="store_true")
     parser.add_argument("--transitions",action="store_true",
                         help="emit the ten rapid RGB transition-only plans")
-    parser.add_argument("--transition-demos",action="store_true",
-                        help="render 1920x1080, five-second scene-cut demos (10 catalog + 4 custom)")
     parser.add_argument("--cli",type=Path)
     args=parser.parse_args()
-    if args.transition_demos:
-        out_dir = OUT / "demos_1080p5s"
-        plans = build_transition_demo_plans()
-    elif args.transitions:
+    if args.transitions:
         out_dir = OUT / "transitions"
         plans = build_transition_plans()
     else:
