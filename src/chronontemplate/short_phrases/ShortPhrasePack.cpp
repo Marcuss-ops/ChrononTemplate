@@ -195,6 +195,10 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductGlowCursor: return glowCursor();
             case ShortPhraseAnimation::ProductGradualBlur: return gradualBlur();
             case ShortPhraseAnimation::ProductShapeBlur: return shapeBlur();
+            case ShortPhraseAnimation::EditorialPromptResponse:
+            case ShortPhraseAnimation::EditorialDiffPatch:
+            case ShortPhraseAnimation::EditorialTerminalFocus:
+                throw std::logic_error("Claude editorial definition unexpectedly fell through");
             default: break;
         }
         // Authored entrance shapes in frames at 30 fps. `definition()` stretches
@@ -577,15 +581,6 @@ namespace chronontemplate {
                 def.accents.front().tracks.front() = track(
                     "scale_x", {{0, 0.15f}, {22, 1.f}, {42, 1.f}, {78, 1.2f}, {102, 1.f}, {120, 1.f}}, "in_out_cubic");
                 break;
-            case ShortPhraseAnimation::EditorialPromptResponse:
-                layerBeat("position_y", 28.f, 0.f, -8.f, 0.f);
-                break;
-            case ShortPhraseAnimation::EditorialDiffPatch:
-                layerBeat("position_x", -22.f, 0.f, 8.f, 0.f);
-                break;
-            case ShortPhraseAnimation::EditorialTerminalFocus:
-                layerBeat("position_x", 20.f, 0.f, -6.f, 0.f);
-                break;
             // These definitions do not use the legacy editorial sequence body.
             case ShortPhraseAnimation::ProductMaskedHeading:
             case ShortPhraseAnimation::ProductSplitFlapText:
@@ -600,10 +595,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductShapeBlur:
                 break;
             // Claude definitions are fully handled by the first switch.
-            case ShortPhraseAnimation::EditorialPromptResponse:
-            case ShortPhraseAnimation::EditorialDiffPatch:
-            case ShortPhraseAnimation::EditorialTerminalFocus:
-                break;
             // These product definitions return directly from the first switch.
             case ShortPhraseAnimation::ProductHardMaskSlideUp:
             case ShortPhraseAnimation::ProductKineticBlurIn:
