@@ -427,6 +427,7 @@ LayerHandle& logo = scene.image({.path = "youtube.png"});
 logo.position(750.f, 540.f, 20.f).animate(SpinXYZ{.inFrame = 10, .duration = 25});
 
 scene.camera().orbit(-0.35f, 0.05f).between(0, 90);
+scene.camera().setFov(42.f).horizon(4.f);
 
 FrameSubmission frame = scene.submit(12);
 ```
@@ -436,6 +437,11 @@ measure them. It is abstract on purpose, so this module keeps compiling without
 the renderer and the real host can be the Chronon engine, the C ABI or a test
 double. `FrameSubmission` is the whole render-side output: per layer, the matrix
 and the content it draws, already resolved.
+
+`CameraHandle::fov(from, to).between(start, end)` animates field of view;
+`setFov(degrees)` sets a static field of view and `horizon(rollDegrees)` sets
+camera roll around the view axis. The latter two are validated at the template
+boundary.
 
 The bridge refuses two defects instead of drawing the wrong thing: a content
 layer with no binding row, and a binding whose measurement is no longer the
@@ -517,6 +523,12 @@ change the radius or opt into a border. `ImageCameraMove` offers a stationary
 camera, a dolly, an orbit, or a combined dolly and orbit. The default is the
 combined move; it goes through `CameraHandle` and the existing ChrononMotion3D
 camera presets, so this pack adds no camera math of its own.
+
+`ImageFrameStyle` also exposes composable editorial effects: `lightLeak` adds
+warm light rays and glow, `channelSplit` adds radial RGB separation,
+`channelTrail` adds temporal echoes, and `sliceDisplace` adds alternating
+mesh-warp bands. These are CPU/render-plan approximations and remain bounded by
+the native effect contracts; they are not optical light-leak simulation.
 
 ```cpp
 #include "chronontemplate/chronontemplate.hpp"

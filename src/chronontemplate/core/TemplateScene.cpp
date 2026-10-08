@@ -191,6 +191,23 @@ namespace chronontemplate {
         return *this;
     }
 
+    CameraHandle& CameraHandle::setFov(float degrees) {
+        if (!std::isfinite(degrees) || degrees <= 0.f || degrees >= 180.f) {
+            throw std::invalid_argument("CameraHandle::setFov: degrees must be finite and in (0, 180)");
+        }
+        rig().setFov(degrees);
+        return *this;
+    }
+
+    CameraHandle& CameraHandle::horizon(float rollDegrees) {
+        if (!std::isfinite(rollDegrees)) {
+            throw std::invalid_argument("CameraHandle::horizon: roll must be finite");
+        }
+        constexpr float kDegreesToRadians = 0.01745329251994329577f;
+        rig().setRoll(rollDegrees * kDegreesToRadians);
+        return *this;
+    }
+
     CameraHandle& CameraHandle::framing(float x, float y, float z) {
 
         // A camera still looks at the canvas centre: the template states where the
@@ -346,6 +363,10 @@ namespace chronontemplate {
         request.grain = spec.frame.grain;
         request.vignette = spec.frame.vignette;
         request.grainSeed = spec.frame.grainSeed;
+        request.lightLeak = spec.frame.lightLeak;
+        request.channelSplit = spec.frame.channelSplit;
+        request.channelTrail = spec.frame.channelTrail;
+        request.sliceDisplace = spec.frame.sliceDisplace;
 
         ContentHandle handle = m_host.createImage(request);
         return adopt(std::move(handle), derivedName(spec.name, spec.path), Layer::kRoot);

@@ -26,7 +26,11 @@ chronon3d::render_plan::LayerPlan makeImageLayerPlan(
         !std::isfinite(request.saturation) || request.saturation < 0.f || request.saturation > 4.f ||
         !std::isfinite(request.contrast) || request.contrast < 0.f || request.contrast > 16.f ||
         !std::isfinite(request.grain) || request.grain < 0.f || request.grain > 1.f ||
-        !std::isfinite(request.vignette) || request.vignette < 0.f || request.vignette > 1.f)
+        !std::isfinite(request.vignette) || request.vignette < 0.f || request.vignette > 1.f ||
+        !std::isfinite(request.lightLeak) || request.lightLeak < 0.f || request.lightLeak > 1.f ||
+        !std::isfinite(request.channelSplit) || request.channelSplit < 0.f || request.channelSplit > 128.f ||
+        request.channelTrail > 16 || !std::isfinite(request.sliceDisplace) ||
+        request.sliceDisplace < 0.f || request.sliceDisplace > 1.f)
         throw std::invalid_argument("makeImageLayerPlan: request style or target viewport is outside supported ranges");
     if (request.crop.enabled &&
         (!std::isfinite(request.crop.origin.x) || !std::isfinite(request.crop.origin.y) ||
@@ -130,6 +134,56 @@ chronon3d::render_plan::LayerPlan makeImageLayerPlan(
         vignette.softness = 0.55f;
         vignette.effect_color = {0.f, 0.f, 0.f, 1.f};
         layer.effects.push_back(std::move(vignette));
+    }
+    if (request.lightLeak > 0.f) {
+        LayerPlan::EffectPlan rays;
+        rays.kind = LayerPlan::EffectKindPlan::LightRays;
+        rays.light_rays_origin = {1.0f, 0.42f};
+        rays.light_rays_length = 0.8f * std::max(handle.metrics.naturalSize.x,
+                                                 handle.metrics.naturalSize.y);
+        rays.light_rays_density = 0.42f + request.lightLeak * 0.45f;
+        rays.light_rays_color = {1.0f, 0.55f, 0.22f, request.lightLeak};
+        rays.light_rays_decay = 0.88f;
+        layer.effects.push_back(std::move(rays));
+        LayerPlan::EffectPlan glow;
+        glow.kind = LayerPlan::EffectKindPlan::Glow;
+        glow.radius = 18.f;
+        glow.glow_intensity = request.lightLeak * 0.65f;
+        glow.effect_color = {1.f, 0.48f, 0.2f, request.lightLeak};
+        layer.effects.push_back(std::move(glow));
+    }
+    if (request.channelSplit > 0.f) {
+        LayerPlan::EffectPlan split;
+        split.kind = LayerPlan::EffectKindPlan::ChromaticAberration;
+        split.chromatic_red_offset = request.channelSplit;
+        split.chromatic_blue_offset = -request.channelSplit;
+        split.chromatic_offset_mode = 1;
+        layer.effects.push_back(std::move(split));
+    }
+    if (request.channelTrail > 0) {
+        LayerPlan::EffectPlan trail;
+        trail.kind = LayerPlan::EffectKindPlan::Echo;
+        trail.echoes = request.channelTrail;
+        trail.decay = 0.48f;
+        trail.time_offset_frames = 1;
+        layer.effects.push_back(std::move(trail));
+    }
+    if (request.sliceDisplace > 0.f) {
+        LayerPlan::EffectPlan slices;
+        slices.kind = LayerPlan::EffectKindPlan::MeshWarp;
+        slices.mesh_cols = 8;
+        slices.mesh_rows = 8;
+        slices.mesh_smoothness = 0.f;
+        slices.mesh_offsets.reserve(8U * 8U * 2U);
+        for (std::uint32_t row = 0; row < 8; ++row) {
+            const float offset = (row % 2U == 0U ? 1.f : -1.f) *
+                request.sliceDisplace * 0.025f;
+            for (std::uint32_t col = 0; col < 8; ++col) {
+                slices.mesh_offsets.push_back(offset);
+                slices.mesh_offsets.push_back(0.f);
+            }
+        }
+        layer.effects.push_back(std::move(slices));
     }
     return layer;
 }

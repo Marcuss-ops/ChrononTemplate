@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <cmath>
 
 using namespace chronontemplate;
 using chrononmotion::motion::ContentRef;
@@ -116,6 +117,18 @@ namespace {
         check(moved, "the orbit moves the eye over the authored window");
     }
 
+    void cameraOpticsHaveDirectTemplateControls() {
+        section("camera optics controls");
+        FakeContentHost host;
+        TemplateScene scene("camera_optics", 30.f, host);
+        scene.camera().setFov(42.f).horizon(8.f);
+        const auto pose = scene.submit(0).camera;
+        check(pose != nullptr, "camera optics controls preserve camera submission");
+        check(pose->fov == 42.f, "setFov authors a static FOV");
+        check(std::abs(pose->roll - 8.f * 0.01745329251994329577f) < 1e-6f,
+              "horizon authors roll in degrees at the template boundary");
+    }
+
     void aRemeasuredAssetCannotSlipThrough() {
 
         section("staleness");
@@ -179,6 +192,7 @@ int main() {
     contentCallsBindOneRowEach();
     aControllerLayerNeedsNoBinding();
     determinismAndCameraMove();
+    cameraOpticsHaveDirectTemplateControls();
     aRemeasuredAssetCannotSlipThrough();
     defectsAreRefused();
     return chrononmotion_test::report();

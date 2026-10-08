@@ -84,6 +84,10 @@ namespace chronontemplate {
         float grain{0.f};
         float vignette{0.f};
         std::uint32_t grainSeed{0};
+        float lightLeak{0.f};
+        float channelSplit{0.f};
+        std::uint32_t channelTrail{0};
+        float sliceDisplace{0.f};
     };
 
     struct ImageSpec {
@@ -180,6 +184,8 @@ namespace chronontemplate {
         CameraHandle& orbit(float yaw, float pitch);
         CameraHandle& push(float distance);
         CameraHandle& fov(float from, float to);
+        CameraHandle& setFov(float degrees);
+        CameraHandle& horizon(float rollDegrees);
         CameraHandle& framing(float x, float y, float z);
 
         /// Apply the pending move over the frame window. Without a pending move
