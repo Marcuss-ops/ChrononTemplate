@@ -591,10 +591,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductShapeBlur:
                 break;
             // Claude definitions are fully handled by the first switch.
-            case ShortPhraseAnimation::EditorialPromptResponse:
-            case ShortPhraseAnimation::EditorialDiffPatch:
-            case ShortPhraseAnimation::EditorialTerminalFocus:
-                break;
             // These product definitions return directly from the first switch.
             case ShortPhraseAnimation::ProductHardMaskSlideUp:
             case ShortPhraseAnimation::ProductKineticBlurIn:
