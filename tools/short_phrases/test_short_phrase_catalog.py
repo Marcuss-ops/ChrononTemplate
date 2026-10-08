@@ -6,7 +6,7 @@ C++-owned pack by `chronontemplate_emit_short_phrase_catalog`. This test pins
 the contract without needing the CLI or a GPU:
 
   1.  the emitter exits 0 and prints valid JSON;
-  2.  the document names the twelve archetypes, the five exit modes and the
+  2.  the document names the short-phrase archetypes, the five exit modes and the
       decor bumper, with unique `short_phrase_*` ids;
   3.  every recipe stays inside the renderer contract: GPU-lowerable selector
       (full | reveal | reveal_soft | band), strictly increasing keyframes that
@@ -88,10 +88,10 @@ def main() -> int:
 
     print("== the short-phrase recipes")
     recipes = document.get("recipes") or []
-    check("twelve originals, ten editorial, and twenty-five product recipes", len(recipes) == 47, str(len(recipes)))
+    check("twelve originals, thirteen editorial, and twenty-five product recipes", len(recipes) == 50, str(len(recipes)))
     editorial = [r for r in recipes if r["id"].startswith("short_phrase_editorial_")]
     product = [r for r in recipes if r["id"].startswith("short_phrase_product_")]
-    check("exactly ten editorial recipes", len(editorial) == 10)
+    check("exactly thirteen editorial recipes", len(editorial) == 13)
     check("fourteen existing, seven text adaptations, and four visual adaptations", len(product) == 25)
     expected_product_ids = {
         "short_phrase_product_masked_heading",
@@ -161,6 +161,12 @@ def main() -> int:
     check("three animation families", {r.get("family") for r in recipes} == {"classic", "editorial", "product_video"})
     check("computer and letter-build subcategories are available",
           {"computer_character_assembly", "letter_by_letter_reveal"}.issubset({r.get("subcategory") for r in recipes}))
+    claude_ids = {"short_phrase_editorial_claude_prompt_response", "short_phrase_editorial_claude_diff_patch", "short_phrase_editorial_claude_terminal_focus"}
+    check("Claude-inspired trio is registered", claude_ids.issubset({r["id"] for r in editorial}))
+    check("Claude-inspired trio declares pure white background", all(r.get("white_background") is True for r in editorial if r["id"] in claude_ids))
+    diff_recipe = next(r for r in editorial if r["id"] == "short_phrase_editorial_claude_diff_patch")
+    check("diff patch orange selector points at the real third word", diff_recipe["text_animators"][1]["selector"]["window"] == "pick:2:3")
+    check("diff patch orange track exists", diff_recipe["text_animators"][1]["properties"][0]["property"] == "fill_orange")
     check("editorial recipes retain their render style", all(r.get("font_size", 0) > 0 and isinstance(r.get("light"), bool) for r in editorial))
     check("three editorial recipes carry native accents", sum(bool(r.get("accents")) for r in editorial) == 3)
     ids = [r.get("id") for r in recipes]

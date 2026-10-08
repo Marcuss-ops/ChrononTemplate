@@ -99,6 +99,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/camera_roll/TitleCameraPack.cpp
         src/chronontemplate/camera_roll/SceneCameraPack.cpp
         src/chronontemplate/entities_with_text/DocumentarySnapshotPack.cpp
+        src/chronontemplate/entities_with_text/EntityFilmstripPack.cpp
         src/chronontemplate/important_phrases/ImportantPhrasePack.cpp
         src/chronontemplate/important_phrases/classic/ClassicPhrasePack.cpp
         src/chronontemplate/important_phrases/typewriter/TypewriterPhrasePack.cpp
@@ -159,6 +160,25 @@ target_link_libraries(chronontemplate_dump_scene_camera_poses PRIVATE chronontem
 add_executable(chronontemplate_sequence_from_json tools/camera_roll/sequence_from_json.cpp)
 target_link_libraries(chronontemplate_sequence_from_json PRIVATE chronontemplate)
 target_include_directories(chronontemplate_sequence_from_json PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+
+add_executable(chronontemplate_emit_entity_filmstrip_reference
+        tools/entities_with_text/emit_entity_filmstrip_reference.cpp)
+target_link_libraries(chronontemplate_emit_entity_filmstrip_reference PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_entity_filmstrip_reference PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_entity_filmstrip_reference PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_entity_filmstrip_reference PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_entity_filmstrip_reference PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_dump_documentary_snapshot_pose
         tools/entities_with_text/dump_documentary_snapshot_pose.cpp)
@@ -415,6 +435,13 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
 
     # Title-to-snapshot documentary scenes are ordinary text/image layers with
     # narrative recipes resolved onto the shared CameraRig.
+    add_executable(chronontemplate_entity_filmstrip_pack_test
+            tests/entity_filmstrip_pack.cpp)
+    target_link_libraries(chronontemplate_entity_filmstrip_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_entity_filmstrip_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_entity_filmstrip_pack_test
+            COMMAND chronontemplate_entity_filmstrip_pack_test)
+
     add_executable(chronontemplate_documentary_snapshot_pack_test
             tests/documentary_snapshot_pack.cpp)
     target_link_libraries(chronontemplate_documentary_snapshot_pack_test PRIVATE chronontemplate)

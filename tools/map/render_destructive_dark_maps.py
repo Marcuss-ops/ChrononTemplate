@@ -1,42 +1,92 @@
 #!/usr/bin/env python3
-"""Destructive Dark Geopolitical Map Animations (5 Distinct Country Motion Styles).
-
-Features 5 distinct, high-impact dark map motion styles with red glow:
-1. ITALY: Tactical Radar Scan & Target Lock HUD with GPS Coordinates
-2. JAPAN: Archipelago Chain-Reaction Wave & Pacific Pulse
-3. RUSSIA: Continental Laser Trace & Dynamic Area Metric (17.1 Mln km²)
-4. GERMANY: Central Europe Logistic Network with Inter-City Beams
-5. SAUDI ARABIA: Desert Grid, Strategic Chokepoints & Red Sea / Gulf Corridors
-
-All rendered with NVIDIA GPU NVENC hardware acceleration at 1080p 30 FPS.
-"""
+"""Render five restrained country-map animations with a CUDA compositor and NVENC."""
 from __future__ import annotations
 
 import argparse
-import concurrent.futures
 import json
 import math
 import os
 import subprocess
+import tempfile
 import sys
 from pathlib import Path
 
 import cv2
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+import torch
+import torch.nn.functional as torch_F
+
+if not torch.cuda.is_available():
+    raise RuntimeError("CUDA is required for map rendering; refusing CPU rendering fallback")
+GPU_DEVICE = torch.device("cuda")
 
 WIDTH = 1920
 HEIGHT = 1080
 FPS = 30
+SUBPIXEL_SHIFT = 8
+SUBPIXEL_SCALE = 1 << SUBPIXEL_SHIFT
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parents[2]
 CHRONON_TEMPLATE = HERE.parents[1]
 CATALOG_DIR = CHRONON_TEMPLATE / "catalog"
 GEOJSON_PATH = CATALOG_DIR / "ne_50m_admin_0_countries.geojson"
-FONTS_DIR = PROJECT_ROOT / "Chronon3d/assets/fonts"
 OUT_DIR = CHRONON_TEMPLATE / "out/destructive_dark_maps"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
+OPENCV_OUT_DIR = CHRONON_TEMPLATE / "out/destructive_opencv_maps"
+FLAG_DIR = CHRONON_TEMPLATE / "assets/flags"
+PROJECT_ROOT = HERE.parents[2]
+sys.path.insert(0, str(PROJECT_ROOT / "Chronon3d/tools/cartography"))
+import dynamic_tile_pyramid as dyn  # noqa: E402
+import fast_plate_sampler as fast  # noqa: E402
+
+RENDERER_MODE = "dark_map"
+MAP_MOTION_SCENES = {
+    "map_image_dark_map_italy_radar_lock": ("dark_map", 1),
+    "map_image_opencv_italy_radar_lock": ("opencv", 1),
+    "map_image_dark_map_japan_archipelago_chain": ("dark_map", 2),
+    "map_image_opencv_japan_archipelago_chain": ("opencv", 2),
+    "map_image_dark_map_russia_continental_laser": ("dark_map", 3),
+    "map_image_opencv_russia_continental_laser": ("opencv", 3),
+    "map_image_dark_map_germany_industrial_nodes": ("dark_map", 4),
+    "map_image_opencv_germany_industrial_nodes": ("opencv", 4),
+    "map_image_dark_map_saudi_arabia_desert_pipeline": ("dark_map", 5),
+    "map_image_opencv_saudi_arabia_desert_pipeline": ("opencv", 5),
+}
+MAP_SCENE_FILES = {
+    1: ("italy", "radar_lock", "01_italy_radar_lock.mp4"),
+    2: ("japan", "archipelago_chain", "02_japan_archipelago_chain.mp4"),
+    3: ("russia", "continental_laser", "03_russia_continental_laser.mp4"),
+    4: ("germany", "industrial_nodes", "04_germany_industrial_nodes.mp4"),
+    5: ("saudi_arabia", "desert_pipeline", "05_saudi_arabia_desert_pipeline.mp4"),
+}
+
+
+def write_motion_manifest():
+    manifest = {
+        "version": 1,
+        "width": WIDTH,
+        "height": HEIGHT,
+        "fps": FPS,
+        "duration_seconds": 5,
+        "render_backend": "torch_cuda",
+        "video_encoder": "h264_nvenc",
+        "motions": [],
+    }
+    for scene_id, (map_id, animation, filename) in MAP_SCENE_FILES.items():
+        for renderer, directory in (("dark_map", OUT_DIR), ("opencv", OPENCV_OUT_DIR)):
+            motion_id = f"map_image_{renderer}_{map_id}_{animation}"
+            manifest["motions"].append({
+                "motion_id": motion_id,
+                "renderer": renderer,
+                "map_id": map_id,
+                "animation": animation,
+                "scene": scene_id,
+                "file": str((directory / filename).relative_to(CHRONON_TEMPLATE)),
+            })
+    (CHRONON_TEMPLATE / "out/map_animation_renderers_v1.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 # Aesthetic color palettes (BGR for OpenCV)
 COLOR_OCEAN_DARK = (14, 12, 10)         # Deep black/charcoal ocean
@@ -47,10 +97,8 @@ COLOR_BORDER_MUTED = (44, 40, 36)       # Country boundaries
 COLOR_GRID_BLUE = (145, 95, 65)         # Cartographic grid lines
 COLOR_GRID_CYAN = (180, 140, 80)        # Bright grid accents
 
-COLOR_RED_VIVID = (20, 25, 245)         # Saturated geopolitical red #F51914
-COLOR_RED_GLOW = (40, 45, 255)          # Bright neon red core
-COLOR_WHITE = (255, 255, 255)
-COLOR_GOLD = (30, 210, 255)
+COLOR_COUNTRY_GLOW = (68, 92, 190)       # Muted warm coral for the highlighted country
+FLAG_BRIGHTNESS = 0.80
 
 
 def smooth_swoop(t: float) -> float:
@@ -67,6 +115,12 @@ def ease_in_cubic(t: float) -> float:
 
 def lerp(a: float, b: float, t: float) -> float:
     return a + (b - a) * t
+
+
+def geographic_bounds(rings: list[np.ndarray]) -> tuple[float, float, float, float]:
+    points = np.concatenate(rings, axis=0)
+    return (float(points[:, 0].min()), float(points[:, 0].max()),
+            float(points[:, 1].min()), float(points[:, 1].max()))
 
 
 class GeoEngine:
@@ -115,10 +169,19 @@ GEO = GeoEngine()
 class DynamicCamera:
     def __init__(self, start_pose: tuple[float, float, float],
                  end_pose: tuple[float, float, float],
-                 total_frames: int):
+                 total_frames: int, provider: str = "esri_sat"):
         self.start_pose = start_pose
         self.end_pose = end_pose
         self.total_frames = max(1, total_frames)
+        self.basemap_sampler = None
+        if RENDERER_MODE == "opencv":
+            scales = (start_pose[2], end_pose[2])
+            zooms = [math.log2(scale * 360.0 / 256.0) for scale in scales]
+            self.basemap_sampler = fast.FastPlateSampler(
+                dyn.DynamicTilePyramid(provider=provider), WIDTH, HEIGHT)
+            self.basemap_sampler.prepare(
+                [(start_pose[1], start_pose[0]), (end_pose[1], end_pose[0])],
+                max(0, math.floor(min(zooms))), math.ceil(max(zooms)) + 1)
 
     def get_pose(self, frame_idx: int) -> tuple[float, float, float]:
         t = smooth_swoop(frame_idx / float(self.total_frames))
@@ -148,13 +211,18 @@ class DynamicCamera:
             xs = WIDTH / 2.0 + (lons - c_lon) * scale
             yms = np.log(np.tan(np.pi / 4.0 + np.radians(lats) / 2.0))
             ys = HEIGHT / 2.0 - (yms - cy_m) * scale_deg
-            pts = np.stack([xs, ys], axis=-1).astype(np.int32)
+            pts = np.rint(np.stack([xs, ys], axis=-1) * SUBPIXEL_SCALE).astype(np.int32)
             polys.append(pts)
         return polys
 
     def render_base(self, c_lon: float, c_lat: float, scale: float,
                     ocean_color=COLOR_OCEAN_DARK, land_color=COLOR_LAND_DARK,
                     border_color=COLOR_BORDER_MUTED, with_grid: bool = True) -> np.ndarray:
+        if self.basemap_sampler is not None:
+            zoom = math.log2(scale * 360.0 / 256.0)
+            frame = self.basemap_sampler.sample_subpixel(c_lat, c_lon, zoom, WIDTH, HEIGHT)
+            frame = cv2.addWeighted(frame, 0.77, np.zeros_like(frame), 0.23, 0)
+            return frame
         frame = np.zeros((HEIGHT, WIDTH, 3), dtype=np.uint8)
         frame[:] = ocean_color
 
@@ -187,32 +255,120 @@ class DynamicCamera:
             xs = WIDTH / 2.0 + (lons - c_lon) * scale
             yms = np.log(np.tan(np.pi / 4.0 + np.radians(lats) / 2.0))
             ys = HEIGHT / 2.0 - (yms - cy_m) * scale_deg
-            pts = np.stack([xs, ys], axis=-1).astype(np.int32)
+            pts = np.rint(np.stack([xs, ys], axis=-1) * SUBPIXEL_SCALE).astype(np.int32)
             visible_polys.append(pts)
 
         if visible_polys:
-            cv2.fillPoly(frame, visible_polys, land_color)
-            cv2.polylines(frame, visible_polys, True, border_color, 1, cv2.LINE_AA)
+            cv2.fillPoly(frame, visible_polys, land_color, shift=SUBPIXEL_SHIFT)
+            cv2.polylines(frame, visible_polys, True, border_color, 1, cv2.LINE_AA,
+                          shift=SUBPIXEL_SHIFT)
 
         return frame
 
 
-class DynamicEffects:
-    @staticmethod
-    def draw_country_fill(frame: np.ndarray, polys: list[np.ndarray],
-                          color_bgr: tuple[int, int, int], opacity: float):
-        if opacity <= 0.001 or not polys:
-            return
-        mask = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
-        cv2.fillPoly(mask, polys, 255)
-        overlay = np.zeros_like(frame)
-        overlay[:] = color_bgr
-        alpha = max(0.0, min(1.0, opacity))
-        fg = cv2.addWeighted(frame, 1.0 - alpha, overlay, alpha, 0)
-        frame[mask > 0] = fg[mask > 0]
+class GPUMapFrame:
+    """CUDA compositor for a single prepared basemap frame."""
+
+    _kernels: dict[float, torch.Tensor] = {}
+
+    def __init__(self, frame: np.ndarray):
+        self.pixels = torch.from_numpy(np.ascontiguousarray(frame)).to(
+            device=GPU_DEVICE, dtype=torch.float32
+        ).permute(2, 0, 1).contiguous()
 
     @staticmethod
-    def draw_outline_glow(frame: np.ndarray, polys: list[np.ndarray],
+    def mask(mask: np.ndarray | torch.Tensor) -> torch.Tensor:
+        if isinstance(mask, torch.Tensor):
+            return mask
+        tensor = torch.from_numpy(np.ascontiguousarray(mask)).to(device=GPU_DEVICE, dtype=torch.float32)
+        return tensor if np.issubdtype(mask.dtype, np.floating) else tensor / 255.0
+
+    @classmethod
+    def gaussian(cls, mask: np.ndarray | torch.Tensor, sigma: float) -> torch.Tensor:
+        source = cls.mask(mask)
+        if sigma not in cls._kernels:
+            radius = max(1, int(math.ceil(3 * sigma)))
+            coords = torch.arange(-radius, radius + 1, device=GPU_DEVICE, dtype=torch.float32)
+            kernel = torch.exp(-(coords * coords) / (2 * sigma * sigma))
+            cls._kernels[sigma] = (kernel / kernel.sum()).view(1, 1, 1, -1)
+        kernel_x = cls._kernels[sigma]
+        kernel_y = kernel_x.transpose(2, 3).contiguous()
+        source = source.view(1, 1, HEIGHT, WIDTH)
+        radius = kernel_x.shape[-1] // 2
+        source = torch_F.pad(source, (radius, radius, 0, 0), mode="replicate")
+        source = torch_F.conv2d(source, kernel_x)
+        source = torch_F.pad(source, (0, 0, radius, radius), mode="replicate")
+        return torch_F.conv2d(source, kernel_y)[0, 0]
+
+    def blend_mask(self, mask: np.ndarray | torch.Tensor,
+                   color_bgr: tuple[int, int, int], opacity: float):
+        if opacity <= 0:
+            return
+        alpha = (self.mask(mask) * float(opacity)).clamp_(0.0, 1.0).unsqueeze(0)
+        color = torch.tensor(color_bgr, device=GPU_DEVICE, dtype=torch.float32).view(3, 1, 1)
+        self.pixels.mul_(1.0 - alpha).add_(color * alpha)
+
+    def blend_patch(self, image_bgr: np.ndarray, mask: np.ndarray | torch.Tensor,
+                    x: int, y: int, opacity: float):
+        """Composite a flag texture into its projected country-mask bounds on CUDA."""
+        if opacity <= 0 or image_bgr.size == 0:
+            return
+        height, width = image_bgr.shape[:2]
+        target = self.pixels[:, y:y + height, x:x + width]
+        alpha = (self.mask(mask) * float(opacity)).clamp_(0.0, 1.0).unsqueeze(0)
+        source = torch.from_numpy(np.ascontiguousarray(image_bgr)).to(
+            device=GPU_DEVICE, dtype=torch.float32
+        ).permute(2, 0, 1)
+        target.mul_(1.0 - alpha).add_(source * alpha)
+
+    def to_numpy(self) -> np.ndarray:
+        return self.pixels.clamp_(0, 255).byte().permute(1, 2, 0).contiguous().cpu().numpy()
+
+
+class DynamicEffects:
+    @staticmethod
+    def draw_country_flag(frame: GPUMapFrame, flag_path: Path, polys: list[np.ndarray],
+                          progress: float, camera_pose: tuple[float, float, float],
+                          geo_bounds: tuple[float, float, float, float]):
+        """Project a subdued flag texture and clip it to the country's vector silhouette."""
+        if progress <= 0.001 or not polys:
+            return
+        country_mask = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
+        cv2.fillPoly(country_mask, polys, 255, shift=SUBPIXEL_SHIFT)
+        all_points = np.concatenate(polys, axis=0).astype(np.float32) / SUBPIXEL_SCALE
+        bx, by, bw, bh = cv2.boundingRect(all_points)
+        x0, y0 = max(0, bx), max(0, by)
+        x1, y1 = min(WIDTH, bx + bw), min(HEIGHT, by + bh)
+        if x0 >= x1 or y0 >= y1:
+            return
+        flag = cv2.imread(str(flag_path), cv2.IMREAD_COLOR)
+        if flag is None:
+            raise FileNotFoundError(f"Country flag asset missing: {flag_path}")
+        c_lon, c_lat, scale = camera_pose
+        min_lon, max_lon, min_lat, max_lat = geo_bounds
+        min_lon, max_lon = sorted((min_lon, max_lon))
+        min_lat, max_lat = sorted((min_lat, max_lat))
+        mercator = lambda lat: math.log(math.tan(math.pi / 4.0 + math.radians(max(-85.0, min(85.0, lat))) / 2.0))
+        min_merc, max_merc = mercator(min_lat), mercator(max_lat)
+        c_merc = mercator(c_lat)
+        map_x = np.broadcast_to(
+            c_lon + ((np.arange(x0, x1, dtype=np.float32)[None, :] + 0.5 - WIDTH / 2.0) / scale),
+            (y1 - y0, x1 - x0),
+        )
+        map_y = np.broadcast_to(
+            c_merc + (HEIGHT / 2.0 - (np.arange(y0, y1, dtype=np.float32)[:, None] + 0.5)) / (scale * 180.0 / math.pi),
+            (y1 - y0, x1 - x0),
+        )
+        src_x = (map_x - min_lon) / max(1e-6, max_lon - min_lon) * (flag.shape[1] - 1)
+        src_y = (max_merc - map_y) / max(1e-6, max_merc - min_merc) * (flag.shape[0] - 1)
+        flag = cv2.remap(flag, src_x.astype(np.float32), src_y.astype(np.float32),
+                         cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+        flag = np.clip(flag.astype(np.float32) * FLAG_BRIGHTNESS, 0, 255).astype(np.uint8)
+        mask_patch = country_mask[y0:y1, x0:x1]
+        frame.blend_patch(flag, mask_patch, x0, y0, ease_out_cubic(progress))
+
+    @staticmethod
+    def draw_outline_glow(frame: GPUMapFrame, polys: list[np.ndarray],
                           color_bgr: tuple[int, int, int], progress: float = 1.0,
                           thickness: int = 3, halo_strength: float = 1.2):
         if progress <= 0.001 or not polys:
@@ -220,12 +376,13 @@ class DynamicEffects:
         edge = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
 
         if progress >= 0.999:
-            cv2.polylines(edge, polys, True, 255, thickness, cv2.LINE_AA)
+            cv2.polylines(edge, polys, True, 255, thickness, cv2.LINE_AA, shift=SUBPIXEL_SHIFT)
         else:
             for poly in polys:
                 if len(poly) < 2:
                     continue
-                seg_lens = np.sqrt(np.sum(np.diff(poly.astype(np.float64), axis=0) ** 2, axis=1))
+                points = poly.astype(np.float64) / SUBPIXEL_SCALE
+                seg_lens = np.sqrt(np.sum(np.diff(points, axis=0) ** 2, axis=1))
                 total_len = float(seg_lens.sum())
                 budget = total_len * progress
                 if budget <= 0:
@@ -233,93 +390,24 @@ class DynamicEffects:
                 for i, d in enumerate(seg_lens):
                     if budget <= 0:
                         break
-                    p1 = poly[i]
-                    p2 = poly[(i + 1) % len(poly)]
+                    p1 = points[i]
+                    p2 = points[(i + 1) % len(poly)]
                     ratio = min(1.0, budget / max(1e-6, d))
-                    p_end = (p1 + (p2 - p1) * ratio).astype(int)
-                    cv2.line(edge, tuple(p1), tuple(p_end), 255, thickness, cv2.LINE_AA)
+                    p_end = p1 + (p2 - p1) * ratio
+                    start_fixed = tuple(np.rint(p1 * SUBPIXEL_SCALE).astype(int))
+                    end_fixed = tuple(np.rint(p_end * SUBPIXEL_SCALE).astype(int))
+                    cv2.line(edge, start_fixed, end_fixed, 255, thickness, cv2.LINE_AA, shift=SUBPIXEL_SHIFT)
                     budget -= d
 
-        base_f = frame.astype(np.float32)
-        c_f = np.asarray(color_bgr, dtype=np.float32)[None, None, :]
+        edge_gpu = frame.mask(edge)
         for sigma, weight in [(24, 0.40 * halo_strength), (10, 0.65 * halo_strength), (3, 0.90 * halo_strength)]:
-            halo = cv2.GaussianBlur(edge, (0, 0), sigma).astype(np.float32) / 255.0
-            a = (halo * weight)[:, :, None]
-            base_f = base_f * (1.0 - a) + c_f * a
-
-        rim = (edge.astype(np.float32) / 255.0)[:, :, None]
-        bright = np.clip(c_f * 0.6 + 255.0 * 0.4, 0, 255)
-        base_f = base_f * (1.0 - rim) + bright * rim
-        frame[:] = np.clip(base_f, 0, 255).astype(np.uint8)
-
-    @staticmethod
-    def draw_speech_pin(frame: np.ndarray, text: str, anchor_pt: tuple[int, int], progress: float,
-                        subtitle: str = ""):
-        """Authentic speech-bubble pin matching the Latin America style."""
-        if progress <= 0.001:
-            return
-        p = ease_out_cubic(progress)
-        font_title = ImageFont.truetype(str(FONTS_DIR / "Inter-SemiBold.ttf"), size=23)
-        font_sub = ImageFont.truetype(str(FONTS_DIR / "Inter-Regular.ttf"), size=15) if subtitle else None
-
-        dummy = Image.new("RGBA", (1, 1))
-        d = ImageDraw.Draw(dummy)
-        bbox = d.textbbox((0, 0), text, font=font_title)
-        tw = bbox[2] - bbox[0]
-        th = bbox[3] - bbox[1]
-
-        if subtitle:
-            s_box = d.textbbox((0, 0), subtitle, font=font_sub)
-            tw = max(tw, s_box[2] - s_box[0])
-            th += s_box[3] - s_box[1] + 6
-
-        pad_x, pad_y = 18, 10
-        w = int((tw + pad_x * 2) * p)
-        h = int((th + pad_y * 2) * p)
-        tail_h = int(10 * p)
-        if w < 10 or h < 10:
-            return
-
-        tot_w = w + 40
-        tot_h = h + tail_h + 20
-
-        img = Image.new("RGBA", (tot_w, tot_h), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-
-        cx = tot_w // 2
-        top = 10
-        rect_box = [cx - w // 2, top, cx + w // 2, top + h]
-        draw.rounded_rectangle(rect_box, radius=5, fill=(255, 255, 255, 255))
-        tri = [(cx - 7, top + h - 1), (cx + 7, top + h - 1), (cx, top + h + tail_h)]
-        draw.polygon(tri, fill=(255, 255, 255, 255))
-
-        if p > 0.6:
-            if subtitle:
-                draw.text((cx, top + 14), text, font=font_title, fill=(15, 18, 24, int(255 * p)), anchor="mm")
-                draw.text((cx, top + 34), subtitle, font=font_sub, fill=(110, 115, 125, int(255 * p)), anchor="mm")
-            else:
-                draw.text((cx, top + h // 2), text, font=font_title, fill=(15, 18, 24, int(255 * p)), anchor="mm")
-
-        np_img = np.asarray(img)
-        shadow = cv2.GaussianBlur(np_img[:, :, 3], (0, 0), 4)
-        shadow_rgba = np.zeros_like(np_img)
-        shadow_rgba[:, :, :3] = 0
-        shadow_rgba[:, :, 3] = (shadow.astype(np.float32) * 0.45).astype(np.uint8)
-        M = np.float32([[1, 0, 0], [0, 1, 3]])
-        shadow_shifted = cv2.warpAffine(shadow_rgba, M, (tot_w, tot_h))
-        comp = Image.alpha_composite(Image.fromarray(shadow_shifted), img)
-
-        px = anchor_pt[0] - tot_w // 2
-        py = anchor_pt[1] - (top + h + tail_h)
-
-        pil_frame = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        pil_frame.paste(comp, (px, py), comp)
-        frame[:] = cv2.cvtColor(np.asarray(pil_frame), cv2.COLOR_RGB2BGR)
-
+            frame.blend_mask(frame.gaussian(edge_gpu, sigma), color_bgr, weight)
+        bright = tuple(int(min(255, c * 0.72 + 255 * 0.28)) for c in color_bgr)
+        frame.blend_mask(edge_gpu, bright, 0.90)
 
 def write_video_h264(frames: list[np.ndarray], out_path: Path):
     cmd_nvenc = [
-        "ffmpeg", "-y",
+        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
         "-f", "rawvideo",
         "-vcodec", "rawvideo",
         "-s", f"{WIDTH}x{HEIGHT}",
@@ -327,52 +415,79 @@ def write_video_h264(frames: list[np.ndarray], out_path: Path):
         "-r", str(FPS),
         "-i", "-",
         "-c:v", "h264_nvenc",
+        "-gpu", "0",
         "-preset", "p5",
         "-cq", "18",
         "-pix_fmt", "yuv420p",
         "-movflags", "+faststart",
         str(out_path)
     ]
-    try:
-        proc = subprocess.Popen(cmd_nvenc, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        for f in frames:
-            proc.stdin.write(f.tobytes())
-        proc.stdin.close()
-        proc.wait()
-        if proc.returncode == 0:
-            return
-    except Exception:
-        pass
-
-    # CPU fallback
-    cmd_cpu = [
-        "ffmpeg", "-y",
-        "-f", "rawvideo",
-        "-vcodec", "rawvideo",
-        "-s", f"{WIDTH}x{HEIGHT}",
-        "-pix_fmt", "bgr24",
-        "-r", str(FPS),
-        "-i", "-",
-        "-c:v", "libx264",
-        "-pix_fmt", "yuv420p",
-        "-profile:v", "high",
-        "-level", "4.1",
-        "-movflags", "+faststart",
-        "-crf", "18",
-        str(out_path)
-    ]
-    proc = subprocess.Popen(cmd_cpu, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    proc = subprocess.Popen(cmd_nvenc, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     for f in frames:
-        proc.stdin.write(f.tobytes())
+        try:
+            proc.stdin.write(f.tobytes())
+        except BrokenPipeError:
+            break
     proc.stdin.close()
+    error = proc.stderr.read().decode("utf-8", errors="replace")
     proc.wait()
+    if proc.returncode != 0:
+        raise RuntimeError(f"GPU NVENC encoding failed for {out_path}: {error.strip()}")
+
+
+class H264NVENCStream:
+    """Stream rendered frames to NVENC without retaining a full clip in RAM."""
+
+    def __init__(self, out_path: Path):
+        cmd = [
+            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+            "-f", "rawvideo", "-vcodec", "rawvideo",
+            "-s", f"{WIDTH}x{HEIGHT}", "-pix_fmt", "bgr24", "-r", str(FPS),
+            "-i", "-", "-c:v", "h264_nvenc", "-gpu", "0", "-preset", "p5",
+            "-cq", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+            str(out_path),
+        ]
+        self._stderr = tempfile.TemporaryFile()
+        self._proc = subprocess.Popen(cmd, stdin=subprocess.PIPE,
+                                      stdout=subprocess.DEVNULL, stderr=self._stderr)
+
+    def __enter__(self):
+        return self
+
+    def write(self, frame: np.ndarray):
+        if self._proc.stdin is None:
+            raise RuntimeError("NVENC stream is already closed")
+        self._proc.stdin.write(np.ascontiguousarray(frame).tobytes())
+
+    def close(self):
+        if self._proc.stdin is not None:
+            self._proc.stdin.close()
+            self._proc.stdin = None
+        self._stderr.seek(0)
+        error = self._stderr.read().decode("utf-8", errors="replace")
+        self._stderr.close()
+        self._proc.wait()
+        if self._proc.returncode != 0:
+            raise RuntimeError(f"GPU NVENC streaming failed: {error.strip()}")
+
+    def __exit__(self, exc_type, exc, traceback):
+        if exc_type is None:
+            self.close()
+        else:
+            if self._proc.stdin is not None:
+                self._proc.stdin.close()
+                self._proc.stdin = None
+            self._proc.terminate()
+            self._proc.wait()
+            self._stderr.close()
+        return False
 
 
 # -----------------------------------------------------------------------------
 # 5 DISTINCT DESTRUCTIVE DARK ANIMATIONS (1 NATION PER VIDEO)
 # -----------------------------------------------------------------------------
 
-def render_italy_radar_lock(out_mp4: Path, num_frames=120):
+def render_italy_radar_lock(out_mp4: Path, num_frames=150):
     """1. ITALY: Tactical Radar Scan & Target Lock HUD with GPS Coordinates."""
     print("Rendering 1/5: Italy Tactical Radar Lock...")
     # Camera starts over high Europe and dives tightly into Italy
@@ -381,57 +496,29 @@ def render_italy_radar_lock(out_mp4: Path, num_frames=120):
                         total_frames=num_frames)
 
     it_rings = GEO.get_country_rings("Italy")
+    it_bounds = geographic_bounds(it_rings)
     frames = []
 
     for f in range(num_frames):
         c_lon, c_lat, scale = cam.get_pose(f)
         frame = cam.render_base(c_lon, c_lat, scale, ocean_color=COLOR_OCEAN_BLUE,
-                                land_color=COLOR_LAND_DEEP, border_color=(45, 40, 36), with_grid=True)
+                                land_color=COLOR_LAND_DEEP, border_color=(45, 40, 36), with_grid=False)
+        frame = GPUMapFrame(frame)
 
         it_polys = cam.project_rings(it_rings, c_lon, c_lat, scale)
-        it_center = cam.project_point(12.5, 41.9, c_lon, c_lat, scale)
+        country_progress = smooth_swoop((f - 16) / 38.0)
+        DynamicEffects.draw_country_flag(frame, FLAG_DIR / "it.png", it_polys, country_progress,
+                                         (c_lon, c_lat, scale), it_bounds)
+        DynamicEffects.draw_outline_glow(frame, it_polys, COLOR_COUNTRY_GLOW,
+                                         progress=country_progress, thickness=2, halo_strength=0.72)
 
-        p_lock = smooth_swoop((f - 18) / 35.0)
-
-        # Radar sweep angle
-        angle_deg = (f * 9.0) % 360.0
-        angle_rad = math.radians(angle_deg)
-        radar_len = 500
-        rx = int(it_center[0] + radar_len * math.cos(angle_rad))
-        ry = int(it_center[1] + radar_len * math.sin(angle_rad))
-        cv2.line(frame, it_center, (rx, ry), (80, 240, 180), 2, cv2.LINE_AA)
-
-        # Country glow on lock
-        if p_lock > 0:
-            DynamicEffects.draw_country_fill(frame, it_polys, COLOR_RED_VIVID, opacity=0.96 * p_lock)
-            DynamicEffects.draw_outline_glow(frame, it_polys, COLOR_RED_VIVID, progress=1.0, halo_strength=1.4)
-
-            # Target Lock Brackets around Italy
-            bw = int(180 * (2.0 - p_lock))
-            bh = int(240 * (2.0 - p_lock))
-            cx, cy = it_center
-            corner_len = 24
-            # 4 corners
-            corners = [
-                ((cx - bw, cy - bh), (cx - bw + corner_len, cy - bh), (cx - bw, cy - bh + corner_len)),
-                ((cx + bw, cy - bh), (cx + bw - corner_len, cy - bh), (cx + bw, cy - bh + corner_len)),
-                ((cx - bw, cy + bh), (cx - bw + corner_len, cy + bh), (cx - bw, cy + bh - corner_len)),
-                ((cx + bw, cy + bh), (cx + bw - corner_len, cy + bh), (cx + bw, cy + bh - corner_len)),
-            ]
-            for c_pt, p_h, p_v in corners:
-                cv2.line(frame, c_pt, p_h, COLOR_WHITE, 3, cv2.LINE_AA)
-                cv2.line(frame, c_pt, p_v, COLOR_WHITE, 3, cv2.LINE_AA)
-
-        # Pin with GPS coordinates
-        DynamicEffects.draw_speech_pin(frame, "ITALIA", it_center, (f - 28) / 22.0, subtitle="41.9° N, 12.5° E")
-
-        frames.append(frame)
+        frames.append(frame.to_numpy())
 
     write_video_h264(frames, out_mp4)
     print("Done Italy")
 
 
-def render_japan_archipelago_chain(out_mp4: Path, num_frames=120):
+def render_japan_archipelago_chain(out_mp4: Path, num_frames=150):
     """2. JAPAN: Archipelago Chain-Reaction Wave & Pacific Pulse."""
     print("Rendering 2/5: Japan Archipelago Chain...")
     cam = DynamicCamera(start_pose=(147.0, 33.0, 9.5),
@@ -439,46 +526,31 @@ def render_japan_archipelago_chain(out_mp4: Path, num_frames=120):
                         total_frames=num_frames)
 
     jp_rings = GEO.get_country_rings("Japan")
+    jp_bounds = geographic_bounds(jp_rings)
     frames = []
 
     for f in range(num_frames):
         c_lon, c_lat, scale = cam.get_pose(f)
         frame = cam.render_base(c_lon, c_lat, scale, ocean_color=COLOR_OCEAN_BLUE,
-                                land_color=COLOR_LAND_DEEP, border_color=(42, 38, 35), with_grid=True)
+                                land_color=COLOR_LAND_DEEP, border_color=(42, 38, 35), with_grid=False)
+        frame = GPUMapFrame(frame)
 
         jp_polys = cam.project_rings(jp_rings, c_lon, c_lat, scale)
 
-        # Sequential wave ignition along latitude (North to South)
-        tokyo_pt = cam.project_point(139.69, 35.68, c_lon, c_lat, scale)
+        country_progress = smooth_swoop((f - 10) / 48.0)
+        DynamicEffects.draw_country_flag(frame, FLAG_DIR / "jp.png", jp_polys, country_progress,
+                                         (c_lon, c_lat, scale), jp_bounds)
+        DynamicEffects.draw_outline_glow(frame, jp_polys, COLOR_COUNTRY_GLOW,
+                                         progress=country_progress, thickness=2, halo_strength=0.72)
 
-        p_wave = smooth_swoop((f - 10) / 45.0)
-        DynamicEffects.draw_country_fill(frame, jp_polys, COLOR_RED_VIVID, opacity=0.96 * p_wave)
-        DynamicEffects.draw_outline_glow(frame, jp_polys, COLOR_RED_VIVID, progress=p_wave, halo_strength=1.5)
-
-        # Expanding circular seismic ripples in Pacific from Tokyo
-        p_ripple = (f - 30) / 70.0
-        if p_ripple > 0:
-            for r_idx in range(3):
-                r_phase = ((f - 30 + r_idx * 18) % 60) / 60.0
-                rad = int(r_phase * 340)
-                alpha = (1.0 - r_phase) * 0.7
-                if rad > 5:
-                    overlay = frame.copy()
-                    cv2.circle(overlay, tokyo_pt, rad, COLOR_RED_VIVID, 3, cv2.LINE_AA)
-                    cv2.circle(overlay, tokyo_pt, rad + 4, (255, 255, 255), 1, cv2.LINE_AA)
-                    frame[:] = cv2.addWeighted(frame, 1.0 - alpha, overlay, alpha, 0)
-
-        # Tokyo pin & country card
-        DynamicEffects.draw_speech_pin(frame, "JAPAN", tokyo_pt, (f - 35) / 22.0, subtitle="PACIFIC FRONT")
-
-        frames.append(frame)
+        frames.append(frame.to_numpy())
 
     write_video_h264(frames, out_mp4)
     print("Done Japan")
 
 
-def render_russia_continental_laser(out_mp4: Path, num_frames=120):
-    """3. RUSSIA: Continental Laser Trace & Dynamic Area Metric (17.1 Mln km²)."""
+def render_russia_continental_laser(out_mp4: Path, num_frames=150):
+    """3. RUSSIA: understated projected country name and outline glow."""
     print("Rendering 3/5: Russia Continental Laser...")
     # Epic transcontinental glide across Eurasia
     cam = DynamicCamera(start_pose=(45.0, 62.0, 4.4),
@@ -486,57 +558,30 @@ def render_russia_continental_laser(out_mp4: Path, num_frames=120):
                         total_frames=num_frames)
 
     ru_rings = GEO.get_country_rings("Russia")
-    font_metric = ImageFont.truetype(str(FONTS_DIR / "Urbanist.ttf"), 68)
-
+    ru_bounds = geographic_bounds(ru_rings)
     frames = []
 
     for f in range(num_frames):
         c_lon, c_lat, scale = cam.get_pose(f)
         frame = cam.render_base(c_lon, c_lat, scale, ocean_color=(15, 13, 11),
-                                land_color=COLOR_LAND_DEEP, border_color=(38, 35, 32), with_grid=True)
+                                land_color=COLOR_LAND_DEEP, border_color=(38, 35, 32), with_grid=False)
+        frame = GPUMapFrame(frame)
 
         ru_polys = cam.project_rings(ru_rings, c_lon, c_lat, scale)
 
-        p_laser = smooth_swoop(f / 65.0)
-        DynamicEffects.draw_country_fill(frame, ru_polys, COLOR_RED_VIVID, opacity=0.94 * p_laser)
-        DynamicEffects.draw_outline_glow(frame, ru_polys, COLOR_RED_VIVID, progress=p_laser, halo_strength=1.6)
+        country_progress = smooth_swoop(f / 65.0)
+        DynamicEffects.draw_country_flag(frame, FLAG_DIR / "ru.png", ru_polys, country_progress,
+                                         (c_lon, c_lat, scale), ru_bounds)
+        DynamicEffects.draw_outline_glow(frame, ru_polys, COLOR_COUNTRY_GLOW,
+                                         progress=country_progress, thickness=2, halo_strength=0.62)
 
-        # Moscow anchor
-        moscow_pt = cam.project_point(37.61, 55.75, c_lon, c_lat, scale)
-        DynamicEffects.draw_speech_pin(frame, "RUSSIA", moscow_pt, (f - 15) / 20.0, subtitle="FEDERATION")
-
-        # Huge kinetic counter badge '17.1 Mln km²'
-        p_metric = ease_out_cubic((f - 25) / 45.0)
-        if p_metric > 0:
-            val = p_metric * 17.1
-            text_str = f"{val:.1f} Mln km²" if p_metric < 0.99 else "17.1 Mln km²"
-
-            temp_img = Image.new("RGBA", (650, 160), (0, 0, 0, 0))
-            d = ImageDraw.Draw(temp_img)
-            d.text((325, 80), text_str, font=font_metric, fill=(255, 255, 255, 255), anchor="mm")
-
-            np_m = np.asarray(temp_img)
-            shadow = cv2.GaussianBlur(np_m[:, :, 3], (0, 0), 12)
-            shadow_rgba = np.zeros_like(np_m)
-            shadow_rgba[:, :, :3] = 0
-            shadow_rgba[:, :, 3] = (shadow.astype(np.float32) * 0.8).astype(np.uint8)
-            M_s = np.float32([[1, 0, 2], [0, 1, 4]])
-            shadow_shifted = cv2.warpAffine(shadow_rgba, M_s, (650, 160))
-            comp_metric = Image.alpha_composite(Image.fromarray(shadow_shifted), temp_img)
-
-            # Paste in upper right
-            mx, my = WIDTH - 680, 80
-            pil_frame = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            pil_frame.paste(comp_metric, (mx, my), comp_metric)
-            frame[:] = cv2.cvtColor(np.asarray(pil_frame), cv2.COLOR_RGB2BGR)
-
-        frames.append(frame)
+        frames.append(frame.to_numpy())
 
     write_video_h264(frames, out_mp4)
     print("Done Russia")
 
 
-def render_germany_industrial_nodes(out_mp4: Path, num_frames=120):
+def render_germany_industrial_nodes(out_mp4: Path, num_frames=150):
     """4. GERMANY: Central Europe Hub & Logistic Network Beams."""
     print("Rendering 4/5: Germany Industrial Network...")
     cam = DynamicCamera(start_pose=(10.0, 52.0, 10.0),
@@ -544,58 +589,30 @@ def render_germany_industrial_nodes(out_mp4: Path, num_frames=120):
                         total_frames=num_frames)
 
     de_rings = GEO.get_country_rings("Germany")
-    cities = [
-        ("Berlin", 13.40, 52.52),
-        ("Hamburg", 9.99, 53.55),
-        ("Frankfurt", 8.68, 50.11),
-        ("Munich", 11.58, 48.13),
-    ]
-
+    de_bounds = geographic_bounds(de_rings)
     frames = []
 
     for f in range(num_frames):
         c_lon, c_lat, scale = cam.get_pose(f)
         frame = cam.render_base(c_lon, c_lat, scale, ocean_color=COLOR_OCEAN_BLUE,
-                                land_color=COLOR_LAND_DEEP, border_color=(45, 42, 38), with_grid=True)
+                                land_color=COLOR_LAND_DEEP, border_color=(45, 42, 38), with_grid=False)
+        frame = GPUMapFrame(frame)
 
         de_polys = cam.project_rings(de_rings, c_lon, c_lat, scale)
 
-        p_fill = smooth_swoop(f / 45.0)
-        DynamicEffects.draw_country_fill(frame, de_polys, COLOR_RED_VIVID, opacity=0.96 * p_fill)
-        DynamicEffects.draw_outline_glow(frame, de_polys, COLOR_RED_VIVID, progress=1.0, halo_strength=1.3)
+        country_progress = smooth_swoop(f / 50.0)
+        DynamicEffects.draw_country_flag(frame, FLAG_DIR / "de.png", de_polys, country_progress,
+                                         (c_lon, c_lat, scale), de_bounds)
+        DynamicEffects.draw_outline_glow(frame, de_polys, COLOR_COUNTRY_GLOW,
+                                         progress=country_progress, thickness=2, halo_strength=0.72)
 
-        # Project city nodes
-        city_pts = [cam.project_point(lon, lat, c_lon, c_lat, scale) for _, lon, lat in cities]
-
-        # Inter-city laser network lines
-        p_net = ease_out_cubic((f - 18) / 35.0)
-        if p_net > 0:
-            lines = [(0, 1), (0, 2), (1, 2), (2, 3), (0, 3)]
-            for i1, i2 in lines:
-                pt1, pt2 = city_pts[i1], city_pts[i2]
-                cur_pt = (int(pt1[0] + (pt2[0] - pt1[0]) * p_net),
-                          int(pt1[1] + (pt2[1] - pt1[1]) * p_net))
-                cv2.line(frame, pt1, cur_pt, (255, 255, 255), 2, cv2.LINE_AA)
-                cv2.line(frame, pt1, cur_pt, COLOR_RED_VIVID, 6, cv2.LINE_AA)
-
-        # Pulse city nodes
-        for idx, (name, _, _) in enumerate(cities):
-            pt = city_pts[idx]
-            cv2.circle(frame, pt, 7, (255, 255, 255), -1, cv2.LINE_AA)
-            cv2.circle(frame, pt, 12, COLOR_RED_VIVID, 2, cv2.LINE_AA)
-
-        # Country speech pin
-        center_de = cam.project_point(10.4, 51.2, c_lon, c_lat, scale)
-        DynamicEffects.draw_speech_pin(frame, "GERMANY", (center_de[0], center_de[1] - 40),
-                                       (f - 25) / 20.0, subtitle="INDUSTRIAL CORE")
-
-        frames.append(frame)
+        frames.append(frame.to_numpy())
 
     write_video_h264(frames, out_mp4)
     print("Done Germany")
 
 
-def render_saudi_arabia_desert_pipeline(out_mp4: Path, num_frames=120):
+def render_saudi_arabia_desert_pipeline(out_mp4: Path, num_frames=150):
     """5. SAUDI ARABIA: Desert Grid, Strategic Chokepoints & Red Sea / Gulf Corridors."""
     print("Rendering 5/5: Saudi Arabia Strategic Chokepoints...")
     # Flight from Red Sea diagonally across Saudi desert towards Persian Gulf
@@ -604,60 +621,41 @@ def render_saudi_arabia_desert_pipeline(out_mp4: Path, num_frames=120):
                         total_frames=num_frames)
 
     sa_rings = GEO.get_country_rings("Saudi Arabia")
+    sa_bounds = geographic_bounds(sa_rings)
     frames = []
 
     for f in range(num_frames):
         c_lon, c_lat, scale = cam.get_pose(f)
         frame = cam.render_base(c_lon, c_lat, scale, ocean_color=COLOR_OCEAN_BLUE,
-                                land_color=COLOR_LAND_DEEP, border_color=(45, 40, 36), with_grid=True)
+                                land_color=COLOR_LAND_DEEP, border_color=(45, 40, 36), with_grid=False)
+        frame = GPUMapFrame(frame)
 
         sa_polys = cam.project_rings(sa_rings, c_lon, c_lat, scale)
 
-        p_fill = smooth_swoop(f / 45.0)
-        DynamicEffects.draw_country_fill(frame, sa_polys, COLOR_RED_VIVID, opacity=0.96 * p_fill)
-        DynamicEffects.draw_outline_glow(frame, sa_polys, COLOR_RED_VIVID, progress=1.0, halo_strength=1.4)
+        country_progress = smooth_swoop(f / 50.0)
+        DynamicEffects.draw_country_flag(frame, FLAG_DIR / "sa.png", sa_polys, country_progress,
+                                         (c_lon, c_lat, scale), sa_bounds)
+        DynamicEffects.draw_outline_glow(frame, sa_polys, COLOR_COUNTRY_GLOW,
+                                         progress=country_progress, thickness=2, halo_strength=0.72)
 
-        # Strategic Chokepoints: Strait of Hormuz & Bab el-Mandeb
-        hormuz_pt = cam.project_point(56.45, 26.56, c_lon, c_lat, scale)
-        mandeb_pt = cam.project_point(43.33, 12.58, c_lon, c_lat, scale)
-        riyadh_pt = cam.project_point(46.67, 24.71, c_lon, c_lat, scale)
-
-        # Curved dashed maritime trade corridors
-        p_route = ease_out_cubic((f - 15) / 45.0)
-        if p_route > 0:
-            ctrl = (int((mandeb_pt[0] + hormuz_pt[0]) / 2.0 + 80),
-                    int((mandeb_pt[1] + hormuz_pt[1]) / 2.0 + 100))
-            steps = 80
-            cur_steps = int(steps * p_route)
-            for i in range(0, cur_steps, 2):
-                t0 = i / float(steps)
-                t1 = min(1.0, (i + 1.2) / float(steps))
-                p0 = (int((1 - t0)**2 * mandeb_pt[0] + 2*(1 - t0)*t0 * ctrl[0] + t0**2 * hormuz_pt[0]),
-                      int((1 - t0)**2 * mandeb_pt[1] + 2*(1 - t0)*t0 * ctrl[1] + t0**2 * hormuz_pt[1]))
-                p1 = (int((1 - t1)**2 * mandeb_pt[0] + 2*(1 - t1)*t1 * ctrl[0] + t1**2 * hormuz_pt[0]),
-                      int((1 - t1)**2 * mandeb_pt[1] + 2*(1 - t1)*t1 * ctrl[1] + t1**2 * hormuz_pt[1]))
-                cv2.line(frame, p0, p1, (255, 255, 255), 3, cv2.LINE_AA)
-
-        # Chokepoint target pulses
-        for pt, label in [(hormuz_pt, "HORMUZ"), (mandeb_pt, "BAB EL-MANDEB")]:
-            cv2.circle(frame, pt, 6, (255, 255, 255), -1, cv2.LINE_AA)
-            cv2.circle(frame, pt, 11, (20, 220, 255), 2, cv2.LINE_AA)
-
-        DynamicEffects.draw_speech_pin(frame, "SAUDI ARABIA", riyadh_pt, (f - 25) / 20.0, subtitle="2.15 Mln km²")
-
-        frames.append(frame)
+        frames.append(frame.to_numpy())
 
     write_video_h264(frames, out_mp4)
     print("Done Saudi Arabia")
 
 
-def run_single(scene_id: int):
+def run_single(work: tuple[int, str]):
+    global RENDERER_MODE
+    scene_id, renderer = work
+    RENDERER_MODE = renderer
+    out_dir = OUT_DIR if renderer == "dark_map" else OPENCV_OUT_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
     scenes = {
-        1: (render_italy_radar_lock, OUT_DIR / "01_italy_radar_lock.mp4"),
-        2: (render_japan_archipelago_chain, OUT_DIR / "02_japan_archipelago_chain.mp4"),
-        3: (render_russia_continental_laser, OUT_DIR / "03_russia_continental_laser.mp4"),
-        4: (render_germany_industrial_nodes, OUT_DIR / "04_germany_industrial_nodes.mp4"),
-        5: (render_saudi_arabia_desert_pipeline, OUT_DIR / "05_saudi_arabia_desert_pipeline.mp4"),
+        1: (render_italy_radar_lock, out_dir / "01_italy_radar_lock.mp4"),
+        2: (render_japan_archipelago_chain, out_dir / "02_japan_archipelago_chain.mp4"),
+        3: (render_russia_continental_laser, out_dir / "03_russia_continental_laser.mp4"),
+        4: (render_germany_industrial_nodes, out_dir / "04_germany_industrial_nodes.mp4"),
+        5: (render_saudi_arabia_desert_pipeline, out_dir / "05_saudi_arabia_desert_pipeline.mp4"),
     }
     fn, path = scenes[scene_id]
     fn(path)
@@ -666,15 +664,36 @@ def run_single(scene_id: int):
 def main():
     parser = argparse.ArgumentParser(description="Render destructive dark map animations (GPU accelerated)")
     parser.add_argument("--scene", type=int, choices=range(1, 6), help="Render specific scene 1-5")
+    parser.add_argument("--renderer", choices=("dark_map", "opencv"), default="dark_map",
+                        help="dark vector atlas or OpenCV imagery underlay; effects and scene timing are shared")
+    parser.add_argument("--motion-id", choices=tuple(MAP_MOTION_SCENES),
+                        help="render the exact selectable RenderingGen map motion")
     args = parser.parse_args()
 
-    if args.scene:
-        run_single(args.scene)
-    else:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
-            list(executor.map(run_single, range(1, 6)))
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is required; no CPU rendering fallback is configured")
+    encoder_list = subprocess.run(["ffmpeg", "-hide_banner", "-encoders"], capture_output=True,
+                                  text=True, check=True).stdout
+    if "h264_nvenc" not in encoder_list:
+        raise RuntimeError("FFmpeg h264_nvenc is required; no software encoder fallback is configured")
+    print(f"GPU renderer active: {torch.cuda.get_device_name(0)}; encoder=h264_nvenc")
 
-    print(f"\nAll 5 destructive dark scenes rendered to: {OUT_DIR}")
+    if args.motion_id:
+        renderer, scene_id = MAP_MOTION_SCENES[args.motion_id]
+        run_single((scene_id, renderer))
+    elif args.scene:
+        run_single((args.scene, args.renderer))
+    elif args.renderer == "opencv":
+        for scene_id in range(1, 6):
+            run_single((scene_id, args.renderer))
+    else:
+        # A single CUDA owner avoids forked CUDA contexts and VRAM oversubscription.
+        for scene_id in range(1, 6):
+            run_single((scene_id, args.renderer))
+
+    output = OUT_DIR if args.renderer == "dark_map" else OPENCV_OUT_DIR
+    write_motion_manifest()
+    print(f"\nAll 5 {args.renderer} scenes rendered to: {output}")
 
 
 if __name__ == "__main__":

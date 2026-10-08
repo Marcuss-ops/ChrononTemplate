@@ -35,6 +35,8 @@ EXPECTED = {
     "metric_v1": {"metric_counter_rise", "metric_counter_scale_settle", "metric_odometer_vertical", "metric_digits_stagger", "metric_bar_grow", "metric_ring_draw", "metric_delta_reveal", "metric_focus_punch", "metric_before_after", "metric_multi_stat_focus", "metric_count_flip", "metric_slide_left", "metric_ribbon_unfold", "metric_split_odometer", "metric_bounce_settle", "metric_arc_sweep", "metric_digit_cascade", "metric_compare_wipe", "metric_pulse_hold", "metric_debt_flip"},
     "date_v1": {"date_fade_rise", "date_year_count", "date_calendar_flip", "date_segment_stagger", "date_timeline_tick", "date_range_draw", "date_marker_drop", "date_underline_focus", "date_history_stack", "date_chronology_focus", "date_page_turn", "date_calendar_drop", "date_month_wipe", "date_timeline_sweep", "date_marker_pop", "date_split_year", "date_bracket_draw", "date_stamp_reveal", "date_era_zoom", "date_digit_flip"},
     "entity_card_v1": {"entity_caption_rise", "entity_depth_caption", "entity_yaw_caption", "entity_split_side", "entity_border_then_caption", "entity_glow_focus", "entity_name_underline", "entity_name_pill", "entity_parallax_caption", "entity_focus_frame"},
+    "metric_didone_v1": {"metric_didone_hairline_rise", "metric_didone_ink_settle", "metric_didone_tracking_open", "metric_didone_rule_wipe", "metric_didone_numeral_settle", "metric_didone_drop_in", "metric_didone_column_rise", "metric_didone_focus_pull", "metric_didone_side_slide", "metric_didone_hold_breathe"},
+    "date_didone_v1": {"date_didone_archive_fade", "date_didone_rule_draw", "date_didone_era_settle", "date_didone_year_slide", "date_didone_stamp_drop", "date_didone_margin_wipe", "date_didone_underline_hold", "date_didone_fade_tracking", "date_didone_chronicle_rise", "date_didone_focus_hold"},
 }
 
 
@@ -44,13 +46,13 @@ class EntityPresentationCatalogTests(unittest.TestCase):
         cls.catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
         cls.families = {family["id"]: family for family in cls.catalog["families"]}
 
-    def test_exact_three_families_with_unique_presets_and_known_templates(self):
+    def test_exact_five_families_with_unique_presets_and_known_templates(self):
         self.assertEqual(set(self.families), set(EXPECTED))
         seen = set()
         for family_id, family in self.families.items():
             ids = [preset["id"] for preset in family["presets"]]
             self.assertEqual(set(ids), EXPECTED[family_id])
-            self.assertEqual(len(ids), 10 if family_id == "entity_card_v1" else 20)
+            self.assertEqual(len(ids), 10 if family_id in ("entity_card_v1", "metric_didone_v1", "date_didone_v1") else 20)
             self.assertEqual(len(ids), len(set(ids)))
             self.assertFalse(seen.intersection(ids))
             seen.update(ids)

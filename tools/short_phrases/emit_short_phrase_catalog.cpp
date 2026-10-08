@@ -1,7 +1,7 @@
 // ChrononTemplate — short-phrase catalog emitter.
 //
 // Prints `catalog/short_phrase_motion.v1.json` to stdout from the C++-owned
-// ShortPhrasePack: the twelve archetypes, their selector windows, their tracks
+// ShortPhrasePack: the short-phrase archetypes, their selector windows, their tracks
 // (layer + per-unit), the semantic emphasis, the exit mode and the decor
 // bumper, plus the timing envelope and the RenderingGen selection table.
 //
@@ -247,6 +247,7 @@ namespace {
                 {"accents", accents},
                 {"font_size", def.font_size},
                 {"light", def.light},
+                {"white_background", def.white_background},
                 {"emphasis", emphasis},
                 {"exit", exitId(def.exit)},
                 {"decor", def.decor == ShortPhraseDecor::None ? json(nullptr) : json(decorId(def.decor))},
@@ -288,7 +289,7 @@ namespace {
 int main() {
     try {
         const std::vector<ShortPhraseAnimation> animations = chronontemplate::shortPhraseAnimations();
-        if (animations.size() != 47) fail("expected twelve original, ten modern editorial, and twenty-five product-motion short-phrase archetypes");
+        if (animations.size() != 50) fail("expected twelve original, thirteen editorial, and twenty-five product-motion short-phrase archetypes");
 
         std::set<std::string> ids;
         json recipes = json::array();

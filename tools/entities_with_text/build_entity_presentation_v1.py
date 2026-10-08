@@ -438,6 +438,16 @@ def build_date_gallery(family: dict) -> dict:
             "date_stamp_reveal": "12 DEC 2025",
             "date_era_zoom": "FY 2026",
             "date_digit_flip": "31/12/2026",
+            "date_didone_archive_fade": "ARCHIVE · 1947",
+            "date_didone_rule_draw": "1969 — 1971",
+            "date_didone_era_settle": "ERA · 1918",
+            "date_didone_year_slide": "2026",
+            "date_didone_stamp_drop": "12 DEC 2025",
+            "date_didone_margin_wipe": "MARGIN · 1864",
+            "date_didone_underline_hold": "SEPTEMBER 2008",
+            "date_didone_fade_tracking": "CIRCA 1900",
+            "date_didone_chronicle_rise": "CHRONICLE · 1789",
+            "date_didone_focus_hold": "MMXXVI",
         }
         sample = date_samples[preset["id"]]
         layers.append(layer_text(f"{preset['id']}-eyebrow", "DATE MOTION GALLERY", [900, 42], [960, 330], start, duration, font=SMALL_FONT, font_size=22, fill="#B4A99B", tracks=[track("opacity", [(0, 0), (18, 1), (71, 1)], "out_cubic")]))
@@ -527,6 +537,16 @@ def build_date_gallery_4x5(family: dict) -> dict:
         "date_stamp_reveal": "12 DEC 2025",
         "date_era_zoom": "FY 2026",
         "date_digit_flip": "31/12/2026",
+        "date_didone_archive_fade": "ARCHIVE · 1947",
+        "date_didone_rule_draw": "1969 — 1971",
+        "date_didone_era_settle": "ERA · 1918",
+        "date_didone_year_slide": "2026",
+        "date_didone_stamp_drop": "12 DEC 2025",
+        "date_didone_margin_wipe": "MARGIN · 1864",
+        "date_didone_underline_hold": "SEPTEMBER 2008",
+        "date_didone_fade_tracking": "CIRCA 1900",
+        "date_didone_chronicle_rise": "CHRONICLE · 1789",
+        "date_didone_focus_hold": "MMXXVI",
     }
     layers = [color_layer("background", [1920, 1080], [960, 540], 0, duration, [0.04, 0.036, 0.031, 1]),
               layer_text("gallery-title", "DATE V1 · 4 × 5 · 20 ALTERNATIVES", [1200, 38], [960, 34], 0, duration, font=SMALL_FONT, font_size=22, fill="#BEB4A6")]
@@ -696,8 +716,8 @@ def build_two_entity_canary() -> dict:
 def load_families() -> dict[str, dict]:
     data = json.loads(CATALOG.read_text(encoding="utf-8"))
     families = {family["id"]: family for family in data["families"]}
-    if set(families) != {"metric_v1", "date_v1", "entity_card_v1"}:
-        raise ValueError("presentation catalog must define exactly metric_v1, date_v1 and entity_card_v1")
+    if set(families) != {"metric_v1", "date_v1", "entity_card_v1", "metric_didone_v1", "date_didone_v1"}:
+        raise ValueError("presentation catalog must define exactly metric_v1, date_v1, entity_card_v1, metric_didone_v1 and date_didone_v1")
     return families
 
 

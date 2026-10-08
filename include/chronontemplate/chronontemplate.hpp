@@ -32,6 +32,7 @@
 #include "chronontemplate/camera_roll/TitleCameraPack.hpp"
 #include "chronontemplate/camera_roll/SceneCameraPack.hpp"
 #include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
+#include "chronontemplate/entities_with_text/EntityFilmstripPack.hpp"
 #include "chronontemplate/core/UiPrimitives.hpp"
 #include "chronontemplate/entities_with_text/YouTubeSubscribe.hpp"
 

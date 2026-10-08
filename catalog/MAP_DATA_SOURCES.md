@@ -16,4 +16,7 @@ All three assets in `catalog/maps/` are raster crops of the same geographic exte
 Country boundaries come from Natural Earth Admin 0 Countries, 1:50m GeoJSON, public domain.
 Source: https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/
 
+`ne_10m_admin_1_bahia.geojson` contains the Bahia state boundary used for the Ilha de Vera Cruz reference-style animation. It is extracted from Natural Earth Admin 1 States/Provinces, 1:10m, public domain.
+Source: https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/
+
 The map renderer uses an equirectangular crop spanning longitude -100°…50° and latitude 8°…72°. Pins, routes, fills, and boundaries share that projection. The perspective canary applies one homography to both the map and its geographic overlays.
