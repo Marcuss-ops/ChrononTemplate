@@ -29,7 +29,7 @@
 
 namespace chronontemplate {
 
-    /// The twelve short-phrase archetypes. The ids are the wire names the
+    /// The short-phrase archetypes. The ids are the wire names the
     /// catalog and the emitter consume (`short_phrase_*`).
     enum class ShortPhraseAnimation {
         ScaleSettleWord,         ///< scale + grey→white settle, for one strong word
@@ -53,7 +53,7 @@ namespace chronontemplate {
         EditorialGlyphCurtain,
         EditorialContrastSweep,
         EditorialQuietZoom,
-        EditorialLiftAndRule,   ///< ten clean editorial recipes, append-only wire ids
+        EditorialLiftAndRule,   ///< clean editorial recipes, append-only wire ids
         ProductHardMaskSlideUp,
         ProductKineticBlurIn,
         ProductWordStagger,
@@ -78,7 +78,10 @@ namespace chronontemplate {
         ProductGlareHover,
         ProductGlowCursor,
         ProductGradualBlur,
-        ProductShapeBlur
+        ProductShapeBlur,
+        EditorialPromptResponse,
+        EditorialDiffPatch,
+        EditorialTerminalFocus
     };
 
     /// How the phrase leaves. The entrance is the recipe; the exit is the beat
@@ -114,7 +117,7 @@ namespace chronontemplate {
         float font_size{0.f};                           ///< optional per-recipe size override
         /// Light theme (white background, black text) used by the shape-assisted
         /// recipes. Colour tracks use the pseudo properties `fill_blue` and
-        /// `fill_gray`: a 0..1 amount of the accent / grey mixed over the resting fill.
+        /// `fill_gray` / `fill_orange`: a 0..1 amount of the accent / grey mixed over the resting fill.
         bool light{false};
         /// Additional native text copies used by prism, cut and replacement
         /// treatments. They are separate render-plan text layers, not DOM clones.
@@ -133,6 +136,8 @@ namespace chronontemplate {
         std::string fill_color{};
         /// Explicit note when a React source interaction/effect is approximated by native RenderPlan motion.
         std::string adaptation_note{};
+        /// White editorial paper palette with ink-black typography.
+        bool white_background{false};
     };
 
     /// The decor bumper, kept out of the text engine as its own definition.

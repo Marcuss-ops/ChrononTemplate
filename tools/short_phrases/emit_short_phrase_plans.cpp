@@ -35,6 +35,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <set>
 #include <vector>
 
 namespace {
@@ -44,6 +45,7 @@ namespace {
     using chronontemplate::PhraseKeyframe;
     using chronontemplate::PhraseSelector;
     using chronontemplate::PhraseTextAnimator;
+    using chronontemplate::PhraseAccent;
     using chronontemplate::PhraseTrack;
     using chronontemplate::ShortPhraseAnimation;
     using chronontemplate::ShortPhraseDecor;
@@ -203,6 +205,63 @@ namespace {
         return baked;
     }
 
+    /// The renderer's text-animator path demands 3-component rotation values
+    /// (render_plan_compiler_animation_text.cpp: scalar rotation is only
+    /// accepted on layer tracks, not inside text_animators), so any animator
+    /// rotation track is projected onto its Z component here.
+    json vectorizeRotation(const PhraseTrack& track, const json& keys) {
+        if (track.property != "rotation") return keys;
+        json rotated = json::array();
+        for (const auto& key : keys) {
+            const float z = key.at("value").get<float>();
+            rotated.push_back({{"frame", key.at("frame")},
+                               {"value", json::array({0.f, 0.f, z})}});
+        }
+        return rotated;
+    }
+
+    /// The per-key component contract rejects axis tracks whose keyframe sets
+    /// or easing differ; resample every position_* axis of one accent onto the
+    /// union of its keyframes (linear cross-sampling) and force a shared
+    /// easing. Position axes move in lockstep anyway, so the resample keeps the
+    /// authored path piecewise-identical at every authored key.
+    void alignAccentAxes(PhraseAccent& accent, const std::string& id) {
+        std::vector<PhraseTrack*> positionAxes;
+        for (auto& track : accent.tracks) {
+            if (track.property.rfind("position_", 0) == 0) positionAxes.push_back(&track);
+        }
+        if (positionAxes.size() < 2) return;
+        std::set<int> union_frames;
+        for (const auto* track : positionAxes) {
+            for (const auto& key : track->keyframes) union_frames.insert(key.frame);
+        }
+        for (auto* track : positionAxes) {
+            std::vector<PhraseKeyframe> resampled;
+            for (const int frame : union_frames) {
+                const auto& keys = track->keyframes;
+                if (frame <= keys.front().frame) {
+                    resampled.push_back({frame, keys.front().value});
+                    continue;
+                }
+                if (frame >= keys.back().frame) {
+                    resampled.push_back({frame, keys.back().value});
+                    continue;
+                }
+                for (std::size_t i = 0; i + 1 < keys.size(); ++i) {
+                    if (keys[i].frame <= frame && frame <= keys[i + 1].frame) {
+                        const float t = static_cast<float>(frame - keys[i].frame) /
+                                        static_cast<float>(keys[i + 1].frame - keys[i].frame);
+                        resampled.push_back({frame, keys[i].value + (keys[i + 1].value - keys[i].value) * t});
+                        break;
+                    }
+                }
+            }
+            track->keyframes = std::move(resampled);
+            track->easing = positionAxes.front()->easing;
+        }
+        (void)id;
+    }
+
     json makeTrack(const PhraseTrack& track, int enter) {
         json result{{"property", track.property},
                     {"keyframes", extendedKeyframes(track, enter)},
@@ -270,19 +329,21 @@ namespace {
                     {"end", std::move(end)}};
     }
 
-    /// `fill_blue` / `fill_gray` are scalar 0..1 mixes over the resting fill; the
-    /// plan contract wants a 4-component `fill_color`, so lower them here.
+    /// Color shorthand is projected to animated RGBA accepted by the renderer.
     bool isColorMix(const std::string& property) {
-        return property == "fill_blue" || property == "fill_gray";
+        return property == "fill_blue" || property == "fill_gray" || property == "fill_orange";
     }
 
-    json colorTrack(const PhraseTrack& track, int enter, bool light, const std::string& where) {
-        const std::array<float, 4> rest = light ? std::array<float, 4>{0.03f, 0.03f, 0.03f, 1.f}
-                                                : std::array<float, 4>{1.f, 1.f, 1.f, 1.f};
+    json colorTrack(const PhraseTrack& track, int enter, bool light, bool whiteBackground, const std::string& where) {
+        const std::array<float, 4> rest = (light || whiteBackground)
+            ? std::array<float, 4>{0.03f, 0.03f, 0.03f, 1.f}
+            : std::array<float, 4>{1.f, 1.f, 1.f, 1.f};
         const std::array<float, 4> target = track.property == "fill_blue"
             ? std::array<float, 4>{0.30f, 0.55f, 1.f, 1.f}
-            : (light ? std::array<float, 4>{0.62f, 0.62f, 0.62f, 1.f}
-                     : std::array<float, 4>{0.40f, 0.40f, 0.40f, 1.f});
+            : track.property == "fill_orange"
+                ? std::array<float, 4>{1.f, 0.38f, 0.12f, 1.f}
+                : (light ? std::array<float, 4>{0.62f, 0.62f, 0.62f, 1.f}
+                         : std::array<float, 4>{0.40f, 0.40f, 0.40f, 1.f});
         json keys = json::array();
         for (const auto& key : bakedTrack(track, enter, where)) {
             const float mix = std::clamp(key.at("value").get<float>(), 0.f, 1.f);
@@ -294,7 +355,7 @@ namespace {
     }
 
     json lowerAnimator(const PhraseTextAnimator& animator, int enter, const std::string& id,
-                       bool light = false) {
+                       bool light = false, bool whiteBackground = false) {
         json properties = json::array();
         for (std::size_t i = 0; i < animator.properties.size(); ++i) {
             const std::string where = id + ".properties[" + std::to_string(i) + "]";
@@ -302,11 +363,12 @@ namespace {
             // Text-animator property tracks are sampled-linear in the contract,
             // so bake the authored easing into per-frame keyframes.
             if (isColorMix(animator.properties[i].property)) {
-                properties.push_back(colorTrack(animator.properties[i], enter, light, where));
+                properties.push_back(colorTrack(animator.properties[i], enter, light, whiteBackground, where));
                 continue;
             }
             properties.push_back(json{{"property", animator.properties[i].property},
-                                      {"keyframes", bakedTrack(animator.properties[i], enter, where)},
+                                      {"keyframes", vectorizeRotation(animator.properties[i],
+                                          bakedTrack(animator.properties[i], enter, where))},
                                       {"easing", "linear"}});
         }
         return json{{"id", id + "_text"},
@@ -366,16 +428,15 @@ namespace {
                 fail(where + " needs at least one property track");
             }
             animators.push_back(lowerAnimator(definition.textAnimators[i], enter, definition.id + "_anim" + std::to_string(i),
-                                              definition.light));
+                                              definition.light, definition.white_background));
         }
-        // Semantic emphasis: each emphasised word comes in accent blue and
-        // settles to the resting fill once the phrase has built.
+        // Semantic emphasis uses the family's accent and settles to the resting fill.
         const int words = static_cast<int>(chronontemplate::shortPhraseWordCount(definition.phrase));
         for (const std::size_t word : definition.emphasis) {
             if (static_cast<int>(word) >= words) fail(definition.id + ": emphasis index out of range");
             PhraseTextAnimator emphasis{
                     PhraseSelector{"word", "forward", "pick:" + std::to_string(word) + ":" + std::to_string(words)},
-                    {PhraseTrack{"fill_blue", "linear",
+                    {PhraseTrack{definition.white_background ? "fill_orange" : "fill_blue", "linear",
                                  definition.id == "short_phrase_product_dual_tone_reveal"
                                      ? std::vector<PhraseKeyframe>{{0, 0.f}, {enter + 8, 0.f},
                                                                    {enter + 16, 1.f}, {120, 1.f}}
@@ -383,7 +444,7 @@ namespace {
                                                                    {enter + 18, 0.f}}}}};
             animators.push_back(lowerAnimator(emphasis, enter,
                                               definition.id + "_emph" + std::to_string(word),
-                                              definition.light));
+                                              definition.light, definition.white_background));
         }
 
         const float phraseFontSize = definition.font_size > 0.f ? definition.font_size : style.font_size;
@@ -393,7 +454,9 @@ namespace {
                               definition.id.find("progressive") != std::string::npos ||
                               definition.id.find("write_on") != std::string::npos ||
                               definition.id.find("cascade_sentence") != std::string::npos;
-        const std::string fontPath = modern ? "assets/fonts/Bricolage-Grotesque.ttf"
+        const std::string fontPath = definition.id == "short_phrase_editorial_claude_terminal_focus"
+                                   ? "assets/fonts/UbuntuMono-R.ttf"
+                                   : modern ? "assets/fonts/Bricolage-Grotesque.ttf"
                                    : sentence ? "assets/fonts/DMSans-Bold.ttf"
                                               : "assets/fonts/Inter-Bold.ttf";
         json textStyle{{"font", fontPath},
@@ -401,7 +464,10 @@ namespace {
                        {"fill", definition.fill_color.empty() ? style.fill : definition.fill_color},
                        {"stroke", json{{"color", "#000000"}, {"width", 0}}},
                        {"glow", json{{"radius", 0}, {"intensity", 0}, {"color", "#000000"}}}};
-        if (definition.light) textStyle["fill"] = "#080808";
+        if (definition.light || definition.white_background) textStyle["fill"] = "#080808";
+        if (definition.id == "short_phrase_editorial_claude_terminal_focus") {
+            textStyle["font"] = "assets/fonts/UbuntuMono-R.ttf";
+        }
         json phrase = json{
                 {"id", "phrase"},
                 {"type", "text"},
@@ -435,7 +501,8 @@ namespace {
                               {"start_frame", 0},
                               {"duration_frames", kDurationFrames}});
         if (modern) {
-            const auto bg = definition.light ? json::array({0.96, 0.95, 0.93, 1.0})
+            const auto bg = definition.white_background ? json::array({1.0, 1.0, 1.0, 1.0})
+                : definition.light ? json::array({0.96, 0.95, 0.93, 1.0})
                 : definition.id == "short_phrase_product_text_match_cut"
                     ? json::array({0.0, 0.0, 0.035, 1.0})
                     : json::array({0.025, 0.032, 0.045, 1.0});
@@ -449,7 +516,13 @@ namespace {
                 return std::stoi(accent.color.substr(offset, 2), nullptr, 16) / 255.f;
             };
             json tracks = json::array();
-            for (const auto& accentTrack : accent.tracks) {
+            // The per-key component contract (render_plan_compiler_animation.cpp
+            // add_component_vector_track) rejects axis tracks whose keyframe
+            // sets or track easing differ, so authored position_x/position_y
+            // pairs must land on the same frames with the same easing.
+            PhraseAccent accentAligned = accent;
+            alignAccentAxes(accentAligned, definition.id);
+            for (const auto& accentTrack : accentAligned.tracks) {
                 validateTrack(accentTrack, definition.id + "." + accent.id);
                 auto lowered = makeTrack(accentTrack, enter);
                 // Native solid-rect promotion needs a non-singular transform
@@ -492,7 +565,8 @@ namespace {
                 json overlayAnimators = json::array();
                 for (std::size_t i = 0; i < overlay.textAnimators.size(); ++i)
                     overlayAnimators.push_back(lowerAnimator(overlay.textAnimators[i], enter,
-                        definition.id + "_" + overlay.id + "_anim" + std::to_string(i), definition.light));
+                        definition.id + "_" + overlay.id + "_anim" + std::to_string(i),
+                        definition.light, definition.white_background));
                 copy["text_animators"] = std::move(overlayAnimators);
             } else {
                 copy.erase("text_animators");
@@ -583,8 +657,9 @@ namespace {
 int main(int argc, char** argv) try {
     if (argc < 2 || argc > 3 || (argc == 3 && std::string(argv[2]) != "--editorial-only" &&
                                 std::string(argv[2]) != "--product-only" &&
-                                std::string(argv[2]) != "--react-text-only")) {
-        std::cerr << "usage: chronontemplate_emit_short_phrase_plans <output-directory> [--editorial-only|--product-only|--react-text-only]\n";
+                                std::string(argv[2]) != "--react-text-only" &&
+                                std::string(argv[2]) != "--claude-only")) {
+        std::cerr << "usage: chronontemplate_emit_short_phrase_plans <output-directory> [--editorial-only|--product-only|--react-text-only|--claude-only]\n";
         return 2;
     }
     const std::filesystem::path outDir = argv[1];
@@ -600,6 +675,11 @@ int main(int argc, char** argv) try {
                          {"canvas", json{{"width", kWidth}, {"height", kHeight},
                                          {"fps", kFps}, {"duration_frames", kDurationFrames}}},
                          {"animations", json::array()}};
+    if (argc == 3 && std::string(argv[2]) == "--claude-only") {
+        manifest["pipeline"] = "ChrononTemplate C++ pack -> chronon.render-plan.v3 -> Chronon3D GPU";
+        manifest["style"]["fill"] = "#080808";
+        manifest["style"]["background"] = "#FFFFFF";
+    }
 
     for (const ShortPhraseAnimation animation : chronontemplate::shortPhraseAnimations()) {
         const ShortPhraseDefinition definition = chronontemplate::definition(animation);
@@ -615,6 +695,10 @@ int main(int argc, char** argv) try {
             definition.id != "short_phrase_product_decrypted_text" &&
             definition.id != "short_phrase_product_scroll_reveal" &&
             definition.id != "short_phrase_product_scrambled_text") continue;
+        if (argc == 3 && std::string(argv[2]) == "--claude-only" &&
+            definition.id != "short_phrase_editorial_claude_prompt_response" &&
+            definition.id != "short_phrase_editorial_claude_diff_patch" &&
+            definition.id != "short_phrase_editorial_claude_terminal_focus") continue;
         const std::string expected = chronontemplate::name(animation);
         if (definition.id != expected) {
             fail("definition id \"" + definition.id + "\" is published as \"" + expected + "\"");
@@ -636,6 +720,7 @@ int main(int argc, char** argv) try {
                 {"exit", exitId(definition.exit)},
                 {"decor", decorName(definition.decor)},
                 {"adaptation_note", definition.adaptation_note},
+                {"white_background", definition.white_background},
                 {"emphasis", emphasis},
                 {"plan", planName},
                 {"render", definition.id + ".mp4"}});

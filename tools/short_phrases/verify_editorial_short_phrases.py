@@ -25,11 +25,11 @@ def frame(path: Path, index: int) -> np.ndarray:
 def verify(directory: Path) -> dict:
     manifest = json.loads((directory / "manifest.json").read_text())
     animations = manifest["animations"]
-    if len(animations) != 10 or any(not a["id"].startswith("short_phrase_editorial_") for a in animations):
-        raise ValueError("expected exactly ten editorial recipes")
+    if len(animations) != 3 or any(not a["id"].startswith("short_phrase_editorial_claude_") for a in animations):
+        raise ValueError("expected exactly the three Claude-inspired recipes")
     expected = {a["render"] for a in animations}
     if {p.name for p in directory.glob("*.mp4")} != expected:
-        raise ValueError("MP4 set differs from the ten-recipe manifest")
+        raise ValueError("MP4 set differs from the three-recipe manifest")
     evidence = []
     for animation in animations:
         path = directory / animation["render"]
@@ -77,6 +77,15 @@ def verify(directory: Path) -> dict:
         for index in (0, 149):
             if float(np.abs(samples[index].astype(np.int16) - background).mean()) > 0.8:
                 raise ValueError(f"{path.name}: phrase does not fully disappear at frame {index}")
+        if animation["id"] == "short_phrase_editorial_claude_diff_patch":
+            orange = (hold[:, :, 0] > 210) & (hold[:, :, 1] > 55) & (hold[:, :, 1] < 190) & (hold[:, :, 2] < 100)
+            if int(orange.sum()) < 20:
+                raise ValueError(f"{path.name}: orange emphasized word is not visible in the hold")
+        if animation.get("white_background"):
+            corner = frames[60, :20, :20].astype(np.int16)
+            paper = np.median(corner, axis=(0, 1))
+            if float(np.min(paper)) < 210:
+                raise ValueError(f"{path.name}: expected bright white editorial background")
         evidence.append({"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
                          "bytes": path.stat().st_size, "width": 1920, "height": 1080,
                          "fps": 30, "frames": 150, "seconds": 5,

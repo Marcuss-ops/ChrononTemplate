@@ -16,8 +16,11 @@ ACCENTS=['#7CE9E4','#8BD8FF','#F7C75D','#79EBDD','#FF55CF','#FF766B','#54F2AE','
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--validate',action='store_true');p.add_argument('--render',action='store_true');p.add_argument('--cli',type=Path,default=CLI);a=p.parse_args()
-    cat=json.loads(CAT.read_text()); motions={m['id']:m for m in cat['motions'] if m.get('category')=='map_image_v1'}
-    if len(motions)!=10: raise SystemExit(f'expected 10 map_image_v1 motions, got {len(motions)}')
+    # This reference renderer still targets the ten retired map-image IDs.
+    # The new selectable Dark Map/OpenCV options live in the paired renderer.
+    legacy_ids={f'map_image_{slug}_{SUFFIX[slug]}' for slug,_ in ITEMS}
+    cat=json.loads(CAT.read_text()); motions={m['id']:m for m in cat['motions'] if m.get('id') in legacy_ids}
+    if len(motions)!=10: raise SystemExit(f'expected 10 legacy map_image_v1 motions, got {len(motions)}')
     for i,(slug,name) in enumerate(ITEMS,1):
         motion_id=f'map_image_{slug}_{SUFFIX[slug]}'
         definition=motions[motion_id]

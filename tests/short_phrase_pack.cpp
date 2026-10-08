@@ -2,6 +2,7 @@
 
 #include "motion_check.hpp"
 
+#include <algorithm>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -27,10 +28,10 @@ namespace {
         check(increasing, (where + " keyframe frames are strictly increasing").c_str());
     }
 
-    void theTwelveArchetypesAreWellFormed() {
-        section("twelve short-phrase archetypes");
+    void theShortPhraseArchetypesAreWellFormed() {
+        section("short-phrase archetypes");
         const std::vector<ShortPhraseAnimation> animations = shortPhraseAnimations();
-        check(animations.size() == 47, "the pack preserves twelve original recipes, adds ten editorial recipes, and registers twenty-five product recipes");
+        check(animations.size() == 50, "the pack preserves twelve original recipes, adds thirteen editorial recipes, and registers twenty-five product recipes");
 
         std::set<std::string> ids;
         bool anyLayer = false;
@@ -165,7 +166,7 @@ namespace {
     }
 
     void theCleanEditorialRecipesAreStable() {
-        section("ten clean editorial recipes");
+        section("clean editorial recipes");
         int count = 0;
         std::set<std::string> motions;
         for (const auto animation : shortPhraseAnimations()) {
@@ -201,13 +202,38 @@ namespace {
             }
             check(motions.insert(fingerprint).second, "each editorial recipe has distinct motion");
         }
-        check(count == 10, "exactly ten editorial recipes");
+        check(count == 13, "exactly thirteen editorial recipes, including the three Claude-inspired looks");
 
         std::size_t productCount = 0;
         for (const auto animation : shortPhraseAnimations()) {
             if (std::string(name(animation)).rfind("short_phrase_product_", 0) == 0) ++productCount;
         }
         check(productCount == 25, "the product family contains fourteen existing recipes, seven text adaptations, and four native visual adaptations");
+    }
+
+    void claudeInspiredShortPhrasesUseTheWhiteEditorialPalette() {
+        section("Claude-inspired white editorial short phrases");
+        const std::vector<ShortPhraseAnimation> animations{
+                ShortPhraseAnimation::EditorialPromptResponse,
+                ShortPhraseAnimation::EditorialDiffPatch,
+                ShortPhraseAnimation::EditorialTerminalFocus};
+        for (const auto animation : animations) {
+            const auto def = definition(animation);
+            check(def.white_background, "Claude-inspired recipes declare the pure-white palette");
+            check(def.id.rfind("short_phrase_editorial_claude_", 0) == 0,
+                  "Claude-inspired recipe ids are stable and editorial");
+            check(!def.textAnimators.empty(), "each new recipe uses native text animation");
+        }
+        const auto patch = definition(ShortPhraseAnimation::EditorialDiffPatch);
+        check(patch.textAnimators.size() >= 2 &&
+                  patch.textAnimators.back().properties.front().property == "fill_orange",
+              "Diff / Patch accents a selected word in orange");
+        check(patch.textAnimators.back().selector.window == "pick:2:3" &&
+                  shortPhraseWordCount(patch.phrase) == 3,
+              "Diff / Patch accent selector targets a valid word");
+        const auto terminal = definition(ShortPhraseAnimation::EditorialTerminalFocus);
+        check(terminal.phrase == "npx chronon render" && terminal.white_background,
+              "Terminal Focus uses a CLI phrase on the white-paper palette");
     }
 
     void theEditorialExtrasAreStable() {
@@ -309,7 +335,9 @@ namespace {
         }
         const std::vector<ShortPhraseAnimation> single = shortPhraseSuggestions(1);
         check(single.front() == ShortPhraseAnimation::ScaleSettleWord,
-              "a single word suggests the scale settle");
+              "the default single-word suggestion remains scale settle");
+        check(std::find(single.begin(), single.end(), ShortPhraseAnimation::EditorialTerminalFocus) != single.end(),
+              "one-word terminal phrases suggest the terminal-focus recipe");
     }
 
     void theFourNativeVisualAdaptationsAreRegistered() {
@@ -345,12 +373,13 @@ namespace {
 }// namespace
 
 int main() {
-    theTwelveArchetypesAreWellFormed();
+    theShortPhraseArchetypesAreWellFormed();
     theCleanEditorialRecipesAreStable();
     theEditorialExtrasAreStable();
     theStarBumperIsASeparateDecorElement();
     theTimingEnvelopeMatchesTheEditorialRules();
     theSuggestionsCoverTheShortPhraseRange();
     theFourNativeVisualAdaptationsAreRegistered();
+    claudeInspiredShortPhrasesUseTheWhiteEditorialPalette();
     return chrononmotion_test::report();
 }

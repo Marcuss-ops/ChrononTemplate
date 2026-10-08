@@ -14,6 +14,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 REPO="$(cd "$ROOT/.." && pwd)"
 OUT="${1:-$ROOT/out/short_phrase_v1}"
+FILTER="${2:-}"
 ASSETS_ROOT="$REPO/Chronon3d"
 EMITTER="$ROOT/build/release-fast/chronontemplate_emit_short_phrase_plans"
 [[ -x "$EMITTER" ]] || EMITTER="$ROOT/build/dev/chronontemplate_emit_short_phrase_plans"
@@ -29,15 +30,23 @@ done
 [[ -x "$EMITTER" ]] || { echo "emitter not built: $EMITTER" >&2; exit 1; }
 
 mkdir -p "$OUT"
-"$EMITTER" "$OUT"
+emitter_args=()
+if [[ -n "$FILTER" ]]; then
+  emitter_args+=("$FILTER")
+fi
+"$EMITTER" "$OUT" "${emitter_args[@]}"
 
-if [[ "${2:-}" == "--emit-only" ]]; then
+if [[ "$FILTER" == "--emit-only" ]]; then
   echo "emitted short-phrase plans only in $OUT"
   exit 0
 fi
 
 shopt -s nullglob
-plans=("$OUT"/short_phrase_*.plan.json)
+if [[ "$FILTER" == "--claude-only" ]]; then
+  plans=("$OUT"/short_phrase_editorial_claude_*.plan.json)
+else
+  plans=("$OUT"/short_phrase_*.plan.json)
+fi
 [[ ${#plans[@]} -gt 0 ]] || { echo "no short-phrase plans in $OUT" >&2; exit 1; }
 
 for plan in "${plans[@]}"; do

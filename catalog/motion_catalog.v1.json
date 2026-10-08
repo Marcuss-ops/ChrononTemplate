@@ -386,7 +386,9 @@
     },
     {
       "id": "blur_focus_in",
-      "targets": ["caption"],
+      "targets": [
+        "caption"
+      ],
       "unit": "glyph",
       "enter": 72,
       "text_animators": [
@@ -2378,7 +2380,9 @@
     },
     {
       "id": "center_expansion",
-      "targets": ["caption"],
+      "targets": [
+        "caption"
+      ],
       "unit": "glyph",
       "enter": 72,
       "tracks": [
@@ -2474,7 +2478,9 @@
     },
     {
       "id": "char_wave",
-      "targets": ["caption"],
+      "targets": [
+        "caption"
+      ],
       "unit": "glyph",
       "enter": 72,
       "tracks": [
@@ -2549,7 +2555,9 @@
     },
     {
       "id": "character_cascade",
-      "targets": ["caption"],
+      "targets": [
+        "caption"
+      ],
       "unit": "glyph",
       "enter": 72,
       "tracks": [
@@ -5607,7 +5615,9 @@
     },
     {
       "id": "image_card_push",
-      "targets": ["image"],
+      "targets": [
+        "image"
+      ],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -6319,7 +6329,9 @@
     },
     {
       "id": "image_diagonal_sweep",
-      "targets": ["image"],
+      "targets": [
+        "image"
+      ],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -7545,7 +7557,9 @@
     },
     {
       "id": "image_parallax_depth_reveal",
-      "targets": ["image"],
+      "targets": [
+        "image"
+      ],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -8123,7 +8137,9 @@
     },
     {
       "id": "image_slide_left_reveal",
-      "targets": ["image"],
+      "targets": [
+        "image"
+      ],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -8162,7 +8178,9 @@
     },
     {
       "id": "image_slide_right_reveal",
-      "targets": ["image"],
+      "targets": [
+        "image"
+      ],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -8950,7 +8968,9 @@
     },
     {
       "id": "image_tilt_settle",
-      "targets": ["image"],
+      "targets": [
+        "image"
+      ],
       "category": "overlay_v3_image",
       "unit": "layer",
       "enter": 60,
@@ -11489,540 +11509,6 @@
       ]
     },
     {
-      "id": "map_image_australia_sunset_drift",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 60,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.19
-            },
-            {
-              "frame": 42,
-              "value": 1.025
-            },
-            {
-              "frame": 60,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 21,
-              "value": 1
-            },
-            {
-              "frame": 60,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
-      "id": "map_image_brazil_glow_reveal",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 54,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.24
-            },
-            {
-              "frame": 40,
-              "value": 1.015
-            },
-            {
-              "frame": 54,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 18,
-              "value": 1
-            },
-            {
-              "frame": 54,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
-      "id": "map_image_china_slow_reveal",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 64,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.16
-            },
-            {
-              "frame": 42,
-              "value": 1.035
-            },
-            {
-              "frame": 64,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 24,
-              "value": 1
-            },
-            {
-              "frame": 64,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
-      "id": "map_image_gujarat_detail_push",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 46,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.15
-            },
-            {
-              "frame": 28,
-              "value": 1.025
-            },
-            {
-              "frame": 46,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 13,
-              "value": 1
-            },
-            {
-              "frame": 46,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
-      "id": "map_image_india_contour_draw",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 52,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.22
-            },
-            {
-              "frame": 34,
-              "value": 1.02
-            },
-            {
-              "frame": 52,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 17,
-              "value": 1
-            },
-            {
-              "frame": 52,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
-      "id": "map_image_iran_gold_focus",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 56,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.18
-            },
-            {
-              "frame": 38,
-              "value": 1.025
-            },
-            {
-              "frame": 56,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 22,
-              "value": 1
-            },
-            {
-              "frame": 56,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
-      "id": "map_image_italy_beacon_arrival",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 58,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.26
-            },
-            {
-              "frame": 42,
-              "value": 1.02
-            },
-            {
-              "frame": 58,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 20,
-              "value": 1
-            },
-            {
-              "frame": 58,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
-      "id": "map_image_korea_pin_focus",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 44,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.28
-            },
-            {
-              "frame": 30,
-              "value": 1.02
-            },
-            {
-              "frame": 44,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 12,
-              "value": 1
-            },
-            {
-              "frame": 44,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
-      "id": "map_image_nigeria_neon_bloom",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 50,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.2
-            },
-            {
-              "frame": 34,
-              "value": 1.015
-            },
-            {
-              "frame": 50,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 12,
-              "value": 1
-            },
-            {
-              "frame": 50,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
-      "id": "map_image_usa_sweep_in",
-      "category": "map_image_v1",
-      "targets": [
-        "map_view"
-      ],
-      "unit": "layer",
-      "enter": 48,
-      "exit": 14,
-      "tracks": [
-        {
-          "property": "scale",
-          "easing": "in_out_sine",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 1.34
-            },
-            {
-              "frame": 18,
-              "value": 1.15
-            },
-            {
-              "frame": 36,
-              "value": 1.025
-            },
-            {
-              "frame": 48,
-              "value": 1
-            }
-          ]
-        },
-        {
-          "property": "opacity",
-          "easing": "linear",
-          "keyframes": [
-            {
-              "frame": 0,
-              "value": 0
-            },
-            {
-              "frame": 15,
-              "value": 1
-            },
-            {
-              "frame": 48,
-              "value": 1
-            }
-          ]
-        }
-      ],
-      "duration_bounds": {
-        "minimum_frames": 48,
-        "maximum_frames": 240
-      },
-      "render_safe": true
-    },
-    {
       "id": "masked_upward_reveal",
       "category": "apple_v2",
       "targets": [
@@ -12390,7 +11876,9 @@
     },
     {
       "id": "opacity_wave",
-      "targets": ["caption"],
+      "targets": [
+        "caption"
+      ],
       "unit": "word",
       "enter": 72,
       "tracks": [
@@ -16988,7 +16476,9 @@
     },
     {
       "id": "scale_wave",
-      "targets": ["caption"],
+      "targets": [
+        "caption"
+      ],
       "unit": "glyph",
       "enter": 72,
       "text_animators": [
@@ -19208,7 +18698,9 @@
     },
     {
       "id": "tracking_collapse",
-      "targets": ["caption"],
+      "targets": [
+        "caption"
+      ],
       "unit": "word",
       "enter": 72,
       "text_animators": [
@@ -19254,7 +18746,9 @@
     },
     {
       "id": "tracking_expansion",
-      "targets": ["caption"],
+      "targets": [
+        "caption"
+      ],
       "unit": "word",
       "enter": 72,
       "text_animators": [
@@ -20151,7 +19645,9 @@
     {
       "id": "typewriter_blur_focus",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20204,7 +19700,9 @@
     {
       "id": "typewriter_clean",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20239,7 +19737,9 @@
     {
       "id": "typewriter_glitch",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20314,7 +19814,9 @@
     {
       "id": "typewriter_lift",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20367,7 +19869,9 @@
     {
       "id": "typewriter_neon",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20434,7 +19938,9 @@
     {
       "id": "typewriter_pop",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20505,7 +20011,9 @@
     {
       "id": "typewriter_scale_up",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20558,7 +20066,9 @@
     {
       "id": "typewriter_slide_in",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20611,7 +20121,9 @@
     {
       "id": "typewriter_soft_lift",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -20674,7 +20186,9 @@
     {
       "id": "typewriter_tracking",
       "category": "typewriter",
-      "targets": ["text"],
+      "targets": [
+        "text"
+      ],
       "unit": "glyph",
       "enter": 42,
       "text_animators": [
@@ -24379,7 +23893,9 @@
     },
     {
       "id": "word_reveal",
-      "targets": ["caption"],
+      "targets": [
+        "caption"
+      ],
       "unit": "word",
       "enter": 72,
       "tracks": [
@@ -24460,7 +23976,10 @@
     },
     {
       "id": "typewriter_modern_01_monospace_block_cursor",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24533,7 +24052,10 @@
     },
     {
       "id": "typewriter_modern_02_kinetic_scramble",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24606,7 +24128,10 @@
     },
     {
       "id": "typewriter_modern_03_soft_opacity_ramp",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24679,7 +24204,10 @@
     },
     {
       "id": "typewriter_modern_04_character_bounce",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24752,7 +24280,10 @@
     },
     {
       "id": "typewriter_modern_05_backspace_correction",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24825,7 +24356,10 @@
     },
     {
       "id": "typewriter_modern_06_glow_beam_sweep",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24898,7 +24432,10 @@
     },
     {
       "id": "typewriter_modern_07_word_snap",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -24971,7 +24508,10 @@
     },
     {
       "id": "typewriter_modern_08_mechanical_y_shift",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25044,7 +24584,10 @@
     },
     {
       "id": "typewriter_modern_09_highlighter_expansion",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25117,7 +24660,10 @@
     },
     {
       "id": "typewriter_modern_10_weight_ramp",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25190,7 +24736,10 @@
     },
     {
       "id": "typewriter_modern_11_dynamic_auto_wrap",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25263,7 +24812,10 @@
     },
     {
       "id": "typewriter_modern_12_glitch_pop",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25336,7 +24888,10 @@
     },
     {
       "id": "typewriter_modern_13_elastic_leading_cursor",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25409,7 +24964,10 @@
     },
     {
       "id": "typewriter_modern_14_focal_blur_dissolve",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25482,7 +25040,10 @@
     },
     {
       "id": "typewriter_modern_15_paper_punch_stencil",
-      "targets": ["text", "short_phrase"],
+      "targets": [
+        "text",
+        "short_phrase"
+      ],
       "category": "typewriter_modern_v1",
       "unit": "glyph",
       "enter": 42,
@@ -25552,6 +25113,1130 @@
           ]
         }
       ]
+    },
+    {
+      "id": "map_image_australia_sunset_drift",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 60,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.19
+            },
+            {
+              "frame": 42,
+              "value": 1.025
+            },
+            {
+              "frame": 60,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 21,
+              "value": 1
+            },
+            {
+              "frame": 60,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_brazil_glow_reveal",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 54,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.24
+            },
+            {
+              "frame": 40,
+              "value": 1.015
+            },
+            {
+              "frame": 54,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 18,
+              "value": 1
+            },
+            {
+              "frame": 54,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_china_slow_reveal",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 64,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.16
+            },
+            {
+              "frame": 42,
+              "value": 1.035
+            },
+            {
+              "frame": 64,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 24,
+              "value": 1
+            },
+            {
+              "frame": 64,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_gujarat_detail_push",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 46,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.15
+            },
+            {
+              "frame": 28,
+              "value": 1.025
+            },
+            {
+              "frame": 46,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 13,
+              "value": 1
+            },
+            {
+              "frame": 46,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_india_contour_draw",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 52,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.22
+            },
+            {
+              "frame": 34,
+              "value": 1.02
+            },
+            {
+              "frame": 52,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 17,
+              "value": 1
+            },
+            {
+              "frame": 52,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_iran_gold_focus",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 56,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.18
+            },
+            {
+              "frame": 38,
+              "value": 1.025
+            },
+            {
+              "frame": 56,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 22,
+              "value": 1
+            },
+            {
+              "frame": 56,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_italy_beacon_arrival",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 58,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.26
+            },
+            {
+              "frame": 42,
+              "value": 1.02
+            },
+            {
+              "frame": 58,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 20,
+              "value": 1
+            },
+            {
+              "frame": 58,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_korea_pin_focus",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 44,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.28
+            },
+            {
+              "frame": 30,
+              "value": 1.02
+            },
+            {
+              "frame": 44,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 12,
+              "value": 1
+            },
+            {
+              "frame": 44,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_nigeria_neon_bloom",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 50,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.2
+            },
+            {
+              "frame": 34,
+              "value": 1.015
+            },
+            {
+              "frame": 50,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 12,
+              "value": 1
+            },
+            {
+              "frame": 50,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_usa_sweep_in",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 48,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.34
+            },
+            {
+              "frame": 18,
+              "value": 1.15
+            },
+            {
+              "frame": 36,
+              "value": 1.025
+            },
+            {
+              "frame": 48,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 15,
+              "value": 1
+            },
+            {
+              "frame": 48,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "render_safe": true,
+      "deprecated": true,
+      "remove_after": "2026-10-08",
+      "deprecation_note": "Replaced by the paired Dark Map and OpenCV country-animation options."
+    },
+    {
+      "id": "map_image_dark_map_italy_radar_lock",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 58,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.24
+            },
+            {
+              "frame": 30,
+              "value": 1.1
+            },
+            {
+              "frame": 58,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 16,
+              "value": 1
+            },
+            {
+              "frame": 58,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "dark_map",
+      "map_id": "italy",
+      "map_animation": "radar_lock"
+    },
+    {
+      "id": "map_image_opencv_italy_radar_lock",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 58,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.24
+            },
+            {
+              "frame": 30,
+              "value": 1.1
+            },
+            {
+              "frame": 58,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 16,
+              "value": 1
+            },
+            {
+              "frame": 58,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "opencv",
+      "map_id": "italy",
+      "map_animation": "radar_lock"
+    },
+    {
+      "id": "map_image_dark_map_japan_archipelago_chain",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 54,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.2
+            },
+            {
+              "frame": 30,
+              "value": 1.06
+            },
+            {
+              "frame": 54,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 14,
+              "value": 1
+            },
+            {
+              "frame": 54,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "dark_map",
+      "map_id": "japan",
+      "map_animation": "archipelago_chain"
+    },
+    {
+      "id": "map_image_opencv_japan_archipelago_chain",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 54,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.2
+            },
+            {
+              "frame": 30,
+              "value": 1.06
+            },
+            {
+              "frame": 54,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 14,
+              "value": 1
+            },
+            {
+              "frame": 54,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "opencv",
+      "map_id": "japan",
+      "map_animation": "archipelago_chain"
+    },
+    {
+      "id": "map_image_dark_map_russia_continental_laser",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 60,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.18
+            },
+            {
+              "frame": 34,
+              "value": 1.04
+            },
+            {
+              "frame": 60,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 18,
+              "value": 1
+            },
+            {
+              "frame": 60,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "dark_map",
+      "map_id": "russia",
+      "map_animation": "continental_laser"
+    },
+    {
+      "id": "map_image_opencv_russia_continental_laser",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 60,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.18
+            },
+            {
+              "frame": 34,
+              "value": 1.04
+            },
+            {
+              "frame": 60,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 18,
+              "value": 1
+            },
+            {
+              "frame": 60,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "opencv",
+      "map_id": "russia",
+      "map_animation": "continental_laser"
+    },
+    {
+      "id": "map_image_dark_map_germany_industrial_nodes",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 52,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.22
+            },
+            {
+              "frame": 28,
+              "value": 1.05
+            },
+            {
+              "frame": 52,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 15,
+              "value": 1
+            },
+            {
+              "frame": 52,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "dark_map",
+      "map_id": "germany",
+      "map_animation": "industrial_nodes"
+    },
+    {
+      "id": "map_image_opencv_germany_industrial_nodes",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 52,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.22
+            },
+            {
+              "frame": 28,
+              "value": 1.05
+            },
+            {
+              "frame": 52,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 15,
+              "value": 1
+            },
+            {
+              "frame": 52,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "opencv",
+      "map_id": "germany",
+      "map_animation": "industrial_nodes"
+    },
+    {
+      "id": "map_image_dark_map_saudi_arabia_desert_pipeline",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 56,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.2
+            },
+            {
+              "frame": 32,
+              "value": 1.04
+            },
+            {
+              "frame": 56,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 17,
+              "value": 1
+            },
+            {
+              "frame": 56,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "dark_map",
+      "map_id": "saudi_arabia",
+      "map_animation": "desert_pipeline"
+    },
+    {
+      "id": "map_image_opencv_saudi_arabia_desert_pipeline",
+      "category": "map_image_v1",
+      "targets": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 56,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "easing": "in_out_sine",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.2
+            },
+            {
+              "frame": 32,
+              "value": 1.04
+            },
+            {
+              "frame": 56,
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 17,
+              "value": 1
+            },
+            {
+              "frame": 56,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "duration_bounds": {
+        "minimum_frames": 150,
+        "maximum_frames": 150
+      },
+      "render_safe": true,
+      "map_renderer": "opencv",
+      "map_id": "saudi_arabia",
+      "map_animation": "desert_pipeline"
     }
   ],
   "overlay_presets": {

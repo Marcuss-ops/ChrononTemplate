@@ -75,6 +75,9 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductGlowCursor: return "short_phrase_product_glow_cursor";
             case ShortPhraseAnimation::ProductGradualBlur: return "short_phrase_product_gradual_blur";
             case ShortPhraseAnimation::ProductShapeBlur: return "short_phrase_product_shape_blur";
+            case ShortPhraseAnimation::EditorialPromptResponse: return "short_phrase_editorial_claude_prompt_response";
+            case ShortPhraseAnimation::EditorialDiffPatch: return "short_phrase_editorial_claude_diff_patch";
+            case ShortPhraseAnimation::EditorialTerminalFocus: return "short_phrase_editorial_claude_terminal_focus";
         }
         throw std::invalid_argument("chronontemplate::name: unknown short phrase animation");
     }
@@ -126,12 +129,47 @@ namespace chronontemplate {
                 ShortPhraseAnimation::ProductGlareHover,
                 ShortPhraseAnimation::ProductGlowCursor,
                 ShortPhraseAnimation::ProductGradualBlur,
-                ShortPhraseAnimation::ProductShapeBlur};
+                ShortPhraseAnimation::ProductShapeBlur,
+                ShortPhraseAnimation::EditorialPromptResponse,
+                ShortPhraseAnimation::EditorialDiffPatch,
+                ShortPhraseAnimation::EditorialTerminalFocus};
     }
 
     static ShortPhraseDefinition entranceDefinition(ShortPhraseAnimation animation) {
         using namespace modern_short_phrase;
         switch (animation) {
+            case ShortPhraseAnimation::EditorialPromptResponse: {
+                ShortPhraseDefinition def{name(animation), "Prompt / Response", "Build with intent", 24,
+                    {track("position_y", {{0, 18.f}, {16, -3.f}, {24, 0.f}}), fadeIn(24, 6)},
+                    {animator(PhraseSelector{"word", "forward", "band"},
+                        {track("position_y", {{0, 16.f}, {24, 0.f}}),
+                         track("opacity", {{0, 0.f}, {12, 1.f}}, "linear")})},
+                    {2}, ShortPhraseExit::Reverse, ShortPhraseDecor::None, {}, 112.f};
+                def.white_background = true;
+                return def;
+            }
+            case ShortPhraseAnimation::EditorialDiffPatch: {
+                ShortPhraseDefinition def{name(animation), "Diff / Patch", "Make. Review. Ship.", 26,
+                    {track("scale", {{0, 0.985f}, {18, 1.012f}, {26, 1.f}}), fadeIn(26, 6)},
+                    {animator(PhraseSelector{"word", "forward", "band"},
+                        {track("position_y", {{0, 12.f}, {26, 0.f}}),
+                         track("opacity", {{0, 0.18f}, {26, 1.f}}, "linear")}),
+                     animator(PhraseSelector{"word", "forward", "pick:2:3"},
+                        {track("fill_orange", {{0, 1.f}, {26, 1.f}}, "linear")})},
+                    {}, ShortPhraseExit::Reverse, ShortPhraseDecor::None, {}, 104.f};
+                def.white_background = true;
+                return def;
+            }
+            case ShortPhraseAnimation::EditorialTerminalFocus: {
+                ShortPhraseDefinition def{name(animation), "Terminal Focus", "npx chronon render", 30,
+                    {track("position_x", {{0, -22.f}, {22, 2.f}, {30, 0.f}}), fadeIn(30, 6)},
+                    {animator(PhraseSelector{"glyph", "forward", "reveal_soft"},
+                        {track("opacity", {{0, 0.f}, {30, 0.f}}, "linear"),
+                         track("tracking", {{0, 5.f}, {30, 0.f}})})},
+                    {}, ShortPhraseExit::Reverse, ShortPhraseDecor::None, {}, 110.f};
+                def.white_background = true;
+                return def;
+            }
             case ShortPhraseAnimation::ProductHardMaskSlideUp: return blurOutUp();
             case ShortPhraseAnimation::ProductKineticBlurIn: return bottomUpLetters();
             case ShortPhraseAnimation::ProductWordStagger: return focusBlurResolve();
@@ -539,6 +577,28 @@ namespace chronontemplate {
                 def.accents.front().tracks.front() = track(
                     "scale_x", {{0, 0.15f}, {22, 1.f}, {42, 1.f}, {78, 1.2f}, {102, 1.f}, {120, 1.f}}, "in_out_cubic");
                 break;
+            case ShortPhraseAnimation::EditorialPromptResponse:
+                layerBeat("position_y", 28.f, 0.f, -8.f, 0.f);
+                break;
+            case ShortPhraseAnimation::EditorialDiffPatch:
+                layerBeat("position_x", -22.f, 0.f, 8.f, 0.f);
+                break;
+            case ShortPhraseAnimation::EditorialTerminalFocus:
+                layerBeat("position_x", 20.f, 0.f, -6.f, 0.f);
+                break;
+            // These definitions do not use the legacy editorial sequence body.
+            case ShortPhraseAnimation::ProductMaskedHeading:
+            case ShortPhraseAnimation::ProductSplitFlapText:
+            case ShortPhraseAnimation::ProductWarpText:
+            case ShortPhraseAnimation::ProductFoldText:
+            case ShortPhraseAnimation::ProductDecryptedText:
+            case ShortPhraseAnimation::ProductScrollReveal:
+            case ShortPhraseAnimation::ProductScrambledText:
+            case ShortPhraseAnimation::ProductGlareHover:
+            case ShortPhraseAnimation::ProductGlowCursor:
+            case ShortPhraseAnimation::ProductGradualBlur:
+            case ShortPhraseAnimation::ProductShapeBlur:
+                break;
             default: break;
         }
         def.enter = 90; // the editorial sequence continues its second beat through frame 120
@@ -589,7 +649,8 @@ namespace chronontemplate {
                     ShortPhraseAnimation::ProductScaleSnap,
                     ShortPhraseAnimation::ProductRadialExpansion,
                     ShortPhraseAnimation::ProductSubtitleDissolve,
-                    ShortPhraseAnimation::ProductFoldText};
+                    ShortPhraseAnimation::ProductFoldText,
+                    ShortPhraseAnimation::EditorialTerminalFocus};
         }
         if (wordCount <= 3) {
             return {ShortPhraseAnimation::CharacterTrackingReveal,
@@ -598,6 +659,8 @@ namespace chronontemplate {
                     ShortPhraseAnimation::EditorialTrackingClose,
                     ShortPhraseAnimation::EditorialUnderlineDraw,
                     ShortPhraseAnimation::EditorialBaselineRise,
+                    ShortPhraseAnimation::EditorialDiffPatch,
+                    ShortPhraseAnimation::EditorialPromptResponse,
                     ShortPhraseAnimation::ProductHardMaskSlideUp,
                     ShortPhraseAnimation::ProductTrackingPullIn,
                     ShortPhraseAnimation::ProductDualToneReveal,
