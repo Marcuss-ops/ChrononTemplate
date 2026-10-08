@@ -370,9 +370,9 @@ namespace chronontemplate {
                         "more expensive", 20,
                         {},
                         {animator(PhraseSelector{"glyph", "forward", "reveal"},
-                                  {track("opacity", {{0, 0.f}, {20, 0.f}}, "linear"),
-                                   track("tracking", {{0, 20.f}, {20, 20.f}}, "linear"),
-                                   track("position_x", {{0, 8.f}, {20, 8.f}}, "linear")})},
+                                  {track("opacity", {{0, 0.f}, {20, 1.f}}, "linear"),
+                                   track("tracking", {{0, 20.f}, {20, 0.f}}, "out_cubic"),
+                                   track("position_x", {{0, 8.f}, {20, 0.f}}, "out_cubic")})},
                         {}, ShortPhraseExit::Wipe, ShortPhraseDecor::None};
 
             // ── 06 · word mask sequence (one slot, one word at a time) ──────
