@@ -95,6 +95,10 @@ namespace chronontemplate {
         float grain{0.f};
         float vignette{0.f};
         std::uint32_t grainSeed{0};
+        float lightLeak{0.f};
+        float channelSplit{0.f};
+        std::uint32_t channelTrail{0};
+        float sliceDisplace{0.f};
     };
 
     enum class ShapeGeometry : std::uint8_t { Rectangle, Ellipse, Grid, DotGrid, Polygon };

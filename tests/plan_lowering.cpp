@@ -118,6 +118,22 @@ int main() {
           imagePlan.effects[3].kind == LayerPlan::EffectKindPlan::Vignette,
           "image ContentHost adapter maps saturation, contrast, stable grain, and vignette");
 
+    ImageRequest editorialEffects;
+    editorialEffects.path = "archive.jpg";
+    editorialEffects.lightLeak = 0.6f;
+    editorialEffects.channelSplit = 4.f;
+    editorialEffects.channelTrail = 3;
+    editorialEffects.sliceDisplace = 0.8f;
+    const auto editorialHandle = host.createImage(editorialEffects);
+    const auto editorialPlan = makeImageLayerPlan(editorialEffects, editorialHandle);
+    check(editorialPlan.effects.size() == 5 &&
+          editorialPlan.effects[0].kind == LayerPlan::EffectKindPlan::LightRays &&
+          editorialPlan.effects[1].kind == LayerPlan::EffectKindPlan::Glow &&
+          editorialPlan.effects[2].kind == LayerPlan::EffectKindPlan::ChromaticAberration &&
+          editorialPlan.effects[3].kind == LayerPlan::EffectKindPlan::Echo &&
+          editorialPlan.effects[4].kind == LayerPlan::EffectKindPlan::MeshWarp,
+          "image frame exposes composable light leak and channel/slice glitch looks");
+
     const ShapeRequest shapeRequest{{640.f, 360.f}, "#C92A32", "RedPortal"};
     const auto shapeHandle = host.createShape(shapeRequest);
     const auto shapePlan = makeShapeLayerPlan(shapeRequest, shapeHandle);
