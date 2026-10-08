@@ -195,10 +195,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductGlowCursor: return glowCursor();
             case ShortPhraseAnimation::ProductGradualBlur: return gradualBlur();
             case ShortPhraseAnimation::ProductShapeBlur: return shapeBlur();
-            case ShortPhraseAnimation::EditorialPromptResponse:
-            case ShortPhraseAnimation::EditorialDiffPatch:
-            case ShortPhraseAnimation::EditorialTerminalFocus:
-                throw std::logic_error("Claude editorial definition unexpectedly fell through");
             default: break;
         }
         // Authored entrance shapes in frames at 30 fps. `definition()` stretches
@@ -595,6 +591,10 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductShapeBlur:
                 break;
             // Claude definitions are fully handled by the first switch.
+            case ShortPhraseAnimation::EditorialPromptResponse:
+            case ShortPhraseAnimation::EditorialDiffPatch:
+            case ShortPhraseAnimation::EditorialTerminalFocus:
+                break;
             // These product definitions return directly from the first switch.
             case ShortPhraseAnimation::ProductHardMaskSlideUp:
             case ShortPhraseAnimation::ProductKineticBlurIn:
