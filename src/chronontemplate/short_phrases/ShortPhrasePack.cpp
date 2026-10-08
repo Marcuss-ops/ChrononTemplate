@@ -599,6 +599,27 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductGradualBlur:
             case ShortPhraseAnimation::ProductShapeBlur:
                 break;
+            // Claude definitions are fully handled by the first switch.
+            case ShortPhraseAnimation::EditorialPromptResponse:
+            case ShortPhraseAnimation::EditorialDiffPatch:
+            case ShortPhraseAnimation::EditorialTerminalFocus:
+                break;
+            // These product definitions return directly from the first switch.
+            case ShortPhraseAnimation::ProductHardMaskSlideUp:
+            case ShortPhraseAnimation::ProductKineticBlurIn:
+            case ShortPhraseAnimation::ProductWordStagger:
+            case ShortPhraseAnimation::ProductTrackingPullIn:
+            case ShortPhraseAnimation::ProductGradientSweep:
+            case ShortPhraseAnimation::ProductSubtitleDissolve:
+            case ShortPhraseAnimation::ProductDualToneReveal:
+            case ShortPhraseAnimation::ProductRollingTicker:
+            case ShortPhraseAnimation::ProductScaleSnap:
+            case ShortPhraseAnimation::ProductRadialExpansion:
+            case ShortPhraseAnimation::ProductDepthParallax:
+            case ShortPhraseAnimation::ProductGlintPass:
+            case ShortPhraseAnimation::ProductLetterRise:
+            case ShortPhraseAnimation::ProductDigitalAssembly:
+                break;
             default: break;
         }
         def.enter = 90; // the editorial sequence continues its second beat through frame 120
