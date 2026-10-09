@@ -1,0 +1,70 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "vintage_map_test",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 120
+  },
+  "layers": [
+    {
+      "id": "basemap",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/vintage_relief_basemap.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "fit": "cover",
+      "start_frame": 0,
+      "duration_frames": 120,
+      "screen_space": true
+    },
+    {
+      "id": "milano_banner",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/banner_milano.png",
+      "size": [
+        302,
+        98
+      ],
+      "position": [
+        -300.0,
+        -150.0
+      ],
+      "start_frame": 10,
+      "duration_frames": 110,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 15,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      },
+      "screen_space": true
+    }
+  ],
+  "output": {
+    "path": "ChrononTemplate/catalog/vintage_documentary_map_italy/out/test_banner.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

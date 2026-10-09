@@ -62,11 +62,23 @@ namespace {
             for (std::size_t i = 0; i < def.tracks.size(); ++i) {
                 everyTrackIsAValidEntrance(def.tracks[i], def.id + ".tracks[" + std::to_string(i) + "]");
             }
+            std::set<std::string> accentIds;
             for (const PhraseAccent& accent : def.accents) {
                 check(accent.width > 0.f && accent.height > 0.f, "highlight accents have positive dimensions");
                 check(!accent.id.empty(), "highlight accents carry an id");
+                check(accentIds.insert(accent.id).second,
+                      (def.id + " accent ids are unique: " + accent.id).c_str());
+                check(!accent.color.empty() && accent.color.front() == '#',
+                      (def.id + "." + accent.id + " declares an authored color").c_str());
+                check(accent.opacity > 0.f && accent.opacity <= 1.f,
+                      (def.id + "." + accent.id + " opacity is in (0, 1]").c_str());
                 for (const PhraseTrack& track : accent.tracks) {
                     everyTrackIsAValidEntrance(track, def.id + "." + accent.id);
+                    for (const auto& key : track.keyframes) {
+                        if (track.property == "scale_x")
+                            check(key.value > 0.f,
+                                  (def.id + "." + accent.id + " scale_x is strictly positive for native affine shapes").c_str());
+                    }
                 }
             }
         }

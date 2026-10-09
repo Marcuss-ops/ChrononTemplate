@@ -1,0 +1,36 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "vintage_map_test",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 120
+  },
+  "layers": [
+    {
+      "id": "basemap",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/vintage_relief_basemap.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "fit": "cover",
+      "start_frame": 0,
+      "duration_frames": 120,
+      "screen_space": true
+    }
+  ],
+  "output": {
+    "path": "/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/catalog/vintage_documentary_map_italy/out/test_render.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

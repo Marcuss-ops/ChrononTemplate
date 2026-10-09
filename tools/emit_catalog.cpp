@@ -31,6 +31,7 @@
 #include "chronontemplate/important_phrases/apple/ApplePhrasePack.hpp"
 #include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
 #include "chronontemplate/important_phrases/ImportantPhrasePack.hpp"
+#include "chronontemplate/important_phrases/highlight/PhraseHighlightPack.hpp"
 
 #include <cstdint>
 #include <fstream>
@@ -109,17 +110,80 @@ namespace {
         return rows;
     }
 
+    json highlightPhraseMotions() {
+        json rows = json::array();
+        constexpr float canvasWidth = 1920.f;
+        for (const auto animation : chronontemplate::phraseHighlightAnimations()) {
+            const auto definition = chronontemplate::definition(animation);
+            json tracks = json::array();
+            for (const auto& track : definition.tracks) tracks.push_back(phraseTrack(track));
+            json components = json::array();
+            for (const auto& accent : definition.accents) {
+                const std::string hex = accent.color;
+                if (hex.size() != 7 || hex.front() != '#')
+                    throw std::runtime_error(definition.id + ": accent color must be #RRGGBB");
+                const auto is_hex_digit = [](char value) {
+                    return (value >= '0' && value <= '9') ||
+                           (value >= 'a' && value <= 'f') ||
+                           (value >= 'A' && value <= 'F');
+                };
+                for (std::size_t index = 1; index < hex.size(); ++index) {
+                    if (!is_hex_digit(hex[index]))
+                        throw std::runtime_error(definition.id + ": accent color contains a non-hex digit");
+                }
+                const auto channel = [&](std::size_t offset) {
+                    return std::stoi(hex.substr(offset, 2), nullptr, 16) / 255.f;
+                };
+                const auto rgba = json::array({channel(1), channel(3), channel(5), 1.f});
+                const auto alpha = static_cast<float>(accent.opacity);
+                json accentTracks = json::array();
+                for (const auto& track : accent.tracks) accentTracks.push_back(phraseTrack(track));
+                components.push_back({{"id", accent.id}, {"type", "shape"},
+                    {"shape", "rect"}, {"placement", "before_image"},
+                    {"absolute_position", false}, {"absolute_radius", false},
+                    {"size_scale", json::array({accent.width / canvasWidth, accent.height / 1080.f})},
+                    {"position_offset", json::array({0.f, 0.f})},
+                    {"position_scale", json::array({0.5f, 0.5f + accent.y_offset / 1080.f})},
+                    {"radius_scale", accent.radius},
+                    {"fill", json::array({rgba[0], rgba[1], rgba[2], 1.f})},
+                    {"opacity", alpha}, {"tracks", accentTracks}});
+            }
+            rows.push_back({{"id", definition.id}, {"category", "phrase_highlight_v1"},
+                {"targets", json::array({"text", "phrase", "important_phrase"})},
+                {"unit", "layer"}, {"enter", definition.enter}, {"exit", 9},
+                {"render_safe", true}, {"tracks", tracks}, {"layer_components", components}});
+        }
+        return rows;
+    }
+
     bool nativePhraseMotion(const json& motion, const std::set<std::string>& candidates) {
         const std::string id = motion.value("id", "");
         if (candidates.find(id) == candidates.end()) return false;
         const std::set<std::string> layerProperties{
             "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
             "rotation", "rotation_z", "opacity"};
-        const std::set<std::string> textProperties{
+        const std::set<std::string> gpuTextAnimatorProperties{
             "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
             "opacity", "tracking"};
         for (const auto& track : motion.value("tracks", json::array())) {
             if (!layerProperties.contains(track.value("property", ""))) return false;
+        }
+        const auto recipe = motion.value("image_recipe", json::object());
+        for (const auto& component : recipe.value("components", json::array())) {
+            if (component.value("type", "") != "shape" ||
+                component.value("shape", "") != "rounded_rect" ||
+                component.value("placement", "") != "before_image") return false;
+            for (const auto& track : component.value("tracks", json::array())) {
+                if (!layerProperties.contains(track.value("property", ""))) return false;
+            }
+        }
+        for (const auto& component : motion.value("layer_components", json::array())) {
+            if (component.value("type", "") != "shape" ||
+                component.value("shape", "") != "rect" ||
+                component.value("placement", "") != "before_image") return false;
+            for (const auto& track : component.value("tracks", json::array())) {
+                if (!layerProperties.contains(track.value("property", ""))) return false;
+            }
         }
         for (const auto& animator : motion.value("text_animators", json::array())) {
             const auto selector = animator.value("selector", json::object());
@@ -132,7 +196,7 @@ namespace {
                 (order != "forward" && order != "reverse" &&
                  order != "from_center" && order != "to_center")) return false;
             for (const auto& track : animator.value("properties", json::array())) {
-                if (!textProperties.contains(track.value("property", ""))) return false;
+                if (!gpuTextAnimatorProperties.contains(track.value("property", ""))) return false;
             }
         }
         return true;
@@ -705,6 +769,8 @@ int main(int argc, char** argv) {
         }
         const json appleMotions = applePhraseMotions();
         for (const auto& row : appleMotions) motions.push_back(row);
+        const json highlightMotions = highlightPhraseMotions();
+        for (const auto& row : highlightMotions) motions.push_back(row);
         const std::set<std::string> motionIDs = validateMotions(motions);
 
         const json& presets = data["overlay_presets"];
@@ -744,8 +810,28 @@ int main(int argc, char** argv) {
         for (const auto& motion : motions) {
             const std::string id = motion.value("id", "");
             const std::string category = motion.value("category", "");
-            if ((id.rfind("typewriter_", 0) == 0 && category != "typewriter_modern_v1") ||
-                category == "apple_phrase_v1") {
+            const bool phraseFamily =
+                (id.rfind("typewriter_", 0) == 0 && category != "typewriter_modern_v1") ||
+                category == "apple_phrase_v1" || category == "phrase_apple_clean_v1" ||
+                category == "phrase_highlight_v1";
+            const bool hasUnsupportedGPUTrack = [&] {
+                const std::set<std::string> layerProperties{
+                    "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
+                    "rotation", "rotation_z", "opacity"};
+                const std::set<std::string> textProperties{
+                    "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
+                    "opacity", "tracking"};
+                for (const auto& track : motion.value("tracks", json::array())) {
+                    if (!layerProperties.contains(track.value("property", ""))) return true;
+                }
+                for (const auto& animator : motion.value("text_animators", json::array())) {
+                    for (const auto& track : animator.value("properties", json::array())) {
+                        if (!textProperties.contains(track.value("property", ""))) return true;
+                    }
+                }
+                return false;
+            }();
+            if (phraseFamily && !hasUnsupportedGPUTrack) {
                 phraseCandidates.insert(id);
             }
         }
