@@ -344,6 +344,9 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         add_test(NAME chronontemplate_text_depth_focus_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/test_text_depth_focus_v1.py")
+        add_test(NAME chronontemplate_native_phrase_enter_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/test_native_phrase_enter.py")
         add_test(NAME chronontemplate_saas_kinetic_typography_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/test_saas_kinetic_typography_v1.py")
@@ -471,6 +474,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_apple_phrase_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_apple_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_apple_phrase_pack_test COMMAND chronontemplate_apple_phrase_pack_test)
+
+    add_executable(chronontemplate_highlight_phrase_pack_test tests/highlight_phrase_pack.cpp)
+    target_link_libraries(chronontemplate_highlight_phrase_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_highlight_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_highlight_phrase_pack_test COMMAND chronontemplate_highlight_phrase_pack_test)
 
     # The first pack: the subscribe card, its controller-driven entrance/exit and
     # the click pulse that only holds because a preset appends keys.

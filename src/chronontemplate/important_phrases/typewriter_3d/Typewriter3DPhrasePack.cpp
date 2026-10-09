@@ -243,7 +243,7 @@ namespace chronontemplate {
     }
 
     PhraseAnimationDefinition definition(Typewriter3DPhraseAnimation animation) {
-        constexpr int enter = 60;// 2 s entrance @ 30 fps
+        constexpr int enter = kPhraseEnterFrames;
         const std::vector<PhraseTrack> typing{track("opacity", {{0, 0.f}, {enter, 0.f}}, "linear")};
 
         switch (animation) {

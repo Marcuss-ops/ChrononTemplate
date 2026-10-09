@@ -124,16 +124,21 @@ namespace chronontemplate {
         std::vector<PhraseTrack> tracks{};
     };
 
+    /// The entrance length every important-phrase family shares: two seconds
+    /// at the pack's 30 fps. The Python lowering (tools/important_phrases/
+    /// emit_native_phrase_pack.py) uses the same value as its default.
+    inline constexpr int kPhraseEnterFrames = 60;
+
     /// One animation of any family: entrance keyframes in `enter` frames of
-    /// local time (60 — a two-second entrance at the pack fps — so the motion
-    /// and the glow read on camera), on the layer and/or on text units. The
-    /// emitter holds the resting value and synthesises the exit. A non-empty
-    /// `cursor` adds the underscore layer the Typewriter family types with.
+    /// local time (kPhraseEnterFrames, so the motion and the glow read on
+    /// camera), on the layer and/or on text units. The emitter holds the
+    /// resting value and synthesises the exit. A non-empty `cursor` adds the
+    /// underscore layer the Typewriter family types with.
     struct PhraseAnimationDefinition {
         std::string id{};    ///< stable wire id, e.g. "classic_typewriter"
         std::string title{}; ///< human name, e.g. "Typewriter"
         std::string phrase{};///< showcase phrase rendered with the animation
-        int enter{48};       ///< entrance length in frames @ the pack fps
+        int enter{kPhraseEnterFrames}; ///< entrance length in frames @ the pack fps
         std::vector<PhraseTrack> tracks{};              ///< layer-level motion
         std::vector<PhraseTextAnimator> textAnimators{};///< per-unit motion
         PhraseCursor cursor{};                          ///< the `_` cursor layer

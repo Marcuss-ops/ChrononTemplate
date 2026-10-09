@@ -145,7 +145,9 @@ def lowered_selector(animator: dict[str, Any], enter: int) -> dict[str, Any]:
 
 
 def lower_motion(motion: dict[str, Any], duration: int) -> dict[str, Any]:
-    enter = min(int(motion.get("enter", 72)), duration - 1)
+    # 60 frames = two seconds at 30 fps; matches kPhraseEnterFrames in
+    # include/chronontemplate/important_phrases/ImportantPhrasePack.hpp.
+    enter = min(int(motion.get("enter", 60)), duration - 1)
     tracks: list[dict[str, Any]] = []
     for track in motion.get("tracks", []):
         tracks.append(

@@ -91,14 +91,21 @@ def build_sampler(builder):
 
 
 def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
-                     preset: str = "veryfast", crf: int = 18) -> dict:
+                     preset: str = "veryfast", crf: int = 18,
+                     gpu_required: bool = False) -> dict:
     """Encode builder frames through the ordered fork pool. Returns stats."""
     out = Path(out_path)
     cmd = ["ffmpeg", "-y", "-f", "rawvideo", "-vcodec", "rawvideo",
            "-s", f"{builder.WIDTH}x{builder.HEIGHT}", "-pix_fmt", "bgr24",
-           "-r", str(builder.FPS), "-i", "-",
-           "-c:v", "libx264", "-preset", preset, "-crf", str(crf),
-           "-pix_fmt", "yuv420p", str(out)]
+           "-r", str(builder.FPS), "-i", "-"]
+    if gpu_required:
+        # Production map overlays must use the NVIDIA encoder. There is no
+        # software fallback: an unavailable/lost GPU fails the runtime job.
+        cmd += ["-c:v", "h264_nvenc", "-gpu", "0", "-preset", "p4",
+                "-tune", "hq", "-rc", "vbr", "-cq", str(crf), "-b:v", "0"]
+    else:
+        cmd += ["-c:v", "libx264", "-preset", preset, "-crf", str(crf)]
+    cmd += ["-pix_fmt", "yuv420p", str(out)]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
     total = builder.TOTAL_FRAMES
@@ -157,9 +164,12 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
              # this is only the post-production tail, not exclusive encoder CPU.
              "post_frame_tail_s": max(0.0, elapsed - produced),
              "engine_fallback_frames": fallback_frames}
+    encoder = "h264_nvenc" if gpu_required else f"libx264 {preset}"
+    stats["encoder"] = encoder
+    stats["gpu_encoder"] = gpu_required
     print(f"frame production: {produced:.2f}s ({stats['production_fps']:.1f} FPS) | "
           f"total incl. encode: {elapsed:.2f}s ({stats['total_fps']:.1f} FPS, "
-          f"{stats['bytes']:,} bytes) | {workers} workers, x264 {preset}", flush=True)
+          f"{stats['bytes']:,} bytes) | {workers} workers, {encoder}", flush=True)
     print(f"  engine fallbacks: {fallback_frames}/{total} frame(s) served by "
           f"the slow engine (0 = every frame took the fast path)", flush=True)
     return stats

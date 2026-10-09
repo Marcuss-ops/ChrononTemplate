@@ -62,7 +62,7 @@ namespace chronontemplate {
         // Local-time entrance keyframes (frames at the pack's 30 fps), authored
         // per animation. Layer tracks move the phrase as one piece; text
         // animators reveal it through its units the way Chronon3D owns them.
-        constexpr int enter = 60;// 2 s entrance @ 30 fps
+        constexpr int enter = kPhraseEnterFrames;
         switch (animation) {
             // ── Layer entrances: the phrase moves as one piece ──────────────
             case ClassicPhraseAnimation::Fade:

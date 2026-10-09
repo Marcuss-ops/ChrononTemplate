@@ -134,31 +134,29 @@ def draw_spring_pin(frame: np.ndarray, point: tuple[int, int], progress: float,
 
 def draw_location_glow(frame: np.ndarray, point: tuple[int, int], progress: float,
                        area_radius_px: int = 0) -> None:
-    """Pulsing cyan ring and bright center point with an optional area halo."""
+    """Pulsing amber beacon with a bright core and optional area halo."""
     import cv2
     import numpy as np
     cx, cy = point
     t = max(0.0, min(1.0, progress))
     pulse = 0.5 + 0.5 * math.sin(t * math.tau * 1.7)
     radius = 40 + int(6 * pulse)
-    cyan = (213, 226, 82)
+    # OpenCV uses BGR: this is #FFD166. Keep the center visibly warm instead
+    # of drawing the near-black target dot that disappeared on dark basemaps.
+    accent = (102, 209, 255)
     # Keep the ring crisp while adding a soft halo in the same map accent.
     light = np.zeros_like(frame)
-    cv2.circle(light, (cx, cy), radius, cyan, 4, cv2.LINE_AA)
-    cv2.circle(light, (cx, cy), radius + 12, cyan, 2, cv2.LINE_AA)
+    cv2.circle(light, (cx, cy), radius, accent, 4, cv2.LINE_AA)
     light = cv2.GaussianBlur(light, (0, 0), 16)
     cv2.addWeighted(frame, 1.0, light, 0.66, 0, dst=frame)
-    cv2.circle(frame, (cx, cy), radius, cyan, 3, cv2.LINE_AA)
-    if area_radius_px > 2:
-        ring = np.zeros_like(frame)
-        cv2.circle(ring, (cx, cy), area_radius_px, (180, 110, 30), 3, cv2.LINE_AA)
-        cv2.circle(ring, (cx, cy), area_radius_px, (255, 150, 45), 3, cv2.LINE_AA)
-        ring = cv2.GaussianBlur(ring, (0, 0), 10)
-        cv2.addWeighted(frame, 1.0, ring, 0.22, 0, dst=frame)
-        cv2.circle(frame, (cx, cy), area_radius_px, (255, 175, 70), 2, cv2.LINE_AA)
-    # Bright center dot reads clearly against both the imagery and the ring.
-    cv2.circle(frame, (cx, cy), 10, (8, 30, 36), -1, cv2.LINE_AA)
-    cv2.circle(frame, (cx, cy), 7, (248, 252, 250), -1, cv2.LINE_AA)
+    cv2.circle(frame, (cx, cy), radius, accent, 3, cv2.LINE_AA)
+    # Keep the geographic cue as a hollow beacon. A filled center reads as a
+    # pin/dot at this scale, so use only a quiet diffuse core and thin ring.
+    core = np.zeros_like(frame)
+    cv2.circle(core, (cx, cy), 13, accent, -1, cv2.LINE_AA)
+    core = cv2.GaussianBlur(core, (0, 0), 8)
+    cv2.addWeighted(frame, 1.0, core, 0.42, 0, dst=frame)
+    cv2.circle(frame, (cx, cy), 8, accent, 2, cv2.LINE_AA)
 
 
 MAP_LABEL_ANIMATIONS = (
@@ -183,12 +181,14 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     cx, cy = point
     # Each treatment changes only the opacity/glow timing. The type remains
     # the same size and at the same screen coordinate for every frame.
+    # The camera has settled at 62% and the marker has been visible since
+    # 68%; delay every label treatment until 80% so it cannot race the zoom.
     timing = {
-        "gentle_fade": (0.50, 0.23), "soft_glow": (0.52, 0.18),
-        "clean_fade": (0.49, 0.24), "word_soft_fade": (0.51, 0.26),
-        "slow_fade": (0.50, 0.20), "quiet_bloom": (0.48, 0.22),
-        "quick_fade": (0.53, 0.18), "silky_fade": (0.50, 0.25),
-        "subtle_halo": (0.51, 0.22), "cinematic_fade": (0.49, 0.20),
+        "gentle_fade": (0.80, 0.16), "soft_glow": (0.80, 0.16),
+        "clean_fade": (0.80, 0.16), "word_soft_fade": (0.80, 0.16),
+        "slow_fade": (0.80, 0.16), "quiet_bloom": (0.80, 0.16),
+        "quick_fade": (0.80, 0.16), "silky_fade": (0.80, 0.16),
+        "subtle_halo": (0.80, 0.16), "cinematic_fade": (0.80, 0.16),
     }
     start, duration = timing[animation]
     t = max(0.0, min(1.0, (progress - start) / duration))
@@ -206,7 +206,7 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     connector = np.zeros_like(frame)
     connector_top = text_y - 6
     if connector_top > cy + 53:
-        cv2.line(connector, (cx, cy + 53), (cx, connector_top), (213, 226, 82), 2, cv2.LINE_AA)
+        cv2.line(connector, (cx, cy + 53), (cx, connector_top), (102, 209, 255), 2, cv2.LINE_AA)
         cv2.addWeighted(frame, 1.0, connector, alpha * 0.8, 0, dst=frame)
     x0, y0 = max(0, text_x - 8), max(0, text_y - 8)
     x1, y1 = min(w, text_x + tw + 8), min(h, text_y + th + 8)

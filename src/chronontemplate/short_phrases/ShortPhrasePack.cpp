@@ -200,6 +200,24 @@ namespace chronontemplate {
         // Authored entrance shapes in frames at 30 fps. `definition()` stretches
         // the entrance window to three seconds so character builds stay legible.
         switch (animation) {
+            // The Claude variants were fully constructed by the dedicated cases.
+            case ShortPhraseAnimation::EditorialPromptResponse:
+            case ShortPhraseAnimation::EditorialDiffPatch:
+            case ShortPhraseAnimation::EditorialTerminalFocus:
+                break;
+            // Dedicated recipes are dispatched in the first switch.
+            case ShortPhraseAnimation::ProductMaskedHeading:
+            case ShortPhraseAnimation::ProductSplitFlapText:
+            case ShortPhraseAnimation::ProductWarpText:
+            case ShortPhraseAnimation::ProductFoldText:
+            case ShortPhraseAnimation::ProductDecryptedText:
+            case ShortPhraseAnimation::ProductScrollReveal:
+            case ShortPhraseAnimation::ProductScrambledText:
+            case ShortPhraseAnimation::ProductGlareHover:
+            case ShortPhraseAnimation::ProductGlowCursor:
+            case ShortPhraseAnimation::ProductGradualBlur:
+            case ShortPhraseAnimation::ProductShapeBlur:
+                break;
             case ShortPhraseAnimation::EditorialBaselineRise:
                 return {name(animation), "Word Snap", "Le idee prendono forma", 16,
                         {track("position_y", {{0, 88.f}, {11, -9.f}, {16, 0.f}}),
@@ -577,6 +595,17 @@ namespace chronontemplate {
                 def.accents.front().tracks.front() = track(
                     "scale_x", {{0, 0.15f}, {22, 1.f}, {42, 1.f}, {78, 1.2f}, {102, 1.f}, {120, 1.f}}, "in_out_cubic");
                 break;
+            // The Claude-inspired recipes return early from entranceDefinition(),
+            // so their second beat is authored here, on the path that actually runs.
+            case ShortPhraseAnimation::EditorialPromptResponse:
+                layerBeat("position_y", 28.f, 0.f, -8.f, 0.f);
+                break;
+            case ShortPhraseAnimation::EditorialDiffPatch:
+                layerBeat("position_x", -22.f, 0.f, 8.f, 0.f);
+                break;
+            case ShortPhraseAnimation::EditorialTerminalFocus:
+                layerBeat("position_x", 20.f, 0.f, -6.f, 0.f);
+                break;
             // These definitions do not use the legacy editorial sequence body.
             case ShortPhraseAnimation::ProductMaskedHeading:
             case ShortPhraseAnimation::ProductSplitFlapText:
@@ -590,8 +619,19 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductGradualBlur:
             case ShortPhraseAnimation::ProductShapeBlur:
                 break;
-            // Claude definitions are fully handled by the first switch.
-            // These product definitions return directly from the first switch.
+            // The classic/product definitions are already fully specified.
+            case ShortPhraseAnimation::ScaleSettleWord:
+            case ShortPhraseAnimation::ShapePhraseWipe:
+            case ShortPhraseAnimation::SemanticTwoLine:
+            case ShortPhraseAnimation::PhraseBuildFocus:
+            case ShortPhraseAnimation::CharacterTrackingReveal:
+            case ShortPhraseAnimation::WordMaskSequence:
+            case ShortPhraseAnimation::CharacterCascadeShapes:
+            case ShortPhraseAnimation::WordCascadeSentence:
+            case ShortPhraseAnimation::SemanticChainCurve:
+            case ShortPhraseAnimation::SimpleProgressivePhrase:
+            case ShortPhraseAnimation::SingleWordSwap:
+            case ShortPhraseAnimation::CharacterWriteOn:
             case ShortPhraseAnimation::ProductHardMaskSlideUp:
             case ShortPhraseAnimation::ProductKineticBlurIn:
             case ShortPhraseAnimation::ProductWordStagger:

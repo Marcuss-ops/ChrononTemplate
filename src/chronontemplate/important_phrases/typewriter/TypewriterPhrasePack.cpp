@@ -98,7 +98,7 @@ namespace chronontemplate {
         // opacity at 0 (hidden until typed); the settling variants drop the
         // opacity property and hold the displacement instead, so the un-typed
         // tail visibly settles glyph by glyph. The `_` cursor trails the edge.
-        constexpr int enter = 60;// 2 s entrance @ 30 fps
+        constexpr int enter = kPhraseEnterFrames;
         const std::vector<PhraseTrack> typing{track("opacity", {{0, 0.f}, {enter, 0.f}}, "linear")};
         switch (animation) {
             case TypewriterPhraseAnimation::Fade:

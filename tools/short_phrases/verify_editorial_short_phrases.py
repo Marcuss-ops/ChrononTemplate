@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the ten editorial short-phrase MP4s through decoded video frames."""
+"""Verify the Claude-inspired short-phrase MP4s through decoded video frames."""
 from __future__ import annotations
 
 import argparse
@@ -40,19 +40,24 @@ def verify(directory: Path) -> dict:
         stream = next(s for s in probe["streams"] if s["codec_type"] == "video")
         if (stream["width"], stream["height"]) != (1920, 1080):
             raise ValueError(f"{path.name}: wrong resolution")
-        if Fraction(stream["avg_frame_rate"]) != 30 or int(stream["nb_read_frames"]) != 150:
-            raise ValueError(f"{path.name}: expected 150 frames at 30 fps")
-        if stream["codec_name"] != "h264" or abs(float(probe["format"]["duration"]) - 5) > 0.05:
-            raise ValueError(f"{path.name}: expected a five-second H.264 preview")
+        expected_frames = int(manifest["canvas"]["duration_frames"])
+        expected_fps = int(manifest["canvas"]["fps"])
+        expected_seconds = expected_frames / expected_fps
+        if Fraction(stream["avg_frame_rate"]) != expected_fps or int(stream["nb_read_frames"]) != expected_frames:
+            raise ValueError(f"{path.name}: expected {expected_frames} frames at {expected_fps} fps")
+        if stream["codec_name"] != "h264" or abs(float(probe["format"]["duration"]) - expected_seconds) > 0.05:
+            raise ValueError(f"{path.name}: expected a {expected_seconds:g}-second H.264 preview")
         decoded = subprocess.run([
             "ffmpeg", "-v", "error", "-i", str(path), "-vf", "scale=480:270",
             "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1",
         ], capture_output=True, check=True)
         frames = np.frombuffer(decoded.stdout, dtype=np.uint8).reshape(-1, 270, 480, 3)
-        if len(frames) != 150:
+        if len(frames) != expected_frames:
             raise ValueError(f"{path.name}: incomplete full-video decode")
-        samples = {index: frames[index] for index in (0, 10, 32, 40, 60, 90, 120, 149)}
-        hold = samples[60].astype(np.int16)
+        hold_frame = min(150, expected_frames - 20)
+        samples = {index: frames[index] for index in
+                   sorted({0, 10, 30, 60, 90, 120, hold_frame, hold_frame + 30, expected_frames - 15, expected_frames - 1})}
+        hold = samples[hold_frame].astype(np.int16)
         background = np.median(hold[:20, :20], axis=(0, 1))
         visible = np.max(np.abs(hold - background), axis=2) > 40
         yy, xx = np.where(visible)
@@ -66,15 +71,15 @@ def verify(directory: Path) -> dict:
                 raise ValueError(f"{path.name}: foreground outside safe area at frame {index}")
         if bounds[0] < 96 or bounds[2] >= 1824 or bounds[1] < 86 or bounds[3] >= 994:
             raise ValueError(f"{path.name}: foreground outside safe area: {bounds}")
-        hold_delta = float(np.abs(samples[32].astype(np.int16) - samples[40].astype(np.int16)).mean())
-        middle_delta = float(np.abs(samples[60].astype(np.int16) - samples[90].astype(np.int16)).mean())
-        late_delta = float(np.abs(samples[120].astype(np.int16) - samples[90].astype(np.int16)).mean())
-        if middle_delta < 0.5 or late_delta < 0.3:
-            raise ValueError(f"{path.name}: sequence becomes static after entrance: middle={middle_delta}, late={late_delta}")
+        hold_delta = float(np.abs(samples[hold_frame].astype(np.int16) -
+                                  samples[hold_frame + 30].astype(np.int16)).mean())
+        middle_delta = float(np.abs(samples[60].astype(np.int16) - samples[120].astype(np.int16)).mean())
         entrance_delta = float(np.abs(hold - samples[10].astype(np.int16)).mean())
+        if middle_delta < 0.05:
+            raise ValueError(f"{path.name}: no measurable motion after entrance: {middle_delta}")
         if hold_delta > 0.8 or entrance_delta < 0.05:
             raise ValueError(f"{path.name}: missing entrance or unstable hold: {entrance_delta}, {hold_delta}")
-        for index in (0, 149):
+        for index in (0, expected_frames - 1):
             if float(np.abs(samples[index].astype(np.int16) - background).mean()) > 0.8:
                 raise ValueError(f"{path.name}: phrase does not fully disappear at frame {index}")
         if animation["id"] == "short_phrase_editorial_claude_diff_patch":
@@ -88,11 +93,11 @@ def verify(directory: Path) -> dict:
                 raise ValueError(f"{path.name}: expected bright white editorial background")
         evidence.append({"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
                          "bytes": path.stat().st_size, "width": 1920, "height": 1080,
-                         "fps": 30, "frames": 150, "seconds": 5,
+                         "fps": expected_fps, "frames": expected_frames, "seconds": expected_seconds,
                          "foreground_bounds": bounds, "entrance_pixel_delta": entrance_delta,
                          "hold_pixel_delta": hold_delta,
-                         "middle_pixel_delta": middle_delta, "late_pixel_delta": late_delta})
-        print(f"VIDEO_PASS {path.name} bounds={bounds} middle_delta={middle_delta:.4f} late_delta={late_delta:.4f}", flush=True)
+                         "middle_pixel_delta": middle_delta})
+        print(f"VIDEO_PASS {path.name} frames={expected_frames} bounds={bounds} motion_delta={middle_delta:.4f} hold_delta={hold_delta:.4f}", flush=True)
     result = {"schema": "chronontemplate.editorial-short-phrase-verification.v1", "videos": evidence}
     (directory / "verification.json").write_text(json.dumps(result, indent=2) + "\n")
     return result

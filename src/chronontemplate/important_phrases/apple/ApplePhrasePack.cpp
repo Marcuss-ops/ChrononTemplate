@@ -18,7 +18,7 @@ namespace {
     }
     PhraseAnimationDefinition make(const char* id, const char* title, const char* phrase,
                                    std::vector<PhraseTrack> layer,
-                                   std::vector<PhraseTextAnimator> text = {}, int enter = 60) {
+                                   std::vector<PhraseTextAnimator> text = {}, int enter = kPhraseEnterFrames) {
         return {id, title, phrase, enter, std::move(layer), std::move(text), {}};
     }
 }
