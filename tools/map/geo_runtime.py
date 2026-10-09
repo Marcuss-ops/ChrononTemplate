@@ -305,7 +305,10 @@ class _ShotBuilder:
         if getattr(self, "minimal_map", False):
             # The one-stop path uses _ShotBuilder (rather than TourBuilder),
             # so keep its marker treatment identical to multi-stop arrivals.
-            if progress >= 0.50:
+            # Finish the level dive (62% of the clip) before revealing the
+            # location beacon. The name fade starts later in
+            # draw_map_marker_label, preserving camera -> point -> label.
+            if progress >= 0.68:
                 radius_km = float(getattr(self, "map_area_glow_radius_km", 0.0))
                 area_px = 0
                 if radius_km > 0:
@@ -400,14 +403,14 @@ class TourBuilder:
         for mark in self._schedule():
             if len(mark) == 3:
                 active_end = (mark[0] + round((mark[1] - mark[0]) * self.stop_dive_fraction)
-                              if self.stop_dive_fraction < 1.0 else mark[1] - 1)
-                phases.append((mark[0], max(mark[0] + 1, active_end)))
+                              if self.stop_dive_fraction < 1.0 else mark[1])
+                phases.append((mark[0], min(mark[1], max(mark[0] + 1, active_end))))
                 continue
             start, end = mark[0], mark[1]
             span = end - start
-            out_end = start + round(span * 0.40)
-            in_start = start + round(span * 0.60)
-            phases.extend(((start, out_end), (in_start, end - 1)))
+            out_end = min(end - 2, max(start + 1, start + round(span * 0.40)))
+            in_start = min(end - 1, max(out_end + 1, start + round(span * 0.60)))
+            phases.extend(((start, out_end), (in_start, end)))
         return phases
 
     def pose(self, f: int):
@@ -420,8 +423,13 @@ class TourBuilder:
                     target = self.stop_end_zooms[i]
                     z_start = (5.2 + (target - 5.2) * self.initial_zoom_fraction
                                if i == 0 else self.stop_end_zooms[i - 1])
-                    phase = (f - m[0]) / max(1, m[1] - m[0] - 1)
-                    dive = smootherstep(min(1.0, phase / self.stop_dive_fraction))
+                    active_end = (m[0] + round((m[1] - m[0]) * self.stop_dive_fraction)
+                                  if self.stop_dive_fraction < 1.0 else m[1])
+                    active_end = min(m[1], max(m[0] + 1, active_end))
+                    active_frames = active_end - m[0]
+                    phase = (1.0 if active_frames <= 1 else
+                             (f - m[0]) / (active_frames - 1))
+                    dive = smootherstep(min(1.0, phase))
                     return (s.lat, s.lon, z_start + (target - z_start) * dive)
                 # travel leg i -> i+1: pull out to the midpoint zoom, glide,
                 # re-dive. The zoom eases the RAW fraction once per half -
@@ -431,9 +439,6 @@ class TourBuilder:
                 i, j = m[2], m[3]
                 a, b = self.stops[i], self.stops[j]
                 raw = (f - m[0]) / max(1, m[1] - m[0] - 1)
-                p = smootherstep(raw)
-                lat = a.lat + (b.lat - a.lat) * p
-                lon = a.lon + (b.lon - a.lon) * p
                 # Pull back before panning so the complete leg stays visible,
                 # then dive toward the next stop. The old 1.2-level pullback
                 # left the camera nearly at street scale while crossing whole
@@ -449,19 +454,30 @@ class TourBuilder:
                 # non-zero phase seam; pan smoothly at constant zoom instead.
                 if (abs(self.stop_end_zooms[i] - self.stop_end_zooms[j]) < 1e-9
                         and route_zoom >= self.stop_end_zooms[i] - 1.0):
+                    p = smootherstep(raw)
                     return (a.lat + (b.lat - a.lat) * p,
                             a.lon + (b.lon - a.lon) * p,
                             self.stop_end_zooms[i])
                 arrival_zoom = self.stop_end_zooms[j - 1] if j > 0 else self.end_zoom
-                if raw < 0.40:
-                    e = smootherstep(raw / 0.40)
+                out_end = min(m[1] - 2, max(m[0] + 1,
+                                            m[0] + round((m[1] - m[0]) * 0.40)))
+                in_start = min(m[1] - 1, max(out_end + 1,
+                                              m[0] + round((m[1] - m[0]) * 0.60)))
+                if f < out_end:
+                    out_frames = out_end - m[0]
+                    e = (1.0 if out_frames <= 1 else
+                         smootherstep((f - m[0]) / (out_frames - 1)))
                     return (a.lat, a.lon,
                             self.stop_end_zooms[i] + (route_zoom - self.stop_end_zooms[i]) * e)
-                if raw < 0.60:
-                    e = smootherstep((raw - 0.40) / 0.20)
+                if f < in_start:
+                    pan_frames = in_start - out_end
+                    e = (1.0 if pan_frames <= 1 else
+                         smootherstep((f - out_end) / (pan_frames - 1)))
                     return (a.lat + (b.lat - a.lat) * e,
                             a.lon + (b.lon - a.lon) * e, route_zoom)
-                e = smootherstep((raw - 0.60) / 0.40)
+                dive_frames = m[1] - in_start
+                e = (1.0 if dive_frames <= 1 else
+                     smootherstep((f - in_start) / (dive_frames - 1)))
                 return (b.lat, b.lon,
                         route_zoom + (arrival_zoom - route_zoom) * e)
         s = self.stops[-1]
@@ -590,9 +606,28 @@ def check_velocity_strict(builder) -> int:  # noqa: ANN001 - duck-typed builder
         spans = (phase_schedule() if phase_schedule is not None else
                  [(m[0], m[1] - 1) for m in schedule() if m[1] - m[0] >= 4])
         for (a0, a1), (b0, b1) in zip(spans, spans[1:]):
-            step = abs(zooms[b0] - zooms[a1 - 1])
-            lim = min(0.8 * _zoom_tv(zooms, a0, a1) / max(1, a1 - a0),
-                      0.8 * _zoom_tv(zooms, b0, b1) / max(1, b1 - b0))
+            # Route phases are sampled on integer frames. At a short or
+            # stationary phase boundary, both local budgets can quantize to
+            # zero even when the seam contains one quantized camera step. Keep
+            # the strict relative bound for ordinary motion, with a 0.10-level
+            # floor for short authored shots. At 24 fps this bounds a one-frame
+            # scale change to about 7%; larger jumps still fail the gate.
+            lim = max(0.10, min(
+                0.8 * _zoom_tv(zooms, a0, a1) / max(1, a1 - a0),
+                0.8 * _zoom_tv(zooms, b0, b1) / max(1, b1 - b0),
+            ))
+            # A hold can separate two active zoom phases. Comparing their
+            # endpoints across that hold mistakes legitimate travel for a
+            # single-frame jump. Check the actual one-frame seams instead.
+            if b0 > a1:
+                seam_steps = []
+                if a1 < n:
+                    seam_steps.append(abs(zooms[a1] - zooms[a1 - 1]))
+                if b0 < n:
+                    seam_steps.append(abs(zooms[b0] - zooms[b0 - 1]))
+                step = max(seam_steps, default=0.0)
+            else:
+                step = abs(zooms[b0] - zooms[a1 - 1])
             if step > lim + 1e-4:
                 raise RuntimeError(
                     f"velocity discontinuity at the {a1}/{b0} junction "

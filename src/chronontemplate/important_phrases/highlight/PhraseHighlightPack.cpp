@@ -19,6 +19,9 @@ namespace {
 
     PhraseAnimationDefinition make(const char* id, const char* title, const char* phrase,
                                    std::vector<PhraseAccent> accents, int enter = 78) {
+        // 78 frames, not kPhraseEnterFrames: the accent sweeps hold until frame
+        // 78, so a shorter entrance would clip them. See the Highlight contract
+        // test, which pins that every keyframe completes inside `enter`.
         // Keep the phrase's vertical placement fixed. The GPU text path can
         // collapse animated position_y updates into a thin strip on frame boundaries.
         return PhraseAnimationDefinition{
@@ -152,7 +155,9 @@ PhraseAnimationDefinition definition(PhraseHighlightAnimation animation) {
                         "LA MEMORIA ATTRAVERSA LE GENERAZIONI",
                         {sweep("rule_top", "#E9B66B", 1240.f, 3.f, y - 7.f, .72f, 28, 54),
                          sweep("rule_main", "#FF1018", 1500.f, 7.f, y + 1.f, 1.f, 38, 64),
-                         sweep("rule_bottom", "#F7F5F1", 980.f, 3.f, y + 12.f, .62f, 52, 78)});
+                         sweep("rule_bottom", "#F7F5F1", 980.f, 3.f, y + 12.f, .62f, 52, 78)}, 80);
+        // 80, not 78: sweep() holds one frame past a finish of 78, so this
+        // recipe's last keyframe is 79 and the entrance must cover it.
         case PhraseHighlightAnimation::SplitMarker:
             return make(name(animation), "Split marker",
                         "DA UNA CRISI NASCE UNA POSSIBILITÀ",

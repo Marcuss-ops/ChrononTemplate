@@ -80,7 +80,7 @@ def main() -> int:
     # Production overlays are emitted at the authored supersampled canvas
     # size. Keep city plates at a documentary overview zoom so exact tile
     # coverage stays bounded even for 3x canvases (e.g. 5760x3240).
-    level_zoom = {"continent": 2.5, "country": 5.0, "region": 8.0, "city": 10.0}
+    level_zoom = {"continent": 2.5, "country": 5.0, "region": 8.0, "city": 11.5}
     stop_zooms = [level_zoom[map_level(pin)] for pin in pins]
 
     if len(stops) == 1:
@@ -92,7 +92,11 @@ def main() -> int:
         elif camera_animation == "slow_approach":
             builder.end_zoom = max(5.8, stop_zooms[0] - 0.9)
     else:
-        travel_seconds = min(1.0, duration_us / 1_000_000 / (2 * (len(stops) - 1)))
+        # Multi-stop zoom legs need enough frames to pass the strict camera
+        # velocity gate at close city zooms. Reserve half of the authored
+        # duration for travel, capped at 1.5 seconds per leg; the other half
+        # remains split into visible stop windows for the sequential pins.
+        travel_seconds = min(1.5, duration_us / 1_000_000 / (2 * (len(stops) - 1)))
         stop_seconds = max(0.15, (duration_us / 1_000_000 - travel_seconds * (len(stops) - 1)) / len(stops))
         builder = geo.TourBuilder(stops, seconds_per_stop=stop_seconds,
                                   travel_seconds=travel_seconds, end_zoom=max(stop_zooms))
@@ -190,7 +194,8 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     stats = harness.encode_with_pool(builder, sampler, args.output,
                                      workers=min(8, max(1, (os.cpu_count() or 2) // 2)),
-                                     block=2, preset="veryfast", crf=18)
+                                     block=2, preset="veryfast", crf=18,
+                                     gpu_required=True)
     if stats.get("engine_fallback_frames", 0):
         raise RuntimeError(f"map sampler used fallback imagery in {stats['engine_fallback_frames']} frames")
     summary = {
@@ -207,6 +212,8 @@ def main() -> int:
         "post_frame_tail_s": stats["post_frame_tail_s"],
         "engine_fallback_frames": stats["engine_fallback_frames"],
         "output_bytes": stats["bytes"],
+        "video_encoder": stats["encoder"],
+        "gpu_encoder": stats["gpu_encoder"],
         "renderer_wall_s": time.perf_counter() - render_started,
     }
     args.summary_output.parent.mkdir(parents=True, exist_ok=True)
