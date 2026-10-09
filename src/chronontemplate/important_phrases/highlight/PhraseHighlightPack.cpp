@@ -35,7 +35,7 @@ namespace {
                        float y, float opacity = 1.f, int start = 32, int finish = 62) {
         const int hold = finish >= 78 ? finish + 1 : 78;
         return accent(id, color, width, height, y, height * .5f, opacity,
-                      {track("scale_x", {{0, 0.f}, {start, 0.f}, {finish, 1.f}, {hold, 1.f}}, "linear"),
+                      {track("scale_x", {{0, .01f}, {start, .01f}, {finish, 1.f}, {hold, 1.f}}, "linear"),
                        track("position_x", {{0, -width * .5f}, {start, -width * .5f},
                                              {finish, 0.f}, {hold, 0.f}}, "linear")});
     }
@@ -99,7 +99,7 @@ PhraseAnimationDefinition definition(PhraseHighlightAnimation animation) {
             return make(name(animation), "Center-out underline",
                         "NON È MAI TROPPO TARDI",
                         {accent("center_rule", "#F7F5F1", 1260.f, 6.f, y, 3.f, .9f,
-                                {track("scale_x", {{0, 0.f}, {42, 1.f}, {78, 1.f}})})});
+                                {track("scale_x", {{0, .01f}, {42, 1.f}, {78, 1.f}}, "out_cubic")})});
         case PhraseHighlightAnimation::DoubleRule:
             return make(name(animation), "Double rule",
                         "UNA NUOVA PROSPETTIVA CAMBIA TUTTO",
@@ -113,7 +113,7 @@ PhraseAnimationDefinition definition(PhraseHighlightAnimation animation) {
             return make(name(animation), "Soft marker pulse",
                         "QUELLO CHE CONTA RESTA CON NOI",
                         {accent("soft_marker", "#C98255", 1480.f, 28.f, y + 6.f, 0.f, .44f,
-                                {track("scale_x", {{0, .94f}, {34, 1.f}, {78, 1.f}}),
+                                {track("scale_x", {{0, .94f}, {34, 1.f}, {78, 1.f}}, "out_cubic"),
                                  track("opacity", {{0, 0.f}, {38, .44f}, {50, .28f},
                                                     {64, .44f}, {78, .44f}}, "in_out_sine")})});
         case PhraseHighlightAnimation::ShortKeywordRule:
@@ -133,7 +133,7 @@ PhraseAnimationDefinition definition(PhraseHighlightAnimation animation) {
             return make(name(animation), "Red marker pulse",
                         "IL CORAGGIO CAMBIA IL PERCORSO",
                         {accent("red_marker", "#A92B2D", 1460.f, 22.f, y + 5.f, 0.f, .65f,
-                                {track("scale_x", {{0, .82f}, {36, 1.f}, {54, .96f}, {78, 1.f}}, "in_out_sine"),
+                                {track("scale_x", {{0, .82f}, {36, 1.f}, {54, .96f}, {78, 1.f}}, "out_cubic"),
                                  track("opacity", {{0, 0.f}, {30, .65f}, {44, .38f},
                                                     {58, .65f}, {78, .65f}}, "in_out_sine")})});
         case PhraseHighlightAnimation::OffsetDoubleRule:
@@ -149,7 +149,7 @@ PhraseAnimationDefinition definition(PhraseHighlightAnimation animation) {
             return make(name(animation), "Center dash",
                         "PICCOLI GESTI GRANDE IMPATTO",
                         {accent("center_dash", "#FF1018", 470.f, 7.f, y, 3.5f, 1.f,
-                                {track("scale_x", {{0, 0.f}, {30, 1.f}, {78, 1.f}})})});
+                                {track("scale_x", {{0, .01f}, {30, 1.f}, {78, 1.f}}, "out_cubic")})});
         case PhraseHighlightAnimation::TripleEditorialRule:
             return make(name(animation), "Triple editorial rule",
                         "LA MEMORIA ATTRAVERSA LE GENERAZIONI",
@@ -163,7 +163,7 @@ PhraseAnimationDefinition definition(PhraseHighlightAnimation animation) {
                         "DA UNA CRISI NASCE UNA POSSIBILITÀ",
                         {sweep("left_marker", "#C98255", 660.f, 18.f, y + 4.f, .65f, 28, 52),
                          accent("right_marker", "#C98255", 660.f, 18.f, y + 4.f, 0.f, .65f,
-                                {track("scale_x", {{0, 0.f}, {43, 1.f}, {78, 1.f}}),
+                                {track("scale_x", {{0, .01f}, {43, 1.f}, {78, 1.f}}, "out_cubic"),
                                  track("position_x", {{0, 330.f}, {43, 0.f}, {78, 0.f}})})});
         case PhraseHighlightAnimation::SlowReveal:
             return make(name(animation), "Slow documentary underline",

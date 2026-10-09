@@ -249,6 +249,7 @@ class _ShotBuilder:
         self.FRAMES_TOTAL = frames          # legacy alias
         self.ZOOM_INDEX = 0                 # pose = (zoom, pitch, yaw, roll)
         self.allow_zoom_hold = preset == "metric"
+        self.start_zoom = 5.2
         self.end_zoom = {"dive": 17.8, "tilt": 17.3, "orbit": 17.5,
                          "metric": 17.5}.get(preset, 17.5)
         self.ANCHORS = ((place.lat, place.lon),)
@@ -268,16 +269,24 @@ class _ShotBuilder:
     # -- motion law (GeoCameraRig schedules: dive 62% / tilt to 80%) ---------
     def pose(self, f: int):
         smootherstep, ROLL_AT = _smootherstep, _roll_bank
-        dive_end = round(self.TOTAL_FRAMES * 0.62)
-        tilt_end = round(self.TOTAL_FRAMES * 0.80)
+        motion_frames = max(2, self.TOTAL_FRAMES - getattr(self, "terminal_hold_frames", 0))
+        # Keep any authored terminal hold stationary at the destination while
+        # preserving the original camera move timing.
+        f = min(f, motion_frames - 1)
+        if getattr(self, "full_duration_zoom", False):
+            e = smootherstep(f / max(1, motion_frames - 1))
+            zoom = self.start_zoom + (self.end_zoom - self.start_zoom) * e
+            return zoom, 0.0, 0.0, 0.0
+        dive_end = round(motion_frames * 0.62)
+        tilt_end = round(motion_frames * 0.80)
         if self.preset == "dive" or f <= dive_end:
             e = smootherstep(f / max(1, dive_end))
-            return 5.2 + (self.end_zoom - 5.2) * e, 0.0, 0.0, 0.0
+            return self.start_zoom + (self.end_zoom - self.start_zoom) * e, 0.0, 0.0, 0.0
         if self.preset == "metric":
             return self.end_zoom, 0.0, 0.0, 0.0
         e = smootherstep((f - dive_end) / max(1, tilt_end - dive_end))
         yaw = (15.0 if self.preset == "orbit" else 0.0) * \
-            smootherstep(max(0.0, (f - tilt_end) / max(1, self.TOTAL_FRAMES - tilt_end)))
+            smootherstep(max(0.0, (f - tilt_end) / max(1, motion_frames - tilt_end)))
         pitch = (35.0 if self.preset in ("tilt", "orbit") else 0.0) * e
         return self.end_zoom, pitch, yaw, ROLL_AT((f - dive_end) / max(1, tilt_end - dive_end))
 
@@ -286,11 +295,16 @@ class _ShotBuilder:
         from render_geo_camera_canary import (
             draw_metric_reveal, draw_hud_overlay, warp_matrix, OVERSIZE,
         )
-        from render_geo_camera_small_places import draw_location_glow, draw_map_marker_label
+        from render_geo_camera_small_places import (
+            apply_city_beacon_map_style, draw_map_location_marker,
+            apply_city_beacon_map_style_opencl, draw_map_location_marker_opencl,
+        )
         import cv2
         zoom, pitch, yaw, roll = self.pose(f)
         progress = f / (self.TOTAL_FRAMES - 1)
-        sample = getattr(sampler, "sample", None)
+        gpu_map = bool(getattr(self, "minimal_map", False) and
+                       getattr(sampler, "gpu_map_enabled", False))
+        sample = sampler.sample_opencl if gpu_map else getattr(sampler, "sample", None)
         if sample is None:
             sample = sampler.sample_continuous
         if pitch < 0.5:
@@ -308,17 +322,26 @@ class _ShotBuilder:
             # Finish the level dive (62% of the clip) before revealing the
             # location beacon. The name fade starts later in
             # draw_map_marker_label, preserving camera -> point -> label.
-            if progress >= 0.68:
-                radius_km = float(getattr(self, "map_area_glow_radius_km", 0.0))
-                area_px = 0
-                if radius_km > 0:
-                    area_px = int(radius_km / (40075.017 * max(0.01, math.cos(math.radians(self.place.lat))))
-                                  * (256 * (2.0 ** zoom)))
-                draw_location_glow(frame, (WIDTH // 2, HEIGHT // 2), progress, area_px)
+            radius_km = float(getattr(self, "map_area_glow_radius_km", 0.0))
+            area_px = 0
+            if radius_km > 0:
+                area_px = int(radius_km / (40075.017 * max(0.01, math.cos(math.radians(self.place.lat))))
+                              * (256 * (2.0 ** zoom)))
             animation = getattr(self, "map_label_animation", "gentle_fade")
-            draw_map_marker_label(frame, (WIDTH // 2, HEIGHT // 2),
-                                  self.place.display_name or self.place.query,
-                                  progress, animation)
+            if animation == "diffuse_city_beacon":
+                if gpu_map:
+                    frame = apply_city_beacon_map_style_opencl(frame, progress)
+                else:
+                    apply_city_beacon_map_style(frame, progress)
+            if gpu_map:
+                frame = draw_map_location_marker_opencl(
+                    frame, (WIDTH // 2, HEIGHT // 2),
+                    self.place.display_name or self.place.query,
+                    progress, animation, area_px)
+                return frame.get()
+            draw_map_location_marker(frame, (WIDTH // 2, HEIGHT // 2),
+                                     self.place.display_name or self.place.query,
+                                     progress, animation, area_px)
             return frame
         if self.preset == "metric":
             # Never fabricate a statistic: the runtime has no trusted metric
@@ -489,15 +512,26 @@ class TourBuilder:
         import cv2
         from render_geo_camera_canary import draw_metric_reveal, draw_hud_overlay
         from render_geo_camera_small_places import (
-            draw_location_glow, draw_map_marker_label, draw_route_glow, draw_spring_pin,
+            apply_city_beacon_map_style, draw_map_location_marker,
+            apply_city_beacon_map_style_opencl, draw_map_location_marker_opencl,
+            draw_route_glow, draw_spring_pin,
         )
         from dynamic_tile_pyramid import latlon_to_global_px
 
         lat, lon, zoom = self.pose(f)
         progress = f / (self.FRAMES_TOTAL - 1)
-        frame = sampler.sample(lat, lon, zoom, WIDTH, HEIGHT)
+        gpu_map = bool(getattr(self, "minimal_map", False) and
+                       getattr(sampler, "gpu_map_enabled", False))
+        frame = (sampler.sample_opencl(lat, lon, zoom, WIDTH, HEIGHT)
+                 if gpu_map else sampler.sample(lat, lon, zoom, WIDTH, HEIGHT))
 
         if getattr(self, "minimal_map", False):
+            animation = getattr(self, "map_label_animation", "gentle_fade")
+            if animation == "diffuse_city_beacon":
+                if gpu_map:
+                    frame = apply_city_beacon_map_style_opencl(frame, progress)
+                else:
+                    apply_city_beacon_map_style(frame, progress)
             location_name = ""
             active_stop = None
             for mark in self._schedule():
@@ -519,10 +553,13 @@ class TourBuilder:
                         earth_km = 40075.017
                         area_px = int(radius_km / (earth_km * max(0.01, math.cos(math.radians(active_stop.lat))))
                                       * (256 * (2.0 ** zoom)))
-                    draw_location_glow(frame, (sx, sy), progress, area_px)
-                    animation = getattr(self, "map_label_animation", "gentle_fade")
-                    draw_map_marker_label(frame, (sx, sy), location_name, progress, animation)
-            return frame
+                    if gpu_map:
+                        frame = draw_map_location_marker_opencl(
+                            frame, (sx, sy), location_name, progress, animation, area_px)
+                    else:
+                        draw_map_location_marker(frame, (sx, sy), location_name,
+                                                 progress, animation, area_px)
+            return frame.get() if gpu_map else frame
 
         # the route so far, glowing under the camera
         zf = int(zoom // 1)

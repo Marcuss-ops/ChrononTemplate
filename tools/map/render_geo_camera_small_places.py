@@ -162,8 +162,151 @@ def draw_location_glow(frame: np.ndarray, point: tuple[int, int], progress: floa
 MAP_LABEL_ANIMATIONS = (
     "gentle_fade", "soft_glow", "clean_fade", "word_soft_fade",
     "slow_fade", "quiet_bloom", "quick_fade", "silky_fade",
-    "subtle_halo", "cinematic_fade",
+    "subtle_halo", "cinematic_fade", "diffuse_city_beacon",
 )
+
+
+def apply_city_beacon_map_style(frame: np.ndarray, progress: float) -> None:
+    """Dark green satellite grade and fine reference-style screen grid."""
+    h, w = frame.shape[:2]
+    green_tint = np.empty_like(frame)
+    green_tint[:] = (14, 42, 16)  # BGR
+    cv2.addWeighted(frame, 0.77, green_tint, 0.23, 0, dst=frame)
+    frame[:] = np.clip(frame.astype(np.float32) * 0.82, 0, 255).astype(np.uint8)
+    step = max(1, round(min(h, w) / 13.5))
+    grid = np.zeros_like(frame)
+    color = (32, 78, 39)
+    for x in range(0, w, step):
+        cv2.line(grid, (x, 0), (x, h - 1), color, 1, cv2.LINE_AA)
+    for y in range(0, h, step):
+        cv2.line(grid, (0, y), (w - 1, y), color, 1, cv2.LINE_AA)
+    cv2.addWeighted(frame, 1.0, grid, 0.38, 0, dst=frame)
+
+
+_OPENCL_GRID_CACHE = {}
+_OPENCL_LABEL_CACHE = {}
+_OPENCL_LUT = None
+_OPENCL_BEACON_CACHE = {}
+
+
+def apply_city_beacon_map_style_opencl(frame, progress: float):
+    """GPU path for the city basemap grade and grid; returns a UMat."""
+    global _OPENCL_LUT
+    import cv2
+    import numpy as np
+    h, w = HEIGHT, WIDTH
+    if _OPENCL_LUT is None:
+        lut = np.empty((1, 256, 3), dtype=np.uint8)
+        tint = (14, 42, 16)
+        for channel in range(3):
+            values = np.arange(256, dtype=np.float32) * 0.6314 + tint[channel] * 0.1886
+            lut[0, :, channel] = np.clip(values, 0, 255).astype(np.uint8)
+        _OPENCL_LUT = lut
+    frame = cv2.LUT(frame, _OPENCL_LUT)
+    cache_key = (w, h)
+    grid = _OPENCL_GRID_CACHE.get(cache_key)
+    if grid is None:
+        grid_host = np.zeros((h, w, 3), dtype=np.uint8)
+        step = max(1, round(min(h, w) / 13.5))
+        for x in range(0, w, step):
+            cv2.line(grid_host, (x, 0), (x, h - 1), (32, 78, 39), 1, cv2.LINE_AA)
+        for y in range(0, h, step):
+            cv2.line(grid_host, (0, y), (w - 1, y), (32, 78, 39), 1, cv2.LINE_AA)
+        grid = cv2.UMat(grid_host)
+        _OPENCL_GRID_CACHE[cache_key] = grid
+    return cv2.addWeighted(frame, 1.0, grid, 0.38, 0.0)
+
+
+def draw_map_location_marker_opencl(frame, point: tuple[int, int], name: str,
+                                    progress: float, animation: str = "diffuse_city_beacon",
+                                    area_radius_px: int = 0):
+    """Draw the beacon and label on the GPU-rendered UMat map frame."""
+    import cv2
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFont
+    h, w = HEIGHT, WIDTH
+    cx, cy = point
+    fade = max(0.0, min(1.0, (progress - 0.68) / 0.12))
+    fade = fade * fade * (3.0 - 2.0 * fade)
+    pulse = 0.5 + 0.5 * math.sin(max(0.0, progress - 0.68) * math.tau * 1.2)
+    if fade > 0.001:
+        radius = max(24, round(min(h, w) * 0.049))
+        key = (w, h, cx, cy, radius)
+        glow = _OPENCL_BEACON_CACHE.get(key)
+        if glow is None:
+            glow_host = np.zeros((h, w, 3), dtype=np.uint8)
+            cv2.circle(glow_host, (cx, cy), radius, (8, 20, 245), -1, cv2.LINE_AA)
+            cv2.ellipse(glow_host, (cx - radius // 5, cy + radius // 8),
+                        (int(radius * 0.75), int(radius * 0.52)), -17, 0, 360,
+                        (8, 12, 255), -1, cv2.LINE_AA)
+            glow_host = cv2.GaussianBlur(glow_host, (0, 0), max(8.0, radius * 0.62))
+            cv2.circle(glow_host, (cx, cy), 4, (12, 26, 255), -1, cv2.LINE_AA)
+            cv2.circle(glow_host, (cx, cy), 2, (135, 165, 255), -1, cv2.LINE_AA)
+            glow = cv2.UMat(glow_host)
+            _OPENCL_BEACON_CACHE[key] = glow
+        frame = cv2.addWeighted(frame, 1.0, glow, fade * (0.78 + 0.18 * pulse), 0.0)
+
+    label = " ".join(str(name or "").split())
+    t = max(0.0, min(1.0, (progress - 0.80) / 0.13))
+    alpha = t * t * (3.0 - 2.0 * t)
+    if label and alpha > 0.005:
+        key = (w, h, label)
+        overlay = _OPENCL_LABEL_CACHE.get(key)
+        if overlay is None:
+            rgba = Image.new("RGB", (w, h), (0, 0, 0))
+            draw = ImageDraw.Draw(rgba)
+            font_path = BASE_DIR / "Chronon3d/assets/fonts/DM-Serif-Display-Italic.ttf"
+            font = ImageFont.truetype(str(font_path), max(24, round(min(h, w) * 0.052)))
+            bbox = font.getbbox(label)
+            tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            x = max(20, min(w - tw - 20, cx - tw // 2))
+            y = min(h - th - 20, cy + max(38, round(min(h, w) * 0.055)))
+            draw.text((x + 2, y + 3), label, font=font, fill=(6, 8, 7), stroke_width=4,
+                      stroke_fill=(6, 8, 7))
+            draw.text((x, y), label, font=font, fill=(244, 244, 239), stroke_width=1,
+                      stroke_fill=(244, 244, 239))
+            overlay = cv2.UMat(np.asarray(rgba, dtype=np.uint8))
+            _OPENCL_LABEL_CACHE[key] = overlay
+        frame = cv2.addWeighted(frame, 1.0, overlay, alpha, 0.0)
+    return frame
+
+
+def draw_diffuse_city_beacon(frame: np.ndarray, point: tuple[int, int],
+                             progress: float, area_radius_px: int = 0) -> None:
+    """A loose red glow over the city, with a small center and soft pulse."""
+    h, w = frame.shape[:2]
+    cx, cy = point
+    fade = max(0.0, min(1.0, (progress - 0.68) / 0.12))
+    fade = fade * fade * (3.0 - 2.0 * fade)
+    if fade <= 0.001:
+        return
+    pulse = 0.5 + 0.5 * math.sin(max(0.0, progress - 0.68) * math.tau * 1.2)
+    radius = max(24, round(min(h, w) * (0.044 + 0.005 * pulse)))
+    glow = np.zeros_like(frame)
+    cv2.circle(glow, (cx, cy), radius, (8, 20, 245), -1, cv2.LINE_AA)
+    cv2.ellipse(glow, (cx - radius // 5, cy + radius // 8),
+                (int(radius * 0.75), int(radius * 0.52)), -17, 0, 360,
+                (8, 12, 255), -1, cv2.LINE_AA)
+    glow = cv2.GaussianBlur(glow, (0, 0), max(8.0, radius * 0.62))
+    cv2.addWeighted(frame, 1.0, glow, fade * (0.78 + 0.18 * pulse), 0, dst=frame)
+    if area_radius_px > 0:
+        area = np.zeros_like(frame)
+        cv2.circle(area, (cx, cy), area_radius_px, (8, 18, 210), 2, cv2.LINE_AA)
+        area = cv2.GaussianBlur(area, (0, 0), max(4, area_radius_px // 5))
+        cv2.addWeighted(frame, 1.0, area, fade * 0.34, 0, dst=frame)
+    cv2.circle(frame, (cx, cy), 4, (12, 26, 255), -1, cv2.LINE_AA)
+    cv2.circle(frame, (cx, cy), 2, (135, 165, 255), -1, cv2.LINE_AA)
+
+
+def draw_map_location_marker(frame: np.ndarray, point: tuple[int, int],
+                             name: str, progress: float,
+                             animation: str = "gentle_fade",
+                             area_radius_px: int = 0) -> None:
+    if animation == "diffuse_city_beacon":
+        draw_diffuse_city_beacon(frame, point, progress, area_radius_px)
+    else:
+        draw_location_glow(frame, point, progress, area_radius_px)
+    draw_map_marker_label(frame, point, name, progress, animation)
 
 
 def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
@@ -189,12 +332,32 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
         "slow_fade": (0.80, 0.16), "quiet_bloom": (0.80, 0.16),
         "quick_fade": (0.80, 0.16), "silky_fade": (0.80, 0.16),
         "subtle_halo": (0.80, 0.16), "cinematic_fade": (0.80, 0.16),
+        "diffuse_city_beacon": (0.80, 0.13),
     }
     start, duration = timing[animation]
     t = max(0.0, min(1.0, (progress - start) / duration))
     ease = t * t * (3.0 - 2.0 * t)
     alpha = ease
     if not label or alpha <= 0.005:
+        return
+    if animation == "diffuse_city_beacon":
+        font_path = BASE_DIR / "Chronon3d/assets/fonts/DM-Serif-Display-Italic.ttf"
+        font = ImageFont.truetype(str(font_path), max(24, round(min(h, w) * 0.052)))
+        bbox = font.getbbox(label)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        text_x = max(20, min(w - tw - 20, cx - tw // 2))
+        text_y = max(20, min(h - th - 20, cy + max(52, round(h * 0.065))))
+        overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
+        draw.text((text_x - bbox[0], text_y - bbox[1]), label, font=font,
+                  fill=(250, 249, 238, int(255 * alpha)),
+                  stroke_width=max(1, round(min(h, w) / 540)),
+                  stroke_fill=(0, 14, 7, int(230 * alpha)))
+        rgba = np.asarray(overlay)
+        mask = rgba[:, :, 3:4].astype(np.float32) / 255.0
+        bgr = rgba[:, :, :3][:, :, ::-1].copy()
+        frame[:] = np.clip(frame.astype(np.float32) * (1.0 - mask) + bgr * mask,
+                           0, 255).astype(np.uint8)
         return
     font_path = BASE_DIR / "Chronon3d/assets/fonts/Inter-SemiBold.ttf"
     font = ImageFont.truetype(str(font_path), 42)

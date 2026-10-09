@@ -1,0 +1,912 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "vintage_documentary_map_italy",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 240
+  },
+  "camera": {
+    "type": "perspective",
+    "position": [
+      0.0,
+      0.0,
+      -1000.0
+    ],
+    "rotation_deg": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "fov_deg": 56.738,
+    "near": 1.0,
+    "far": 5000.0,
+    "zoom": 1.0
+  },
+  "camera_animation": {
+    "tracks": [
+      {
+        "property": "camera_position_x",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": -180.0
+          },
+          {
+            "frame": 60,
+            "value": -170.0
+          },
+          {
+            "frame": 130,
+            "value": 70.0
+          },
+          {
+            "frame": 239,
+            "value": 90.0
+          }
+        ]
+      },
+      {
+        "property": "camera_position_y",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": 0.0
+          },
+          {
+            "frame": 60,
+            "value": 0.0
+          },
+          {
+            "frame": 130,
+            "value": -25.0
+          },
+          {
+            "frame": 239,
+            "value": -35.0
+          }
+        ]
+      },
+      {
+        "property": "camera_position_z",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": -1000.0
+          },
+          {
+            "frame": 60,
+            "value": -985.0
+          },
+          {
+            "frame": 130,
+            "value": -945.0
+          },
+          {
+            "frame": 239,
+            "value": -915.0
+          }
+        ]
+      }
+    ]
+  },
+  "layers": [
+    {
+      "id": "vintage_relief_basemap",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/vintage_relief_basemap.png",
+      "size": [
+        2750,
+        1546
+      ],
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 0,
+      "duration_frames": 240
+    },
+    {
+      "id": "milano_pin_shadow",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_ground_shadow.png",
+      "size": [
+        160,
+        80
+      ],
+      "position": [
+        -380.0,
+        105.0,
+        -1.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 8,
+      "duration_frames": 232,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.1
+              },
+              {
+                "frame": 18,
+                "value": 1.0
+              },
+              {
+                "frame": 55,
+                "value": 1.0
+              },
+              {
+                "frame": 85,
+                "value": 0.0
+              },
+              {
+                "frame": 231,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 18,
+                "value": 0.8
+              },
+              {
+                "frame": 55,
+                "value": 0.8
+              },
+              {
+                "frame": 85,
+                "value": 0.0
+              },
+              {
+                "frame": 231,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "milano_pin_marker",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_marker_red.png",
+      "size": [
+        140,
+        200
+      ],
+      "position": [
+        -380.0,
+        185.0,
+        -6.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 10,
+      "duration_frames": 230,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 160.0
+              },
+              {
+                "frame": 16,
+                "value": -12.0
+              },
+              {
+                "frame": 22,
+                "value": 8.0
+              },
+              {
+                "frame": 28,
+                "value": 0.0
+              },
+              {
+                "frame": 229,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.4
+              },
+              {
+                "frame": 16,
+                "value": 1.1
+              },
+              {
+                "frame": 28,
+                "value": 1.0
+              },
+              {
+                "frame": 229,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 10,
+                "value": 1.0
+              },
+              {
+                "frame": 55,
+                "value": 1.0
+              },
+              {
+                "frame": 85,
+                "value": 0.0
+              },
+              {
+                "frame": 229,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "milano_banner_tag",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/banner_milano.png",
+      "size": [
+        302,
+        98
+      ],
+      "position": [
+        -190.0,
+        190.0,
+        -8.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 24,
+      "duration_frames": 216,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale_x",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.05
+              },
+              {
+                "frame": 20,
+                "value": 1.0
+              },
+              {
+                "frame": 215,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -50.0
+              },
+              {
+                "frame": 20,
+                "value": 0.0
+              },
+              {
+                "frame": 215,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 12,
+                "value": 1.0
+              },
+              {
+                "frame": 55,
+                "value": 1.0
+              },
+              {
+                "frame": 85,
+                "value": 0.0
+              },
+              {
+                "frame": 215,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cremona_province_hatch",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/cremona_province_hatch.png",
+      "size": [
+        341,
+        278
+      ],
+      "position": [
+        -160.0,
+        -70.0,
+        -2.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 65,
+      "duration_frames": 175,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 25,
+                "value": 0.95
+              },
+              {
+                "frame": 174,
+                "value": 0.95
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.92
+              },
+              {
+                "frame": 25,
+                "value": 1.0
+              },
+              {
+                "frame": 174,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cremona_pin_shadow",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_ground_shadow.png",
+      "size": [
+        160,
+        80
+      ],
+      "position": [
+        -125.0,
+        -145.0,
+        -1.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 82,
+      "duration_frames": 158,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.1
+              },
+              {
+                "frame": 18,
+                "value": 1.0
+              },
+              {
+                "frame": 157,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 18,
+                "value": 0.8
+              },
+              {
+                "frame": 157,
+                "value": 0.8
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cremona_pin_marker",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_marker_red.png",
+      "size": [
+        140,
+        200
+      ],
+      "position": [
+        -125.0,
+        -60.0,
+        -7.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 85,
+      "duration_frames": 155,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 170.0
+              },
+              {
+                "frame": 18,
+                "value": -12.0
+              },
+              {
+                "frame": 24,
+                "value": 7.0
+              },
+              {
+                "frame": 30,
+                "value": 0.0
+              },
+              {
+                "frame": 154,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 12,
+                "value": 1.0
+              },
+              {
+                "frame": 154,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.4
+              },
+              {
+                "frame": 18,
+                "value": 1.1
+              },
+              {
+                "frame": 30,
+                "value": 1.0
+              },
+              {
+                "frame": 154,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cremona_banner_tag",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/banner_cremona.png",
+      "size": [
+        341,
+        98
+      ],
+      "position": [
+        85.0,
+        -60.0,
+        -9.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 102,
+      "duration_frames": 138,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale_x",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.05
+              },
+              {
+                "frame": 20,
+                "value": 1.0
+              },
+              {
+                "frame": 137,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -50.0
+              },
+              {
+                "frame": 20,
+                "value": 0.0
+              },
+              {
+                "frame": 137,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 14,
+                "value": 1.0
+              },
+              {
+                "frame": 137,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "connector_callout_line",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/connector_line.png",
+      "size": [
+        320,
+        120
+      ],
+      "position": [
+        210.0,
+        10.0,
+        -4.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 118,
+      "duration_frames": 122,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale_x",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.01
+              },
+              {
+                "frame": 18,
+                "value": 1.0
+              },
+              {
+                "frame": 121,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "scale_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.01
+              },
+              {
+                "frame": 18,
+                "value": 1.0
+              },
+              {
+                "frame": 121,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 12,
+                "value": 0.95
+              },
+              {
+                "frame": 121,
+                "value": 0.95
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "photo_card_torrazzo",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/photo_card_torrazzo.png",
+      "size": [
+        430,
+        560
+      ],
+      "position": [
+        430.0,
+        160.0,
+        -12.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 125,
+      "duration_frames": 115,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_z",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -180.0
+              },
+              {
+                "frame": 30,
+                "value": 0.0
+              },
+              {
+                "frame": 114,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 90.0
+              },
+              {
+                "frame": 30,
+                "value": 0.0
+              },
+              {
+                "frame": 114,
+                "value": 0.0
+              }
+            ]
+          },
+          {
+            "property": "rotation_z",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 14.0
+              },
+              {
+                "frame": 24,
+                "value": -6.0
+              },
+              {
+                "frame": 34,
+                "value": -4.2
+              },
+              {
+                "frame": 114,
+                "value": -4.2
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.6
+              },
+              {
+                "frame": 24,
+                "value": 1.04
+              },
+              {
+                "frame": 34,
+                "value": 1.0
+              },
+              {
+                "frame": 114,
+                "value": 1.0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 16,
+                "value": 1.0
+              },
+              {
+                "frame": 114,
+                "value": 1.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "typography_anni",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/typography_anni.png",
+      "size": [
+        450,
+        180
+      ],
+      "position": [
+        -560.0,
+        -380.0,
+        -5.0
+      ],
+      "fit": "contain",
+      "enable_3d": true,
+      "start_frame": 142,
+      "duration_frames": 98,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 26,
+                "value": 0.95
+              },
+              {
+                "frame": 97,
+                "value": 0.95
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -35.0
+              },
+              {
+                "frame": 26,
+                "value": 0.0
+              },
+              {
+                "frame": 97,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/catalog/vintage_documentary_map_italy/out/vintage_documentary_map_italy.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

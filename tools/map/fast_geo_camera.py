@@ -56,6 +56,13 @@ def _worker_init() -> None:
         cv2.setNumThreads(1)  # belt and braces: env may arrive after init
     except Exception:
         pass
+    if os.environ.get("CHRONON_OPENCL_FRAME_RENDER") == "1":
+        cv2.ocl.setUseOpenCL(True)
+        if not cv2.ocl.useOpenCL():
+            raise RuntimeError("OpenCL GPU frame rendering did not initialize in a worker")
+        device = cv2.ocl.Device.getDefault()
+        if "NVIDIA" not in device.vendorName().upper():
+            raise RuntimeError(f"OpenCL worker selected unexpected device: {device.name()}")
 
 
 def _render_block(args) -> tuple[bytes, int]:
@@ -101,7 +108,7 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
     if gpu_required:
         # Production map overlays must use the NVIDIA encoder. There is no
         # software fallback: an unavailable/lost GPU fails the runtime job.
-        cmd += ["-c:v", "h264_nvenc", "-gpu", "0", "-preset", "p4",
+        cmd += ["-c:v", "h264_nvenc", "-gpu", "0", "-preset", "p6",
                 "-tune", "hq", "-rc", "vbr", "-cq", str(crf), "-b:v", "0"]
     else:
         cmd += ["-c:v", "libx264", "-preset", preset, "-crf", str(crf)]
@@ -126,10 +133,20 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
     stderr_thread = threading.Thread(target=drain_stderr, daemon=True)
     stderr_thread.start()
     try:
-        with ctx.Pool(processes=workers, initializer=_worker_init) as pool:
-            for data, fb in pool.imap(_render_block, blocks):  # submission order
+        if getattr(sampler, "gpu_map_enabled", False):
+            # OpenCL contexts are process-local and GPU resources should not be
+            # copied through fork. Render UMat frames in the initialized
+            # parent process; pixel kernels still run on the GPU and frames
+            # stream directly to NVENC.
+            for block_args in blocks:
+                data, fb = _render_block(block_args)
                 proc.stdin.write(data)
                 fallback_frames += fb
+        else:
+            with ctx.Pool(processes=workers, initializer=_worker_init) as pool:
+                for data, fb in pool.imap(_render_block, blocks):  # submission order
+                    proc.stdin.write(data)
+                    fallback_frames += fb
         produced = time.perf_counter() - t0
         try:
             proc.stdin.close()

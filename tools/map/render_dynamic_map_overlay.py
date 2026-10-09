@@ -32,9 +32,25 @@ def main() -> int:
     render_started = time.perf_counter()
     payload = json.loads(args.input.read_text(encoding="utf-8"))
     width, height = int(payload["width"]), int(payload["height"])
+    # Preserve the media contract exactly; the map renderer must match the
+    # source timeline's frame rate for deterministic overlay synchronization.
     fps_num, fps_den = int(payload["fps_num"]), int(payload["fps_den"])
     duration_us = int(payload["duration_us"])
-    pins = payload.get("pins", [])
+    raw_pins = payload.get("pins", [])
+    # Keep a route map focused: repeated mentions of the same place are one
+    # stop, and no tour may contain more than five distinct stops.
+    pins = []
+    seen_pin_coords = set()
+    for pin in raw_pins:
+        coordinate_key = (round(float(pin["latitude"]), 4), round(float(pin["longitude"]), 4))
+        if coordinate_key in seen_pin_coords:
+            continue
+        seen_pin_coords.add(coordinate_key)
+        pins.append(pin)
+        if len(pins) == 5:
+            break
+    if len(pins) != len(raw_pins):
+        print(f"[dynamic-map] limited route to {len(pins)} unique stops from {len(raw_pins)} mentions", flush=True)
     area_glow_radius_km = float(payload.get("area_glow_radius_km", 0.0))
     camera_animations = {"signature_dive", "tilt_reveal", "orbit_arrival",
                          "slow_approach", "wide_context"}
@@ -58,6 +74,14 @@ def main() -> int:
     import fast_geo_camera as harness
     import dynamic_tile_pyramid as dyn
     import fast_plate_sampler as fast
+    # Map motion and pixel composition run through OpenCV's OpenCL kernels on
+    # the NVIDIA device; NVENC remains the encoded-video writer.
+    if not cv2.ocl.haveOpenCL():
+        raise RuntimeError("GPU map rendering requires an active OpenCL device")
+    # Keep OpenCL disabled through the CPU-only acceptance gate. The actual
+    # encoder streams frames from this process, so its OpenCL context is never
+    # inherited by forked workers.
+    cv2.ocl.setUseOpenCL(False)
     # The runtime picks the basemap style per render; an id outside the
     # certified palette is a hard failure, never a silent fallback to satellite.
     if not dyn.is_basemap_style(basemap):
@@ -77,31 +101,37 @@ def main() -> int:
             return scope
         return "city"
 
-    # Production overlays are emitted at the authored supersampled canvas
-    # size. Keep city plates at a documentary overview zoom so exact tile
-    # coverage stays bounded even for 3x canvases (e.g. 5760x3240).
-    level_zoom = {"continent": 2.5, "country": 5.0, "region": 8.0, "city": 11.5}
+    # Keep country and region maps at a broad reference scale. City maps land
+    # near street level; 17.0 is within the certified local tile pyramid.
+    level_zoom = {"continent": 2.5, "country": 5.0, "region": 8.0, "city": 17.0}
     stop_zooms = [level_zoom[map_level(pin)] for pin in pins]
 
     if len(stops) == 1:
         preset = {"tilt_reveal": "tilt", "orbit_arrival": "orbit"}.get(camera_animation, "dive")
         builder = geo._ShotBuilder(stops[0], preset, total_frames)
         builder.end_zoom = stop_zooms[0]
+        # Start city approaches at metro scale and finish at street scale;
+        # regional and national views stay at their authored overview zoom.
+        builder.start_zoom = min(builder.end_zoom, max(10.0, builder.end_zoom - 4.5))
+        # City maps spend the full 6.5-second camera window approaching the
+        # destination, then remain still for the 1.5-second label read.
+        builder.full_duration_zoom = True
+        builder.terminal_hold_frames = round(1.5 * fps_num / fps_den)
         if camera_animation == "wide_context":
             builder.end_zoom = max(5.8, stop_zooms[0] - 2.0)
         elif camera_animation == "slow_approach":
             builder.end_zoom = max(5.8, stop_zooms[0] - 0.9)
     else:
-        # Multi-stop zoom legs need enough frames to pass the strict camera
-        # velocity gate at close city zooms. Reserve half of the authored
-        # duration for travel, capped at 1.5 seconds per leg; the other half
-        # remains split into visible stop windows for the sequential pins.
-        travel_seconds = min(1.5, duration_us / 1_000_000 / (2 * (len(stops) - 1)))
-        stop_seconds = max(0.15, (duration_us / 1_000_000 - travel_seconds * (len(stops) - 1)) / len(stops))
+        # Keep the previous five-second camera tour, then hold the final
+        # destination for another 1.5 seconds. The builder's timeline ends
+        # before TOTAL_FRAMES, so its final-pose fallback supplies that hold.
+        tour_seconds = max(1.0, duration_us / 1_000_000 - 1.5)
+        travel_seconds = min(1.5, tour_seconds / (2 * (len(stops) - 1)))
+        stop_seconds = max(0.15, (tour_seconds - travel_seconds * (len(stops) - 1)) / len(stops))
         builder = geo.TourBuilder(stops, seconds_per_stop=stop_seconds,
                                   travel_seconds=travel_seconds, end_zoom=max(stop_zooms))
         builder.stop_end_zooms = stop_zooms
-        builder.initial_zoom_fraction = 0.5
+        builder.initial_zoom_fraction = 0.62
         builder.stop_dive_fraction = 0.58
         if camera_animation == "tilt_reveal":
             builder.initial_zoom_fraction = 0.54
@@ -151,8 +181,11 @@ def main() -> int:
             builder.end_zoom = max(builder.stop_end_zooms)
         stop_zooms = [max(5.0, zoom) for zoom in stop_zooms]
         prepare_zmin = 5
-    prepare_zmax = min(builder.PREPARE_ZMAX,
-                       max(6, math.ceil(max(stop_zooms)) + 1))
+    # Regional routes use a lower zoom while crossing distance, but each stop
+    # still needs its local high-zoom tiles for the city arrival. Do not cap
+    # the prepared pyramid at the route builder's broad-span limit.
+    prepare_zmax = min(18, max(builder.PREPARE_ZMAX,
+                               6, math.ceil(max(stop_zooms)) + 1))
     if prepare_zmax < prepare_zmin:
         prepare_zmax = prepare_zmin
 
@@ -168,6 +201,7 @@ def main() -> int:
         prepare_zmax = max(prepare_zmax, math.ceil(leg_zoom) + 1)
 
     sampler = fast.FastPlateSampler(pyramid, width, height)
+    sampler.gpu_map_enabled = False
     sampler.prepare(anchors, prepare_zmin, prepare_zmax)
     for frame_idx in range(total_frames):
         if len(stops) > 1:
@@ -191,10 +225,22 @@ def main() -> int:
     gate_ms = (time.perf_counter() - gate_started) * 1000.0
     if sampler.fallback_count != 0:
         raise RuntimeError(f"map acceptance gate used {sampler.fallback_count} slow-engine fallback frames")
+    # The acceptance gate is deliberately CPU-only and small. Actual video
+    # frames use OpenCL on the NVIDIA device, then stream to NVENC.
+    cv2.ocl.setUseOpenCL(True)
+    if not cv2.ocl.useOpenCL():
+        raise RuntimeError("OpenCL GPU map renderer failed to initialize")
+    device = cv2.ocl.Device.getDefault()
+    if "NVIDIA" not in device.vendorName().upper():
+        raise RuntimeError(f"GPU map renderer selected unexpected device: {device.name()}")
+    print(f"[dynamic-map] GPU frame renderer: OpenCL / {device.name()}", flush=True)
+    gpu_plate_bytes = sampler.prepare_opencl()
+    print(f"[dynamic-map] uploaded {gpu_plate_bytes} map plate bytes to GPU", flush=True)
+    sampler.gpu_map_enabled = True
     args.output.parent.mkdir(parents=True, exist_ok=True)
     stats = harness.encode_with_pool(builder, sampler, args.output,
-                                     workers=min(8, max(1, (os.cpu_count() or 2) // 2)),
-                                     block=2, preset="veryfast", crf=18,
+                                     workers=min(2, max(1, (os.cpu_count() or 2) // 2)),
+                                     block=2, preset="slow", crf=15,
                                      gpu_required=True)
     if stats.get("engine_fallback_frames", 0):
         raise RuntimeError(f"map sampler used fallback imagery in {stats['engine_fallback_frames']} frames")
@@ -214,6 +260,9 @@ def main() -> int:
         "output_bytes": stats["bytes"],
         "video_encoder": stats["encoder"],
         "gpu_encoder": stats["gpu_encoder"],
+        "gpu_frame_renderer": "opencv_opencl",
+        "opencl_device": device.name(),
+        "gpu_plate_bytes": gpu_plate_bytes,
         "renderer_wall_s": time.perf_counter() - render_started,
     }
     args.summary_output.parent.mkdir(parents=True, exist_ok=True)
