@@ -226,7 +226,8 @@ if(CHRONONTEMPLATE_BUILD_CATALOG_TOOL)
     target_include_directories(chronontemplate_emit_catalog PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
     target_compile_definitions(chronontemplate_emit_catalog PRIVATE
             CHRONONTEMPLATE_CATALOG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/motion_catalog.v1.json"
-            CHRONONTEMPLATE_ENTITY_PRESENTATION_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/entity_presentation.v1.json")
+            CHRONONTEMPLATE_ENTITY_PRESENTATION_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/entity_presentation.v1.json"
+            CHRONONTEMPLATE_ANIMATION_SECTIONS_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/animation_sections.v1.json")
     target_compile_options(chronontemplate_emit_catalog PRIVATE -Wall -Wextra)
     if(CHRONONTEMPLATE_WERROR)
         target_compile_options(chronontemplate_emit_catalog PRIVATE -Werror)

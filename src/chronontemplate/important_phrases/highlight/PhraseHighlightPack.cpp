@@ -60,6 +60,7 @@ const char* name(PhraseHighlightAnimation animation) {
         case PhraseHighlightAnimation::TripleEditorialRule: return "phrase_triple_editorial_rule";
         case PhraseHighlightAnimation::SplitMarker: return "phrase_split_marker";
         case PhraseHighlightAnimation::SlowReveal: return "phrase_slow_reveal";
+        case PhraseHighlightAnimation::YellowHighlighterSweep: return "phrase_yellow_highlighter_sweep";
     }
     throw std::invalid_argument("unknown phrase highlight animation");
 }
@@ -80,7 +81,8 @@ std::vector<PhraseHighlightAnimation> phraseHighlightAnimations() {
             PhraseHighlightAnimation::CenterDash,
             PhraseHighlightAnimation::TripleEditorialRule,
             PhraseHighlightAnimation::SplitMarker,
-            PhraseHighlightAnimation::SlowReveal};
+            PhraseHighlightAnimation::SlowReveal,
+            PhraseHighlightAnimation::YellowHighlighterSweep};
 }
 
 PhraseAnimationDefinition definition(PhraseHighlightAnimation animation) {
@@ -169,6 +171,11 @@ PhraseAnimationDefinition definition(PhraseHighlightAnimation animation) {
             return make(name(animation), "Slow documentary underline",
                         "OGNI DETTAGLIO RACCONTA QUALCOSA",
                         {sweep("slow_rule", "#FF1018", 1500.f, 5.f, y, .88f, 46, 78)}, 88);
+        case PhraseHighlightAnimation::YellowHighlighterSweep:
+            return make(name(animation), "Yellow highlighter sweep",
+                        "LA GERMANIA HA PERSO 144MILA POSTI DI LAVORO",
+                        {sweep("yellow_highlighter", "#F2E500", 1480.f, 48.f,
+                               y + 4.f, .94f, 22, 58)});
     }
     throw std::invalid_argument("unknown phrase highlight animation");
 }

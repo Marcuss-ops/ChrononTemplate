@@ -26237,6 +26237,966 @@
       "map_renderer": "opencv",
       "map_id": "saudi_arabia",
       "map_animation": "desert_pipeline"
+    },
+    {
+      "id": "data_histogram_stagger_up",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale_y"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 18,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale_y",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.04
+            },
+            {
+              "frame": 18,
+              "value": 0.55
+            },
+            {
+              "frame": 42,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_histogram_wave",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale_y"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 20,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale_y",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.18
+            },
+            {
+              "frame": 16,
+              "value": 0.88
+            },
+            {
+              "frame": 30,
+              "value": 0.34
+            },
+            {
+              "frame": 46,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_histogram_center_out",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale_x"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 18,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale_x",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.01
+            },
+            {
+              "frame": 20,
+              "value": 0.38
+            },
+            {
+              "frame": 44,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_bar_compare_reveal",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale_x"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 18,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale_x",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.01
+            },
+            {
+              "frame": 22,
+              "value": 0.55
+            },
+            {
+              "frame": 42,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_line_trace",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale_x"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 18,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale_x",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.01
+            },
+            {
+              "frame": 42,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_peak_callout",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 18,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.72
+            },
+            {
+              "frame": 22,
+              "value": 1.12
+            },
+            {
+              "frame": 36,
+              "value": 0.97
+            },
+            {
+              "frame": 48,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_counter_roll",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "position_y"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 20,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "position_y",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 34
+            },
+            {
+              "frame": 22,
+              "value": 0
+            },
+            {
+              "frame": 72,
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_grid_assemble",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale_y"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 24,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale_y",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.01
+            },
+            {
+              "frame": 30,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_area_fill_rise",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale_y"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 24,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale_y",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.01
+            },
+            {
+              "frame": 38,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_chart_focus_pulse",
+      "category": "histograms_data_v1",
+      "supported_template": "data_visualization",
+      "targets": [
+        "data"
+      ],
+      "supported_content": [
+        "data"
+      ],
+      "unit": "layer",
+      "enter": 36,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1
+            },
+            {
+              "frame": 18,
+              "value": 1.045
+            },
+            {
+              "frame": 34,
+              "value": 1
+            },
+            {
+              "frame": 52,
+              "value": 1.025
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "date_oil_crisis_stamp",
+      "category": "date_v1",
+      "supported_template": "timeline_date_card",
+      "targets": [
+        "text",
+        "date"
+      ],
+      "supported_content": [
+        "text",
+        "date"
+      ],
+      "unit": "layer",
+      "enter": 72,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 240
+      },
+      "required_properties": [
+        "opacity",
+        "scale_x",
+        "position_y"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 12,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale_x",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.04
+            },
+            {
+              "frame": 18,
+              "value": 1.04
+            },
+            {
+              "frame": 30,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "position_y",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 24
+            },
+            {
+              "frame": 18,
+              "value": 0
+            },
+            {
+              "frame": 72,
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "map_middle_east_oil_focus",
+      "category": "map_image_v1",
+      "supported_template": "map_editorial",
+      "targets": [
+        "map_view"
+      ],
+      "supported_content": [
+        "map_view"
+      ],
+      "unit": "layer",
+      "enter": 72,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 48,
+        "maximum_frames": 240
+      },
+      "required_properties": [
+        "opacity",
+        "scale",
+        "position_x",
+        "position_y"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 18,
+              "value": 1
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.18
+            },
+            {
+              "frame": 42,
+              "value": 1.04
+            },
+            {
+              "frame": 72,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "position_x",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 30
+            },
+            {
+              "frame": 38,
+              "value": 0
+            },
+            {
+              "frame": 72,
+              "value": 0
+            }
+          ]
+        },
+        {
+          "property": "position_y",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 18
+            },
+            {
+              "frame": 38,
+              "value": 0
+            },
+            {
+              "frame": 72,
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "image_one_sided_rounded_accent",
+      "category": "image_premium_v1",
+      "supported_template": "image",
+      "targets": [
+        "image"
+      ],
+      "supported_content": [
+        "image"
+      ],
+      "unit": "layer",
+      "enter": 28,
+      "exit": 8,
+      "duration_bounds": {
+        "minimum_frames": 24,
+        "maximum_frames": 180
+      },
+      "required_properties": [
+        "opacity",
+        "scale"
+      ],
+      "render_safe": true,
+      "requires_3d": false,
+      "requires_camera": false,
+      "tracks": [
+        {
+          "property": "opacity",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0
+            },
+            {
+              "frame": 14,
+              "value": 1
+            },
+            {
+              "frame": 60,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "property": "scale",
+          "easing": "out_cubic",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.97
+            },
+            {
+              "frame": 28,
+              "value": 1
+            },
+            {
+              "frame": 60,
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "image_recipe": {
+        "components": [
+          {
+            "id": "one_sided_accent_edge",
+            "type": "shape",
+            "shape": "rect",
+            "placement": "before_image",
+            "size_scale": [
+              1.0,
+              1.0
+            ],
+            "position_offset": [
+              12.0,
+              12.0
+            ],
+            "radius_scale": 0.025,
+            "fill": [
+              0.94,
+              0.3,
+              0.2,
+              1.0
+            ],
+            "opacity": 1.0,
+            "tracks": [
+              {
+                "property": "opacity",
+                "easing": "out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 0,
+                    "value": 0
+                  },
+                  {
+                    "frame": 14,
+                    "value": 1
+                  },
+                  {
+                    "frame": 60,
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
   ],
   "overlay_presets": {

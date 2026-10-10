@@ -34,6 +34,7 @@
 #include "chronontemplate/important_phrases/highlight/PhraseHighlightPack.hpp"
 
 #include <cstdint>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -709,6 +710,13 @@ int main(int argc, char** argv) {
             fail("rgb_motion.rapid_transitions omits a published rapid preset");
 
         json entityPresentation = json::parse(readFile(CHRONONTEMPLATE_ENTITY_PRESENTATION_FILE));
+        json animationSections = json::parse(readFile(CHRONONTEMPLATE_ANIMATION_SECTIONS_FILE));
+        requireObject(animationSections, "animation_sections");
+        if (animationSections.value("schema", "") != "chronontemplate.animation-sections.v1" ||
+            animationSections.value("version", 0) != 1 || !animationSections.contains("sections") ||
+            !animationSections["sections"].is_array()) {
+            fail("animation sections have an unsupported schema or missing sections");
+        }
         requireObject(entityPresentation, "entity_presentation");
         if (entityPresentation.value("schema", "") != "chronontemplate.entity-presentation.v1" ||
             entityPresentation.value("version", 0) != 1 || !entityPresentation.contains("families") ||
@@ -772,6 +780,27 @@ int main(int argc, char** argv) {
         const json highlightMotions = highlightPhraseMotions();
         for (const auto& row : highlightMotions) motions.push_back(row);
         const std::set<std::string> motionIDs = validateMotions(motions);
+        std::set<std::string> sectionIDs;
+        for (const auto& section : animationSections["sections"]) {
+            requireObject(section, "animation section");
+            const std::string id = section.value("id", "");
+            if (id.empty() || !sectionIDs.insert(id).second || section.value("name", "").empty() ||
+                !section.contains("motion_ids") || !section["motion_ids"].is_array() ||
+                section["motion_ids"].empty()) {
+                fail("animation section needs a unique id, display name and non-empty motion_ids");
+            }
+            for (const auto& motionID : section["motion_ids"]) {
+                if (!motionID.is_string() || motionIDs.find(motionID.get<std::string>()) == motionIDs.end()) {
+                    fail("animation section " + id + " refers to an unknown motion id");
+                }
+                const auto found = std::find_if(motions.begin(), motions.end(), [&](const json& motion) {
+                    return motion.value("id", "") == motionID.get<std::string>();
+                });
+                if (found == motions.end() || found->value("category", "") != id) {
+                    fail("animation section " + id + " contains a motion from a different category");
+                }
+            }
+        }
 
         const json& presets = data["overlay_presets"];
         requireObject(presets, "overlay_presets");
@@ -795,6 +824,7 @@ int main(int argc, char** argv) {
         emitted["documentary_snapshot_recipes"] = documentarySnapshotRecipes();
         emitted["documentary_snapshot_styles"] = documentarySnapshotStyles();
         emitted["entity_presentation"] = entityPresentation;
+        emitted["animation_sections"] = animationSections;
         emitted["abstract_backgrounds"] = abstractBackgrounds;
         emitted["photo_motion"] = photoMotion;
         emitted["tech_backgrounds"] = techBackgrounds;
