@@ -1,0 +1,44 @@
+{
+  "schema": "chronontemplate.map-assets.v1",
+  "version": 1,
+  "maps": [
+    {
+      "id": "natural_earth_hypso_relief_water",
+      "name": "Natural Earth Hypsometric Relief",
+      "asset": "natural_earth_hypso_relief_water.jpg",
+      "width": 1480,
+      "height": 630,
+      "source": "Natural Earth 1:10m Cross-Blended Hypsometric Tints",
+      "license": "Public domain"
+    },
+    {
+      "id": "natural_earth_landcover_relief_water",
+      "name": "Natural Earth Landcover Relief",
+      "asset": "natural_earth_landcover_relief_water.jpg",
+      "width": 1480,
+      "height": 630,
+      "source": "Natural Earth 1:10m Natural Earth I with shaded relief and water",
+      "license": "Public domain"
+    },
+    {
+      "id": "nasa_blue_marble_august",
+      "name": "NASA Blue Marble August 2004",
+      "asset": "nasa_blue_marble_august.jpg",
+      "width": 1480,
+      "height": 630,
+      "source": "NASA Blue Marble Next Generation, Terra/MODIS",
+      "license": "NASA freely available imagery"
+    },
+    {
+      "id": "white_claude_map",
+      "name": "White Claude Map",
+      "asset": "white_claude_map.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "OpenTopoMap; map data © OpenStreetMap contributors",
+      "license": "CC BY-SA; attribution is embedded in the animated map",
+      "region": "Lombardy, Italy",
+      "plan": "../vintage_documentary_map_italy/vintage_documentary_map_italy.plan.json"
+    }
+  ]
+}

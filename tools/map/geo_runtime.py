@@ -405,12 +405,17 @@ class TourBuilder:
     # timeline: [dive i][travel i->i+1][dive i+1]...
     def _schedule(self):
         frames_per = int(self.sps * self.FPS)
+        initial_frames = max(
+            frames_per,
+            int(getattr(self, "initial_stop_frames", frames_per)),
+        )
         leg = max(1, int(self.travel * self.FPS))
         marks = []
         f = 0
         for i in range(len(self.stops)):
-            marks.append((f, f + frames_per, i))
-            f += frames_per
+            stop_frames = initial_frames if i == 0 else frames_per
+            marks.append((f, f + stop_frames, i))
+            f += stop_frames
             if i < len(self.stops) - 1:
                 marks.append((f, f + leg, i, i + 1))
                 f += leg
@@ -618,6 +623,35 @@ def _pose_zoom(builder, frame: int) -> float:  # noqa: ANN001 - duck-typed build
     if zoom_index is None:
         raise TypeError(f"{type(builder).__name__} must declare ZOOM_INDEX")
     return float(pose[zoom_index])
+
+
+def fit_initial_stop_frames(builder, minimum_final_hold_frames: int = 0) -> int:  # noqa: ANN001 - duck-typed builder
+    """Choose the shortest first-stop duration that passes the strict gate.
+
+    Tour stop durations are quantized to whole frames. For particular zoom
+    spans, an even/odd frame count can put the sampled smootherstep peak just
+    above the relative velocity bound. Try only the next few frame counts and
+    never consume the caller's reserved final hold. Other stop/travel durations
+    remain untouched. Raises the original gate error when no fit exists.
+    """
+    base_frames = max(int(builder.sps * builder.FPS),
+                      int(getattr(builder, "initial_stop_frames", 0)))
+    builder.initial_stop_frames = base_frames
+    first_error = None
+    for candidate in range(base_frames, base_frames + 8):
+        builder.initial_stop_frames = candidate
+        scheduled_end = builder._schedule()[-1][1]
+        if builder.TOTAL_FRAMES - scheduled_end < minimum_final_hold_frames:
+            break
+        try:
+            check_velocity_strict(builder)
+            return candidate
+        except RuntimeError as exc:
+            if first_error is None:
+                first_error = exc
+    if first_error is not None:
+        raise first_error
+    raise RuntimeError("no initial stop duration fits before the reserved final hold")
 
 
 def check_velocity_strict(builder) -> int:  # noqa: ANN001 - duck-typed builder
@@ -887,7 +921,59 @@ def self_test() -> int:
           and abs(last[2] - tb.end_zoom) < 1e-9,
           "the tour ends framed on its final stop at landing zoom")
 
-    # 3. Pose continuity: the same phase-aware strict bound the render gate
+    # 3. Production short-route quantization: a five-stop, 8-second shot at
+    #    24 fps has an 8-frame first stop that fails the strict relative peak
+    #    bound, while the next (9-frame) duration passes. Preserve the
+    #    explicit 1.5-second final destination hold while fitting it.
+    fit_stops = [Place(query=str(i), lat=45.5 - i * 0.05, lon=9.0 + i * 0.2, ok=True)
+                 for i in range(5)]
+    fit = TourBuilder(fit_stops, seconds_per_stop=0.34, travel_seconds=1.2, end_zoom=16.0)
+    fit.FPS = 24
+    fit.TOTAL_FRAMES = 192
+    fit.FRAMES_TOTAL = 192
+    fit.stop_end_zooms = [16.0] * len(fit_stops)
+    fit.initial_zoom_fraction = 0.90
+    fit.stop_dive_fraction = 1.0
+    try:
+        selected = fit_initial_stop_frames(fit, minimum_final_hold_frames=36)
+        check(selected == 9 and check_velocity_strict(fit) > 0,
+              f"short five-stop camera selects {selected} opening frames without weakening the gate")
+        check(fit.TOTAL_FRAMES - fit._schedule()[-1][1] >= 36,
+              "short five-stop camera preserves the full 1.5-second final hold")
+    except RuntimeError as exc:
+        check(False, f"short five-stop camera frame fit: {exc}")
+
+    # Production route-count regressions: a three-stop itinerary fits its
+    # 6.5-second camera window and preserves the reserved label hold, whereas
+    # seven stops cannot fit and must fail closed (the production renderer caps
+    # tours at five unique stops).
+    for stop_count, should_fit in ((3, True), (7, False)):
+        route_stops = [Place(query=str(i), lat=45.5 - i * 0.03,
+                             lon=9.0 + i * 0.05, ok=True)
+                       for i in range(stop_count)]
+        route_travel = min(1.6, max(1.2, 6.5 / (1.9 * (stop_count - 1))))
+        route_stop = max(0.15, (6.5 - route_travel * (stop_count - 1)) / stop_count)
+        route = TourBuilder(route_stops, seconds_per_stop=route_stop,
+                            travel_seconds=route_travel, end_zoom=17.0)
+        route.FPS = 24
+        route.TOTAL_FRAMES = 192
+        route.FRAMES_TOTAL = 192
+        route.stop_end_zooms = [17.0] * stop_count
+        route.initial_zoom_fraction = 0.90
+        route.stop_dive_fraction = 1.0
+        try:
+            opening_frames = fit_initial_stop_frames(route, minimum_final_hold_frames=36)
+            remaining = route.TOTAL_FRAMES - route._schedule()[-1][1]
+            route_passed = (check_velocity_strict(route) > 0 and remaining >= 36
+                            and route.TOTAL_FRAMES == 192)
+            check(should_fit and route_passed,
+                  f"{stop_count}-stop production route keeps 192 frames and a 36-frame final hold "
+                  f"(opening={opening_frames}, hold={remaining})")
+        except RuntimeError as exc:
+            check(not should_fit,
+                  f"{stop_count}-stop production route frame fit: {exc}")
+
+    # 4. Pose continuity: the same phase-aware strict bound the render gate
     #    enforces, checked offline on the schedule and every single-shot preset.
     #    A pure dive/metric shot exposes one phase without a schedule; verify
     #    its own zoom trace, not pitch/yaw/roll.

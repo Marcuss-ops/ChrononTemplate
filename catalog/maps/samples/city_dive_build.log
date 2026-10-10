@@ -1,0 +1,40 @@
+[natural_earth_hypso_relief_water] prepare esri_topo tile pyramid
+[DynamicTilePyramid] Prefetching exact plate coverage: 2062 tiles, workers=10...
+[DynamicTilePyramid] Exact tile prefetch complete: requested=2062 fetched=2062 memory_hits=0 elapsed_ms=1378.1.
+[natural_earth_hypso_relief_water] frame 0/150 zoom=3.00 altitude=14080.9km
+[natural_earth_hypso_relief_water] frame 30/150 zoom=3.85 altitude=7785.6km
+[natural_earth_hypso_relief_water] frame 60/150 zoom=7.67 altitude=553.0km
+[natural_earth_hypso_relief_water] frame 90/150 zoom=13.00 altitude=13.8km
+[natural_earth_hypso_relief_water] frame 120/150 zoom=16.72 altitude=1.0km
+[natural_earth_hypso_relief_water] frame 149/150 zoom=17.50 altitude=0.6km
+[natural_earth_hypso_relief_water] wrote 8,914,569 bytes in 9.6s
+[natural_earth_landcover_relief_water] prepare esri_natgeo tile pyramid
+[DynamicTilePyramid] Prefetching exact plate coverage: 2062 tiles, workers=10...
+[DynamicTilePyramid] Exact tile prefetch complete: requested=2062 fetched=2062 memory_hits=0 elapsed_ms=4538.4.
+[natural_earth_landcover_relief_water] frame 0/150 zoom=3.00 altitude=14080.9km
+[natural_earth_landcover_relief_water] frame 30/150 zoom=3.85 altitude=7785.6km
+[natural_earth_landcover_relief_water] frame 60/150 zoom=7.67 altitude=553.0km
+[natural_earth_landcover_relief_water] frame 90/150 zoom=13.00 altitude=13.8km
+[natural_earth_landcover_relief_water] frame 120/150 zoom=16.72 altitude=1.0km
+[natural_earth_landcover_relief_water] frame 149/150 zoom=17.50 altitude=0.6km
+[natural_earth_landcover_relief_water] wrote 6,557,626 bytes in 10.2s
+[nasa_blue_marble_august] prepare esri_sat tile pyramid
+[DynamicTilePyramid] Prefetching exact plate coverage: 2062 tiles, workers=10...
+[DynamicTilePyramid] Exact tile prefetch complete: requested=2062 fetched=2062 memory_hits=0 elapsed_ms=1311.7.
+[nasa_blue_marble_august] frame 0/150 zoom=3.00 altitude=14080.9km
+[nasa_blue_marble_august] frame 30/150 zoom=3.85 altitude=7785.6km
+[nasa_blue_marble_august] frame 60/150 zoom=7.67 altitude=553.0km
+[nasa_blue_marble_august] frame 90/150 zoom=13.00 altitude=13.8km
+[nasa_blue_marble_august] frame 120/150 zoom=16.72 altitude=1.0km
+[nasa_blue_marble_august] frame 149/150 zoom=17.50 altitude=0.6km
+[nasa_blue_marble_august] wrote 8,690,144 bytes in 9.5s
+[white_claude_map] prepare esri_topo tile pyramid
+[DynamicTilePyramid] Prefetching exact plate coverage: 2062 tiles, workers=10...
+[DynamicTilePyramid] Exact tile prefetch complete: requested=2062 fetched=2062 memory_hits=0 elapsed_ms=1285.6.
+[white_claude_map] frame 0/150 zoom=3.00 altitude=14080.9km
+[white_claude_map] frame 30/150 zoom=3.85 altitude=7785.6km
+[white_claude_map] frame 60/150 zoom=7.67 altitude=553.0km
+[white_claude_map] frame 90/150 zoom=13.00 altitude=13.8km
+[white_claude_map] frame 120/150 zoom=16.72 altitude=1.0km
+[white_claude_map] frame 149/150 zoom=17.50 altitude=0.6km
+[white_claude_map] wrote 8,720,476 bytes in 24.6s

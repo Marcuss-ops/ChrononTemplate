@@ -156,6 +156,25 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
             pass
         stderr_thread.join()
         return_code = proc.wait()
+    except BrokenPipeError as exc:
+        # Keep FFmpeg's stderr and exit status when NVENC closes its input
+        # early. Killing the encoder here used to hide the real initialization
+        # or device-loss error behind a generic BrokenPipeError.
+        if proc.stdin and not proc.stdin.closed:
+            try:
+                proc.stdin.close()
+            except BrokenPipeError:
+                pass
+        try:
+            return_code = proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            return_code = proc.wait()
+        stderr_thread.join()
+        diagnostic = b"".join(stderr_tail).decode("utf-8", errors="replace")
+        raise RuntimeError(
+            f"ffmpeg closed the frame pipe early (status {return_code}): {diagnostic}"
+        ) from exc
     except BaseException:
         if proc.stdin and not proc.stdin.closed:
             try:

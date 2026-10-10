@@ -38,7 +38,9 @@ def main() -> int:
     duration_us = int(payload["duration_us"])
     raw_pins = payload.get("pins", [])
     # Keep a route map focused: repeated mentions of the same place are one
-    # stop, and no tour may contain more than five distinct stops.
+    # stop, and no tour may contain more than five distinct stops. This cap
+    # is part of the camera's authored 6.5-second route budget; seven stops
+    # cannot preserve the 1.5-second terminal hold inside that window.
     pins = []
     seen_pin_coords = set()
     for pin in raw_pins:
@@ -126,22 +128,35 @@ def main() -> int:
         # destination for another 1.5 seconds. The builder's timeline ends
         # before TOTAL_FRAMES, so its final-pose fallback supplies that hold.
         tour_seconds = max(1.0, duration_us / 1_000_000 - 1.5)
-        travel_seconds = min(1.5, tour_seconds / (2 * (len(stops) - 1)))
+        # Give close-zoom transitions a little more room: the strict camera
+        # velocity gate caught a small zoom snap at a five-stop city route.
+        # Keep the authored tour duration fixed by taking that time from the
+        # per-stop holds, and reserve the final 1.5 s for the destination hold.
+        # Five-stop close-zoom routes need at least 1.2 s per leg to stay
+        # inside the strict zoom-velocity gate. Borrow the extra time from
+        # per-stop holds; keep the authored tour and final 1.5 s hold intact.
+        travel_seconds = min(1.6, max(1.2, tour_seconds / (1.9 * (len(stops) - 1))))
         stop_seconds = max(0.15, (tour_seconds - travel_seconds * (len(stops) - 1)) / len(stops))
         builder = geo.TourBuilder(stops, seconds_per_stop=stop_seconds,
                                   travel_seconds=travel_seconds, end_zoom=max(stop_zooms))
         builder.stop_end_zooms = stop_zooms
-        builder.initial_zoom_fraction = 0.62
-        builder.stop_dive_fraction = 0.58
+        # Start much closer to the first city: this avoids a steep opening
+        # zoom step on short, multi-stop routes and matches the requested
+        # city-first framing.
+        builder.initial_zoom_fraction = 0.90
+        # Use the full stop window for each city dive. The default short
+        # 0.58 fraction quantized to fewer than two useful frames on dense
+        # five-stop routes and tripped the strict velocity gate at frame 0.
+        builder.stop_dive_fraction = 1.0
         if camera_animation == "tilt_reveal":
-            builder.initial_zoom_fraction = 0.54
-            builder.stop_dive_fraction = 0.62
+            builder.initial_zoom_fraction = 0.90
+            builder.stop_dive_fraction = 1.0
         elif camera_animation == "orbit_arrival":
-            builder.initial_zoom_fraction = 0.58
-            builder.stop_dive_fraction = 0.60
+            builder.initial_zoom_fraction = 0.90
+            builder.stop_dive_fraction = 1.0
         elif camera_animation == "slow_approach":
-            builder.initial_zoom_fraction = 0.62
-            builder.stop_dive_fraction = 0.72
+            builder.initial_zoom_fraction = 0.90
+            builder.stop_dive_fraction = 1.0
         elif camera_animation == "wide_context":
             builder.stop_end_zooms = [max(5.8, zoom - 1.7) for zoom in stop_zooms]
         builder.end_zoom = max(builder.stop_end_zooms)
@@ -149,6 +164,7 @@ def main() -> int:
         # its own frame count from stop/travel phases.
         builder.TOTAL_FRAMES = total_frames
         builder.FRAMES_TOTAL = total_frames
+        geo.fit_initial_stop_frames(builder, minimum_final_hold_frames=round(1.5 * builder.FPS))
 
     # Production map overlays are clean satellite imagery: show only the
     # current place name, with no altitude HUD, diagnostic headings, route

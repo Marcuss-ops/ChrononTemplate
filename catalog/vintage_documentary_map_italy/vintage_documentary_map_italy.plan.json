@@ -1,137 +1,31 @@
 {
   "schema": "chronon.render-plan.v2",
   "version": 2,
-  "job_id": "vintage_documentary_map_italy",
+  "job_id": "ferragni_north_italy_editorial_map_5s",
   "canvas": {
     "width": 1920,
     "height": 1080,
     "fps_num": 30,
     "fps_den": 1,
-    "duration_frames": 240
-  },
-  "camera": {
-    "type": "perspective",
-    "position": [
-      0.0,
-      0.0,
-      -1000.0
-    ],
-    "rotation_deg": [
-      0.0,
-      0.0,
-      0.0
-    ],
-    "fov_deg": 56.738,
-    "near": 1.0,
-    "far": 5000.0,
-    "zoom": 1.0
-  },
-  "camera_animation": {
-    "tracks": [
-      {
-        "property": "camera_position_x",
-        "easing": "in_out_cubic",
-        "keyframes": [
-          {
-            "frame": 0,
-            "value": -180.0
-          },
-          {
-            "frame": 60,
-            "value": -170.0
-          },
-          {
-            "frame": 130,
-            "value": 70.0
-          },
-          {
-            "frame": 239,
-            "value": 90.0
-          }
-        ]
-      },
-      {
-        "property": "camera_position_y",
-        "easing": "in_out_cubic",
-        "keyframes": [
-          {
-            "frame": 0,
-            "value": 0.0
-          },
-          {
-            "frame": 60,
-            "value": 0.0
-          },
-          {
-            "frame": 130,
-            "value": -25.0
-          },
-          {
-            "frame": 239,
-            "value": -35.0
-          }
-        ]
-      },
-      {
-        "property": "camera_position_z",
-        "easing": "in_out_cubic",
-        "keyframes": [
-          {
-            "frame": 0,
-            "value": -1000.0
-          },
-          {
-            "frame": 60,
-            "value": -985.0
-          },
-          {
-            "frame": 130,
-            "value": -945.0
-          },
-          {
-            "frame": 239,
-            "value": -915.0
-          }
-        ]
-      }
-    ]
+    "duration_frames": 150
   },
   "layers": [
     {
-      "id": "vintage_relief_basemap",
+      "id": "map_overview",
       "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/vintage_relief_basemap.png",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/opentopo_north_italy_overview.png",
       "size": [
-        2750,
-        1546
+        1920,
+        1080
       ],
       "position": [
-        0.0,
-        0.0,
-        0.0
+        0,
+        0
       ],
       "fit": "contain",
-      "enable_3d": true,
       "start_frame": 0,
-      "duration_frames": 240
-    },
-    {
-      "id": "milano_pin_shadow",
-      "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_ground_shadow.png",
-      "size": [
-        160,
-        80
-      ],
-      "position": [
-        -380.0,
-        105.0,
-        -1.0
-      ],
-      "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 8,
-      "duration_frames": 232,
+      "duration_frames": 78,
+      "screen_space": true,
       "animation": {
         "tracks": [
           {
@@ -140,185 +34,19 @@
             "keyframes": [
               {
                 "frame": 0,
-                "value": 0.1
+                "value": 1.02
               },
               {
-                "frame": 18,
-                "value": 1.0
+                "frame": 35,
+                "value": 1
               },
               {
-                "frame": 55,
-                "value": 1.0
+                "frame": 60,
+                "value": 1.02
               },
               {
-                "frame": 85,
-                "value": 0.0
-              },
-              {
-                "frame": 231,
-                "value": 0.0
-              }
-            ]
-          },
-          {
-            "property": "opacity",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.0
-              },
-              {
-                "frame": 18,
-                "value": 0.8
-              },
-              {
-                "frame": 55,
-                "value": 0.8
-              },
-              {
-                "frame": 85,
-                "value": 0.0
-              },
-              {
-                "frame": 231,
-                "value": 0.0
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "milano_pin_marker",
-      "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_marker_red.png",
-      "size": [
-        140,
-        200
-      ],
-      "position": [
-        -380.0,
-        185.0,
-        -6.0
-      ],
-      "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 10,
-      "duration_frames": 230,
-      "animation": {
-        "tracks": [
-          {
-            "property": "position_y",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 160.0
-              },
-              {
-                "frame": 16,
-                "value": -12.0
-              },
-              {
-                "frame": 22,
-                "value": 8.0
-              },
-              {
-                "frame": 28,
-                "value": 0.0
-              },
-              {
-                "frame": 229,
-                "value": 0.0
-              }
-            ]
-          },
-          {
-            "property": "scale",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.4
-              },
-              {
-                "frame": 16,
-                "value": 1.1
-              },
-              {
-                "frame": 28,
-                "value": 1.0
-              },
-              {
-                "frame": 229,
-                "value": 1.0
-              }
-            ]
-          },
-          {
-            "property": "opacity",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.0
-              },
-              {
-                "frame": 10,
-                "value": 1.0
-              },
-              {
-                "frame": 55,
-                "value": 1.0
-              },
-              {
-                "frame": 85,
-                "value": 0.0
-              },
-              {
-                "frame": 229,
-                "value": 0.0
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "milano_banner_tag",
-      "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/banner_milano.png",
-      "size": [
-        302,
-        98
-      ],
-      "position": [
-        -190.0,
-        190.0,
-        -8.0
-      ],
-      "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 24,
-      "duration_frames": 216,
-      "animation": {
-        "tracks": [
-          {
-            "property": "scale_x",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.05
-              },
-              {
-                "frame": 20,
-                "value": 1.0
-              },
-              {
-                "frame": 215,
-                "value": 1.0
+                "frame": 77,
+                "value": 1.03
               }
             ]
           },
@@ -328,15 +56,19 @@
             "keyframes": [
               {
                 "frame": 0,
-                "value": -50.0
+                "value": 0
               },
               {
-                "frame": 20,
-                "value": 0.0
+                "frame": 35,
+                "value": -4
               },
               {
-                "frame": 215,
-                "value": 0.0
+                "frame": 60,
+                "value": 4
+              },
+              {
+                "frame": 77,
+                "value": 8
               }
             ]
           },
@@ -346,23 +78,15 @@
             "keyframes": [
               {
                 "frame": 0,
-                "value": 0.0
+                "value": 1
               },
               {
-                "frame": 12,
-                "value": 1.0
+                "frame": 60,
+                "value": 1
               },
               {
-                "frame": 55,
-                "value": 1.0
-              },
-              {
-                "frame": 85,
-                "value": 0.0
-              },
-              {
-                "frame": 215,
-                "value": 0.0
+                "frame": 77,
+                "value": 0
               }
             ]
           }
@@ -370,80 +94,21 @@
       }
     },
     {
-      "id": "cremona_province_hatch",
+      "id": "map_detail",
       "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/cremona_province_hatch.png",
+      "asset": "ChrononTemplate/catalog/maps/white_claude_map.png",
       "size": [
-        341,
-        278
+        1920,
+        1080
       ],
       "position": [
-        -160.0,
-        -70.0,
-        -2.0
+        0,
+        0
       ],
       "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 65,
-      "duration_frames": 175,
-      "animation": {
-        "tracks": [
-          {
-            "property": "opacity",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.0
-              },
-              {
-                "frame": 25,
-                "value": 0.95
-              },
-              {
-                "frame": 174,
-                "value": 0.95
-              }
-            ]
-          },
-          {
-            "property": "scale",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.92
-              },
-              {
-                "frame": 25,
-                "value": 1.0
-              },
-              {
-                "frame": 174,
-                "value": 1.0
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "cremona_pin_shadow",
-      "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_ground_shadow.png",
-      "size": [
-        160,
-        80
-      ],
-      "position": [
-        -125.0,
-        -145.0,
-        -1.0
-      ],
-      "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 82,
-      "duration_frames": 158,
+      "start_frame": 58,
+      "duration_frames": 92,
+      "screen_space": true,
       "animation": {
         "tracks": [
           {
@@ -452,375 +117,15 @@
             "keyframes": [
               {
                 "frame": 0,
-                "value": 0.1
-              },
-              {
-                "frame": 18,
-                "value": 1.0
-              },
-              {
-                "frame": 157,
-                "value": 1.0
-              }
-            ]
-          },
-          {
-            "property": "opacity",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.0
-              },
-              {
-                "frame": 18,
-                "value": 0.8
-              },
-              {
-                "frame": 157,
-                "value": 0.8
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "cremona_pin_marker",
-      "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_marker_red.png",
-      "size": [
-        140,
-        200
-      ],
-      "position": [
-        -125.0,
-        -60.0,
-        -7.0
-      ],
-      "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 85,
-      "duration_frames": 155,
-      "animation": {
-        "tracks": [
-          {
-            "property": "position_y",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 170.0
-              },
-              {
-                "frame": 18,
-                "value": -12.0
-              },
-              {
-                "frame": 24,
-                "value": 7.0
-              },
-              {
-                "frame": 30,
-                "value": 0.0
-              },
-              {
-                "frame": 154,
-                "value": 0.0
-              }
-            ]
-          },
-          {
-            "property": "opacity",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.0
-              },
-              {
-                "frame": 12,
-                "value": 1.0
-              },
-              {
-                "frame": 154,
-                "value": 1.0
-              }
-            ]
-          },
-          {
-            "property": "scale",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.4
-              },
-              {
-                "frame": 18,
-                "value": 1.1
-              },
-              {
-                "frame": 30,
-                "value": 1.0
-              },
-              {
-                "frame": 154,
-                "value": 1.0
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "cremona_banner_tag",
-      "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/banner_cremona.png",
-      "size": [
-        341,
-        98
-      ],
-      "position": [
-        85.0,
-        -60.0,
-        -9.0
-      ],
-      "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 102,
-      "duration_frames": 138,
-      "animation": {
-        "tracks": [
-          {
-            "property": "scale_x",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.05
-              },
-              {
-                "frame": 20,
-                "value": 1.0
-              },
-              {
-                "frame": 137,
-                "value": 1.0
-              }
-            ]
-          },
-          {
-            "property": "position_x",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": -50.0
-              },
-              {
-                "frame": 20,
-                "value": 0.0
-              },
-              {
-                "frame": 137,
-                "value": 0.0
-              }
-            ]
-          },
-          {
-            "property": "opacity",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.0
-              },
-              {
-                "frame": 14,
-                "value": 1.0
-              },
-              {
-                "frame": 137,
-                "value": 1.0
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "connector_callout_line",
-      "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/connector_line.png",
-      "size": [
-        320,
-        120
-      ],
-      "position": [
-        210.0,
-        10.0,
-        -4.0
-      ],
-      "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 118,
-      "duration_frames": 122,
-      "animation": {
-        "tracks": [
-          {
-            "property": "scale_x",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.01
-              },
-              {
-                "frame": 18,
-                "value": 1.0
-              },
-              {
-                "frame": 121,
-                "value": 1.0
-              }
-            ]
-          },
-          {
-            "property": "scale_y",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.01
-              },
-              {
-                "frame": 18,
-                "value": 1.0
-              },
-              {
-                "frame": 121,
-                "value": 1.0
-              }
-            ]
-          },
-          {
-            "property": "opacity",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.0
-              },
-              {
-                "frame": 12,
-                "value": 0.95
-              },
-              {
-                "frame": 121,
-                "value": 0.95
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "photo_card_torrazzo",
-      "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/photo_card_torrazzo.png",
-      "size": [
-        430,
-        560
-      ],
-      "position": [
-        430.0,
-        160.0,
-        -12.0
-      ],
-      "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 125,
-      "duration_frames": 115,
-      "animation": {
-        "tracks": [
-          {
-            "property": "position_z",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": -180.0
-              },
-              {
-                "frame": 30,
-                "value": 0.0
-              },
-              {
-                "frame": 114,
-                "value": 0.0
-              }
-            ]
-          },
-          {
-            "property": "position_y",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 90.0
-              },
-              {
-                "frame": 30,
-                "value": 0.0
-              },
-              {
-                "frame": 114,
-                "value": 0.0
-              }
-            ]
-          },
-          {
-            "property": "rotation_z",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 14.0
-              },
-              {
-                "frame": 24,
-                "value": -6.0
-              },
-              {
-                "frame": 34,
-                "value": -4.2
-              },
-              {
-                "frame": 114,
-                "value": -4.2
-              }
-            ]
-          },
-          {
-            "property": "scale",
-            "easing": "out_cubic",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 0.6
-              },
-              {
-                "frame": 24,
                 "value": 1.04
               },
               {
-                "frame": 34,
-                "value": 1.0
+                "frame": 26,
+                "value": 1
               },
               {
-                "frame": 114,
-                "value": 1.0
+                "frame": 91,
+                "value": 1.01
               }
             ]
           },
@@ -830,15 +135,15 @@
             "keyframes": [
               {
                 "frame": 0,
-                "value": 0.0
+                "value": 0
               },
               {
-                "frame": 16,
-                "value": 1.0
+                "frame": 18,
+                "value": 1
               },
               {
-                "frame": 114,
-                "value": 1.0
+                "frame": 91,
+                "value": 1
               }
             ]
           }
@@ -846,22 +151,21 @@
       }
     },
     {
-      "id": "typography_anni",
+      "id": "map_editorial_wash",
       "type": "image",
-      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/typography_anni.png",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/map_editorial_wash.png",
       "size": [
-        450,
-        180
+        1920,
+        1080
       ],
       "position": [
-        -560.0,
-        -380.0,
-        -5.0
+        0,
+        0
       ],
       "fit": "contain",
-      "enable_3d": true,
-      "start_frame": 142,
-      "duration_frames": 98,
+      "start_frame": 0,
+      "duration_frames": 150,
+      "screen_space": true,
       "animation": {
         "tracks": [
           {
@@ -870,33 +174,1534 @@
             "keyframes": [
               {
                 "frame": 0,
-                "value": 0.0
+                "value": 0.12
               },
               {
-                "frame": 26,
+                "frame": 100,
+                "value": 0.12
+              },
+              {
+                "frame": 120,
                 "value": 0.95
               },
               {
-                "frame": 97,
+                "frame": 149,
                 "value": 0.95
               }
             ]
-          },
+          }
+        ]
+      }
+    },
+    {
+      "id": "milano_8_pin",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_marker_red.png",
+      "size": [
+        78,
+        112
+      ],
+      "position": [
+        -62.307692307694765,
+        188.2024836625119
+      ],
+      "fit": "contain",
+      "start_frame": 8,
+      "duration_frames": 68,
+      "screen_space": true,
+      "animation": {
+        "tracks": [
           {
             "property": "position_y",
             "easing": "out_cubic",
             "keyframes": [
               {
                 "frame": 0,
-                "value": -35.0
+                "value": 65
               },
               {
-                "frame": 26,
-                "value": 0.0
+                "frame": 13,
+                "value": -7
               },
               {
-                "frame": 97,
-                "value": 0.0
+                "frame": 20,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.55
+              },
+              {
+                "frame": 13,
+                "value": 1.12
+              },
+              {
+                "frame": 21,
+                "value": 1
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 8,
+                "value": 1
+              },
+              {
+                "frame": 53,
+                "value": 1
+              },
+              {
+                "frame": 67,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "milano_8_tag",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/banner_milano.png",
+      "size": [
+        240,
+        78
+      ],
+      "position": [
+        85.69230769230535,
+        206.2024836625119
+      ],
+      "fit": "contain",
+      "start_frame": 13,
+      "duration_frames": 63,
+      "screen_space": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -55
+              },
+              {
+                "frame": 15,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              },
+              {
+                "frame": 43,
+                "value": 1
+              },
+              {
+                "frame": 67,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "stat_75",
+      "type": "text",
+      "text": "75",
+      "size": [
+        400,
+        190
+      ],
+      "position": [
+        342,
+        760
+      ],
+      "start_frame": 30,
+      "duration_frames": 58,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 170,
+        "min_font_size": 170,
+        "max_font_size": 170,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EBDD",
+        "stroke": {
+          "color": "#211B16",
+          "width": 4
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 80
+              },
+              {
+                "frame": 20,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 12,
+                "value": 1
+              },
+              {
+                "frame": 42,
+                "value": 1
+              },
+              {
+                "frame": 58,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "stat_milioni",
+      "type": "text",
+      "text": "MILIONI",
+      "size": [
+        700,
+        125
+      ],
+      "position": [
+        752,
+        778
+      ],
+      "start_frame": 36,
+      "duration_frames": 54,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 92,
+        "min_font_size": 92,
+        "max_font_size": 92,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EBDD",
+        "stroke": {
+          "color": "#211B16",
+          "width": 3
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -65
+              },
+              {
+                "frame": 23,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 14,
+                "value": 1
+              },
+              {
+                "frame": 37,
+                "value": 1
+              },
+              {
+                "frame": 54,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "stat_di_euro",
+      "type": "text",
+      "text": "DI EURO",
+      "size": [
+        420,
+        62
+      ],
+      "position": [
+        384,
+        900
+      ],
+      "start_frame": 48,
+      "duration_frames": 40,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 43,
+        "min_font_size": 43,
+        "max_font_size": 43,
+        "fit_mode": "shrink_only",
+        "fill": "#E3D6BF",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 36
+              },
+              {
+                "frame": 16,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 14,
+                "value": 0.96
+              },
+              {
+                "frame": 28,
+                "value": 0.96
+              },
+              {
+                "frame": 40,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cremona_province",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/cremona_province_accurate.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "fit": "contain",
+      "start_frame": 69,
+      "duration_frames": 81,
+      "screen_space": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.12
+              },
+              {
+                "frame": 18,
+                "value": 1
+              },
+              {
+                "frame": 80,
+                "value": 1
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 18,
+                "value": 0.96
+              },
+              {
+                "frame": 62,
+                "value": 0.96
+              },
+              {
+                "frame": 80,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "milano_67_pin",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_marker_red.png",
+      "size": [
+        78,
+        112
+      ],
+      "position": [
+        -283.9999999999985,
+        234.56730036976734
+      ],
+      "fit": "contain",
+      "start_frame": 67,
+      "duration_frames": 37,
+      "screen_space": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 65
+              },
+              {
+                "frame": 13,
+                "value": -7
+              },
+              {
+                "frame": 20,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.55
+              },
+              {
+                "frame": 13,
+                "value": 1.12
+              },
+              {
+                "frame": 21,
+                "value": 1
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 8,
+                "value": 1
+              },
+              {
+                "frame": 24,
+                "value": 1
+              },
+              {
+                "frame": 36,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "milano_67_tag",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/banner_milano.png",
+      "size": [
+        240,
+        78
+      ],
+      "position": [
+        -135.99999999999852,
+        252.56730036976734
+      ],
+      "fit": "contain",
+      "start_frame": 72,
+      "duration_frames": 32,
+      "screen_space": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -55
+              },
+              {
+                "frame": 15,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              },
+              {
+                "frame": 14,
+                "value": 1
+              },
+              {
+                "frame": 36,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cremona_76_pin",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/pin_marker_red.png",
+      "size": [
+        78,
+        112
+      ],
+      "position": [
+        49.0799999999939,
+        45.95246591316766
+      ],
+      "fit": "contain",
+      "start_frame": 76,
+      "duration_frames": 74,
+      "screen_space": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 65
+              },
+              {
+                "frame": 13,
+                "value": -7
+              },
+              {
+                "frame": 20,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.55
+              },
+              {
+                "frame": 13,
+                "value": 1.12
+              },
+              {
+                "frame": 21,
+                "value": 1
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 8,
+                "value": 1
+              },
+              {
+                "frame": 52,
+                "value": 1
+              },
+              {
+                "frame": 73,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cremona_76_tag",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/banner_cremona.png",
+      "size": [
+        280,
+        78
+      ],
+      "position": [
+        217.07999999999402,
+        63.95246591316766
+      ],
+      "fit": "contain",
+      "start_frame": 81,
+      "duration_frames": 69,
+      "screen_space": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -55
+              },
+              {
+                "frame": 15,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              },
+              {
+                "frame": 42,
+                "value": 1
+              },
+              {
+                "frame": 73,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "torrazzo_polaroid",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/vintage_documentary_map_italy/assets/photo_card_torrazzo.png",
+      "size": [
+        345,
+        450
+      ],
+      "position": [
+        600,
+        -165
+      ],
+      "fit": "contain",
+      "start_frame": 85,
+      "duration_frames": 65,
+      "screen_space": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -85
+              },
+              {
+                "frame": 20,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.68
+              },
+              {
+                "frame": 18,
+                "value": 1.04
+              },
+              {
+                "frame": 25,
+                "value": 1
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 12,
+                "value": 1
+              },
+              {
+                "frame": 44,
+                "value": 1
+              },
+              {
+                "frame": 64,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "photo_caption",
+      "type": "text",
+      "text": "IL TORRAZZO  ·  CREMONA",
+      "size": [
+        390,
+        34
+      ],
+      "position": [
+        1510,
+        676
+      ],
+      "start_frame": 98,
+      "duration_frames": 52,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#EFE5D1",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 0.95
+              },
+              {
+                "frame": 30,
+                "value": 0.95
+              },
+              {
+                "frame": 51,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_date",
+      "type": "text",
+      "text": "12 OTTOBRE",
+      "size": [
+        620,
+        60
+      ],
+      "position": [
+        492,
+        634
+      ],
+      "start_frame": 101,
+      "duration_frames": 49,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 46,
+        "min_font_size": 46,
+        "max_font_size": 46,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EBDD",
+        "stroke": {
+          "color": "#211B16",
+          "width": 3
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 34
+              },
+              {
+                "frame": 13,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year",
+      "type": "text",
+      "text": "2009",
+      "size": [
+        700,
+        190
+      ],
+      "position": [
+        490,
+        742
+      ],
+      "start_frame": 106,
+      "duration_frames": 44,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 185,
+        "min_font_size": 185,
+        "max_font_size": 185,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EBDD",
+        "stroke": {
+          "color": "#211B16",
+          "width": 5
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.78
+              },
+              {
+                "frame": 17,
+                "value": 1
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 11,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_name",
+      "type": "text",
+      "text": "CHIARA FERRAGNI",
+      "size": [
+        780,
+        65
+      ],
+      "position": [
+        1320,
+        802
+      ],
+      "start_frame": 122,
+      "duration_frames": 28,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 44,
+        "min_font_size": 44,
+        "max_font_size": 44,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EBDD",
+        "stroke": {
+          "color": "#211B16",
+          "width": 3
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 26
+              },
+              {
+                "frame": 13,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2006",
+      "type": "text",
+      "text": "2006",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        140,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2007",
+      "type": "text",
+      "text": "2007",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        304,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2008",
+      "type": "text",
+      "text": "2008",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        468,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2009",
+      "type": "text",
+      "text": "2009",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        632,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 24,
+        "min_font_size": 24,
+        "max_font_size": 24,
+        "fit_mode": "shrink_only",
+        "fill": "#E7DCC8",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2010",
+      "type": "text",
+      "text": "2010",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        796,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2011",
+      "type": "text",
+      "text": "2011",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        960,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2012",
+      "type": "text",
+      "text": "2012",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        1124,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2013",
+      "type": "text",
+      "text": "2013",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        1288,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2014",
+      "type": "text",
+      "text": "2014",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        1452,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2015",
+      "type": "text",
+      "text": "2015",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        1616,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "timeline_year_2016",
+      "type": "text",
+      "text": "2016",
+      "size": [
+        90,
+        34
+      ],
+      "position": [
+        1780,
+        904
+      ],
+      "start_frame": 111,
+      "duration_frames": 39,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#C8B99E",
+        "stroke": {
+          "color": "#211B16",
+          "width": 2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 10,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "map_credit",
+      "type": "text",
+      "text": "© OpenStreetMap · OpenTopoMap  |  Confini ISTAT 2023 / geoBoundaries",
+      "size": [
+        1120,
+        26
+      ],
+      "position": [
+        960,
+        1050
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "style": {
+        "font": "ChrononTemplate/assets/fonts/Inter-Bold.ttf",
+        "font_size": 14,
+        "min_font_size": 14,
+        "max_font_size": 14,
+        "fit_mode": "shrink_only",
+        "fill": "#D7C8AE",
+        "stroke": {
+          "color": "#211B16",
+          "width": 1
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.74
+              },
+              {
+                "frame": 149,
+                "value": 0.74
               }
             ]
           }
@@ -905,7 +1710,7 @@
     }
   ],
   "output": {
-    "path": "/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/catalog/vintage_documentary_map_italy/out/vintage_documentary_map_italy.mp4",
+    "path": "vintage_documentary_map_italy.mp4",
     "format": "mp4",
     "codec": "h264"
   }

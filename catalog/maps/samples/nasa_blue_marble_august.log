@@ -1,0 +1,83 @@
+[2026-10-10 08:07:01.022] [info] [asset-profile] kind=0 path=ChrononTemplate/catalog/maps/samples/nasa_blue_marble_august_plate.jpg bytes=347208 cache=miss invalidated=0 stat=0.01ms hash=3.81ms hashed_bytes=347208 total=3.89ms
+[2026-10-10 08:07:01.022] [info] [asset-digest-cache] hits=0 misses=1 invalidations=0 bytes_hashed=347208 lookup_ms=0.00 write_ms=0.00 full_hash_ms=3.81
+[2026-10-10 08:07:01.022] [info] [plan-profile] read=0.10ms parse=0.05ms decode=17.69ms resolver=0.01ms compile_validate=4.66ms total=22.54ms
+[2026-10-10 08:07:01.023] [info] [asset-profile] kind=0 path=ChrononTemplate/catalog/maps/samples/nasa_blue_marble_august_plate.jpg bytes=347208 cache=hit invalidated=0 stat=0.01ms hash=0.00ms hashed_bytes=0 total=0.06ms
+[2026-10-10 08:07:01.023] [info] [asset-digest-cache] hits=1 misses=0 invalidations=0 bytes_hashed=0 lookup_ms=0.00 write_ms=0.00 full_hash_ms=0.00
+[2026-10-10 08:07:01.023] [info] [plan-compile-profile] assets=0.11ms fingerprint=0.03ms media_resolution=0.00ms materialize=0.00ms composition_compile=0.00ms compatibility_view=0.00ms total=0.26ms
+[2026-10-10 08:07:01.023] [info] [video] Auto-selecting yuv420p pipe pixel format for 1920x1080 output
+[2026-10-10 08:07:01.023] [info] [video] execution plan resolved (reason: render_graph_default); decode=2 composite=3 encode=2 interop=0 handoff=3 codec=3
+[2026-10-10 08:07:01.069] [info] [video-runtime] created persistent runtime for device 0 (CUDA ordinal 0)
+[2026-10-10 08:07:01.069] [info] [video] Using in-process FFmpeg sink via VideoSinkEncoderAdapter
+[2026-10-10 08:07:01.069] [info] [video] encoder feed capability: host_frame=true direct_yuv=false native_surface=false
+[2026-10-10 08:07:01.069] [warning] [video_adapter] Hardware codec 'h264_nvenc' is unavailable in CPU-only mode; falling back to libx264
+[libx264 @ 0x56347c70f700] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX
+[libx264 @ 0x56347c70f700] profile High, level 5.0, 4:2:0, 8-bit
+[2026-10-10 08:07:01.211] [info] [video_adapter] Opened ffmpeg-pipe sink: 1920x1080 @ 30/1fps, format=yuv420p, codec=h264_nvenc
+[2026-10-10 08:07:01.785] [info] ImageCache: loaded 'ChrononTemplate/catalog/maps/samples/nasa_blue_marble_august_plate.jpg' (1920x1080) in 503.854ms
+[2026-10-10 08:07:01.930] [info] [temp-lifetime] frame=0 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:07:01.930] [info] [exec-level-diag] frame=0 level=0 nodes=2 input_ms=0.001 dispatch_ms=37.772 fb_release_ms=0.002
+[2026-10-10 08:07:01.930] [info] [graph-edge] frame=0 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:07:01.930] [info] [graph-edge] frame=0 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:07:01.958] [info] [temp-lifetime] frame=0 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:07:01.958] [info] [exec-level-diag] frame=0 level=1 nodes=1 input_ms=0.014 dispatch_ms=27.888 fb_release_ms=0.006
+[2026-10-10 08:07:02.028] [info] [pool-warm] Pre-allocated 4 canvas buffers (1920x1152 bucket) at startup
+[2026-10-10 08:07:02.075] [info] [pool-warm] Pre-allocated 3 buffers (text-bbox+glow-pad) bucket 1920x1024 at startup
+[2026-10-10 08:07:02.089] [info] [pool-warm] Pre-allocated 3 buffers (downsample-half) bucket 1024x640 at startup
+[2026-10-10 08:07:02.096] [info] [pool-warm] Pre-allocated 3 buffers (downsample-quarter) bucket 512x384 at startup
+[2026-10-10 08:07:02.121] [info] [video] Exporting via Arena-backed SIMD pipeline
+[2026-10-10 08:07:02.173] [info] [temp-lifetime] frame=1 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:07:02.173] [info] [exec-level-diag] frame=1 level=0 nodes=2 input_ms=0.001 dispatch_ms=52.989 fb_release_ms=0.002
+[2026-10-10 08:07:02.173] [info] [graph-edge] frame=1 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:07:02.173] [info] [graph-edge] frame=1 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:07:02.191] [info] [temp-lifetime] frame=1 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:07:02.191] [info] [exec-level-diag] frame=1 level=1 nodes=1 input_ms=0.013 dispatch_ms=17.705 fb_release_ms=0.007
+[2026-10-10 08:07:02.233] [info] [temp-lifetime] frame=2 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:07:02.233] [info] [exec-level-diag] frame=2 level=0 nodes=2 input_ms=0.001 dispatch_ms=42.238 fb_release_ms=0.002
+[2026-10-10 08:07:02.233] [info] [graph-edge] frame=2 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:07:02.233] [info] [graph-edge] frame=2 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:07:02.257] [info] [temp-lifetime] frame=2 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:07:02.257] [info] [exec-level-diag] frame=2 level=1 nodes=1 input_ms=0.013 dispatch_ms=23.577 fb_release_ms=0.006
+[2026-10-10 08:07:03.319] [info] [video]   15/150 frames
+[2026-10-10 08:07:04.747] [info] [video]   30/150 frames
+[2026-10-10 08:07:06.105] [info] [video]   45/150 frames
+[2026-10-10 08:07:07.709] [info] [video]   60/150 frames
+[2026-10-10 08:07:08.961] [info] [video]   75/150 frames
+[2026-10-10 08:07:11.055] [info] [video]   90/150 frames
+[2026-10-10 08:07:12.895] [info] [video]   105/150 frames
+[2026-10-10 08:07:14.445] [info] [video]   120/150 frames
+[2026-10-10 08:07:16.137] [info] [video]   135/150 frames
+[2026-10-10 08:07:17.341] [info] [video]   150/150 frames
+[2026-10-10 08:07:17.469] [info] [video] writer join complete
+[2026-10-10 08:07:17.469] [info] [drain-debug] start drain, capacity=6
+[2026-10-10 08:07:17.469] [info] [drain-debug] reap done, busy_count=0
+[2026-10-10 08:07:17.469] [info] [video] trimming framebuffer pool
+[2026-10-10 08:07:17.475] [info] [video] Released framebuffer pool — memory trimmed
+[2026-10-10 08:07:17.475] [info] [video] frame-loop cleanup complete
+[2026-10-10 08:07:17.475] [info] [video] Encoder write blocked duration: 2579.77 ms
+[2026-10-10 08:07:17.475] [info] [video_diag] conversion_and_copy_duration_ms: 3353 ms
+[2026-10-10 08:07:17.475] [info] [video_diag] conversion_bytes_written=466560000 encoder_staging_copy_bytes=0 encoder_slot_reuses=146
+[libx264 @ 0x56347c70f700] frame I:3     Avg QP:10.16  size:208613
+[libx264 @ 0x56347c70f700] frame P:147   Avg QP:16.67  size: 19491
+[libx264 @ 0x56347c70f700] mb I  I16..4: 40.5% 49.4% 10.1%
+[libx264 @ 0x56347c70f700] mb P  I16..4:  1.1%  0.2%  0.0%  P16..4: 31.5% 10.3%  8.4%  0.0%  0.0%    skip:48.4%
+[libx264 @ 0x56347c70f700] 8x8 transform intra:35.8% inter:30.7%
+[libx264 @ 0x56347c70f700] coded y,uvDC,uvAC intra: 31.3% 37.7% 35.4% inter: 10.6% 9.4% 1.7%
+[libx264 @ 0x56347c70f700] i16 v,h,dc,p: 44% 55%  1%  0%
+[libx264 @ 0x56347c70f700] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu:  9% 13% 29%  7%  8%  5%  8%  7% 14%
+[libx264 @ 0x56347c70f700] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 14% 19% 10%  8% 10%  7% 10%  8% 14%
+[libx264 @ 0x56347c70f700] i8c dc,h,v,p: 51% 39%  7%  3%
+[libx264 @ 0x56347c70f700] Weighted P-Frames: Y:0.0% UV:0.0%
+[libx264 @ 0x56347c70f700] ref P L0: 39.8%  4.6% 20.1% 13.9% 11.7%  9.9%
+[libx264 @ 0x56347c70f700] kb/s:5585.63
+[2026-10-10 08:07:21.074] [info] [video_adapter] Closed sink — 150 frames written, write_blocked=2579.77ms, close=3599.11ms
+[2026-10-10 08:07:21.080] [info] [video] render_ms=15321.85 encode_ms=3638.57 writer_encode_ms=6011.85 wall_ms=20056.76 nvml_stop_ms=5.29
+[2026-10-10 08:07:21.080] [info] [video] FFmpeg queue wait duration: 0.51 ms
+[2026-10-10 08:07:21.138] [info] [video] copy_eligible=true sha256=01039f43c8dfa978dd490393c09b6d2860618834103744a2cf5b6a21b37fed12
+[2026-10-10 08:07:21.139] [info] [video] Wrote ChrononTemplate/catalog/maps/samples/nasa_blue_marble_august_5s.mp4
+[2026-10-10 08:07:21.139] [info] [startup-profile] total=280.91ms logger=0.03ms cli_bootstrap=2.34ms cli_parse=0.00ms composition=0.07ms plan_read=0.10ms json_parse=0.05ms plan_decode_validate=17.69ms asset_resolve=0.01ms plan_compile=4.66ms other=0.00ms
+[2026-10-10 08:07:21.150] [info] [video] Wrote exact per-frame timing sidecar: ChrononTemplate/catalog/maps/samples/nasa_blue_marble_august_5s.mp4.timing.json
+[2026-10-10 08:07:21.154] [info] [INFO] job-lifecycle: slot_pool_close_ms=0.0 surface_release_ms=0.0
+[2026-10-10 08:07:21.170] [info] [INFO] job-lifecycle: queue_close_ms=0.0 writer_join_ms=0.0 encoder_reset_ms=1.9 decoder_reset_ms=0.0 full_graph_reset_ms=16.8 sink_ctx_reset_ms=0.0 device_runtime_reset_ms=0.0 device_reservation_reset_ms=0.0
+[2026-10-10 08:07:21.173] [info] [INFO] job-lifecycle: sidecar_write_ms=12.9 session_teardown_ms=21.3
+[2026-10-10 08:07:21.181] [info] [INFO] job-lifecycle: post_sidecar_to_receipt_ms=28.9
+[2026-10-10 08:07:21.181] [info] [INFO] job-lifecycle: execute_ms=20157.8 receipt_build_ms=0.0 receipt_write_ms=0.0 caller_tail_ms=0.0

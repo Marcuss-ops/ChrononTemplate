@@ -10,6 +10,10 @@ All three assets in `catalog/maps/` are raster crops of the same geographic exte
   Source: https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-1/
 - `nasa_blue_marble_august.jpg` — NASA Blue Marble: Next Generation, August 2004 (Terra/MODIS), cropped from its 21,600 × 10,800 cloud-free global composite. NASA describes source imagery at 500 m resolution and makes it freely available.
   Source: https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/
+- `white_claude_map.png` — **White Claude Map**, a warm monochrome OpenTopoMap plate centered on Lombardy, Italy, used by the `vintage_documentary_map_italy` animated map plan. Map data © OpenStreetMap contributors; map style © OpenTopoMap (CC BY-SA). The plan also includes Cremona provincial boundaries from ISTAT via geoBoundaries (CC BY 3.0), with credits rendered in-video.
+  Source: https://www.openstreetmap.org/copyright and https://opentopomap.org/about
+
+`maps/maps.v1.json` is the machine-readable inventory of these reusable map plates, including White Claude Map.
 
 ## Geographic overlays
 

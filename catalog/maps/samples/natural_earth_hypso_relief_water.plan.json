@@ -1,0 +1,82 @@
+{
+  "schema": "chronon.render-plan.v2",
+  "version": 2,
+  "job_id": "map_sample_natural_earth_hypso_relief_water",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 150
+  },
+  "layers": [
+    {
+      "id": "map",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/maps/samples/natural_earth_hypso_relief_water_plate.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "fit": "contain",
+      "start_frame": 0,
+      "duration_frames": 150,
+      "screen_space": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.02
+              },
+              {
+                "frame": 149,
+                "value": 1.09
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -12
+              },
+              {
+                "frame": 149,
+                "value": 10
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 8
+              },
+              {
+                "frame": 149,
+                "value": -8
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "ChrononTemplate/catalog/maps/samples/natural_earth_hypso_relief_water_5s.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}
