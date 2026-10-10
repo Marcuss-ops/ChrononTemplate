@@ -114,7 +114,10 @@ namespace {
                      TitleCameraMove::RollSettle, TitleCameraMove::RollPass,
                      TitleCameraMove::DollyZoomSubtle, TitleCameraMove::FocusPush,
                      TitleCameraMove::ParallaxSide, TitleCameraMove::ParallaxPush,
-                     TitleCameraMove::WhipSettle, TitleCameraMove::CornerReveal}) {
+                     TitleCameraMove::WhipSettle, TitleCameraMove::CornerReveal,
+                     TitleCameraMove::CrashPush, TitleCameraMove::TopDownSettle,
+                     TitleCameraMove::HandheldMicro, TitleCameraMove::OrbitWide,
+                     TitleCameraMove::FloorRise}) {
             FakeContentHost host;
             TemplateScene scene("title_camera_p0", 30.f, host, kViewportW, kViewportH);
             auto& title = scene.text({.text = "ROME", .font = "Inter-Bold.ttf", .fontSize = 180.f});
@@ -168,7 +171,10 @@ namespace {
                      TitleCameraMove::RollSettle, TitleCameraMove::RollPass,
                      TitleCameraMove::DollyZoomSubtle, TitleCameraMove::FocusPush,
                      TitleCameraMove::ParallaxSide, TitleCameraMove::ParallaxPush,                                                          TitleCameraMove::WhipSettle,
-                                                          TitleCameraMove::CornerReveal}) {
+                                                          TitleCameraMove::CornerReveal,
+                     TitleCameraMove::CrashPush, TitleCameraMove::TopDownSettle,
+                     TitleCameraMove::HandheldMicro, TitleCameraMove::OrbitWide,
+                     TitleCameraMove::FloorRise}) {
             FakeContentHost host;
             chrononmotion::motion::Layer::Id titleId{0};
             const TitleCameraShot shot{.anchor = {.center = Vector3(960.f, 540.f, 0.f)},
@@ -210,7 +216,10 @@ namespace {
                      TitleCameraMove::RollSettle, TitleCameraMove::RollPass,
                      TitleCameraMove::DollyZoomSubtle, TitleCameraMove::FocusPush,
                      TitleCameraMove::ParallaxSide, TitleCameraMove::ParallaxPush,
-                     TitleCameraMove::WhipSettle, TitleCameraMove::CornerReveal}) {
+                     TitleCameraMove::WhipSettle, TitleCameraMove::CornerReveal,
+                     TitleCameraMove::CrashPush, TitleCameraMove::TopDownSettle,
+                     TitleCameraMove::HandheldMicro, TitleCameraMove::OrbitWide,
+                     TitleCameraMove::FloorRise}) {
             FakeContentHost host;
             chrononmotion::motion::Layer::Id titleId{0};
             const TitleCameraShot shot{.anchor = {.center = Vector3(960.f, 540.f, 0.f)},
@@ -240,7 +249,8 @@ namespace {
                                     PushSpec{TitleCameraMove::LowAnglePush, "low_angle_push"},
                                     PushSpec{TitleCameraMove::ArcPush, "arc_push"},
                                     PushSpec{TitleCameraMove::ParallaxPush, "parallax_push"},
-                                    PushSpec{TitleCameraMove::WhipSettle, "whip_settle"}}) {
+                                    PushSpec{TitleCameraMove::WhipSettle, "whip_settle"},
+                                    PushSpec{TitleCameraMove::CrashPush, "crash_push"}}) {
             FakeContentHost host;
             chrononmotion::motion::Layer::Id titleId{0};
             const TitleCameraShot shot{.anchor = {.center = Vector3(960.f, 540.f, 0.f)},
@@ -275,7 +285,8 @@ namespace {
                      TitleCameraMove::LeftDrift, TitleCameraMove::RightDrift,
                      TitleCameraMove::MicroOrbitLeft, TitleCameraMove::MicroOrbitRight,
                      TitleCameraMove::ArcPush, TitleCameraMove::ArcPull,
-                     TitleCameraMove::ParallaxSide, TitleCameraMove::WhipSettle}) {
+                     TitleCameraMove::ParallaxSide, TitleCameraMove::WhipSettle,
+                     TitleCameraMove::OrbitWide}) {
             FakeContentHost host;
             chrononmotion::motion::Layer::Id titleId{0};
             const TitleCameraShot shot{.anchor = {.center = Vector3(960.f, 540.f, 0.f)},
@@ -302,7 +313,8 @@ namespace {
                      TitleCameraMove::MicroOrbitLeft, TitleCameraMove::MicroOrbitRight,
                      TitleCameraMove::ArcPush, TitleCameraMove::ArcPull,
                      TitleCameraMove::RollSettle, TitleCameraMove::RollPass,
-                     TitleCameraMove::WhipSettle, TitleCameraMove::CornerReveal}) {
+                     TitleCameraMove::WhipSettle, TitleCameraMove::CornerReveal,
+                     TitleCameraMove::HandheldMicro, TitleCameraMove::OrbitWide}) {
             FakeContentHost host;
             chrononmotion::motion::Layer::Id titleId{0};
             const TitleCameraShot shot{.anchor = {.center = Vector3(960.f, 540.f, 0.f)},
@@ -331,7 +343,10 @@ namespace {
                      TitleCameraMove::RollSettle, TitleCameraMove::RollPass,
                      TitleCameraMove::DollyZoomSubtle, TitleCameraMove::FocusPush,
                      TitleCameraMove::ParallaxSide, TitleCameraMove::ParallaxPush,
-                     TitleCameraMove::CornerReveal}) {
+                     TitleCameraMove::CornerReveal,
+                     TitleCameraMove::CrashPush, TitleCameraMove::TopDownSettle,
+                     TitleCameraMove::HandheldMicro, TitleCameraMove::OrbitWide,
+                     TitleCameraMove::FloorRise}) {
             FakeContentHost host;
             chrononmotion::motion::Layer::Id titleId{0};
             const TitleCameraShot shot{.anchor = {.center = Vector3(960.f, 540.f, 0.f)},
@@ -407,7 +422,10 @@ namespace {
                      TitleCameraMove::LowAnglePush, TitleCameraMove::HighAngleSettle,
                      TitleCameraMove::RollSettle, TitleCameraMove::RollPass,
                      TitleCameraMove::FocusPush, TitleCameraMove::ParallaxSide,
-                     TitleCameraMove::ParallaxPush, TitleCameraMove::CornerReveal}) {
+                     TitleCameraMove::ParallaxPush, TitleCameraMove::CornerReveal,
+                     TitleCameraMove::CrashPush, TitleCameraMove::TopDownSettle,
+                     TitleCameraMove::HandheldMicro, TitleCameraMove::OrbitWide,
+                     TitleCameraMove::FloorRise}) {
             FakeContentHost host;
             chrononmotion::motion::Layer::Id titleId{0};
             const TitleCameraShot shot{.anchor = {.center = Vector3(960.f, 540.f, 0.f)},
@@ -433,9 +451,9 @@ namespace {
         section("contract: stable ids, pure plan, lens channels");
 
         const std::vector<std::string> ids = titleCameraMoveIds();
-        check(ids.size() == 20, "exactly twenty title_camera_* presets exist");
+        check(ids.size() == 25, "twenty-five title_camera_* presets exist (20 v1 + 5 v2)");
         check(ids.front() == "title_camera_slow_push", "the canonical order starts at slow_push");
-        check(ids.back() == "title_camera_corner_reveal", "the canonical order ends at corner_reveal");
+        check(ids.back() == "title_camera_floor_rise", "the canonical order ends at floor_rise");
         bool unique = true;
         for (std::size_t i = 0; i < ids.size(); ++i) {
             for (std::size_t j = i + 1; j < ids.size(); ++j) {
