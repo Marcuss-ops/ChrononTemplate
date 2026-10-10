@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import subprocess
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -64,6 +65,79 @@ def date_frame(t,i):
         ld.text((960,475),"6 ottobre 1973",font=font(102,DIDONE),fill=(255,249,238,255),anchor="mm")
         im.paste(layer,(0,0),layer)
     # Gentle, continuous camera drift across the five seconds.
+    return im
+
+DATE_STYLES=["fade_rise","year_count","calendar_flip","segment_stagger","timeline_tick",
+             "range_draw","marker_drop","underline_focus","history_stack","chronology_focus"]
+def date_style_frame(style,t,i):
+    im=base((14,16,17)); d=ImageDraw.Draw(im)
+    cream=(248,246,237); muted=(154,157,151)
+    # Editorial date pack examples all use the same event data and visibly different motion.
+    a=ease((t-.14)/.36); p=pop((t-.12)/.42)
+    if style=="fade_rise":
+        y=530+int((1-a)*105); d.rectangle((388,y+85,1532,y+89),fill=CORAL)
+        text_center(d,(960,y),"6 ottobre 1973",font(94,DIDONE),cream)
+        d.text((960,y+112),"GUERRA DEL KIPPUR",font=font(25,REG),fill=muted,anchor="mm")
+    elif style=="year_count":
+        year=1948+int(25*ease(t/.74)); text_center(d,(960,465),str(year),font(176),cream)
+        w=int(740*a); d.rounded_rectangle((960-w//2,585,960+w//2,594),radius=5,fill=CORAL)
+        if t>.62: text_center(d,(960,678),"6 OTTOBRE",font(34,REG),muted)
+    elif style=="calendar_flip":
+        # A page hinges into a settled card; the stable endpoint reads as a calendar.
+        angle=math.cos(math.pi*p); card_w=max(64,int(650*abs(angle)))
+        cx,cy=960,525
+        d.rounded_rectangle((cx-card_w//2,cy-255,cx+card_w//2,cy+255),radius=24,fill=cream)
+        if abs(angle)>.32:
+            d.rounded_rectangle((cx-card_w//2,cy-255,cx+card_w//2,cy-132),radius=24,fill=CORAL)
+            d.rectangle((cx-card_w//2,cy-157,cx+card_w//2,cy-132),fill=CORAL)
+        if p>.42:
+            text_center(d,(cx,cy-174),"OTTOBRE",font(31),cream)
+            text_center(d,(cx,cy+16),"6",font(158),INK)
+            text_center(d,(cx,cy+154),"1973",font(39),INK)
+    elif style=="segment_stagger":
+        for j,(s,x,y,f) in enumerate([("6",665,480,font(146,DIDONE)),("OTTOBRE",960,490,font(52)),("1973",1280,480,font(146,DIDONE))]):
+            q=pop((t-(.12+j*.13))/.34); xx=int(x+(1-q)*(-150 if j%2==0 else 150))
+            text_center(d,(xx,y),s,f,cream)
+        d.rectangle((670,603,670+int(580*a),609),fill=CORAL)
+    elif style in ("timeline_tick","chronology_focus"):
+        x0,x1=230,1690; yy=615; years=list(range(1950,2001,5)); x1973=x0+(1973-1950)/(2000-1950)*(x1-x0)
+        d.line((x0,yy,x0+int((x1-x0)*a),yy),fill=(95,98,95),width=4)
+        for year in years:
+            x=x0+(year-1950)/(2000-1950)*(x1-x0); active=year==1970 or year==1975
+            hh=26 if active else 13
+            d.line((int(x),yy-hh,int(x),yy+hh),fill=CORAL if active else muted,width=4)
+            d.text((x,yy+50),str(year),font=font(19,REG),fill=muted,anchor="mm")
+        q=ease((t-.38)/.27); r=int(17+10*q)
+        d.ellipse((x1973-r,yy-r,x1973+r,yy+r),fill=CORAL)
+        text_center(d,(x1973,405-int(35*q)),"6 OTTOBRE 1973",font(43),cream)
+        if style=="chronology_focus":
+            d.rounded_rectangle((x1973-260,721,x1973+260,787),radius=14,fill=(36,39,39))
+            text_center(d,(x1973,754),"GUERRA DEL KIPPUR",font(22,REG),cream)
+    elif style=="range_draw":
+        d.text((310,340),"1973",font=font(39),fill=cream); d.text((1440,340),"1974",font=font(39),fill=cream)
+        d.line((320,550,1600,550),fill=(64,68,68),width=8)
+        q=ease((t-.15)/.60); d.line((320,550,320+int(1280*q),550),fill=CORAL,width=10)
+        for x in (320,1600): d.ellipse((x-14,536,x+14,564),fill=cream)
+        text_center(d,(320+int(1280*min(q,.61)),455),"6 OTTOBRE",font(33),cream)
+        if t>.60: text_center(d,(960,700),"1973",font(96,DIDONE),cream)
+    elif style=="marker_drop":
+        yy=680; d.line((330,yy,1590,yy),fill=(91,94,92),width=4)
+        x=960; fall=ease((t-.10)/.52); y=int(210+470*fall)
+        d.line((x,yy-145,x,y),fill=CORAL,width=5)
+        r=int(10+23*ease((t-.48)/.22)); d.ellipse((x-r,yy-r,x+r,yy+r),fill=CORAL)
+        text_center(d,(x,yy-225),"6 ottobre 1973",font(76,DIDONE),cream)
+    elif style=="underline_focus":
+        text_center(d,(960,520),"6 ottobre 1973",font(105,DIDONE),cream)
+        q=ease((t-.26)/.46); d.rounded_rectangle((470,622,470+int(980*q),630),radius=4,fill=CORAL)
+        if t>.54: text_center(d,(960,700),"IL GIORNO IN CUI INIZIÒ LA GUERRA",font(25,REG),muted)
+    elif style=="history_stack":
+        entries=[("1948","Nascita di Israele"),("1956","Crisi di Suez"),("1967","Guerra dei Sei Giorni"),("1973","Guerra del Kippur")]
+        for j,(year,label) in enumerate(entries):
+            q=ease((t-(.05+j*.13))/.28); x=int(530+(1-q)*115); y=284+j*155
+            active=j==3; col=CORAL if active else (67,70,69)
+            d.text((x,y),year,font=font(47,DIDONE),fill=col)
+            d.text((x+190,y+10),label,font=font(28,REG),fill=cream if active else muted)
+            if active: d.rounded_rectangle((470,y-18,1450,y+75),radius=14,outline=CORAL,width=3)
     return im
 
 def map_frame(t,i):
@@ -211,6 +285,12 @@ def image_frame(t,i):
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
+    if len(sys.argv)>1 and sys.argv[1]=="--dates-only":
+        for ix,style in enumerate(DATE_STYLES,1):
+            name="date_"+style
+            print(f"[{ix}/{len(DATE_STYLES)}] Date motion: {name}",flush=True)
+            encode(name,lambda t,i,s=style:date_style_frame(s,t,i))
+        return
     plans=[("date_oil_crisis_stamp",date_frame),("map_middle_east_oil_focus",map_frame),
       ("phrase_yellow_highlighter_sweep",phrase_frame)]
     data_names=["data_histogram_stagger_up","data_histogram_wave","data_histogram_center_out","data_bar_compare_reveal","data_line_trace","data_peak_callout","data_counter_roll","data_grid_assemble","data_area_fill_rise","data_chart_focus_pulse"]
