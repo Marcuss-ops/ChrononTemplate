@@ -29,7 +29,8 @@ namespace chronontemplate {
         CenterDash,
         TripleEditorialRule,
         SplitMarker,
-        SlowReveal
+        SlowReveal,
+        YellowHighlighterSweep
     };
 
     [[nodiscard]] const char* name(PhraseHighlightAnimation animation);

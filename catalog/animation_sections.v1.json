@@ -1,0 +1,23 @@
+{
+  "schema": "chronontemplate.animation-sections.v1",
+  "version": 1,
+  "sections": [
+    {
+      "id": "histograms_data_v1",
+      "name": "Istogrammi & Data",
+      "description": "Grafici, istogrammi, confronti e animazioni dei dati.",
+      "motion_ids": [
+        "data_histogram_stagger_up",
+        "data_histogram_wave",
+        "data_histogram_center_out",
+        "data_bar_compare_reveal",
+        "data_line_trace",
+        "data_peak_callout",
+        "data_counter_roll",
+        "data_grid_assemble",
+        "data_area_fill_rise",
+        "data_chart_focus_pulse"
+      ]
+    }
+  ]
+}
