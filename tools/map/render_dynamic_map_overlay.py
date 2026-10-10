@@ -17,6 +17,13 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
+# The production worker's /usr/bin/python3 also sees a newer NumPy installed
+# under /usr/local, while its distro OpenCV extension was built against NumPy
+# 1.x. Prefer the distro package directory so cv2 and NumPy load as a matched
+# pair; the rest of the interpreter's site-packages remain available afterward.
+SYSTEM_DIST_PACKAGES = Path("/usr/lib/python3/dist-packages")
+if SYSTEM_DIST_PACKAGES.is_dir():
+    sys.path.insert(0, str(SYSTEM_DIST_PACKAGES))
 sys.path.insert(0, str(ROOT / "Chronon3d/tools/cartography"))
 sys.path.insert(0, str(HERE))
 
@@ -246,7 +253,12 @@ def main() -> int:
     cv2.ocl.setUseOpenCL(True)
     if not cv2.ocl.useOpenCL():
         raise RuntimeError("OpenCL GPU map renderer failed to initialize")
-    device = cv2.ocl.Device.getDefault()
+    # The distro OpenCV 4.5 API exposes Device_getDefault directly, while
+    # newer builds expose Device.getDefault.
+    if hasattr(cv2.ocl, "Device"):
+        device = cv2.ocl.Device.getDefault()
+    else:
+        device = cv2.ocl.Device_getDefault()
     if "NVIDIA" not in device.vendorName().upper():
         raise RuntimeError(f"GPU map renderer selected unexpected device: {device.name()}")
     print(f"[dynamic-map] GPU frame renderer: OpenCL / {device.name()}", flush=True)

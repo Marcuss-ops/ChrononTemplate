@@ -919,7 +919,7 @@ applyTitleCameraShot(scene, TitleCameraMove::LowAnglePush,
                                      .inFrame = 0, .duration = 135});
 ```
 
-The twenty ids, in canonical order (`titleCameraMoveIds()`, stable and
+The twenty-five ids, in canonical order (`titleCameraMoveIds()`, stable and
 append-only): `title_camera_slow_push`, `title_camera_slow_pull_out`,
 `title_camera_left_drift`, `title_camera_right_drift`,
 `title_camera_vertical_rise`, `title_camera_vertical_descend`,
@@ -929,7 +929,10 @@ append-only): `title_camera_slow_push`, `title_camera_slow_pull_out`,
 `title_camera_roll_pass`, `title_camera_dolly_zoom_subtle`,
 `title_camera_focus_push`, `title_camera_parallax_side`,
 `title_camera_parallax_push`, `title_camera_whip_settle`,
-`title_camera_corner_reveal`.
+`title_camera_corner_reveal`, plus the five v2 additions
+`title_camera_crash_push`, `title_camera_top_down_settle`,
+`title_camera_handheld_micro`, `title_camera_orbit_wide`,
+`title_camera_floor_rise`.
 
 They are recipes, not implementations: `arc_push` is dolly + pan + target lock,
 `dolly_zoom_subtle` is dolly + FOV compensation (the exact tan ratio, so the
@@ -945,7 +948,7 @@ fast but continuous.
 
 The acceptance suite (`tests/title_camera_pack.cpp`, one scene per preset on a
 fixed anchor — the `title_camera_documentary_gallery_v1` grammar, where only
-the camera differs between shots) pins eight gates across all twenty presets:
+the camera differs between shots) pins eight gates across all presets:
 
 1. **P0** — the title never animates: empty layer tracks, and
    `titleTransform(frame0) == titleTransform(frameEnd)`;
@@ -965,6 +968,24 @@ adjacent frame windows on the same scene. A canary gallery
 (`title_camera_documentary_gallery_v1`: 1920×1080, 30 fps, one title, one
 background, twenty clips — one per camera) renders through the regular scene
 submission path; the C++ contract above is the gate, the render is the exhibit.
+
+The v2 refresh (`tools/camera_roll/emit_title_camera_v2.cpp`, 100% C++ — the
+legacy `render_title_camera_documentary_v1.py` is superseded) lowers every
+preset to a `chronon.render-plan.v3` plan with the modern short-phrase look:
+`assets/fonts/Bricolage-Grotesque.ttf` title face, warm-white `#F2F0E8` fill
+with a matching glow (radius 24, intensity 0.55) and a deep-ink background.
+`--v1-only` emits just the original twenty (for the Drive refresh); the
+default emits all twenty-five × two titles. Upload goes through RenderingGen's
+content-addressed `drive-upload`:
+`tools/camera_roll/upload_title_camera_v2_drive.sh`.
+
+The bake contract behind every plan: Motion tracks are sampled at integer
+frames into dense `linear` keys (the camera bake is the only passage from rig
+to renderer, mirrored Z, `chrononCameraEuler` rotation). The guarantees are
+pinned in ChrononMotion3D (`motion_renderplan_easing_parity` over all 11
+easings, `motion_projection_parity` Motion-vs-renderer < 0.02 px,
+`motion_camera_bake_roundtrip`), so a plan that validates renders the authored
+move rather than a re-spelling of it.
 
 ### Documentary title-to-snapshot family — `documentary_title_snapshot_v1`
 

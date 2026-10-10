@@ -54,7 +54,7 @@ namespace chronontemplate {
         Cinematic
     };
 
-    /// The twenty title-camera presets. The values are stable ids: they reach
+    /// The title-camera presets. The values are stable ids: they reach
     /// the contract test and the catalog verbatim, so they are append-only.
     enum class TitleCameraMove : std::uint8_t {
         SlowPush,            ///< title_camera_slow_push
@@ -76,7 +76,12 @@ namespace chronontemplate {
         ParallaxSide,        ///< title_camera_parallax_side
         ParallaxPush,        ///< title_camera_parallax_push
         WhipSettle,          ///< title_camera_whip_settle
-        CornerReveal         ///< title_camera_corner_reveal
+        CornerReveal,        ///< title_camera_corner_reveal
+        CrashPush,           ///< title_camera_crash_push (v2: fast editorial push)
+        TopDownSettle,       ///< title_camera_top_down_settle (v2: from above)
+        HandheldMicro,       ///< title_camera_handheld_micro (v2: micro drift + roll)
+        OrbitWide,           ///< title_camera_orbit_wide (v2: wide orbit)
+        FloorRise            ///< title_camera_floor_rise (v2: low rise + push)
     };
 
     /// Authoring description of one title shot: what is framed, how tight, how

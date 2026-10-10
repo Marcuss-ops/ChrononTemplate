@@ -157,9 +157,28 @@ target_link_libraries(chronontemplate_dump_title_camera_poses PRIVATE chronontem
 add_executable(chronontemplate_dump_scene_camera_poses tools/camera_roll/dump_scene_camera_poses.cpp)
 target_link_libraries(chronontemplate_dump_scene_camera_poses PRIVATE chronontemplate)
 
+add_executable(chronontemplate_emit_title_camera_v2 tools/camera_roll/emit_title_camera_v2.cpp)
+target_link_libraries(chronontemplate_emit_title_camera_v2 PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_title_camera_v2 PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_title_camera_v2 PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_sequence_from_json tools/camera_roll/sequence_from_json.cpp)
 target_link_libraries(chronontemplate_sequence_from_json PRIVATE chronontemplate)
 target_include_directories(chronontemplate_sequence_from_json PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+
+add_executable(chronontemplate_emit_camera_1950_story tools/camera_roll/emit_camera_1950_story.cpp)
+target_link_libraries(chronontemplate_emit_camera_1950_story PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_camera_1950_story PRIVATE
+    "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/vcpkg_installed/linux-video-fast-dev/x64-linux/include")
+
+# Native C++ examples for the vector-map, date-marker, and fading-image samples.
+add_executable(chronontemplate_emit_oil_crisis_reference_plans
+        tools/showcases/emit_oil_crisis_reference_plans.cpp)
+target_include_directories(chronontemplate_emit_oil_crisis_reference_plans PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_oil_crisis_reference_plans PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_oil_crisis_reference_plans PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_entity_filmstrip_reference
         tools/entities_with_text/emit_entity_filmstrip_reference.cpp)

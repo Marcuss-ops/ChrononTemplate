@@ -98,7 +98,6 @@ namespace chronontemplate {
         const std::vector<LayoutCell> cells = layoutCells(spec.tiles.size(), canvas.x, canvas.y,
                                                           spec.margin, spec.gap,
                                                           spec.direction, spec.columns);
-        const float fps = scene.fps();
         const int count = static_cast<int>(cells.size());
         const int stagger = std::max(1, spec.duration / (count + 1));
         const int endFrame = spec.inFrame + spec.duration + spec.holdFrames;

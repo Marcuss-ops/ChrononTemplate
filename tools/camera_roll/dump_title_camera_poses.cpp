@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace chronontemplate;
 using namespace chrononmotion;
@@ -38,13 +39,15 @@ Vector3 euler(const Quaternion& q) {
 int main() {
     constexpr int duration=135, fps=30;
     Host host;
-    for (int m=0; m<20; ++m) {
-        const auto move=static_cast<TitleCameraMove>(m);
+    const std::vector<std::string> ids = titleCameraMoveIds();
+    for (std::size_t m = 0; m < ids.size(); ++m) {
+        const auto move = static_cast<TitleCameraMove>(m);
+        const std::string& id = ids[m];
         TemplateScene scene("title_camera_render", static_cast<float>(fps), host, 1920.f,1080.f);
         auto& title=scene.text({.text="THE ART OF SIMPLICITY",.font="Inter-Bold.ttf",.fontSize=180.f});
         title.position(960.f,540.f);
         applyTitleCameraShot(scene,move,TitleCameraShot{.anchor={.center=Vector3(960.f,540.f,0.f),.halfWidth=900.f,.halfHeight=120.f},.framing=TitleFraming::Medium,.intensity=TitleCameraIntensity::Editorial,.inFrame=0,.duration=duration});
-        std::cout << titleCameraMoveId(move) << '\n';
+        std::cout << id << '\n';
         for (int f=0; f<=duration; ++f) {
             const auto p=scene.camera().rig().sample(static_cast<float>(f)/fps);
             const Vector3 r=euler(p.orientation);

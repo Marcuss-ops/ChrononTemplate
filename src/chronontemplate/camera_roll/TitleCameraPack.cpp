@@ -171,6 +171,34 @@ namespace chronontemplate {
                     plan.panX = 300.f * loudness;
                     plan.dolly = plan.distance * 0.16f * loudness;
                     break;
+                case TitleCameraMove::CrashPush:
+                    // v2: fast editorial push, twice the dolly rate of slow_push.
+                    plan.dolly = plan.distance * 0.44f * loudness;
+                    break;
+                case TitleCameraMove::TopDownSettle:
+                    // v2: from above the title down to the frontal rest pose.
+                    plan.heightOffset = 230.f * loudness;
+                    plan.heightEnd = 0.f;
+                    plan.dolly = plan.distance * 0.06f * loudness;
+                    break;
+                case TitleCameraMove::HandheldMicro:
+                    // v2: handheld micro drift + tiny roll settle.
+                    plan.panX = 64.f * loudness;
+                    plan.rollStart = degToRad(0.9f) * loudness;
+                    plan.rollEnd = 0.f;
+                    plan.dolly = plan.distance * 0.04f * loudness;
+                    break;
+                case TitleCameraMove::OrbitWide:
+                    // v2: wide orbit, double the micro-orbit swing.
+                    plan.yawStart = degToRad(15.f) * loudness;
+                    plan.yawEnd = degToRad(-7.f) * loudness;
+                    break;
+                case TitleCameraMove::FloorRise:
+                    // v2: low rise with a gentle push, monumental settle.
+                    plan.heightOffset = -165.f * loudness;
+                    plan.heightEnd = 0.f;
+                    plan.dolly = plan.distance * 0.18f * loudness;
+                    break;
             }
             return plan;
         }
@@ -211,13 +239,18 @@ namespace chronontemplate {
             case TitleCameraMove::ParallaxPush:    return "title_camera_parallax_push";
             case TitleCameraMove::WhipSettle:      return "title_camera_whip_settle";
             case TitleCameraMove::CornerReveal:    return "title_camera_corner_reveal";
+            case TitleCameraMove::CrashPush:       return "title_camera_crash_push";
+            case TitleCameraMove::TopDownSettle:  return "title_camera_top_down_settle";
+            case TitleCameraMove::HandheldMicro:  return "title_camera_handheld_micro";
+            case TitleCameraMove::OrbitWide:       return "title_camera_orbit_wide";
+            case TitleCameraMove::FloorRise:       return "title_camera_floor_rise";
         }
         return "title_camera_unknown";
     }
 
     std::vector<std::string> titleCameraMoveIds() {
         std::vector<std::string> ids;
-        ids.reserve(20);
+        ids.reserve(25);
         for (const TitleCameraMove move : {
                      TitleCameraMove::SlowPush, TitleCameraMove::SlowPullOut,
                      TitleCameraMove::LeftDrift, TitleCameraMove::RightDrift,
@@ -228,7 +261,10 @@ namespace chronontemplate {
                      TitleCameraMove::RollSettle, TitleCameraMove::RollPass,
                      TitleCameraMove::DollyZoomSubtle, TitleCameraMove::FocusPush,
                      TitleCameraMove::ParallaxSide, TitleCameraMove::ParallaxPush,
-                     TitleCameraMove::WhipSettle, TitleCameraMove::CornerReveal}) {
+                     TitleCameraMove::WhipSettle, TitleCameraMove::CornerReveal,
+                     TitleCameraMove::CrashPush, TitleCameraMove::TopDownSettle,
+                     TitleCameraMove::HandheldMicro, TitleCameraMove::OrbitWide,
+                     TitleCameraMove::FloorRise}) {
             ids.emplace_back(titleCameraMoveId(move));
         }
         return ids;
