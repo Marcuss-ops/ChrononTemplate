@@ -140,6 +140,114 @@ def date_style_frame(style,t,i):
             if active: d.rounded_rectangle((470,y-18,1450,y+75),radius=14,outline=CORAL,width=3)
     return im
 
+def reference_phrase_frame(t,i):
+    im=base(); d=ImageDraw.Draw(im); f=font(68)
+    # Three-line editorial composition from the supplied employment phrase reference.
+    y=[300,394,488]
+    a="Nell’ultimo anno,"; b="la Germania ha perso"
+    w1=d.textlength(a+" ",font=f); w2=d.textlength(b,font=f); x=(W-w1-w2)/2
+    d.text((x,y[0]),a,font=f,fill=INK)
+    q=ease((t-.13)/.32); d.rectangle((x+w1-5,y[0]+8,x+w1-5+int((w2+12)*q),y[0]+82),fill=YELLOW)
+    d.text((x+w1,y[0]),b,font=f,fill=INK)
+    a2="144mila posti di lavoro"; b2="nel settore"; full=d.textlength(a2+" "+b2,font=f); x2=(W-full)/2; y2=y[1]; wa=d.textlength(a2,font=f)
+    q2=ease((t-.38)/.32); d.rectangle((x2-6,y2+8,x2-6+int((wa+14)*q2),y2+82),fill=YELLOW)
+    d.text((x2,y2),a2,font=f,fill=INK); d.text((x2+wa+13,y2),b2,font=f,fill=INK)
+    d.text((W/2,y[2]),"industriale.",font=f,fill=INK,anchor="ma")
+    # Fine ruled-paper details and a quiet camera drift keep it close to the reference frame.
+    d.line((0,615,W,615),fill=(231,231,227),width=2)
+    return im
+
+def reference_map_frame(t,i):
+    im=Image.open(ASSETS/"middle_east_oil_regions.png").convert("RGB")
+    # Slow push toward the eastern Sinai and a geographic hatch reveal.
+    zoom=1.0+.13*ease(t); cw=int(W/zoom); ch=int(H/zoom); cx=973; cy=520
+    im=im.crop((cx-cw//2,cy-ch//2,cx+cw//2,cy+ch//2)).resize((W,H),Image.Resampling.LANCZOS)
+    d=ImageDraw.Draw(im)
+    # Animate the two map chevrons from the supplied reference as directional markers.
+    q=ease((t-.28)/.34)
+    for x,y,sgn in [(500,510,1),(1195,458,-1)]:
+        shift=int((1-q)*35)
+        d.line((x+shift,y-18,x+shift+sgn*20,y),fill=(255,255,255),width=7)
+        d.line((x+shift+sgn*20,y,x+shift,y+18),fill=(255,255,255),width=7)
+    labels=[("EGITTO",450,780,.18),("ISRAELE",1190,310,.44),("Gaza",1110,433,.58),("DESERTO DEL SINAI",1195,660,.72)]
+    for label,x,y,at in labels:
+        a=ease((t-at)/.18)
+        if a>0:
+            w=d.textlength(label,font=font(24 if label!="EGITTO" else 54))
+            f=font(24 if label!="EGITTO" else 54)
+            d.rounded_rectangle((x-12,y-8,x+w+18,y+43),radius=10,fill=(250,249,244))
+            d.text((x,y),label,font=f,fill=INK)
+    # Trace the Sinai boundary with a moving coral point; no flashing opacity changes.
+    route=[(1004,500),(1033,543),(1062,587),(1081,630),(1095,671)]
+    n=min(len(route),max(1,int(ease((t-.2)/.5)*(len(route)-1))+1))
+    if t>.2:
+        d.line(route[:n],fill=CORAL,width=6,joint="curve")
+        x,y=route[n-1]; d.ellipse((x-9,y-9,x+9,y+9),fill=CORAL,outline="white",width=3)
+    return im
+
+def reference_date_frame(t,i):
+    im=base((15,17,18)); d=ImageDraw.Draw(im)
+    import random
+    rng=random.Random(i//6)
+    for _ in range(110):
+        x=rng.randrange(W); y=rng.randrange(H); r=rng.choice([1,1,2])
+        d.ellipse((x-r,y-r,x+r,y+r),fill=(35,36,35))
+    # A distinct type-on-tape treatment: guide line draws first, then a clean title plate.
+    q=ease((t-.10)/.42); d.rectangle((0,695,int(785*q),699),fill=CORAL)
+    r=ease((t-.30)/.36); left,right=675,1245; width=int((right-left)*r)
+    d.rectangle((left,410,left+width,500),fill=CORAL)
+    title="6 ottobre 1973"; f=font(80,DIDONE)
+    if r>.02:
+        # Sequentially reveal the title as the tape advances.
+        count=int(len(title)*ease((t-.39)/.38)); visible=title[:count]
+        tw=d.textlength(visible,font=f); d.text((960-tw/2,414),visible,font=f,fill=(255,249,238))
+    tick=ease((t-.62)/.24); d.rectangle((left+width,500,left+width+int(230*tick),504),fill=CORAL)
+    return im
+
+def reference_chart_frame(t,i):
+    im=base((249,248,244)); d=ImageDraw.Draw(im)
+    d.rounded_rectangle((104,62,250,100),radius=5,fill=CORAL)
+    d.text((116,68),"OCCUPAZIONE",font=font(17),fill="white")
+    d.text((102,118),"Auto tedesca: mai così pochi occupati",font=font(45),fill=INK)
+    d.text((105,176),"Addetti nell’industria automobilistica in Germania, migliaia",font=font(23,REG),fill=(98,100,97))
+    # Accurate editorial layout and a chronological line reveal of the reference data.
+    x0,x1,y0,y1=150,1612,835,330; lo,hi=650,860
+    for val in (650,700,750,800,850):
+        yy=y0-(val-lo)/(hi-lo)*(y0-y1); d.line((x0,yy,x1,yy),fill=(224,224,219),width=2)
+        d.text((110,yy),str(val),font=font(18,REG),fill=(105,106,102),anchor="rm")
+    years=[2006,2007,2008,2010,2012,2014,2016,2018,2019,2020,2021,2022,2023,2024,2025,2026]
+    vals =[730,725,750,700,735,765,795,820,834,815,785,775,780,772,732,691.5]
+    pts=[]
+    for yr,val in zip(years,vals):
+        x=x0+(yr-2006)/(2026-2006)*(x1-x0); y=y0-(val-lo)/(hi-lo)*(y0-y1); pts.append((int(x),int(y)))
+    progress=ease((t-.12)/.62); hist=pts[:-1]; upto=min(len(hist)-1,max(2,int(2+progress*(len(hist)-2))))
+    # Pink filled area follows the animated historical line.
+    fill_layer=Image.new("RGBA",(W,H),(0,0,0,0)); fd=ImageDraw.Draw(fill_layer)
+    fd.polygon([(hist[0][0],y0),*hist[:upto+1],(hist[upto][0],y0)],fill=(239,74,99,35))
+    im=Image.alpha_composite(im.convert("RGBA"),fill_layer).convert("RGB"); d=ImageDraw.Draw(im)
+    d.line(hist[:upto+1],fill=CORAL,width=7,joint="curve")
+    for x,y in hist[:upto+1]: d.ellipse((x-5,y-5,x+5,y+5),fill=CORAL)
+    # Forecast leg uses a dotted line and hollow endpoint, drawn only after the last historical point.
+    if progress>.72:
+        q=ease((progress-.72)/.28); a,b=pts[-2],pts[-1]
+        for k in range(10):
+            u=(k+.2)/10; v=min(1,u/q) if q else 0
+            x=int(a[0]+(b[0]-a[0])*v); y=int(a[1]+(b[1]-a[1])*v)
+            d.ellipse((x-3,y-3,x+3,y+3),fill=CORAL)
+        d.ellipse((b[0]-9,b[1]-9,b[0]+9,b[1]+9),fill=(249,248,244),outline=CORAL,width=4)
+    for yr in range(2006,2026,2):
+        x=x0+(yr-2006)/(2026-2006)*(x1-x0); d.text((x,866),str(yr),font=font(16,REG),fill=(104,105,101),anchor="mm")
+    # Main metric and milestone callouts resolve in as the line reaches the endpoint.
+    p=ease((t-.58)/.2)
+    d.rounded_rectangle((103,238,360,327),radius=4,fill=INK)
+    d.text((123,241),"−144.000",font=font(39,DIDONE),fill="white")
+    d.text((123,287),"posti persi in un anno",font=font(17,REG),fill="white")
+    d.text((x0+int((x1-x0)*.62),304),"Picco 2018: 834.000",font=font(22),fill=INK)
+    d.rounded_rectangle((1430,445,1778,548),radius=2,fill=CORAL)
+    d.text((1604,461),f"{int(691500*p):,}".replace(",","."),font=font(52,DIDONE),fill="white",anchor="mt")
+    d.text((1605,818),"Fonte: Destatis · stima 2026",font=font(14,REG),fill=(120,120,115),anchor="mm")
+    return im
+
 def map_frame(t,i):
     bg=Image.open(ASSETS/"middle_east_oil_regions.png").convert("RGB")
     # Cropping and rescaling creates a steady camera move over the actual geographic artwork.
@@ -285,6 +393,12 @@ def image_frame(t,i):
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
+    if len(sys.argv)>1 and sys.argv[1]=="--references-only":
+        refs=[("ref_phrase_german_jobs",reference_phrase_frame),("ref_chart_german_employment",reference_chart_frame),
+              ("ref_map_sinai",reference_map_frame),("ref_date_october_1973",reference_date_frame)]
+        for ix,(name,fn) in enumerate(refs,1):
+            print(f"[{ix}/{len(refs)}] Reference recreation: {name}",flush=True); encode(name,fn)
+        return
     if len(sys.argv)>1 and sys.argv[1]=="--dates-only":
         for ix,style in enumerate(DATE_STYLES,1):
             name="date_"+style
