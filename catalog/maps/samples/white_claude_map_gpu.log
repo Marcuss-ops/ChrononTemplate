@@ -1,0 +1,88 @@
+[2026-10-10 08:10:03.368] [info] [asset-profile] kind=0 path=ChrononTemplate/catalog/maps/samples/white_claude_map_plate.jpg bytes=1287335 cache=miss invalidated=0 stat=0.01ms hash=11.28ms hashed_bytes=1287335 total=11.36ms
+[2026-10-10 08:10:03.369] [info] [asset-digest-cache] hits=0 misses=1 invalidations=0 bytes_hashed=1287335 lookup_ms=0.00 write_ms=0.00 full_hash_ms=11.28
+[2026-10-10 08:10:03.369] [info] [plan-profile] read=0.07ms parse=0.04ms decode=5.75ms resolver=0.01ms compile_validate=11.65ms total=17.54ms
+[2026-10-10 08:10:03.369] [info] [asset-profile] kind=0 path=ChrononTemplate/catalog/maps/samples/white_claude_map_plate.jpg bytes=1287335 cache=hit invalidated=0 stat=0.01ms hash=0.00ms hashed_bytes=0 total=0.06ms
+[2026-10-10 08:10:03.369] [info] [asset-digest-cache] hits=1 misses=0 invalidations=0 bytes_hashed=0 lookup_ms=0.00 write_ms=0.00 full_hash_ms=0.00
+[2026-10-10 08:10:03.369] [info] [plan-compile-profile] assets=0.13ms fingerprint=0.03ms media_resolution=0.00ms materialize=0.00ms composition_compile=0.00ms compatibility_view=0.01ms total=0.28ms
+[2026-10-10 08:10:03.369] [info] [video] Auto-selecting yuv420p pipe pixel format for 1920x1080 output
+[2026-10-10 08:10:03.369] [info] [video] DirectYUV composition classification rejected the candidate: no video background for DirectYUV
+[2026-10-10 08:10:03.369] [info] [video] execution plan resolved (reason: direct_yuv_capability_rejected); decode=1 composite=2 encode=1 interop=2 handoff=1 codec=3
+[2026-10-10 08:10:03.390] [info] [video-runtime] created persistent runtime for device 0 (CUDA ordinal 0)
+[2026-10-10 08:10:03.390] [info] [video] encoder feed capability: host_frame=false direct_yuv=false native_surface=true
+[2026-10-10 08:10:03.627] [info] [native_av] CUDA context contract: native=0x55e858956a50 ffmpeg=0x55e858956a50
+[2026-10-10 08:10:03.639] [info] [native_av] NVENC tuning applied: rc=driver-default preset=slow async_depth=4 nvenc_surfaces=8 qp=-1 bitrate=0
+[h264_nvenc @ 0x55e85887ecc0] Defined rc_lookahead requires more surfaces, increasing used surfaces 8 -> 34
+[2026-10-10 08:10:03.706] [info] [native_av] encoder bitstream contract: codec=27 profile=100 level=-99 pix_fmt=119 parameter_sets=50 materialized=true
+[2026-10-10 08:10:03.706] [info] [native_av] Opened native encoder: 1920x1080 @ 30fps, codec=h264_nvenc, rc=driver-default, preset=slow, output='ChrononTemplate/catalog/maps/samples/white_claude_map_gpu.partial.mp4'
+[2026-10-10 08:10:04.769] [info] ImageCache: loaded 'ChrononTemplate/catalog/maps/samples/white_claude_map_plate.jpg' (1920x1080) in 560.856ms
+[2026-10-10 08:10:04.991] [info] [pool-warm] Pre-allocated and pre-imported 6 execution slots (1920x1080) for native NVENC
+[2026-10-10 08:10:05.123] [info] [temp-lifetime] frame=0 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:10:05.123] [info] [exec-level-diag] frame=0 level=0 nodes=2 input_ms=0.001 dispatch_ms=1.902 fb_release_ms=0.001
+[2026-10-10 08:10:05.123] [info] [graph-edge] frame=0 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:10:05.123] [info] [graph-edge] frame=0 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:10:05.123] [info] [temp-lifetime] frame=0 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:10:05.123] [info] [exec-level-diag] frame=0 level=1 nodes=1 input_ms=0.012 dispatch_ms=0.069 fb_release_ms=0.003
+[2026-10-10 08:10:05.123] [info] [video] Exporting via Arena-backed SIMD pipeline
+[2026-10-10 08:10:05.126] [info] [temp-lifetime] frame=1 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:10:05.126] [info] [exec-level-diag] frame=1 level=0 nodes=2 input_ms=0.000 dispatch_ms=2.607 fb_release_ms=0.001
+[2026-10-10 08:10:05.126] [info] [graph-edge] frame=1 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:10:05.126] [info] [graph-edge] frame=1 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:10:05.126] [info] [temp-lifetime] frame=1 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:10:05.126] [info] [exec-level-diag] frame=1 level=1 nodes=1 input_ms=0.010 dispatch_ms=0.089 fb_release_ms=0.002
+[2026-10-10 08:10:05.127] [info] [temp-lifetime] frame=2 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:10:05.127] [info] [exec-level-diag] frame=2 level=0 nodes=2 input_ms=0.000 dispatch_ms=0.153 fb_release_ms=0.000
+[2026-10-10 08:10:05.127] [info] [graph-edge] frame=2 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:10:05.127] [info] [graph-edge] frame=2 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:10:05.127] [info] [temp-lifetime] frame=2 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:10:05.127] [info] [exec-level-diag] frame=2 level=1 nodes=1 input_ms=0.010 dispatch_ms=0.051 fb_release_ms=0.001
+[2026-10-10 08:10:05.141] [info] [video]   15/150 frames
+[2026-10-10 08:10:05.158] [info] [vulkan-lifecycle] frame=25 vram_bytes=605650944 live_surfaces=17 surface_bindings=9 registry_live_handles=57 physical_images=17 deferred_releases=0 vma_allocations=19 surfaces_created=57 surfaces_released=48 queue_packages=1 execution_slots_busy=2 command_batch_active=false
+[2026-10-10 08:10:05.161] [info] [video]   30/150 frames
+[2026-10-10 08:10:05.228] [info] [video]   45/150 frames
+[2026-10-10 08:10:05.247] [info] [vulkan-lifecycle] frame=50 vram_bytes=605650944 live_surfaces=17 surface_bindings=9 registry_live_handles=107 physical_images=17 deferred_releases=0 vma_allocations=19 surfaces_created=107 surfaces_released=98 queue_packages=1 execution_slots_busy=4 command_batch_active=false
+[2026-10-10 08:10:05.332] [info] [video]   60/150 frames
+[2026-10-10 08:10:05.489] [info] [video]   75/150 frames
+[2026-10-10 08:10:05.490] [info] [vulkan-lifecycle] frame=75 vram_bytes=534872064 live_surfaces=15 surface_bindings=9 registry_live_handles=157 physical_images=15 deferred_releases=0 vma_allocations=17 surfaces_created=157 surfaces_released=148 queue_packages=1 execution_slots_busy=2 command_batch_active=false
+[2026-10-10 08:10:05.553] [info] [video]   90/150 frames
+[2026-10-10 08:10:05.684] [info] [vulkan-lifecycle] frame=100 vram_bytes=534872064 live_surfaces=15 surface_bindings=9 registry_live_handles=207 physical_images=15 deferred_releases=0 vma_allocations=17 surfaces_created=207 surfaces_released=198 queue_packages=1 execution_slots_busy=2 command_batch_active=false
+[2026-10-10 08:10:05.726] [info] [video]   105/150 frames
+[2026-10-10 08:10:05.834] [info] [video]   120/150 frames
+[2026-10-10 08:10:05.854] [info] [vulkan-lifecycle] frame=125 vram_bytes=534872064 live_surfaces=15 surface_bindings=9 registry_live_handles=257 physical_images=15 deferred_releases=0 vma_allocations=17 surfaces_created=257 surfaces_released=248 queue_packages=1 execution_slots_busy=2 command_batch_active=false
+[2026-10-10 08:10:05.898] [info] [video]   135/150 frames
+[2026-10-10 08:10:05.974] [info] [video]   150/150 frames
+[2026-10-10 08:10:05.974] [info] [vulkan-lifecycle] frame=150 vram_bytes=605650944 live_surfaces=17 surface_bindings=11 registry_live_handles=307 physical_images=17 deferred_releases=0 vma_allocations=19 surfaces_created=307 surfaces_released=296 queue_packages=3 execution_slots_busy=4 command_batch_active=false
+[2026-10-10 08:10:05.981] [info] [video] writer join complete
+[2026-10-10 08:10:05.981] [info] [drain-debug] start drain, capacity=6
+[2026-10-10 08:10:05.981] [info] [drain-debug] slot_id=2 has completion, waiting
+[2026-10-10 08:10:05.989] [info] [drain-debug] slot_id=2 wait complete
+[2026-10-10 08:10:05.989] [info] [drain-debug] slot_id=3 has completion, waiting
+[2026-10-10 08:10:05.989] [info] [drain-debug] slot_id=3 wait complete
+[2026-10-10 08:10:05.989] [info] [drain-debug] slot_id=4 has completion, waiting
+[2026-10-10 08:10:05.989] [info] [drain-debug] slot_id=4 wait complete
+[2026-10-10 08:10:05.989] [info] [drain-debug] slot_id=5 has completion, waiting
+[2026-10-10 08:10:05.989] [info] [drain-debug] slot_id=5 wait complete
+[2026-10-10 08:10:05.989] [info] [drain-debug] reap done, busy_count=0
+[2026-10-10 08:10:05.989] [info] [video] trimming framebuffer pool
+[2026-10-10 08:10:05.990] [info] [video] Released framebuffer pool — memory trimmed
+[2026-10-10 08:10:05.990] [info] [video] frame-loop cleanup complete
+[2026-10-10 08:10:05.990] [info] [video] Encoder write blocked duration: 0.00 ms
+[2026-10-10 08:10:05.990] [info] [video_diag] conversion_and_copy_duration_ms: 0 ms
+[2026-10-10 08:10:05.990] [info] [video_diag] conversion_bytes_written=0 encoder_staging_copy_bytes=0 encoder_slot_reuses=0
+[2026-10-10 08:10:05.990] [info] [native_av] close: sending encoder flush
+[2026-10-10 08:10:06.061] [info] [native_av] close: encoder flush accepted
+[2026-10-10 08:10:06.125] [info] [native_av] close: packets drained=true
+[2026-10-10 08:10:06.125] [info] [native_av] close: finalizing mux session
+[2026-10-10 08:10:06.125] [info] [native_av] close: mux session finalized
+[2026-10-10 08:10:06.125] [info] [native_av] Closed native encoder — 150 frames accepted, encoder_packets=150 mux_packets=150 packet_pts=0..149, YUV cache: 0 hits / 0 misses
+[2026-10-10 08:10:06.125] [info] [video_native] convert=3.81ms  send_frame=319.28ms  backpressure=0.00ms  flush=134.82ms  receive_packet=63.07ms  mux_write=9.70ms  trailer=0.15ms
+[2026-10-10 08:10:06.131] [info] [video] render_ms=960.13 encode_ms=156.64 writer_encode_ms=280.93 wall_ms=2761.66 nvml_stop_ms=4.25
+[2026-10-10 08:10:06.131] [info] [video] FFmpeg queue wait duration: 0.24 ms
+[2026-10-10 08:10:06.173] [info] [video] copy_eligible=true sha256=288367d7fbbdbdaf363ec1e7d1eb266b113d8a08329edf6c5e7b65cfcbc3eaa7
+[2026-10-10 08:10:06.173] [info] [video] Wrote ChrononTemplate/catalog/maps/samples/white_claude_map_gpu.mp4
+[2026-10-10 08:10:06.173] [info] [startup-profile] total=847.97ms logger=0.03ms cli_bootstrap=2.37ms cli_parse=0.00ms composition=0.08ms plan_read=0.07ms json_parse=0.04ms plan_decode_validate=5.75ms asset_resolve=0.01ms plan_compile=11.65ms other=0.00ms
+[2026-10-10 08:10:06.187] [info] [video] Wrote exact per-frame timing sidecar: ChrononTemplate/catalog/maps/samples/white_claude_map_gpu.mp4.timing.json
+[2026-10-10 08:10:06.345] [info] [INFO] job-lifecycle: slot_pool_close_ms=0.0 surface_release_ms=0.0
+[2026-10-10 08:10:06.543] [info] [INFO] job-lifecycle: queue_close_ms=0.0 writer_join_ms=0.0 encoder_reset_ms=155.6 decoder_reset_ms=0.0 full_graph_reset_ms=198.5 sink_ctx_reset_ms=0.0 device_runtime_reset_ms=0.0 device_reservation_reset_ms=0.0
+[2026-10-10 08:10:06.545] [info] [INFO] job-lifecycle: sidecar_write_ms=15.7 session_teardown_ms=356.1
+[2026-10-10 08:10:06.561] [info] [INFO] job-lifecycle: post_sidecar_to_receipt_ms=372.0
+[2026-10-10 08:10:06.568] [info] [INFO] job-lifecycle: execute_ms=3198.6 receipt_build_ms=0.0 receipt_write_ms=0.0 caller_tail_ms=0.0

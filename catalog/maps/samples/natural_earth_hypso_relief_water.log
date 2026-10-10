@@ -1,0 +1,83 @@
+[2026-10-10 08:06:13.890] [info] [asset-profile] kind=0 path=ChrononTemplate/catalog/maps/samples/natural_earth_hypso_relief_water_plate.jpg bytes=367378 cache=miss invalidated=0 stat=0.01ms hash=5.57ms hashed_bytes=367378 total=5.75ms
+[2026-10-10 08:06:13.891] [info] [asset-digest-cache] hits=0 misses=1 invalidations=0 bytes_hashed=367378 lookup_ms=0.00 write_ms=0.01 full_hash_ms=5.57
+[2026-10-10 08:06:13.891] [info] [plan-profile] read=0.10ms parse=0.08ms decode=8.70ms resolver=0.02ms compile_validate=6.99ms total=15.91ms
+[2026-10-10 08:06:13.891] [info] [asset-profile] kind=0 path=ChrononTemplate/catalog/maps/samples/natural_earth_hypso_relief_water_plate.jpg bytes=367378 cache=hit invalidated=0 stat=0.01ms hash=0.00ms hashed_bytes=0 total=0.06ms
+[2026-10-10 08:06:13.891] [info] [asset-digest-cache] hits=1 misses=0 invalidations=0 bytes_hashed=0 lookup_ms=0.00 write_ms=0.00 full_hash_ms=0.00
+[2026-10-10 08:06:13.892] [info] [plan-compile-profile] assets=0.11ms fingerprint=0.03ms media_resolution=0.00ms materialize=0.01ms composition_compile=0.00ms compatibility_view=0.01ms total=1.06ms
+[2026-10-10 08:06:13.892] [info] [video] Auto-selecting yuv420p pipe pixel format for 1920x1080 output
+[2026-10-10 08:06:13.892] [info] [video] execution plan resolved (reason: render_graph_default); decode=2 composite=3 encode=2 interop=0 handoff=3 codec=3
+[2026-10-10 08:06:13.939] [info] [video-runtime] created persistent runtime for device 0 (CUDA ordinal 0)
+[2026-10-10 08:06:13.940] [info] [video] Using in-process FFmpeg sink via VideoSinkEncoderAdapter
+[2026-10-10 08:06:13.940] [info] [video] encoder feed capability: host_frame=true direct_yuv=false native_surface=false
+[2026-10-10 08:06:13.940] [warning] [video_adapter] Hardware codec 'h264_nvenc' is unavailable in CPU-only mode; falling back to libx264
+[libx264 @ 0x55a1133c67c0] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX
+[libx264 @ 0x55a1133c67c0] profile High, level 5.0, 4:2:0, 8-bit
+[2026-10-10 08:06:13.995] [info] [video_adapter] Opened ffmpeg-pipe sink: 1920x1080 @ 30/1fps, format=yuv420p, codec=h264_nvenc
+[2026-10-10 08:06:14.612] [info] ImageCache: loaded 'ChrononTemplate/catalog/maps/samples/natural_earth_hypso_relief_water_plate.jpg' (1920x1080) in 576.606ms
+[2026-10-10 08:06:14.875] [info] [temp-lifetime] frame=0 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:06:14.875] [info] [exec-level-diag] frame=0 level=0 nodes=2 input_ms=0.001 dispatch_ms=72.561 fb_release_ms=0.002
+[2026-10-10 08:06:14.875] [info] [graph-edge] frame=0 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:06:14.875] [info] [graph-edge] frame=0 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:06:14.941] [info] [temp-lifetime] frame=0 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:06:14.941] [info] [exec-level-diag] frame=0 level=1 nodes=1 input_ms=0.013 dispatch_ms=65.758 fb_release_ms=0.007
+[2026-10-10 08:06:15.061] [info] [pool-warm] Pre-allocated 4 canvas buffers (1920x1152 bucket) at startup
+[2026-10-10 08:06:15.122] [info] [pool-warm] Pre-allocated 3 buffers (text-bbox+glow-pad) bucket 1920x1024 at startup
+[2026-10-10 08:06:15.136] [info] [pool-warm] Pre-allocated 3 buffers (downsample-half) bucket 1024x640 at startup
+[2026-10-10 08:06:15.142] [info] [pool-warm] Pre-allocated 3 buffers (downsample-quarter) bucket 512x384 at startup
+[2026-10-10 08:06:15.163] [info] [video] Exporting via Arena-backed SIMD pipeline
+[2026-10-10 08:06:15.226] [info] [temp-lifetime] frame=1 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:06:15.226] [info] [exec-level-diag] frame=1 level=0 nodes=2 input_ms=0.001 dispatch_ms=57.137 fb_release_ms=0.002
+[2026-10-10 08:06:15.226] [info] [graph-edge] frame=1 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:06:15.226] [info] [graph-edge] frame=1 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:06:15.246] [info] [temp-lifetime] frame=1 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:06:15.246] [info] [exec-level-diag] frame=1 level=1 nodes=1 input_ms=0.015 dispatch_ms=19.640 fb_release_ms=0.009
+[2026-10-10 08:06:15.313] [info] [temp-lifetime] frame=2 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:06:15.313] [info] [exec-level-diag] frame=2 level=0 nodes=2 input_ms=0.001 dispatch_ms=62.259 fb_release_ms=0.002
+[2026-10-10 08:06:15.313] [info] [graph-edge] frame=2 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:06:15.313] [info] [graph-edge] frame=2 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:06:15.337] [info] [temp-lifetime] frame=2 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:06:15.337] [info] [exec-level-diag] frame=2 level=1 nodes=1 input_ms=0.015 dispatch_ms=24.394 fb_release_ms=0.008
+[2026-10-10 08:06:16.655] [info] [video]   15/150 frames
+[2026-10-10 08:06:18.720] [info] [video]   30/150 frames
+[2026-10-10 08:06:20.821] [info] [video]   45/150 frames
+[2026-10-10 08:06:22.453] [info] [video]   60/150 frames
+[2026-10-10 08:06:24.349] [info] [video]   75/150 frames
+[2026-10-10 08:06:26.289] [info] [video]   90/150 frames
+[2026-10-10 08:06:27.734] [info] [video]   105/150 frames
+[2026-10-10 08:06:29.122] [info] [video]   120/150 frames
+[2026-10-10 08:06:30.587] [info] [video]   135/150 frames
+[2026-10-10 08:06:32.693] [info] [video]   150/150 frames
+[2026-10-10 08:06:32.821] [info] [video] writer join complete
+[2026-10-10 08:06:32.821] [info] [drain-debug] start drain, capacity=6
+[2026-10-10 08:06:32.821] [info] [drain-debug] reap done, busy_count=0
+[2026-10-10 08:06:32.821] [info] [video] trimming framebuffer pool
+[2026-10-10 08:06:32.825] [info] [video] Released framebuffer pool — memory trimmed
+[2026-10-10 08:06:32.825] [info] [video] frame-loop cleanup complete
+[2026-10-10 08:06:32.825] [info] [video] Encoder write blocked duration: 4041.13 ms
+[2026-10-10 08:06:32.825] [info] [video_diag] conversion_and_copy_duration_ms: 3299 ms
+[2026-10-10 08:06:32.825] [info] [video_diag] conversion_bytes_written=466560000 encoder_staging_copy_bytes=0 encoder_slot_reuses=146
+[libx264 @ 0x55a1133c67c0] frame I:3     Avg QP:12.27  size:227075
+[libx264 @ 0x55a1133c67c0] frame P:147   Avg QP:16.01  size: 20728
+[libx264 @ 0x55a1133c67c0] mb I  I16..4: 12.7% 74.9% 12.3%
+[libx264 @ 0x55a1133c67c0] mb P  I16..4:  1.3%  0.1%  0.1%  P16..4: 38.4% 13.0%  8.9%  0.0%  0.0%    skip:38.2%
+[libx264 @ 0x55a1133c67c0] 8x8 transform intra:45.7% inter:33.9%
+[libx264 @ 0x55a1133c67c0] coded y,uvDC,uvAC intra: 49.3% 49.9% 38.2% inter: 10.9% 7.9% 1.0%
+[libx264 @ 0x55a1133c67c0] i16 v,h,dc,p: 14% 77%  1%  8%
+[libx264 @ 0x55a1133c67c0] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu: 12% 15% 18%  9%  7%  5%  8%  9% 16%
+[libx264 @ 0x55a1133c67c0] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 17% 22% 13%  7%  9%  7%  7%  7% 11%
+[libx264 @ 0x55a1133c67c0] i8c dc,h,v,p: 31% 51% 10%  8%
+[libx264 @ 0x55a1133c67c0] Weighted P-Frames: Y:0.0% UV:0.0%
+[libx264 @ 0x55a1133c67c0] ref P L0: 40.8%  3.2% 21.3% 13.7% 11.4%  9.6%
+[libx264 @ 0x55a1133c67c0] kb/s:5965.16
+[2026-10-10 08:06:37.774] [info] [video_adapter] Closed sink — 150 frames written, write_blocked=4041.13ms, close=4949.17ms
+[2026-10-10 08:06:37.787] [info] [video] render_ms=17638.63 encode_ms=4985.33 writer_encode_ms=7419.02 wall_ms=23894.27 nvml_stop_ms=12.22
+[2026-10-10 08:06:37.787] [info] [video] FFmpeg queue wait duration: 0.50 ms
+[2026-10-10 08:06:37.871] [info] [video] copy_eligible=true sha256=daf7b63dee0b0a916992fd651b68cfebda3b79701c68794f095777de4be9b717
+[2026-10-10 08:06:37.872] [info] [video] Wrote ChrononTemplate/catalog/maps/samples/natural_earth_hypso_relief_water_5s.mp4
+[2026-10-10 08:06:37.872] [info] [startup-profile] total=165.99ms logger=0.13ms cli_bootstrap=8.89ms cli_parse=0.00ms composition=0.08ms plan_read=0.10ms json_parse=0.08ms plan_decode_validate=8.70ms asset_resolve=0.02ms plan_compile=6.99ms other=0.00ms
+[2026-10-10 08:06:37.899] [info] [video] Wrote exact per-frame timing sidecar: ChrononTemplate/catalog/maps/samples/natural_earth_hypso_relief_water_5s.mp4.timing.json
+[2026-10-10 08:06:37.902] [info] [INFO] job-lifecycle: slot_pool_close_ms=0.0 surface_release_ms=0.0
+[2026-10-10 08:06:37.932] [info] [INFO] job-lifecycle: queue_close_ms=0.0 writer_join_ms=0.0 encoder_reset_ms=0.9 decoder_reset_ms=0.0 full_graph_reset_ms=30.7 sink_ctx_reset_ms=0.0 device_runtime_reset_ms=0.0 device_reservation_reset_ms=0.0
+[2026-10-10 08:06:37.933] [info] [INFO] job-lifecycle: sidecar_write_ms=28.6 session_teardown_ms=32.3
+[2026-10-10 08:06:38.002] [info] [INFO] job-lifecycle: post_sidecar_to_receipt_ms=101.4
+[2026-10-10 08:06:38.002] [info] [INFO] job-lifecycle: execute_ms=24110.0 receipt_build_ms=0.0 receipt_write_ms=0.0 caller_tail_ms=0.0

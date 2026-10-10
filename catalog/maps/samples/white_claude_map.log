@@ -1,0 +1,84 @@
+[2026-10-10 08:07:21.300] [info] [asset-profile] kind=0 path=ChrononTemplate/catalog/maps/samples/white_claude_map_plate.jpg bytes=1287335 cache=miss invalidated=0 stat=0.01ms hash=7.31ms hashed_bytes=1287335 total=7.40ms
+[2026-10-10 08:07:21.301] [info] [asset-digest-cache] hits=0 misses=1 invalidations=0 bytes_hashed=1287335 lookup_ms=0.00 write_ms=0.00 full_hash_ms=7.31
+[2026-10-10 08:07:21.301] [info] [plan-profile] read=0.09ms parse=0.05ms decode=13.13ms resolver=0.02ms compile_validate=8.26ms total=21.55ms
+[2026-10-10 08:07:21.301] [info] [asset-profile] kind=0 path=ChrononTemplate/catalog/maps/samples/white_claude_map_plate.jpg bytes=1287335 cache=hit invalidated=0 stat=0.01ms hash=0.00ms hashed_bytes=0 total=0.06ms
+[2026-10-10 08:07:21.301] [info] [asset-digest-cache] hits=1 misses=0 invalidations=0 bytes_hashed=0 lookup_ms=0.00 write_ms=0.00 full_hash_ms=0.00
+[2026-10-10 08:07:21.301] [info] [plan-compile-profile] assets=0.11ms fingerprint=0.03ms media_resolution=0.00ms materialize=0.00ms composition_compile=0.00ms compatibility_view=0.01ms total=0.25ms
+[2026-10-10 08:07:21.302] [info] [video] Auto-selecting yuv420p pipe pixel format for 1920x1080 output
+[2026-10-10 08:07:21.302] [info] [video] execution plan resolved (reason: render_graph_default); decode=2 composite=3 encode=2 interop=0 handoff=3 codec=3
+[2026-10-10 08:07:21.331] [info] [video-runtime] created persistent runtime for device 0 (CUDA ordinal 0)
+[2026-10-10 08:07:21.331] [info] [video] Using in-process FFmpeg sink via VideoSinkEncoderAdapter
+[2026-10-10 08:07:21.331] [info] [video] encoder feed capability: host_frame=true direct_yuv=false native_surface=false
+[2026-10-10 08:07:21.331] [warning] [video_adapter] Hardware codec 'h264_nvenc' is unavailable in CPU-only mode; falling back to libx264
+[libx264 @ 0x55b2cc444840] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX
+[libx264 @ 0x55b2cc444840] profile High, level 5.0, 4:2:0, 8-bit
+[2026-10-10 08:07:21.375] [info] [video_adapter] Opened ffmpeg-pipe sink: 1920x1080 @ 30/1fps, format=yuv420p, codec=h264_nvenc
+[2026-10-10 08:07:21.970] [info] ImageCache: loaded 'ChrononTemplate/catalog/maps/samples/white_claude_map_plate.jpg' (1920x1080) in 536.962ms
+[2026-10-10 08:07:22.139] [info] [temp-lifetime] frame=0 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:07:22.139] [info] [exec-level-diag] frame=0 level=0 nodes=2 input_ms=0.001 dispatch_ms=41.459 fb_release_ms=0.002
+[2026-10-10 08:07:22.139] [info] [graph-edge] frame=0 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:07:22.139] [info] [graph-edge] frame=0 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:07:22.169] [info] [temp-lifetime] frame=0 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:07:22.169] [info] [exec-level-diag] frame=0 level=1 nodes=1 input_ms=0.013 dispatch_ms=29.704 fb_release_ms=0.007
+[2026-10-10 08:07:22.239] [info] [pool-warm] Pre-allocated 4 canvas buffers (1920x1152 bucket) at startup
+[2026-10-10 08:07:22.286] [info] [pool-warm] Pre-allocated 3 buffers (text-bbox+glow-pad) bucket 1920x1024 at startup
+[2026-10-10 08:07:22.299] [info] [pool-warm] Pre-allocated 3 buffers (downsample-half) bucket 1024x640 at startup
+[2026-10-10 08:07:22.305] [info] [pool-warm] Pre-allocated 3 buffers (downsample-quarter) bucket 512x384 at startup
+[2026-10-10 08:07:22.327] [info] [video] Exporting via Arena-backed SIMD pipeline
+[2026-10-10 08:07:22.371] [info] [temp-lifetime] frame=1 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:07:22.371] [info] [exec-level-diag] frame=1 level=0 nodes=2 input_ms=0.001 dispatch_ms=44.330 fb_release_ms=0.002
+[2026-10-10 08:07:22.371] [info] [graph-edge] frame=1 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:07:22.371] [info] [graph-edge] frame=1 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:07:22.417] [info] [temp-lifetime] frame=1 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:07:22.417] [info] [exec-level-diag] frame=1 level=1 nodes=1 input_ms=0.013 dispatch_ms=45.550 fb_release_ms=0.006
+[2026-10-10 08:07:22.487] [info] [temp-lifetime] frame=2 after_level=0 live=[0,1,] retired=[]
+[2026-10-10 08:07:22.487] [info] [exec-level-diag] frame=2 level=0 nodes=2 input_ms=0.001 dispatch_ms=69.279 fb_release_ms=0.002
+[2026-10-10 08:07:22.487] [info] [graph-edge] frame=2 level=1 consumer_id=2 input_index=0 producer_id=0 producer_level=0
+[2026-10-10 08:07:22.487] [info] [graph-edge] frame=2 level=1 consumer_id=2 input_index=1 producer_id=1 producer_level=0
+[2026-10-10 08:07:22.534] [info] [temp-lifetime] frame=2 after_level=1 live=[2,] retired=[0,1,]
+[2026-10-10 08:07:22.534] [info] [exec-level-diag] frame=2 level=1 nodes=1 input_ms=0.013 dispatch_ms=46.815 fb_release_ms=0.006
+[2026-10-10 08:07:23.829] [info] [video]   15/150 frames
+[2026-10-10 08:07:25.237] [info] [video]   30/150 frames
+[2026-10-10 08:07:26.598] [info] [video]   45/150 frames
+[2026-10-10 08:07:28.153] [info] [video]   60/150 frames
+[2026-10-10 08:07:29.593] [info] [video]   75/150 frames
+[2026-10-10 08:07:31.202] [info] [video]   90/150 frames
+[2026-10-10 08:07:33.228] [info] [video]   105/150 frames
+[2026-10-10 08:07:35.793] [info] [video]   120/150 frames
+[2026-10-10 08:07:36.202] [info] [exec-fb-diag] resetting temp[1] took 1.039 ms
+[2026-10-10 08:07:38.573] [info] [video]   135/150 frames
+[2026-10-10 08:07:41.544] [info] [video]   150/150 frames
+[2026-10-10 08:07:41.654] [info] [video] writer join complete
+[2026-10-10 08:07:41.654] [info] [drain-debug] start drain, capacity=6
+[2026-10-10 08:07:41.654] [info] [drain-debug] reap done, busy_count=0
+[2026-10-10 08:07:41.654] [info] [video] trimming framebuffer pool
+[2026-10-10 08:07:41.658] [info] [video] Released framebuffer pool — memory trimmed
+[2026-10-10 08:07:41.658] [info] [video] frame-loop cleanup complete
+[2026-10-10 08:07:41.658] [info] [video] Encoder write blocked duration: 10266.60 ms
+[2026-10-10 08:07:41.658] [info] [video_diag] conversion_and_copy_duration_ms: 3382 ms
+[2026-10-10 08:07:41.658] [info] [video_diag] conversion_bytes_written=466560000 encoder_staging_copy_bytes=0 encoder_slot_reuses=146
+[libx264 @ 0x55b2cc444840] frame I:3     Avg QP:18.12  size:790179
+[libx264 @ 0x55b2cc444840] frame P:147   Avg QP:20.31  size:215795
+[libx264 @ 0x55b2cc444840] mb I  I16..4:  1.0% 32.7% 66.3%
+[libx264 @ 0x55b2cc444840] mb P  I16..4:  0.1%  0.0%  0.0%  P16..4: 43.9% 28.4% 24.6%  0.0%  0.0%    skip: 3.0%
+[libx264 @ 0x55b2cc444840] 8x8 transform intra:31.0% inter:22.9%
+[libx264 @ 0x55b2cc444840] coded y,uvDC,uvAC intra: 93.1% 53.7% 18.1% inter: 71.2% 7.6% 0.1%
+[libx264 @ 0x55b2cc444840] i16 v,h,dc,p: 23% 69%  4%  3%
+[libx264 @ 0x55b2cc444840] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu: 11% 12% 14% 11%  8%  6%  7% 14% 16%
+[libx264 @ 0x55b2cc444840] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 11% 11%  7% 11% 12% 10% 11% 12% 14%
+[libx264 @ 0x55b2cc444840] i8c dc,h,v,p: 24% 53% 17%  5%
+[libx264 @ 0x55b2cc444840] Weighted P-Frames: Y:0.0% UV:0.0%
+[libx264 @ 0x55b2cc444840] ref P L0: 37.7%  6.2% 15.0% 14.0% 14.8% 12.3%
+[libx264 @ 0x55b2cc444840] kb/s:54547.73
+[2026-10-10 08:07:48.217] [info] [video_adapter] Closed sink — 150 frames written, write_blocked=10266.60ms, close=6558.98ms
+[2026-10-10 08:07:48.221] [info] [video] render_ms=19298.38 encode_ms=6596.01 writer_encode_ms=13725.53 wall_ms=26919.24 nvml_stop_ms=3.53
+[2026-10-10 08:07:48.221] [info] [video] FFmpeg queue wait duration: 0.54 ms
+[2026-10-10 08:07:48.507] [info] [video] copy_eligible=true sha256=d18ec2b4e5f2a87a32ab3397c6076e5ec71a66227be01d0e89eb94ce6f59f42e
+[2026-10-10 08:07:48.520] [info] [video] Wrote ChrononTemplate/catalog/maps/samples/white_claude_map_5s.mp4
+[2026-10-10 08:07:48.520] [info] [startup-profile] total=143.64ms logger=0.03ms cli_bootstrap=2.35ms cli_parse=0.00ms composition=0.07ms plan_read=0.09ms json_parse=0.05ms plan_decode_validate=13.13ms asset_resolve=0.02ms plan_compile=8.26ms other=0.00ms
+[2026-10-10 08:07:48.533] [info] [video] Wrote exact per-frame timing sidecar: ChrononTemplate/catalog/maps/samples/white_claude_map_5s.mp4.timing.json
+[2026-10-10 08:07:48.537] [info] [INFO] job-lifecycle: slot_pool_close_ms=0.0 surface_release_ms=0.0
+[2026-10-10 08:07:48.551] [info] [INFO] job-lifecycle: queue_close_ms=0.0 writer_join_ms=0.0 encoder_reset_ms=2.3 decoder_reset_ms=0.0 full_graph_reset_ms=14.5 sink_ctx_reset_ms=0.0 device_runtime_reset_ms=0.0 device_reservation_reset_ms=0.0
+[2026-10-10 08:07:48.551] [info] [INFO] job-lifecycle: sidecar_write_ms=14.1 session_teardown_ms=16.9
+[2026-10-10 08:07:48.560] [info] [INFO] job-lifecycle: post_sidecar_to_receipt_ms=25.1
+[2026-10-10 08:07:48.560] [info] [INFO] job-lifecycle: execute_ms=27258.1 receipt_build_ms=0.0 receipt_write_ms=0.0 caller_tail_ms=0.0
