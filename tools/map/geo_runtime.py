@@ -298,6 +298,7 @@ class _ShotBuilder:
         from render_geo_camera_small_places import (
             apply_city_beacon_map_style, draw_map_location_marker,
             apply_city_beacon_map_style_opencl, draw_map_location_marker_opencl,
+            draw_editorial_map_caption,
         )
         import cv2
         zoom, pitch, yaw, roll = self.pose(f)
@@ -317,32 +318,13 @@ class _ShotBuilder:
                                         flags=cv2.INTER_LINEAR,
                                         borderMode=cv2.BORDER_REFLECT_101)
         if getattr(self, "minimal_map", False):
-            # The one-stop path uses _ShotBuilder (rather than TourBuilder),
-            # so keep its marker treatment identical to multi-stop arrivals.
-            # Finish the level dive (62% of the clip) before revealing the
-            # location beacon. The name fade starts later in
-            # draw_map_marker_label, preserving camera -> point -> label.
-            radius_km = float(getattr(self, "map_area_glow_radius_km", 0.0))
-            area_px = 0
-            if radius_km > 0:
-                area_px = int(radius_km / (40075.017 * max(0.01, math.cos(math.radians(self.place.lat))))
-                              * (256 * (2.0 ** zoom)))
-            animation = getattr(self, "map_label_animation", "gentle_fade")
-            if animation == "diffuse_city_beacon":
-                if gpu_map:
-                    frame = apply_city_beacon_map_style_opencl(frame, progress)
-                else:
-                    apply_city_beacon_map_style(frame, progress)
-            if gpu_map:
-                frame = draw_map_location_marker_opencl(
-                    frame, (WIDTH // 2, HEIGHT // 2),
-                    self.place.display_name or self.place.query,
-                    progress, animation, area_px)
-                return frame.get()
-            draw_map_location_marker(frame, (WIDTH // 2, HEIGHT // 2),
-                                     self.place.display_name or self.place.query,
-                                     progress, animation, area_px)
-            return frame
+            # No map pin/beacon: use the same editorial title rail as the
+            # Chronon map template, with the place name below the map image.
+            frame = frame.get() if gpu_map else frame
+            return draw_editorial_map_caption(
+                frame, self.place.display_name or self.place.query, progress,
+                getattr(self, "map_typography", {}),
+                getattr(self, "map_label_animation", "gentle_fade"))
         if self.preset == "metric":
             # Never fabricate a statistic: the runtime has no trusted metric
             # source yet, so make the missing data explicit in the reveal.
@@ -519,6 +501,7 @@ class TourBuilder:
         from render_geo_camera_small_places import (
             apply_city_beacon_map_style, draw_map_location_marker,
             apply_city_beacon_map_style_opencl, draw_map_location_marker_opencl,
+            draw_editorial_map_caption,
             draw_route_glow, draw_spring_pin,
         )
         from dynamic_tile_pyramid import latlon_to_global_px
@@ -531,12 +514,6 @@ class TourBuilder:
                  if gpu_map else sampler.sample(lat, lon, zoom, WIDTH, HEIGHT))
 
         if getattr(self, "minimal_map", False):
-            animation = getattr(self, "map_label_animation", "gentle_fade")
-            if animation == "diffuse_city_beacon":
-                if gpu_map:
-                    frame = apply_city_beacon_map_style_opencl(frame, progress)
-                else:
-                    apply_city_beacon_map_style(frame, progress)
             location_name = ""
             active_stop = None
             for mark in self._schedule():
@@ -544,27 +521,13 @@ class TourBuilder:
                     active_stop = self.stops[mark[2]]
                     location_name = active_stop.display_name or active_stop.query
                     break
-            if active_stop is not None:
-                zf = int(zoom // 1)
-                scale = 2.0 ** (zoom - zf)
-                ax, ay = latlon_to_global_px(lat, lon, zf)
-                px, py = latlon_to_global_px(active_stop.lat, active_stop.lon, zf)
-                sx = int(WIDTH / 2 + (px - ax) * scale)
-                sy = int(HEIGHT / 2 + (py - ay) * scale)
-                if 0 <= sx < WIDTH and 0 <= sy < HEIGHT:
-                    radius_km = float(getattr(self, "map_area_glow_radius_km", 0.0))
-                    area_px = 0
-                    if radius_km > 0:
-                        earth_km = 40075.017
-                        area_px = int(radius_km / (earth_km * max(0.01, math.cos(math.radians(active_stop.lat))))
-                                      * (256 * (2.0 ** zoom)))
-                    if gpu_map:
-                        frame = draw_map_location_marker_opencl(
-                            frame, (sx, sy), location_name, progress, animation, area_px)
-                    else:
-                        draw_map_location_marker(frame, (sx, sy), location_name,
-                                                 progress, animation, area_px)
-            return frame.get() if gpu_map else frame
+            if active_stop is None and self.stops:
+                active_stop = self.stops[-1]
+                location_name = active_stop.display_name or active_stop.query
+            frame = frame.get() if gpu_map else frame
+            return draw_editorial_map_caption(
+                frame, location_name, progress, getattr(self, "map_typography", {}),
+                getattr(self, "map_label_animation", "gentle_fade"))
 
         # the route so far, glowing under the camera
         zf = int(zoom // 1)

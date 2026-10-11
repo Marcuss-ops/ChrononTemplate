@@ -1,0 +1,658 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "astronaut_camera_transition_gate_0_35",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 36
+  },
+  "camera": {
+    "type": "perspective",
+    "position": [
+      0,
+      0,
+      -1000
+    ],
+    "rotation_deg": [
+      0,
+      0,
+      0
+    ],
+    "fov_deg": 42,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1
+  },
+  "camera_animation": {
+    "tracks": [
+      {
+        "property": "camera_position_x",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": 0
+          },
+          {
+            "frame": 35,
+            "value": 95
+          }
+        ]
+      },
+      {
+        "property": "camera_position_y",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": 0
+          },
+          {
+            "frame": 35,
+            "value": -45
+          }
+        ]
+      },
+      {
+        "property": "camera_position_z",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": -1000
+          },
+          {
+            "frame": 35,
+            "value": 2100
+          }
+        ]
+      },
+      {
+        "property": "camera_rotation_x",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": 0
+          },
+          {
+            "frame": 35,
+            "value": 2
+          }
+        ]
+      },
+      {
+        "property": "camera_rotation_y",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": 0
+          },
+          {
+            "frame": 35,
+            "value": -4
+          }
+        ]
+      },
+      {
+        "property": "camera_rotation_z",
+        "easing": "in_out_cubic",
+        "keyframes": [
+          {
+            "frame": 0,
+            "value": 0
+          },
+          {
+            "frame": 35,
+            "value": 3
+          }
+        ]
+      }
+    ]
+  },
+  "layers": [
+    {
+      "id": "humanity-background",
+      "type": "image",
+      "asset": "ChrononTemplate/assets/astronaut_camera_transition_v1/humanity-plate-v2.png",
+      "fit": "cover",
+      "size": [
+        2400,
+        1350
+      ],
+      "position": [
+        0,
+        0,
+        1800
+      ],
+      "enable_3d": true,
+      "start_frame": 0,
+      "duration_frames": 36,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1
+              },
+              {
+                "frame": 18,
+                "value": 1
+              },
+              {
+                "frame": 28,
+                "value": 0.4
+              },
+              {
+                "frame": 35,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "scale": [
+        2.4,
+        2.4
+      ]
+    },
+    {
+      "id": "humanity-title",
+      "type": "text",
+      "text": "HUMANITY",
+      "size": [
+        1640,
+        220
+      ],
+      "position": [
+        960,
+        690,
+        1200
+      ],
+      "enable_3d": true,
+      "start_frame": 0,
+      "duration_frames": 36,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 150,
+        "min_font_size": 150,
+        "max_font_size": 150,
+        "fill": "#FFFFFF",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1
+              },
+              {
+                "frame": 17,
+                "value": 1
+              },
+              {
+                "frame": 27,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "scale": [
+        2.3,
+        2.3
+      ]
+    },
+    {
+      "id": "humanity-astronaut",
+      "type": "image",
+      "asset": "ChrononTemplate/assets/astronaut_camera_transition_v1/humanity-astronaut-v3.png",
+      "fit": "contain",
+      "size": [
+        720,
+        470
+      ],
+      "position": [
+        -45,
+        65,
+        500
+      ],
+      "enable_3d": true,
+      "start_frame": 0,
+      "duration_frames": 36,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1
+              },
+              {
+                "frame": 12,
+                "value": 1
+              },
+              {
+                "frame": 22,
+                "value": 0.6
+              },
+              {
+                "frame": 27,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": 80
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": -60
+              }
+            ]
+          },
+          {
+            "property": "position_z",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": 80
+              }
+            ]
+          }
+        ]
+      },
+      "scale": [
+        1.4,
+        1.4
+      ]
+    },
+    {
+      "id": "humanity-cloud-foreground",
+      "type": "image",
+      "asset": "ChrononTemplate/assets/astronaut_camera_transition_v1/foreground-clouds-v2.png",
+      "fit": "cover",
+      "size": [
+        2600,
+        1463
+      ],
+      "position": [
+        0,
+        0,
+        -100
+      ],
+      "enable_3d": true,
+      "start_frame": 0,
+      "duration_frames": 36,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1
+              },
+              {
+                "frame": 18,
+                "value": 1
+              },
+              {
+                "frame": 26,
+                "value": 0.7
+              },
+              {
+                "frame": 32,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": 0
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -120
+              },
+              {
+                "frame": 35,
+                "value": 400
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 120
+              },
+              {
+                "frame": 35,
+                "value": -260
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  1,
+                  1
+                ]
+              },
+              {
+                "frame": 35,
+                "value": [
+                  3.2,
+                  3.2
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "scale": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "id": "advances-background",
+      "type": "image",
+      "asset": "ChrononTemplate/assets/astronaut_camera_transition_v1/advances-plate-v2.png",
+      "fit": "cover",
+      "size": [
+        3600,
+        2025
+      ],
+      "position": [
+        0,
+        0,
+        4400
+      ],
+      "enable_3d": true,
+      "start_frame": 0,
+      "duration_frames": 36,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 12,
+                "value": 0
+              },
+              {
+                "frame": 20,
+                "value": 0.35
+              },
+              {
+                "frame": 30,
+                "value": 1
+              },
+              {
+                "frame": 35,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "scale": [
+        4,
+        4
+      ]
+    },
+    {
+      "id": "advances-title",
+      "type": "text",
+      "text": "ADVANCES",
+      "size": [
+        1640,
+        220
+      ],
+      "position": [
+        960,
+        690,
+        3200
+      ],
+      "enable_3d": true,
+      "start_frame": 0,
+      "duration_frames": 36,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "font_size": 145,
+        "min_font_size": 145,
+        "max_font_size": 145,
+        "fill": "#FFFFFF",
+        "fit_mode": "shrink_only"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 17,
+                "value": 0
+              },
+              {
+                "frame": 25,
+                "value": 0.75
+              },
+              {
+                "frame": 32,
+                "value": 1
+              },
+              {
+                "frame": 35,
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "scale": [
+        1.25,
+        1.25
+      ]
+    },
+    {
+      "id": "advances-astronaut",
+      "type": "image",
+      "asset": "ChrononTemplate/assets/astronaut_camera_transition_v1/advances-astronaut-v3.png",
+      "fit": "contain",
+      "size": [
+        350,
+        475
+      ],
+      "position": [
+        -270,
+        40,
+        3000
+      ],
+      "enable_3d": true,
+      "start_frame": 0,
+      "duration_frames": 36,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 20,
+                "value": 0
+              },
+              {
+                "frame": 27,
+                "value": 0.85
+              },
+              {
+                "frame": 33,
+                "value": 1
+              },
+              {
+                "frame": 35,
+                "value": 1
+              }
+            ]
+          },
+          {
+            "property": "position_x",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": 190
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": -60
+              }
+            ]
+          },
+          {
+            "property": "rotation_z",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": 2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "end-white",
+      "type": "color",
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "screen_space": true,
+      "start_frame": 0,
+      "duration_frames": 36,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 35,
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "enable_3d": true
+    }
+  ],
+  "output": {
+    "path": "ChrononTemplate/output/astronaut_camera_transition_v1/astronaut_camera_transition_gate_0_35.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

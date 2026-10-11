@@ -1,0 +1,45 @@
+{
+  "background_seed_points": [
+    "0.03,0.05",
+    "0.95,0.07",
+    "0.05,0.94",
+    "0.95,0.94",
+    "0.82,0.24",
+    "0.32,0.14"
+  ],
+  "estimated_work_units": 862600640,
+  "foreground_fraction": 0.2017970401691332,
+  "foreground_seed_points": [
+    "0.51,0.62",
+    "0.48,0.38",
+    "0.24,0.32",
+    "0.70,0.58",
+    "0.43,0.91",
+    "0.59,0.94"
+  ],
+  "fully_transparent_pixels": 0,
+  "gate": {
+    "maximum_foreground_fraction": 0.9990000128746033,
+    "maximum_mean_uncertainty": 1.0,
+    "minimum_foreground_fraction": 0.0010000000474974513,
+    "status": "pass"
+  },
+  "height": 860,
+  "input": "ChrononTemplate/assets/astronaut_camera_transition_v1/humanity.png",
+  "input_transfer": "srgb",
+  "iterations": 128,
+  "matte_written": true,
+  "maximum_work_units": 2000000000,
+  "mean_uncertainty": 0.8575216973578635,
+  "method": "seeded_linear_rgb_full_covariance_gaussian_models_with_edge_weighted_diffusion",
+  "next_step": "inspect and correct matte, then use as mask-propagate seed",
+  "output": "ChrononTemplate/assets/astronaut_camera_transition_v1/humanity-astronaut-matte.png",
+  "schema": "chronon.scribble_segmentation.v1",
+  "seed_radius_pixels": 5,
+  "seeded_pixel_count": 972,
+  "source_alpha_used_as_coverage": true,
+  "uncertainty_definition": "source-alpha-weighted mean(4*soft_segmentation_alpha*(1-soft_segmentation_alpha)) over unseeded visible coverage",
+  "width": 1529,
+  "working_space": "linear_bt709"
+}
+
