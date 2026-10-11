@@ -153,6 +153,43 @@ namespace chronontemplate {
                                               chrononmotion::motion::Easing::linear());
         }
 
+        void animatePerlinDrift(LayerHandle& layer, float fps, int startFrame, int endFrame,
+                                float x, float y, float u, float v, float phase,
+                                float distance, std::uint32_t seed, float hoverDrift) {
+            using chronon3d::graphics::Field2DGenerator;
+            const auto field = makeField(Field2DGenerator::Perlin, 3.8f, seed, 0.3f);
+            const int steps = std::clamp((endFrame - startFrame) / 36, 3, 8);
+            float pathX = 0.f;
+            float pathY = 0.f;
+            for (int step = 0; step <= steps; ++step) {
+                const float t = static_cast<float>(step) / static_cast<float>(steps);
+                if (step > 0) {
+                    const float previousT = static_cast<float>(step - 1) / static_cast<float>(steps);
+                    const float sampleT = (previousT + t) * 0.5f;
+                    const chronon3d::Vec2 point{
+                        u * 7.f + std::cos(phase) * 0.35f + sampleT * 1.6f,
+                        v * 7.f + std::sin(phase) * 0.35f + sampleT * 1.6f};
+                    constexpr float epsilon = 0.0125f;
+                    const float dx = field.sample({point.x + epsilon, point.y}) -
+                                     field.sample({point.x - epsilon, point.y});
+                    const float dy = field.sample({point.x, point.y + epsilon}) -
+                                     field.sample({point.x, point.y - epsilon});
+                    const float angle = std::hypot(dx, dy) > 1.0e-5f
+                        ? std::atan2(dy, dx) : phase;
+                    const float segment = distance / static_cast<float>(steps);
+                    pathX += std::cos(angle) * segment;
+                    pathY += std::sin(angle) * segment;
+                }
+                const int frame = startFrame + static_cast<int>(std::lround(
+                    static_cast<float>(endFrame - startFrame) * t));
+                const float seconds = static_cast<float>(frame) / fps;
+                layer.layer().tracks.position.add(seconds,
+                    chrononmotion::Vector3(x + pathX + hoverDrift * t,
+                                           y + pathY - hoverDrift * 0.35f * t, 0.f),
+                    chrononmotion::motion::Easing::linear());
+            }
+        }
+
         void fadeInAndOut(LayerHandle& layer, int inFrame, int endFrame,
                           int enterFrames, int exitFrames, float opacity) {
             const int exitStart = endFrame - exitFrames;
@@ -492,6 +529,29 @@ namespace chronontemplate {
             const float cameraScale = 20.f / spec.particleCameraDistance;
             const int enter = boundedEnterFrames(spec.duration, 10);
             const int exit = exitFramesFor(spec.duration);
+
+            // Give the particle field a restrained Perlin texture and fine
+            // animated grain. Both use the authored seed, so frame access and
+            // rerenders stay reproducible while different seeds vary the look.
+            ShapeSpec fieldRequest;
+            fieldRequest.size = canvas;
+            fieldRequest.fillColor = spec.ground;
+            fieldRequest.name = spec.name + "_perlin_grain";
+            fieldRequest.field = makeField(chronon3d::graphics::Field2DGenerator::Perlin,
+                                           3.2f, backgroundSeed(spec.seed, 0x7065726cU), 0.2f);
+            fieldRequest.fieldRamp = fieldRamp({{0.f, {spec.ground, 0.94f}},
+                                                {0.52f, {spec.accent, 0.10f}},
+                                                {1.f, {spec.accent, 0.24f}}});
+            fieldRequest.fieldRenderScale = 2;
+            fieldRequest.noiseAmount = 0.045f;
+            fieldRequest.noiseSeed = backgroundSeed(spec.seed, 0x67726169U);
+            fieldRequest.animatedNoise = true;
+            fieldRequest.noiseSize = 1.4f;
+            LayerHandle& texture = scene.shape(fieldRequest);
+            texture.position(canvas.x * 0.5f, canvas.y * 0.5f);
+            staggerFadeInAndOut(texture, inFrame, endFrame, 0, enter, exit, 1.f);
+            out.accents.push_back(&texture);
+
             for (int index = 0; index < count; ++index) {
                 const auto item = static_cast<std::uint32_t>(index);
                 const float u = unitHash(item * 3u + spec.seed + 0x51ed270bU);
@@ -517,9 +577,9 @@ namespace chronontemplate {
                     ? 0.46f + unitHash(item * 17u + spec.seed) * 0.42f : 1.f;
                 staggerFadeInAndOut(particle, inFrame, endFrame, index % std::max(1, enter),
                                     enter, exit, alpha);
-                animateDrift(particle, scene.fps(), inFrame, endFrame - exit,
-                    x, y, x + std::cos(phase) * temporalOrbit + hoverDrift,
-                    y + std::sin(phase) * temporalOrbit - hoverDrift * 0.35f);
+                animatePerlinDrift(particle, scene.fps(), inFrame, endFrame - exit,
+                    x, y, u, v, phase, temporalOrbit, backgroundSeed(spec.seed, item + 0x7065726cU),
+                    hoverDrift);
                 out.accents.push_back(&particle);
             }
         }
