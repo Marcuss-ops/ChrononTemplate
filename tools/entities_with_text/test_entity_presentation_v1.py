@@ -89,8 +89,10 @@ class EntityPresentationCatalogTests(unittest.TestCase):
                             self.assertEqual(values[-1], 1)
                         if track["property"] in {"position_x", "position_y", "position_z", "rotation_x", "rotation_y"}:
                             self.assertEqual(values[-1], 0)
-                        if preset["id"] in {"entity_depth_caption", "entity_yaw_caption", "entity_parallax_caption"} and track["property"] == "position_z":
+                        if preset["id"] in {"entity_depth_caption", "entity_yaw_caption"} and track["property"] == "position_z":
                             self.assertEqual(values[-1], 0)
+                        if preset["id"] == "entity_parallax_caption":
+                            self.assertNotIn(track["property"], {"position_z", "rotation_x", "rotation_y"})
 
     def test_catalog_is_deterministic_and_all_motion_track_sample_frames_exist(self):
         self.assertEqual(json.loads(CATALOG_PATH.read_text()), self.catalog)

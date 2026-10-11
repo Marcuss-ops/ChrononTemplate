@@ -19,6 +19,7 @@ import sys
 import math
 import time
 import subprocess
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -346,6 +347,111 @@ def draw_map_location_marker(frame: np.ndarray, point: tuple[int, int],
     else:
         draw_location_glow(frame, point, progress, area_radius_px)
     draw_map_marker_label(frame, point, name, progress, animation)
+
+
+def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
+                              typography: dict | None = None,
+                              animation: str = "gentle_fade") -> np.ndarray:
+    """Render the place name in a Chronon-style rail below the map imagery."""
+    from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+    label = " ".join(str(text or "").split())
+    if not label:
+        return frame
+    h, w = frame.shape[:2]
+    # These values come from the run-level OverlayStyle payload projected by
+    # PipelineGen; fallback values match its canonical Bricolage phrase style.
+    style = typography or {}
+    font_files = {
+        "bricolage_grotesque": "Bricolage-Grotesque.ttf",
+        "inter": "Inter.ttf", "inter_bold": "Inter-Bold.ttf",
+        "poppins": "Poppins-Bold.ttf", "dejavu_sans": "DejaVuSans.ttf",
+        "playfair_display_italic": "PlayfairDisplay-Italic.ttf",
+    }
+    family = str(style.get("font_family", "bricolage_grotesque"))
+    if family not in font_files:
+        raise ValueError(f"unsupported runtime typography font_family: {family}")
+    font_path = BASE_DIR / "RenderingGen/renderinggen/assets/fonts" / font_files[family]
+    font_size = max(32, round(float(style.get("font_size_px", 92)) * w / 1920))
+    font = _editorial_caption_font(str(font_path), font_size)
+    stroke_width = max(0, round(float(style.get("stroke_size", 2))))
+    shadow_blur = max(0, round(float(style.get("shadow_blur_px", 14)) * w / 1920))
+    shadow_opacity = max(0.0, min(1.0, float(style.get("shadow_opacity", 0.7))))
+    glow_size = max(0, round(float(style.get("glow_size", 10)) * w / 1920))
+    glow_intensity = max(0.0, min(1.0, float(style.get("glow_intensity", 0.4))))
+    fill = str(style.get("fill", "#F8F5EA"))
+    shadow_color = str(style.get("shadow_color", "#000000"))
+    glow_color = str(style.get("glow_color", "#FFFFFF"))
+    bbox = font.getbbox(label, stroke_width=stroke_width)
+    text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    rail_h = max(132, round(h * 0.16))
+    rail_y = h - rail_h - max(26, round(h * 0.025))
+    rail_margin = max(48, round(w * 0.06))
+    rail = (rail_margin, 0, w - rail_margin, rail_h)
+    center_x = w // 2
+    text_x = center_x - text_w // 2
+    text_y = (rail_h - text_h) // 2 - bbox[1]
+    animation_timing = {
+        "gentle_fade": (0.78, 0.16), "soft_glow": (0.75, 0.20),
+        "clean_fade": (0.81, 0.13), "word_soft_fade": (0.76, 0.18),
+        "slow_fade": (0.67, 0.29), "quiet_bloom": (0.72, 0.22),
+        "quick_fade": (0.84, 0.08), "silky_fade": (0.74, 0.21),
+        "subtle_halo": (0.77, 0.17), "cinematic_fade": (0.70, 0.25),
+        "diffuse_city_beacon": (0.78, 0.16),
+    }
+    if animation not in animation_timing:
+        raise ValueError(f"unknown map caption animation: {animation}")
+    start, duration = animation_timing[animation]
+    reveal = max(0.0, min(1.0, (progress - start) / duration))
+    alpha = int(255 * reveal * reveal * (3.0 - 2.0 * reveal))
+    if alpha <= 0:
+        return frame
+
+    layer = Image.new("RGBA", (w, rail_h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    draw.rounded_rectangle(rail, radius=max(20, round(rail_h * 0.22)),
+                           fill=(7, 16, 20, 224))
+    accent_y = 5
+    draw.rounded_rectangle((rail_margin + 24, accent_y, w - rail_margin - 24, accent_y + 3),
+                           radius=2, fill=(248, 245, 234, 120))
+    def rgba(color: str, opacity: float) -> tuple[int, int, int, int]:
+        raw = color.lstrip("#")
+        if len(raw) != 6:
+            raise ValueError(f"invalid runtime map typography color: {color}")
+        rgb = tuple(int(raw[index:index + 2], 16) for index in (0, 2, 4))
+        return rgb[0], rgb[1], rgb[2], round(255 * max(0.0, min(1.0, opacity)))
+
+    if glow_size > 0 and glow_intensity > 0:
+        glow_layer = Image.new("RGBA", (w, rail_h), (0, 0, 0, 0))
+        glow_draw = ImageDraw.Draw(glow_layer)
+        glow_draw.text((text_x, text_y), label, font=font,
+                       fill=rgba(glow_color, glow_intensity), stroke_width=stroke_width + 5,
+                       stroke_fill=rgba(glow_color, glow_intensity))
+        layer.alpha_composite(glow_layer.filter(ImageFilter.GaussianBlur(glow_size)))
+    shadow_layer = Image.new("RGBA", (w, rail_h), (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(shadow_layer)
+    shadow_draw.text((text_x + 2, text_y + 4), label, font=font,
+                     fill=rgba(shadow_color, shadow_opacity), stroke_width=stroke_width + 2,
+                     stroke_fill=rgba(shadow_color, shadow_opacity))
+    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(shadow_blur))
+    layer.alpha_composite(shadow_layer)
+    draw = ImageDraw.Draw(layer)
+    draw.text((text_x, text_y), label, font=font,
+              fill=rgba(fill, 1.0), stroke_width=stroke_width,
+              stroke_fill=rgba("#111827", 1.0))
+    rgba_layer = np.asarray(layer)
+    roi = frame[rail_y:rail_y + rail_h]
+    alpha_mask = (rgba_layer[:, :, 3:4].astype(np.float32) / 255.0) * reveal
+    bgr = rgba_layer[:, :, :3][:, :, ::-1]
+    roi[:] = np.clip(roi.astype(np.float32) * (1.0 - alpha_mask) + bgr * alpha_mask,
+                     0, 255).astype(np.uint8)
+    return frame
+
+
+@lru_cache(maxsize=16)
+def _editorial_caption_font(path: str, size: int):
+    from PIL import ImageFont
+    return ImageFont.truetype(path, size)
 
 
 def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,

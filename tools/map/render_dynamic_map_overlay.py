@@ -192,6 +192,7 @@ def main() -> int:
     builder.minimal_map = True
     builder.map_area_glow_radius_km = area_glow_radius_km
     builder.map_label_animation = label_animation
+    builder.map_typography = payload.get("typography", {})
 
     if builder.WIDTH != width or builder.HEIGHT != height:
         raise ValueError("Chronon geo camera output dimensions do not match the overlay canvas")
