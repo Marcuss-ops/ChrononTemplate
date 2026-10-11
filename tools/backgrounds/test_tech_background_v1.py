@@ -15,17 +15,18 @@ class TechBackgroundTests(unittest.TestCase):
     def setUpClass(cls):
         cls.family = json.loads((ROOT / "catalog/tech_background_v1.json").read_text())
 
-    def test_catalog_has_six_unique_recipe_ids(self):
+    def test_catalog_has_seven_unique_recipe_ids(self):
         ids = [r["id"] for r in self.family["recipes"]]
-        self.assertEqual(len(ids), 6)
-        self.assertEqual(len(set(ids)), 6)
+        self.assertEqual(len(ids), 7)
+        self.assertEqual(len(set(ids)), 7)
         self.assertEqual(ids, ["tech_blue_horizon", "tech_aqua_horizon", "tech_magenta_cone",
-                               "tech_arc_green", "tech_arc_red", "tech_duotone_blob"])
+                               "tech_arc_green", "tech_arc_red", "tech_duotone_blob",
+                               "tech_marble_vein"])
 
     def test_gallery_and_torture_are_deterministic(self):
         first, second = tech.build_plans(self.family), tech.build_plans(self.family)
         self.assertEqual(first, second)
-        self.assertEqual(first["canary_tech_background_v1"]["canvas"]["duration_frames"], 6 * 90)
+        self.assertEqual(first["canary_tech_background_v1"]["canvas"]["duration_frames"], 7 * 90)
         self.assertEqual(first["canary_tech_background_torture_v1"]["canvas"]["duration_frames"], 450)
 
     def test_common_title_is_identical_across_gallery(self):
@@ -40,7 +41,7 @@ class TechBackgroundTests(unittest.TestCase):
         for index, ident in enumerate(recipes):
             layers = tech.scene_layers(recipes[ident], 0, tech.SEGMENT, index)
             if ident in {"tech_blue_horizon", "tech_aqua_horizon"}:
-                self.assertTrue(any(layer["shape"].get("field") for layer in layers if "shape" in layer))
+                self.assertTrue(any(layer["shape"].get("fill", {}).get("type") == "field" for layer in layers if "shape" in layer))
                 self.assertTrue(any(layer["shape"].get("type") == "path" for layer in layers if "shape" in layer))
             elif ident == "tech_magenta_cone":
                 self.assertTrue(any(any(effect["type"] == "light_rays" for effect in layer.get("effects", []))
@@ -49,6 +50,13 @@ class TechBackgroundTests(unittest.TestCase):
                 arcs = [layer for layer in layers if layer.get("shape", {}).get("type") == "arc"]
                 self.assertEqual(len(arcs), 2)
                 self.assertTrue(all(layer["position"][1] > tech.H for layer in arcs))
+            elif ident == "tech_marble_vein":
+                self.assertTrue(any(layer["shape"].get("fill", {}).get("type") == "field" for layer in layers if "shape" in layer))
+                veins = [layer for layer in layers
+                         if layer.get("shape", {}).get("type") == "path"
+                         and layer["shape"].get("stroke")]
+                self.assertEqual(len(veins), 3)
+                self.assertTrue(any("gold" in layer["id"] for layer in veins))
             else:
                 blobs = [layer for layer in layers if layer.get("shape", {}).get("type") == "ellipse"]
                 self.assertEqual(len(blobs), 3)
@@ -63,9 +71,9 @@ class TechBackgroundTests(unittest.TestCase):
         different = tech.field_layer("field", 0, 90, 43, "perlin", ramp,
                                      frequency=3, drift=(.02, -.01))
         self.assertEqual(first, same)
-        self.assertNotEqual(first["shape"]["field"]["seed"],
-                            different["shape"]["field"]["seed"])
-        self.assertEqual(first["shape"]["field_drift"], [.02, -.01])
+        self.assertNotEqual(first["shape"]["fill"]["field"]["seed"],
+                            different["shape"]["fill"]["field"]["seed"])
+        self.assertEqual(first["shape"]["fill"]["field_drift"], [.02, -.01])
 
     def test_animation_tracks_have_absolute_sorted_unique_frame_keys(self):
         plan = tech.build_gallery(self.family)

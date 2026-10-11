@@ -9,7 +9,8 @@
     {"id": "tech_magenta_cone", "layers": ["cone_path", "light_rays", "bloom"], "seed": 1203},
     {"id": "tech_arc_green", "layers": ["offscreen_arc", "soft_halo", "bloom"], "seed": 1204},
     {"id": "tech_arc_red", "layers": ["offscreen_arc", "soft_halo", "bloom"], "seed": 1205},
-    {"id": "tech_duotone_blob", "layers": ["radial_fields", "screen_blend", "bloom"], "seed": 1206}
+    {"id": "tech_duotone_blob", "layers": ["radial_fields", "screen_blend", "bloom"], "seed": 1206},
+    {"id": "tech_marble_vein", "layers": ["stone_field", "gold_vein", "grey_vein", "hairline_vein"], "seed": 1207}
   ],
   "style_tokens": {
     "navy": [0.012, 0.018, 0.075, 1.0],
@@ -19,6 +20,9 @@
     "green": [0.18, 1.0, 0.55, 1.0],
     "red": [1.0, 0.12, 0.2, 1.0],
     "violet": [0.52, 0.22, 0.98, 1.0],
-    "title": [0.94, 0.97, 1.0, 1.0]
+    "title": [0.94, 0.97, 1.0, 1.0],
+    "marble_stone": [0.93, 0.93, 0.95, 1.0],
+    "marble_gold": [0.79, 0.64, 0.15, 1.0],
+    "marble_grey": [0.54, 0.56, 0.6, 1.0]
   }
 }
