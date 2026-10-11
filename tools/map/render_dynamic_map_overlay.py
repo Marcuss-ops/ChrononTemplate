@@ -121,15 +121,24 @@ def main() -> int:
         builder.end_zoom = stop_zooms[0]
         # Start city approaches at metro scale and finish at street scale;
         # regional and national views stay at their authored overview zoom.
-        builder.start_zoom = min(builder.end_zoom, max(10.0, builder.end_zoom - 4.5))
-        # City maps spend the full 6.5-second camera window approaching the
-        # destination, then remain still for the 1.5-second label read.
+        # City maps should arrive at a useful street scale quickly. The old
+        # wide_context target stayed two zoom levels above the destination,
+        # making the place feel distant even at the end of the clip.
+        if map_level(pins[0]) == "city":
+            builder.end_zoom = min(17.0, stop_zooms[0])
+            # Open from the surrounding territory (rather than already at
+            # town scale), while retaining the short arrival window below.
+            builder.start_zoom = max(8.0, builder.end_zoom - 5.5)
+        else:
+            if camera_animation == "wide_context":
+                builder.end_zoom = max(5.8, stop_zooms[0] - 2.0)
+            elif camera_animation == "slow_approach":
+                builder.end_zoom = max(5.8, stop_zooms[0] - 0.9)
+            builder.start_zoom = max(5.8, builder.end_zoom - 1.5)
+        # Complete the approach in the opening 42%, then hold the destination
+        # long enough for the target marker and place name to read clearly.
         builder.full_duration_zoom = True
-        builder.terminal_hold_frames = round(1.5 * fps_num / fps_den)
-        if camera_animation == "wide_context":
-            builder.end_zoom = max(5.8, stop_zooms[0] - 2.0)
-        elif camera_animation == "slow_approach":
-            builder.end_zoom = max(5.8, stop_zooms[0] - 0.9)
+        builder.terminal_hold_frames = round(total_frames * 0.58)
     else:
         # Keep the previous five-second camera tour, then hold the final
         # destination for another 1.5 seconds. The builder's timeline ends
