@@ -58,12 +58,13 @@ def _fade(duration: int) -> list[dict]:
 def field_layer(id_: str, start: int, duration: int, seed: int, generator: str,
                 ramp: list[dict], *, frequency=1.0, operators=None,
                 scale=2, opacity=.7, drift=(0.0,0.0)) -> dict:
-    shape={"type":"rect","fill":[.01,.02,.06,1],
-           "field":{"generator":generator,"seed":seed,"frequency":frequency,"octaves":5,
-                    "operators":operators or []},
-           "field_render_scale":scale,
-           "field_drift":[float(drift[0]),float(drift[1])],
-           "field_ramp":{"type":"linear","start":[0,.5],"end":[1,.5],"color_stops":ramp}}
+    shape={"type":"rect",
+           "fill":{"type":"field",
+                   "field":{"generator":generator,"seed":seed,"frequency":frequency,"octaves":5,
+                            "operators":operators or []},
+                   "field_ramp":{"type":"linear","start":[0,.5],"end":[1,.5],"color_stops":ramp},
+                   "field_render_scale":scale,
+                   "field_drift":[float(drift[0]),float(drift[1])]}}
     return layer(id_,"shape",start,duration,size=[W,H],position=[W/2,H/2],shape=shape,
                  blend_mode="screen",opacity=opacity,animation={"tracks":_fade(duration)})
 
@@ -168,6 +169,18 @@ def scene_layers(recipe: dict, start: int, duration: int, index: int) -> list[di
                                 animation={"tracks":[*_fade(duration),
                                     track("position_x",[(0,0),(duration-1,16 if name!="pink" else -14)]),
                                     track("position_y",[(0,0),(duration-1,-8 if name=="violet" else 8)])]}))
+    elif ident=="tech_marble_vein":
+        ramp=[{"position":0,"color":[.78,.79,.83,1]},
+              {"position":.5,"color":[.94,.94,.96,1]},
+              {"position":1,"color":[.68,.69,.75,1]}]
+        result.append(field_layer(f"{ident}-stone",start,duration,seed,"perlin",ramp,
+                                  frequency=3,scale=2,opacity=.92,drift=(.004,.002)))
+        result.append(stroke_path(f"{ident}-vein-gold",start,duration,line_commands(-40),"#C9A227",3,
+                                  blur=4,bloom=.4,opacity=.8,rotation=(-4,5),offset=(0,10)))
+        result.append(stroke_path(f"{ident}-vein-grey",start,duration,line_commands(60),"#8A8F98",6,
+                                  blur=12,bloom=.3,opacity=.66,rotation=(3,-5),offset=(0,-12)))
+        result.append(stroke_path(f"{ident}-vein-hairline",start,duration,line_commands(10),"#F4F1E6",2,
+                                  blur=2,bloom=.3,opacity=.9,rotation=(-2,3),offset=(0,6)))
     else:
         raise ValueError(f"unknown tech background recipe: {ident}")
     return result
