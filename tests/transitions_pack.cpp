@@ -30,13 +30,8 @@ namespace {
     void everyLookHasAStableCatalogId() {
         section("transitions expose stable catalog ids");
         const std::vector<TransitionLook> looks = transitionLooks();
-        check(looks.size() == 20, "the pack ships twelve legacy and eight rapid looks");
-        const char* known[] = {"transition_wipe", "transition_push_through", "transition_dip_to_black",
-                               "transition_dip_to_color", "transition_blinds", "transition_iris_circle",
-                               "transition_glitch_slices", "transition_light_leak",
-                               "transition_barn_doors", "transition_curtain_lift",
-                               "transition_diamond_iris", "transition_four_way_doors",
-                               "lightleak_flash_sweep", "lightleak_corner_burn", "lightleak_whiteout",
+        check(looks.size() == 8, "the pack ships eight rapid light looks");
+        const char* known[] = {"lightleak_flash_sweep", "lightleak_corner_burn", "lightleak_whiteout",
                                "lightleak_diagonal_cut", "lightleak_double_pass", "lightleak_film_burn",
                                "lightleak_center_burst", "lightleak_horizontal_whip"};
 
@@ -97,62 +92,12 @@ namespace {
                 }
             }
 
-            // A covering look reaches full opacity inside the window; the leak
-            // wash peaks at its authored peak instead. (The sweep plates carry no
-            // opacity keys — they cover geometrically — so their static opacity
-            // of 1 is the covering value.)
-            const float expectedPeak = (look == TransitionLook::LightLeak ||
-                                        look == TransitionLook::LightLeakFlashSweep ||
-                                        look == TransitionLook::LightLeakCornerBurn ||
-                                        look == TransitionLook::LightLeakDiagonalCut ||
-                                        look == TransitionLook::LightLeakDoublePass ||
-                                        look == TransitionLook::LightLeakFilmBurn ||
-                                        look == TransitionLook::LightLeakCenterBurst ||
-                                        look == TransitionLook::LightLeakHorizontalWhip)
-                    ? specFor(look).leakPeakOpacity : 1.f;
+            // Every rapid look is a light wash peaking at its authored peak.
+            // Whiteout layers a full-opacity white wash on top of the warm one.
+            const float expectedPeak = (look == TransitionLook::LightLeakWhiteout)
+                    ? 1.f : specFor(look).leakPeakOpacity;
             check(maxWindowOpacity > expectedPeak - 0.05f,
-                  "the transition covers or washes the cut inside its window");
-        }
-    }
-
-    void wipesAreFullyCoveringAtTheMidpoint() {
-        section("sweep cuts are centered and opaque on the cover frame");
-        for (const TransitionLook look : {TransitionLook::Wipe, TransitionLook::PushThrough}) {
-            FakeContentHost host;
-            TemplateScene scene("sweep", 30.f, host, 1920.f, 1080.f);
-            const TransitionComposition cut = addTransition(scene, specFor(look));
-            const FrameSubmission cover = scene.submit(22);
-            check(cover.layers.size() == cut.plates.size(),
-                  "each sweep plate submits on the cover frame");
-            // The bar is twice the frame span and the sweep is linear, so at the
-            // cover frame the bar's centre is the canvas centre. Anchor-aware:
-            // the matrix translation is position - anchor, so the centred bar
-            // reads (-span/2, -barH/2) = (-960, 0), and the canvas stays covered
-            // while that translation stays in [-span, 0]. The plate carries no
-            // opacity keys, so its static opacity of 1 is the cover.
-            const BoundLayer* b = findLayer(cover, cut.plates[0]->id());
-            check(b != nullptr, "the leading plate is bound on the cover frame");
-            if (b) {
-                check(b->transform.visible, "the leading plate is visible on the cover frame");
-                check(std::fabs(b->transform.opacity - 1.f) < 1e-6f,
-                      "the leading plate covers at full opacity");
-                check(std::fabs(b->transform.world.elements[12] + 960.f) < 1e-3f,
-                      "the bar is horizontally centred at the cover frame");
-                check(std::fabs(b->transform.world.elements[13]) < 1e-3f,
-                      "the bar is vertically centred at the cover frame");
-            }
-            // The canvas stays covered on the frames either side of the midpoint.
-            for (const int frame : {20, 24}) {
-                const FrameSubmission near = scene.submit(frame);
-                const BoundLayer* side = findLayer(near, cut.plates[0]->id());
-                check(side != nullptr, "the leading plate is bound across the cover window");
-                if (side) {
-                    const float tx = side->transform.world.elements[12];
-                    check(tx <= 1e-3f && tx >= -1920.f - 1e-3f,
-                          "the bar still spans the canvas beside the midpoint");
-                }
-            }
-            check(scene.validate().empty(), "the sweep scene validates");
+                  "the transition washes the cut inside its window");
         }
     }
 
@@ -160,8 +105,7 @@ namespace {
         section("transition evaluation is a pure function of (scene, frame)");
         FakeContentHost host;
         TemplateScene scene("deterministic", 30.f, host, 1920.f, 1080.f);
-        TransitionSpec spec = specFor(TransitionLook::Blinds);
-        spec.slices = 5;
+        TransitionSpec spec = specFor(TransitionLook::LightLeakDoublePass);
         const TransitionComposition cut = addTransition(scene, spec);
 
         for (const int frame : {12, 18, 22, 26, 33}) {
@@ -179,7 +123,7 @@ namespace {
                 check(identical, "the same frame always produces the same matrices");
             }
         }
-        check(cut.plates.size() == 5, "blinds author one plate per slice");
+        check(cut.plates.size() == 2, "double pass authors two crossing beams");
     }
 
     void rapidLooksAreDeterministicAtArbitraryFrames() {
@@ -211,7 +155,7 @@ namespace {
         FakeContentHost host;
         TemplateScene scene("gate", 30.f, host, 1920.f, 1080.f);
 
-        TransitionSpec shortSpec = specFor(TransitionLook::Wipe);
+        TransitionSpec shortSpec = specFor(TransitionLook::LightLeakFlashSweep);
         shortSpec.duration = 1;
         bool threw = false;
         try {
@@ -221,7 +165,7 @@ namespace {
         }
         check(threw, "a one-frame duration is rejected");
 
-        TransitionSpec sliceSpec = specFor(TransitionLook::Blinds);
+        TransitionSpec sliceSpec = specFor(TransitionLook::LightLeakFlashSweep);
         sliceSpec.slices = 0;
         threw = false;
         try {
@@ -241,7 +185,7 @@ namespace {
         }
         check(threw, "a named rapid look rejects durations below its declared window");
 
-        TransitionSpec leakSpec = specFor(TransitionLook::LightLeak);
+        TransitionSpec leakSpec = specFor(TransitionLook::LightLeakFlashSweep);
         leakSpec.leakPeakOpacity = 0.f;
         threw = false;
         try {
@@ -279,12 +223,12 @@ namespace {
         section("motion blur is an opt-in scene declaration");
         FakeContentHost host;
         TemplateScene plain("plain", 30.f, host, 1920.f, 1080.f);
-        (void) addTransition(plain, specFor(TransitionLook::Wipe));
+        (void) addTransition(plain, specFor(TransitionLook::LightLeakFlashSweep));
         check(!plain.temporalMotionBlur().has_value(),
               "a transition without motion blur leaves the scene declaration unset");
 
         TemplateScene blurred("blurred", 30.f, host, 1920.f, 1080.f);
-        TransitionSpec spec = specFor(TransitionLook::Wipe);
+        TransitionSpec spec = specFor(TransitionLook::LightLeakFlashSweep);
         spec.enableMotionBlur = true;
         (void) addTransition(blurred, spec);
         check(blurred.temporalMotionBlur().has_value(), "the opt-in declares the setting");
@@ -299,7 +243,6 @@ int main() {
 
     everyLookHasAStableCatalogId();
     everyLookAssemblesSubmitsAndCoversTheMidpoint();
-    wipesAreFullyCoveringAtTheMidpoint();
     determinismHoldsFrameByFrame();
     validationRejectsBadSpecs();
     rapidLooksAreDeterministicAtArbitraryFrames();

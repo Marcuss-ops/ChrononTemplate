@@ -16,7 +16,8 @@ REPO="$(cd "$ROOT/.." && pwd)"
 OUT="${1:-$ROOT/out/short_phrase_v1}"
 FILTER="${2:-}"
 ASSETS_ROOT="$REPO/Chronon3d"
-EMITTER="$ROOT/build/release-fast/chronontemplate_emit_short_phrase_plans"
+EMITTER="$ROOT/build/dev-fast/chronontemplate_emit_short_phrase_plans"
+[[ -x "$EMITTER" ]] || EMITTER="$ROOT/build/release-fast/chronontemplate_emit_short_phrase_plans"
 [[ -x "$EMITTER" ]] || EMITTER="$ROOT/build/dev/chronontemplate_emit_short_phrase_plans"
 
 CLI=""
@@ -44,6 +45,8 @@ fi
 shopt -s nullglob
 if [[ "$FILTER" == "--claude-only" ]]; then
   plans=("$OUT"/short_phrase_editorial_claude_*.plan.json)
+elif [[ "$FILTER" == "--paper-only" ]]; then
+  plans=("$OUT"/short_phrase_editorial_paper_*.plan.json)
 else
   plans=("$OUT"/short_phrase_*.plan.json)
 fi
@@ -56,8 +59,7 @@ for plan in "${plans[@]}"; do
     --assets-root "$ASSETS_ROOT" \
     --backend vulkan \
     --hardware nvenc \
-    --encoder-backend native \
-    --gpu-hot-path-mode require_gpu_native \
+    --encoder-backend pipe \
     --codec h264 \
     --fps 30 \
     --rate-control qp \

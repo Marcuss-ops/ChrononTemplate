@@ -75,78 +75,6 @@ namespace chronontemplate {
             return composition;
         }
 
-        void fadeAndExit(Layer& layer, const Final3DData& data) {
-            presets::fadeIn(layer, data.startFrame, 18, data.fps);
-            presets::fadeOut(layer, endFrame(data) - 18, 18, data.fps);
-        }
-
-        Composition logoReveal(const Final3DData& data) {
-            Composition result = baseComposition(
-                    data, "final_3d_logo_reveal",
-                    MaterialDescriptor::emissive(1, Color(0x35a7ff), 3.f));
-            Layer& primary = *result.scene.findLayer(kPrimary);
-            presets::cardTurn(primary, data.startFrame, 26, data.fps);
-            presets::scalePop(primary, data.startFrame + 4, 24, 0.65f, 1.f, data.fps);
-            fadeAndExit(primary, data);
-            presets::cameraPush(result.camera, data.startFrame + 18, 36, 3.f, data.fps);
-            return result;
-        }
-
-        Composition productOrbit(const Final3DData& data) {
-            Composition result = baseComposition(
-                    data, "final_3d_product_orbit",
-                    MaterialDescriptor::lambert(2, Color(0xdddddd)));
-            Layer& product = result.scene.addContent(
-                    4, "Product", ContentRef::image(data.assetId, Vector2(640.f, 640.f)), kRoot);
-            product.positionedAt(Vector3(0.f, 0.f, 0.f)).scaled(0.75f).alive(lifetime(data));
-            presets::fadeScale(product, data.startFrame, 24, 0.75f, data.fps);
-            presets::spinXYZ(product, data.startFrame + 18, 72, 0.75f, data.fps);
-            presets::fadeOut(product, endFrame(data) - 18, 18, data.fps);
-            presets::cameraOrbit(result.camera, data.startFrame + 12, 84, math::PI * 0.28f, math::PI * 0.04f, data.fps);
-            PointLight& rim = result.scene.addPointLight(52, "Rim", kRoot);
-            rim.transform.position.set(-4.f, 2.f, 5.f);
-            rim.color.setRGB(0.2f, 0.5f, 1.f, ColorSpace::Linear);
-            rim.intensity = 4.f;
-            rim.range = 20.f;
-            return result;
-        }
-
-        Composition titleCard3D(const Final3DData& data) {
-            Composition result = baseComposition(
-                    data, "final_3d_title_card",
-                    MaterialDescriptor::emissive(3, Color(0xff4e8a), 2.f));
-            Layer& primary = *result.scene.findLayer(kPrimary);
-            Layer& subtitle = result.scene.addContent(
-                    kSecondary, "Subtitle", ContentRef::text(data.subtitle, Vector2(700.f, 72.f)), kRoot);
-            subtitle.positionedAt(Vector3(0.f, -150.f, 0.f)).alive(lifetime(data));
-            declareTextStyle(result, kSecondary, data.subtitleFont, kSubtitleFontSize);
-            presets::cardTurn(primary, data.startFrame, 26, data.fps);
-            presets::tilt3D(primary, data.startFrame + 18, 30, 8.f, data.fps);
-            presets::fadeIn(subtitle, data.startFrame + 28, 18, data.fps);
-            presets::fadeOut(primary, endFrame(data) - 18, 18, data.fps);
-            presets::fadeOut(subtitle, endFrame(data) - 18, 18, data.fps);
-            presets::cameraOrbit(result.camera, data.startFrame + 18, 72, math::PI * 0.12f, 0.f, data.fps);
-            return result;
-        }
-
-        Composition macBookProduct(const Final3DData& data) {
-            Composition result = baseComposition(
-                    data, "final_macbook_product",
-                    MaterialDescriptor::lambert(6, Color(0xc9d4e2)));
-            Layer& title = *result.scene.findLayer(kPrimary);
-            title.positionedAt(Vector3(0.f, 3.2f, 0.f));
-            presets::fadeIn(title, data.startFrame, 18, data.fps);
-            Layer& product = result.scene.addContent(
-                    4, "MacBookProduct", ContentRef::image(data.assetId, Vector2(900.f, 600.f)), kRoot);
-            product.positionedAt(Vector3(0.f, -1.5f, 0.f)).scaled(0.72f).alive(lifetime(data));
-            presets::fadeScale(product, data.startFrame + 8, 24, 0.72f, data.fps);
-            presets::cardTurn(product, data.startFrame + 24, 24, data.fps);
-            presets::cameraOrbit(result.camera, data.startFrame + 18, 84, math::PI * 0.18f, 0.f, data.fps);
-            presets::fadeOut(title, endFrame(data) - 18, 18, data.fps);
-            presets::fadeOut(product, endFrame(data) - 18, 18, data.fps);
-            return result;
-        }
-
         Composition typewriter3DGlow(const Final3DData& data) {
             Composition result = baseComposition(
                     data, "final_typewriter_3d_glow",
@@ -235,35 +163,6 @@ namespace chronontemplate {
             return result;
         }
 
-        Composition cameraPush(const Final3DData& data) {
-            Composition result = baseComposition(
-                    data, "final_3d_camera_push",
-                    MaterialDescriptor::lambert(4, Color(0xffcc88)));
-            Layer& primary = *result.scene.findLayer(kPrimary);
-            primary.transform.position.z = -1.f;
-            presets::fadeScale(primary, data.startFrame, 20, 0.8f, data.fps);
-            presets::cameraPush(result.camera, data.startFrame + 10, 84, 6.f, data.fps);
-            fadeAndExit(primary, data);
-            return result;
-        }
-
-        Composition lightPulse(const Final3DData& data) {
-            Composition result = baseComposition(
-                    data, "final_3d_light_pulse",
-                    MaterialDescriptor::emissive(5, Color(0x66ddff), 4.f));
-            Layer& primary = *result.scene.findLayer(kPrimary);
-            presets::fadeIn(primary, data.startFrame, 18, data.fps);
-            presets::scalePop(primary, data.startFrame + 10, 28, 0.9f, 1.f, data.fps);
-            DirectionalLight& key = static_cast<DirectionalLight&>(*result.scene.lights().front());
-            const float t0 = frameToTime(data.startFrame + 12, data.fps);
-            const float t1 = frameToTime(data.startFrame + 32, data.fps);
-            key.intensityTrack.add(t0, 0.5f, Easing::easeInOut());
-            key.intensityTrack.add(t1, 4.f, Easing::easeOut());
-            key.intensityTrack.add(frameToTime(data.startFrame + 52, data.fps), 1.5f, Easing::easeInOut());
-            fadeAndExit(primary, data);
-            return result;
-        }
-
     }// namespace
 
     void Final3DData::validate() const {
@@ -292,12 +191,6 @@ namespace chronontemplate {
 
     const char* name(Final3DPreset preset) {
         switch (preset) {
-            case Final3DPreset::LogoReveal: return "logo_reveal";
-            case Final3DPreset::ProductOrbit: return "product_orbit";
-            case Final3DPreset::TitleCard3D: return "title_card_3d";
-            case Final3DPreset::CameraPush: return "camera_push";
-            case Final3DPreset::LightPulse: return "light_pulse";
-            case Final3DPreset::MacBookProduct: return "macbook_product";
             case Final3DPreset::Typewriter3DGlow: return "typewriter_3d_glow";
             case Final3DPreset::CleanRed: return "clean_red";
             case Final3DPreset::YouTubeCanary: return "youtube_canary";
@@ -308,10 +201,7 @@ namespace chronontemplate {
     }
 
     std::vector<Final3DPreset> final3DPresets() {
-        return {Final3DPreset::LogoReveal, Final3DPreset::ProductOrbit,
-                Final3DPreset::TitleCard3D, Final3DPreset::CameraPush,
-                Final3DPreset::LightPulse, Final3DPreset::MacBookProduct,
-                Final3DPreset::Typewriter3DGlow, Final3DPreset::CleanRed,
+        return {Final3DPreset::Typewriter3DGlow, Final3DPreset::CleanRed,
                 Final3DPreset::YouTubeCanary, Final3DPreset::TextStatic,
                 Final3DPreset::TextDollyOrbitGlow};
     }
@@ -340,36 +230,6 @@ namespace chronontemplate {
 
         data.validate();
         switch (preset) {
-            case Final3DPreset::LogoReveal: {
-                Composition composition = logoReveal(data);
-                verifyCatalogContract(composition);
-                return composition;
-            }
-            case Final3DPreset::ProductOrbit: {
-                Composition composition = productOrbit(data);
-                verifyCatalogContract(composition);
-                return composition;
-            }
-            case Final3DPreset::TitleCard3D: {
-                Composition composition = titleCard3D(data);
-                verifyCatalogContract(composition);
-                return composition;
-            }
-            case Final3DPreset::CameraPush: {
-                Composition composition = cameraPush(data);
-                verifyCatalogContract(composition);
-                return composition;
-            }
-            case Final3DPreset::LightPulse: {
-                Composition composition = lightPulse(data);
-                verifyCatalogContract(composition);
-                return composition;
-            }
-            case Final3DPreset::MacBookProduct: {
-                Composition composition = macBookProduct(data);
-                verifyCatalogContract(composition);
-                return composition;
-            }
             case Final3DPreset::Typewriter3DGlow: {
                 Composition composition = typewriter3DGlow(data);
                 verifyCatalogContract(composition);

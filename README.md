@@ -46,9 +46,7 @@ and does not implement geographic projection.
 ```text
 important_phrases/          phrasing and titling, one subdir per family
   ImportantPhrasePack            shared look + plan data types
-  classic/                       fourteen "normal" phrase animations
   typewriter/                    fifteen typed animations, `_` cursor
-  typewriter_3d/                 3D typewriter + neon glow / web cards
   apple/                         modern restrained phrase presets
   highlight/                     long phrases with animated under-phrase accents
   didone/                        editorial Didone title pack
@@ -60,7 +58,7 @@ backgrounds/                BackgroundPack — editorial documentary/grid/scan/d
 entities_with_text/         DocumentarySnapshotPack + YouTubeSubscribe
 map/                        ModernMapPack — styled plate, labels and camera beat
 camera_roll/                TitleCameraPack + SceneCameraPack — camera-only motion
-transitions/                TransitionPack — twelve legacy + eight rapid looks
+transitions/                TransitionPack — eight rapid light looks
 captions_dataviz/           CaptionsDataVizPack — PCM beat grid, beat-timed captions, bar + step-line charts
 composers/                  LayoutComposer — flex row/column/grid boards plus FLIP moves
 ```
@@ -298,8 +296,8 @@ mouse-free deterministic particles. Contract:
 
 ## Declarative transitions (BACKLOG item 4)
 
-`include/chronontemplate/transitions/TransitionPack.hpp` exposes eight legacy
-looks and eight rapid light-transition presets. The rapid IDs are
+`include/chronontemplate/transitions/TransitionPack.hpp` exposes eight rapid
+light-transition presets. The rapid IDs are
 `lightleak_flash_sweep` (6–10f), `lightleak_corner_burn` (8–12f),
 `lightleak_whiteout` (5–8f), `lightleak_diagonal_cut` (6–9f),
 `lightleak_double_pass` (10–14f), `lightleak_film_burn` (8–12f),
@@ -359,25 +357,20 @@ When requested, scene temporal motion blur remains an opt-in declaration.
 ```cpp
 TemplateScene scene("cut", 30.f, host, 1920.f, 1080.f);
 TransitionSpec spec;
-spec.look = TransitionLook::GlitchSlices;
+spec.look = TransitionLook::LightLeakDiagonalCut;
 spec.travel = chrononmotion::motion::presets::Direction::Left;
 spec.inFrame = 30;
-spec.duration = 20;
+spec.duration = recommendedTransitionDuration(spec.look);
 spec.enableMotionBlur = true;
 const TransitionComposition cut = addTransition(scene, spec);
 ```
 
-`transitionId` names each look (`transition_wipe`, `transition_push_through`,
-`transition_dip_to_black`, `transition_dip_to_color`, `transition_blinds`,
-`transition_iris_circle`, `transition_glitch_slices`,
-`transition_light_leak`, `transition_barn_doors`, `transition_curtain_lift`,
-`transition_diamond_iris`, `transition_four_way_doors`, `lightleak_flash_sweep`, `lightleak_corner_burn`,
+`transitionId` names each look (`lightleak_flash_sweep`, `lightleak_corner_burn`,
 `lightleak_whiteout`, `lightleak_diagonal_cut`, `lightleak_double_pass`,
 `lightleak_film_burn`, `lightleak_center_burst`, and
 `lightleak_horizontal_whip`); `coverFrame` is the authored peak/cover point.
 Scale never reaches an exact zero (the plan lowering fails closed on singular
-transforms) and the glitch slices are deterministic by index, never by an RNG,
-so every cut is a pure function of (scene, frame). Contract:
+transforms), so every cut is a pure function of (scene, frame). Contract:
 `chronontemplate_transitions_pack_test`.
 
 ## Captions and data-viz (BACKLOG item 5)
@@ -460,7 +453,7 @@ data.subtitle = "FINAL ANIMATION";
 data.assetId = "product.asset";
 
 auto composition = chronontemplate::build(
-    chronontemplate::Final3DPreset::LogoReveal, data);
+    chronontemplate::Final3DPreset::Typewriter3DGlow, data);
 
 composition.scene.evaluate(30);
 auto compiled = composition.scene.compile();
@@ -468,12 +461,6 @@ auto compiled = composition.scene.compile();
 
 Final 3D presets:
 
-- `LogoReveal`
-- `ProductOrbit`
-- `TitleCard3D`
-- `CameraPush`
-- `LightPulse`
-- `MacBookProduct` — a product card on a title, then a quarter turn under an orbit
 - `Typewriter3DGlow` — one complete text content request with typewriter intent; Chronon3D owns cluster/glyph reveal and fixed layout
 - `CleanRed` — the headline slides in flat while the key light keys from dim to red
 - `YouTubeCanary` — the production `CHRONON` composition intent: red glow, typewriter style, XYZ motion and camera orbit on one content id
@@ -861,23 +848,22 @@ still owns content bytes, text layout and rasterization; ChrononTemplate only
 orchestrates the handoff and declares intent. No browser, renderer,
 font system or Windows toolchain is required.
 
-## Important-phrase style families (Classic)
+## Important-phrase style families
 
 RenderingGen names the editorial kind (IMPORTANT_PHRASE);
 `include/chronontemplate/important_phrases/ImportantPhrasePack.hpp` owns how such a phrase looks
-and moves. `Classic` is the first family: white Montserrat Bold face with a
-soft white glow and a slight black stroke on the black canvas, fourteen
-animations — seven layer entrances, three staggered glyph windows, two
-whole-run focuses and two full-run word emphases. The second family,
-`Typewriter`, types the phrase glyph by glyph while the `_` underscore cursor
-trails, blinks, leads or holds: fifteen animations with `typewriter_*` ids.
-One file per family (`ClassicPhrasePack.*`, `TypewriterPhrasePack.*`) on the
-shared look and motion vocabulary of `ImportantPhrasePack.*`, so a pipeline
-can render one family while the other stays ready.
+and moves: white Montserrat Bold face with a soft white glow and a slight
+black stroke on the black canvas. `Typewriter` types the phrase glyph by
+glyph while the `_` underscore cursor trails, blinks, leads or holds:
+fifteen animations with `typewriter_*` ids. `Apple` is the restrained modern
+family, `Highlight` carries animated under-phrase accents and `Didone` the
+editorial Didone titles. One file per family (`TypewriterPhrasePack.*`,
+`ApplePhrasePack.*`, …) on the shared look and motion vocabulary of
+`ImportantPhrasePack.*`, so a pipeline can render one family while the others
+stay ready.
 
-The pack is data; `tools/important_phrases/emit_important_phrase_classic.cpp` lowers it to
-`chronon.render-plan.v2` and `tools/important_phrases/render_important_phrase_classic.sh` renders
-the showcase MP4s on the Vulkan lane (GPU-native text, `require_gpu_native`).
+The packs are data; `tools/important_phrases/emit_important_phrase_plans.cpp` lowers them to
+`chronon.render-plan.v2` for showcase MP4s on the Vulkan lane (GPU-native text, `require_gpu_native`).
 The GPU lane samples animator properties per run — per-glyph effect is always
 `property(t) * weight(glyph, t)` — so unit-level staging lives in the selector
 window: `reveal` holds the property at its hidden value and sweeps the window

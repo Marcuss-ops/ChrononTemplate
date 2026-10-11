@@ -7,8 +7,9 @@
 // when a phrase is short.
 //
 // The pack is data, not rendering, exactly like the important-phrase families:
-// tools/emit_important_phrase_classic.cpp lowers these definitions to the
-// Chronon3D render-plan contract and Chronon3D shapes the run. Every text
+// tools/important_phrases/emit_important_phrase_plans.cpp lowers those
+// definitions to the Chronon3D render-plan contract and Chronon3D shapes
+// the run. Every text
 // animator stays inside Chronon3D's canonical GPU text contract (one selector,
 // a forward glyph window or a full-run word emphasis), so the family renders on
 // the Vulkan lane with require_gpu_native.
@@ -81,7 +82,8 @@ namespace chronontemplate {
         ProductShapeBlur,
         EditorialPromptResponse,
         EditorialDiffPatch,
-        EditorialTerminalFocus
+        EditorialTerminalFocus,
+        EditorialPaperTitleCard ///< minimal documentary card: off-white paper, ink text, soft shadow
     };
 
     /// How the phrase leaves. The entrance is the recipe; the exit is the beat
@@ -130,6 +132,7 @@ namespace chronontemplate {
             float opacity{1.f};
             std::vector<PhraseTrack> tracks{};
             std::vector<PhraseTextAnimator> textAnimators{};
+            bool behind{false}; ///< draw under the main phrase (shadow copies)
         };
         std::vector<TextOverlay> textOverlays{};
         bool drawMainPhrase{true};
@@ -138,6 +141,9 @@ namespace chronontemplate {
         std::string adaptation_note{};
         /// White editorial paper palette with ink-black typography.
         bool white_background{false};
+        /// Off-white paper stack (solid + noise/dust/vignette texture), ink text (#131313)
+        /// and a two-layer soft shadow. Mutually exclusive with `white_background`.
+        bool paper_background{false};
     };
 
     /// The decor bumper, kept out of the text engine as its own definition.

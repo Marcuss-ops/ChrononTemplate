@@ -619,12 +619,9 @@ int main(int argc, char** argv) {
         validateFrameRange("micro_frames", 4, 6);
         validateFrameRange("normal_frames", 7, 10);
         validateFrameRange("hero_frames", 11, 16);
-        if (!transitions.contains("recipes") || !transitions["recipes"].is_array() || transitions["recipes"].size() != 20)
-            fail("transitions.recipes must define exactly twelve legacy and eight rapid looks");
+        if (!transitions.contains("recipes") || !transitions["recipes"].is_array() || transitions["recipes"].size() != 8)
+            fail("transitions.recipes must define exactly eight rapid looks");
         const std::set<std::string> expectedTransitionIDs{
-            "transition_wipe", "transition_push_through", "transition_dip_to_black", "transition_dip_to_color",
-            "transition_blinds", "transition_iris_circle", "transition_glitch_slices", "transition_light_leak",
-            "transition_barn_doors", "transition_curtain_lift", "transition_diamond_iris", "transition_four_way_doors",
             "lightleak_flash_sweep", "lightleak_corner_burn", "lightleak_whiteout", "lightleak_diagonal_cut",
             "lightleak_double_pass", "lightleak_film_burn", "lightleak_center_burst", "lightleak_horizontal_whip"};
         std::set<std::string> transitionIDs;
@@ -641,15 +638,10 @@ int main(int argc, char** argv) {
             const std::string timing = recipe.value("timing_class", "");
             if (minimum < 2 || weight < 0 || weight > 100 || recipe.value("implementation", "").empty())
                 fail("transition " + id + " has invalid timing, weight, or implementation metadata");
-            if (timing == "legacy") {
-                if (maximum != 0 || recommended < minimum || weight != 0)
-                    fail("legacy transition " + id + " must have unbounded maximum and zero weight");
-            } else {
-                if (maximum < minimum || recommended < minimum || recommended > maximum ||
-                    (timing != "micro" && timing != "normal" && timing != "hero"))
-                    fail("rapid transition " + id + " has an invalid timing range");
-                rapidWeightTotal += weight;
-            }
+            if (maximum < minimum || recommended < minimum || recommended > maximum ||
+                (timing != "micro" && timing != "normal" && timing != "hero"))
+                fail("rapid transition " + id + " has an invalid timing range");
+            rapidWeightTotal += weight;
         }
         if (transitionIDs != expectedTransitionIDs || rapidWeightTotal != 100)
             fail("transition IDs must match the C++ contract and rapid weights must sum to 100");

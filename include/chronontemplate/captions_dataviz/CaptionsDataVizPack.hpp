@@ -93,11 +93,11 @@ namespace chronontemplate {
         std::vector<std::string> labels{};    ///< per-bar text; empty entries render the value
         int highlightIndex{-1};               ///< one bar gets a pulsing halo
         std::string title{};
-        std::string barColor{"#1B2330"};
-        std::string accentColor{"#00E5FF"};
-        std::string labelColor{"#FFFFFF"};
-        std::string labelFont{};
-        std::string titleFont{};
+        std::string barColor{"#201F1C"};
+        std::string accentColor{"#000000"};
+        std::string labelColor{"#080808"};
+        std::string labelFont{"assets/fonts/Inter-SemiBold.ttf"};
+        std::string titleFont{"assets/fonts/Inter-SemiBold.ttf"};
         float chartHeightFraction{0.45f};     ///< chart height as a fraction of the canvas
         float marginX{0.08f};                 ///< side margin as a fraction of the canvas
         bool showTrendLine{true};             ///< a rule that draws itself to the average

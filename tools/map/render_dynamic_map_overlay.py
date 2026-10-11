@@ -126,9 +126,11 @@ def main() -> int:
         # making the place feel distant even at the end of the clip.
         if map_level(pins[0]) == "city":
             builder.end_zoom = min(17.0, stop_zooms[0])
-            # Open from the surrounding territory (rather than already at
-            # town scale), while retaining the short arrival window below.
-            builder.start_zoom = max(8.0, builder.end_zoom - 5.5)
+            # Open closer to town scale: a 5.5-level dive reads as a
+            # sudden drop and the clip feels rushed. A 3-level approach
+            # keeps the same arrival window but nearly halves peak zoom
+            # velocity, so the flight stays readable.
+            builder.start_zoom = max(8.0, builder.end_zoom - 3.0)
         else:
             if camera_animation == "wide_context":
                 builder.end_zoom = max(5.8, stop_zooms[0] - 2.0)
@@ -149,9 +151,11 @@ def main() -> int:
         # Keep the authored tour duration fixed by taking that time from the
         # per-stop holds, and reserve the final 1.5 s for the destination hold.
         # Five-stop close-zoom routes need at least 1.2 s per leg to stay
-        # inside the strict zoom-velocity gate. Borrow the extra time from
+        # inside the strict zoom-velocity gate. Multi-stop tours involve more
+        # ground to cover, so give each leg 1.8-2.4 s: slower legs stay far
+        # inside the gate and remain readable. Borrow the extra time from
         # per-stop holds; keep the authored tour and final 1.5 s hold intact.
-        travel_seconds = min(1.6, max(1.2, tour_seconds / (1.9 * (len(stops) - 1))))
+        travel_seconds = min(2.4, max(1.8, tour_seconds / (1.9 * (len(stops) - 1))))
         stop_seconds = max(0.15, (tour_seconds - travel_seconds * (len(stops) - 1)) / len(stops))
         builder = geo.TourBuilder(stops, seconds_per_stop=stop_seconds,
                                   travel_seconds=travel_seconds, end_zoom=max(stop_zooms))

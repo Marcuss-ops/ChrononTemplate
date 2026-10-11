@@ -86,12 +86,6 @@ namespace chronontemplate {
     };
 
     enum class Final3DPreset {
-        LogoReveal,
-        ProductOrbit,
-        TitleCard3D,
-        CameraPush,
-        LightPulse,
-        MacBookProduct,
         Typewriter3DGlow,
         CleanRed,
         YouTubeCanary,

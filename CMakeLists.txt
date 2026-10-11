@@ -101,9 +101,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/entities_with_text/DocumentarySnapshotPack.cpp
         src/chronontemplate/entities_with_text/EntityFilmstripPack.cpp
         src/chronontemplate/important_phrases/ImportantPhrasePack.cpp
-        src/chronontemplate/important_phrases/classic/ClassicPhrasePack.cpp
         src/chronontemplate/important_phrases/typewriter/TypewriterPhrasePack.cpp
-        src/chronontemplate/important_phrases/typewriter_3d/Typewriter3DPhrasePack.cpp
         src/chronontemplate/important_phrases/apple/ApplePhrasePack.cpp
         src/chronontemplate/important_phrases/highlight/PhraseHighlightPack.cpp
         src/chronontemplate/important_phrases/didone/DidoneTitlesPack.cpp
@@ -180,6 +178,42 @@ target_include_directories(chronontemplate_emit_oil_crisis_reference_plans PRIVA
 target_compile_features(chronontemplate_emit_oil_crisis_reference_plans PRIVATE cxx_std_20)
 target_compile_options(chronontemplate_emit_oil_crisis_reference_plans PRIVATE -Wall -Wextra)
 
+add_executable(chronontemplate_emit_truett_cathy_legacy_v1
+        tools/entities_with_text/emit_truett_cathy_legacy_v1.cpp)
+target_link_libraries(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_usa_atmospheric_backlight_v1
+        tools/map/emit_usa_atmospheric_backlight_v1.cpp)
+target_link_libraries(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    target_sources(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_entity_filmstrip_reference
         tools/entities_with_text/emit_entity_filmstrip_reference.cpp)
 target_link_libraries(chronontemplate_emit_entity_filmstrip_reference PRIVATE chronontemplate)
@@ -208,6 +242,10 @@ if(TARGET chrononmotion_chronon3d_adapter)
     add_executable(chronontemplate_dump_documentary_snapshot_plan
             tools/entities_with_text/dump_documentary_snapshot_plan.cpp)
     target_link_libraries(chronontemplate_dump_documentary_snapshot_plan
+            PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
+    add_executable(chronontemplate_emit_dataviz_sample
+            tools/captions_dataviz/emit_dataviz_sample.cpp)
+    target_link_libraries(chronontemplate_emit_dataviz_sample
             PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
 endif()
 
@@ -252,10 +290,10 @@ if(CHRONONTEMPLATE_BUILD_CATALOG_TOOL)
         target_compile_options(chronontemplate_emit_catalog PRIVATE -Werror)
     endif()
 
-    # The Classic important-phrase pack lowers its fifteen C++ animations to
-    # chronon.render-plan.v2 plans; the renderer draws the glow and the glyphs.
+    # The important-phrase plans: Typewriter, Highlight and Apple families
+    # lowered to chronon.render-plan.v2 plans; the renderer draws the glow.
     add_executable(chronontemplate_emit_important_phrase_plans
-            tools/important_phrases/emit_important_phrase_classic.cpp)
+            tools/important_phrases/emit_important_phrase_plans.cpp)
     target_link_libraries(chronontemplate_emit_important_phrase_plans PRIVATE chronontemplate)
     target_include_directories(chronontemplate_emit_important_phrase_plans PRIVATE
             "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
@@ -472,23 +510,12 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     add_test(NAME chronontemplate_documentary_snapshot_pack_test
             COMMAND chronontemplate_documentary_snapshot_pack_test)
 
-    # The important-phrase families, one file per family: the shared
-    # white-on-black look + fourteen Classic definitions, and the fifteen
-    # Typewriter definitions with their underscore cursor.
-    add_executable(chronontemplate_classic_phrase_pack_test tests/classic_phrase_pack.cpp)
-    target_link_libraries(chronontemplate_classic_phrase_pack_test PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_classic_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    add_test(NAME chronontemplate_classic_phrase_pack_test COMMAND chronontemplate_classic_phrase_pack_test)
-
+    # The important-phrase families: the shared white-on-black look plus the
+    # fifteen Typewriter definitions with their underscore cursor.
     add_executable(chronontemplate_typewriter_phrase_pack_test tests/typewriter_phrase_pack.cpp)
     target_link_libraries(chronontemplate_typewriter_phrase_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_typewriter_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_typewriter_phrase_pack_test COMMAND chronontemplate_typewriter_phrase_pack_test)
-
-    add_executable(chronontemplate_typewriter_3d_pack_test tests/typewriter_3d_pack.cpp)
-    target_link_libraries(chronontemplate_typewriter_3d_pack_test PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_typewriter_3d_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    add_test(NAME chronontemplate_typewriter_3d_pack_test COMMAND chronontemplate_typewriter_3d_pack_test)
 
     add_executable(chronontemplate_apple_phrase_pack_test tests/apple_phrase_pack.cpp)
     target_link_libraries(chronontemplate_apple_phrase_pack_test PRIVATE chronontemplate)

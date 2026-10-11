@@ -26,9 +26,7 @@ namespace {
 
     void finalCatalog() {
         section("final 3D preset catalog");
-        check(final3DPresets().size() == 11, "final 3D catalog exposes eleven presets including the new text dolly/orbit glow recipe");
-        check(std::string(name(Final3DPreset::MacBookProduct)) == "macbook_product",
-              "macbook preset has a stable wire name");
+        check(final3DPresets().size() == 5, "final 3D catalog exposes five modern presets");
         check(std::string(name(Final3DPreset::Typewriter3DGlow)) == "typewriter_3d_glow",
               "typewriter preset has a stable wire name");
         check(std::string(name(Final3DPreset::CleanRed)) == "clean_red",
@@ -72,12 +70,6 @@ namespace {
     void stylePresets() {
         section("style presets");
         const Final3DData data = finalData();
-
-        const Composition macBook = build(Final3DPreset::MacBookProduct, data);
-        const Layer* product = macBook.scene.findLayer("MacBookProduct");
-        check(product != nullptr && product->content.isImage(),
-              "macbook preset places an image product under the scene root");
-        check(macBook.scene.validate().empty(), "macbook preset has a valid hierarchy");
 
         const Composition typewriter = build(Final3DPreset::Typewriter3DGlow, data);
         std::size_t textLayers = 0;
@@ -150,7 +142,7 @@ namespace {
         invalid.duration = 30;
         bool rejected = false;
         try {
-            (void)build(Final3DPreset::LogoReveal, invalid);
+            (void)build(Final3DPreset::Typewriter3DGlow, invalid);
         } catch (const std::invalid_argument&) {
             rejected = true;
         }
