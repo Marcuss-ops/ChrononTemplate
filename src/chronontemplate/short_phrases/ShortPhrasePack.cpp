@@ -78,6 +78,7 @@ namespace chronontemplate {
             case ShortPhraseAnimation::EditorialPromptResponse: return "short_phrase_editorial_claude_prompt_response";
             case ShortPhraseAnimation::EditorialDiffPatch: return "short_phrase_editorial_claude_diff_patch";
             case ShortPhraseAnimation::EditorialTerminalFocus: return "short_phrase_editorial_claude_terminal_focus";
+            case ShortPhraseAnimation::EditorialPaperTitleCard: return "short_phrase_editorial_paper_title_card";
         }
         throw std::invalid_argument("chronontemplate::name: unknown short phrase animation");
     }
@@ -132,7 +133,8 @@ namespace chronontemplate {
                 ShortPhraseAnimation::ProductShapeBlur,
                 ShortPhraseAnimation::EditorialPromptResponse,
                 ShortPhraseAnimation::EditorialDiffPatch,
-                ShortPhraseAnimation::EditorialTerminalFocus};
+                ShortPhraseAnimation::EditorialTerminalFocus,
+                ShortPhraseAnimation::EditorialPaperTitleCard};
     }
 
     static ShortPhraseDefinition entranceDefinition(ShortPhraseAnimation animation) {
@@ -170,6 +172,31 @@ namespace chronontemplate {
                 def.white_background = true;
                 return def;
             }
+            case ShortPhraseAnimation::EditorialPaperTitleCard: {
+                ShortPhraseDefinition def{name(animation), "Paper Title Card", "Every detail matters", 12,
+                    {track("opacity", {{0, 0.f}, {12, 1.f}}, "linear"),
+                     track("blur", {{0, 10.f}, {12, 0.f}}),
+                     track("position_y", {{0, 12.f}, {12, 0.f}})},
+                    {}, {}, ShortPhraseExit::Reverse, ShortPhraseDecor::None, {}, 120.f};
+                def.paper_background = true;
+                const auto shadow = [&](const char* id, float offsetX, float offsetY, float opacity, float blurRest) {
+                    ShortPhraseDefinition::TextOverlay overlay;
+                    overlay.id = id;
+                    overlay.text = def.phrase;
+                    overlay.fill = "#000000";
+                    overlay.offset_x = offsetX;
+                    overlay.offset_y = offsetY;
+                    overlay.tracks = {track("opacity", {{0, 0.f}, {12, opacity}}, "linear"),
+                                      track("position_y", {{0, 12.f}, {12, 0.f}})};
+                    overlay.textAnimators = {animator(PhraseSelector{"glyph", "forward", "full"},
+                                                      {track("blur", {{0, blurRest}, {209, blurRest}})})};
+                    overlay.behind = true;
+                    def.textOverlays.push_back(std::move(overlay));
+                };
+                shadow("shadow_ambient", 0.f, 6.f, 0.25f, 14.f);
+                shadow("shadow_contact", 0.f, 2.f, 0.25f, 4.f);
+                return def;
+            }
             case ShortPhraseAnimation::ProductHardMaskSlideUp: return blurOutUp();
             case ShortPhraseAnimation::ProductKineticBlurIn: return bottomUpLetters();
             case ShortPhraseAnimation::ProductWordStagger: return focusBlurResolve();
@@ -204,6 +231,7 @@ namespace chronontemplate {
             case ShortPhraseAnimation::EditorialPromptResponse:
             case ShortPhraseAnimation::EditorialDiffPatch:
             case ShortPhraseAnimation::EditorialTerminalFocus:
+            case ShortPhraseAnimation::EditorialPaperTitleCard:
                 break;
             // Dedicated recipes are dispatched in the first switch.
             case ShortPhraseAnimation::ProductMaskedHeading:
@@ -510,6 +538,7 @@ namespace chronontemplate {
         const bool editorial = def.id.rfind("short_phrase_editorial_", 0) == 0;
         const bool product = def.id.rfind("short_phrase_product_", 0) == 0;
         if (product) return def; // product timings are authored to their source beat; do not stretch them
+        if (animation == ShortPhraseAnimation::EditorialPaperTitleCard) return def; // authored 12-frame beat
         if (!editorial) {
             const int authoredEnter = def.enter;
             constexpr int kReadableEnterFrames = 90; // 3 s @ 30 fps
@@ -698,7 +727,8 @@ namespace chronontemplate {
                     ShortPhraseAnimation::ProductRadialExpansion,
                     ShortPhraseAnimation::ProductSubtitleDissolve,
                     ShortPhraseAnimation::ProductFoldText,
-                    ShortPhraseAnimation::EditorialTerminalFocus};
+                    ShortPhraseAnimation::EditorialTerminalFocus,
+                    ShortPhraseAnimation::EditorialPaperTitleCard};
         }
         if (wordCount <= 3) {
             return {ShortPhraseAnimation::CharacterTrackingReveal,
@@ -721,7 +751,8 @@ namespace chronontemplate {
                     ShortPhraseAnimation::ProductGlareHover,
                     ShortPhraseAnimation::ProductGlowCursor,
                     ShortPhraseAnimation::ProductGradualBlur,
-                    ShortPhraseAnimation::ProductShapeBlur};
+                    ShortPhraseAnimation::ProductShapeBlur,
+                    ShortPhraseAnimation::EditorialPaperTitleCard};
         }
         if (wordCount <= 5) {
             return {ShortPhraseAnimation::WordCascadeSentence,

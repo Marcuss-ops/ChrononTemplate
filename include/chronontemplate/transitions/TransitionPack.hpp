@@ -21,21 +21,10 @@
 
 namespace chronontemplate {
 
-    /// The transition looks the pack can assemble. Existing values are frozen;
-    /// new looks are append-only so serialized enum values remain stable.
+    /// The transition looks the pack can assemble: eight rapid light looks.
+    /// The twelve legacy looks (wipe/push/dip/blinds/iris/glitch/leak/doors)
+    /// were removed; values are append-only so serialized enum values stay stable.
     enum class TransitionLook : std::uint8_t {
-        Wipe,
-        PushThrough,
-        DipToBlack,
-        DipToColor,
-        Blinds,
-        IrisCircle,
-        GlitchSlices,
-        LightLeak,
-        BarnDoors,
-        CurtainLift,
-        DiamondIris,
-        FourWayDoors,
         LightLeakFlashSweep,
         LightLeakCornerBurn,
         LightLeakWhiteout,
@@ -55,7 +44,7 @@ namespace chronontemplate {
     [[nodiscard]] int recommendedTransitionDuration(TransitionLook look) noexcept;
     [[nodiscard]] bool isRapidTransition(TransitionLook look) noexcept;
 
-    enum class TransitionTimingClass : std::uint8_t { Legacy, Micro, Normal, Hero };
+    enum class TransitionTimingClass : std::uint8_t { Micro, Normal, Hero };
     [[nodiscard]] TransitionTimingClass transitionTimingClass(TransitionLook look) noexcept;
 
     /// Suggested selector distribution; percentages sum to 100. It is catalog
@@ -64,7 +53,7 @@ namespace chronontemplate {
     [[nodiscard]] std::vector<TransitionWeight> recommendedTransitionWeights();
 
     struct TransitionSpec {
-        TransitionLook look{TransitionLook::Wipe};
+        TransitionLook look{TransitionLook::LightLeakFlashSweep};
         std::string plateColor{"#0B0E14"};   ///< the covering plate (or dip colour)
         std::string inColor{"#101720"};      ///< the incoming plate for PushThrough
         std::string leakColor{"#FFB35C"};    ///< the LightLeak wash colour

@@ -1,12 +1,13 @@
-// ChrononTemplate — Classic important-phrase plan emitter.
+// ChrononTemplate — important-phrase plan emitter.
 //
-// This tool lowers the C++-owned Classic pack (ImportantPhrasePack) to the
-// Chronon3D render-plan contract, one plan per animation. It is deliberately
-// thin: the look and the fifteen animations live in
-// include/chronontemplate/important_phrases/ImportantPhrasePack.hpp and this program only
-// projects them — extended keyframes (hold + synthesised exit) and the lowered
-// selector window, the same canonical lowering emit_native_phrase_pack.py
-// applies to catalog motions.
+// This tool lowers the C++-owned important-phrase families (Typewriter,
+// Highlight, Apple) to the Chronon3D render-plan contract, one plan per
+// animation. It is deliberately thin: the shared look lives in
+// include/chronontemplate/important_phrases/ImportantPhrasePack.hpp, each
+// family owns its animations, and this program only projects them —
+// extended keyframes (hold + synthesised exit) and the lowered selector
+// window, the same canonical lowering emit_native_phrase_pack.py applies
+// to catalog motions.
 //
 // Validation is fail-closed: a keyframe list that does not start at frame 0,
 // a non-monotonic one, or an animation with neither layer tracks nor text
@@ -18,7 +19,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include "chronontemplate/important_phrases/classic/ClassicPhrasePack.hpp"
 #include "chronontemplate/important_phrases/ImportantPhrasePack.hpp"
 #include "chronontemplate/important_phrases/typewriter/TypewriterPhrasePack.hpp"
 #include "chronontemplate/important_phrases/apple/ApplePhrasePack.hpp"
@@ -36,7 +36,6 @@
 namespace {
 
     using json = nlohmann::ordered_json;
-    using chronontemplate::ClassicPhraseAnimation;
     using chronontemplate::ClassicPhraseStyle;
     using chronontemplate::PhraseAnimationDefinition;
     using chronontemplate::PhraseHighlightAnimation;
@@ -53,7 +52,7 @@ namespace {
     constexpr int kExitFrames = 9;
 
     [[noreturn]] void fail(const std::string& message) {
-        throw std::runtime_error("emit_important_phrase_classic: " + message);
+        throw std::runtime_error("emit_important_phrase_plans: " + message);
     }
 
     void validateTrack(const PhraseTrack& track, const std::string& where) {
@@ -419,7 +418,7 @@ int main(int argc, char** argv) try {
 
     const ClassicPhraseStyle style = chronontemplate::classicPhraseStyle();
     const ClassicPhraseStyle appleStyle = chronontemplate::applePhraseStyle();
-    json manifest = json{{"schema", "chronontemplate.important-phrase-classic.v1"},
+    json manifest = json{{"schema", "chronontemplate.important-phrase.v1"},
                         {"pipeline", "ChrononTemplate C++ pack -> chronon.render-plan.v2 -> Chronon3D GPU"},
                         {"style", json{{"font", style.font},
                                        {"font_size", style.font_size},
@@ -463,7 +462,6 @@ int main(int argc, char** argv) try {
         }
     };
     if (!staticOnly) {
-        emitFamily(chronontemplate::classicPhraseAnimations(), "classic");
         emitFamily(chronontemplate::typewriterPhraseAnimations(), "typewriter");
         emitFamily(chronontemplate::phraseHighlightAnimations(), "phrase_highlight");
         emitFamily(chronontemplate::applePhraseAnimations(), "apple");
@@ -541,7 +539,7 @@ int main(int argc, char** argv) try {
                                                   {"plan", still.id + ".plan.json"}});
     }
     writeFile(outDir / "manifest.json", manifest.dump(2) + "\n");
-    std::cout << "emitted " << manifest["animations"].size() << " classic important-phrase plans in "
+    std::cout << "emitted " << manifest["animations"].size() << " important-phrase plans in "
               << outDir.string() << "\n";
     return 0;
 } catch (const std::exception& error) {

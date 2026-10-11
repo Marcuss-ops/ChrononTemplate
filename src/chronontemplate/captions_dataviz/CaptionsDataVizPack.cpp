@@ -209,14 +209,18 @@ namespace chronontemplate {
                                                                           ? spec.accentColor
                                                                           : spec.barColor,
                                                      .name = spec.name + "_bar_" + std::to_string(i)});
-            // Anchor at the base: scale grows the bar up off the floor, never
-            // around its middle.
-            bar.position(cx, floorY - height * 0.5f, 0.f)
-               .anchor(barW * 0.5f, height * 0.5f)
+            // RenderPlan has no anchor field, so the anchored base pivot is
+            // expressed as a position track that mirrors the scale easing:
+            // both tracks share frames and easing, so the base stays glued
+            // to the floor exactly as an anchored growth would.
+            bar.position(cx - 0.01f * barW, floorY - 0.02f * height, 0.f)
                .alive(inFrame, endFrame);
             Track<Vector3>& scale = bar.layer().tracks.scale;
             scale.add(frameTime(start, fps), Vector3(0.02f, 0.02f, 1.f), Easing::overshoot());
             scale.add(frameTime(start + grow, fps), Vector3(1.f, 1.f, 1.f), Easing::overshoot());
+            Track<Vector3>& barPos = bar.layer().tracks.position;
+            barPos.add(frameTime(start, fps), Vector3(cx - 0.01f * barW, floorY - 0.02f * height, 0.f), Easing::overshoot());
+            barPos.add(frameTime(start + grow, fps), Vector3(cx - 0.5f * barW, floorY - height, 0.f), Easing::overshoot());
 
             LayerHandle& label = scene.text(TextSpec{.text = valueText(i),
                                                      .font = spec.labelFont,
@@ -252,10 +256,10 @@ namespace chronontemplate {
             LayerHandle& rule = scene.shape(ShapeSpec{.size = Vector2(width, std::max(2.f, canvas.y * 0.0035f)),
                                                       .fillColor = spec.accentColor,
                                                       .name = spec.name + "_trend"});
-            // Scale X from nothing to full width about the left edge: the rule
-            // draws itself, exactly like the motion core's lineDraw vocabulary.
-            rule.position(left + width * 0.5f, avgY, 0.f)
-                .anchor(width * 0.5f, 0.f)
+            // Scale X from nothing to full width about the left edge: with a
+            // zero anchor the local origin is the left edge, so the same
+            // scale track draws the rule itself with no pivot to represent.
+            rule.position(left, avgY, 0.f)
                 .alive(peak - grow, endFrame);
             Track<Vector3>& scale = rule.layer().tracks.scale;
             scale.add(frameTime(peak - grow, fps), Vector3(0.02f, 1.f, 1.f), Easing::easeInOut());
@@ -357,12 +361,16 @@ namespace chronontemplate {
                                                      .name = spec.name + "_line_dot_" + std::to_string(i),
                                                      .cornerRadius = dotR});
             const int land = inFrame + static_cast<int>(i) * 3 + grow;
-            dot.position(x, y, 0.f)
-               .anchor(dotR, dotR)
+            // Centered pop with a zero anchor: the position track mirrors the
+            // scale easing so the dot's center never drifts while it pops.
+            dot.position(x - 0.02f * dotR, y - 0.02f * dotR, 0.f)
                .alive(inFrame, endFrame);
             Track<Vector3>& scale = dot.layer().tracks.scale;
             scale.add(frameTime(land - grow, fps), Vector3(0.02f, 0.02f, 1.f), Easing::overshoot());
             scale.add(frameTime(land, fps), Vector3(1.f, 1.f, 1.f), Easing::overshoot());
+            Track<Vector3>& dotPos = dot.layer().tracks.position;
+            dotPos.add(frameTime(land - grow, fps), Vector3(x - 0.02f * dotR, y - 0.02f * dotR, 0.f), Easing::overshoot());
+            dotPos.add(frameTime(land, fps), Vector3(x - dotR, y - dotR, 0.f), Easing::overshoot());
             if (hot) {
                 pm::pulseOpacity(dot.layer(), land, std::max(1, endFrame - land), 3, fps, 0.35f);
             }
@@ -392,8 +400,9 @@ namespace chronontemplate {
             LayerHandle& run = scene.shape(ShapeSpec{.size = Vector2(runW, thickness),
                                                      .fillColor = spec.accentColor,
                                                      .name = spec.name + "_line_run_" + std::to_string(i)});
-            run.position(x0 + runW * 0.5f, y0, 0.f)
-               .anchor(runW * 0.5f, 0.f)
+            // Zero anchor: the local origin is the run's left edge, so the
+            // scale track draws it left-to-right with no pivot to represent.
+            run.position(x0, y0, 0.f)
                .alive(inFrame, endFrame);
             Track<Vector3>& runScale = run.layer().tracks.scale;
             runScale.add(frameTime(start, fps), Vector3(0.02f, 1.f, 1.f), Easing::easeInOut());
@@ -406,14 +415,21 @@ namespace chronontemplate {
                 LayerHandle& riser = scene.shape(ShapeSpec{.size = Vector2(thickness, std::fabs(rise)),
                                                            .fillColor = spec.accentColor,
                                                            .name = spec.name + "_line_riser_" + std::to_string(i)});
-                riser.position(x1, top + std::fabs(rise) * 0.5f, 0.f)
-                     .anchor(0.f, std::fabs(rise) * 0.5f)
+                // Zero anchor: the position track mirrors the scale easing so
+                // the riser grows about its middle exactly as before.
+                const float riseH = std::fabs(rise);
+                riser.position(x1, top + riseH * 0.49f, 0.f)
                      .alive(inFrame, endFrame);
                 Track<Vector3>& riseScale = riser.layer().tracks.scale;
                 riseScale.add(frameTime(start + grow / 2, fps), Vector3(1.f, 0.02f, 1.f),
                               Easing::easeInOut());
                 riseScale.add(frameTime(start + grow, fps), Vector3(1.f, 1.f, 1.f),
                               Easing::easeInOut());
+                Track<Vector3>& risePos = riser.layer().tracks.position;
+                risePos.add(frameTime(start + grow / 2, fps), Vector3(x1, top + riseH * 0.49f, 0.f),
+                            Easing::easeInOut());
+                risePos.add(frameTime(start + grow, fps), Vector3(x1, top, 0.f),
+                            Easing::easeInOut());
                 out.risers.push_back(&riser);
             }
         }

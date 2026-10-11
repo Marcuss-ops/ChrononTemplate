@@ -4,12 +4,13 @@
 // how such a phrase LOOKS and the motion vocabulary every family animates it
 // with. One file per family from here on:
 //
-//   ClassicPhrasePack.hpp   — the fourteen "normal" phrase animations
 //   TypewriterPhrasePack.hpp— the fifteen typed animations with the `_` cursor
+//   ApplePhrasePack.hpp     — the restrained modern presets
+//   PhraseHighlightPack.hpp — long phrases with animated accents
+//   DidoneTitlesPack.hpp    — editorial Didone titles
 //
-// The packs are data, not rendering: tools/emit_important_phrase_classic.cpp
-// lowers the family definitions to the Chronon3D render-plan contract and
-// Chronon3D shapes the run and draws the glow.
+// The packs are data, not rendering: Chronon3D shapes the run and draws
+// the single native glow.
 //
 // Every animation stays inside Chronon3D's canonical GPU text contract (see
 // can_lower_gpu_text_animation): one text animator, one selector — either a
@@ -38,10 +39,8 @@ namespace chronontemplate {
     /// The important-phrase look every family shares: a white Montserrat Bold
     /// face with a *soft white* glow and a *slight black* stroke on the black
     /// canvas — the stroke keeps every letter crisp, the glow gives it
-    /// presence. (The first revision haloed in black, which on the black
-    /// canvas is invisible by construction.) Motion recipes animate the phrase
-    /// layer; they never restyle it. The name dates from the Classic family,
-    /// which introduced it.
+    /// presence. Motion recipes animate the phrase layer; they never restyle
+    /// it.
     struct ClassicPhraseStyle {
         std::string font{"assets/fonts/Montserrat-Bold.ttf"};
         float font_size{130.f};
@@ -135,7 +134,7 @@ namespace chronontemplate {
     /// resting value and synthesises the exit. A non-empty `cursor` adds the
     /// underscore layer the Typewriter family types with.
     struct PhraseAnimationDefinition {
-        std::string id{};    ///< stable wire id, e.g. "classic_typewriter"
+        std::string id{};    ///< stable wire id, e.g. "typewriter_clean"
         std::string title{}; ///< human name, e.g. "Typewriter"
         std::string phrase{};///< showcase phrase rendered with the animation
         int enter{kPhraseEnterFrames}; ///< entrance length in frames @ the pack fps

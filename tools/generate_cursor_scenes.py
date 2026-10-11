@@ -1203,8 +1203,15 @@ BUILDERS = [
 
 def main():
     print(f"Emitting 12 Web Cursor Animation plans to {OUT_DIR}...")
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    from fix_moving_shapes_gpu import convert_layer_list, rebase_layer_list
     for idx, builder in enumerate(BUILDERS, 1):
         plan = builder()
+        # GPU fix: shape+position-track vanishes mid-ramp (Vulkan); text tracks fine
+        convert_layer_list(plan["layers"])
+        # Renderer adds keys to base pos; generators write absolute coords
+        rebase_layer_list(plan["layers"])
         plan_path = OUT_DIR / f"cursor_scene_{idx:02d}.plan.json"
         with open(plan_path, "w") as f:
             json.dump(plan, f, indent=2)

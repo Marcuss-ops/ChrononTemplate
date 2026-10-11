@@ -88,10 +88,10 @@ def main() -> int:
 
     print("== the short-phrase recipes")
     recipes = document.get("recipes") or []
-    check("twelve originals, thirteen editorial, and twenty-five product recipes", len(recipes) == 50, str(len(recipes)))
+    check("twelve originals, fourteen editorial, and twenty-five product recipes", len(recipes) == 51, str(len(recipes)))
     editorial = [r for r in recipes if r["id"].startswith("short_phrase_editorial_")]
     product = [r for r in recipes if r["id"].startswith("short_phrase_product_")]
-    check("exactly thirteen editorial recipes", len(editorial) == 13)
+    check("exactly fourteen editorial recipes", len(editorial) == 14)
     check("fourteen existing, seven text adaptations, and four visual adaptations", len(product) == 25)
     expected_product_ids = {
         "short_phrase_product_masked_heading",

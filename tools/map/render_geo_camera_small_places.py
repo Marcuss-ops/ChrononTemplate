@@ -167,12 +167,18 @@ MAP_LABEL_ANIMATIONS = (
 
 
 def apply_city_beacon_map_style(frame: np.ndarray, progress: float) -> None:
-    """Dark green satellite grade and fine reference-style screen grid."""
+    """Soft green satellite grade and fine reference-style screen grid.
+
+    The grade stays readable on bright documentary footage: the frame keeps
+    ~77% of its luminance (plus a light green lift) instead of the former
+    ~63%, so tile detail survives final-video compression. The GPU LUT below
+    encodes the exact same transfer — keep the two in sync.
+    """
     h, w = frame.shape[:2]
     green_tint = np.empty_like(frame)
     green_tint[:] = (14, 42, 16)  # BGR
-    cv2.addWeighted(frame, 0.77, green_tint, 0.23, 0, dst=frame)
-    frame[:] = np.clip(frame.astype(np.float32) * 0.82, 0, 255).astype(np.uint8)
+    cv2.addWeighted(frame, 0.86, green_tint, 0.14, 0, dst=frame)
+    frame[:] = np.clip(frame.astype(np.float32) * 0.90, 0, 255).astype(np.uint8)
     step = max(1, round(min(h, w) / 13.5))
     grid = np.zeros_like(frame)
     color = (32, 78, 39)
@@ -199,7 +205,7 @@ def apply_city_beacon_map_style_opencl(frame, progress: float):
         lut = np.empty((1, 256, 3), dtype=np.uint8)
         tint = (14, 42, 16)
         for channel in range(3):
-            values = np.arange(256, dtype=np.float32) * 0.6314 + tint[channel] * 0.1886
+            values = np.arange(256, dtype=np.float32) * 0.774 + tint[channel] * 0.126
             lut[0, :, channel] = np.clip(values, 0, 255).astype(np.uint8)
         _OPENCL_LUT = lut
     frame = cv2.LUT(frame, _OPENCL_LUT)

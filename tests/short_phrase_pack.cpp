@@ -31,7 +31,7 @@ namespace {
     void theShortPhraseArchetypesAreWellFormed() {
         section("short-phrase archetypes");
         const std::vector<ShortPhraseAnimation> animations = shortPhraseAnimations();
-        check(animations.size() == 50, "the pack preserves twelve original recipes, adds thirteen editorial recipes, and registers twenty-five product recipes");
+        check(animations.size() == 51, "the pack preserves twelve original recipes, adds fourteen editorial recipes, and registers twenty-five product recipes");
 
         std::set<std::string> ids;
         bool anyLayer = false;
@@ -175,7 +175,7 @@ namespace {
             ++count;
             check(def.decor == ShortPhraseDecor::None, "editorial phrases carry no bumper");
             check(shortPhraseWordCount(def.phrase) <= 7, "editorial samples stay short");
-            check(def.enter == 90, "editorial entrance lands at the documented three-second reveal");
+            const bool isPaperCard = def.id == "short_phrase_editorial_paper_title_card";
             bool middleBeat = false;
             bool sequenceTrack = false;
             for (const auto& t : def.tracks) {
@@ -185,8 +185,28 @@ namespace {
                     if (k.frame > 42 && k.frame < 120 && k.value != t.keyframes.back().value) middleBeat = true;
                 }
             }
-            check(sequenceTrack, "every editorial recipe includes a track continuing into the second beat");
-            check(middleBeat, "every editorial recipe has a visible second motion beat");
+            if (isPaperCard) {
+                // The paper title card is the family's fast-beat exception: a
+                // 12-frame snap entrance (not the staged three-second reveal),
+                // with two blurred shadow overlays carrying the depth instead
+                // of a second motion beat.
+                check(def.enter == 12, "the paper title card keeps its authored 12-frame beat");
+                for (const auto& t : def.tracks) {
+                    check(t.keyframes.back().frame == 12,
+                          "paper title card tracks land on the 12-frame beat");
+                }
+                check(def.textOverlays.size() == 2,
+                      "the paper title card carries ambient + contact shadow overlays");
+                for (const auto& overlay : def.textOverlays) {
+                    check(overlay.behind, "paper title card overlays draw behind the phrase");
+                    check(!overlay.textAnimators.empty(),
+                          "paper title card overlays carry blur animators");
+                }
+            } else {
+                check(def.enter == 90, "editorial entrance lands at the documented three-second reveal");
+                check(sequenceTrack, "every editorial recipe includes a track continuing into the second beat");
+                check(middleBeat, "every editorial recipe has a visible second motion beat");
+            }
             std::string fingerprint;
             for (const auto& t : def.tracks) {
                 fingerprint += t.property + std::to_string(t.keyframes.front().value);
@@ -202,7 +222,7 @@ namespace {
             }
             check(motions.insert(fingerprint).second, "each editorial recipe has distinct motion");
         }
-        check(count == 13, "exactly thirteen editorial recipes, including the three Claude-inspired looks");
+        check(count == 14, "exactly fourteen editorial recipes, including the three Claude-inspired looks and the paper title card");
 
         std::size_t productCount = 0;
         for (const auto animation : shortPhraseAnimations()) {
