@@ -223,51 +223,84 @@ def draw_map_location_marker_opencl(frame, point: tuple[int, int], name: str,
     """Draw the beacon and label on the GPU-rendered UMat map frame."""
     import cv2
     import numpy as np
-    from PIL import Image, ImageDraw, ImageFont
     h, w = HEIGHT, WIDTH
     cx, cy = point
-    fade = max(0.0, min(1.0, (progress - 0.68) / 0.12))
+    # Start the target as the camera settles, instead of leaving a tiny glow
+    # until the last seconds of the map clip.
+    fade = max(0.0, min(1.0, (progress - 0.44) / 0.10))
     fade = fade * fade * (3.0 - 2.0 * fade)
     pulse = 0.5 + 0.5 * math.sin(max(0.0, progress - 0.68) * math.tau * 1.2)
+    radius = max(24, round(min(h, w) * 0.052))
+    key = (w, h, cx, cy, radius)
+    cached = _OPENCL_BEACON_CACHE.get(key)
+    if cached is None:
+        glow_host = np.zeros((h, w, 3), dtype=np.uint8)
+        accent = (18, 174, 255)  # vivid amber in OpenCV's BGR order
+        cv2.circle(glow_host, (cx, cy), radius + 12, accent, -1, cv2.LINE_AA)
+        glow_host = cv2.GaussianBlur(glow_host, (0, 0), max(8.0, radius * 0.62))
+        marker_host = np.zeros((h, w, 3), dtype=np.uint8)
+        marker_mask = np.zeros((h, w), dtype=np.uint8)
+        # Opaque strokes stay visible over pale topographic tiles; the
+        # previous additive-only treatment washed into the white roads.
+        cv2.circle(marker_host, (cx, cy), radius, (30, 24, 18), 8, cv2.LINE_AA)
+        cv2.circle(marker_mask, (cx, cy), radius, 255, 10, cv2.LINE_AA)
+        cv2.circle(marker_host, (cx, cy), radius, (0, 165, 255), 4, cv2.LINE_AA)
+        cv2.circle(marker_mask, (cx, cy), radius, 255, 6, cv2.LINE_AA)
+        cv2.circle(marker_host, (cx, cy), 8, (0, 70, 255), -1, cv2.LINE_AA)
+        cv2.circle(marker_mask, (cx, cy), 8, 255, -1, cv2.LINE_AA)
+        cv2.circle(marker_host, (cx, cy), 8, (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.circle(marker_mask, (cx, cy), 8, 255, 3, cv2.LINE_AA)
+        point_host = np.zeros((h, w, 3), dtype=np.uint8)
+        point_mask = np.zeros((h, w), dtype=np.uint8)
+        # Keep the original exact-location point visible from frame one;
+        # the larger target ring is a later emphasis around this point.
+        cv2.circle(point_host, (cx, cy), 12, (255, 255, 255), -1, cv2.LINE_AA)
+        cv2.circle(point_mask, (cx, cy), 12, 255, -1, cv2.LINE_AA)
+        cv2.circle(point_host, (cx, cy), 8, (25, 25, 235), -1, cv2.LINE_AA)
+        cv2.circle(point_host, (cx, cy), 3, (255, 220, 175), -1, cv2.LINE_AA)
+        cached = (cv2.UMat(glow_host), cv2.UMat(marker_host),
+                  cv2.UMat(marker_mask), cv2.UMat(point_host),
+                  cv2.UMat(point_mask))
+        _OPENCL_BEACON_CACHE[key] = cached
+    glow, marker, marker_mask, point, point_mask = cached
+    frame = cv2.copyTo(point, point_mask, frame)
     if fade > 0.001:
-        radius = max(24, round(min(h, w) * 0.049))
-        key = (w, h, cx, cy, radius)
-        glow = _OPENCL_BEACON_CACHE.get(key)
-        if glow is None:
-            glow_host = np.zeros((h, w, 3), dtype=np.uint8)
-            cv2.circle(glow_host, (cx, cy), radius, (8, 20, 245), -1, cv2.LINE_AA)
-            cv2.ellipse(glow_host, (cx - radius // 5, cy + radius // 8),
-                        (int(radius * 0.75), int(radius * 0.52)), -17, 0, 360,
-                        (8, 12, 255), -1, cv2.LINE_AA)
-            glow_host = cv2.GaussianBlur(glow_host, (0, 0), max(8.0, radius * 0.62))
-            cv2.circle(glow_host, (cx, cy), 4, (12, 26, 255), -1, cv2.LINE_AA)
-            cv2.circle(glow_host, (cx, cy), 2, (135, 165, 255), -1, cv2.LINE_AA)
-            glow = cv2.UMat(glow_host)
-            _OPENCL_BEACON_CACHE[key] = glow
         frame = cv2.addWeighted(frame, 1.0, glow, fade * (0.78 + 0.18 * pulse), 0.0)
+        frame = cv2.copyTo(marker, marker_mask, frame)
 
     label = " ".join(str(name or "").split())
-    t = max(0.0, min(1.0, (progress - 0.80) / 0.13))
+    t = max(0.0, min(1.0, (progress - 0.56) / 0.12))
     alpha = t * t * (3.0 - 2.0 * t)
     if label and alpha > 0.005:
         key = (w, h, label)
         overlay = _OPENCL_LABEL_CACHE.get(key)
         if overlay is None:
-            rgba = Image.new("RGB", (w, h), (0, 0, 0))
-            draw = ImageDraw.Draw(rgba)
-            font_path = BASE_DIR / "Chronon3d/assets/fonts/DM-Serif-Display-Italic.ttf"
-            font = ImageFont.truetype(str(font_path), max(24, round(min(h, w) * 0.052)))
-            bbox = font.getbbox(label)
-            tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            font_face = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale, text_thickness = 1.15, 2
+            (tw, th), baseline = cv2.getTextSize(label, font_face, font_scale, text_thickness)
             x = max(20, min(w - tw - 20, cx - tw // 2))
-            y = min(h - th - 20, cy + max(38, round(min(h, w) * 0.055)))
-            draw.text((x + 2, y + 3), label, font=font, fill=(6, 8, 7), stroke_width=4,
-                      stroke_fill=(6, 8, 7))
-            draw.text((x, y), label, font=font, fill=(244, 244, 239), stroke_width=1,
-                      stroke_fill=(244, 244, 239))
-            overlay = cv2.UMat(np.asarray(rgba, dtype=np.uint8))
+            y = min(h - baseline - 16, cy + radius + th + 36)
+            shadow_host = np.zeros((h, w, 3), dtype=np.uint8)
+            shadow_mask = np.zeros((h, w), dtype=np.uint8)
+            cv2.putText(shadow_host, label, (x + 2, y + 3), font_face, font_scale,
+                        (0, 0, 0), 9, cv2.LINE_AA)
+            cv2.putText(shadow_mask, label, (x + 2, y + 3), font_face, font_scale,
+                        255, 11, cv2.LINE_AA)
+            text_host = np.zeros((h, w, 3), dtype=np.uint8)
+            text_mask = np.zeros((h, w), dtype=np.uint8)
+            cv2.putText(text_host, label, (x, y), font_face, font_scale,
+                        (255, 255, 255), text_thickness, cv2.LINE_AA)
+            cv2.putText(text_mask, label, (x, y), font_face, font_scale,
+                        255, text_thickness + 2, cv2.LINE_AA)
+            overlay = (cv2.UMat(shadow_host), cv2.UMat(255 - shadow_mask),
+                       cv2.UMat(text_host), cv2.UMat(255 - text_mask))
             _OPENCL_LABEL_CACHE[key] = overlay
-        frame = cv2.addWeighted(frame, 1.0, overlay, alpha, 0.0)
+        shadow, shadow_outside, text, text_outside = overlay
+        blended = cv2.addWeighted(frame, 1.0 - alpha, shadow, alpha, 0.0)
+        frame = cv2.copyTo(frame, shadow_outside, blended)
+        blended = cv2.addWeighted(frame, 1.0 - alpha, text, alpha, 0.0)
+        frame = cv2.copyTo(frame, text_outside, blended)
+        frame = blended
     return frame
 
 
