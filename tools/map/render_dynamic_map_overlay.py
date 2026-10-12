@@ -190,6 +190,7 @@ def main() -> int:
     # current place name, with no altitude HUD, diagnostic headings, route
     # graphics, attribution stamp, descent caption or progress bar.
     builder.minimal_map = True
+    builder.map_basemap = basemap
     builder.map_area_glow_radius_km = area_glow_radius_km
     builder.map_label_animation = label_animation
     builder.map_typography = payload.get("typography", {})
