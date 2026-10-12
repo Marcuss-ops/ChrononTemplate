@@ -23,6 +23,8 @@ MAP_STYLES = [
     ("03_orbit_arrival", "orbit_arrival", "Orbit Arrival", "A restrained yaw that adds dimensionality."),
     ("04_slow_approach", "slow_approach", "Slow Approach", "Longer, calmer approach with a clean hold."),
     ("05_wide_context", "wide_context", "Wide Context", "A wider landing that preserves nearby geography."),
+    ("06_steady_hold", "steady_hold", "Steady Hold", "Nearly static drift with a long readable hold."),
+    ("07_fast_push", "fast_push", "Fast Push", "A quicker close-range push for short map beats."),
 ]
 
 
@@ -61,8 +63,15 @@ def encode_label_variant(source: Path, output: Path, animation: str, title: str)
     raw_path.unlink(missing_ok=True)
 
 
+MAP_BASEMAPS = [
+    ("08_basemap_roadmap", "esri_street", "Roadmap", "Classic street-map canvas (map_type=roadmap)."),
+    ("09_basemap_terrain", "esri_topo", "Terrain", "Topographic tiles (map_type=terrain)."),
+]
+
+
 def render_map_variant(style_id: str, camera_animation: str, title: str,
-                       description: str, map_label: str) -> Path:
+                       description: str, map_label: str,
+                       basemap: str = "esri_sat") -> Path:
     source = OUT / f"{style_id}.json"
     target = OUT / f"{style_id}.mp4"
     payload = {
@@ -74,6 +83,7 @@ def render_map_variant(style_id: str, camera_animation: str, title: str,
         "area_glow_radius_km": 3.5,
         "camera_animation": camera_animation,
         "label_animation": map_label,
+        "basemap": basemap,
     }
     source.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
     subprocess.run([sys.executable, str(RENDERER), "--input", str(source),
@@ -90,6 +100,7 @@ def main() -> int:
         "canvas": "1920x1080, 24 fps, 5 seconds",
         "label_treatment": "white face, black keyline, soft cyan outer glow; positioned below the map beacon",
         "map_animations": [], "label_animations": [],
+        "basemap_variants": [],
     }
 
     # Five real map-camera passes, each rendered through the ChrononTemplate
@@ -109,6 +120,18 @@ def main() -> int:
         manifest["map_animations"].append({"id": style_id, "name": title,
                                            "description": description,
                                            "file": path.name})
+
+    # Basemap variants prove the runtime map_type choice on the same camera:
+    # satellite (the default, used by every clip above), roadmap, terrain.
+    for style_id, basemap, title, description in MAP_BASEMAPS:
+        print(f"[map-pack] rendering basemap {title}", flush=True)
+        path = render_map_variant(style_id, "slow_approach", title,
+                                  description, "gentle_fade", basemap)
+        map_files[style_id] = path
+        manifest["basemap_variants"].append({"id": style_id, "name": title,
+                                              "description": description,
+                                              "basemap": basemap,
+                                              "file": path.name})
 
     # The label set shares one already-rendered Chronon camera move so the
     # comparison isolates typography and entrance timing.
@@ -137,6 +160,8 @@ def main() -> int:
               "Every label has a white face, black stroke and soft cyan glow and sits below the point beacon.", "",
               "## Map camera animations", ""]
     readme.extend(f"- **{x['name']}** — {x['description']} `{x['file']}`" for x in manifest["map_animations"])
+    readme.extend(["", "## Basemap variants (runtime map_type)", ""])
+    readme.extend(f"- **{x['name']}** — {x['description']} `{x['file']}`" for x in manifest["basemap_variants"])
     readme.extend(["", "## Marker label animations", ""])
     readme.extend(f"- **{x['name']}** — `{x['file']}`" for x in manifest["label_animations"])
     (OUT / "README.md").write_text("\n".join(readme) + "\n", encoding="utf-8")

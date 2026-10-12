@@ -99,6 +99,24 @@ namespace chronontemplate {
         float channelSplit{0.f};
         std::uint32_t channelTrail{0};
         float sliceDisplace{0.f};
+        /// Torn-paper alpha edge (RoughenEdges). Zero amount disables it;
+        /// otherwise amount is in (0,64], scale in (0,1024].
+        float tornEdgeAmount{0.f};
+        float tornEdgeScale{8.f};
+        std::uint32_t tornEdgeSeed{0};
+        /// Analog scanlines (square-wave warp). Zero intensity disables them;
+        /// otherwise intensity is in (0,0.25] and spacing in [0.002,1].
+        float scanlineIntensity{0.f};
+        float scanlineSpacing{0.035f};
+        /// Digital mosaic blocks (glitch). Zero disables them; otherwise the
+        /// block size in px, validated in [2,64].
+        std::uint32_t mosaicBlockSize{0};
+        /// Archival optical lens (barrel distortion). Zero curvature is flat;
+        /// otherwise curvature is in [-1,1], scale in [1,2] (post-warp framing
+        /// that keeps warped edges covered) and soft blur in [0,32] px.
+        float lensCurvature{0.f};
+        float lensScale{1.f};
+        float softBlur{0.f};
     };
 
     enum class ShapeGeometry : std::uint8_t { Rectangle, Ellipse, Grid, DotGrid, Polygon };

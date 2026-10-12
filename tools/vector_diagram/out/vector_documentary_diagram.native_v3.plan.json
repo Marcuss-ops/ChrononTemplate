@@ -1,0 +1,303 @@
+{
+  "canvas": {
+    "duration_frames": 90,
+    "fps_den": 1,
+    "fps_num": 30,
+    "height": 1080,
+    "width": 1920
+  },
+  "job_id": "vector_documentary_diagram",
+  "layers": [
+    {
+      "color": [
+        0.027450980392156862,
+        0.03529411764705882,
+        0.050980392156862744,
+        1.0
+      ],
+      "duration_frames": 90,
+      "id": "background",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "type": "color"
+    },
+    {
+      "duration_frames": 90,
+      "id": "trajectory",
+      "position": [
+        0,
+        0
+      ],
+      "shape": {
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "animation": {
+                "easing": "linear",
+                "keyframes": [
+                  {
+                    "frame": 8,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 40,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              },
+              "end": 1.0,
+              "offset": 0.0,
+              "start": 0.0
+            }
+          }
+        ],
+        "path": [
+          {
+            "point": [
+              -768.0,
+              345.5999999999999
+            ],
+            "type": "move_to"
+          },
+          {
+            "point": [
+              -384.0,
+              -10.799999999999955
+            ],
+            "type": "line_to"
+          },
+          {
+            "point": [
+              -192.0,
+              -86.40000000000003
+            ],
+            "type": "line_to"
+          },
+          {
+            "point": [
+              38.40000000000009,
+              -302.4
+            ],
+            "type": "line_to"
+          },
+          {
+            "point": [
+              345.60000000000014,
+              -475.2
+            ],
+            "type": "line_to"
+          },
+          {
+            "point": [
+              729.5999999999999,
+              302.4
+            ],
+            "type": "line_to"
+          }
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 2
+        },
+        "type": "path"
+      },
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "type": "shape"
+    },
+    {
+      "animation": {
+        "tracks": [
+          {
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0
+              },
+              {
+                "frame": 12,
+                "value": 1
+              }
+            ],
+            "property": "opacity"
+          }
+        ]
+      },
+      "duration_frames": 90,
+      "effects": [
+        {
+          "color": [
+            1.0,
+            0.7215686274509804,
+            0.0,
+            1.0
+          ],
+          "intensity": 0.5,
+          "radius": 22,
+          "type": "glow"
+        }
+      ],
+      "follow_path": {
+        "auto_orient": false,
+        "clamp_end": true,
+        "path_commands": [
+          {
+            "point": [
+              192.0,
+              885.5999999999999
+            ],
+            "type": "move_to"
+          },
+          {
+            "point": [
+              576.0,
+              529.2
+            ],
+            "type": "line_to"
+          },
+          {
+            "point": [
+              768.0,
+              453.59999999999997
+            ],
+            "type": "line_to"
+          },
+          {
+            "point": [
+              998.4000000000001,
+              237.6
+            ],
+            "type": "line_to"
+          },
+          {
+            "point": [
+              1305.6000000000001,
+              64.8
+            ],
+            "type": "line_to"
+          },
+          {
+            "point": [
+              1689.6,
+              842.4
+            ],
+            "type": "line_to"
+          }
+        ],
+        "progress": {
+          "easing": "linear",
+          "keyframes": [
+            {
+              "frame": 12,
+              "value": 0.0
+            },
+            {
+              "frame": 60,
+              "value": 1.0
+            }
+          ]
+        }
+      },
+      "id": "traveling_dot",
+      "position": [
+        0,
+        0
+      ],
+      "shape": {
+        "fill": [
+          1.0,
+          0.8666666666666667,
+          0.12549019607843137,
+          1.0
+        ],
+        "type": "ellipse"
+      },
+      "size": [
+        12,
+        12
+      ],
+      "start_frame": 0,
+      "type": "shape"
+    },
+    {
+      "animation": {
+        "tracks": [
+          {
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 48,
+                "value": 0
+              },
+              {
+                "frame": 67,
+                "value": 1
+              }
+            ],
+            "property": "opacity"
+          }
+        ]
+      },
+      "duration_frames": 90,
+      "effects": [
+        {
+          "color": [
+            1.0,
+            0.2196078431372549,
+            0.30980392156862746,
+            1.0
+          ],
+          "intensity": 0.45,
+          "radius": 18,
+          "type": "glow"
+        }
+      ],
+      "id": "peak_marker",
+      "position": [
+        508.8863759178814,
+        -144.54508876629012
+      ],
+      "shape": {
+        "fill": [
+          1.0,
+          0.2196078431372549,
+          0.30980392156862746,
+          1.0
+        ],
+        "type": "ellipse"
+      },
+      "size": [
+        10,
+        10
+      ],
+      "start_frame": 0,
+      "type": "shape"
+    }
+  ],
+  "output": {
+    "format": "mp4",
+    "path": "vector_documentary_diagram.mp4"
+  },
+  "schema": "chronon.render-plan.v3",
+  "version": 3
+}

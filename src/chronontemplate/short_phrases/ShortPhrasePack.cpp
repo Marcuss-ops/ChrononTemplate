@@ -57,7 +57,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductGradientSweep: return "short_phrase_product_line_by_line_slide";
             case ShortPhraseAnimation::ProductSubtitleDissolve: return "short_phrase_product_per_word_rise";
             case ShortPhraseAnimation::ProductDualToneReveal: return "short_phrase_product_perspective_marquee";
-            case ShortPhraseAnimation::ProductRollingTicker: return "short_phrase_product_scan_band";
             case ShortPhraseAnimation::ProductScaleSnap: return "short_phrase_product_scramble_reveal";
             case ShortPhraseAnimation::ProductRadialExpansion: return "short_phrase_product_strikethrough_replace";
             case ShortPhraseAnimation::ProductDepthParallax: return "short_phrase_product_text_match_cut";
@@ -72,7 +71,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductScrollReveal: return "short_phrase_product_scroll_reveal";
             case ShortPhraseAnimation::ProductScrambledText: return "short_phrase_product_scrambled_text";
             case ShortPhraseAnimation::ProductGlareHover: return "short_phrase_product_glare_hover";
-            case ShortPhraseAnimation::ProductGlowCursor: return "short_phrase_product_glow_cursor";
             case ShortPhraseAnimation::ProductGradualBlur: return "short_phrase_product_gradual_blur";
             case ShortPhraseAnimation::ProductShapeBlur: return "short_phrase_product_shape_blur";
             case ShortPhraseAnimation::EditorialPromptResponse: return "short_phrase_editorial_claude_prompt_response";
@@ -113,7 +111,6 @@ namespace chronontemplate {
                 ShortPhraseAnimation::ProductGradientSweep,
                 ShortPhraseAnimation::ProductSubtitleDissolve,
                 ShortPhraseAnimation::ProductDualToneReveal,
-                ShortPhraseAnimation::ProductRollingTicker,
                 ShortPhraseAnimation::ProductScaleSnap,
                 ShortPhraseAnimation::ProductRadialExpansion,
                 ShortPhraseAnimation::ProductDepthParallax,
@@ -128,7 +125,6 @@ namespace chronontemplate {
                 ShortPhraseAnimation::ProductScrollReveal,
                 ShortPhraseAnimation::ProductScrambledText,
                 ShortPhraseAnimation::ProductGlareHover,
-                ShortPhraseAnimation::ProductGlowCursor,
                 ShortPhraseAnimation::ProductGradualBlur,
                 ShortPhraseAnimation::ProductShapeBlur,
                 ShortPhraseAnimation::EditorialPromptResponse,
@@ -204,7 +200,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductGradientSweep: return lineByLineSlide();
             case ShortPhraseAnimation::ProductSubtitleDissolve: return perWordRise();
             case ShortPhraseAnimation::ProductDualToneReveal: return perspectiveMarquee();
-            case ShortPhraseAnimation::ProductRollingTicker: return scanBand();
             case ShortPhraseAnimation::ProductScaleSnap: return scrambleReveal();
             case ShortPhraseAnimation::ProductRadialExpansion: return strikethroughReplace();
             case ShortPhraseAnimation::ProductDepthParallax: return textMatchCut();
@@ -219,7 +214,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductScrollReveal: return scrollReveal();
             case ShortPhraseAnimation::ProductScrambledText: return scrambledText();
             case ShortPhraseAnimation::ProductGlareHover: return glareHover();
-            case ShortPhraseAnimation::ProductGlowCursor: return glowCursor();
             case ShortPhraseAnimation::ProductGradualBlur: return gradualBlur();
             case ShortPhraseAnimation::ProductShapeBlur: return shapeBlur();
             default: break;
@@ -242,7 +236,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductScrollReveal:
             case ShortPhraseAnimation::ProductScrambledText:
             case ShortPhraseAnimation::ProductGlareHover:
-            case ShortPhraseAnimation::ProductGlowCursor:
             case ShortPhraseAnimation::ProductGradualBlur:
             case ShortPhraseAnimation::ProductShapeBlur:
                 break;
@@ -364,13 +357,6 @@ namespace chronontemplate {
                                   {track("fill_gray", {{0, 1.f}, {20, 1.f}}, "linear"),
                                    track("opacity", {{0, 0.45f}, {20, 1.f}}, "linear")})},
                         {2}, ShortPhraseExit::Reverse, ShortPhraseDecor::None, {}, 106.f};
-            case ShortPhraseAnimation::ProductRollingTicker:
-                return {name(animation), "Vertical Ticker", "Designed for what is next", 24,
-                        {fadeIn(24, 6)},
-                        {animator(PhraseSelector{"word", "forward", "band"},
-                                  {track("position_y", {{0, 52.f}, {18, -4.f}, {24, 0.f}}, "out_cubic"),
-                                   track("opacity", {{0, 0.f}, {12, 1.f}}, "linear")})},
-                        {}, ShortPhraseExit::Wipe, ShortPhraseDecor::None, {}, 104.f};
             case ShortPhraseAnimation::ProductScaleSnap:
                 return {name(animation), "Scale Snap & Settle", "Solid by design", 16,
                         {track("scale", {{0, 1.18f}, {11, 0.985f}, {16, 1.f}}, "out_cubic"), fadeIn(16, 4)},
@@ -644,7 +630,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductScrollReveal:
             case ShortPhraseAnimation::ProductScrambledText:
             case ShortPhraseAnimation::ProductGlareHover:
-            case ShortPhraseAnimation::ProductGlowCursor:
             case ShortPhraseAnimation::ProductGradualBlur:
             case ShortPhraseAnimation::ProductShapeBlur:
                 break;
@@ -668,7 +653,6 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductGradientSweep:
             case ShortPhraseAnimation::ProductSubtitleDissolve:
             case ShortPhraseAnimation::ProductDualToneReveal:
-            case ShortPhraseAnimation::ProductRollingTicker:
             case ShortPhraseAnimation::ProductScaleSnap:
             case ShortPhraseAnimation::ProductRadialExpansion:
             case ShortPhraseAnimation::ProductDepthParallax:
@@ -749,7 +733,6 @@ namespace chronontemplate {
                     ShortPhraseAnimation::ProductWarpText,
                     ShortPhraseAnimation::ProductScrambledText,
                     ShortPhraseAnimation::ProductGlareHover,
-                    ShortPhraseAnimation::ProductGlowCursor,
                     ShortPhraseAnimation::ProductGradualBlur,
                     ShortPhraseAnimation::ProductShapeBlur,
                     ShortPhraseAnimation::EditorialPaperTitleCard};
@@ -778,7 +761,6 @@ namespace chronontemplate {
                 ShortPhraseAnimation::EditorialGlyphCurtain,
                 ShortPhraseAnimation::EditorialContrastSweep,
                 ShortPhraseAnimation::ProductGradientSweep,
-                ShortPhraseAnimation::ProductRollingTicker,
                 ShortPhraseAnimation::ProductWordStagger,
                 ShortPhraseAnimation::ProductGlintPass,
                 ShortPhraseAnimation::ProductLetterRise,

@@ -9,6 +9,7 @@
 namespace chronontemplate {
 
     namespace {
+        using chrononmotion::Vector2;
         using chrononmotion::Vector3;
         using chrononmotion::motion::Easing;
         using chrononmotion::motion::Layer;
@@ -104,6 +105,20 @@ namespace chronontemplate {
     LayerHandle& addImageAnimation(TemplateScene& scene, ImageAnimation animation,
                                    const std::string& assetPath, const std::string& name,
                                    ImageFrameStyle frame, ImageCameraMove cameraMove) {
+        // Colored-border entrances: the caller may pass its own frame, but an
+        // untinted frame gets the recipe's signature border so the payload's
+        // overlay_style.image.border.* runtime overrides stay authoritative
+        // while a bare call still renders the designed colored edge.
+        if (animation == ImageAnimation::BorderDrawIn && frame.borderWidth <= 0.f) {
+            frame = ImageFrameStyle{.cornerRadius = frame.cornerRadius > 0.f ? frame.cornerRadius : 64.f,
+                                     .borderColor = "#38BDF8", .borderWidth = 6.f};
+        } else if (animation == ImageAnimation::BorderGlowPulse && frame.borderWidth <= 0.f) {
+            frame = ImageFrameStyle{.cornerRadius = frame.cornerRadius > 0.f ? frame.cornerRadius : 64.f,
+                                     .borderColor = "#A78BFA", .borderWidth = 8.f};
+        } else if (animation == ImageAnimation::BorderNeonSweep && frame.borderWidth <= 0.f) {
+            frame = ImageFrameStyle{.cornerRadius = frame.cornerRadius > 0.f ? frame.cornerRadius : 64.f,
+                                     .borderColor = "#E8B84A", .borderWidth = 5.f};
+        }
         LayerHandle& image = scene.image(ImageSpec{
                 .path = assetPath, .name = name, .frame = std::move(frame)});
 
@@ -153,9 +168,35 @@ namespace chronontemplate {
             return image;
         } else if (animation != ImageAnimation::Fade && animation != ImageAnimation::Rise &&
                    animation != ImageAnimation::ScalePop && animation != ImageAnimation::Slide &&
-                   animation != ImageAnimation::Spin) {
+                   animation != ImageAnimation::Spin &&
+                   animation != ImageAnimation::BorderDrawIn &&
+                   animation != ImageAnimation::BorderGlowPulse &&
+                   animation != ImageAnimation::BorderNeonSweep &&
+                   animation != ImageAnimation::BoundedEdgeLeft &&
+                   animation != ImageAnimation::BoundedEdgeRight &&
+                   animation != ImageAnimation::BoundedEdgeTop &&
+                   animation != ImageAnimation::BoundedEdgeBottom &&
+                   animation != ImageAnimation::BoundedEdgeSweep) {
             throw std::invalid_argument("addImageAnimation: unknown animation");
         }
+        // Single-side bounded edge strokes: a thin white bar rides one card
+        // side with a slight offset gap, parented to the image so it follows
+        // the entrance choreography. Geometry targets the 480px preset card
+        // (half-size 240); the bar is drawn relative to the image center.
+        const auto boundedEdge = [&](float barW, float barH, float relX, float relY,
+                                     const Vector3& slideFrom, const std::string& tag) -> void {
+            LayerHandle& edge = scene.shape(ShapeSpec{
+                    .size = Vector2(barW, barH), .fillColor = "#FFFFFF",
+                    .name = name + "_edge_" + tag, .cornerRadius = 3.f});
+            edge.parent(image.id());
+            edge.position(relX, relY);
+            edge.alive(0, 150);
+            edge.animateOpacity(0, 24, 0.f, 1.f);
+            if (slideFrom.x != 0.f || slideFrom.y != 0.f || slideFrom.z != 0.f) {
+                edge.animatePosition(0, 36, slideFrom);
+            }
+            edge.animateOpacity(132, 18, 1.f, 0.f);
+        };
 
         using chrononmotion::motion::presets::Direction;
         switch (animation) {
@@ -182,6 +223,64 @@ namespace chronontemplate {
             case ImageAnimation::Spin:
                 image.animate(SpinXYZ{.inFrame = 0, .duration = 126, .turns = 0.5f})
                      .animate(FadeIn{.inFrame = 0, .duration = 18});
+                break;
+            case ImageAnimation::BorderDrawIn:
+                // Cyan edge draws in with a settling scale, echoing the
+                // image_border_draw_in premium recipe.
+                image.animate(ScalePop{.inFrame = 0, .duration = 96,
+                                       .from = 0.94f, .to = 1.02f})
+                     .animate(FadeIn{.inFrame = 0, .duration = 24});
+                chrononmotion::motion::presets::floatHover(
+                        *scene.motion().findLayer(image.id()), 32, 100, 18.f, scene.fps());
+                break;
+            case ImageAnimation::BorderGlowPulse:
+                // Violet edge pulses: pop in, breathe, then hold for the
+                // runtime-tinted glow plate behind the card.
+                image.animate(ScalePop{.inFrame = 0, .duration = 88,
+                                       .from = 0.90f, .to = 1.04f})
+                     .animate(FadeIn{.inFrame = 0, .duration = 20});
+                chrononmotion::motion::presets::floatHover(
+                        *scene.motion().findLayer(image.id()), 40, 90, 26.f, scene.fps());
+                break;
+            case ImageAnimation::BorderNeonSweep:
+                // Gold edge sweeps in from the side with a neon settle.
+                image.animate(SlideIn{.direction = Direction::Left, .inFrame = 0,
+                                      .duration = 72, .distance = 260.f})
+                     .animate(FadeIn{.inFrame = 0, .duration = 18});
+                chrononmotion::motion::presets::floatHover(
+                        *scene.motion().findLayer(image.id()), 36, 96, 22.f, scene.fps());
+                break;
+            case ImageAnimation::BoundedEdgeLeft:
+                image.animate(ScalePop{.inFrame = 0, .duration = 88,
+                                       .from = 0.92f, .to = 1.0f})
+                     .animate(FadeIn{.inFrame = 0, .duration = 20});
+                boundedEdge(6.f, 440.f, -254.f, 0.f, Vector3(-70.f, 0.f, 0.f), "left");
+                break;
+            case ImageAnimation::BoundedEdgeRight:
+                image.animate(ScalePop{.inFrame = 0, .duration = 88,
+                                       .from = 0.92f, .to = 1.0f})
+                     .animate(FadeIn{.inFrame = 0, .duration = 20});
+                boundedEdge(6.f, 440.f, 254.f, 0.f, Vector3(70.f, 0.f, 0.f), "right");
+                break;
+            case ImageAnimation::BoundedEdgeTop:
+                image.animate(ScalePop{.inFrame = 0, .duration = 88,
+                                       .from = 0.92f, .to = 1.0f})
+                     .animate(FadeIn{.inFrame = 0, .duration = 20});
+                boundedEdge(440.f, 6.f, 0.f, -254.f, Vector3(0.f, -70.f, 0.f), "top");
+                break;
+            case ImageAnimation::BoundedEdgeBottom:
+                image.animate(ScalePop{.inFrame = 0, .duration = 88,
+                                       .from = 0.92f, .to = 1.0f})
+                     .animate(FadeIn{.inFrame = 0, .duration = 20});
+                boundedEdge(440.f, 6.f, 0.f, 254.f, Vector3(0.f, 70.f, 0.f), "bottom");
+                break;
+            case ImageAnimation::BoundedEdgeSweep:
+                // The white bar travels from the left edge to the right edge
+                // during the entrance, then rests on the right side.
+                image.animate(ScalePop{.inFrame = 0, .duration = 88,
+                                       .from = 0.92f, .to = 1.0f})
+                     .animate(FadeIn{.inFrame = 0, .duration = 20});
+                boundedEdge(6.f, 440.f, 254.f, 0.f, Vector3(-508.f, 0.f, 0.f), "sweep");
                 break;
             default:
                 throw std::invalid_argument("addImageAnimation: unknown animation");

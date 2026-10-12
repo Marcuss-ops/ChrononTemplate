@@ -45,6 +45,10 @@ namespace chronontemplate {
 
     [[nodiscard]] const char* name(TypewriterPhraseAnimation animation);
     [[nodiscard]] PhraseAnimationDefinition definition(TypewriterPhraseAnimation animation);
+    /// Payload-driven variant: scales the `_` cursor box by cursorScale
+    /// (1.0 preserves the catalog authoring; clamps inside the emitter).
+    [[nodiscard]] PhraseAnimationDefinition definitionScaled(TypewriterPhraseAnimation animation,
+                                                             float cursorScale);
     [[nodiscard]] std::vector<TypewriterPhraseAnimation> typewriterPhraseAnimations();
 
 }// namespace chronontemplate

@@ -290,7 +290,7 @@ namespace {
 int main() {
     try {
         const std::vector<ShortPhraseAnimation> animations = chronontemplate::shortPhraseAnimations();
-        if (animations.size() != 51) fail("expected twelve original, fourteen editorial, and twenty-five product-motion short-phrase archetypes");
+        if (animations.size() != 49) fail("expected twelve original, fourteen editorial, and twenty-three product-motion short-phrase archetypes");
 
         std::set<std::string> ids;
         json recipes = json::array();

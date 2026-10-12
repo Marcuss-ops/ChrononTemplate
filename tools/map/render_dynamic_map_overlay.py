@@ -62,15 +62,44 @@ def main() -> int:
         print(f"[dynamic-map] limited route to {len(pins)} unique stops from {len(raw_pins)} mentions", flush=True)
     area_glow_radius_km = float(payload.get("area_glow_radius_km", 0.0))
     camera_animations = {"signature_dive", "tilt_reveal", "orbit_arrival",
-                         "slow_approach", "wide_context"}
+                         "slow_approach", "wide_context", "steady_hold",
+                         "fast_push"}
     from render_geo_camera_small_places import MAP_LABEL_ANIMATIONS
+    from map_compositions import MAP_COMPOSITIONS, MULTI_PIN_SYSTEMS
+    from map_editorial import MAP_EDITORIAL_SCENES, MULTI_PIN_SCENES
+    from map_editorial_gpu import reset_gpu_counters, gpu_counters, geo_project
     camera_animation = str(payload.get("camera_animation", "signature_dive"))
     label_animation = str(payload.get("label_animation", "gentle_fade"))
+    map_animation = str(payload.get("map_animation", "") or "")
     basemap = str(payload.get("basemap", "esri_sat"))
     if camera_animation not in camera_animations:
         raise ValueError(f"unsupported camera_animation: {camera_animation}")
-    if label_animation not in MAP_LABEL_ANIMATIONS:
+    if label_animation != "none" and label_animation not in MAP_LABEL_ANIMATIONS:
         raise ValueError(f"unsupported label_animation: {label_animation}")
+    if map_animation and map_animation not in MAP_COMPOSITIONS \
+            and map_animation not in MAP_EDITORIAL_SCENES:
+        raise ValueError(f"unsupported map_animation: {map_animation}")
+    if map_animation in MULTI_PIN_SYSTEMS and len(pins) < 2:
+        raise ValueError(f"map_animation {map_animation} requires at least two pins")
+    if map_animation in MULTI_PIN_SCENES and len(pins) < 2:
+        raise ValueError(f"map_animation {map_animation} requires at least two pins")
+    if map_animation == "ed_yemen_markers" and len(pins) != 3:
+        raise ValueError("ed_yemen_markers requires exactly three grounded pins")
+    if map_animation in MAP_EDITORIAL_SCENES and label_animation != "none":
+        raise ValueError("certified editorial map scenes require label_animation='none'")
+    # Photo slots only accept real assets: a specified photo that does not
+    # exist fails closed; an absent photo compacts the card (never generated).
+    for pin in pins:
+        photo = str(pin.get("photo") or "")
+        if photo and not Path(photo).is_file():
+            raise ValueError(f"map pin photo asset not found: {photo}")
+        value = pin.get("value", None)
+        if value is not None:
+            try:
+                if not math.isfinite(float(value)):
+                    raise ValueError(f"map pin value must be finite: {value}")
+            except (TypeError, ValueError):
+                raise ValueError(f"map pin value must be a number: {value}")
     if width < 16 or height < 16 or fps_num <= 0 or fps_den <= 0 or duration_us <= 0 or not pins:
         raise ValueError("dynamic map requires valid canvas, frame rate, duration and at least one pin")
     if not math.isfinite(area_glow_radius_km) or not 0.0 <= area_glow_radius_km <= 1000.0:
@@ -114,8 +143,31 @@ def main() -> int:
     # near street level; 17.0 is within the certified local tile pyramid.
     level_zoom = {"continent": 2.5, "country": 5.0, "region": 8.0, "city": 17.0}
     stop_zooms = [level_zoom[map_level(pin)] for pin in pins]
+    # Editorial country scenes use a deliberately wide Middle East frame;
+    # no city-level zoom-in that crops out the country polygon. Region/country
+    # pins stay fixed while the camera performs a subtle, measurable push.
+    editorial_country_scenes = set(MAP_EDITORIAL_SCENES)
+    if map_animation in editorial_country_scenes:
+        # 5.4 -> 6.0 frames the Arabian Peninsula and the Gulf at 1080p.
+        stop_zooms = [6.0 for _ in pins]
 
-    if len(stops) == 1:
+    if map_animation in editorial_country_scenes:
+        # One centered camera for all pins/regions; multiple markers appear
+        # together in a single geographic canvas (no Tivoli/Fiumicino hops).
+        from geo_runtime import Place
+        from dynamic_tile_pyramid import latlon_to_global_px
+        center_lat, center_lon = 22.0, 53.0
+        camera_place = Place(query="Middle East", display_name="Middle East",
+                             lat=center_lat, lon=center_lon, ok=True)
+        builder = geo._ShotBuilder(camera_place, "dive", total_frames)
+        builder.start_zoom = 5.0
+        builder.end_zoom = 5.2
+        builder.ANCHORS = tuple((s.lat, s.lon) for s in stops) + ((center_lat, center_lon),)
+        builder.PREPARE_ZMIN, builder.PREPARE_ZMAX = 5, 8
+        builder.full_duration_zoom = True
+        builder.terminal_hold_frames = round(total_frames * 0.50)
+        builder._editorial_stops = stops
+    elif len(stops) == 1:
         preset = {"tilt_reveal": "tilt", "orbit_arrival": "orbit"}.get(camera_animation, "dive")
         builder = geo._ShotBuilder(stops[0], preset, total_frames)
         builder.end_zoom = stop_zooms[0]
@@ -126,21 +178,57 @@ def main() -> int:
         # making the place feel distant even at the end of the clip.
         if map_level(pins[0]) == "city":
             builder.end_zoom = min(17.0, stop_zooms[0])
-            # Open closer to town scale: a 5.5-level dive reads as a
-            # sudden drop and the clip feels rushed. A 3-level approach
-            # keeps the same arrival window but nearly halves peak zoom
-            # velocity, so the flight stays readable.
-            builder.start_zoom = max(8.0, builder.end_zoom - 3.0)
+            if camera_animation == "signature_dive":
+                # Classic wide satellite dive: opens far above town scale.
+                # Explicit choice only (never in the Go random pool).
+                builder.start_zoom = max(8.0, builder.end_zoom - 5.5)
+            elif camera_animation == "steady_hold":
+                # Nearly static: a 0.8-level drift, then a long readable hold.
+                builder.start_zoom = max(8.0, builder.end_zoom - 0.8)
+            elif camera_animation == "fast_push":
+                # Quicker 2-level push for short map beats.
+                builder.start_zoom = max(8.0, builder.end_zoom - 2.0)
+            else:
+                # Open closer to town scale: a 5.5-level dive reads as a
+                # sudden drop and the clip feels rushed. A 3-level approach
+                # keeps the same arrival window but nearly halves peak zoom
+                # velocity, so the flight stays readable.
+                builder.start_zoom = max(8.0, builder.end_zoom - 3.0)
         else:
             if camera_animation == "wide_context":
                 builder.end_zoom = max(5.8, stop_zooms[0] - 2.0)
             elif camera_animation == "slow_approach":
                 builder.end_zoom = max(5.8, stop_zooms[0] - 0.9)
-            builder.start_zoom = max(5.8, builder.end_zoom - 1.5)
+            elif camera_animation == "signature_dive":
+                builder.end_zoom = max(5.8, stop_zooms[0])
+                builder.start_zoom = max(5.8, builder.end_zoom - 5.5)
+            elif camera_animation == "steady_hold":
+                builder.end_zoom = max(5.8, stop_zooms[0] - 0.5)
+                builder.start_zoom = max(5.8, builder.end_zoom - 0.8)
+            elif camera_animation == "fast_push":
+                builder.end_zoom = max(5.8, stop_zooms[0] - 0.5)
+                builder.start_zoom = max(5.8, builder.end_zoom - 2.0)
+            else:
+                builder.start_zoom = max(5.8, builder.end_zoom - 1.5)
+            if camera_animation not in ("signature_dive", "steady_hold", "fast_push"):
+                builder.start_zoom = max(5.8, builder.end_zoom - 1.5)
+            # Overview scopes (country/continent) sit at or below the 5.8
+            # framing floor, which clamps start and end to the same zoom:
+            # a static shot the velocity gate rightly rejects. Repair with a
+            # gentle 0.5-level push-in fully above the z=5 sampler floor
+            # instead of weakening the gate or faking motion elsewhere.
+            if abs(builder.start_zoom - builder.end_zoom) < 1e-9:
+                builder.start_zoom = 5.0
+                builder.end_zoom = 5.5
         # Complete the approach in the opening 42%, then hold the destination
         # long enough for the target marker and place name to read clearly.
         builder.full_duration_zoom = True
-        builder.terminal_hold_frames = round(total_frames * 0.58)
+        if camera_animation == "steady_hold":
+            builder.terminal_hold_frames = round(total_frames * 0.70)
+        elif camera_animation in ("fast_push", "signature_dive"):
+            builder.terminal_hold_frames = round(total_frames * 0.50)
+        else:
+            builder.terminal_hold_frames = round(total_frames * 0.58)
     else:
         # Keep the previous five-second camera tour, then hold the final
         # destination for another 1.5 seconds. The builder's timeline ends
@@ -177,6 +265,9 @@ def main() -> int:
         elif camera_animation == "slow_approach":
             builder.initial_zoom_fraction = 0.90
             builder.stop_dive_fraction = 1.0
+        elif camera_animation in ("signature_dive", "steady_hold", "fast_push"):
+            builder.initial_zoom_fraction = 0.90
+            builder.stop_dive_fraction = 1.0
         elif camera_animation == "wide_context":
             builder.stop_end_zooms = [max(5.8, zoom - 1.7) for zoom in stop_zooms]
         builder.end_zoom = max(builder.stop_end_zooms)
@@ -186,14 +277,32 @@ def main() -> int:
         builder.FRAMES_TOTAL = total_frames
         geo.fit_initial_stop_frames(builder, minimum_final_hold_frames=round(1.5 * builder.FPS))
 
-    # Production map overlays are clean satellite imagery: show only the
-    # current place name, with no altitude HUD, diagnostic headings, route
-    # graphics, attribution stamp, descent caption or progress bar.
+    # Production map overlays are clean satellite imagery. Editorial country
+    # scenes get one fixed regional view rather than a stop-by-stop city tour;
+    # their geographies are projected against this live camera pose.
     builder.minimal_map = True
     builder.map_basemap = basemap
     builder.map_area_glow_radius_km = area_glow_radius_km
     builder.map_label_animation = label_animation
+    builder.map_composition = map_animation
+    builder.editorial_pins = [dict(pin) for pin in pins]
+    builder.map_pin_extras = [{
+        "latitude": float(pin["latitude"]),
+        "longitude": float(pin["longitude"]),
+        "label": str(pin.get("label") or pin["id"]),
+        "subtitle": str(pin.get("subtitle") or "")[:40],
+        "category": str(pin.get("category") or "")[:24],
+        "color": str(pin.get("color") or "")[:16],
+        "value": pin.get("value", None),
+        "unit": str(pin.get("unit") or "")[:12],
+        "photo": str(pin.get("photo") or ""),
+        "location": str(pin.get("location") or "")[:40],
+    } for pin in pins]
     builder.map_typography = payload.get("typography", {})
+    builder.editorial_mode = map_animation in editorial_country_scenes
+    # Required for the hard fail-closed GPU compositor; no automatic ndarray
+    # fallback is permitted for editorial scene renders.
+    builder.require_gpu_editorial = bool(map_animation in editorial_country_scenes)
 
     if builder.WIDTH != width or builder.HEIGHT != height:
         raise ValueError("Chronon geo camera output dimensions do not match the overlay canvas")
@@ -230,7 +339,8 @@ def main() -> int:
     # The camera may zoom out to show an entire route leg. Validate its actual
     # frame trajectory at the integer-sampling boundary before encoding; never
     # rely on the sampler's slow fallback to hide an undersized plate.
-    for leg_index in range(len(stops) - 1):
+    if map_animation not in editorial_country_scenes:
+      for leg_index in range(len(stops) - 1):
         a, b = stops[leg_index], stops[leg_index + 1]
         ax, ay = dyn.latlon_to_global_px(a.lat, a.lon, 5)
         bx, by = dyn.latlon_to_global_px(b.lat, b.lon, 5)
@@ -242,7 +352,10 @@ def main() -> int:
     sampler.gpu_map_enabled = False
     sampler.prepare(anchors, prepare_zmin, prepare_zmax)
     for frame_idx in range(total_frames):
-        if len(stops) > 1:
+        if map_animation in editorial_country_scenes:
+            zoom = builder.pose(frame_idx)[0]
+            lat, lon = builder.place.lat, builder.place.lon
+        elif len(stops) > 1:
             lat, lon, zoom = builder.pose(frame_idx)
         else:
             lat, lon = stops[0].lat, stops[0].lon
@@ -251,6 +364,22 @@ def main() -> int:
             raise RuntimeError(
                 f"prepared map plates do not cover camera frame {frame_idx} "
                 f"at zoom {zoom:.3f}; refusing slow fallback")
+        if map_animation in editorial_country_scenes:
+            project = lambda y, x, _a=(lat, lon), _z=zoom: geo_project(
+                y, x, _a, _z, width, height)
+            visible_geometries = {
+                "ed_saudi_base": [(24.7136,46.6753)],
+                "ed_iran_glow": [(32.0,53.0)],
+                "ed_yemen_fill": [(15.3,47.0)],
+                "ed_yemen_markers": [(float(pin["latitude"]),float(pin["longitude"])) for pin in pins],
+                "ed_hormuz_routes": [(26.55,56.27),(12.58,43.35),(7.0,72.5)],
+                "ed_mocha_tactical": [(13.3167,43.25)],
+            }[map_animation]
+            offscreen = [point for point in visible_geometries
+                         if not (-40 <= project(*point)[0] <= width+40
+                                 and -40 <= project(*point)[1] <= height+40)]
+            if offscreen:
+                raise RuntimeError(f"scene {map_animation} has off-screen key geography at frame {frame_idx}: {offscreen}")
     if sampler.fallback_count != 0:
         raise RuntimeError("geometry-only sampler coverage check invoked the slow renderer")
     print(f"[dynamic-map] prepared zooms {sampler.z_min}..{sampler.z_max}", flush=True)
@@ -259,12 +388,29 @@ def main() -> int:
     if pyramid.telemetry["tile_fallbacks"] != 0:
         raise RuntimeError(f"tile prefetch produced {pyramid.telemetry['tile_fallbacks']} fallback tiles")
     gate_started = time.perf_counter()
-    geo.gate_builder(builder, sampler, "production-map-overlay")
+    # Determinism/velocity gate stays CPU-only for classic scenes. Editorial
+    # requires UMat from the first probe and asserts OpenCL composite counters.
+    if map_animation in MAP_EDITORIAL_SCENES:
+        cv2.ocl.setUseOpenCL(True)
+        if not cv2.ocl.useOpenCL():
+            raise RuntimeError("OpenCL GPU map renderer failed to initialize")
+        gpu_plate_bytes = sampler.prepare_opencl()
+        sampler.gpu_map_enabled = True
+        sampler.editorial_gpu_enabled = True
+        sampler.editorial_scene = map_animation
+        reset_gpu_counters()
+        geo.gate_builder(builder, sampler, "production-map-overlay-gpu")
+        gpu_gate_counts = gpu_counters()
+        if gpu_gate_counts.get("opencl", 0) <= 0 or gpu_gate_counts.get("composites", 0) <= 0:
+            raise RuntimeError(f"GPU acceptance gate observed no editorial composites: {gpu_gate_counts}")
+    else:
+        geo.gate_builder(builder, sampler, "production-map-overlay")
+        gpu_plate_bytes = 0
     gate_ms = (time.perf_counter() - gate_started) * 1000.0
     if sampler.fallback_count != 0:
         raise RuntimeError(f"map acceptance gate used {sampler.fallback_count} slow-engine fallback frames")
-    # The acceptance gate is deliberately CPU-only and small. Actual video
-    # frames use OpenCL on the NVIDIA device, then stream to NVENC.
+    # Actual video frames use OpenCL on NVIDIA and encode to NVENC when the
+    # requested scene requires GPU; CPU render is a classic-scene path only.
     cv2.ocl.setUseOpenCL(True)
     if not cv2.ocl.useOpenCL():
         raise RuntimeError("OpenCL GPU map renderer failed to initialize")
@@ -277,16 +423,30 @@ def main() -> int:
     if "NVIDIA" not in device.vendorName().upper():
         raise RuntimeError(f"GPU map renderer selected unexpected device: {device.name()}")
     print(f"[dynamic-map] GPU frame renderer: OpenCL / {device.name()}", flush=True)
-    gpu_plate_bytes = sampler.prepare_opencl()
+    if not sampler.gpu_map_enabled:
+        gpu_plate_bytes = sampler.prepare_opencl()
+        sampler.gpu_map_enabled = True
     print(f"[dynamic-map] uploaded {gpu_plate_bytes} map plate bytes to GPU", flush=True)
-    sampler.gpu_map_enabled = True
+    sampler.editorial_gpu_enabled = bool(map_animation in MAP_EDITORIAL_SCENES)
+    sampler.editorial_scene = map_animation
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    if map_animation in MAP_EDITORIAL_SCENES:
+        # Artistically complex editorial overlays must remain GPU-rendered;
+        # rejecting unavailable devices/fallbacks is part of this mode.
+        sampler.editorial_gpu_enabled = True
+        sampler.editorial_scene = map_animation
+    reset_gpu_counters()
     stats = harness.encode_with_pool(builder, sampler, args.output,
                                      workers=min(2, max(1, (os.cpu_count() or 2) // 2)),
                                      block=2, preset="slow", crf=15,
                                      gpu_required=True)
     if stats.get("engine_fallback_frames", 0):
         raise RuntimeError(f"map sampler used fallback imagery in {stats['engine_fallback_frames']} frames")
+    overlay_counts = gpu_counters()
+    if map_animation in MAP_EDITORIAL_SCENES and (
+            overlay_counts.get("opencl", 0) <= 0 or
+            overlay_counts.get("composites", 0) <= 0):
+        raise RuntimeError(f"editorial GPU scene did not register OpenCL composites: {overlay_counts}")
     summary = {
         "schema": "chronon.dynamic-map-telemetry.v1",
         "basemap": basemap,
@@ -294,6 +454,10 @@ def main() -> int:
         "dimensions": {"width": width, "height": height},
         "fps": {"num": fps_num, "den": fps_den},
         "tile": dict(pyramid.telemetry),
+        "camera": {"start_zoom": builder.start_zoom,
+                   "end_zoom": builder.end_zoom,
+                   "terminal_hold_frames": builder.terminal_hold_frames,
+                   "center": [builder.place.lat, builder.place.lon]},
         "plates": dict(sampler.prepare_telemetry),
         "gate_ms": gate_ms,
         "frame_pipeline_s": stats["production_s"],
@@ -304,6 +468,8 @@ def main() -> int:
         "video_encoder": stats["encoder"],
         "gpu_encoder": stats["gpu_encoder"],
         "gpu_frame_renderer": "opencv_opencl",
+        "gpu_overlay_compositor": "opencv_umat_opencl" if map_animation in MAP_EDITORIAL_SCENES else "legacy",
+        "gpu_overlay_counts": overlay_counts,
         "opencl_device": device.name(),
         "gpu_plate_bytes": gpu_plate_bytes,
         "renderer_wall_s": time.perf_counter() - render_started,

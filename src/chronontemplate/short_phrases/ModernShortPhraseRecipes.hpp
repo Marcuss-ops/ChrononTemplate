@@ -11,7 +11,6 @@ ShortPhraseDefinition kineticCenterBuild();
 ShortPhraseDefinition lineByLineSlide();
 ShortPhraseDefinition perWordRise();
 ShortPhraseDefinition perspectiveMarquee();
-ShortPhraseDefinition scanBand();
 ShortPhraseDefinition scrambleReveal();
 ShortPhraseDefinition strikethroughReplace();
 ShortPhraseDefinition textMatchCut();
@@ -26,7 +25,6 @@ ShortPhraseDefinition decryptedText();
 ShortPhraseDefinition scrollReveal();
 ShortPhraseDefinition scrambledText();
 ShortPhraseDefinition glareHover();
-ShortPhraseDefinition glowCursor();
 ShortPhraseDefinition gradualBlur();
 ShortPhraseDefinition shapeBlur();
 }

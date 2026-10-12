@@ -309,7 +309,7 @@ class _ShotBuilder:
         from render_geo_camera_small_places import (
             apply_city_beacon_map_style, draw_map_location_marker,
             apply_city_beacon_map_style_opencl, draw_map_location_marker_opencl,
-            draw_editorial_map_caption,
+            draw_editorial_map_caption, MARKER_DRAWN_STYLES,
         )
         import cv2
         zoom, pitch, yaw, roll = self.pose(f)
@@ -329,13 +329,56 @@ class _ShotBuilder:
                                         flags=cv2.INTER_LINEAR,
                                         borderMode=cv2.BORDER_REFLECT_101)
         if getattr(self, "minimal_map", False):
+            if getattr(self, "require_gpu_editorial", False) and not gpu_map:
+                raise RuntimeError("editorial map requires the OpenCL GPU map sampler")
             # No map pin/beacon: use the same editorial title rail as the
             # Chronon map template, with the place name below the map image.
-            frame = frame.get() if gpu_map else frame
+            composition = getattr(self, "map_composition", "") or ""
+            if composition:
+                from map_editorial_gpu import draw_editorial_scene_gpu
+                from map_editorial import MAP_EDITORIAL_SCENES
+                from map_editorial_gpu import geo_project
+                if composition not in MAP_EDITORIAL_SCENES:
+                    raise ValueError(f"unsupported GPU editorial scene: {composition}")
+                extras = list(getattr(self, "map_pin_extras", [{}]))
+                pin_records = [{
+                    "latitude": float(p.get("latitude", self.place.lat)),
+                    "longitude": float(p.get("longitude", self.place.lon)),
+                    "label": str(p.get("label", p.get("name", self.place.display_name or self.place.query))),
+                    **(extras[i] if i < len(extras) else {}),
+                } for i,p in enumerate(getattr(self, "editorial_pins", []))]
+                if not pin_records:
+                    pin_records = [{
+                        "latitude": self.place.lat,
+                        "longitude": self.place.lon,
+                        "label": self.place.display_name or self.place.query,
+                        **(extras[0] if extras else {}),
+                    }]
+                # Editorial scene: fixed country geography projected around
+                # the camera anchor; all caller pins remain grounded.
+                anchor = (self.place.lat, self.place.lon)
+
+                def _project(lat, lon, _a=anchor, _z=zoom):
+                    return geo_project(lat, lon, _a, _z, WIDTH, HEIGHT)
+
+                frame = draw_editorial_scene_gpu(frame, composition, {
+                    "W": WIDTH, "H": HEIGHT, "project": _project,
+                    "pins": pin_records,
+                }, progress)
+                from map_editorial_gpu import gpu_counters
+                self._last_gpu_overlay_counters = gpu_counters()
+                return frame
+            label_animation = getattr(self, "map_label_animation", "gentle_fade")
             frame = draw_editorial_map_caption(
                 frame, self.place.display_name or self.place.query, progress,
-                getattr(self, "map_typography", {}),
-                getattr(self, "map_label_animation", "gentle_fade"))
+                getattr(self, "map_typography", {}), label_animation)
+            if label_animation in MARKER_DRAWN_STYLES:
+                # Distinct styles own marker + text at the camera nadir
+                # (the rail stays suppressed for them upstream).
+                draw_map_location_marker(
+                    frame, (WIDTH // 2, HEIGHT // 2),
+                    self.place.display_name or self.place.query,
+                    progress, label_animation)
             _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
             return frame
         if self.preset == "metric":
@@ -514,7 +557,7 @@ class TourBuilder:
         from render_geo_camera_small_places import (
             apply_city_beacon_map_style, draw_map_location_marker,
             apply_city_beacon_map_style_opencl, draw_map_location_marker_opencl,
-            draw_editorial_map_caption,
+            draw_editorial_map_caption, MARKER_DRAWN_STYLES,
             draw_route_glow, draw_spring_pin,
         )
         from dynamic_tile_pyramid import latlon_to_global_px
@@ -527,6 +570,8 @@ class TourBuilder:
                  if gpu_map else sampler.sample(lat, lon, zoom, WIDTH, HEIGHT))
 
         if getattr(self, "minimal_map", False):
+            if getattr(self, "require_gpu_editorial", False) and not gpu_map:
+                raise RuntimeError("editorial map requires the OpenCL GPU map sampler")
             location_name = ""
             active_stop = None
             for mark in self._schedule():
@@ -537,10 +582,53 @@ class TourBuilder:
             if active_stop is None and self.stops:
                 active_stop = self.stops[-1]
                 location_name = active_stop.display_name or active_stop.query
-            frame = frame.get() if gpu_map else frame
+            composition = getattr(self, "map_composition", "") or ""
+            if composition:
+                # Geo-anchored outlines/routes use the identical tile-sampler
+                # projection at each current camera pose. Keep frame pixels as
+                # UMat through all full-frame effects and composites.
+                from map_editorial_gpu import (
+                    draw_editorial_scene_gpu, geo_project, gpu_counters,
+                )
+                from map_editorial import MAP_EDITORIAL_SCENES
+                if composition not in MAP_EDITORIAL_SCENES:
+                    raise ValueError(f"unsupported GPU editorial scene: {composition}")
+                lat_c, lon_c, zoom_c = lat, lon, zoom
+                extras = list(getattr(self, "map_pin_extras", []))
+                pins = []
+                for i, s in enumerate(self.stops):
+                    sx, sy = geo_project(s.lat, s.lon, (lat_c, lon_c),
+                                         zoom_c, WIDTH, HEIGHT)
+                    if composition in ("ed_yemen_markers",):
+                        ex = extras[i] if i < len(extras) else {}
+                        pins.append({"latitude": s.lat, "longitude": s.lon,
+                                     "label": s.display_name or s.query, **ex})
+                    elif -200 <= sx <= WIDTH + 200 and -200 <= sy <= HEIGHT + 200:
+                        ex = extras[i] if i < len(extras) else {}
+                        pins.append({"latitude": s.lat, "longitude": s.lon,
+                                     "label": s.display_name or s.query, **ex})
+                if pins or composition in ("ed_saudi_base", "ed_iran_glow",
+                                             "ed_yemen_fill", "ed_hormuz_routes",
+                                             "ed_mocha_tactical"):
+                    anchor = (lat_c, lon_c)
+
+                    def _project(lat, lon, _a=anchor, _z=zoom_c):
+                        return geo_project(lat, lon, _a, _z, WIDTH, HEIGHT)
+
+                    frame = draw_editorial_scene_gpu(frame, composition, {
+                        "W": WIDTH, "H": HEIGHT, "project": _project,
+                        "pins": pins,
+                    }, progress)
+                self._last_gpu_overlay_counters = gpu_counters()
+                return frame
+            label_animation = getattr(self, "map_label_animation", "gentle_fade")
             frame = draw_editorial_map_caption(
                 frame, location_name, progress, getattr(self, "map_typography", {}),
-                getattr(self, "map_label_animation", "gentle_fade"))
+                label_animation)
+            if label_animation in MARKER_DRAWN_STYLES:
+                draw_map_location_marker(
+                    frame, (WIDTH // 2, HEIGHT // 2), location_name,
+                    progress, label_animation)
             _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
             return frame
 
@@ -713,8 +801,13 @@ def gate_builder(builder, sampler, label: str) -> None:
     """The acceptance gate every render must pass before encoding."""
     n_seg = check_velocity_strict(builder)
     probe = builder.TOTAL_FRAMES // 2
-    a = builder.render_frame_fast(sampler, probe).tobytes()
-    b = builder.render_frame_fast(sampler, probe).tobytes()
+    frame_a = builder.render_frame_fast(sampler, probe)
+    frame_b = builder.render_frame_fast(sampler, probe)
+    if hasattr(frame_a, "get"):
+        frame_a = frame_a.get()
+    if hasattr(frame_b, "get"):
+        frame_b = frame_b.get()
+    a, b = frame_a.tobytes(), frame_b.tobytes()
     if a != b:
         raise RuntimeError(f"[{label}] gate: frame {probe} is not deterministic")
     print(f"[gate] {label}: {n_seg} phase(s) velocity-strict PASS, "

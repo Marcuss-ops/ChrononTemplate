@@ -96,8 +96,28 @@ add_library(chronontemplate STATIC
         # Optional offline RenderPlan bridge lives outside the Motion core.
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
         src/chronontemplate/single_images/ImageAnimationPack.cpp
+        src/chronontemplate/single_images/PixelGridPack.cpp
+        src/chronontemplate/single_images/EdgeStrokePack.cpp
+        src/chronontemplate/single_images/GlowPack.cpp
+        src/chronontemplate/single_images/RGBSplitPack.cpp
+        src/chronontemplate/elements/ElementsCommon.cpp
+        src/chronontemplate/elements/TimelineElements.cpp
+        src/chronontemplate/elements/AnnotationElements.cpp
+        src/chronontemplate/elements/WebElements.cpp
+        src/chronontemplate/elements/DocumentaryElements.cpp
+        src/chronontemplate/elements/DiagramElements.cpp
+        src/chronontemplate/vintage_documentary/VintageDocumentaryPack.cpp
+        src/chronontemplate/documentary_effects/MagnifierLoupePack.cpp
+        src/chronontemplate/documentary_effects/RedactedPack.cpp
+        src/chronontemplate/documentary_effects/FilmLeaderPack.cpp
+        src/chronontemplate/documentary_effects/DepthParallaxPack.cpp
+        src/chronontemplate/documentary_effects/RouteDrawingPack.cpp
+        src/chronontemplate/documentary_effects/BeforeAfterPack.cpp
+        src/chronontemplate/documentary_effects/AnimatedCountersPack.cpp
         src/chronontemplate/camera_roll/TitleCameraPack.cpp
         src/chronontemplate/camera_roll/SceneCameraPack.cpp
+        src/chronontemplate/camera_roll/CameraMotionPack.cpp
+        src/chronontemplate/ui_camera/UiCameraChoreography.cpp
         src/chronontemplate/entities_with_text/DocumentarySnapshotPack.cpp
         src/chronontemplate/entities_with_text/EntityFilmstripPack.cpp
         src/chronontemplate/important_phrases/ImportantPhrasePack.cpp
@@ -118,7 +138,6 @@ add_library(chronontemplate STATIC
         src/chronontemplate/short_phrases/animations/LineByLineSlide.cpp
         src/chronontemplate/short_phrases/animations/PerWordRise.cpp
         src/chronontemplate/short_phrases/animations/PerspectiveMarquee.cpp
-        src/chronontemplate/short_phrases/animations/ScanBand.cpp
         src/chronontemplate/short_phrases/animations/ScrambleReveal.cpp
         src/chronontemplate/short_phrases/animations/StrikethroughReplace.cpp
         src/chronontemplate/short_phrases/animations/TextMatchCut.cpp
@@ -133,7 +152,6 @@ add_library(chronontemplate STATIC
         src/chronontemplate/short_phrases/animations/ScrollReveal.cpp
         src/chronontemplate/short_phrases/animations/ScrambledText.cpp
         src/chronontemplate/short_phrases/animations/GlareHover.cpp
-        src/chronontemplate/short_phrases/animations/GlowCursor.cpp
         src/chronontemplate/short_phrases/animations/GradualBlur.cpp
         src/chronontemplate/short_phrases/animations/ShapeBlur.cpp
         # the packs a template author starts from
@@ -163,6 +181,24 @@ target_compile_options(chronontemplate_emit_title_camera_v2 PRIVATE -Wall -Wextr
 add_executable(chronontemplate_sequence_from_json tools/camera_roll/sequence_from_json.cpp)
 target_link_libraries(chronontemplate_sequence_from_json PRIVATE chronontemplate)
 target_include_directories(chronontemplate_sequence_from_json PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+
+add_executable(chronontemplate_emit_ui_choreography_canary tools/ui_camera/emit_ui_choreography_canary.cpp)
+target_link_libraries(chronontemplate_emit_ui_choreography_canary PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_ui_choreography_canary PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_ui_choreography_canary PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_ui_choreography_canary PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_ui_choreography_canary PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_camera_1950_story tools/camera_roll/emit_camera_1950_story.cpp)
 target_link_libraries(chronontemplate_emit_camera_1950_story PRIVATE chronontemplate)
@@ -461,6 +497,56 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_image_animation_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_image_animation_pack_test COMMAND chronontemplate_image_animation_pack_test)
 
+    add_executable(chronontemplate_image_style_packs_test tests/image_style_packs.cpp)
+    target_link_libraries(chronontemplate_image_style_packs_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_image_style_packs_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_image_style_packs_test COMMAND chronontemplate_image_style_packs_test)
+
+    add_executable(chronontemplate_elements_timeline_test tests/elements_timeline.cpp)
+    target_link_libraries(chronontemplate_elements_timeline_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_elements_timeline_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_elements_timeline_test COMMAND chronontemplate_elements_timeline_test)
+
+    add_executable(chronontemplate_elements_annotation_test tests/elements_annotation.cpp)
+    target_link_libraries(chronontemplate_elements_annotation_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_elements_annotation_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_elements_annotation_test COMMAND chronontemplate_elements_annotation_test)
+
+    add_executable(chronontemplate_elements_web_test tests/elements_web.cpp)
+    target_link_libraries(chronontemplate_elements_web_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_elements_web_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_elements_web_test COMMAND chronontemplate_elements_web_test)
+
+    add_executable(chronontemplate_elements_documentary_test tests/elements_documentary.cpp)
+    target_link_libraries(chronontemplate_elements_documentary_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_elements_documentary_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_elements_documentary_test COMMAND chronontemplate_elements_documentary_test)
+
+    add_executable(chronontemplate_elements_diagram_test tests/elements_diagram.cpp)
+    target_link_libraries(chronontemplate_elements_diagram_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_elements_diagram_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_elements_diagram_test COMMAND chronontemplate_elements_diagram_test)
+
+    add_executable(chronontemplate_vintage_documentary_pack_test tests/vintage_documentary_pack.cpp)
+    target_link_libraries(chronontemplate_vintage_documentary_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_vintage_documentary_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_vintage_documentary_pack_test COMMAND chronontemplate_vintage_documentary_pack_test)
+
+    add_executable(chronontemplate_archival_lens_look_test tests/archival_lens_look.cpp)
+    target_link_libraries(chronontemplate_archival_lens_look_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_archival_lens_look_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_archival_lens_look_test COMMAND chronontemplate_archival_lens_look_test)
+
+    add_executable(chronontemplate_doc_effects_camera_test tests/doc_effects_camera.cpp)
+    target_link_libraries(chronontemplate_doc_effects_camera_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_doc_effects_camera_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_doc_effects_camera_test COMMAND chronontemplate_doc_effects_camera_test)
+
+    add_executable(chronontemplate_doc_effects_graphic_test tests/doc_effects_graphic.cpp)
+    target_link_libraries(chronontemplate_doc_effects_graphic_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_doc_effects_graphic_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_doc_effects_graphic_test COMMAND chronontemplate_doc_effects_graphic_test)
+
     # The title-camera documentary family: the title never animates, the camera
     # is the only authored motion, and the eight family gates hold for all
     # twenty title_camera_* presets.
@@ -477,6 +563,39 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_scene_camera_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_scene_camera_pack_test COMMAND chronontemplate_scene_camera_pack_test)
 
+    # The camera motion pack: fifty narrative presets as data, one resolver,
+    # single-shot PoseTracks plus two-shot ShotTimelines, the spec selection
+    # table and the 0.5 / 1.0 / 1.5 intensity ladder, pinned for all presets.
+    add_executable(chronontemplate_camera_motion_pack_test tests/camera_motion_pack.cpp)
+    target_link_libraries(chronontemplate_camera_motion_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_camera_motion_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_camera_motion_pack_test COMMAND chronontemplate_camera_motion_pack_test)
+
+    # The camera motion catalog emitter: fifty spec rows projected to JSON.
+    add_executable(chronontemplate_emit_camera_motion_catalog
+            tools/camera_roll/emit_camera_motion_catalog.cpp)
+    target_link_libraries(chronontemplate_emit_camera_motion_catalog PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_emit_camera_motion_catalog PRIVATE
+            ${CHRONONTEMPLATE_NLOHMANN_JSON_DIR})
+    target_compile_options(chronontemplate_emit_camera_motion_catalog PRIVATE -Wall -Wextra)
+
+    # Certification plans for the spec's priority thirteen: rig-sampled
+    # camera channels over the shared canary, ready for chronon3d_cli.
+    add_executable(chronontemplate_emit_camera_motion_certification
+            tools/camera_roll/emit_camera_motion_certification.cpp)
+    target_link_libraries(chronontemplate_emit_camera_motion_certification PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_emit_camera_motion_certification PRIVATE
+            ${CHRONONTEMPLATE_NLOHMANN_JSON_DIR})
+    target_compile_options(chronontemplate_emit_camera_motion_certification PRIVATE -Wall -Wextra)
+
+    # The UI + smooth-camera choreography: one Null controller carries the
+    # panel, the camera push/drift/settle rides the rig, framing fits the
+    # measured bounds, and the 90-frame canary lowers to RenderPlan V3.
+    add_executable(chronontemplate_ui_camera_choreography_test tests/ui_camera_choreography.cpp)
+    target_link_libraries(chronontemplate_ui_camera_choreography_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_ui_camera_choreography_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_ui_camera_choreography_test COMMAND chronontemplate_ui_camera_choreography_test)
+
     if(Python3_Interpreter_FOUND)
         add_test(NAME chronontemplate_scene_sequence_json_contract
             COMMAND "${Python3_EXECUTABLE}"
@@ -486,6 +605,13 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
 
     # The short-phrase catalog contract: the emitter is fail-closed and the
     # committed catalog must be exactly what the C++ pack emits today.
+    if(Python3_Interpreter_FOUND AND TARGET chronontemplate_emit_camera_motion_catalog)
+        add_test(NAME chronontemplate_camera_motion_catalog_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/camera_roll/test_camera_motion_catalog.py"
+                    --tool "$<TARGET_FILE:chronontemplate_emit_camera_motion_catalog>"
+                    --catalog "${CMAKE_CURRENT_SOURCE_DIR}/catalog/camera_motion_pack.v1.json")
+    endif()
     if(Python3_Interpreter_FOUND AND TARGET chronontemplate_emit_short_phrase_catalog)
         add_test(NAME chronontemplate_short_phrase_catalog_contract
             COMMAND "${Python3_EXECUTABLE}"

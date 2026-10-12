@@ -88,11 +88,11 @@ def main() -> int:
 
     print("== the short-phrase recipes")
     recipes = document.get("recipes") or []
-    check("twelve originals, fourteen editorial, and twenty-five product recipes", len(recipes) == 51, str(len(recipes)))
+    check("twelve originals, fourteen editorial, and twenty-three product recipes", len(recipes) == 49, str(len(recipes)))
     editorial = [r for r in recipes if r["id"].startswith("short_phrase_editorial_")]
     product = [r for r in recipes if r["id"].startswith("short_phrase_product_")]
     check("exactly fourteen editorial recipes", len(editorial) == 14)
-    check("fourteen existing, seven text adaptations, and four visual adaptations", len(product) == 25)
+    check("fourteen existing, seven text adaptations and three visual adaptations", len(product) == 23)
     expected_product_ids = {
         "short_phrase_product_masked_heading",
         "short_phrase_product_split_flap_text",
@@ -102,12 +102,10 @@ def main() -> int:
         "short_phrase_product_scroll_reveal",
         "short_phrase_product_scrambled_text",
         "short_phrase_product_glare_hover",
-        "short_phrase_product_glow_cursor",
         "short_phrase_product_gradual_blur",
         "short_phrase_product_shape_blur",
         "short_phrase_product_per_word_rise",
         "short_phrase_product_perspective_marquee",
-        "short_phrase_product_scan_band",
         "short_phrase_product_strikethrough_replace",
         "short_phrase_product_text_shimmer",
     }
@@ -121,14 +119,14 @@ def main() -> int:
                   "short_phrase_product_warp_text", "short_phrase_product_fold_text",
                   "short_phrase_product_decrypted_text", "short_phrase_product_scroll_reveal",
                   "short_phrase_product_scrambled_text", "short_phrase_product_glare_hover",
-                  "short_phrase_product_glow_cursor", "short_phrase_product_gradual_blur",
+                  "short_phrase_product_gradual_blur",
                   "short_phrase_product_shape_blur"}))
     adapted_product_ids = {
         "short_phrase_product_masked_heading", "short_phrase_product_split_flap_text",
         "short_phrase_product_warp_text", "short_phrase_product_fold_text",
         "short_phrase_product_decrypted_text", "short_phrase_product_scroll_reveal",
         "short_phrase_product_scrambled_text", "short_phrase_product_glare_hover",
-        "short_phrase_product_glow_cursor", "short_phrase_product_gradual_blur",
+        "short_phrase_product_gradual_blur",
         "short_phrase_product_shape_blur",
     }
     for recipe in product:
@@ -137,7 +135,6 @@ def main() -> int:
             if recipe["id"] not in {
                 "short_phrase_product_per_word_rise",
                 "short_phrase_product_perspective_marquee",
-                "short_phrase_product_scan_band",
                 "short_phrase_product_strikethrough_replace",
                 "short_phrase_product_text_shimmer",
             }:
