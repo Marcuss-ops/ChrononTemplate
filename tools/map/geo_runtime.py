@@ -211,12 +211,23 @@ def _roll_bank(p: float) -> float:
     return -8.0 * math.sin(max(0.0, min(1.0, p)) * math.pi)
 
 
-def _draw_map_attribution(frame) -> None:  # noqa: ANN001 - numpy/OpenCV image
+def _draw_map_attribution(frame, basemap: str = "esri_sat") -> None:  # noqa: ANN001 - numpy/OpenCV image
     import cv2
-    text = "Esri, Vantor, Earthstar Geographics, and the GIS User Community"
-    cv2.putText(frame, text, (28, frame.shape[0] - 22),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.42, (238, 238, 238), 1,
-                cv2.LINE_AA)
+    credits = {
+        "esri_street": "Sources: Esri, DeLorme, HERE, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), MapmyIndia, TomTom",
+        "esri_topo": "Sources: Esri, DeLorme, HERE, TomTom, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, swisstopo, MapmyIndia, GIS User Community",
+        "esri_sat": "Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+    }
+    text = credits.get(basemap, "Sources: Esri and the GIS User Community")
+    scale = max(0.25, min(0.36, frame.shape[1] / 1920 * 0.34))
+    (text_w, text_h), baseline = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, 1)
+    x, y = 18, 20 + text_h
+    overlay = frame.copy()
+    cv2.rectangle(overlay, (x - 8, y - text_h - 7),
+                  (x + text_w + 8, y + baseline + 5), (0, 0, 0), -1)
+    cv2.addWeighted(overlay, 0.58, frame, 0.42, 0, dst=frame)
+    cv2.putText(frame, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, scale,
+                (248, 246, 236), 1, cv2.LINE_AA)
 
 
 def _draw_minimal_location_name(frame, name: str) -> None:  # noqa: ANN001 - numpy/OpenCV image
@@ -321,10 +332,12 @@ class _ShotBuilder:
             # No map pin/beacon: use the same editorial title rail as the
             # Chronon map template, with the place name below the map image.
             frame = frame.get() if gpu_map else frame
-            return draw_editorial_map_caption(
+            frame = draw_editorial_map_caption(
                 frame, self.place.display_name or self.place.query, progress,
                 getattr(self, "map_typography", {}),
                 getattr(self, "map_label_animation", "gentle_fade"))
+            _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
+            return frame
         if self.preset == "metric":
             # Never fabricate a statistic: the runtime has no trusted metric
             # source yet, so make the missing data explicit in the reveal.
@@ -343,7 +356,7 @@ class _ShotBuilder:
             )
         draw_hud_overlay(frame, self.place.lat, self.place.lon, zoom, progress,
                          target_title=f"{self.place.short_name} (GEO CAMERA V1)")
-        _draw_map_attribution(frame)
+        _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
         return frame
 
     def render_frame_engine(self, f: int):
@@ -525,9 +538,11 @@ class TourBuilder:
                 active_stop = self.stops[-1]
                 location_name = active_stop.display_name or active_stop.query
             frame = frame.get() if gpu_map else frame
-            return draw_editorial_map_caption(
+            frame = draw_editorial_map_caption(
                 frame, location_name, progress, getattr(self, "map_typography", {}),
                 getattr(self, "map_label_animation", "gentle_fade"))
+            _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
+            return frame
 
         # the route so far, glowing under the camera
         zf = int(zoom // 1)
@@ -559,7 +574,7 @@ class TourBuilder:
 
         draw_hud_overlay(frame, lat, lon, zoom, progress,
                          target_title="GEO RUNTIME TOUR")
-        _draw_map_attribution(frame)
+        _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
         return frame
 
 
