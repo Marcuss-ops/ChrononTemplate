@@ -75,6 +75,10 @@ namespace chronontemplate {
 
     /// Per-image frame style passed to Chronon's ContentHost. Radius zero keeps
     /// square corners; borderWidth zero disables the optional outline.
+    /// tornEdge*/scanline*/mosaic* mirror ImageRequest: torn paper alpha edge,
+    /// analog scanlines and digital mosaic blocks, all off at zero.
+    /// lens* carries the archival optical look: barrel curvature (0 = flat),
+    /// post-warp framing scale and a slight soft blur, all neutral at default.
     struct ImageFrameStyle {
         float cornerRadius{0.f};
         std::string borderColor{};
@@ -88,6 +92,15 @@ namespace chronontemplate {
         float channelSplit{0.f};
         std::uint32_t channelTrail{0};
         float sliceDisplace{0.f};
+        float tornEdgeAmount{0.f};
+        float tornEdgeScale{8.f};
+        std::uint32_t tornEdgeSeed{0};
+        float scanlineIntensity{0.f};
+        float scanlineSpacing{0.035f};
+        std::uint32_t mosaicBlockSize{0};
+        float lensCurvature{0.f};
+        float lensScale{1.f};
+        float softBlur{0.f};
     };
 
     struct ImageSpec {

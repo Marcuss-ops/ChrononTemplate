@@ -62,7 +62,6 @@ namespace chronontemplate {
         ProductGradientSweep,
         ProductSubtitleDissolve,
         ProductDualToneReveal,
-        ProductRollingTicker,
         ProductScaleSnap,
         ProductRadialExpansion,
         ProductDepthParallax,
@@ -77,13 +76,12 @@ namespace chronontemplate {
         ProductScrollReveal,
         ProductScrambledText,
         ProductGlareHover,
-        ProductGlowCursor,
         ProductGradualBlur,
         ProductShapeBlur,
         EditorialPromptResponse,
         EditorialDiffPatch,
         EditorialTerminalFocus,
-        EditorialPaperTitleCard ///< minimal documentary card: off-white paper, ink text, soft shadow
+        EditorialPaperTitleCard  ///< minimal documentary card: off-white paper, ink text, soft shadow
     };
 
     /// How the phrase leaves. The entrance is the recipe; the exit is the beat

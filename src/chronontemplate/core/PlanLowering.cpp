@@ -30,7 +30,21 @@ chronon3d::render_plan::LayerPlan makeImageLayerPlan(
         !std::isfinite(request.lightLeak) || request.lightLeak < 0.f || request.lightLeak > 1.f ||
         !std::isfinite(request.channelSplit) || request.channelSplit < 0.f || request.channelSplit > 128.f ||
         request.channelTrail > 16 || !std::isfinite(request.sliceDisplace) ||
-        request.sliceDisplace < 0.f || request.sliceDisplace > 1.f)
+        request.sliceDisplace < 0.f || request.sliceDisplace > 1.f ||
+        !std::isfinite(request.tornEdgeAmount) || request.tornEdgeAmount < 0.f || request.tornEdgeAmount > 64.f ||
+        !std::isfinite(request.tornEdgeScale) || request.tornEdgeScale < 0.f || request.tornEdgeScale > 1024.f ||
+        (request.tornEdgeAmount == 0.f && (request.tornEdgeScale != 8.f || request.tornEdgeSeed != 0)) ||
+        (request.tornEdgeAmount > 0.f && request.tornEdgeScale <= 0.f) ||
+        !std::isfinite(request.scanlineIntensity) || request.scanlineIntensity < 0.f || request.scanlineIntensity > 0.25f ||
+        !std::isfinite(request.scanlineSpacing) || request.scanlineSpacing < 0.002f || request.scanlineSpacing > 1.f ||
+        (request.scanlineIntensity == 0.f && request.scanlineSpacing != 0.035f) ||
+        request.mosaicBlockSize > 64 || (request.mosaicBlockSize == 1) ||
+        !std::isfinite(request.lensCurvature) || request.lensCurvature < -1.f ||
+        request.lensCurvature > 1.f ||
+        !std::isfinite(request.lensScale) || request.lensScale < 1.f ||
+        request.lensScale > 2.f ||
+        !std::isfinite(request.softBlur) || request.softBlur < 0.f ||
+        request.softBlur > 32.f)
         throw std::invalid_argument("makeImageLayerPlan: request style or target viewport is outside supported ranges");
     if (request.crop.enabled &&
         (!std::isfinite(request.crop.origin.x) || !std::isfinite(request.crop.origin.y) ||
@@ -152,6 +166,16 @@ chronon3d::render_plan::LayerPlan makeImageLayerPlan(
         glow.effect_color = {1.f, 0.48f, 0.2f, request.lightLeak};
         layer.effects.push_back(std::move(glow));
     }
+    // Archival optical lens first: the content warps, then splits, then
+    // softens — the pipeline order the look depends on.
+    if (request.lensCurvature != 0.f) {
+        LayerPlan::EffectPlan lens;
+        lens.kind = LayerPlan::EffectKindPlan::LensDistortion;
+        lens.lens_curvature = request.lensCurvature;
+        lens.lens_center = {0.5f, 0.5f};
+        lens.lens_scale = request.lensScale;
+        layer.effects.push_back(std::move(lens));
+    }
     if (request.channelSplit > 0.f) {
         LayerPlan::EffectPlan split;
         split.kind = LayerPlan::EffectKindPlan::ChromaticAberration;
@@ -160,6 +184,12 @@ chronon3d::render_plan::LayerPlan makeImageLayerPlan(
         split.chromatic_offset_mode = 1;
         layer.effects.push_back(std::move(split));
     }
+    if (request.softBlur > 0.f) {
+        LayerPlan::EffectPlan blur;
+        blur.kind = LayerPlan::EffectKindPlan::GaussianBlur;
+        blur.radius = request.softBlur;
+        layer.effects.push_back(std::move(blur));
+    }
     if (request.channelTrail > 0) {
         LayerPlan::EffectPlan trail;
         trail.kind = LayerPlan::EffectKindPlan::Echo;
@@ -167,6 +197,16 @@ chronon3d::render_plan::LayerPlan makeImageLayerPlan(
         trail.decay = 0.48f;
         trail.time_offset_frames = 1;
         layer.effects.push_back(std::move(trail));
+    }
+    if (request.tornEdgeAmount > 0.f) {
+        LayerPlan::EffectPlan torn;
+        torn.kind = LayerPlan::EffectKindPlan::RoughenEdges;
+        torn.amount = request.tornEdgeAmount;
+        torn.roughen_scale = request.tornEdgeScale;
+        torn.roughen_complexity = 3;
+        torn.warp_evolution = 0.f;
+        torn.roughen_seed = request.tornEdgeSeed;
+        layer.effects.push_back(std::move(torn));
     }
     if (request.sliceDisplace > 0.f) {
         LayerPlan::EffectPlan slices;
@@ -184,6 +224,21 @@ chronon3d::render_plan::LayerPlan makeImageLayerPlan(
             }
         }
         layer.effects.push_back(std::move(slices));
+    }
+    if (request.scanlineIntensity > 0.f) {
+        LayerPlan::EffectPlan scan;
+        scan.kind = LayerPlan::EffectKindPlan::WaveWarp;
+        scan.amount = request.scanlineIntensity;
+        scan.warp_wavelength = request.scanlineSpacing;
+        scan.warp_direction = {0.f, 1.f};
+        scan.wave_type = 2;
+        layer.effects.push_back(std::move(scan));
+    }
+    if (request.mosaicBlockSize >= 2) {
+        LayerPlan::EffectPlan mosaic;
+        mosaic.kind = LayerPlan::EffectKindPlan::Mosaic;
+        mosaic.block_size = request.mosaicBlockSize;
+        layer.effects.push_back(std::move(mosaic));
     }
     return layer;
 }

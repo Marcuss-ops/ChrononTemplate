@@ -1,0 +1,78 @@
+{
+  "schema": "chronontemplate.vintage-documentary.v1",
+  "version": 1,
+  "family_id": "vintage_documentary_v1",
+  "description": "Documentario vintage: foto su carta strappata con grade analogico, sfondo nero atmosferico con luce rossa diffusa, titolo giallo in doppio glow, glitch digitale finale a fasce. Ogni valore compila 1:1 nei campi di VintageDocumentaryScene (include/chronontemplate/vintage_documentary/VintageDocumentaryPack.hpp) e abbassa solo a primitive Chronon esistenti (RoughenEdges, Noise, WaveWarp scanlines, Mosaic, ChromaticAberration, Glow testi, gradienti radiali).",
+  "canvas": {"width": 1920, "height": 1080, "fps_num": 30, "fps_den": 1},
+  "scene": {
+    "name": "vintage_documentary",
+    "in_frame": 0,
+    "duration_frames": 150,
+    "photo_asset": "assets/test/square_bottle_test.png",
+    "photo": {"width": 760, "height": 480, "center": [960, 430]},
+    "title_center_y": 790
+  },
+  "background": {
+    "color": "#050505",
+    "radial_light": {
+      "color": "#52090D",
+      "center": [0.5, 0.5],
+      "radius": 0.62,
+      "opacity": 0.22
+    },
+    "dust": {"count": 36, "opacity": 0.25, "seed": 42},
+    "vignette_strength": 0.45,
+    "grain": 0.02,
+    "grain_seed": 99
+  },
+  "brush": {
+    "direction": "right-to-left",
+    "start_frame": 0,
+    "duration_frames": 60,
+    "bristle_seed": 11,
+    "bristle_amplitude_px": 44,
+    "edge_softness_px": 16,
+    "slant": -0.5,
+    "push_in": [1.08, 1.0],
+    "push_duration_frames": 70,
+    "lead": {"color": "#FFF6D2", "intensity": 0.35},
+    "photo_src": "assets/famous_people_trio_v1/sources/neil_armstrong.jpg"
+  },
+  "photo": {
+    "saturation": 0.72,
+    "contrast": 0.95,
+    "grain": 0.018,
+    "grain_seed": 7,
+    "vignette": 0.1,
+    "corner_radius": 14,
+    "torn_edge": {"amount": 7, "scale": 9, "seed": 7},
+    "scanlines": {"intensity": 0.06, "spacing": 0.004},
+    "tint": {"color": "#D9A7A0", "opacity": 0.14},
+    "edge_glow": {"color": "#FFF6D8", "opacity": 0.1}
+  },
+  "title": {
+    "text": "APOLLO 1969",
+    "font_size": 64,
+    "color": "#F3CA43",
+    "glow_small": {"radius_px": 12, "intensity": 0.45},
+    "glow_wide": {"radius_px": 65, "intensity": 0.18, "color": "#E4E6A0"},
+    "divider": {"width": 420, "opacity": 0.9}
+  },
+  "ending": {
+    "glitch": {
+      "start_frame": 130,
+      "duration_frames": 10,
+      "slices_displace": 0.6,
+      "max_horizontal_offset_px": 80,
+      "rgb_split_px": 5,
+      "mosaic_block_size": 12,
+      "seed": 123
+    }
+  },
+  "lowering_notes": {
+    "torn_edge": "ImageRequest.tornEdge* -> RoughenEdges (solo sul contorno carta, mai Noise sull'immagine)",
+    "scanlines": "ImageRequest.scanline* -> WaveWarp quadra, DENTRO la foto; la polvere resta sopra l'intera scena",
+    "glitch": "Duplicato foto vivo solo nella finestra glitch: sliceDisplace -> MeshWarp a righe alterne, channelSplit -> ChromaticAberration, mosaic -> Mosaic. Card pulita sotto con dip a 0.12",
+    "static_textures": "Torn edge, grain e dust cotti una volta nelle request; per frame si animano solo transform, opacity e finestra glitch"
+  }
+}

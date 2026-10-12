@@ -324,7 +324,13 @@ namespace chronontemplate {
             !std::isfinite(spec.frame.saturation) || spec.frame.saturation < 0.f || spec.frame.saturation > 4.f ||
             !std::isfinite(spec.frame.contrast) || spec.frame.contrast < 0.f || spec.frame.contrast > 16.f ||
             !std::isfinite(spec.frame.grain) || spec.frame.grain < 0.f || spec.frame.grain > 1.f ||
-            !std::isfinite(spec.frame.vignette) || spec.frame.vignette < 0.f || spec.frame.vignette > 1.f) {
+            !std::isfinite(spec.frame.vignette) || spec.frame.vignette < 0.f || spec.frame.vignette > 1.f ||
+            !std::isfinite(spec.frame.lensCurvature) || spec.frame.lensCurvature < -1.f ||
+            spec.frame.lensCurvature > 1.f ||
+            !std::isfinite(spec.frame.lensScale) || spec.frame.lensScale < 1.f ||
+            spec.frame.lensScale > 2.f ||
+            !std::isfinite(spec.frame.softBlur) || spec.frame.softBlur < 0.f ||
+            spec.frame.softBlur > 32.f) {
             throw std::invalid_argument("TemplateScene::image: invalid image frame or look style");
         }
         const bool noTargetSize = spec.targetSize.x == 0.f && spec.targetSize.y == 0.f;
@@ -367,6 +373,15 @@ namespace chronontemplate {
         request.channelSplit = spec.frame.channelSplit;
         request.channelTrail = spec.frame.channelTrail;
         request.sliceDisplace = spec.frame.sliceDisplace;
+        request.tornEdgeAmount = spec.frame.tornEdgeAmount;
+        request.tornEdgeScale = spec.frame.tornEdgeScale;
+        request.tornEdgeSeed = spec.frame.tornEdgeSeed;
+        request.scanlineIntensity = spec.frame.scanlineIntensity;
+        request.scanlineSpacing = spec.frame.scanlineSpacing;
+        request.mosaicBlockSize = spec.frame.mosaicBlockSize;
+        request.lensCurvature = spec.frame.lensCurvature;
+        request.lensScale = spec.frame.lensScale;
+        request.softBlur = spec.frame.softBlur;
 
         ContentHandle handle = m_host.createImage(request);
         return adopt(std::move(handle), derivedName(spec.name, spec.path), Layer::kRoot);

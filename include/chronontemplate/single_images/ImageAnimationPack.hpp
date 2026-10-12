@@ -15,6 +15,14 @@ namespace chronontemplate {
         ScalePop,
         Slide,
         Spin,
+        BorderDrawIn,
+        BorderGlowPulse,
+        BorderNeonSweep,
+        BoundedEdgeLeft,
+        BoundedEdgeRight,
+        BoundedEdgeTop,
+        BoundedEdgeBottom,
+        BoundedEdgeSweep,
         DepthFloatIn,
         YawFlipIn,
         PitchLift,
@@ -31,6 +39,8 @@ namespace chronontemplate {
 
     /// Optional camera move for 2.5D image scenes. The camera implementation
     /// and interpolation are delegated to ChrononMotion3D through CameraHandle.
+    /// The Border* entrances are 2D recipes with runtime-tintable colored
+    /// borders: cyan draw-in, violet glow pulse and gold neon sweep.
     enum class ImageCameraMove {
         None,
         Dolly,

@@ -1,0 +1,142 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "minimal_peak_diagram_a",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 150
+  },
+  "layers": [
+    {
+      "id": "black_background",
+      "type": "color",
+      "color": [
+        0.011764705882352941,
+        0.011764705882352941,
+        0.01568627450980392,
+        1.0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 150
+    },
+    {
+      "id": "diagram_path",
+      "type": "shape",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "color": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "screen_space": true,
+      "start_frame": 0,
+      "duration_frames": 150,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -307.2,
+              237.6
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -96.0,
+              -75.6
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              19.2,
+              -248.4
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              288.0,
+              226.8
+            ]
+          }
+        ],
+        "fill": [
+          0.011764705882352941,
+          0.011764705882352941,
+          0.01568627450980392,
+          1.0
+        ],
+        "stroke": {
+          "color": "#E8EBF0",
+          "width": 2.5,
+          "cap": "round",
+          "join": "round"
+        }
+      }
+    },
+    {
+      "id": "yellow_marker",
+      "type": "shape",
+      "size": [
+        48,
+        48
+      ],
+      "position": [
+        -182.4,
+        70.2
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 1.0,
+      "blend_mode": "normal",
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          0.8980392156862745,
+          0.16862745098039217,
+          1.0
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 72,
+          "intensity": 0.82,
+          "color": [
+            1.0,
+            0.6039215686274509,
+            0.09411764705882353,
+            1.0
+          ]
+        }
+      ]
+    }
+  ],
+  "output": {
+    "path": "minimal_peak_diagram_a.mp4",
+    "format": "mp4"
+  }
+}

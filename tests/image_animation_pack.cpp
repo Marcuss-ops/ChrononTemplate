@@ -140,10 +140,98 @@ namespace {
         }
     }
 
+    void theThreeColoredBorderImageEntrancesSubmit() {
+        section("three colored-border image entrances");
+        constexpr const char* asset = "assets/test/square_bottle_test.png";
+        constexpr std::array<ImageAnimation, 3> animations{
+                ImageAnimation::BorderDrawIn, ImageAnimation::BorderGlowPulse,
+                ImageAnimation::BorderNeonSweep};
+        constexpr std::array<const char*, 3> colors{"#38BDF8", "#A78BFA", "#E8B84A"};
+        for (std::size_t i = 0; i < animations.size(); ++i) {
+            FakeContentHost host;
+            TemplateScene scene(std::string("image_border_") + std::to_string(i), 30.f, host,
+                                1920.f, 1080.f);
+            LayerHandle& image = addImageAnimation(scene, animations[i], asset,
+                                                    "bordered", ImageFrameStyle{.cornerRadius = 64.f},
+                                                    ImageCameraMove::Dolly);
+            image.position(960.f, 540.f);
+            check(host.lastImageRequest().borderWidth > 0.f,
+                  "each colored-border recipe paints a visible border");
+            check(host.lastImageRequest().borderColor == colors[i],
+                  "each colored-border recipe keeps its signature border color");
+            const FrameSubmission start = scene.submit(0);
+            const FrameSubmission settled = scene.submit(48);
+            const FrameSubmission exit = scene.submit(149);
+            const BoundLayer* a = findLayer(start, image.id());
+            const BoundLayer* c = findLayer(settled, image.id());
+            const BoundLayer* d = findLayer(exit, image.id());
+            check(a && c && d, "each bordered entrance submits its image");
+            check(c->transform.opacity > 0.f, "the bordered image is visible after its entrance");
+            check(d->transform.opacity < c->transform.opacity,
+                  "the bordered image fades out before the end of the timeline");
+            check(scene.validate().empty(), "each bordered scene validates");
+            // A runtime-tinted frame stays authoritative: the payload's
+            // overlay_style.image.border.* color wins over the recipe default.
+            FakeContentHost tintedHost;
+            TemplateScene tinted(std::string("image_border_tinted_") + std::to_string(i), 30.f,
+                                 tintedHost, 1920.f, 1080.f);
+            (void) addImageAnimation(tinted, animations[i], asset, "bordered",
+                                     ImageFrameStyle{.cornerRadius = 32.f,
+                                                    .borderColor = "#112233",
+                                                    .borderWidth = 4.f},
+                                     ImageCameraMove::None);
+            check(tintedHost.lastImageRequest().borderColor == "#112233",
+                  "an explicit runtime border color overrides the recipe default");
+        }
+    }
+
+    void theFiveBoundedEdgeStrokesSubmit() {
+        section("five bounded single-side edge strokes");
+        constexpr const char* asset = "assets/test/square_bottle_test.png";
+        constexpr std::array<ImageAnimation, 5> animations{
+                ImageAnimation::BoundedEdgeLeft, ImageAnimation::BoundedEdgeRight,
+                ImageAnimation::BoundedEdgeTop, ImageAnimation::BoundedEdgeBottom,
+                ImageAnimation::BoundedEdgeSweep};
+        constexpr std::array<const char*, 5> tags{"left", "right", "top", "bottom", "sweep"};
+        for (std::size_t i = 0; i < animations.size(); ++i) {
+            FakeContentHost host;
+            TemplateScene scene(std::string("image_edge_") + tags[i], 30.f, host,
+                                1920.f, 1080.f);
+            LayerHandle& image = addImageAnimation(scene, animations[i], asset,
+                                                    "bounded", ImageFrameStyle{.cornerRadius = 64.f},
+                                                    ImageCameraMove::None);
+            image.position(960.f, 540.f);
+            const std::string edgeName = std::string("bounded_edge_") + tags[i];
+            const auto* shape = host.findShapeRequest(edgeName);
+            check(shape != nullptr, "each bounded recipe emits its white edge bar");
+            if (shape) {
+                check(shape->fillColor == "#FFFFFF",
+                      "the single-side stroke stays white with its slight offset");
+                const bool vertical = i < 2 || i == 4;
+                check(vertical ? (shape->size.x < shape->size.y)
+                               : (shape->size.x > shape->size.y),
+                      "vertical sides use a tall bar, horizontal sides a wide bar");
+            }
+            const FrameSubmission start = scene.submit(0);
+            const FrameSubmission settled = scene.submit(48);
+            const FrameSubmission exit = scene.submit(149);
+            const BoundLayer* a = findLayer(start, image.id());
+            const BoundLayer* c = findLayer(settled, image.id());
+            const BoundLayer* d = findLayer(exit, image.id());
+            check(a && c && d, "each bounded entrance submits its image");
+            check(c->transform.opacity > 0.f, "the bounded image is visible after its entrance");
+            check(d->transform.opacity < c->transform.opacity,
+                  "the bounded image fades out before the end of the timeline");
+            check(scene.validate().empty(), "each bounded scene validates");
+        }
+    }
+
 }// namespace
 
 int main() {
     theFiveSquareCornerImageEntrancesSubmit();
     theTwelveClean25dAnimationsSubmitWithTheirAuthoredCameraBehavior();
+    theThreeColoredBorderImageEntrancesSubmit();
+    theFiveBoundedEdgeStrokesSubmit();
     return chrononmotion_test::report();
 }

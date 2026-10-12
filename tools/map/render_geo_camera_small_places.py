@@ -164,7 +164,36 @@ MAP_LABEL_ANIMATIONS = (
     "gentle_fade", "soft_glow", "clean_fade", "word_soft_fade",
     "slow_fade", "quiet_bloom", "quick_fade", "silky_fade",
     "subtle_halo", "cinematic_fade", "diffuse_city_beacon",
+    "rise_up", "pop_in", "soft_tracking",
+    "title_top", "badge_side", "huge_center",
+    "small_above", "caption_card", "editorial_serif",
+    "gpin_bubble", "card_glass", "bare_big",
+    "ribbon", "dot_ring", "outline_box",
 )
+
+# Distinct-geometry label styles: different size, position and typeface.
+# The ten calm fades share one geometry; these six do not.
+NEW_LABEL_GEOMETRIES = (
+    "title_top", "badge_side", "huge_center",
+    "small_above", "caption_card", "editorial_serif",
+)
+
+# Full marker compositions: own marker + own text shape, no standard beacon,
+# no bottom rail (the rail is suppressed for these in
+# draw_editorial_map_caption). gpin_bubble is a Google-style red pin with a
+# white bubble; card_glass a frosted card; bare_big naked display type;
+# ribbon a full-width band; dot_ring an ultra-minimal dot; outline_box an
+# empty wireframe box with corner ticks.
+COMPOSITION_STYLES = (
+    "gpin_bubble", "card_glass", "bare_big",
+    "ribbon", "dot_ring", "outline_box",
+)
+
+# Styles drawn through the marker path in production minimal_map renders
+# (geo_runtime calls draw_map_location_marker at the camera nadir for
+# these): the 6 distinct geometries plus the 6 full compositions. Every
+# other animation keeps the approved rail-only production look.
+MARKER_DRAWN_STYLES = NEW_LABEL_GEOMETRIES + COMPOSITION_STYLES
 
 
 def apply_city_beacon_map_style(frame: np.ndarray, progress: float) -> None:
@@ -342,6 +371,11 @@ def draw_map_location_marker(frame: np.ndarray, point: tuple[int, int],
                              name: str, progress: float,
                              animation: str = "gentle_fade",
                              area_radius_px: int = 0) -> None:
+    if animation in COMPOSITION_STYLES:
+        # Compositions own their marker: no standard amber beacon, otherwise
+        # every treatment would share the same glow and look identical.
+        draw_map_marker_label(frame, point, name, progress, animation)
+        return
     if animation == "diffuse_city_beacon":
         draw_diffuse_city_beacon(frame, point, progress, area_radius_px)
     else:
@@ -356,7 +390,10 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
     from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
     label = " ".join(str(text or "").split())
-    if not label:
+    if not label or animation == "none" or animation in MARKER_DRAWN_STYLES:
+        # Marker-drawn styles carry their own name at the camera nadir
+        # (drawn by draw_map_location_marker); the standard rail would
+        # duplicate it and make every treatment look the same.
         return frame
     h, w = frame.shape[:2]
     # These values come from the run-level OverlayStyle payload projected by
@@ -398,6 +435,11 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
         "quick_fade": (0.84, 0.08), "silky_fade": (0.74, 0.21),
         "subtle_halo": (0.77, 0.17), "cinematic_fade": (0.70, 0.25),
         "diffuse_city_beacon": (0.78, 0.16),
+        "rise_up": (0.74, 0.20), "pop_in": (0.82, 0.10),
+        "soft_tracking": (0.68, 0.26),
+        "title_top": (0.70, 0.22), "badge_side": (0.78, 0.16),
+        "huge_center": (0.66, 0.28), "small_above": (0.80, 0.14),
+        "caption_card": (0.74, 0.20), "editorial_serif": (0.72, 0.22),
     }
     if animation not in animation_timing:
         raise ValueError(f"unknown map caption animation: {animation}")
@@ -454,9 +496,262 @@ def _editorial_caption_font(path: str, size: int):
     return ImageFont.truetype(path, size)
 
 
+def _draw_composition(frame: np.ndarray, point: tuple[int, int],
+                      label: str, t: float, ease: float, animation: str) -> None:
+    """Draw a full marker composition: own marker + own text shape.
+
+    No standard amber beacon and no bottom rail (suppressed upstream), so
+    each composition reads as a different video, not a different fade.
+    """
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFont
+    h, w = frame.shape[:2]
+    cx, cy = point
+
+    def font(name: str, size: int):
+        return ImageFont.truetype(str(BASE_DIR / "Chronon3d/assets/fonts" / name), size)
+
+    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+
+    def composite() -> None:
+        rgba = np.asarray(overlay)
+        mask = rgba[:, :, 3:4].astype(np.float32) / 255.0
+        bgr = rgba[:, :, :3][:, :, ::-1].copy()
+        frame[:] = np.clip(frame.astype(np.float32) * (1.0 - mask) + bgr * mask,
+                           0, 255).astype(np.uint8)
+
+    if animation == "gpin_bubble":
+        # Google-style red teardrop pin dropping onto the point, white
+        # bubble with dark text above it.
+        import math
+        drop = 1.0 - (1.0 - t) ** 3
+        py = cy - round(170 * (1.0 - drop))
+        pa = int(255 * drop)
+        if pa > 1:
+            draw.ellipse((cx - 30, py - 68, cx + 30, py - 8), fill=(220, 30, 30, pa))
+            draw.polygon([(cx - 23, py - 26), (cx + 23, py - 26), (cx, py + 8)],
+                         fill=(220, 30, 30, pa))
+            draw.ellipse((cx - 11, py - 49, cx + 11, py - 29), fill=(255, 255, 255, pa))
+        tb = max(0.0, min(1.0, (t - 0.30) / 0.70))
+        tb = tb * tb * (3.0 - 2.0 * tb)
+        over = 1.0 + 0.25 * math.sin(min(1.0, tb * 1.15) * math.pi)
+        ba = max(0.0, min(1.0, tb * over))
+        if ba > 0.01:
+            f = font("Inter-SemiBold.ttf", 36)
+            bbox = f.getbbox(label)
+            tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            bw, bh = tw + 72, th + 40
+            bx0 = max(10, min(w - bw - 10, cx - bw // 2))
+            by1 = py - 84
+            by0 = by1 - bh
+            bia = int(255 * ba)
+            draw.rounded_rectangle((bx0, by0, bx0 + bw, by1), radius=22,
+                                   fill=(255, 255, 255, bia))
+            draw.polygon([(cx - 12, by1 - 2), (cx + 12, by1 - 2), (cx, by1 + 20)],
+                         fill=(255, 255, 255, bia))
+            draw.text((bx0 + 36 - bbox[0], by0 + 20 - bbox[1]), label, font=f,
+                      fill=(17, 24, 39, bia))
+    elif animation == "card_glass":
+        # Frosted dark card, left-center, cyan border, white text.
+        import cv2
+        a = int(255 * ease)
+        if a > 1:
+            f = font("Inter-SemiBold.ttf", 54)
+            bbox = f.getbbox(label)
+            tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            x0, y0 = 120, h // 2 - 95
+            x1, y1 = min(w - 120, x0 + tw + 140), y0 + th + 96
+            roi = frame[y0:y1, x0:x1]
+            if roi.size > 0:
+                blurred = cv2.GaussianBlur(roi, (31, 31), 0)
+                tint = np.full_like(roi, (12, 22, 30))
+                frame[y0:y1, x0:x1] = cv2.addWeighted(blurred, 0.45, tint, 0.55, 0)
+            draw.rounded_rectangle((x0, y0, x1, y1), radius=20,
+                                   outline=(102, 209, 255, a), width=3)
+            draw.line((x0 + 34, y0 + th + 78, x0 + 134, y0 + th + 78),
+                      fill=(102, 209, 255, a), width=4)
+            draw.text((x0 + 60 - bbox[0], y0 + 34 - bbox[1]), label, font=f,
+                      fill=(255, 255, 255, a))
+            draw.ellipse((cx - 7, cy - 7, cx + 7, cy + 7), fill=(255, 255, 255, a))
+    elif animation == "bare_big":
+        # Naked display type, no rectangle, no stroke, soft offset shadow.
+        a = int(255 * ease)
+        if a > 1:
+            f = font("Inter-Light.ttf", 120)
+            bbox = f.getbbox(label)
+            tw = bbox[2] - bbox[0]
+            x = max(20, min(w - tw - 20, w // 2 - tw // 2))
+            y = int(h * 0.40)
+            draw.text((x - bbox[0] + 5, y - bbox[1] + 7), label, font=f,
+                      fill=(0, 0, 0, int(120 * ease)))
+            draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+                      fill=(255, 255, 255, a))
+            draw.ellipse((cx - 6, cy - 6, cx + 6, cy + 6), fill=(255, 255, 255, a))
+    elif animation == "ribbon":
+        # Full-width band wiping in from the left, centered bold text.
+        a = int(255 * ease)
+        if a > 1:
+            f = font("Inter-Bold.ttf", 64)
+            bbox = f.getbbox(label)
+            tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            band_h, band_y = 170, 210
+            draw.rectangle((0, band_y, w, band_y + band_h), fill=(7, 16, 24, int(205 * ease)))
+            draw.line((0, band_y, w, band_y), fill=(102, 209, 255, a), width=4)
+            draw.line((0, band_y + band_h, w, band_y + band_h), fill=(102, 209, 255, a), width=4)
+            draw.text((w // 2 - tw // 2 - bbox[0], band_y + (band_h - th) // 2 - bbox[1]),
+                      label, font=f, fill=(255, 255, 255, a))
+            # Wipe reveal from the left.
+            rgba = np.asarray(overlay)
+            cut = int(w * ease)
+            rgba[:, cut:, 3] = 0
+            draw.ellipse((cx - 7, cy - 7, cx + 7, cy + 7), fill=(255, 255, 255, a))
+    elif animation == "dot_ring":
+        # Ultra-minimal: small dot, thin pulsing ring, tiny text, nothing else.
+        import math
+        a = int(255 * ease)
+        if a > 1:
+            pulse = 0.5 + 0.5 * math.sin(t * math.tau * 1.5)
+            r = int(14 + 12 * pulse)
+            draw.ellipse((cx - r, cy - r, cx + r, cy + r),
+                         outline=(102, 209, 255, a), width=2)
+            draw.ellipse((cx - 6, cy - 6, cx + 6, cy + 6), fill=(255, 255, 255, a))
+            f = font("Inter-Medium.ttf", 28)
+            bbox = f.getbbox(label)
+            draw.text((cx + 30 - bbox[0], cy - 44 - bbox[1]), label, font=f,
+                      fill=(255, 255, 255, a), stroke_width=2,
+                      stroke_fill=(6, 20, 28, int(230 * ease)))
+    elif animation == "outline_box":
+        # Empty wireframe box with white corner ticks around the text.
+        a = int(255 * ease)
+        if a > 1:
+            f = font("Inter-SemiBold.ttf", 56)
+            bbox = f.getbbox(label)
+            tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            pad = 30
+            x = max(20, min(w - tw - 20, cx - tw // 2))
+            y = max(20, min(h - th - 20, cy + 76))
+            x0, y0, x1, y1 = x - pad, y - pad + 6, x + tw + pad, y + th + pad + 6
+            draw.rectangle((x0, y0, x1, y1), outline=(102, 209, 255, a), width=2)
+            L = 26
+            for cx0, cy0, dx, dy in ((x0, y0, 1, 1), (x1, y0, -1, 1),
+                                     (x0, y1, 1, -1), (x1, y1, -1, -1)):
+                draw.line((cx0, cy0, cx0 + dx * L, cy0), fill=(255, 255, 255, a), width=5)
+                draw.line((cx0, cy0, cx0, cy0 + dy * L), fill=(255, 255, 255, a), width=5)
+            draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+                      fill=(255, 255, 255, a))
+            draw.ellipse((cx - 6, cy - 6, cx + 6, cy + 6), fill=(255, 255, 255, a))
+    else:
+        return
+    composite()
+
+
+def _draw_distinct_label_style(frame: np.ndarray, point: tuple[int, int],
+                               label: str, alpha: float, ease: float,
+                               animation: str) -> None:
+    """Draw one of the distinct-geometry label styles (size/position/typeface).
+
+    Unlike the ten calm fades (same 42px Inter below the beacon), each style
+    here owns its geometry: title_top is a large top title, badge_side a
+    pill right of the beacon, huge_center a display face high on the frame,
+    small_above a small caption over the beacon, caption_card a top-left
+    card, editorial_serif a large roman face below the beacon.
+    """
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFont
+    h, w = frame.shape[:2]
+    cx, cy = point
+    a = int(255 * max(0.0, min(1.0, alpha)))
+    if a <= 1:
+        return
+    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+
+    def font(name: str, size: int):
+        return ImageFont.truetype(str(BASE_DIR / "Chronon3d/assets/fonts" / name), size)
+
+    def composite() -> None:
+        rgba = np.asarray(overlay)
+        mask = rgba[:, :, 3:4].astype(np.float32) / 255.0
+        bgr = rgba[:, :, :3][:, :, ::-1].copy()
+        frame[:] = np.clip(frame.astype(np.float32) * (1.0 - mask) + bgr * mask,
+                           0, 255).astype(np.uint8)
+
+    if animation == "title_top":
+        f = font("Inter-Bold.ttf", 84)
+        bbox = f.getbbox(label)
+        tw = bbox[2] - bbox[0]
+        x = max(20, min(w - tw - 20, w // 2 - tw // 2))
+        draw.text((x - bbox[0], 110 - bbox[1]), label, font=f,
+                  fill=(255, 255, 255, a), stroke_width=3,
+                  stroke_fill=(6, 20, 28, int(230 * alpha)))
+    elif animation == "badge_side":
+        f = font("Inter-SemiBold.ttf", 34)
+        bbox = f.getbbox(label)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        padx, pady = 24, 12
+        x0, y0 = cx + 66, cy - th // 2 - pady - 10
+        x1, y1 = x0 + tw + padx * 2, y0 + th + pady * 2
+        draw.rounded_rectangle((x0, y0, x1, y1), radius=(y1 - y0) // 2,
+                               fill=(7, 16, 24, int(225 * alpha)),
+                               outline=(102, 209, 255, a), width=3)
+        draw.text((x0 + padx - bbox[0], y0 + pady - bbox[1]), label, font=f,
+                  fill=(255, 255, 255, a))
+    elif animation == "huge_center":
+        f = font("AbrilFatface-Regular.ttf", 150)
+        bbox = f.getbbox(label)
+        tw = bbox[2] - bbox[0]
+        x = max(20, min(w - tw - 20, w // 2 - tw // 2))
+        y = int(h * 0.24)
+        draw.text((x - bbox[0] + 4, y - bbox[1] + 6), label, font=f,
+                  fill=(0, 0, 0, int(110 * alpha)))
+        draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+                  fill=(250, 246, 235, a), stroke_width=2,
+                  stroke_fill=(6, 20, 28, int(200 * alpha)))
+    elif animation == "small_above":
+        f = font("Inter-Medium.ttf", 30)
+        bbox = f.getbbox(label)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        x = max(20, min(w - tw - 20, cx - tw // 2))
+        y = max(20, cy - 122)
+        draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+                  fill=(255, 255, 255, a), stroke_width=2,
+                  stroke_fill=(6, 20, 28, int(230 * alpha)))
+        draw.line((x, y + th + 8, x + tw, y + th + 8),
+                  fill=(102, 209, 255, a), width=3)
+    elif animation == "caption_card":
+        f = font("Inter-SemiBold.ttf", 46)
+        bbox = f.getbbox(label)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        x0, y0 = 60, 128
+        x1, y1 = x0 + tw + 120, y0 + th + 56
+        draw.rounded_rectangle((x0, y0, x1, y1), radius=18,
+                               fill=(7, 16, 20, int(224 * alpha)))
+        draw.rounded_rectangle((x0 + 20, y0 + 22, x0 + 28, y1 - 22), radius=4,
+                               fill=(248, 245, 234, int(200 * alpha)))
+        ty = y0 + (y1 - y0 - th) // 2
+        draw.text((x0 + 52 - bbox[0], ty - bbox[1]), label, font=f,
+                  fill=(255, 255, 255, a))
+    elif animation == "editorial_serif":
+        f = font("DM-Serif-Display.ttf", 76)
+        bbox = f.getbbox(label)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        slide = round(20 * (1.0 - ease))
+        x = max(20, min(w - tw - 20, cx - tw // 2))
+        y = max(20, min(h - th - 20, cy + 72 + slide))
+        draw.text((x - bbox[0] + 3, y - bbox[1] + 4), label, font=f,
+                  fill=(0, 0, 0, int(140 * alpha)))
+        draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+                  fill=(250, 249, 238, a), stroke_width=2,
+                  stroke_fill=(0, 14, 7, int(230 * alpha)))
+    else:
+        return
+    composite()
+
+
 def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
                           progress: float, animation: str = "gentle_fade") -> None:
-    """Draw the city name directly below its animated beacon."""
+    """Draw the city name with the requested label treatment."""
     import cv2
     import numpy as np
     from PIL import Image, ImageDraw, ImageFont
@@ -478,12 +773,26 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
         "quick_fade": (0.80, 0.16), "silky_fade": (0.80, 0.16),
         "subtle_halo": (0.80, 0.16), "cinematic_fade": (0.80, 0.16),
         "diffuse_city_beacon": (0.80, 0.13),
+        "rise_up": (0.76, 0.18), "pop_in": (0.82, 0.10),
+        "soft_tracking": (0.72, 0.22),
+        "title_top": (0.70, 0.22), "badge_side": (0.78, 0.16),
+        "huge_center": (0.66, 0.28), "small_above": (0.80, 0.14),
+        "caption_card": (0.74, 0.20), "editorial_serif": (0.72, 0.22),
+        "gpin_bubble": (0.60, 0.20), "card_glass": (0.70, 0.20),
+        "bare_big": (0.72, 0.22), "ribbon": (0.68, 0.20),
+        "dot_ring": (0.76, 0.16), "outline_box": (0.74, 0.20),
     }
     start, duration = timing[animation]
     t = max(0.0, min(1.0, (progress - start) / duration))
     ease = t * t * (3.0 - 2.0 * t)
     alpha = ease
     if not label or alpha <= 0.005:
+        return
+    if animation in COMPOSITION_STYLES:
+        _draw_composition(frame, point, label, t, ease, animation)
+        return
+    if animation in NEW_LABEL_GEOMETRIES:
+        _draw_distinct_label_style(frame, point, label, alpha, ease, animation)
         return
     if animation == "diffuse_city_beacon":
         font_path = BASE_DIR / "Chronon3d/assets/fonts/DM-Serif-Display-Italic.ttf"
@@ -511,6 +820,16 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     # Keep the name centered below the ring with a short connector to its point.
     text_x = max(20, min(w - tw - 20, cx - tw // 2))
     text_y = max(20, min(h - th - 20, cy + 68))
+    if animation == "rise_up":
+        # Slides up from 28px below while fading in.
+        text_y = max(20, min(h - th - 20, cy + 68 + round(28 * (1.0 - ease))))
+    elif animation == "pop_in":
+        # Quick overshoot on alpha for a snappy entrance.
+        overshoot = 1.0 + 0.35 * math.sin(min(1.0, t * 1.2) * math.pi)
+        alpha = max(0.0, min(1.0, ease * overshoot))
+    elif animation == "soft_tracking":
+        # Same position, slower reveal with a softer (wider-feel) keyline.
+        text_y = max(20, min(h - th - 20, cy + 72))
     connector = np.zeros_like(frame)
     connector_top = text_y - 6
     if connector_top > cy + 53:

@@ -1,0 +1,2378 @@
+{
+ "canvas": {
+  "duration_frames": 90,
+  "fps_den": 1,
+  "fps_num": 30,
+  "height": 1080,
+  "width": 1920
+ },
+ "job_id": "vector_documentary_diagram_baked",
+ "layers": [
+  {
+   "color": [
+    0.027450980392156862,
+    0.03529411764705882,
+    0.050980392156862744,
+    1.0
+   ],
+   "duration_frames": 90,
+   "id": "background",
+   "position": [
+    0,
+    0
+   ],
+   "size": [
+    1920,
+    1080
+   ],
+   "start_frame": 0,
+   "type": "color"
+  },
+  {
+   "duration_frames": 82,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_00",
+   "position": [
+    -768.0,
+    345.5999999999999
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 8,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 81,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_01",
+   "position": [
+    -732.6655303185497,
+    312.8051953269039
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 9,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 81,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_02",
+   "position": [
+    -697.3310606370994,
+    280.0103906538078
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 9,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 80,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_03",
+   "position": [
+    -661.996590955649,
+    247.2155859807118
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 10,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 79,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_04",
+   "position": [
+    -626.6621212741989,
+    214.4207813076157
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 11,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 79,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_05",
+   "position": [
+    -591.3276515927485,
+    181.6259766345197
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 11,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 78,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_06",
+   "position": [
+    -555.9931819112982,
+    148.8311719614236
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 12,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 77,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_07",
+   "position": [
+    -520.6587122298479,
+    116.03636728832748
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 13,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 77,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_08",
+   "position": [
+    -485.3242425483976,
+    83.24156261523149
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 13,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 76,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_09",
+   "position": [
+    -449.98977286694725,
+    50.44675794213549
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 14,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 75,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_10",
+   "position": [
+    -414.6553031854969,
+    17.65195326903938
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 15,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 75,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_11",
+   "position": [
+    -378.05992558281116,
+    -13.138904301768093
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 15,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 74,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_12",
+   "position": [
+    -333.20377874955966,
+    -30.80101211736087
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 16,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 73,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_13",
+   "position": [
+    -288.34763191630805,
+    -48.4631199329537
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 17,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 72,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_14",
+   "position": [
+    -243.49148508305643,
+    -66.12522774854654
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 18,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 72,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_15",
+   "position": [
+    -198.6353382498047,
+    -83.78733556413943
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 18,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 71,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_16",
+   "position": [
+    -162.03283555681423,
+    -114.4942166654867
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 19,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 70,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_17",
+   "position": [
+    -126.86320994554683,
+    -147.46574067604985
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 20,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 70,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_18",
+   "position": [
+    -91.69358433427942,
+    -180.437264686613
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 20,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 69,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_19",
+   "position": [
+    -56.52395872301213,
+    -213.40878869717608
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 21,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 68,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_20",
+   "position": [
+    -21.354333111744836,
+    -246.38031270773922
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 22,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 68,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_21",
+   "position": [
+    13.815292499522457,
+    -279.35183671830225
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 22,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 67,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_22",
+   "position": [
+    51.04576451410094,
+    -309.51324253918176
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 23,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 66,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_23",
+   "position": [
+    93.06279278716966,
+    -333.1478209427829
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 24,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 66,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_24",
+   "position": [
+    135.07982106023883,
+    -356.78239934638424
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 24,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 65,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_25",
+   "position": [
+    177.09684933330777,
+    -380.41697774998556
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 25,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 64,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_26",
+   "position": [
+    219.11387760637672,
+    -404.05155615358683
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 26,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 64,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_27",
+   "position": [
+    261.13090587944566,
+    -427.6861345571882
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 26,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 63,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_28",
+   "position": [
+    303.1479341525146,
+    -451.3207129607895
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 27,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 62,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_29",
+   "position": [
+    345.1649624255838,
+    -474.9552913643908
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 28,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 62,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_30",
+   "position": [
+    366.72460257291937,
+    -432.42267978983864
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 28,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 61,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_31",
+   "position": [
+    388.07021418627687,
+    -389.19781627278945
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 29,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 60,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_32",
+   "position": [
+    409.4158257996346,
+    -345.97295275574004
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 30,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 60,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_33",
+   "position": [
+    430.76143741299234,
+    -302.7480892386907
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 30,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 59,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_34",
+   "position": [
+    452.10704902635007,
+    -259.5232257216413
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 31,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 58,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_35",
+   "position": [
+    473.4526606397076,
+    -216.29836220459214
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 32,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 57,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_36",
+   "position": [
+    494.79827225306553,
+    -173.07349868754255
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 33,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 57,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_37",
+   "position": [
+    516.143883866423,
+    -129.8486351704932
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 33,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 56,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_38",
+   "position": [
+    537.4894954797808,
+    -86.62377165344401
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 34,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 55,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_39",
+   "position": [
+    558.8351070931385,
+    -43.398908136394596
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 35,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 55,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_40",
+   "position": [
+    580.1807187064962,
+    -0.17404461934529536
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 35,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 54,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_41",
+   "position": [
+    601.526330319854,
+    43.05081889770406
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 36,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 53,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_42",
+   "position": [
+    622.8719419332115,
+    86.27568241475319
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 37,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 53,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_43",
+   "position": [
+    644.2175535465692,
+    129.50054593180255
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 37,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 52,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_44",
+   "position": [
+    665.5631651599269,
+    172.72540944885213
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 38,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 51,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_45",
+   "position": [
+    686.9087767732844,
+    215.95027296590138
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 39,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 51,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_46",
+   "position": [
+    708.2543883866422,
+    259.1751364829505
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 39,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 50,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+     ],
+     "intensity": 0.25,
+     "radius": 8.0,
+     "type": "glow"
+    }
+   ],
+   "id": "traj_47",
+   "position": [
+    729.5999999999999,
+    302.4
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     1.0,
+     1.0,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 40,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_00",
+   "position": [
+    -768.0,
+    345.5999999999999
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 12,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_01",
+   "position": [
+    -657.2853283314557,
+    242.8429453576323
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 15,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_02",
+   "position": [
+    -546.5706566629115,
+    140.08589071526467
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 18,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_03",
+   "position": [
+    -435.8559849943671,
+    37.32883607289705
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 22,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_04",
+   "position": [
+    -309.280500438492,
+    -40.22080295234372
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 25,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_05",
+   "position": [
+    -173.75604409390337,
+    -103.50370866196567
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 28,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_06",
+   "position": [
+    -63.557883845265565,
+    -206.81448389506346
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 31,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_07",
+   "position": [
+    48.24462929589629,
+    -307.93760397894164
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 34,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_08",
+   "position": [
+    179.8979845515123,
+    -381.9926163102257
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 38,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_09",
+   "position": [
+    311.55133980712844,
+    -456.04762864150973
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 41,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_10",
+   "position": [
+    395.1854180573962,
+    -374.78952843377294
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 44,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_11",
+   "position": [
+    462.0683344459169,
+    -239.35162274701855
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 47,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_12",
+   "position": [
+    528.9512508344378,
+    -103.9137170602637
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 50,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_13",
+   "position": [
+    595.8341672229585,
+    31.524188626490854
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 54,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 5,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_14",
+   "position": [
+    662.7170836114792,
+    166.96209431324553
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 57,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 30,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.7215686274509804,
+      0.0,
+      1.0
+     ],
+     "intensity": 0.5,
+     "radius": 22.0,
+     "type": "glow"
+    }
+   ],
+   "id": "head_15",
+   "position": [
+    729.5999999999999,
+    302.4
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.8666666666666667,
+     0.12549019607843137,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    12,
+    12
+   ],
+   "start_frame": 60,
+   "type": "shape"
+  },
+  {
+   "duration_frames": 42,
+   "effects": [
+    {
+     "color": [
+      1.0,
+      0.2196078431372549,
+      0.30980392156862746,
+      1.0
+     ],
+     "intensity": 0.45,
+     "radius": 18.0,
+     "type": "glow"
+    }
+   ],
+   "id": "peak_marker",
+   "position": [
+    508.8863759178814,
+    -144.54508876629012
+   ],
+   "shape": {
+    "fill": [
+     1.0,
+     0.2196078431372549,
+     0.30980392156862746,
+     1.0
+    ],
+    "type": "ellipse"
+   },
+   "size": [
+    10,
+    10
+   ],
+   "start_frame": 48,
+   "type": "shape"
+  }
+ ],
+ "output": {
+  "format": "mp4",
+  "path": "vector_documentary_diagram_baked.mp4"
+ },
+ "schema": "chronon.render-plan.v3",
+ "version": 3
+}

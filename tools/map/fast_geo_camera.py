@@ -72,7 +72,10 @@ def _render_block(args) -> tuple[bytes, int]:
     fb0 = sampler.fallback_count
     parts = []
     for f in range(f0, min(f1, builder.TOTAL_FRAMES)):
-        parts.append(builder.render_frame_fast(sampler, f).tobytes())
+        frame = builder.render_frame_fast(sampler, f)
+        if hasattr(frame, "get"):
+            frame = frame.get()
+        parts.append(frame.tobytes())
     return b"".join(parts), sampler.fallback_count - fb0
 
 

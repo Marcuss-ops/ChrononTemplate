@@ -31,7 +31,7 @@ namespace {
     void theShortPhraseArchetypesAreWellFormed() {
         section("short-phrase archetypes");
         const std::vector<ShortPhraseAnimation> animations = shortPhraseAnimations();
-        check(animations.size() == 51, "the pack preserves twelve original recipes, adds fourteen editorial recipes, and registers twenty-five product recipes");
+        check(animations.size() == 49, "the pack preserves twelve original recipes, adds fourteen editorial recipes, and registers twenty-three product recipes");
 
         std::set<std::string> ids;
         bool anyLayer = false;
@@ -228,7 +228,7 @@ namespace {
         for (const auto animation : shortPhraseAnimations()) {
             if (std::string(name(animation)).rfind("short_phrase_product_", 0) == 0) ++productCount;
         }
-        check(productCount == 25, "the product family contains fourteen existing recipes, seven text adaptations, and four native visual adaptations");
+        check(productCount == 23, "the product family contains fourteen existing recipes, seven text adaptations and three native visual adaptations");
     }
 
     void claudeInspiredShortPhrasesUseTheWhiteEditorialPalette() {
@@ -361,10 +361,9 @@ namespace {
     }
 
     void theFourNativeVisualAdaptationsAreRegistered() {
-        section("four native visual adaptations");
+        section("three native visual adaptations");
         const std::vector<ShortPhraseAnimation> animations{
                 ShortPhraseAnimation::ProductGlareHover,
-                ShortPhraseAnimation::ProductGlowCursor,
                 ShortPhraseAnimation::ProductGradualBlur,
                 ShortPhraseAnimation::ProductShapeBlur};
         for (const ShortPhraseAnimation animation : animations) {

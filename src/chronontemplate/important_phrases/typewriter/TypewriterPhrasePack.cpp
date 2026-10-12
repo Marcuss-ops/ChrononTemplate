@@ -17,7 +17,17 @@ namespace chronontemplate {
         // characters sweeps its cursor over n * 57 px, centred on the canvas.
 
         PhraseTrack cursorTrail(float half, int enter) {
-            return track("position_x", {{0, -half}, {enter, half}}, "out_cubic");
+            // Softer, more natural typing sweep: sine easing avoids the
+            // previous robotic cubic attack while keeping the same timing.
+            return track("position_x", {{0, -half}, {enter, half}}, "out_sine");
+        }
+
+        PhraseCursor scaledCursor(PhraseCursor base, float sizeScale) {
+            if (sizeScale > 0.f && sizeScale != 1.f) {
+                base.box[0] *= sizeScale;
+                base.box[1] *= sizeScale;
+            }
+            return base;
         }
 
         /// Cursor always lit: fades in with the phrase and exits with it (the
@@ -195,15 +205,14 @@ namespace chronontemplate {
                         {},
                         {typedReveal("reveal", typing)},
                         PhraseCursor{"_", {140.f, 360.f}, {960.f, 540.f},
-                                     {cursorTrail(420.f, enter), cursorBlink(6, 6, 110)}}};
-            case TypewriterPhraseAnimation::CursorLeads:
+                                     {cursorTrail(420.f, enter), cursorBlink(6, 6, 110)}}};            case TypewriterPhraseAnimation::CursorLeads:
                 return {"typewriter_cursor_leads", "Typewriter Cursor Leads",
                         "IL CURSORE GUIDA", enter,
                         {},
                         {typedReveal("reveal", typing)},
                         PhraseCursor{"_", {140.f, 360.f}, {960.f, 540.f},
-                                     {track("position_x", {{0, -475.f}, {14, 475.f}}, "out_cubic"),
-                                      cursorLit()}}};
+                                     {track("position_x", {{0, -475.f}, {14, 475.f}}, "out_sine"),
+                                      cursorLit()}}}                  ;
             case TypewriterPhraseAnimation::SoftLift:
                 return {"typewriter_soft_lift", "Typewriter Soft Lift",
                         "PIANO COME NEVE", enter,
@@ -213,6 +222,14 @@ namespace chronontemplate {
                         {}};
         }
         throw std::invalid_argument("chronontemplate::definition: unknown typewriter phrase animation");
+    }
+
+    PhraseAnimationDefinition definitionScaled(TypewriterPhraseAnimation animation, float cursorScale) {
+        // Payload-driven cursor grandezza: scales the `_` cursor box.
+        // 1.0 (or non-positive) preserves the catalog Authoring.
+        auto def = definition(animation);
+        def.cursor = scaledCursor(std::move(def.cursor), cursorScale);
+        return def;
     }
 
 }// namespace chronontemplate

@@ -1,0 +1,146 @@
+{
+ "canvas": {
+  "duration_frames": 60,
+  "fps_den": 1,
+  "fps_num": 30,
+  "height": 1080,
+  "width": 1920
+ },
+ "job_id": "vector_morph_test",
+ "layers": [
+  {
+   "color": [
+    0.027,
+    0.035,
+    0.05,
+    1.0
+   ],
+   "duration_frames": 60,
+   "id": "background",
+   "position": [
+    0,
+    0
+   ],
+   "size": [
+    1920,
+    1080
+   ],
+   "start_frame": 0,
+   "type": "color"
+  },
+  {
+   "duration_frames": 60,
+   "id": "morph_shape",
+   "position": [
+    0,
+    0
+   ],
+   "shape": {
+    "operators": [
+     {
+      "kind": "morph",
+      "params": {
+       "animation": {
+        "easing": "linear",
+        "keyframes": [
+         {
+          "frame": 0,
+          "value": 0.0
+         },
+         {
+          "frame": 45,
+          "value": 1.0
+         }
+        ]
+       },
+       "progress": 0.0,
+       "target": [
+        {
+         "point": [
+          -150.0,
+          -70.0
+         ],
+         "type": "move_to"
+        },
+        {
+         "point": [
+          150.0,
+          -70.0
+         ],
+         "type": "line_to"
+        },
+        {
+         "point": [
+          150.0,
+          70.0
+         ],
+         "type": "line_to"
+        },
+        {
+         "point": [
+          -150.0,
+          70.0
+         ],
+         "type": "line_to"
+        },
+        {
+         "type": "close"
+        }
+       ]
+      }
+     }
+    ],
+    "path": [
+     {
+      "point": [
+       -100.0,
+       -100.0
+      ],
+      "type": "move_to"
+     },
+     {
+      "point": [
+       100.0,
+       -100.0
+      ],
+      "type": "line_to"
+     },
+     {
+      "point": [
+       100.0,
+       100.0
+      ],
+      "type": "line_to"
+     },
+     {
+      "point": [
+       -100.0,
+       100.0
+      ],
+      "type": "line_to"
+     },
+     {
+      "type": "close"
+     }
+    ],
+    "stroke": {
+     "color": "#FFFFFF",
+     "width": 3
+    },
+    "type": "path"
+   },
+   "size": [
+    1920,
+    1080
+   ],
+   "start_frame": 0,
+   "type": "shape"
+  }
+ ],
+ "output": {
+  "format": "mp4",
+  "path": "vector_morph_test.mp4"
+ },
+ "schema": "chronon.render-plan.v3",
+ "version": 3
+}
