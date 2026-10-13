@@ -143,29 +143,73 @@ def main() -> int:
     # near street level; 17.0 is within the certified local tile pyramid.
     level_zoom = {"continent": 2.5, "country": 5.0, "region": 8.0, "city": 17.0}
     stop_zooms = [level_zoom[map_level(pin)] for pin in pins]
-    # Editorial country scenes use a deliberately wide Middle East frame;
-    # no city-level zoom-in that crops out the country polygon. Region/country
-    # pins stay fixed while the camera performs a subtle, measurable push.
+    # A short map beat cannot carry a multi-stop tour and still reserve the
+    # authored final hold. Keep the lead location as a single animated map
+    # instead of failing the whole video during TourBuilder's strict gate.
+    # Dedicated multi-pin compositions keep their pins and fail closed above.
+    minimum_tour_seconds = 3.0 + 4.5 * (len(stops) - 1)
+    if (
+        len(stops) > 1
+        and total_frames / geo.FPS < minimum_tour_seconds
+        and map_animation not in MULTI_PIN_SYSTEMS
+        and map_animation not in MULTI_PIN_SCENES
+    ):
+        print(
+            f"[dynamic-map] short beat ({total_frames / geo.FPS:.2f}s): "
+            f"using lead location {stops[0].display_name!r} instead of "
+            f"a {len(stops)}-stop tour",
+            flush=True,
+        )
+        pins = pins[:1]
+        stops = stops[:1]
+        stop_zooms = stop_zooms[:1]
+    # Candidate-area bounds keep each authored camera focused on its subject.
     editorial_country_scenes = set(MAP_EDITORIAL_SCENES)
+    scene_camera_bounds = {
+        "ed_saudi_base": (16.0, 34.0, 33.0, 56.0),
+        "ed_iran_glow": (23.5, 46.0, 32.5, 57.0),
+        "ed_yemen_fill": (11.0, 42.0, 20.0, 53.0),
+        "ed_yemen_markers": (12.2, 40.5, 19.8, 47.0),
+        "ed_hormuz_routes": (5.0, 37.0, 29.0, 75.0),
+        "ed_mocha_tactical": (12.4, 42.0, 15.8, 45.2),
+    }
+    bounds_telemetry = None
     if map_animation in editorial_country_scenes:
-        # 5.4 -> 6.0 frames the Arabian Peninsula and the Gulf at 1080p.
-        stop_zooms = [6.0 for _ in pins]
-
-    if map_animation in editorial_country_scenes:
-        # One centered camera for all pins/regions; multiple markers appear
-        # together in a single geographic canvas (no Tivoli/Fiumicino hops).
         from geo_runtime import Place
-        from dynamic_tile_pyramid import latlon_to_global_px
-        center_lat, center_lon = 22.0, 53.0
-        camera_place = Place(query="Middle East", display_name="Middle East",
+        from map_editorial_gpu import fit_geo_bounds
+        if map_animation in ("location_focus", "location_pulse"):
+            # Frame a grounded town-scale context around the actual spoken pin.
+            focus = stops[0]
+            bounds = (focus.lat-.020, focus.lon-.030,
+                      focus.lat+.020, focus.lon+.030)
+        else:
+            bounds = scene_camera_bounds.get(map_animation,
+                        (6.0, 36.0, 40.0, 66.0))
+        if map_animation == "ed_yemen_fill":
+            width_fraction, height_fraction = 0.55, 0.86
+        elif map_animation in ("location_focus", "location_pulse"):
+            width_fraction, height_fraction = 0.70, 0.72
+        elif map_animation == "ed_yemen_markers":
+            width_fraction, height_fraction = 0.70, 0.74
+        elif map_animation == "ed_iran_glow":
+            width_fraction, height_fraction = 0.76, 0.76
+        elif map_animation == "ed_mocha_tactical":
+            width_fraction, height_fraction = 0.76, 0.72
+        else:
+            width_fraction, height_fraction = (0.74 if map_animation=="ed_saudi_base" else 0.78), (0.90 if map_animation=="ed_saudi_base" else 0.72)
+        center_lat, center_lon, fitted_zoom, bounds_telemetry = fit_geo_bounds(
+            bounds,width,height,width_fraction=width_fraction,
+            height_fraction=height_fraction,min_zoom=5.0,
+            max_zoom=15.0 if map_animation in ("location_focus", "location_pulse") else 8.0)
+        camera_place = Place(query="Editorial map bounds", display_name="Editorial map bounds",
                              lat=center_lat, lon=center_lon, ok=True)
         builder = geo._ShotBuilder(camera_place, "dive", total_frames)
-        builder.start_zoom = 5.0
-        builder.end_zoom = 5.2
-        builder.ANCHORS = tuple((s.lat, s.lon) for s in stops) + ((center_lat, center_lon),)
-        builder.PREPARE_ZMIN, builder.PREPARE_ZMAX = 5, 8
+        builder.start_zoom = max(8.0,fitted_zoom-(1.8 if map_animation in ("location_focus", "location_pulse") else 0.32))
+        builder.end_zoom = fitted_zoom
+        builder.ANCHORS = tuple((s.lat,s.lon) for s in stops) + ((center_lat,center_lon),)
+        builder.PREPARE_ZMIN, builder.PREPARE_ZMAX = 5, max(8,math.ceil(fitted_zoom)+1)
         builder.full_duration_zoom = True
-        builder.terminal_hold_frames = round(total_frames * 0.50)
+        builder.terminal_hold_frames = round(total_frames*(.48 if map_animation in ("location_focus", "location_pulse") else .52))
         builder._editorial_stops = stops
     elif len(stops) == 1:
         preset = {"tilt_reveal": "tilt", "orbit_arrival": "orbit"}.get(camera_animation, "dive")
@@ -285,6 +329,7 @@ def main() -> int:
     builder.map_area_glow_radius_km = area_glow_radius_km
     builder.map_label_animation = label_animation
     builder.map_composition = map_animation
+    builder.editorial_bounds_telemetry = bounds_telemetry
     builder.editorial_pins = [dict(pin) for pin in pins]
     builder.map_pin_extras = [{
         "latitude": float(pin["latitude"]),
@@ -365,9 +410,13 @@ def main() -> int:
                 f"prepared map plates do not cover camera frame {frame_idx} "
                 f"at zoom {zoom:.3f}; refusing slow fallback")
         if map_animation in editorial_country_scenes:
-            project = lambda y, x, _a=(lat, lon), _z=zoom: geo_project(
-                y, x, _a, _z, width, height)
+            def project(y, x, _a=(lat, lon), _z=zoom):
+                return geo_project(y,x,_a,_z,width,height)
+            project.anchor=(lat,lon)
+            project.zoom=zoom
             visible_geometries = {
+                "location_focus": [(float(pin["latitude"]),float(pin["longitude"])) for pin in pins],
+                "location_pulse": [(float(pin["latitude"]),float(pin["longitude"])) for pin in pins],
                 "ed_saudi_base": [(24.7136,46.6753)],
                 "ed_iran_glow": [(32.0,53.0)],
                 "ed_yemen_fill": [(15.3,47.0)],
@@ -380,6 +429,13 @@ def main() -> int:
                                  and -40 <= project(*point)[1] <= height+40)]
             if offscreen:
                 raise RuntimeError(f"scene {map_animation} has off-screen key geography at frame {frame_idx}: {offscreen}")
+            if map_animation in scene_camera_bounds:
+                geometry_bounds = scene_camera_bounds[map_animation]
+                south,west,north,east=geometry_bounds
+                bound_points=[project(y,x) for y in (south,north) for x in (west,east)]
+                xs=[p[0] for p in bound_points];ys=[p[1] for p in bound_points]
+                if min(xs)<0 or max(xs)>width or min(ys)<0 or max(ys)>height:
+                    raise RuntimeError(f"scene bounds leave frame at camera frame {frame_idx}: {geometry_bounds}")
     if sampler.fallback_count != 0:
         raise RuntimeError("geometry-only sampler coverage check invoked the slow renderer")
     print(f"[dynamic-map] prepared zooms {sampler.z_min}..{sampler.z_max}", flush=True)
@@ -457,7 +513,8 @@ def main() -> int:
         "camera": {"start_zoom": builder.start_zoom,
                    "end_zoom": builder.end_zoom,
                    "terminal_hold_frames": builder.terminal_hold_frames,
-                   "center": [builder.place.lat, builder.place.lon]},
+                   "center": [builder.place.lat, builder.place.lon],
+                   "fit_bounds": getattr(builder,"editorial_bounds_telemetry",None)},
         "plates": dict(sampler.prepare_telemetry),
         "gate_ms": gate_ms,
         "frame_pipeline_s": stats["production_s"],

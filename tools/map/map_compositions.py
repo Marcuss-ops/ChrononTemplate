@@ -525,7 +525,9 @@ def _comp_focus_title(frame, pins, progress, W, H) -> None:
     import numpy as np
     from PIL import Image, ImageDraw
     cx, cy = _region_centroid(pins)
-    wash_e = _ease(_stage(progress, 0.22, 0.35))
+    # Put the editorial title on screen first; bring in the geographic focus
+    # only after the label has had a short, readable lead.
+    wash_e = _ease(_stage(progress, 0.58, 0.30))
     if wash_e > 0.01:
         wash = np.zeros_like(frame)
         cv2.circle(wash, (cx, cy), 260, (200, 150, 60), -1, cv2.LINE_AA)
@@ -535,7 +537,7 @@ def _comp_focus_title(frame, pins, progress, W, H) -> None:
         cv2.circle(frame, (cx, cy), 8, (255, 255, 255), -1, cv2.LINE_AA)
     # Giant condensed title, screen-space: rises 35px, blur approximated by
     # drawing soft before sharp while entering.
-    title_e = _ease(_stage(progress, 0.39, 0.28))
+    title_e = _ease(_stage(progress, 0.04, 0.30))
     if title_e > 0.01:
         rgba = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).convert("RGBA")
         draw = ImageDraw.Draw(rgba)
@@ -546,11 +548,11 @@ def _comp_focus_title(frame, pins, progress, W, H) -> None:
         rise = int(35 * (1.0 - title_e))
         base = H - 260 + rise
         _text(draw, (90, base), name, f_big)
-        sub_e = _ease(_stage(progress, 0.50, 0.25))
+        sub_e = _ease(_stage(progress, 0.18, 0.24))
         if sub_e > 0.01 and sub:
             _text(draw, (96, base + 168), sub, _font("sans", 34),
                   fill=(150, 210, 235))
-        line_e = _ease(_stage(progress, 0.55, 0.25))
+        line_e = _ease(_stage(progress, 0.25, 0.24))
         if line_e > 0.01:
             y = base + (226 if sub else 190)
             draw.line([(90, y), (90 + int(520 * line_e), y)],

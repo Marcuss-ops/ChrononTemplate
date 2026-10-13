@@ -83,10 +83,15 @@ def main() -> int:
                 + shared[name]["id"])
             print("deleted: " + name, flush=True)
         print(f"DEL-STILLS done {len(jpgs)}", flush=True)
-    elif action == "update":
-        shared = json.loads((SYS_OUT / "drive_links_shared.json")
-                            .read_text())["files"]
-        mp4s = mp4_list(SYS_OUT)[lo:hi]
+    elif action in ("update", "update-editorial"):
+        if action == "update-editorial":
+            links_path=ED_OUT/"drive_links_ed.json"
+            shared=json.loads(links_path.read_text())["files"]
+            mp4s=[p for p in mp4_list(ED_OUT) if p.name in shared][lo:hi]
+        else:
+            shared = json.loads((SYS_OUT / "drive_links_shared.json")
+                                .read_text())["files"]
+            mp4s = mp4_list(SYS_OUT)[lo:hi]
         for path in mp4s:
             res = update_media(token, shared[path.name]["id"], path,
                                "video/mp4")
