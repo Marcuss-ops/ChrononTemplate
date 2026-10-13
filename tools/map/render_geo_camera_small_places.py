@@ -449,44 +449,83 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
     if alpha <= 0:
         return frame
 
-    layer = Image.new("RGBA", (w, rail_h), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(layer)
-    draw.rounded_rectangle(rail, radius=max(20, round(rail_h * 0.22)),
-                           fill=(7, 16, 20, 224))
-    accent_y = 5
-    draw.rounded_rectangle((rail_margin + 24, accent_y, w - rail_margin - 24, accent_y + 3),
-                           radius=2, fill=(248, 245, 234, 120))
-    def rgba(color: str, opacity: float) -> tuple[int, int, int, int]:
-        raw = color.lstrip("#")
-        if len(raw) != 6:
-            raise ValueError(f"invalid runtime map typography color: {color}")
-        rgb = tuple(int(raw[index:index + 2], 16) for index in (0, 2, 4))
-        return rgb[0], rgb[1], rgb[2], round(255 * max(0.0, min(1.0, opacity)))
+    # 01_ed_saudi_base capsule style:
+    # Compact rounded box with Gaussian blurred drop shadow, 1px keyline,
+    # uppercase condensed bold font with tracking (+2px) and 8px upward drift.
+    label_upper = label.upper()
+    pad_x = max(18, round(22.0 * w / 1920))
+    pad_y = max(8, round(10.0 * h / 1080))
+    letter_spacing = max(1, round(2.0 * w / 1920))
 
-    if glow_size > 0 and glow_intensity > 0:
-        glow_layer = Image.new("RGBA", (w, rail_h), (0, 0, 0, 0))
-        glow_draw = ImageDraw.Draw(glow_layer)
-        glow_draw.text((text_x, text_y), label, font=font,
-                       fill=rgba(glow_color, glow_intensity), stroke_width=stroke_width + 5,
-                       stroke_fill=rgba(glow_color, glow_intensity))
-        layer.alpha_composite(glow_layer.filter(ImageFilter.GaussianBlur(glow_size)))
-    shadow_layer = Image.new("RGBA", (w, rail_h), (0, 0, 0, 0))
-    shadow_draw = ImageDraw.Draw(shadow_layer)
-    shadow_draw.text((text_x + 2, text_y + 4), label, font=font,
-                     fill=rgba(shadow_color, shadow_opacity), stroke_width=stroke_width + 2,
-                     stroke_fill=rgba(shadow_color, shadow_opacity))
-    shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(shadow_blur))
-    layer.alpha_composite(shadow_layer)
+    # Measure tracked title width
+    tracked_w = 0
+    char_boxes = []
+    dummy_img = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
+    dummy_draw = ImageDraw.Draw(dummy_img)
+    for ch in label_upper:
+        cb = dummy_draw.textbbox((0, 0), ch, font=font, stroke_width=stroke_width)
+        char_boxes.append((cb[2] - cb[0], cb))
+        tracked_w += (cb[2] - cb[0]) + letter_spacing
+    if tracked_w > 0:
+        tracked_w -= letter_spacing
+
+    th = text_h
+    box_w = tracked_w + 2 * pad_x
+    box_h = th + 2 * pad_y
+
+    # Position at bottom-center with safe margin
+    safe_bottom = max(36, round(h * 0.08))
+    box_x0 = (w - box_w) // 2
+    box_y0 = h - box_h - safe_bottom
+
+    # Upward drift during entrance (8px lift decaying with ease)
+    ease_v = reveal * reveal * (3.0 - 2.0 * reveal)
+    y_lift = int(round((1.0 - ease_v) * 8))
+    box_y0_eff = box_y0 + y_lift
+    box_y1_eff = box_y0_eff + box_h
+    box_x1 = box_x0 + box_w
+
+    layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+
+    # 1. Soft blurred drop shadow (radius 5, blur 8, alpha up to 130)
+    shadow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shadow)
+    sd.rounded_rectangle(
+        (box_x0, box_y0_eff + 4, box_x1, box_y1_eff + 4),
+        radius=max(4, round(5 * w / 1920)),
+        fill=(0, 0, 0, int(130 * reveal)),
+    )
+    layer.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(max(4, round(8 * w / 1920)))))
+
+    # 2. Translucent dark capsule box + 1px subtle keyline
     draw = ImageDraw.Draw(layer)
-    draw.text((text_x, text_y), label, font=font,
-              fill=rgba(fill, 1.0), stroke_width=stroke_width,
-              stroke_fill=rgba("#111827", 1.0))
+    draw.rounded_rectangle(
+        (box_x0, box_y0_eff, box_x1, box_y1_eff),
+        radius=max(4, round(4 * w / 1920)),
+        fill=(10, 16, 22, int(242 * reveal)),
+        outline=(221, 230, 232, int(100 * reveal)),
+        width=1,
+    )
+
+    # 3. Tracked uppercase text with 1px stroke
+    tx = box_x0 + pad_x
+    ty = box_y0_eff + pad_y - bbox[1]
+    ink = (242, 244, 238, int(255 * reveal))
+    stroke_ink = (3, 8, 12, int(210 * reveal))
+    for ch, (cw, cb) in zip(label_upper, char_boxes):
+        draw.text(
+            (tx, ty), ch, font=font, fill=ink,
+            stroke_width=1, stroke_fill=stroke_ink,
+        )
+        tx += cw + letter_spacing
+
     rgba_layer = np.asarray(layer)
-    roi = frame[rail_y:rail_y + rail_h]
-    alpha_mask = (rgba_layer[:, :, 3:4].astype(np.float32) / 255.0) * reveal
+    alpha_mask = rgba_layer[:, :, 3:4].astype(np.float32) / 255.0
     bgr = rgba_layer[:, :, :3][:, :, ::-1]
-    roi[:] = np.clip(roi.astype(np.float32) * (1.0 - alpha_mask) + bgr * alpha_mask,
-                     0, 255).astype(np.uint8)
+    frame[:] = np.clip(
+        frame.astype(np.float32) * (1.0 - alpha_mask) + bgr * alpha_mask,
+        0, 255,
+    ).astype(np.uint8)
     return frame
 
 
@@ -754,7 +793,7 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     """Draw the city name with the requested label treatment."""
     import cv2
     import numpy as np
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw, ImageFont, ImageFilter
     label = " ".join(str(text or "").split())
     if not label or animation == "none":
         return
@@ -813,43 +852,98 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
         frame[:] = np.clip(frame.astype(np.float32) * (1.0 - mask) + bgr * mask,
                            0, 255).astype(np.uint8)
         return
-    font_path = BASE_DIR / "Chronon3d/assets/fonts/Inter-SemiBold.ttf"
-    font = ImageFont.truetype(str(font_path), 42)
-    bbox = font.getbbox(label)
-    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    # Keep the name centered below the ring with a short connector to its point.
-    text_x = max(20, min(w - tw - 20, cx - tw // 2))
-    text_y = max(20, min(h - th - 20, cy + 68))
+    # 01_ed_saudi_base capsule style for marker label:
+    label_upper = label.upper()
+    font_path = BASE_DIR / "Chronon3d/assets/fonts/Oswald-Bold.ttf"
+    if not font_path.is_file():
+        font_path = BASE_DIR / "Chronon3d/assets/fonts/Inter-Bold.ttf"
+    font_size = max(24, round(32.0 * min(w, h) / 1080))
+    font = ImageFont.truetype(str(font_path), font_size)
+
+    pad_x = max(14, round(18.0 * w / 1920))
+    pad_y = max(6, round(8.0 * h / 1080))
+    letter_spacing = max(1, round(2.0 * w / 1920))
+
+    # Measure tracked label width
+    dummy_img = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
+    dummy_draw = ImageDraw.Draw(dummy_img)
+    tracked_w = 0
+    char_boxes = []
+    for ch in label_upper:
+        cb = dummy_draw.textbbox((0, 0), ch, font=font, stroke_width=1)
+        char_boxes.append((cb[2] - cb[0], cb))
+        tracked_w += (cb[2] - cb[0]) + letter_spacing
+    if tracked_w > 0:
+        tracked_w -= letter_spacing
+
+    bbox = font.getbbox(label_upper)
+    th = bbox[3] - bbox[1]
+    box_w = tracked_w + 2 * pad_x
+    box_h = th + 2 * pad_y
+
+    # Position centered below the marker pin
+    box_x0 = max(20, min(w - box_w - 20, cx - box_w // 2))
+    base_y0 = cy + 56
     if animation == "rise_up":
-        # Slides up from 28px below while fading in.
-        text_y = max(20, min(h - th - 20, cy + 68 + round(28 * (1.0 - ease))))
+        base_y0 += round(20 * (1.0 - ease))
     elif animation == "pop_in":
-        # Quick overshoot on alpha for a snappy entrance.
         overshoot = 1.0 + 0.35 * math.sin(min(1.0, t * 1.2) * math.pi)
         alpha = max(0.0, min(1.0, ease * overshoot))
-    elif animation == "soft_tracking":
-        # Same position, slower reveal with a softer (wider-feel) keyline.
-        text_y = max(20, min(h - th - 20, cy + 72))
-    connector = np.zeros_like(frame)
-    connector_top = text_y - 6
-    if connector_top > cy + 53:
-        cv2.line(connector, (cx, cy + 53), (cx, connector_top), (102, 209, 255), 2, cv2.LINE_AA)
-        cv2.addWeighted(frame, 1.0, connector, alpha * 0.8, 0, dst=frame)
-    x0, y0 = max(0, text_x - 8), max(0, text_y - 8)
-    x1, y1 = min(w, text_x + tw + 8), min(h, text_y + th + 8)
-    roi = frame[y0:y1, x0:x1]
-    if roi.size == 0:
-        return
-    label_image = Image.new("RGBA", (roi.shape[1], roi.shape[0]), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(label_image)
-    local = (text_x - x0 - bbox[0], text_y - y0 - bbox[1])
-    draw.text(local, label, font=font, fill=(255, 255, 255, 255),
-              stroke_width=2, stroke_fill=(6, 20, 28, 240))
-    alpha_mask = np.asarray(label_image)[:, :, 3]
-    overlay = np.asarray(label_image)[:, :, :3][:, :, ::-1].copy()
-    mask = (alpha_mask.astype(np.float32) / 255.0 * alpha)[:, :, None]
-    roi[:] = np.clip(roi.astype(np.float32) * (1.0 - mask) + overlay * mask,
-                     0, 255).astype(np.uint8)
+
+    y_lift = int(round((1.0 - ease) * 8))
+    box_y0_eff = max(20, min(h - box_h - 20, base_y0 + y_lift))
+    box_y1_eff = box_y0_eff + box_h
+    box_x1 = box_x0 + box_w
+
+    # Clean leader line connecting pin center to top edge of box
+    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw_ov = ImageDraw.Draw(overlay)
+    if box_y0_eff > cy + 10:
+        draw_ov.line(
+            (cx, cy + 10, cx, box_y0_eff),
+            fill=(221, 230, 232, int(160 * alpha)),
+            width=1,
+        )
+
+    # 1. Soft blurred drop shadow
+    shadow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shadow)
+    sd.rounded_rectangle(
+        (box_x0, box_y0_eff + 4, box_x1, box_y1_eff + 4),
+        radius=4,
+        fill=(0, 0, 0, int(130 * alpha)),
+    )
+    overlay.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(6)))
+
+    # 2. Translucent dark rounded box + 1px subtle keyline
+    draw_ov = ImageDraw.Draw(overlay)
+    draw_ov.rounded_rectangle(
+        (box_x0, box_y0_eff, box_x1, box_y1_eff),
+        radius=4,
+        fill=(10, 16, 22, int(242 * alpha)),
+        outline=(221, 230, 232, int(100 * alpha)),
+        width=1,
+    )
+
+    # 3. Tracked uppercase bold text
+    tx = box_x0 + pad_x
+    ty = box_y0_eff + pad_y - bbox[1]
+    ink = (242, 244, 238, int(255 * alpha))
+    stroke_ink = (3, 8, 12, int(210 * alpha))
+    for ch, (cw, cb) in zip(label_upper, char_boxes):
+        draw_ov.text(
+            (tx, ty), ch, font=font, fill=ink,
+            stroke_width=1, stroke_fill=stroke_ink,
+        )
+        tx += cw + letter_spacing
+
+    rgba = np.asarray(overlay)
+    mask = rgba[:, :, 3:4].astype(np.float32) / 255.0
+    bgr = rgba[:, :, :3][:, :, ::-1].copy()
+    frame[:] = np.clip(
+        frame.astype(np.float32) * (1.0 - mask) + bgr * mask,
+        0, 255,
+    ).astype(np.uint8)
 
 
 def draw_route_glow(frame: np.ndarray, frm: tuple[float, float], to: tuple[float, float],

@@ -41,6 +41,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 
 MAP_EDITORIAL_SCENES = (
+    "location_focus",
+    "location_pulse",
     "ed_saudi_base",
     "ed_iran_glow",
     "ed_yemen_fill",

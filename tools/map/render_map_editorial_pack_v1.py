@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the six certified Middle East editorial scenes at a fixed overview.
+"""Render all six certified documentary map scenes from the shared visual brief.
 
 Each clip's `map_animation` id is an exact runtime payload value. Outputs are
 MP4-only in the pack directory; uploads never include stills or payloads.
@@ -33,23 +33,22 @@ CLIPS = [
      [{"id": "yemen", "label": "Yemen", "latitude": 15.3,
        "longitude": 47.0, "scope": "country"}],
      "ed_yemen_fill", "Yemen full country fill; not conflict-control data."),
-    ("04_ed_yemen_markers",
-     [{"id": "hodeidah", "label": "Hodeidah", "latitude": 14.7979,
-       "longitude": 42.9545, "scope": "country"},
-      {"id": "sanaa", "label": "Sanaa", "latitude": 15.3694,
+    ("04_ed_yemen_markers",      [{"id": "sanaa", "label": "Sanaa", "latitude": 15.3694,
        "longitude": 44.1910, "scope": "country"},
+      {"id": "hodeidah", "label": "Hodeidah", "latitude": 14.7979,
+       "longitude": 42.9545, "scope": "country"},
       {"id": "abha", "label": "Abha Intl Airport", "latitude": 18.2164,
        "longitude": 42.5053, "scope": "country"}],
      "ed_yemen_markers", "Yemen fill with grounded city/airport markers.",
-     8_000_000),
-    ("05_ed_hormuz_routes",
-     [{"id": "hormuz", "label": "Strait of Hormuz", "latitude": 26.55,
-       "longitude": 56.27, "scope": "country"}],
-     "ed_hormuz_routes", "Three clearly editorial, schematic Hormuz routes."),
+     5_000_000),
     ("06_ed_mocha_tactical",
      [{"id": "mocha", "label": "Mocha", "latitude": 13.3167,
        "longitude": 43.2500, "scope": "region"}],
      "ed_mocha_tactical", "Mocha schematic tactical overlays, not sourced control."),
+    ("05_ed_hormuz_routes",
+     [{"id": "hormuz", "label": "Strait of Hormuz", "latitude": 26.55,
+       "longitude": 56.27, "scope": "country"}],
+     "ed_hormuz_routes", "Editorial route corridors through Hormuz, Bab el-Mandeb, Asia and Europe."),
 ]
 
 
@@ -81,15 +80,16 @@ def main():
         "camera_animation": CAMERA_ANIMATION,
         "label_animation": "none (every scene owns its text)",
         "basemap": BASEMAP,
-        "canvas": "1920x1080, 24 fps, 5s (Yemen markers 8s)",
-        "honesty": "Country borders: Natural Earth 50m. Yemen fill is a "
-                   "national boundary, not territorial-control data. Hormuz "
-                   "routes and Mocha tactical overlays are schematic.",
+        "canvas": "1920x1080, 24 fps, 5s per scene",
+        "honesty": "Country borders: Natural Earth 50m. Yemen fill is the national boundary only; no sourced control-area dataset was present. Hormuz routes and Mocha tactical overlays are schematic.",
         "clips": [],
         "files": "MP4 only; telemetry, JSON payloads, and stills stay local.",
     }
+    filter_ids = set(sys.argv[1:]) if len(sys.argv) > 1 else None
     for entry in CLIPS:
         slug, pins, anim, desc = entry[:4]
+        if filter_ids and slug not in filter_ids and anim not in filter_ids:
+            continue
         dur = entry[4] if len(entry) > 4 else STD_US
         print("[map-editorial] rendering " + slug + " [" + anim + "]",
               flush=True)

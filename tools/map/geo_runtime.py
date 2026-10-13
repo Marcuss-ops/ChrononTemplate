@@ -334,12 +334,10 @@ class _ShotBuilder:
             # No map pin/beacon: use the same editorial title rail as the
             # Chronon map template, with the place name below the map image.
             composition = getattr(self, "map_composition", "") or ""
-            if composition:
+            from map_editorial import MAP_EDITORIAL_SCENES
+            if composition in MAP_EDITORIAL_SCENES:
                 from map_editorial_gpu import draw_editorial_scene_gpu
-                from map_editorial import MAP_EDITORIAL_SCENES
                 from map_editorial_gpu import geo_project
-                if composition not in MAP_EDITORIAL_SCENES:
-                    raise ValueError(f"unsupported GPU editorial scene: {composition}")
                 extras = list(getattr(self, "map_pin_extras", [{}]))
                 pin_records = [{
                     "latitude": float(p.get("latitude", self.place.lat)),
@@ -364,10 +362,29 @@ class _ShotBuilder:
                 frame = draw_editorial_scene_gpu(frame, composition, {
                     "W": WIDTH, "H": HEIGHT, "project": _project,
                     "pins": pin_records,
+                    "basemap": getattr(self, "map_basemap", "esri_street"),
                 }, progress)
                 from map_editorial_gpu import gpu_counters
                 self._last_gpu_overlay_counters = gpu_counters()
                 return frame
+            elif composition:
+                from map_compositions import MAP_COMPOSITIONS
+                if composition not in MAP_COMPOSITIONS:
+                    raise ValueError(f"unsupported map composition: {composition}")
+                # Generic compositions are certified for the CPU map renderer,
+                # while this production path uses OpenCL. Preserve camera and
+                # label animation with the standard map caption rather than
+                # rejecting a valid deterministic composition id.
+                print(
+                    f"[dynamic-map] composition {composition!r} has no GPU scene; "
+                    "using the GPU-safe map caption",
+                    flush=True,
+                )
+            # The standard caption/marker helpers use NumPy and Pillow. OpenCL
+            # sampling returns cv2.UMat, so download only this fallback frame
+            # before applying those CPU overlays.
+            if gpu_map:
+                frame = frame.get()
             label_animation = getattr(self, "map_label_animation", "gentle_fade")
             frame = draw_editorial_map_caption(
                 frame, self.place.display_name or self.place.query, progress,

@@ -24,30 +24,32 @@ import numpy as np
 from map_editorial import load_borders
 
 STYLE = {
-    "country_px": 58,
-    "place_px": 40,
-    "route_px": 32,
-    "secondary_px": 23,
+    "country_px": 54,
+    "place_px": 35,
+    "route_px": 30,
+    "secondary_px": 21,
     "legend_px": 22,
-    "capsule_pad_x": 22,
-    "capsule_pad_y": 10,
+    "capsule_pad_x": 20,
+    "capsule_pad_y": 9,
     "safe_margin": 54,
-    "grid_alpha": 0.065,
-    "vignette_strength": 0.14,
-    "map_exposure": 0.89,
-    "map_contrast": 0.97,
-    "saturation": 0.76,
+    "grid_alpha": 0.045,
+    "vignette_strength": 0.10,
+    "map_exposure": 0.92,
+    "map_contrast": 1.03,
+    "saturation": 0.72,
 }
 
 WHITE = (242, 244, 238)
-DARK = (7, 14, 21)
+DARK = (10, 16, 22)
 RED = (38, 48, 242)       # BGR, saturated red
 RED_HI = (130, 150, 255)  # warm white/red highlight
-CYAN = (255, 205, 68)
-BLUE = (255, 166, 74)
-TEAL = (214, 202, 65)
-PINK = (205, 105, 238)
-GREEN = (96, 164, 91)
+CYAN = (240, 205, 64)     # BGR, cyan / teal for Bab el-Mandeb
+BLUE = (255, 166, 74)     # BGR, marine blue for global routes
+TEAL = (214, 202, 65)     # BGR, teal
+PINK = (205, 50, 220)     # BGR, magenta / fuchsia for pipeline
+MAGENTA = (205, 50, 220)  # BGR, pipeline magenta
+GREEN = (70, 155, 60)     # BGR, rich editorial green
+YELLOW = (64, 210, 255)   # BGR, warm gold
 
 FONT_DIRS = [Path("/usr/share/fonts/truetype/msttcorefonts"),
              Path("/usr/share/fonts/truetype/liberation"),
@@ -59,6 +61,7 @@ _GPU_OPS = {"opencl": 0, "mask_uploads": 0, "composites": 0, "blur": 0}
 _VIGNETTE_CACHE = {}
 _GRID_CACHE = {}
 _CURRENT_SIZE = (1920, 1080)
+_COUNTRY_MASK_CACHE = {}
 
 
 def reset_gpu_counters():
@@ -81,12 +84,7 @@ def _assert_gpu(frame):
 
 
 def geo_project(lat, lon, anchor, zoom, width, height):
-    """Exact Web-Mercator screen projection used by FastPlateSampler.sample_opencl.
-
-    FastPlateSampler crops the requested camera center to output center. At
-    integer tile zoom, each global Mercator pixel at that zoom maps to
-    2**fractional_zoom pixels in the rendered canvas.
-    """
+    """Exact Web-Mercator projection used by FastPlateSampler.sample_opencl."""
     from dynamic_tile_pyramid import latlon_to_global_px
     z = math.floor(zoom)
     scale = 2.0 ** (zoom - z)
@@ -94,6 +92,213 @@ def geo_project(lat, lon, anchor, zoom, width, height):
     ax, ay = latlon_to_global_px(anchor[0], anchor[1], z)
     return (width * 0.5 + (gx - ax) * scale,
             height * 0.5 + (gy - ay) * scale)
+
+
+def fit_geo_bounds(bounds, width, height, *, width_fraction=0.78,
+                   height_fraction=0.76, min_zoom=5.0, max_zoom=8.0):
+    """Return a camera center/zoom fitting WGS84 (south, west, north, east).
+
+    The calculation uses the same global Web-Mercator pixel authority as the
+    sampler. Binary search maximizes the zoom while keeping the padded bounds
+    inside both safe-area dimensions.
+    """
+    from dynamic_tile_pyramid import latlon_to_global_px, global_px_to_latlon
+    south, west, north, east = map(float, bounds)
+    if not (-85 < south < north < 85 and -180 <= west < east <= 180):
+        raise ValueError(f"invalid geographic bounds: {bounds}")
+    if not (0 < width_fraction <= 1 and 0 < height_fraction <= 1):
+        raise ValueError("bounds fit fractions must be in (0, 1]")
+    zref = 8
+    corners = [latlon_to_global_px(lat, lon, zref)
+               for lat in (south, north) for lon in (west, east)]
+    xs, ys = [p[0] for p in corners], [p[1] for p in corners]
+    center = global_px_to_latlon((min(xs)+max(xs))/2,
+                                 (min(ys)+max(ys))/2, zref)
+    span_w, span_h = max(xs)-min(xs), max(ys)-min(ys)
+    limit_w, limit_h = width*width_fraction, height*height_fraction
+    if span_w <= 0 or span_h <= 0:
+        raise ValueError("geographic bounds have no area")
+    scale = min(limit_w/span_w, limit_h/span_h)
+    zoom = zref + math.log2(scale)
+    zoom = min(max_zoom, max(min_zoom, zoom))
+    fitted_w, fitted_h = span_w*2**(zoom-zref), span_h*2**(zoom-zref)
+    return (center[0], center[1], zoom,
+            {"bounds": [south, west, north, east],
+             "projected_span_px_at_z8": [span_w, span_h],
+             "fitted_size_px": [fitted_w, fitted_h],
+             "canvas_fraction": [fitted_w/width, fitted_h/height]})
+
+
+def _rects_intersect(a, b, gap=0):
+    return not (a[2]+gap <= b[0] or a[0] >= b[2]+gap or
+                a[3]+gap <= b[1] or a[1] >= b[3]+gap)
+
+
+def _place_labels(entries, W, H, draw):
+    """Measure capsules first; place without overlap and fail closed on collision."""
+    from PIL import Image, ImageDraw
+    safe = STYLE["safe_margin"]
+    occupied, layout = [], []
+    for entry in entries:
+        title = " ".join(str(entry["text"]).upper().split())
+        subtitle = " ".join(str(entry.get("subtitle") or "").upper().split())
+        role = entry.get("role", "place")
+        title_size = STYLE["country_px"] if role == "country" else STYLE["route_px"] if role == "route" else STYLE["place_px"]
+        sub_font = _font(STYLE["secondary_px"], False)
+        sb = draw.textbbox((0,0), subtitle, font=sub_font) if subtitle else (0,0,0,0)
+        pad_x, pad_y = STYLE["capsule_pad_x"], STYLE["capsule_pad_y"]
+        max_text_width=W-2*STYLE["safe_margin"]-2*pad_x-16
+        while True:
+            title_font = _font(title_size, True)
+            tb = draw.textbbox((0,0), title, font=title_font, stroke_width=1)
+            tracked_w = sum(draw.textbbox((0,0),c,font=title_font)[2]+2 for c in title)-2
+            title_w=max(tracked_w,tb[2]-tb[0])
+            if max(title_w,sb[2]-sb[0] if subtitle else 0)<=max_text_width or title_size<=20:
+                break
+            title_size-=1
+        sub_w=sb[2]-sb[0] if subtitle else 0
+        box_w=max(title_w,sub_w)+2*pad_x+8
+        gap=7 if subtitle else 0
+        box_h=(tb[3]-tb[1])+(sb[3]-sb[1] if subtitle else 0)+2*pad_y+gap
+        if box_w > W-2*safe or box_h > H-2*safe:
+            raise ValueError(f"label too large for canvas: {title}")
+        cx,cy=entry.get("center",(W/2,H/2))
+        explicit=entry.get("box")
+        if explicit:
+            candidates=[(explicit[0],explicit[1])]
+        else:
+            offsets=entry.get("candidate_offsets",((0,-1),(0,1),(1,0),(-1,0)))
+            distance=entry.get("candidate_distance",78)
+            candidates=[]
+            for dx,dy in offsets:
+                if (dx,dy)==(0,-1): x,y=cx-box_w/2,cy-distance-box_h
+                elif (dx,dy)==(0,1): x,y=cx-box_w/2,cy+distance
+                elif (dx,dy)==(1,0): x,y=cx+distance,cy-box_h/2
+                elif (dx,dy)==(-1,0): x,y=cx-distance-box_w,cy-box_h/2
+                else: x,y=cx-box_w/2+dx*distance,cy-box_h/2+dy*distance
+                candidates.append((x,y))
+            # Deterministic safe-area grid fallback is ordered by distance to
+            # the geographic point, preserving local association when possible.
+            step_y=box_h+14; step_x=box_w+14
+            ys=list(range(safe,max(safe+1,H-safe-box_h),step_y))
+            xs=list(range(safe,max(safe+1,W-safe-box_w),step_x))
+            ys.append(max(safe,H-safe-box_h)); xs.append(max(safe,W-safe-box_w))
+            grid=[(x,y) for y in sorted(set(ys)) for x in sorted(set(xs))]
+            candidates.extend(sorted(grid,key=lambda q:(q[0]+box_w/2-cx)**2+
+                                                       (q[1]+box_h/2-cy)**2))
+        chosen=None
+        for x,y in candidates:
+            x0=max(safe,min(W-safe-box_w,int(round(x))))
+            y0=max(safe,min(H-safe-box_h,int(round(y))))
+            box=(x0,y0,x0+box_w,y0+box_h)
+            if not any(_rects_intersect(box,old,12) for old in occupied):
+                chosen=box;break
+        if chosen is None:
+            raise ValueError(f"label collision cannot be resolved: {title}")
+        occupied.append(chosen)
+        title_row=(chosen[0]+pad_x,chosen[1]+pad_y,
+                   chosen[0]+pad_x+title_w,chosen[1]+pad_y+(tb[3]-tb[1]))
+        subtitle_row=None
+        if subtitle:
+            subtitle_row=(chosen[0]+pad_x, title_row[3]+gap,
+                          chosen[0]+pad_x+sub_w, title_row[3]+gap+(sb[3]-sb[1]))
+        layout.append({"entry":entry,"box":chosen,"title_font":title_font,
+                       "sub_font":sub_font,"title_bbox":tb,"subtitle_bbox":sb,
+                       "title_width":title_w,"rows":[title_row,subtitle_row]})
+    return layout
+
+
+def _text_plate(W, H, entries, progress, *, return_layout=False):
+    """Measured capsules: title/subtitle rows have distinct baselines and boxes."""
+    from PIL import Image, ImageDraw, ImageFilter
+    plate = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(plate)
+    # Lay out the complete scene at every frame, including not-yet-revealed
+    # entries. Reserving their boxes prevents already-visible labels jumping
+    # when later callouts enter.
+    layout=_place_labels(entries,W,H,draw)
+    occupied=[]
+    for item in layout:
+        entry=item["entry"]; x0,y0,x1,y1=item["box"]
+        reveal=max(0.0,min(1.0,entry.get("reveal",1.0)))
+        if reveal <= 0.005:
+            continue
+        y_lift = int(round((1.0 - _ease(reveal)) * 8))
+        y0_eff = y0 + y_lift
+        y1_eff = y1 + y_lift
+        title=str(entry["text"]).upper(); subtitle=str(entry.get("subtitle") or "").upper()
+        font=item["title_font"]; subfont=item["sub_font"]
+        pad_x,pad_y=STYLE["capsule_pad_x"],STYLE["capsule_pad_y"]
+        color=entry.get("accent"); alpha=int(242*reveal)
+        shadow=Image.new("RGBA",(W,H),(0,0,0,0));sd=ImageDraw.Draw(shadow)
+        sd.rounded_rectangle((x0,y0_eff+4,x1,y1_eff+4),radius=5,fill=(0,0,0,int(130*reveal)))
+        plate.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(8)))
+        draw=ImageDraw.Draw(plate)
+        draw.rounded_rectangle((x0,y0_eff,x1,y1_eff),radius=4,fill=(*DARK,alpha),
+                               outline=(221,230,232,int(100*reveal)),width=1)
+        if color:
+            draw.rectangle((x0,y0_eff+4,x0+4,y1_eff-4),fill=(*color[::-1],alpha))
+        ink=(*WHITE,int(255*reveal)); tx=x0+pad_x+(5 if color else 0)
+        ty=y0_eff+pad_y-item["title_bbox"][1]
+        for ch in title:
+            draw.text((tx,ty),ch,font=font,fill=ink,stroke_width=1,
+                      stroke_fill=(3,8,12,int(210*reveal)))
+            tx+=draw.textbbox((0,0),ch,font=font)[2]+2
+        if subtitle:
+            sy=ty+(item["title_bbox"][3]-item["title_bbox"][1])+7
+            draw.text((x0+pad_x+(5 if color else 0),sy-item["subtitle_bbox"][1]),
+                      subtitle,font=subfont,fill=(183,203,210,int(255*reveal)))
+        anchor=entry.get("leader")
+        if anchor:
+            ax,ay=anchor
+            bx=max(x0,min(x1,ax));by=max(y0_eff,min(y1_eff,ay))
+            if x0<=ax<=x1 and y0_eff<=ay<=y1_eff:
+                distances=((abs(ay-y0_eff), (ax,y0_eff)),(abs(ay-y1_eff),(ax,y1_eff)),
+                           (abs(ax-x0),(x0,ay)),(abs(ax-x1),(x1,ay)))
+                bx,by=min(distances,key=lambda q:q[0])[1]
+            draw.line((ax,ay,bx,by),fill=(225,235,238,int(210*reveal)),width=2)
+    all_rects=[]
+    for item in layout:
+        name=item["entry"]["text"]
+        for row in item["rows"]:
+            if row is None: continue
+            if any(_rects_intersect(row,old,2) for old in all_rects):
+                raise ValueError(f"text row bounding boxes overlap at {name}")
+            all_rects.append(row)
+    for a,b in zip(layout,layout[1:]):
+        if _rects_intersect(a["box"],b["box"],4):
+            raise ValueError(f"label capsule bounding boxes overlap: {a['entry']['text']} / {b['entry']['text']}")
+    plate_arr=np.asarray(plate)
+    boxes=[item["box"] for item in layout]
+    return (plate_arr,boxes) if return_layout else plate_arr
+
+
+def _simple_legend_plate(W, H, progress):
+    """Compact Mocha legend that labels illustrative areas without asserting control."""
+    from PIL import Image, ImageDraw
+    plate = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(plate)
+    reveal = _stage(progress, 0.58, 0.12)
+    if reveal <= 0.01:
+        return np.asarray(plate)
+    font = _font(15, False)
+    title_font = _font(16, True)
+    x, y = 54, H - 116
+    width = 360
+    height = 92
+    alpha = int(225 * reveal)
+    y_lift = int((1.0 - _ease(reveal)) * 8)
+    y += y_lift
+    draw.rounded_rectangle((x, y, x + width, y + height), radius=5,
+                           fill=(*DARK, alpha), outline=(225, 232, 235, int(90 * reveal)), width=1)
+    rows = ((GREEN, "GOVERNMENT / ALLIED AREA"), (RED, "HOUTHI CONTROL ZONE"))
+    for i, (color, label) in enumerate(rows):
+        yy = y + 12 + i * 26
+        draw.rectangle((x + 14, yy + 2, x + 28, yy + 16), fill=(*color[::-1], int(255 * reveal)))
+        draw.text((x + 36, yy), label, font=title_font, fill=(*WHITE, int(255 * reveal)))
+    draw.text((x + 14, y + 68), "SCHEMATIC — NOT VERIFIED CONTROL DATA",
+              font=font, fill=(185, 200, 206, int(240 * reveal)))
+    return np.asarray(plate)
 
 
 def _font(size: int, condensed: bool = True):
@@ -114,6 +319,11 @@ def _font(size: int, condensed: bool = True):
                     pass
     _FONT_CACHE[key] = ImageFont.load_default()
     return _FONT_CACHE[key]
+
+
+def _ease(t: float) -> float:
+    t = max(0.0, min(1.0, float(t)))
+    return t * t * (3.0 - 2.0 * t)
 
 
 def _stage(p, start, duration):
@@ -291,96 +501,47 @@ def _draw_vignette(frame, W, H):
     return composite_mask(frame, mask, (0, 0, 0), STYLE["vignette_strength"])
 
 
-def _text_plate(W, H, entries, progress):
-    """Render measured documentary typography and capsules into transparent RGBA.
-
-    entry fields: text, center, role, reveal, accent, subtitle, leader.
-    Placement is screen-space; location pins remain geographic.
-    """
+def _text_plate_legacy(W, H, entries, progress):
+    """Legacy layout kept for diagnostics; production uses measured _text_plate above."""
     from PIL import Image, ImageDraw, ImageFilter
-    plate = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(plate)
-    safe = STYLE["safe_margin"]
-    occupied = []
-    for entry in entries:
-        reveal = max(0.0, min(1.0, entry.get("reveal", 1.0)))
-        if reveal <= 0.01:
-            continue
-        text = " ".join(str(entry["text"]).upper().split())
-        role = entry.get("role", "place")
-        target = STYLE["country_px"] if role == "country" else STYLE["route_px"] if role == "route" else STYLE["place_px"]
-        min_size = 25
-        color = entry.get("accent")
-        subtitle = entry.get("subtitle") or ""
-        # Measure and reduce only to documented minimum; if no fit, use a
-        # second row/alternate candidate rather than clipping outside canvas.
-        size = target
-        while size > min_size:
-            font = _font(size, True)
-            bb = draw.textbbox((0, 0), text, font=font, stroke_width=1)
-            if bb[2] - bb[0] <= W - 2 * safe - 44:
-                break
-            size -= 1
-        font = _font(size, True)
-        secondary_font = _font(STYLE["secondary_px"], False)
-        tw = draw.textbbox((0, 0), text, font=font, stroke_width=1)[2]
-        sh = draw.textbbox((0, 0), subtitle, font=secondary_font)[3] if subtitle else 0
-        pad_x, pad_y = STYLE["capsule_pad_x"], STYLE["capsule_pad_y"]
-        bw = min(W - 2 * safe, tw + pad_x * 2)
-        bh = size + 2 * pad_y + (sh + 5 if subtitle else 0)
-        cx, cy = entry["center"]
-        # Collision-aware candidate list: above, below, right, left.
-        candidates = [(cx, cy - bh - 34), (cx, cy + 34),
-                      (cx + 40, cy - bh / 2), (cx - 40, cy - bh / 2)]
-        chosen = None
-        for tx, ty in candidates:
-            x0 = int(max(safe, min(W - safe - bw, tx - bw / 2)))
-            y0 = int(max(safe, min(H - safe - bh, ty)))
-            box = (x0, y0, x0 + bw, y0 + bh)
-            if all(box[2] <= b[0] - 10 or box[0] >= b[2] + 10 or
-                   box[3] <= b[1] - 8 or box[1] >= b[3] + 8 for b in occupied):
-                chosen = box
-                break
-        if chosen is None:
-            # fail-safe layout shrinks to minimum size while preserving safe area
-            x0 = int(max(safe, min(W - safe - bw, cx - bw / 2)))
-            y0 = int(max(safe, min(H - safe - bh, cy - bh / 2)))
-            chosen = (x0, y0, x0 + bw, y0 + bh)
-        x0, y0, x1, y1 = chosen
-        occupied.append(chosen)
-        alpha = int(242 * reveal)
-        # soft shadow + very thin divider; no pill/big app-button aesthetic
-        shadow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        sd = ImageDraw.Draw(shadow)
-        sd.rounded_rectangle((x0, y0 + 5, x1, y1 + 5), radius=5,
-                             fill=(0, 0, 0, int(130 * reveal)))
-        shadow = shadow.filter(ImageFilter.GaussianBlur(10))
-        plate.alpha_composite(shadow)
-        draw = ImageDraw.Draw(plate)
-        draw.rounded_rectangle(chosen, radius=4, fill=(*DARK, alpha),
-                               outline=(221, 230, 232, int(100 * reveal)), width=1)
-        if color:
-            accent_rgb = color[::-1]
-            draw.rectangle((x0, y0 + 5, x0 + 4, y1 - 5), fill=(*accent_rgb, alpha))
-        # letter tracking 1.8px, condensed display font
-        tx = x0 + pad_x + (4 if color else 0)
-        ty = y0 + pad_y
-        ink = (*WHITE, int(255 * reveal))
-        for ch in text:
-            draw.text((tx, ty), ch, font=font, fill=ink,
-                      stroke_width=1, stroke_fill=(3, 8, 12, int(210 * reveal)))
-            tx += draw.textbbox((0, 0), ch, font=font)[2] + 2
+    plate=Image.new("RGBA",(W,H),(0,0,0,0))
+    draw=ImageDraw.Draw(plate)
+    visible=[e for e in entries if _stage(progress,0,1) >= 0 and
+             max(0.0,min(1.0,e.get("reveal",1.0)))>0.01]
+    layout=_place_labels(visible,W,H,draw)
+    for item in layout:
+        entry=item["entry"]; x0,y0,x1,y1=item["box"]
+        reveal=max(0.0,min(1.0,entry.get("reveal",1.0)))
+        title=" ".join(str(entry["text"]).upper().split())
+        subtitle=" ".join(str(entry.get("subtitle") or "").upper().split())
+        color=entry.get("accent"); pad_x=STYLE["capsule_pad_x"]; pad_y=STYLE["capsule_pad_y"]
+        shadow=Image.new("RGBA",(W,H),(0,0,0,0));sd=ImageDraw.Draw(shadow)
+        sd.rounded_rectangle((x0,y0+4,x1,y1+4),radius=5,fill=(0,0,0,int(115*reveal)))
+        plate.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(7)))
+        draw=ImageDraw.Draw(plate)
+        draw.rounded_rectangle(item["box"],radius=4,fill=(*DARK,int(242*reveal)),
+                               outline=(221,230,232,int(100*reveal)),width=1)
+        if color: draw.rectangle((x0+1,y0+5,x0+4,y1-5),fill=(*color[::-1],int(242*reveal)))
+        ink=(*WHITE,int(255*reveal)); xtext=x0+pad_x+(5 if color else 0)
+        title_y=y0+pad_y-item["title_bbox"][1]
+        for ch in title:
+            draw.text((xtext,title_y),ch,font=item["title_font"],fill=ink,stroke_width=1,
+                      stroke_fill=(3,8,12,int(210*reveal)))
+            xtext+=draw.textbbox((0,0),ch,font=item["title_font"])[2]+2
         if subtitle:
-            draw.text((x0 + pad_x + (4 if color else 0), y0 + pad_y + size + 2),
-                      subtitle.upper(), font=secondary_font,
-                      fill=(183, 203, 210, int(255 * reveal)))
-        leader = entry.get("leader")
-        if leader:
-            lx = (x0 + x1) // 2
-            ly = y0 if leader[1] < y0 else y1
-            draw.line((leader[0], leader[1], lx, ly),
-                      fill=(225, 235, 238, int(210 * reveal)), width=2)
-    return np.asarray(plate)
+            sub_y=title_y+(item["title_bbox"][3]-item["title_bbox"][1])+7
+            draw.text((x0+pad_x+(5 if color else 0),sub_y-item["subtitle_bbox"][1]),
+                      subtitle,font=item["sub_font"],fill=(183,203,210,int(255*reveal)))
+        if entry.get("leader"):
+            ax,ay=entry["leader"]; bx=max(x0,min(x1,ax)); by=max(y0,min(y1,ay))
+            if x0<=ax<=x1 and y0<=ay<=y1:
+                edge=((abs(ay-y0),(ax,y0)),(abs(ay-y1),(ax,y1)),
+                      (abs(ax-x0),(x0,ay)),(abs(ax-x1),(x1,ay)))
+                bx,by=min(edge,key=lambda v:v[0])[1]
+            draw.line((ax,ay,bx,by),fill=(225,235,238,int(210*reveal)),width=2)
+    plate_arr=np.asarray(plate)
+    boxes=[item["box"] for item in layout]
+    return (plate_arr,boxes) if return_layout else plate_arr
 
 
 def _mask_rings(rings, W, H, reveal=1.0, stroke=3):
@@ -412,22 +573,38 @@ def _mask_rings(rings, W, H, reveal=1.0, stroke=3):
     return mask
 
 
-def _country(frame, iso, project, progress, W, H, *, fill=None, glow=None):
+def _country(frame, iso, project, progress, W, H, *, fill=None, glow=None,
+             stroke_px=2, reveal_start=0.12, reveal_duration=0.32,
+             fill_start=0.34, fill_duration=0.24):
     data = load_borders().get(iso)
     if not data:
         raise ValueError(f"Natural Earth geometry missing: {iso}")
     rings = []
     fill_mask = _blank_mask(W, H)
-    for ring in data["polygons"]:
-        pts = np.asarray([project(lat, lon) for lon, lat in ring], np.int32)
-        if pts.shape[0] < 4 or pts[:,0].max() < -20 or pts[:,0].min() > W+20 or pts[:,1].max() < -20 or pts[:,1].min() > H+20:
-            continue
-        rings.append(pts.reshape(-1,2))
-        cv2.fillPoly(fill_mask, [pts.reshape(-1,1,2)], 255, lineType=cv2.LINE_AA)
-    reveal = _stage(progress, 0.12, 0.32)
-    stroke_mask = _mask_rings(rings, W, H, reveal, 3)
+    cache_key=None
     if fill:
-        frame = composite_mask(frame, fill_mask, fill[0], fill[1] * _stage(progress, 0.34, 0.24))
+        try:
+            cache_key=(iso,W,H,tuple(round(v,7) for v in project.anchor),round(project.zoom,7))
+        except AttributeError:
+            cache_key=None
+    cached=_COUNTRY_MASK_CACHE.get(cache_key) if cache_key is not None else None
+    if cached is not None:
+        rings,fill_mask=cached
+        rings=[ring.copy() for ring in rings]
+        fill_mask=fill_mask.copy()
+    else:
+        for ring in data["polygons"]:
+            pts = np.asarray([project(lat, lon) for lon, lat in ring], np.int32)
+            if pts.shape[0] < 4 or pts[:,0].max() < -20 or pts[:,0].min() > W+20 or pts[:,1].max() < -20 or pts[:,1].min() > H+20:
+                continue
+            rings.append(pts.reshape(-1,2))
+            cv2.fillPoly(fill_mask, [pts.reshape(-1,1,2)], 255, lineType=cv2.LINE_AA)
+        if cache_key is not None:
+            _COUNTRY_MASK_CACHE[cache_key]=(rings,fill_mask)
+    reveal = _stage(progress, reveal_start, reveal_duration)
+    stroke_mask = _mask_rings(rings, W, H, reveal, stroke_px)
+    if fill:
+        frame = composite_mask(frame, fill_mask, fill[0], fill[1] * _stage(progress, fill_start, fill_duration))
     if glow:
         frame = glow_mask(frame, stroke_mask, glow[0], glow[1] * _stage(progress, 0.28, 0.24))
     else:
@@ -455,7 +632,7 @@ def _line_mask(points, W, H, width=4, dashed=False):
 
 
 def _route(frame, geo_points, project, W, H, progress, color, start,
-           duration=0.24, width=5, arrow=True, dashed=False):
+           duration=0.24, width=5, arrow=True, dashed=False, glow_strength=0.55):
     if progress <= start:
         return frame
     reveal=_stage(progress,start,duration)
@@ -474,7 +651,7 @@ def _route(frame, geo_points, project, W, H, progress, color, start,
     if reveal>0.01:
         cut.insert(0,pts[0])
     mask=_line_mask(cut,W,H,width,dashed)
-    frame=glow_mask(frame,mask,color,1.0)
+    frame=glow_mask(frame,mask,color,glow_strength)
     if arrow and len(cut)>=2:
         a,b=cut[-2],cut[-1]; ang=math.atan2(b[1]-a[1],b[0]-a[0]); L=width*5; S=width*3
         tri=np.array([b,(int(b[0]-L*math.cos(ang)+S*math.sin(ang)),int(b[1]-L*math.sin(ang)-S*math.cos(ang))),
@@ -484,16 +661,30 @@ def _route(frame, geo_points, project, W, H, progress, color, start,
     return frame
 
 
-def _marker(frame, point, progress, W, H, color=RED, radius=9):
-    x,y=map(int,point)
-    disk=_blank_mask(W,H); ring=_blank_mask(W,H)
-    r=max(1,int(radius*max(0.05,min(1.15,progress*1.15))))
-    cv2.circle(disk,(x,y),r,255,-1,cv2.LINE_AA)
-    cv2.circle(ring,(x,y),r+8,255,2,cv2.LINE_AA)
-    frame=glow_mask(frame,ring,color,0.8)
-    frame=composite_mask(frame,disk,color,1.0)
-    core=_blank_mask(W,H); cv2.circle(core,(x,y),3,255,-1,cv2.LINE_AA)
-    return composite_mask(frame,core,WHITE,1.0)
+def _marker(frame, point, progress, W, H, color=RED, radius=7):
+    """Refined editorial marker: dark center, crisp red ring, subtle outer pulse halo."""
+    x, y = int(round(point[0])), int(round(point[1]))
+    p = max(0.0, min(1.0, progress))
+    pulse = 1.0 + 0.18 * math.sin(p * math.pi) if p < 1.0 else 1.0
+    r = max(2, int(round(radius * pulse)))
+
+    if p > 0.05:
+        halo_r = int(round(r + 5 + (1.0 - p) * 5))
+        halo_mask = _blank_mask(W, H)
+        cv2.circle(halo_mask, (x, y), halo_r, 255, 1, cv2.LINE_AA)
+        frame = composite_mask(frame, halo_mask, color, 0.38 * (1.0 - 0.4 * p))
+
+    ring_mask = _blank_mask(W, H)
+    cv2.circle(ring_mask, (x, y), r, 255, 2, cv2.LINE_AA)
+    frame = glow_mask(frame, ring_mask, color, 0.40)
+
+    core_mask = _blank_mask(W, H)
+    cv2.circle(core_mask, (x, y), max(1, r - 2), 255, -1, cv2.LINE_AA)
+    frame = composite_mask(frame, core_mask, DARK, 0.85)
+
+    dot_mask = _blank_mask(W, H)
+    cv2.circle(dot_mask, (x, y), 2, 255, -1, cv2.LINE_AA)
+    return composite_mask(frame, dot_mask, WHITE, 0.95)
 
 
 def _label(frame, W,H, entries):
@@ -524,64 +715,227 @@ def draw_editorial_scene_gpu(frame, scene, ctx, progress):
     frame=_base_grade(frame)
     frame=_draw_grid(frame,W,H,_stage(progress,0.0,0.18))
     pin_entries=_pin_entries(ctx,project,progress,scene)
+    if scene in ("location_focus", "location_pulse"):
+        # A short title lead establishes the place before the map comes up.
+        # The text/panel is rasterized as a mask on the host; the title blend,
+        # map reveal, marker glow and all full-frame effects stay OpenCL/UMat.
+        from PIL import Image, ImageDraw
+        pulse_variant = scene == "location_pulse"
+        map_reveal = _ease(_stage(progress, .07 if pulse_variant else .10,
+                                   .15 if pulse_variant else .12))
+        if map_reveal < 1.0:
+            frame = cv2.addWeighted(frame, map_reveal, _solid(W,H,DARK),
+                                    1.0-map_reveal, 0)
+            _GPU_OPS["opencl"] += 1
+        pin = pin_entries[0][0] if pin_entries else {"label":"Località"}
+        point = pin_entries[0][1] if pin_entries else (W//2,H//2)
+        title_plate = Image.new("RGBA", (W,H), (0,0,0,0))
+        title_draw = ImageDraw.Draw(title_plate)
+        title_e = 1.0 - _ease(_stage(progress, .08, .10))
+        if title_e > .01:
+            f_title = _font(max(44, round(102*W/1920)), True)
+            title = str(pin.get("label") or "LOCALITÀ").upper()
+            bbox=title_draw.textbbox((0,0),title,font=f_title)
+            title_h=bbox[3]-bbox[1]
+            title_w=bbox[2]-bbox[0]
+            x = int(W*.085) if not pulse_variant else max(42,(W-title_w)//2)
+            y = int(H*.43) if not pulse_variant else int(H*.18)
+            title_draw.rounded_rectangle((x-28,y-28,min(W-50,x+title_w+56),y+title_h+64),
+                                         radius=8,fill=(10,16,22,int(225*title_e)),
+                                         outline=(221,230,232,int(90*title_e)),width=1)
+            title_draw.text((x,y), title, font=f_title,
+                            fill=(248,245,234,int(255*title_e)))
+        if np.any(np.asarray(title_plate)[:,:,3]):
+            frame = composite_rgba(frame, np.asarray(title_plate))
+        reveal = _ease(_stage(progress,.22 if pulse_variant else .25,.13))
+        if reveal > .01:
+            x,y=map(int,point)
+            frame=_marker(frame,(x,y),reveal,W,H,YELLOW,8)
+        # The basemap already labels the town. A second floating callout on
+        # the same marker duplicates the name and covers nearby roads.
+        credits = {
+            "esri_street": "Sources: Esri, DeLorme, HERE, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), MapmyIndia, TomTom",
+            "esri_topo": "Sources: Esri, DeLorme, HERE, TomTom, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, swisstopo, MapmyIndia, GIS User Community",
+            "esri_sat": "Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+        }
+        credit = credits.get(ctx.get("basemap", "esri_street"), "Sources: Esri and the GIS User Community")
+        credit_plate=Image.new("RGBA",(W,H),(0,0,0,0))
+        credit_draw=ImageDraw.Draw(credit_plate)
+        credit_draw.text((18,H-25),credit,font=_font(max(10,round(13*W/1920)),False),
+                         fill=(248,246,236,220),stroke_width=1,stroke_fill=(0,0,0,220))
+        frame=composite_rgba(frame,np.asarray(credit_plate))
+        return frame
     if scene == "ed_yemen_markers" and len(pin_entries) < 3:
         raise ValueError("ed_yemen_markers requires three grounded pins")
     labels=[]
     if scene=="ed_saudi_base":
-        frame,_,_=_country(frame,"SAU",project,progress,W,H)
-        x,y=project(*((24.7136,46.6753)))
-        labels=[{"text":"SAUDI ARABIA","center":(x,y),"role":"country","reveal":_stage(progress,.38,.24),"subtitle":"KINGDOM OF SAUDI ARABIA","accent":CYAN}]
+        frame,_,_=_country(frame,"SAU",project,progress,W,H,stroke_px=2,
+                            reveal_start=0.04,reveal_duration=0.30)
+        x,y=project(24.7136,46.6753)
+        labels=[{"text":"SAUDI ARABIA","center":(x,y),"role":"country",
+                 "reveal":_stage(progress,.26,.16),"candidate_distance":56}]
+
     elif scene=="ed_iran_glow":
-        frame,_,_=_country(frame,"IRN",project,progress,W,H,glow=(RED,1.0))
-        tx,ty=project(35.6892,51.3890)
-        labels=[{"text":"IRAN","center":(tx,ty),"role":"country","reveal":_stage(progress,.45,.18),"subtitle":"PERSIAN GULF REGION","accent":RED_HI}]
-        # Context note is evidence-neutral rather than making a current-events claim.
-        labels.append({"text":"PERSIAN GULF REGION","center":(W*.5,H*.82),"role":"route","reveal":_stage(progress,.62,.22),"accent":RED})
+        frame,_,_=_country(frame,"IRN",project,progress,W,H,glow=(RED,.55),
+                            stroke_px=2,reveal_start=.08,reveal_duration=.32)
+        tx,ty=project(29.8,52.0)
+        labels=[
+            {"text":"IRAN","center":(tx,ty),"role":"country",
+             "reveal":_stage(progress,.32,.14)},
+            {"text":"US NAVAL BLOCKADE OF IRAN","center":(W*.50,H*.82),
+             "role":"route","reveal":_stage(progress,.44,.14),
+             "accent":RED,"candidate_distance":24}
+        ]
+
     elif scene in ("ed_yemen_markers","ed_yemen_fill"):
-        frame,_,_=_country(frame,"SAU",project,progress,W,H)
-        frame,_,_=_country(frame,"YEM",project,progress,W,H,fill=(GREEN,.38))
+        frame,_,_=_country(frame,"SAU",project,progress,W,H,
+                            reveal_start=0.0,reveal_duration=.20,stroke_px=2)
         if scene == "ed_yemen_markers":
-            for i,(pin,xy,_idx) in enumerate(pin_entries[:3]):
-                e=_stage(progress,.42+i*.09,.13)
-                if e>0:
-                    frame=_marker(frame,xy,e,W,H,RED,10)
-                    labels.append({"text":pin.get("label") or pin.get("name") or "LOCATION",
-                                   "center":xy,"role":"place","reveal":e,"accent":RED_HI})
-        area=project(14.6,45.55)
-        labels.append({"text":"YEMEN","center":area,"role":"country","reveal":_stage(progress,.62,.17),"subtitle":"INTERNATIONAL BOUNDARY","accent":GREEN})
+            frame,_,_=_country(frame,"YEM",project,progress,W,H,
+                                fill=(GREEN,.40),fill_start=0.0,fill_duration=.18,
+                                reveal_start=0.0,reveal_duration=.20,stroke_px=2)
+            labels.extend([
+                {"text":"SAUDI ARABIA","center":project(19.2,44.5),"role":"country",
+                 "reveal":_stage(progress,.08,.10)},
+                {"text":"YEMEN","center":project(14.8,46.0),"role":"country",
+                 "reveal":_stage(progress,.08,.10)},
+            ])
+            # Strict sequential reveal: Sanaa -> Hodeidah -> Abha
+            sanaa_pt = project(15.3694, 44.1910)
+            e_sanaa = _stage(progress, .18, .12)
+            if e_sanaa > 0:
+                frame = _marker(frame, sanaa_pt, e_sanaa, W, H, RED, 7)
+            labels.append({"text":"SANAA","center":sanaa_pt,"role":"place",
+                           "reveal":e_sanaa,"accent":RED,"leader":sanaa_pt,
+                           "candidate_distance":68,
+                           "candidate_offsets":((1,0),(0,-1),(0,1),(-1,0))})
+
+            hodeidah_pt = project(14.7979, 42.9545)
+            e_hod = _stage(progress, .32, .12)
+            if e_hod > 0:
+                frame = _marker(frame, hodeidah_pt, e_hod, W, H, RED, 7)
+            labels.append({"text":"HODEIDAH","center":hodeidah_pt,"role":"place",
+                           "reveal":e_hod,"accent":RED,"leader":hodeidah_pt,
+                           "candidate_distance":68,
+                           "candidate_offsets":((-1,0),(0,1),(0,-1),(1,0))})
+
+            abha_pt = project(18.2164, 42.5053)
+            e_abha = _stage(progress, .46, .12)
+            if e_abha > 0:
+                frame = _marker(frame, abha_pt, e_abha, W, H, RED, 7)
+            labels.append({"text":"ABHA INTL AIRPORT","center":abha_pt,"role":"place",
+                           "reveal":e_abha,"accent":RED,"leader":abha_pt,
+                           "candidate_distance":68,
+                           "candidate_offsets":((1,0),(0,-1),(-1,0),(0,1))})
+
+        else:
+            frame,_,_=_country(frame,"YEM",project,progress,W,H,
+                                fill=(GREEN,.40),fill_start=.08,fill_duration=.24,
+                                reveal_start=.08,reveal_duration=.24,stroke_px=2)
+            labels.extend([
+                {"text":"SAUDI ARABIA","center":project(19.3,46.5),"role":"country",
+                 "reveal":_stage(progress,.28,.12)},
+                {"text":"YEMEN","center":project(14.6,45.55),"role":"country",
+                 "reveal":_stage(progress,.28,.12)},
+                {"text":"HOUTHI-CONTROLLED AREA","center":(W*.50,H*.84),
+                 "role":"route","reveal":_stage(progress,.44,.14),"accent":GREEN},
+            ])
+
     elif scene in ("ed_hormuz_routes","ed_hormuz_focus"):
         for iso in ("SAU","IRN","YEM","OMN","ARE"):
-            frame,_,_=_country(frame,iso,project,progress,W,H)
+            frame,_,_=_country(frame,iso,project,progress,W,H,stroke_px=2)
         if scene=="ed_hormuz_focus":
-            hp=project(26.55,56.27); frame=_marker(frame,hp,_stage(progress,.32,.18),W,H,RED,18)
-            labels=[{"text":"STRAIT OF HORMUZ","center":hp,"role":"route","reveal":_stage(progress,.48,.2),"accent":RED_HI}]
+            hp=project(26.55,56.27); frame=_marker(frame,hp,_stage(progress,.20,.16),W,H,RED,10)
+            labels=[{"text":"STRAIT OF HORMUZ","center":hp,"role":"route","reveal":_stage(progress,.36,.16),"accent":RED}]
         else:
-            frame=_route(frame,[(26.5,56.3),(24.3,58.8),(21.5,62.0),(17.5,66.0),(12,68.5),(7,72.5)],project,W,H,progress,BLUE,.27,arrow=True)
-            frame=_route(frame,[(26.6,50.2),(24.8,47.8),(23.2,44.8),(22.2,41.8),(21.6,39.4)],project,W,H,progress,TEAL,.40,arrow=True)
-            frame=_route(frame,[(26.5,56.3),(24.8,60.2),(20,63.2),(14,64.5),(8.5,70.5)],project,W,H,progress,PINK,.52,arrow=True,dashed=True)
-            for name,lat,lon in (("STRAIT OF HORMUZ",26.55,56.27),("BAB EL-MANDEB",12.58,43.35)):
-                hp=project(lat,lon); frame=_marker(frame,hp,_stage(progress,.22,.12),W,H,RED,13)
-                labels.append({"text":name,"center":hp,"role":"route","reveal":_stage(progress,.65,.16),"accent":RED_HI})
+            # 1. Chokepoint Hormuz hotspot + label
+            hp=project(26.55,56.27)
+            e_hp=_stage(progress,.10,.12)
+            if e_hp>0:
+                frame=_marker(frame,hp,e_hp,W,H,RED,8)
+            labels.append({"text":"HORMUZ","center":hp,"role":"route",
+                           "reveal":e_hp,"accent":RED,
+                           "leader":hp,"candidate_distance":64,
+                           "candidate_offsets":((0,-1),(1,0),(-1,0),(0,1))})
+
+            # 2. Blue maritime route: TO ASIA
+            frame=_route(frame,[(26.5,56.3),(24.3,58.8),(21.5,62.0),(17.5,66.0),(12.0,68.5),(7.0,72.5)],
+                         project,W,H,progress,BLUE,.22,duration=.18,width=6,arrow=True,glow_strength=.45)
+            labels.append({"text":"TO ASIA","center":project(15.0,68.0),"role":"route",
+                           "reveal":_stage(progress,.32,.12),"accent":BLUE,"candidate_distance":58})
+
+            # 3. Magenta pipeline: EAST-WEST PIPELINE
+            frame=_route(frame,[(26.6,50.2),(24.8,47.8),(23.2,44.8),(22.2,41.8),(21.6,39.4)],
+                         project,W,H,progress,MAGENTA,.38,duration=.16,width=6,arrow=True,glow_strength=.45)
+            labels.append({"text":"EAST-WEST PIPELINE","center":project(23.1,44.0),"role":"route",
+                           "reveal":_stage(progress,.46,.12),"accent":MAGENTA,"candidate_distance":54})
+
+            # 4. Red Sea corridor / Bab el-Mandeb: TO EUROPE
+            frame=_route(frame,[(12.58,43.35),(14.8,41.8),(18.5,39.0),(22.5,37.0),(27.7,34.6)],
+                         project,W,H,progress,CYAN,.52,duration=.16,width=5,arrow=True,dashed=True,glow_strength=.40)
+            bmp=project(12.58,43.35)
+            e_bm=_stage(progress,.58,.10)
+            if e_bm>0:
+                frame=_marker(frame,bmp,e_bm,W,H,RED,7)
+            labels.extend([
+                {"text":"BAB EL-MANDEB","center":bmp,"role":"route",
+                 "reveal":e_bm,"accent":RED,"leader":bmp,"candidate_distance":62},
+                {"text":"TO EUROPE","center":project(25.5,35.5),"role":"route",
+                 "reveal":_stage(progress,.62,.10),"accent":CYAN,"candidate_distance":58},
+            ])
+
     elif scene=="ed_mocha_tactical":
-        frame,_,_=_country(frame,"YEM",project,progress,W,H)
-        # Tactical zones and attack arrows remain explicitly schematic.
-        zone=[(16.6,43.1),(16.6,45.6),(14.2,45.6),(13.4,44.4),(14.2,43.2)]
-        zm=_blank_mask(W,H); cv2.fillPoly(zm,[np.array([project(lat,lon) for lat,lon in zone],np.int32).reshape(-1,1,2)],255,cv2.LINE_AA)
-        frame=composite_mask(frame,zm,GREEN,.30*_stage(progress,.25,.2))
+        frame,_,_=_country(frame,"YEM",project,progress,W,H,stroke_px=2,
+                            reveal_start=0.0,reveal_duration=.20)
+        # Tactical partitions
+        green_zone=[(15.6,42.9),(15.6,44.0),(14.0,44.2),(13.7,43.3),(14.7,42.8)]
+        red_zone=[(15.6,44.0),(15.4,45.2),(14.0,45.3),(13.4,44.2),(14.0,44.2)]
+        for points,color,alpha,start in ((green_zone,GREEN,.38,.10),(red_zone,RED,.35,.20)):
+            mask=_blank_mask(W,H)
+            pts=np.array([project(lat,lon) for lat,lon in points],np.int32).reshape(-1,1,2)
+            cv2.fillPoly(mask,[pts],255,cv2.LINE_AA)
+            frame=composite_mask(frame,mask,color,alpha*_stage(progress,start,.14))
+
+        # Soft contact hatch
+        hatchpoly=[project(lat,lon) for lat,lon in ((15.2,43.4),(15.2,44.5),(13.6,44.5),(13.3,43.7))]
+        hm=_blank_mask(W,H);cv2.fillPoly(hm,[np.array(hatchpoly,np.int32).reshape(-1,1,2)],255,cv2.LINE_AA)
         hatch=_blank_mask(W,H)
-        hatchpoly=[project(lat,lon) for lat,lon in ((15.2,43.3),(15.2,44.6),(13.6,44.6),(13.3,43.6))]
-        hm=_blank_mask(W,H); cv2.fillPoly(hm,[np.array(hatchpoly,np.int32).reshape(-1,1,2)],255,cv2.LINE_AA)
-        for x in range(-H,W,18):cv2.line(hatch,(x,0),(x+H,H),255,2,cv2.LINE_AA)
+        for x in range(-H,W,32):cv2.line(hatch,(x,0),(x+H,H),255,1,cv2.LINE_AA)
         hatch=cv2.bitwise_and(hatch,hm)
-        frame=composite_mask(frame,hatch,RED,.42*_stage(progress,.36,.22))
-        frame=_route(frame,[(15.8,44.8),(14.8,44.2),(14,43.7),(13.5,43.35)],project,W,H,progress,RED_HI,.48,arrow=True,width=13)
-        mx,my=project(13.3167,43.25); frame=_marker(frame,(mx,my),_stage(progress,.6,.15),W,H,RED,12)
-        labels=[{"text":"MOCHA","center":(mx,my),"role":"place","reveal":_stage(progress,.66,.15),"accent":RED_HI},
-                {"text":"SCHEMATIC TACTICAL ZONE","center":project(15.3,45.3),"role":"route","reveal":_stage(progress,.74,.16),"accent":RED}]
+        frame=composite_mask(frame,hatch,RED,.28*_stage(progress,.32,.14))
+
+        # Smooth tactical directional arrows (entering sequentially)
+        for i,route in enumerate(([(15.6,44.8),(14.7,44.2),(14.1,43.75),(13.65,43.45)],
+                                  [(15.2,45.0),(14.4,44.2),(13.9,43.70),(13.55,43.50)])):
+            frame=_route(frame,route,project,W,H,progress,BLUE,.44+i*.08,
+                         duration=.14,width=4,arrow=True,glow_strength=.32)
+
+        # Mocha marker + label
+        mx,my=project(13.3167,43.25)
+        e_mocha=_stage(progress,.58,.10)
+        if e_mocha>0:
+            frame=_marker(frame,(mx,my),e_mocha,W,H,RED,8)
+
+        # Hanish Islands circle + label
+        hx,hy=project(13.72,42.73)
+        e_hanish=_stage(progress,.64,.10)
+        hanish=_blank_mask(W,H);cv2.ellipse(hanish,(int(hx),int(hy)),(22,13),0,0,360,255,1,cv2.LINE_AA)
+        frame=composite_mask(frame,hanish,WHITE,.85*e_hanish)
+
+        labels=[
+            {"text":"MOCHA","center":(mx,my),"role":"place","reveal":e_mocha,
+             "accent":RED,"leader":(mx,my),"candidate_distance":64,
+             "candidate_offsets":((1,0),(0,1),(1,-1))},
+            {"text":"HANISH ISLANDS","center":(hx,hy),"role":"place","reveal":e_hanish,
+             "leader":(hx,hy),"candidate_distance":64,
+             "candidate_offsets":((-1,0),(0,-1),(-1,-1))}
+        ]
     else:
         raise ValueError(f"unsupported GPU editorial scene: {scene}")
     if labels:
         frame=composite_rgba(frame,_text_plate(W,H,labels,progress))
+    if scene=="ed_mocha_tactical":
+        frame=composite_rgba(frame,_simple_legend_plate(W,H,progress))
     frame=_draw_vignette(frame,W,H)
     _GPU_OPS["opencl"] += 1
     return frame
