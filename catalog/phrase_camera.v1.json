@@ -1,0 +1,277 @@
+{
+ "catalog_id": "phrase_camera_v1",
+ "canvas": {
+  "fps": 30,
+  "height": 1080,
+  "width": 1920
+ },
+ "font": {
+  "body_asset": "assets/fonts/Play-Regular.ttf",
+  "family": "Play",
+  "title_asset": "assets/fonts/Play-Bold.ttf"
+ },
+ "note": "V3: fix zoom 4x (singolo spazio coordinate PS=1.5 per bg/dust/testo, netto 1x a z=1), ampiezze visibili con margini>=120px, motore float, dither +-1.2 LSB, FOV costante, nessuno shake/bounce/glow.",
+ "quality_rules": {
+  "background": "antracite, tranne focus_push su editorial ivory",
+  "bounce": false,
+  "fov": "stabile",
+  "phrase_px": "85-120 a 1080p, fit con safe margin >= 120px",
+  "rotation_max_deg": 2,
+  "shake": false,
+  "text_glow": false,
+  "zoom_range": "4-12%"
+ },
+ "recipes": [
+  {
+   "camera": {
+    "easing": "smootherstep",
+    "fov_deg": 40,
+    "transform": "dolly"
+   },
+   "duration_s": 4,
+   "file": "phrase_camera_slow_push.mp4",
+   "id": "phrase_camera_slow_push",
+   "move": {
+    "apparent_scale": [
+     1.0,
+     1.12
+    ]
+   },
+   "phrase": "The Hidden Truth."
+  },
+  {
+   "camera": {
+    "easing": "ease_in_out_sine",
+    "fov_deg": 40,
+    "transform": "lateral_track"
+   },
+   "duration_s": 3,
+   "file": "phrase_camera_side_reveal.mp4",
+   "id": "phrase_camera_side_reveal",
+   "move": {
+    "apparent_lateral_px": 115,
+    "end_centered": true
+   },
+   "phrase": "Nothing Was Accidental."
+  },
+  {
+   "camera": {
+    "easing": "ease_in_out_sine",
+    "fov_deg": 40,
+    "transform": "orbit_yaw"
+   },
+   "duration_s": 4,
+   "file": "phrase_camera_micro_orbit.mp4",
+   "id": "phrase_camera_micro_orbit",
+   "move": {
+    "yaw_deg": [
+     -2.0,
+     2.0
+    ]
+   },
+   "phrase": "A New Beginning.",
+   "sub": "CINEMATIC TYPOGRAPHY"
+  },
+  {
+   "camera": {
+    "blur_px": [
+     2.0,
+     0.0
+    ],
+    "easing": "ease_out_cubic",
+    "fov_deg": 40,
+    "transform": "dolly+defocus_compositing"
+   },
+   "duration_s": 3,
+   "file": "phrase_camera_focus_push.mp4",
+   "id": "phrase_camera_focus_push",
+   "move": {
+    "apparent_scale": [
+     0.94,
+     1.0
+    ]
+   },
+   "phrase": "The Final Decision."
+  },
+  {
+   "camera": {
+    "easing": "smootherstep",
+    "fov_deg": 40,
+    "transform": "diagonal_drift"
+   },
+   "duration_s": 5,
+   "file": "phrase_camera_diagonal_drift.mp4",
+   "id": "phrase_camera_diagonal_drift",
+   "move": "diagonale 60+60px + push 1.00->1.06",
+   "phrase": "Everything Changed."
+  },
+  {
+   "id": "phrase_camera_crane_down",
+   "file": "phrase_camera_crane_down.mp4",
+   "phrase": "The Road Ahead.",
+   "duration_s": 4,
+   "camera": {
+    "transform": "crane_down",
+    "fov_deg": 40
+   },
+   "move": "pan verticale 80px + push 1.00->1.05"
+  },
+  {
+   "id": "phrase_camera_track_right",
+   "file": "phrase_camera_track_right.mp4",
+   "phrase": "No Way Back.",
+   "duration_s": 4,
+   "camera": {
+    "transform": "lateral_track",
+    "fov_deg": 40
+   },
+   "move": "traversata -120px -> +120px"
+  },
+  {
+   "id": "phrase_camera_orbit_return",
+   "file": "phrase_camera_orbit_return.mp4",
+   "phrase": "A Second Chance.",
+   "duration_s": 4,
+   "camera": {
+    "transform": "orbit_yaw",
+    "fov_deg": 40
+   },
+   "move": "yaw +2 -> -2 gradi"
+  },
+  {
+   "id": "phrase_camera_push_combo",
+   "file": "phrase_camera_push_combo.mp4",
+   "phrase": "The Turning Point.",
+   "duration_s": 5,
+   "camera": {
+    "transform": "dolly+lateral",
+    "fov_deg": 40
+   },
+   "move": "push 1.00->1.12 + track +-60px"
+  },
+  {
+   "id": "phrase_camera_tilt_rise",
+   "file": "phrase_camera_tilt_rise.mp4",
+   "phrase": "Rising Above It All.",
+   "duration_s": 4,
+   "camera": {
+    "transform": "tilt_rise",
+    "fov_deg": 40
+   },
+   "move": "salita 90px + push 1.00->1.07"
+  },
+  {
+   "id": "phrase_camera_zoom_out",
+   "file": "phrase_camera_zoom_out.mp4",
+   "phrase": "The Full Picture.",
+   "duration_s": 4,
+   "camera": {
+    "transform": "dolly_out",
+    "fov_deg": 40
+   },
+   "move": "reveal 1.15->1.00"
+  },
+  {
+   "id": "phrase_camera_diagonal_up",
+   "file": "phrase_camera_diagonal_up.mp4",
+   "phrase": "Against The Current.",
+   "duration_s": 5,
+   "camera": {
+    "transform": "diagonal_drift",
+    "fov_deg": 40
+   },
+   "move": "diagonale +70/-70px + 1.06"
+  },
+  {
+   "id": "phrase_camera_focus_settle",
+   "file": "phrase_camera_focus_settle.mp4",
+   "phrase": "The Hard Evidence.",
+   "duration_s": 3,
+   "camera": {
+    "transform": "dolly+defocus_compositing",
+    "fov_deg": 40
+   },
+   "move": "1.08->1.00 + blur 2.5->0"
+  },
+  {
+   "id": "phrase_camera_pedestal_push",
+   "file": "phrase_camera_pedestal_push.mp4",
+   "phrase": "Higher Stakes.",
+   "duration_s": 4,
+   "camera": {
+    "transform": "pedestal_push",
+    "fov_deg": 40
+   },
+   "move": "push 1.00->1.12 + pedestal 60px"
+  },
+  {
+   "id": "phrase_camera_lateral_settle",
+   "file": "phrase_camera_lateral_settle.mp4",
+   "phrase": "Back To Center.",
+   "duration_s": 3,
+   "camera": {
+    "transform": "lateral_track",
+    "fov_deg": 40
+   },
+   "move": "+120px -> centrato"
+  },
+  {
+   "id": "phrase_camera_depth_parallax",
+   "file": "phrase_camera_depth_parallax.mp4",
+   "phrase": "Layers Of Truth.",
+   "duration_s": 5,
+   "camera": {
+    "transform": "dolly",
+    "fov_deg": 40
+   },
+   "move": "push 1.00->1.08, dust 2.2x"
+  },
+  {
+   "id": "phrase_camera_arc_drift",
+   "file": "phrase_camera_arc_drift.mp4",
+   "phrase": "The Long Way Home.",
+   "duration_s": 5,
+   "camera": {
+    "transform": "arc_drift",
+    "fov_deg": 40
+   },
+   "move": "arco x +-60px, y seno 25px + 1.05"
+  },
+  {
+   "id": "phrase_camera_breathe",
+   "file": "phrase_camera_breathe.mp4",
+   "phrase": "Still Waters.",
+   "duration_s": 5,
+   "camera": {
+    "transform": "dolly",
+    "fov_deg": 40
+   },
+   "move": "respiro 1.00->1.04"
+  },
+  {
+   "id": "phrase_camera_descend",
+   "file": "phrase_camera_descend.mp4",
+   "phrase": "What Lies Beneath.",
+   "duration_s": 4,
+   "camera": {
+    "transform": "descend",
+    "fov_deg": 40
+   },
+   "move": "discesa 80px + settle 1.08->1.00"
+  },
+  {
+   "id": "phrase_camera_rise_reveal",
+   "file": "phrase_camera_rise_reveal.mp4",
+   "phrase": "A New Dawn.",
+   "duration_s": 4,
+   "camera": {
+    "transform": "tilt_rise",
+    "fov_deg": 40
+   },
+   "move": "salita 90px + push 1.00->1.07"
+  }
+ ],
+ "schema": "chronontemplate.phrase-camera.v1",
+ "source": "chronontemplate::PhraseCameraPack",
+ "version": 3
+}

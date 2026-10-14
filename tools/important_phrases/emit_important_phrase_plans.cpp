@@ -1,7 +1,6 @@
 // ChrononTemplate — important-phrase plan emitter.
 //
-// This tool lowers the C++-owned important-phrase families (Typewriter,
-// Highlight, Apple) to the Chronon3D render-plan contract, one plan per
+// This tool lowers the C++-owned important-phrase families (Apple) to the Chronon3D render-plan contract, one plan per
 // animation. It is deliberately thin: the shared look lives in
 // include/chronontemplate/important_phrases/ImportantPhrasePack.hpp, each
 // family owns its animations, and this program only projects them —
@@ -20,9 +19,7 @@
 #include <nlohmann/json.hpp>
 
 #include "chronontemplate/important_phrases/ImportantPhrasePack.hpp"
-#include "chronontemplate/important_phrases/typewriter/TypewriterPhrasePack.hpp"
 #include "chronontemplate/important_phrases/apple/ApplePhrasePack.hpp"
-#include "chronontemplate/important_phrases/highlight/PhraseHighlightPack.hpp"
 
 #include <cmath>
 #include <filesystem>
@@ -38,7 +35,6 @@ namespace {
     using json = nlohmann::ordered_json;
     using chronontemplate::ClassicPhraseStyle;
     using chronontemplate::PhraseAnimationDefinition;
-    using chronontemplate::PhraseHighlightAnimation;
     using chronontemplate::PhraseKeyframe;
     using chronontemplate::PhraseSelector;
     using chronontemplate::PhraseTextAnimator;
@@ -360,8 +356,8 @@ namespace {
         }
         layers.push_back(phrase);
 
-        // The Typewriter family types with a `_` cursor layer: same face, its
-        // own tracks (the sweep on position_x, the blink on opacity).
+        // Cursor layer for definitions that declare one (`_` caret text with
+        // its own tracks: the sweep on position_x, the blink on opacity).
         if (!definition.cursor.tracks.empty()) {
             json cursorTracks = json::array();
             for (std::size_t i = 0; i < definition.cursor.tracks.size(); ++i) {
@@ -462,8 +458,6 @@ int main(int argc, char** argv) try {
         }
     };
     if (!staticOnly) {
-        emitFamily(chronontemplate::typewriterPhraseAnimations(), "typewriter");
-        emitFamily(chronontemplate::phraseHighlightAnimations(), "phrase_highlight");
         emitFamily(chronontemplate::applePhraseAnimations(), "apple");
     }
     if (mode == "--editorial-static" || mode == "--editorial-word-reveal" ||

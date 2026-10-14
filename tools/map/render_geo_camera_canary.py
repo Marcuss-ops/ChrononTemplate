@@ -41,11 +41,9 @@ from dynamic_tile_pyramid import (  # noqa: E402 - sys.path is set above
     compute_altitude_km,
 )
 
-# The proven projection + Drive plumbing, reused as-is.
+# The projection and canonical content-addressed Drive publisher.
 from render_dynamic_map_3d_orbit_colosseum import (  # noqa: E402
-    compute_perspective_homography,
-    refresh_drive_token,
-    upload_to_drive,
+    compute_perspective_homography, refresh_drive_token, upload_to_drive,
     DRIVE_FOLDER_ID,
 )
 
@@ -112,19 +110,6 @@ CHAIN_BANDS = (
 # ---- fast_geo_camera harness contract (see fast_geo_camera.py) -------------
 ANCHORS = ((LAT, LON),)
 PREPARE_ZMIN, PREPARE_ZMAX = 5, 18
-_PYRAMID = None
-
-
-def prepare_engine():
-    """The engine-side pyramid, prepared once for render_frame_engine."""
-    global _PYRAMID
-    if _PYRAMID is None:
-        _PYRAMID = DynamicTilePyramid(provider="esri_sat")
-        _PYRAMID.prefetch_pyramid(LAT, LON, min_zoom=5, max_zoom=16,
-                                  tile_radius_x=9, tile_radius_y=9)
-        _PYRAMID.prefetch_pyramid(LAT, LON, min_zoom=17, max_zoom=18,
-                                  tile_radius_x=9, tile_radius_y=9)
-    return _PYRAMID
 
 
 # Per-process warp destination: warpPerspective with BORDER_REFLECT_101
@@ -161,11 +146,6 @@ def render_frame_fast(sampler, frame_idx: int) -> np.ndarray:
                      target_title="COLOSSEUM (GEO CAMERA V1)")
     draw_chain_tag(frame, zoom)
     return frame
-
-
-def render_frame_engine(frame_idx: int) -> np.ndarray:
-    """The reference frame, straight from the engine (the sequential path)."""
-    return render_frame(prepare_engine(), frame_idx)[0]
 
 
 def run_acceptance_fast(sampler) -> int:

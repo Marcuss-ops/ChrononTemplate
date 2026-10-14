@@ -18,6 +18,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from threading import Lock
 
+from geo_catalog import GeographicCatalog
+
 
 NOMINATIM_MIN_INTERVAL_SECONDS = 1.0
 _GEOCODE_TIMEOUT_SECONDS = 12
@@ -167,8 +169,101 @@ def extract_places(text: str) -> list[Place]:
     return places
 
 
-def geocode(place: Place, language: str = "it") -> Place:
-    """Resolve with Nominatim, using a persistent cache and its 1 req/s policy."""
+def _catalog_region_center(geometry: dict) -> tuple[float, float] | None:
+    """Return the ADM1 boundary bounding-box center in lon/lat."""
+    coordinates = geometry.get("coordinates", [])
+    if geometry.get("type") == "Polygon":
+        polygons = [coordinates]
+    elif geometry.get("type") == "MultiPolygon":
+        polygons = coordinates
+    else:
+        return None
+    points = [point for polygon in polygons for ring in polygon for point in ring
+              if isinstance(point, list) and len(point) >= 2]
+    if not points:
+        return None
+    longitudes = [float(point[0]) for point in points]
+    latitudes = [float(point[1]) for point in points]
+    return ((min(latitudes) + max(latitudes)) / 2.0,
+            (min(longitudes) + max(longitudes)) / 2.0)
+
+
+def geocode(place: Place, language: str = "it", *, offline_only: bool = False,
+            catalog_path: str | Path | None = None, catalog=None) -> Place:
+    """Resolve from the checked-in gazetteer first, then optionally Nominatim.
+
+    Global/localized exact city names, unique ADM1 region names and country
+    names/capitals are resolved offline. Set ``offline_only`` to prohibit
+    network fallback entirely (also available as ``CHRONON_GEOCODE_OFFLINE``).
+    """
+    owns_catalog = catalog is None
+    if catalog is None:
+        try:
+            catalog = GeographicCatalog(catalog_path) if catalog_path else GeographicCatalog()
+        except FileNotFoundError:
+            catalog = None
+
+    unresolved_ambiguous_query = False
+    if catalog is not None:
+        try:
+            city = catalog.exact_city(place.query)
+            if city:
+                place.display_name = ", ".join(
+                    value for value in (city["name"], city.get("region_name"), city["country_iso2"])
+                    if value)
+                place.lat = float(city["latitude"])
+                place.lon = float(city["longitude"])
+                place.ok = True
+                print(f"  [geocode] {place.query} -> {city['name']} "
+                      f"({place.lat:.5f}, {place.lon:.5f}) [offline catalog]", flush=True)
+                return place
+
+            regions = catalog.find_regions(place.query, include_geometry=True)
+            country_candidates = catalog.countries_by_name(place.query)
+            country = country_candidates[0] if len(country_candidates) == 1 else None
+            # Names shared by an ADM1 region and a country (e.g. Georgia) are
+            # ambiguous without explicit context; do not guess a fly-to target
+            # or send the unresolved query to an online geocoder.
+            region_country_collision = bool(regions and country_candidates)
+            if regions and (len(regions) != 1 or region_country_collision):
+                unresolved_ambiguous_query = True
+            if unresolved_ambiguous_query:
+                place.ok = False
+                print(f"  [geocode] {place.query}: NOT FOUND [offline catalog; ambiguous]", flush=True)
+                return place
+
+            if len(regions) == 1 and regions[0].get("geometry"):
+                center = _catalog_region_center(regions[0]["geometry"])
+                if center:
+                    place.lat, place.lon = center
+                    place.display_name = f"{regions[0]['name']}, {regions[0]['country_iso2']}"
+                    place.ok = True
+                    print(f"  [geocode] {place.query} -> {place.display_name} "
+                          f"({place.lat:.5f}, {place.lon:.5f}) [offline ADM1]", flush=True)
+                    return place
+
+            if country and country.get("capital"):
+                capital = catalog.exact_city(country["capital"], country_iso2=country["iso2"])
+                if capital:
+                    place.lat = float(capital["latitude"])
+                    place.lon = float(capital["longitude"])
+                    place.display_name = f"{country['name']} ({capital['name']})"
+                    place.ok = True
+                    print(f"  [geocode] {place.query} -> {place.display_name} "
+                          f"({place.lat:.5f}, {place.lon:.5f}) [offline country]", flush=True)
+                    return place
+        finally:
+            if owns_catalog:
+                catalog.close()
+
+    offline_only = offline_only or os.environ.get("CHRONON_GEOCODE_OFFLINE", "").casefold() in {
+        "1", "true", "yes", "on"
+    }
+    if offline_only:
+        print(f"  [geocode] {place.query}: NOT FOUND [offline catalog]", flush=True)
+        return place
+
+    """Resolve remote-only places with Nominatim, persistent cache and 1 req/s."""
     global _LAST_GEOCODE_REQUEST
     normalized_query = " ".join(place.query.casefold().split())
     cache_key = json.dumps([normalized_query, language.casefold()], ensure_ascii=False,

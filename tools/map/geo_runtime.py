@@ -5,7 +5,7 @@ The pipeline, end to end:
 
     text ("Roma, poi il Colosseo, infine Venezia")
       -> extract_places        LLM-free, heuristic + gazetteer geography parser
-      -> geocode               Nominatim/OpenStreetMap (free, no key)
+      -> geocode               checked-in offline catalog (Nominatim is opt-in)
       -> render                geo_camera_v1 shots (fast pool, verified sampler)
       -> concat                one continuous tour mp4 (ffmpeg concat demuxer)
 
@@ -35,6 +35,7 @@ import time
 from pathlib import Path
 
 from geo_places import Place, Tour, extract_places, geocode
+from geo_catalog import GeographicCatalog
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]  # the repo root (VeloxEditing), two levels up
@@ -45,8 +46,8 @@ for p in (str(ROOT / "Chronon3d/tools/cartography"), str(HERE)):
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
 
 # ---------------------------------------------------------------------------
-# Place parsing and Nominatim lookup live in geo_places; keep these imported
-# names visible here as a compatibility facade for existing map scripts.
+# Place parsing and catalog/Nominatim lookup live in geo_places; keep these
+# imported names visible here as a compatibility facade for existing map scripts.
 # ---------------------------------------------------------------------------
 def _format_wgs84(lat: float, lon: float) -> str:
     """Format coordinates without assuming the northern/eastern hemispheres."""
@@ -103,8 +104,9 @@ def _draw_country_outline(frame, iso: str, anchor, zoom: float, alpha: float) ->
                       (247, 249, 250), 2, cv2.LINE_AA)
     if not np.any(stroke):
         return
-    halo = cv2.GaussianBlur(stroke, (0, 0), 5.0)
-    cv2.addWeighted(frame, 1.0, halo, 0.32 * alpha, 0, dst=frame)
+    from glow_primitive import composite_halo
+    composite_halo(frame, stroke[:, :, 0], (250, 252, 255), sigma=5.0,
+                   intensity=0.32 * alpha)
     cv2.addWeighted(frame, 1.0, stroke, 0.86 * alpha, 0, dst=frame)
 
 
@@ -145,8 +147,9 @@ def _draw_municipal_outline(frame, municipality: str, anchor, zoom: float,
         cv2.polylines(stroke, [pts.reshape(-1, 1, 2)], True,
                       (247, 249, 250), 2, cv2.LINE_AA)
     if np.any(stroke):
-        halo = cv2.GaussianBlur(stroke, (0, 0), 5.0)
-        cv2.addWeighted(frame, 1.0, halo, 0.20 * alpha, 0, dst=frame)
+        from glow_primitive import composite_halo
+        composite_halo(frame, stroke[:, :, 0], (250, 252, 255), sigma=5.0,
+                       intensity=0.20 * alpha)
         cv2.addWeighted(frame, 1.0, stroke, 0.90 * alpha, 0, dst=frame)
 
 
@@ -196,8 +199,11 @@ class _ShotBuilder:
     def __init__(self, place: Place, preset: str, frames: int):
         if frames < 2:
             raise ValueError("a shot requires at least two frames")
+        if preset not in {"dive", "tilt", "orbit", "metric", "earthrise", "space_to_street"}:
+            raise ValueError(f"unsupported shot preset: {preset}")
         self.place = place
         self.preset = preset
+        self.documentary_layers = {}
         # The fast_geo_camera harness contract (attribute names included).
         self.WIDTH, self.HEIGHT, self.FPS = WIDTH, HEIGHT, FPS
         self.TOTAL_FRAMES = frames
@@ -209,18 +215,6 @@ class _ShotBuilder:
                          "metric": 17.5}.get(preset, 17.5)
         self.ANCHORS = ((place.lat, place.lon),)
         self.PREPARE_ZMIN, self.PREPARE_ZMAX = 5, 18
-        self._engine = None
-
-    # Lazily prepare the independent per-frame reference path for --verify.
-    def engine(self):
-        if self._engine is None:
-            import dynamic_tile_pyramid as dyn
-            self._engine = dyn.DynamicTilePyramid(provider="esri_sat")
-            self._engine.prefetch_pyramid(
-                self.place.lat, self.place.lon, min_zoom=self.PREPARE_ZMIN,
-                max_zoom=self.PREPARE_ZMAX, tile_radius_x=9, tile_radius_y=9)
-        return self._engine
-
     # -- motion law (GeoCameraRig schedules: dive 62% / tilt to 80%) ---------
     def pose(self, f: int):
         smootherstep, ROLL_AT = _smootherstep, _roll_bank
@@ -228,12 +222,21 @@ class _ShotBuilder:
         # Keep any authored terminal hold stationary at the destination while
         # preserving the original camera move timing.
         f = min(f, motion_frames - 1)
-        if getattr(self, "full_duration_zoom", False):
+        if getattr(self, "full_duration_zoom", False) and self.preset not in ("earthrise", "space_to_street"):
             e = smootherstep(f / max(1, motion_frames - 1))
             zoom = self.start_zoom + (self.end_zoom - self.start_zoom) * e
             return zoom, 0.0, 0.0, 0.0
         dive_end = round(motion_frames * 0.62)
         tilt_end = round(motion_frames * 0.80)
+        if self.preset in ("earthrise", "space_to_street"):
+            from geo_documentary import earthrise_zoom, space_to_street_zoom
+            if self.preset == "earthrise":
+                zoom, _route_draw_on = earthrise_zoom(
+                    self.end_zoom, self.start_zoom, f / max(1, motion_frames - 1))
+            else:
+                zoom = space_to_street_zoom(
+                    f / max(1, motion_frames - 1), self.start_zoom, self.end_zoom)
+            return zoom, 0.0, 0.0, 0.0
         if self.preset == "dive" or f <= dive_end:
             e = smootherstep(f / max(1, dive_end))
             return self.start_zoom + (self.end_zoom - self.start_zoom) * e, 0.0, 0.0, 0.0
@@ -342,6 +345,66 @@ class _ShotBuilder:
                     progress, label_animation)
             _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
             return frame
+        if self.preset == "earthrise":
+            from render_geo_camera_small_places import draw_route_glow
+            from geo_documentary import earthrise_zoom
+            route_progress = earthrise_zoom(self.start_zoom, self.end_zoom, progress)[1]
+            route_end = (self.place.lat + 0.08, self.place.lon + 0.12)
+            route_to = (self.place.lat + (route_end[0] - self.place.lat) * route_progress,
+                        self.place.lon + (route_end[1] - self.place.lon) * route_progress)
+            draw_route_glow(frame, (self.place.lat, self.place.lon), route_to,
+                            (self.place.lat, self.place.lon), zoom, route_progress)
+        documentary = self.documentary_layers
+        pose = self.pose(f)
+        camera_project = documentary.get("pose_project")
+        if camera_project is not None:
+            from geo_documentary import pose_label_anchor
+            documentary["project"] = lambda lon, lat: pose_label_anchor(
+                lat, lon, pose, camera_project)
+        if self.preset == "space_to_street":
+            from geo_documentary import draw_space_to_street
+            project = documentary.get("project") or (
+                lambda lon, lat: (round(WIDTH/2 + (lon-self.place.lon)*10000),
+                                  round(HEIGHT/2 - (lat-self.place.lat)*10000)))
+            draw_space_to_street(frame, project, progress,
+                                 documentary.get("route_geojson"))
+        elif documentary.get("route_geojson"):
+            from geo_documentary import draw_geojson_lines
+            project = documentary.get("project") or (
+                lambda lon, lat: (round(WIDTH/2 + (lon-self.place.lon)*10000),
+                                  round(HEIGHT/2 - (lat-self.place.lat)*10000)))
+            draw_geojson_lines(frame, documentary["route_geojson"], project, progress,
+                               color_bgr=tuple(documentary.get("route_color_bgr", (80,220,255))),
+                               width=int(documentary.get("route_width", 3)))
+        if documentary.get("camera_labels"):
+            from geo_documentary import draw_camera_aligned_label
+            for label in documentary["camera_labels"]:
+                draw_camera_aligned_label(
+                    frame, (float(label["latitude"]), float(label["longitude"])),
+                    str(label["text"]), pose, documentary["pose_project"], progress,
+                    color=tuple(label.get("color_bgr", (255,255,255))))
+        if documentary.get("regions"):
+            from geo_documentary import draw_geojson_regions
+            project = documentary.get("project") or (
+                lambda lon, lat: (round(WIDTH/2 + (lon-self.place.lon)*10000),
+                                  round(HEIGHT/2 - (lat-self.place.lat)*10000)))
+            draw_geojson_regions(frame, documentary["regions"], project, progress,
+                                 values=documentary.get("values"),
+                                 value_range=documentary.get("value_range"),
+                                 fill_alpha=float(documentary.get("fill_alpha", .32)))
+        if documentary.get("hotspots"):
+            from geo_documentary import draw_radar_pulse
+            project = documentary.get("project") or (
+                lambda lon, lat: (round(WIDTH/2 + (lon-self.place.lon)*10000),
+                                  round(HEIGHT/2 - (lat-self.place.lat)*10000)))
+            for hot in documentary["hotspots"]:
+                point = project(float(hot["longitude"]), float(hot["latitude"]))
+                draw_radar_pulse(frame, (round(point[0]), round(point[1])), progress,
+                                 color_bgr=tuple(hot.get("color_bgr", (40,80,255))))
+        if documentary.get("hillshade") is not None:
+            from geo_documentary import apply_hillshade
+            frame = apply_hillshade(frame, documentary["hillshade"],
+                                    float(documentary.get("hillshade_alpha", .25)))
         if self.preset == "metric":
             # Never fabricate a statistic: the runtime has no trusted metric
             # source yet, so make the missing data explicit in the reveal.
@@ -363,17 +426,14 @@ class _ShotBuilder:
         _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
         return frame
 
-    def render_frame_engine(self, f: int):
-        """Reference renderer: recompose each frame from the tile engine."""
-        return self.render_frame_fast(self.engine(), f)
-
 
 class TourBuilder:
     """One continuous shot: dive to each stop in sequence, glow-route leg
     between stops, spring pin on arrival. The 'subsequent animation'."""
 
     def __init__(self, stops: list[Place], seconds_per_stop: float = 5.0,
-                 travel_seconds: float = 3.0, end_zoom: float = 16.5):
+                 travel_seconds: float = 3.0, end_zoom: float = 16.5,
+                 beat_events: list[dict] | None = None):
         if seconds_per_stop <= 0.0 or travel_seconds <= 0.0:
             raise ValueError("tour stop and travel durations must be positive")
         self.stops = [s for s in stops if s.ok]
@@ -386,7 +446,7 @@ class TourBuilder:
         leg = max(1, int(travel_seconds * FPS))
         self.TOTAL_FRAMES = max(2, int(seconds_per_stop * FPS) * len(self.stops)
                                 + leg * (len(self.stops) - 1))
-        self.FRAMES_TOTAL = self.TOTAL_FRAMES  # legacy alias
+        self.FRAMES_TOTAL = self.TOTAL_FRAMES
         self.ZOOM_INDEX = 2                    # pose = (lat, lon, zoom)
         # Integer frame boundaries quantize short travel legs; allow a small
         # discrete overshoot over the nominal 2.0 continuity bound.
@@ -418,10 +478,36 @@ class TourBuilder:
                         for stop in self.stops)
             for zoom in range(5, 19)
         }
+        self._route_overlay_buffer = None
+        self.beat_events = [dict(event) for event in (beat_events or [])]
+        schedule_end = self._schedule_end_frame()
+        for event in self.beat_events:
+            frame = int(event["frame"])
+            if frame < 0 or frame >= schedule_end:
+                raise ValueError(f"beat event frame {frame} exceeds tour schedule end {schedule_end}")
+
+    def _schedule_end_frame(self) -> int:
+        if getattr(self, "country_intro", False):
+            return int(self.TOTAL_FRAMES)
+        reductions = getattr(self, "_stop_frame_reductions", ())
+        total = 0
+        for i in range(len(self.stops)):
+            stop_frames = (max(2, int(getattr(self, "initial_stop_frames", int(self.sps * self.FPS))))
+                           if i == 0 else int(self.sps * self.FPS))
+            if i < len(reductions):
+                stop_frames = max(2, stop_frames - int(reductions[i]))
+            total += stop_frames
+            if i < len(self.stops)-1:
+                travel_seconds = (getattr(self, "initial_travel_seconds", self.travel)
+                                  if i == 0 and getattr(self, "country_intro", False)
+                                  else self.travel)
+                total += max(1, int(round(travel_seconds * self.FPS)))
+        return total
 
     # timeline: [dive i][travel i->i+1][dive i+1]...
     def _schedule(self):
         frames_per = int(self.sps * self.FPS)
+
         initial_frames = max(2, int(getattr(self, "initial_stop_frames", frames_per)))
         marks = []
         f = 0
@@ -440,7 +526,14 @@ class TourBuilder:
                 leg = max(1, int(round(travel_seconds * self.FPS)))
                 marks.append((f, f + leg, i, i + 1))
                 f += leg
+        # Beat events annotate authored route/pin actions; keep them out of
+        # the contiguous camera-phase list so pose and velocity gates remain
+        # an exact partition of the timeline.
         return marks
+
+    def _beat_events_at(self, frame: int) -> list[dict]:
+        return [event for event in self.beat_events
+                if int(event["frame"]) == frame]
 
     def _zoom_gate_phases(self):
         """Split a route leg's pullback and dive into separate zoom laws.
@@ -450,7 +543,7 @@ class TourBuilder:
         """
         phases = []
         for mark in self._schedule():
-            if len(mark) == 3:
+            if len(mark) == 3 and isinstance(mark[2], int):
                 active_end = (mark[0] + round((mark[1] - mark[0]) * self.stop_dive_fraction)
                               if self.stop_dive_fraction < 1.0 else mark[1])
                 stop_reveal_zooms = getattr(self, "stop_reveal_zooms", None)
@@ -465,7 +558,7 @@ class TourBuilder:
                     phases.append((mark[0], min(mark[1], max(mark[0] + 1, active_end))))
                 continue
             start, end = mark[0], mark[1]
-            if (len(mark) == 4 and mark[2] == 0
+            if (len(mark) == 4 and isinstance(mark[2], int) and mark[2] == 0
                     and getattr(self, "country_intro", False)):
                 phases.append((start, end))
                 continue
@@ -479,7 +572,7 @@ class TourBuilder:
         smootherstep = _smootherstep
         for m in self._schedule():
             if m[0] <= f < m[1]:
-                if len(m) == 3:  # dive/hold on stop i
+                if len(m) == 3 and isinstance(m[2], int):  # dive/hold on stop i
                     i = m[2]
                     s = self.stops[i]
                     target = self.stop_end_zooms[i]
@@ -596,9 +689,17 @@ class TourBuilder:
         progress = f / (self.FRAMES_TOTAL - 1)
         gpu_map = bool(getattr(self, "minimal_map", False) and
                        getattr(sampler, "gpu_map_enabled", False))
-        frame = (sampler.sample_opencl(lat, lon, zoom, WIDTH, HEIGHT)
-                 if gpu_map else sampler.sample(lat, lon, zoom, WIDTH, HEIGHT))
-
+        if gpu_map:
+            frame = sampler.sample_opencl(lat, lon, zoom, WIDTH, HEIGHT)
+        else:
+            frame = sampler.sample(lat, lon, zoom, WIDTH, HEIGHT)
+        epoch_sampler = getattr(self, "epoch_before_sampler", None)
+        if epoch_sampler is not None:
+            from geo_documentary import diagonal_wipe
+            if not gpu_map:
+                raise RuntimeError("dual-epoch comparison requires the OpenCL map sampler")
+            before = epoch_sampler.sample_opencl(lat, lon, zoom, WIDTH, HEIGHT)
+            frame = diagonal_wipe(before, frame, progress, frame_shape=(HEIGHT, WIDTH))
         if getattr(self, "minimal_map", False):
             if getattr(self, "require_gpu_editorial", False) and not gpu_map:
                 raise RuntimeError("editorial map requires the OpenCL GPU map sampler")
@@ -606,7 +707,8 @@ class TourBuilder:
             active_stop = None
             label_progress = progress
             for mark in self._schedule():
-                if len(mark) == 3 and mark[0] <= f < mark[1]:
+                if (len(mark) == 3 and isinstance(mark[2], int)
+                        and mark[0] <= f < mark[1]):
                     if mark[2] in getattr(self, "hidden_stop_indices", ()):
                         break
                     active_stop = self.stops[mark[2]]
@@ -705,8 +807,9 @@ class TourBuilder:
                 _draw_municipal_outline(frame, active_stop.query,
                                         (lat, lon), zoom, outline_alpha)
             _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
-            if was_gpu_frame:
-                frame = cv2.UMat(frame)
+            # The host copy is already needed for Pillow labels and CPU-only
+            # border layers. Return it directly: re-uploading only for the
+            # encoder to download again added a redundant GPU round trip.
             return frame
 
         # the route so far, glowing under the camera
@@ -727,10 +830,14 @@ class TourBuilder:
             ]
             stop_points = tuple(_latlon_to_global_px(stop.lat, stop.lon, zf)
                                 for stop in self.stops)
-        overlay = np.zeros_like(frame)
+        overlay = getattr(self, "_route_overlay_buffer", None)
+        if overlay is None or overlay.shape != frame.shape or overlay.dtype != frame.dtype:
+            overlay = np.empty_like(frame)
+            self._route_overlay_buffer = overlay
+        overlay.fill(0)
         done_until = f
         for (m0, m1, *idx) in self._schedule():
-            if len(idx) == 2 and m1 <= f:  # finished travel leg: full glow
+            if len(idx) == 2 and isinstance(idx[0], int) and m1 <= f:  # finished travel leg: full glow
                 for px, py in route_points[idx[0]]:
                     sx, sy = int(WIDTH / 2 + (px - ax) * scale), int(HEIGHT / 2 + (py - ay) * scale)
                     if 0 <= sx < WIDTH and 0 <= sy < HEIGHT:
@@ -739,7 +846,7 @@ class TourBuilder:
 
         # arrival pin on the stop the camera is diving into
         for (m0, m1, *idx) in self._schedule():
-            if len(idx) == 1 and m0 <= f < m1 + int(0.4 * self.FPS):
+            if len(idx) == 1 and isinstance(idx[0], int) and m0 <= f < m1 + int(0.4 * self.FPS):
                 stop_px, stop_py = stop_points[idx[0]]
                 sx = int(WIDTH / 2 + (stop_px - ax) * scale)
                 sy = int(HEIGHT / 2 + (stop_py - ay) * scale)
@@ -747,6 +854,51 @@ class TourBuilder:
                     draw_spring_pin(frame, (sx, sy), (f - m0 + int(0.4 * self.FPS))
                                     / (m1 - m0 + int(0.4 * self.FPS)), fire=0.80, span=0.12)
 
+        for event in getattr(self, "beat_events", []):
+            if int(event["frame"]) != f:
+                continue
+            action = event.get("action", "pin")
+            if action == "route":
+                draw_route_glow(frame, (lat, lon),
+                                (lat + 0.02, lon + 0.02), (lat, lon), zoom, 1.0)
+            elif action == "pin":
+                draw_spring_pin(frame, (WIDTH // 2, HEIGHT // 2), 1.0,
+                                fire=0.9, span=0.12)
+            else:
+                raise ValueError(f"unsupported beat event action: {action!r}")
+
+        documentary = getattr(self, "documentary_layers", {})
+        if documentary.get("route_geojson"):
+            from geo_documentary import draw_geojson_lines
+            project = documentary.get("project") or (
+                lambda lon, lat: (round(WIDTH/2 + (lon-self.stops[0].lon)*10000),
+                                  round(HEIGHT/2 - (lat-self.stops[0].lat)*10000)))
+            draw_geojson_lines(frame, documentary["route_geojson"], project,
+                               progress, color_bgr=tuple(documentary.get("route_color_bgr", (80,220,255))),
+                               width=int(documentary.get("route_width", 3)))
+        if documentary.get("regions"):
+            from geo_documentary import draw_geojson_regions
+            project = documentary.get("project") or (
+                lambda lon, lat: (round(WIDTH/2 + (lon-self.stops[0].lon)*10000),
+                                  round(HEIGHT/2 - (lat-self.stops[0].lat)*10000)))
+            draw_geojson_regions(
+                frame, documentary["regions"], project, progress,
+                values=documentary.get("values"),
+                value_range=documentary.get("value_range"),
+                fill_alpha=float(documentary.get("fill_alpha", 0.32)))
+        if documentary.get("hotspots"):
+            from geo_documentary import draw_radar_pulse
+            for hot in documentary["hotspots"]:
+                project = documentary.get("project") or (
+                    lambda lon, lat: (round(WIDTH/2 + (lon-self.stops[0].lon)*10000),
+                                      round(HEIGHT/2 - (lat-self.stops[0].lat)*10000)))
+                hx, hy = project(float(hot["longitude"]), float(hot["latitude"]))
+                draw_radar_pulse(frame, (round(hx), round(hy)), progress,
+                                 color_bgr=tuple(hot.get("color_bgr", (40,80,255))))
+        if documentary.get("hillshade") is not None:
+            from geo_documentary import apply_hillshade
+            frame = apply_hillshade(frame, documentary["hillshade"],
+                                    float(documentary.get("hillshade_alpha", 0.25)))
         draw_hud_overlay(frame, lat, lon, zoom, progress,
                          target_title="GEO RUNTIME TOUR")
         _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
@@ -773,6 +925,7 @@ def _pose_zoom(builder, frame: int) -> float:  # noqa: ANN001 - duck-typed build
     """Read zoom from the explicitly documented pose layout of each builder."""
     pose = builder.pose(frame)
     zoom_index = getattr(builder, "ZOOM_INDEX", None)
+
     if zoom_index is None:
         raise TypeError(f"{type(builder).__name__} must declare ZOOM_INDEX")
     return float(pose[zoom_index])
@@ -914,6 +1067,7 @@ def gate_builder(builder, sampler, label: str) -> None:
     frame_b = builder.render_frame_fast(sampler, probe)
     if hasattr(frame_a, "get"):
         frame_a = frame_a.get()
+
     if hasattr(frame_b, "get"):
         frame_b = frame_b.get()
     a, b = frame_a.tobytes(), frame_b.tobytes()
@@ -930,7 +1084,10 @@ class GeoRuntime:
     def __init__(self, out_root: Path | None = None, workers: int = 4,
                  block: int = 10, preset_x264: str = "veryfast",
                  crf: int = 18, keep_individual: bool = False,
-                 upload: bool = False):
+                          upload: bool = False, strict_native: bool = False,
+                 wayback_release: int | None = None,
+                 geographic_catalog_path: Path | None = None,
+                 offline_geocoding: bool = True):
         # Canonical output home, next to every other camera_motion_v2 render.
         if workers < 1 or block < 1:
             raise ValueError("workers and block must be positive integers")
@@ -942,6 +1099,38 @@ class GeoRuntime:
         self.crf = crf
         self.keep_individual = keep_individual
         self.upload = upload
+        self.strict_native = bool(strict_native)
+        self.wayback_release = wayback_release
+        self.geographic_catalog_path = geographic_catalog_path
+        self.offline_geocoding = bool(offline_geocoding)
+        self._geographic_catalog = None
+        self._geographic_catalog_unavailable = False
+        if geographic_catalog_path is not None:
+            self._geographic_catalog = GeographicCatalog(geographic_catalog_path)
+        if wayback_release is not None and int(wayback_release) <= 0:
+            raise ValueError("wayback_release must be positive")
+
+    def _resolve_place(self, place: Place) -> Place:
+        catalog = self._geographic_catalog
+        if catalog is None and not self._geographic_catalog_unavailable:
+            try:
+                catalog = GeographicCatalog()
+                self._geographic_catalog = catalog
+            except FileNotFoundError:
+                self._geographic_catalog_unavailable = True
+        return geocode(place, offline_only=self.offline_geocoding,
+                       catalog=catalog)
+
+    def close(self) -> None:
+        if self._geographic_catalog is not None:
+            self._geographic_catalog.close()
+            self._geographic_catalog = None
+
+    def __enter__(self) -> "GeoRuntime":
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.close()
 
     # -- text -> resolved places ---------------------------------------------
     def resolve(self, text: str) -> Tour:
@@ -952,7 +1141,7 @@ class GeoRuntime:
         print(f"[resolve] {len(places)} candidate(s): "
               f"{[p.query for p in places]}", flush=True)
         for pl in places:
-            tour.stops.append(geocode(pl))
+            tour.stops.append(self._resolve_place(pl))
         return tour
 
     # -- one place -> one shot mp4 --------------------------------------------
@@ -960,20 +1149,113 @@ class GeoRuntime:
                      out: Path | None = None, verify: bool = False) -> dict:
         if not place.ok:
             raise ValueError(f"place is not geocoded: {place.query}")
+        if self.wayback_release is not None and place.preset != "earthrise":
+            raise ValueError("wayback_release requires the earthrise preset")
+        if place.preset not in {"dive", "tilt", "orbit", "metric", "earthrise", "space_to_street"}:
+            raise ValueError(f"unsupported shot preset: {place.preset}")
         import fast_geo_camera as harness
         builder = _ShotBuilder(place, place.preset, frames)
+        builder.documentary_layers = dict(getattr(place, "_documentary_layers", {}))
+        builder.beat_events = [dict(event) for event in getattr(place, "_beat_events", [])]
+        builder.epoch_before_sampler = None
+        for event in builder.beat_events:
+            event_frame = int(event["frame"])
+            if event_frame < 0 or event_frame >= frames:
+                raise ValueError(f"beat event frame {event_frame} exceeds shot length {frames}")
+        if "hillshade_path" in builder.documentary_layers:
+            import cv2
+            hillshade_path = Path(builder.documentary_layers.pop("hillshade_path"))
+            hillshade = cv2.imread(str(hillshade_path), cv2.IMREAD_GRAYSCALE)
+            if hillshade is None:
+                raise ValueError(f"could not read hillshade image: {hillshade_path}")
+            builder.documentary_layers["hillshade"] = cv2.resize(
+                hillshade, (WIDTH, HEIGHT), interpolation=cv2.INTER_LINEAR)
+        documentary_provider = builder.documentary_layers.pop("provider", None)
+        documentary_release = builder.documentary_layers.pop("wayback_release", None)
+        builder.tile_provider = (str(documentary_provider) if documentary_provider else
+                                 ("esri_wayback" if self.wayback_release is not None else "esri_sat"))
+        builder.wayback_release = (self.wayback_release if self.wayback_release is not None
+                                   else documentary_release)
+        if builder.tile_provider == "esri_wayback" and builder.wayback_release is None:
+            raise ValueError("esri_wayback documentary provider requires wayback_release")
+        if builder.tile_provider == "esri_wayback" and place.preset != "earthrise":
+            raise ValueError("Wayback tile provider requires the earthrise preset")
+        builder.FPS = FPS
+        builder.TOTAL_FRAMES = builder.FRAMES_TOTAL = int(frames)
+        if place.preset in ("earthrise", "space_to_street"):
+            builder.start_zoom, builder.end_zoom = (17.5, 5.5) if place.preset == "earthrise" else (5.0, 18.0)
+        epoch_provider = builder.documentary_layers.pop("epoch_before_provider", None)
+        epoch_release = builder.documentary_layers.pop("epoch_before_release", None)
+        if epoch_provider is not None:
+            from geo_documentary import build_epoch_sampler
+            builder.epoch_before_sampler = build_epoch_sampler(
+                str(epoch_provider), epoch_release, WIDTH, HEIGHT, builder.ANCHORS,
+                builder.PREPARE_ZMIN, builder.PREPARE_ZMAX)
+        self._check_native_runtime()
         sampler = harness.build_sampler(builder)
+        if self.strict_native or builder.epoch_before_sampler is not None:
+            builder.minimal_map = True
+            builder.require_gpu_editorial = True
+            sampler.prepare_opencl()
+            sampler.gpu_map_enabled = True
+            if builder.epoch_before_sampler is not None:
+                builder.epoch_before_sampler.prepare_opencl()
+                builder.epoch_before_sampler.gpu_map_enabled = True
+        self._assert_no_fallback(sampler)
         gate_builder(builder, sampler, label=place.query)
         if verify:
-            if not harness.verify_against_engine(builder, sampler):
+            if not harness.verify_against_sampler(builder, sampler):
                 raise RuntimeError(f"verify failed for {place.query}")
         safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", place.query).strip("._") or "place"
         out = Path(out or (self.out_root / f"{safe_name}_{place.preset}.mp4"))
         out.parent.mkdir(parents=True, exist_ok=True)
         stats = harness.encode_with_pool(builder, sampler, out,
                                          self.workers, self.block,
-                                         self.preset_x264, self.crf)
+                                         self.preset_x264, self.crf,
+                                         gpu_required=self.strict_native)
+        if getattr(sampler.pyr, "fallback_tile_count", 0):
+            self._assert_no_fallback(sampler)
+        if builder.epoch_before_sampler is not None:
+            self._assert_no_fallback(builder.epoch_before_sampler)
         return stats
+
+    def _assert_no_fallback(self, sampler) -> None:
+        pyramid = getattr(sampler, "pyr", sampler)
+        missing_tiles = int(getattr(pyramid, "fallback_tile_count", 0))
+        if missing_tiles:
+            raise RuntimeError(
+                f"GeoRuntime fail-closed sampling gate failed: "
+                f"fallback_tiles={missing_tiles}")
+
+    def _check_native_runtime(self) -> None:
+        if not self.strict_native:
+            return
+        import cv2
+        import shutil
+        if not cv2.ocl.haveOpenCL():
+            raise RuntimeError("--strict-native requires OpenCL support")
+        import numpy as np
+        cv2.ocl.setUseOpenCL(True)
+        if not cv2.ocl.useOpenCL():
+            raise RuntimeError("--strict-native could not activate OpenCL")
+        probe = cv2.add(cv2.UMat(np.zeros((1,1), np.uint8)),
+                        cv2.UMat(np.ones((1,1), np.uint8))).get()
+        if int(probe[0, 0]) != 1:
+            raise RuntimeError("--strict-native OpenCL probe did not produce the expected result")
+        # OpenCV wheels expose the default device through two API spellings.
+        device = (cv2.ocl.Device.getDefault() if hasattr(cv2.ocl, "Device")
+                  else cv2.ocl.Device_getDefault())
+        if "NVIDIA" not in device.vendorName().upper():
+            raise RuntimeError(f"--strict-native requires NVIDIA OpenCL, got {device.name()}")
+        ffmpeg = shutil.which("ffmpeg")
+        if not ffmpeg:
+            raise RuntimeError("--strict-native requires ffmpeg with h264_nvenc")
+        probe = __import__("subprocess").run(
+            [ffmpeg, "-hide_banner", "-encoders"], capture_output=True,
+            text=True, check=False)
+
+        if probe.returncode or "h264_nvenc" not in probe.stdout:
+            raise RuntimeError("--strict-native requires the h264_nvenc encoder")
 
     # -- tour -> concatenated mp4 ----------------------------------------------
     def render_tour(self, text: str, out: Path | None = None,
@@ -991,16 +1273,23 @@ class GeoRuntime:
         if len(stops) == 1:
             builder = _ShotBuilder(stops[0], stops[0].preset, 120)
         else:
-            builder = TourBuilder(stops)
+            beat_events = list(getattr(stops[0], "_beat_events", []))
+            builder = TourBuilder(stops, beat_events=beat_events)
+        self._check_native_runtime()
         sampler = harness.build_sampler(builder)
+        if self.strict_native:
+            builder.minimal_map = True
+            builder.require_gpu_editorial = True
+            sampler.prepare_opencl()
+            sampler.gpu_map_enabled = True
+        self._assert_no_fallback(sampler)
         # The gate always runs: velocity continuity per segment + determinism.
         gate_builder(builder, sampler, label=" ".join(s.short_name for s in stops))
         if verify and isinstance(builder, _ShotBuilder):
-            # A single-place shot has an independent per-frame engine reference.
-            # A multi-stop tour has no separate engine implementation; its strict
-            # phase/junction and deterministic-frame gates are authoritative.
-            if not harness.verify_against_engine(builder, sampler):
-                raise RuntimeError("single-place engine comparison failed")
+            # The independent slow engine path has been removed. The fast
+            # sampler's coverage and deterministic-frame gate is authoritative.
+            if not harness.verify_against_sampler(builder, sampler):
+                raise RuntimeError("prepared-plate verification failed")
         elif verify and len(stops) > 1:
             print("[verify] multi-stop tour has no independent frame renderer; "
                   "phase and determinism gates passed instead", flush=True)
@@ -1008,9 +1297,12 @@ class GeoRuntime:
         stamp = time.strftime("%Y%m%d_%H%M%S")
         out = Path(out or (self.out_root / f"tour_{stamp}.mp4"))
         out.parent.mkdir(parents=True, exist_ok=True)
-        tour.stats.append(harness.encode_with_pool(
+        tour_stats = harness.encode_with_pool(
             builder, sampler, out, self.workers, self.block,
-            self.preset_x264, self.crf))
+            self.preset_x264, self.crf, gpu_required=self.strict_native)
+        if getattr(sampler.pyr, "fallback_tile_count", 0):
+            self._assert_no_fallback(sampler)
+        tour.stats.append(tour_stats)
         tour.mp4 = out
         if self.upload:
             from render_dynamic_map_3d_orbit_colosseum import (
@@ -1173,9 +1465,11 @@ def self_test() -> int:
         check(True, f"tour zoom velocity strictly continuous in all {n_seg} phases")
     except RuntimeError as exc:
         check(False, f"tour zoom velocity: {exc}")
-    for preset in ("dive", "tilt", "orbit", "metric"):
+    for preset in ("dive", "tilt", "orbit", "metric", "earthrise", "space_to_street"):
         try:
             single = _ShotBuilder(stops[0], preset, 120)
+            if preset in ("earthrise", "space_to_street"):
+                single.start_zoom, single.end_zoom = (17.5, 5.5) if preset == "earthrise" else (5.0, 18.0)
             n_seg = check_velocity_strict(single)
             zoom_trace = [_pose_zoom(single, f) for f in range(single.TOTAL_FRAMES)]
             if preset in ("tilt", "orbit"):
@@ -1203,7 +1497,29 @@ def main() -> None:
     ap.add_argument("--out", default=None, help="output MP4 path")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--block", type=int, default=10)
-    ap.add_argument("--preset", default="veryfast")
+    ap.add_argument("--preset", default="veryfast",
+                    help="encoder preset; documentary shot preset is selected with --shot-preset")
+    ap.add_argument("--shot-preset", choices=("dive", "earthrise", "tilt", "orbit", "metric", "space_to_street"),
+                    default=None, help="repeatable camera motion preset for --place")
+    ap.add_argument("--place", help="single explicit place query (offline catalog by default)")
+    ap.add_argument("--offline-geocoding", dest="offline_geocoding", action="store_true",
+                    default=True,
+                    help="resolve only from the offline geography catalog (default); never call Nominatim")
+    ap.add_argument("--online-geocoding", dest="offline_geocoding", action="store_false",
+                    help="allow Nominatim fallback for places missing from the offline catalog")
+    ap.add_argument("--geographic-catalog", type=Path, default=None,
+                    help="override the checked-in geographic catalog path")
+    ap.add_argument("--strict-native", action="store_true",
+                    help="fail unless NVIDIA OpenCL and NVENC are available")
+    ap.add_argument("--wayback-release", type=int, default=None,
+                    help="explicit Esri Wayback release number; no release is guessed")
+    ap.add_argument("--documentary", type=Path, default=None,
+                    help="JSON layers: regions/routes/values/hotspots/hillshade_path; provider and epoch_before_provider are optional")
+
+    ap.add_argument("--beat-times", type=Path, default=None,
+                    help="JSON array of beat times in seconds, used to snap route events")
+    ap.add_argument("--beats-offset", type=float, default=0.0,
+                    help="offset in seconds between beat JSON and shot start")
     ap.add_argument("--crf", type=int, default=18)
     ap.add_argument("--verify", action="store_true",
                     help="compare single-place fast frames with independent tile-engine frames")
@@ -1213,10 +1529,46 @@ def main() -> None:
                     help="offline: extraction table, tour schedule, pose continuity")
     args = ap.parse_args()
 
+    if args.wayback_release is not None and args.wayback_release <= 0:
+        ap.error("--wayback-release must be a positive release number")
+    if args.wayback_release is not None and not args.place:
+        ap.error("--wayback-release is supported with --place")
+    if args.wayback_release is not None and args.shot_preset not in (None, "earthrise"):
+        ap.error("--wayback-release requires --shot-preset earthrise")
     if args.self_test:
         sys.exit(self_test())
     rt = GeoRuntime(workers=args.workers, block=args.block,
-                    preset_x264=args.preset, crf=args.crf, upload=args.upload)
+                    preset_x264=args.preset, crf=args.crf, upload=args.upload,
+                    strict_native=args.strict_native,
+                    wayback_release=args.wayback_release,
+                    geographic_catalog_path=args.geographic_catalog,
+                    offline_geocoding=args.offline_geocoding)
+    if args.place:
+        if args.text:
+            ap.error("use either --place or free-text tour arguments")
+        shot = args.shot_preset or "dive"
+        place = rt._resolve_place(Place(args.place, preset=shot))
+        if not place.ok:
+            raise RuntimeError(f"could not geocode requested place: {args.place}")
+        if args.documentary:
+            config = json.loads(args.documentary.read_text(encoding="utf-8"))
+            if not isinstance(config, dict):
+                ap.error("--documentary JSON root must be an object")
+            place._documentary_layers = config
+        if args.beat_times:
+            beat_times = json.loads(args.beat_times.read_text(encoding="utf-8"))
+            if not isinstance(beat_times, list):
+                ap.error("--beat-times JSON root must be an array of seconds")
+            if any(float(t) < args.beats_offset for t in beat_times):
+                ap.error("beat time precedes --beats-offset; align the beat track first")
+            place._beat_events = __import__("geo_documentary").beat_schedule(
+                [{"id": "route", "action": "route", "time_s": args.beats_offset}],
+                beat_times, FPS)
+        report = rt.render_place(place, frames=round(8 * FPS),
+                                 out=Path(args.out) if args.out else None,
+                                 verify=args.verify)
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+        return
     if args.repl or not args.text:
         rt.repl()
         return

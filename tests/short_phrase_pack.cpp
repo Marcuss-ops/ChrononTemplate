@@ -31,7 +31,7 @@ namespace {
     void theShortPhraseArchetypesAreWellFormed() {
         section("short-phrase archetypes");
         const std::vector<ShortPhraseAnimation> animations = shortPhraseAnimations();
-        check(animations.size() == 49, "the pack preserves twelve original recipes, adds fourteen editorial recipes, and registers twenty-three product recipes");
+        check(animations.size() == 27, "the pack exposes the 27 short-phrase recipes (typewriter removed, burst kept)");
 
         std::set<std::string> ids;
         bool anyLayer = false;
@@ -51,8 +51,7 @@ namespace {
             check(def.id == id, "the definition publishes the same id as its enumerator");
             check(!def.title.empty(), "each archetype carries a human title");
             check(!def.phrase.empty(), "each archetype carries a showcase phrase");
-            if (id.rfind("short_phrase_product_", 0) == 0 &&
-                id != "short_phrase_product_line_by_line_slide") {
+            if (id.rfind("short_phrase_product_", 0) == 0) {
                 check(shortPhraseWordCount(def.phrase) <= 5,
                       "product short-phrase showcase text stays inside the 1..5-word range");
             }
@@ -79,11 +78,6 @@ namespace {
                             animator.properties[j],
                             def.id + ".textAnimators[" + std::to_string(i) + "].properties[" +
                                     std::to_string(j) + "]");
-                    if (animator.properties[j].property == "character_offset") {
-                        const auto& keys = animator.properties[j].keyframes;
-                        check(keys.size() >= 2 && keys.front().value == 8.f && keys.back().value == 0.f,
-                              "decrypted-text offset moves from an encoded state to the source text");
-                    }
                 }
                 check(animator.selector.unit == "glyph" || animator.selector.unit == "word" ||
                               animator.selector.unit == "line",
@@ -137,137 +131,38 @@ namespace {
         check(anyEmphasis, "at least one archetype carries semantic emphasis");
         check(anyDecor, "at least one archetype carries the decor star");
 
-        const std::vector<std::string> reactIds{
-                "short_phrase_product_masked_heading",
-                "short_phrase_product_split_flap_text",
-                "short_phrase_product_warp_text",
-                "short_phrase_product_fold_text",
+        const std::set<std::string> retiredIds{
+                "short_phrase_editorial_claude_diff_patch",
+                "short_phrase_editorial_claude_prompt_response",
+                "short_phrase_editorial_lift_and_rule",
+                "short_phrase_editorial_rule_handoff",
+                "short_phrase_editorial_underline_draw",
+                "short_phrase_phrase_build_focus",
                 "short_phrase_product_decrypted_text",
-                "short_phrase_product_scroll_reveal",
-                "short_phrase_product_scrambled_text"};
-        for (const std::string& reactId : reactIds) {
-            const auto found = definitions.find(reactId);
-            check(found != definitions.end(), (reactId + " is registered").c_str());
-            if (found == definitions.end()) continue;
-            const auto& note = found->second.adaptation_note;
-            check(note.find("not represented") != std::string::npos ||
-                          note.find("native eased entrance") != std::string::npos,
-                  (reactId + " documents effects/interaction that cannot be carried over").c_str());
-            check(found->second.enter == 90,
-                  (reactId + " reaches its native frame-based reveal at frame 90").c_str());
-            if (reactId == "short_phrase_product_decrypted_text") {
-                check(found->second.textOverlays.size() == 10,
-                      "decrypted text includes nine encoded snapshots and one resolved overlay");
-                if (!found->second.textOverlays.empty())
-                    check(found->second.textOverlays.back().text == "DECODE THE SIGNAL",
-                          "the decrypted text ends with its exact target string");
-            }
+                "short_phrase_product_fold_text",
+                "short_phrase_product_glare_hover",
+                "short_phrase_product_line_by_line_slide",
+                "short_phrase_product_scramble_reveal",
+                "short_phrase_product_shape_blur",
+                "short_phrase_product_warp_text",
+                "short_phrase_product_weight_wave",
+                "short_phrase_scale_settle_word",
+                "short_phrase_semantic_chain_curve",
+                "short_phrase_semantic_two_line",
+                "short_phrase_simple_progressive_phrase",
+                "short_phrase_single_word_swap",
+                "short_phrase_word_cascade_sentence",
+                "short_phrase_word_mask_sequence",
+                "short_phrase_character_write_on",
+                "short_phrase_editorial_paper_title_card"};
+        for (const auto& retiredId : retiredIds) {
+            check(definitions.count(retiredId) == 0,
+                  (retiredId + " is absent from the short-phrase family").c_str());
         }
     }
 
-    void theCleanEditorialRecipesAreStable() {
-        section("clean editorial recipes");
-        int count = 0;
-        std::set<std::string> motions;
-        for (const auto animation : shortPhraseAnimations()) {
-            const auto def = definition(animation);
-            if (def.id.rfind("short_phrase_editorial_", 0) != 0) continue;
-            ++count;
-            check(def.decor == ShortPhraseDecor::None, "editorial phrases carry no bumper");
-            check(shortPhraseWordCount(def.phrase) <= 7, "editorial samples stay short");
-            const bool isPaperCard = def.id == "short_phrase_editorial_paper_title_card";
-            bool middleBeat = false;
-            bool sequenceTrack = false;
-            for (const auto& t : def.tracks) {
-                everyKeyframeListIsAValidEntrance(t, def.id + "." + t.property);
-                sequenceTrack = sequenceTrack || t.keyframes.back().frame >= 120;
-                for (const auto& k : t.keyframes) {
-                    if (k.frame > 42 && k.frame < 120 && k.value != t.keyframes.back().value) middleBeat = true;
-                }
-            }
-            if (isPaperCard) {
-                // The paper title card is the family's fast-beat exception: a
-                // 12-frame snap entrance (not the staged three-second reveal),
-                // with two blurred shadow overlays carrying the depth instead
-                // of a second motion beat.
-                check(def.enter == 12, "the paper title card keeps its authored 12-frame beat");
-                for (const auto& t : def.tracks) {
-                    check(t.keyframes.back().frame == 12,
-                          "paper title card tracks land on the 12-frame beat");
-                }
-                check(def.textOverlays.size() == 2,
-                      "the paper title card carries ambient + contact shadow overlays");
-                for (const auto& overlay : def.textOverlays) {
-                    check(overlay.behind, "paper title card overlays draw behind the phrase");
-                    check(!overlay.textAnimators.empty(),
-                          "paper title card overlays carry blur animators");
-                }
-            } else {
-                check(def.enter == 90, "editorial entrance lands at the documented three-second reveal");
-                check(sequenceTrack, "every editorial recipe includes a track continuing into the second beat");
-                check(middleBeat, "every editorial recipe has a visible second motion beat");
-            }
-            std::string fingerprint;
-            for (const auto& t : def.tracks) {
-                fingerprint += t.property + std::to_string(t.keyframes.front().value);
-            }
-            for (const auto& a : def.textAnimators) {
-                fingerprint += a.selector.window;
-                for (const auto& t : a.properties) fingerprint += t.property;
-            }
-            for (const auto& a : def.accents) {
-                fingerprint += a.id;
-                check(a.width > 0.f && a.height > 0.f, "editorial accents have positive dimensions");
-                for (const auto& t : a.tracks) everyKeyframeListIsAValidEntrance(t, def.id + "." + a.id);
-            }
-            check(motions.insert(fingerprint).second, "each editorial recipe has distinct motion");
-        }
-        check(count == 14, "exactly fourteen editorial recipes, including the three Claude-inspired looks and the paper title card");
 
-        std::size_t productCount = 0;
-        for (const auto animation : shortPhraseAnimations()) {
-            if (std::string(name(animation)).rfind("short_phrase_product_", 0) == 0) ++productCount;
-        }
-        check(productCount == 23, "the product family contains fourteen existing recipes, seven text adaptations and three native visual adaptations");
-    }
 
-    void claudeInspiredShortPhrasesUseTheWhiteEditorialPalette() {
-        section("Claude-inspired white editorial short phrases");
-        const std::vector<ShortPhraseAnimation> animations{
-                ShortPhraseAnimation::EditorialPromptResponse,
-                ShortPhraseAnimation::EditorialDiffPatch,
-                ShortPhraseAnimation::EditorialTerminalFocus};
-        for (const auto animation : animations) {
-            const auto def = definition(animation);
-            check(def.white_background, "Claude-inspired recipes declare the pure-white palette");
-            check(def.id.rfind("short_phrase_editorial_claude_", 0) == 0,
-                  "Claude-inspired recipe ids are stable and editorial");
-            check(!def.textAnimators.empty(), "each new recipe uses native text animation");
-        }
-        const auto patch = definition(ShortPhraseAnimation::EditorialDiffPatch);
-        check(patch.textAnimators.size() >= 2 &&
-                  patch.textAnimators.back().properties.front().property == "fill_orange",
-              "Diff / Patch accents a selected word in orange");
-        check(patch.textAnimators.back().selector.window == "pick:2:3" &&
-                  shortPhraseWordCount(patch.phrase) == 3,
-              "Diff / Patch accent selector targets a valid word");
-        const auto terminal = definition(ShortPhraseAnimation::EditorialTerminalFocus);
-        check(terminal.phrase == "npx chronon render" && terminal.white_background,
-              "Terminal Focus uses a CLI phrase on the white-paper palette");
-    }
-
-    void theEditorialExtrasAreStable() {
-        section("short-phrase editorial extras");
-        check(definition(ShortPhraseAnimation::SemanticChainCurve).exit == ShortPhraseExit::ArcDissolve,
-              "the semantic chain folds away on an arc");
-        check(definition(ShortPhraseAnimation::ShapePhraseWipe).decor == ShortPhraseDecor::StarBumper,
-              "the shape wipe carries the star bumper");
-        check(definition(ShortPhraseAnimation::CharacterCascadeShapes).decor == ShortPhraseDecor::StarBumper,
-              "the character cascade carries the star bumper");
-        check(std::string(name(ShortPhraseAnimation::WordCascadeSentence)) ==
-                      "short_phrase_word_cascade_sentence",
-              "word cascade has a stable wire name");
-    }
 
     void theStarBumperIsASeparateDecorElement() {
         section("short_phrase.decor.star_bumper");
@@ -328,77 +223,47 @@ namespace {
         }
         check(shortPhraseSuggestions(0).empty(), "zero words is outside the family");
         check(shortPhraseSuggestions(6).empty(), "six or more words route to Important Phrases");
-        const std::vector<ShortPhraseAnimation> adapted{
-                ShortPhraseAnimation::ProductMaskedHeading,
-                ShortPhraseAnimation::ProductSplitFlapText,
-                ShortPhraseAnimation::ProductWarpText,
-                ShortPhraseAnimation::ProductFoldText,
-                ShortPhraseAnimation::ProductDecryptedText,
-                ShortPhraseAnimation::ProductScrollReveal,
-                ShortPhraseAnimation::ProductScrambledText};
-        for (const auto animation : adapted) {
-            const auto def = definition(animation);
-            check(def.adaptation_note.find("not represented") != std::string::npos ||
-                          def.adaptation_note.find("no scroll container") != std::string::npos ||
-                          def.adaptation_note.find("replaces viewport scrubbing") != std::string::npos ||
-                          def.adaptation_note.find("no runtime trigger") != std::string::npos ||
-                          def.adaptation_note.find("native eased entrance") != std::string::npos,
-                  "React interactivity/effects are explicitly documented as adaptations");
-            check(def.enter == 90, "adapted phrase effects use the three-second showcase reveal");
-            check(definition(animation).id == name(animation), "each React effect has a stable catalog id");
-            if (animation == ShortPhraseAnimation::ProductDecryptedText) {
-                check(def.textOverlays.size() == 10,
-                      "decrypted text contains nine fixed scramble stages followed by its resolved phrase");
-                check(def.textOverlays.back().text == "DECODE THE SIGNAL",
-                      "decrypted text ends on the exact resolved phrase");
+        const std::set<std::string> retired{
+                "short_phrase_editorial_claude_diff_patch",
+                "short_phrase_editorial_claude_prompt_response",
+                "short_phrase_editorial_lift_and_rule",
+                "short_phrase_editorial_rule_handoff",
+                "short_phrase_editorial_underline_draw",
+                "short_phrase_phrase_build_focus",
+                "short_phrase_product_decrypted_text",
+                "short_phrase_product_fold_text",
+                "short_phrase_product_glare_hover",
+                "short_phrase_product_line_by_line_slide",
+                "short_phrase_product_scramble_reveal",
+                "short_phrase_product_shape_blur",
+                "short_phrase_product_warp_text",
+                "short_phrase_product_weight_wave",
+                "short_phrase_scale_settle_word",
+                "short_phrase_semantic_chain_curve",
+                "short_phrase_semantic_two_line",
+                "short_phrase_simple_progressive_phrase",
+                "short_phrase_single_word_swap",
+                "short_phrase_word_cascade_sentence",
+                "short_phrase_word_mask_sequence",
+                "short_phrase_character_write_on",
+                "short_phrase_editorial_paper_title_card"};
+        for (int words = 1; words <= 5; ++words) {
+            for (const auto pick : shortPhraseSuggestions(words)) {
+                check(!retired.count(name(pick)), "removed motions are never suggested");
             }
         }
         const std::vector<ShortPhraseAnimation> single = shortPhraseSuggestions(1);
-        check(single.front() == ShortPhraseAnimation::ScaleSettleWord,
-              "the default single-word suggestion remains scale settle");
         check(std::find(single.begin(), single.end(), ShortPhraseAnimation::EditorialTerminalFocus) != single.end(),
               "one-word terminal phrases suggest the terminal-focus recipe");
     }
 
-    void theFourNativeVisualAdaptationsAreRegistered() {
-        section("three native visual adaptations");
-        const std::vector<ShortPhraseAnimation> animations{
-                ShortPhraseAnimation::ProductGlareHover,
-                ShortPhraseAnimation::ProductGradualBlur,
-                ShortPhraseAnimation::ProductShapeBlur};
-        for (const ShortPhraseAnimation animation : animations) {
-            const auto def = definition(animation);
-            check(def.enter == 90, "each adapted visual recipe uses the authored three-second reveal");
-            check(def.adaptation_note.find("not represented") != std::string::npos,
-                  "each recipe documents browser-only behavior");
-            bool hasNativeMotion = !def.tracks.empty() || !def.textAnimators.empty() || !def.accents.empty();
-            for (const auto& overlay : def.textOverlays)
-                hasNativeMotion = hasNativeMotion || !overlay.tracks.empty() || !overlay.textAnimators.empty();
-            check(hasNativeMotion, "each adapted effect has native motion");
-            for (const auto& track : def.tracks)
-                everyKeyframeListIsAValidEntrance(track, def.id + ".track");
-            for (const auto& animator : def.textAnimators)
-                for (const auto& track : animator.properties)
-                    everyKeyframeListIsAValidEntrance(track, def.id + ".text");
-            for (const auto& accent : def.accents) {
-                check(accent.width > 0.f && accent.height > 0.f,
-                      "native accents have positive dimensions");
-                for (const auto& track : accent.tracks)
-                    everyKeyframeListIsAValidEntrance(track, def.id + ".accent");
-            }
-        }
-    }
 
 }// namespace
 
 int main() {
     theShortPhraseArchetypesAreWellFormed();
-    theCleanEditorialRecipesAreStable();
-    theEditorialExtrasAreStable();
     theStarBumperIsASeparateDecorElement();
     theTimingEnvelopeMatchesTheEditorialRules();
     theSuggestionsCoverTheShortPhraseRange();
-    theFourNativeVisualAdaptationsAreRegistered();
-    claudeInspiredShortPhrasesUseTheWhiteEditorialPalette();
     return chrononmotion_test::report();
 }

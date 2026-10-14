@@ -1,0 +1,459 @@
+{
+  "cases": 112,
+  "goldens": [
+    {
+      "file": "esri_sat__gentle_fade.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__soft_glow.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__clean_fade.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__word_soft_fade.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__slow_fade.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__quiet_bloom.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__quick_fade.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__silky_fade.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__subtle_halo.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__cinematic_fade.png",
+      "sha256": "7b521a8bac2ff41cf39f1d7db7bbf1a597e2417ce18db630074bd5218a5d3745"
+    },
+    {
+      "file": "esri_sat__diffuse_city_beacon.png",
+      "sha256": "d26d37f5c916498f3317fd564e5d7132b4b03c3a504e7919dc1f13240dbb711a"
+    },
+    {
+      "file": "esri_sat__rise_up.png",
+      "sha256": "ce3293718f57cb35a8041af2099d9f343dc156ab2cf89385ef32af593a994886"
+    },
+    {
+      "file": "esri_sat__pop_in.png",
+      "sha256": "ce3293718f57cb35a8041af2099d9f343dc156ab2cf89385ef32af593a994886"
+    },
+    {
+      "file": "esri_sat__soft_tracking.png",
+      "sha256": "ce3293718f57cb35a8041af2099d9f343dc156ab2cf89385ef32af593a994886"
+    },
+    {
+      "file": "esri_sat__title_top.png",
+      "sha256": "520952736b7b84b68b4ba719b7c5f646eb2dfe0fd59d742a23eeafff41d91e46"
+    },
+    {
+      "file": "esri_sat__badge_side.png",
+      "sha256": "3430c58e547eff78c54d9b24111e0501812e4156ad4ef4fc29d3d352e6ee081f"
+    },
+    {
+      "file": "esri_sat__huge_center.png",
+      "sha256": "bd897d6bbb3b1ea4a3c9aa0d0e69b9cd610cbc1aa1ad6f3604e042441456989a"
+    },
+    {
+      "file": "esri_sat__small_above.png",
+      "sha256": "74c0b2cc95449d223e2565e1141ade5dc86b5cee669e5b9e174fbc42a7dfda31"
+    },
+    {
+      "file": "esri_sat__caption_card.png",
+      "sha256": "b8aca661b0d43209e0cb6fc88e690285740bbab63ef6d3d2a5489dbd104b410f"
+    },
+    {
+      "file": "esri_sat__editorial_serif.png",
+      "sha256": "6eda9388f0d8156482844e6c11a3b65def1626481daab2effba46baf0052449a"
+    },
+    {
+      "file": "esri_sat__gpin_bubble.png",
+      "sha256": "3daaca5cd27049553bb7462d38fc302fa84874a35e1305efd601232c902c1812"
+    },
+    {
+      "file": "esri_sat__card_glass.png",
+      "sha256": "1b0e3b541f05295c33fab17b3bcf45f8a9513c181f9274d054d5b3522b8f98db"
+    },
+    {
+      "file": "esri_sat__bare_big.png",
+      "sha256": "ae9e1381ad0294f095442a618efdab15823157e9e670ac973f1f7f25a2ba48d9"
+    },
+    {
+      "file": "esri_sat__glow_react.png",
+      "sha256": "fdf46d6dbba572f94bd9228afdbdb1782b13938a1e17243e60eb36ec38b46f3d"
+    },
+    {
+      "file": "esri_sat__editorial_tag.png",
+      "sha256": "d5b32aa7d7addfb05af3a675f214de6dafe5510c9cc81eb4532607291609fc2d"
+    },
+    {
+      "file": "esri_sat__ribbon.png",
+      "sha256": "6e64addf8546e0bf7468cd8544d948356811da925172479b3e9ee120b2c2a75e"
+    },
+    {
+      "file": "esri_sat__dot_ring.png",
+      "sha256": "ccedd9f76a896c10011c4223dfa22dbf3bf31619332f58846d92ff609f0eccba"
+    },
+    {
+      "file": "esri_sat__outline_box.png",
+      "sha256": "f4bd5df9be13a55da96520a124fbddeaa8d289af3ea1ba87b6422857f028a596"
+    },
+    {
+      "file": "esri_street__gentle_fade.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__soft_glow.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__clean_fade.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__word_soft_fade.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__slow_fade.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__quiet_bloom.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__quick_fade.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__silky_fade.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__subtle_halo.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__cinematic_fade.png",
+      "sha256": "304a9bcc5e28d61ed5b5cb020ed438fadcbddf30ba64e08cbfbe6fff8a7eedf3"
+    },
+    {
+      "file": "esri_street__diffuse_city_beacon.png",
+      "sha256": "b127f7e993dc29fa29416802e620d0e335d150e400216ca911578ba7cbed22fa"
+    },
+    {
+      "file": "esri_street__rise_up.png",
+      "sha256": "63224afd9b38edfa9518e8598e2bf911c4467954a65e7b7452041b54666673b4"
+    },
+    {
+      "file": "esri_street__pop_in.png",
+      "sha256": "63224afd9b38edfa9518e8598e2bf911c4467954a65e7b7452041b54666673b4"
+    },
+    {
+      "file": "esri_street__soft_tracking.png",
+      "sha256": "63224afd9b38edfa9518e8598e2bf911c4467954a65e7b7452041b54666673b4"
+    },
+    {
+      "file": "esri_street__title_top.png",
+      "sha256": "6245f6927e7df77675a524be84707627aea08098f9415fe08577de33bc96308c"
+    },
+    {
+      "file": "esri_street__badge_side.png",
+      "sha256": "7b899bf959533c04f889ee77f556df5619700bac6816d6f214cc18b65cba76e9"
+    },
+    {
+      "file": "esri_street__huge_center.png",
+      "sha256": "20babcfb47959908b55aa155344a60be7d262171d50df8431245aef6e82da7c0"
+    },
+    {
+      "file": "esri_street__small_above.png",
+      "sha256": "5ce8a05893758b005c6966b7d7e80c886788ffee548dff2e329c09675132604c"
+    },
+    {
+      "file": "esri_street__caption_card.png",
+      "sha256": "5c2e588c4f01ec53a6972a9b2ca4f7a3c26487e2ffd9ce0e8e96672c8303b7b2"
+    },
+    {
+      "file": "esri_street__editorial_serif.png",
+      "sha256": "3c940d098655a718848ad84267dd96b90c220fe7a955290858c8b8b2afad4634"
+    },
+    {
+      "file": "esri_street__gpin_bubble.png",
+      "sha256": "1d7ef18892e5505c6b6c745ea24da353d8fbe0f631371b887e6342243d96d9b2"
+    },
+    {
+      "file": "esri_street__card_glass.png",
+      "sha256": "2bbb0a2081c1cc0489529f2925a759b5f6d7a6dc26b76111daec43c726c0ef43"
+    },
+    {
+      "file": "esri_street__bare_big.png",
+      "sha256": "e389120cad37d2351abaf242a5f5f9392834f94e3eaf8767fe26184fc81efddc"
+    },
+    {
+      "file": "esri_street__glow_react.png",
+      "sha256": "c378f3cae4c0fff50db6e896bfa3ed6293dd7deaf7102580bac4d84762d46391"
+    },
+    {
+      "file": "esri_street__editorial_tag.png",
+      "sha256": "6d5fb566215319f77bdd3fa3229b347bb05bdef90ade3c78d87bd9bee2e5bd9d"
+    },
+    {
+      "file": "esri_street__ribbon.png",
+      "sha256": "f6ee50167837b8bfd9198585f33dda9cd69c7802d52d2f43e24c5ee4e0ff7e3e"
+    },
+    {
+      "file": "esri_street__dot_ring.png",
+      "sha256": "87ee634d9277aa015e9b8527b3ca1e3910dea52cfdcc42bc2d689293b64375e0"
+    },
+    {
+      "file": "esri_street__outline_box.png",
+      "sha256": "617be2bd5392e10f68d3671abd5e513a71991406a91ce6bb65cf9c9d3b4ef6a8"
+    },
+    {
+      "file": "esri_topo__gentle_fade.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__soft_glow.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__clean_fade.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__word_soft_fade.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__slow_fade.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__quiet_bloom.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__quick_fade.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__silky_fade.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__subtle_halo.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__cinematic_fade.png",
+      "sha256": "8097dc19e35253a631eafb62c786b34d93064a4e6e338bace6d68f6271ce02a5"
+    },
+    {
+      "file": "esri_topo__diffuse_city_beacon.png",
+      "sha256": "50554dbf12618aa8767f2b4253fe1f4d1a862e518a51eccb1c522e5076057ba2"
+    },
+    {
+      "file": "esri_topo__rise_up.png",
+      "sha256": "55ccf9bdfd6c9885b68c7eaa1fa843f8d8d03fd4f225f8c53d2f750028dd46f8"
+    },
+    {
+      "file": "esri_topo__pop_in.png",
+      "sha256": "55ccf9bdfd6c9885b68c7eaa1fa843f8d8d03fd4f225f8c53d2f750028dd46f8"
+    },
+    {
+      "file": "esri_topo__soft_tracking.png",
+      "sha256": "55ccf9bdfd6c9885b68c7eaa1fa843f8d8d03fd4f225f8c53d2f750028dd46f8"
+    },
+    {
+      "file": "esri_topo__title_top.png",
+      "sha256": "2cb4ab8879476bf7fd208692e3a73c6f39a51ec0e60ddda06904a90c1719fa5b"
+    },
+    {
+      "file": "esri_topo__badge_side.png",
+      "sha256": "3be2b5b269682e35b77c2f0b2827c273e1f2d29f09e5183e0e5cd080638cb41f"
+    },
+    {
+      "file": "esri_topo__huge_center.png",
+      "sha256": "3403f773b9c7ac1272f4629cc365a4e43dc19df8c7c49f5318dffd3e4ba16a23"
+    },
+    {
+      "file": "esri_topo__small_above.png",
+      "sha256": "b788ce4f473efb00b657cda83f6d91fd166d7c44790594194693d922228b0310"
+    },
+    {
+      "file": "esri_topo__caption_card.png",
+      "sha256": "29ebca29305b4f5807cd4299b4a0bf82e9c19b89e47544cbbdec8d0bad0cb285"
+    },
+    {
+      "file": "esri_topo__editorial_serif.png",
+      "sha256": "bae4a7ed37306a10c875b07560db073b6368c39c2fbfba301111479d9b69d9c7"
+    },
+    {
+      "file": "esri_topo__gpin_bubble.png",
+      "sha256": "18d6b2b0a7eec6e4c2c5cdcb27bf188dc048cd81a655fd740ac7e05f9292c24a"
+    },
+    {
+      "file": "esri_topo__card_glass.png",
+      "sha256": "51fb7f96cba80513ef5f63550910c65c8e8a5fd476328c65bc30a606ab3255d2"
+    },
+    {
+      "file": "esri_topo__bare_big.png",
+      "sha256": "5ab61c472d791254e5a8b7a81e6cbe3eee79fee879840f427434ff47ea606bbb"
+    },
+    {
+      "file": "esri_topo__glow_react.png",
+      "sha256": "225c6a536b5836794e51b6b5f11d76d0ba27557efb9dcee706c2ea80029ff71b"
+    },
+    {
+      "file": "esri_topo__editorial_tag.png",
+      "sha256": "ec0306f289f3c5ade3ccc11b60015b24a1425c9d096b31859055eeb1cd04289e"
+    },
+    {
+      "file": "esri_topo__ribbon.png",
+      "sha256": "b2e0cc134b6f01dd520d5099bd576b2d3e5ab263798629ec8e3ac42bba2fb668"
+    },
+    {
+      "file": "esri_topo__dot_ring.png",
+      "sha256": "912dc5894d9f1076c99618d198cc243f5c4e8b3803b7fce4779013c841162670"
+    },
+    {
+      "file": "esri_topo__outline_box.png",
+      "sha256": "272e9b8e83541dfe747d9e628a24fc2b035968192603be47ead0f55be1695945"
+    },
+    {
+      "file": "esri_dark__gentle_fade.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__soft_glow.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__clean_fade.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__word_soft_fade.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__slow_fade.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__quiet_bloom.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__quick_fade.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__silky_fade.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__subtle_halo.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__cinematic_fade.png",
+      "sha256": "326a0b8321a5845d93517da803eb5489dd1b798632c5342e40865c44f4319856"
+    },
+    {
+      "file": "esri_dark__diffuse_city_beacon.png",
+      "sha256": "cc6dbc9303a363da885bf61ebc1146376493ac84f9be3f647b1d42ec2044751b"
+    },
+    {
+      "file": "esri_dark__rise_up.png",
+      "sha256": "231c538608efd188d3ed939be96d74b0a00a1c0bccbb0970666389e777260f35"
+    },
+    {
+      "file": "esri_dark__pop_in.png",
+      "sha256": "231c538608efd188d3ed939be96d74b0a00a1c0bccbb0970666389e777260f35"
+    },
+    {
+      "file": "esri_dark__soft_tracking.png",
+      "sha256": "231c538608efd188d3ed939be96d74b0a00a1c0bccbb0970666389e777260f35"
+    },
+    {
+      "file": "esri_dark__title_top.png",
+      "sha256": "e21d441c2e8090964110e8001833b2b5db013bfbbda70db382b5dda73f3f4390"
+    },
+    {
+      "file": "esri_dark__badge_side.png",
+      "sha256": "129e320e36260478ebd088759978319c1049890a696aee5f1244beed4745b721"
+    },
+    {
+      "file": "esri_dark__huge_center.png",
+      "sha256": "28ab1202a28e908cf6584e81cca70a4a65e95e6b27aee2efe0094c93871c1ce8"
+    },
+    {
+      "file": "esri_dark__small_above.png",
+      "sha256": "b5a18dd307328daaf8743b71fc8c10e78fa2bad76cafa06b29b4ffa8528fa73e"
+    },
+    {
+      "file": "esri_dark__caption_card.png",
+      "sha256": "b3a3da201632804e8560c6285801891055b90b8906bfac949ee91dad1d722bba"
+    },
+    {
+      "file": "esri_dark__editorial_serif.png",
+      "sha256": "3a2ea84e2bf19c18f6bccf7b87c32d78fbe02aece2f43b8359d3a53dbe31894a"
+    },
+    {
+      "file": "esri_dark__gpin_bubble.png",
+      "sha256": "13b4f89aef8711c457ca2ab9b8fc05e91a02e56748598752c5184b1cd8645855"
+    },
+    {
+      "file": "esri_dark__card_glass.png",
+      "sha256": "3ddeb8aed38d12f879fbc330ba4db2fd04bbcd08aa3ba367da9d3679860b0804"
+    },
+    {
+      "file": "esri_dark__bare_big.png",
+      "sha256": "9f9d3a69c58d6381b1aa4d3aeab9f36ac6c401673b1c44448123ddb2e4543d73"
+    },
+    {
+      "file": "esri_dark__glow_react.png",
+      "sha256": "e3e554b7ed2361b80846d150bf84f60ffee2364dba653cb8c572ac8c6f52cf71"
+    },
+    {
+      "file": "esri_dark__editorial_tag.png",
+      "sha256": "245f61804f234e80651382d353688fe0ddf0d73ed12809ef154dbcce062d6ad4"
+    },
+    {
+      "file": "esri_dark__ribbon.png",
+      "sha256": "da3a18011acc57328d8ec22ac5eed61f3a0646fdde2e52c9ef64305119832b57"
+    },
+    {
+      "file": "esri_dark__dot_ring.png",
+      "sha256": "e04066d507b7909ed789b885eaa9fdcc54c5e0b2ab59d63fa1eaf05f2d96c43d"
+    },
+    {
+      "file": "esri_dark__outline_box.png",
+      "sha256": "9dc0291fd4c40d5e7601e1d17c8b2c14f265451005cd15683d11523da29cab6c"
+    }
+  ],
+  "schema": "chronon.geo-label-basemap-goldens.v1",
+  "seed": 20261014,
+  "size": [
+    960,
+    540
+  ]
+}

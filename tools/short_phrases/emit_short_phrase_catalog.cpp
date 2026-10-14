@@ -37,15 +37,23 @@ namespace {
     using chronontemplate::ShortPhraseExit;
     using chronontemplate::ShortPhraseTiming;
 
+    [[noreturn]] void fail(const std::string& message);
+
     constexpr int kWidth = 1920;
     constexpr int kHeight = 1080;
     constexpr int kFps = 30;
     constexpr int kMaxEnterFrames = 150; // Product styles may spend up to 5 s on a deliberate build.
 
+    const chronontemplate::ShortPhraseRecipeSpec& recipeSpec(const std::string& id) {
+        const auto& specs = chronontemplate::shortPhraseRecipeSpecs();
+        const auto found = std::find_if(specs.begin(), specs.end(),
+                                        [&](const auto& spec) { return id == spec.id; });
+        if (found == specs.end()) fail(id + ": missing declarative recipe spec");
+        return *found;
+    }
+
     std::string familyId(const std::string& id) {
-        if (id.rfind("short_phrase_editorial_", 0) == 0) return "editorial";
-        if (id.rfind("short_phrase_product_", 0) == 0) return "product_video";
-        return "classic";
+        return recipeSpec(id).family;
     }
 
     std::string subcategoryId(const std::string& id) {
@@ -53,7 +61,7 @@ namespace {
             id.find("chromatic_fringe_title") != std::string::npos) return "computer_character_assembly";
         if (id.find("letter_rise") != std::string::npos || id.find("weight_wave") != std::string::npos ||
             id.find("character") != std::string::npos || id.find("glyph") != std::string::npos ||
-            id.find("typewriter") != std::string::npos || id.find("write_on") != std::string::npos) return "letter_by_letter_reveal";
+            id.find("write_on") != std::string::npos) return "letter_by_letter_reveal";
         if (id.find("word") != std::string::npos || id.find("ticker") != std::string::npos ||
             id.find("swap") != std::string::npos || id.find("progressive") != std::string::npos ||
             id.find("line_by_line") != std::string::npos || id.find("split_flap") != std::string::npos) return "word_sequence";
@@ -206,18 +214,13 @@ namespace {
         }
         json emphasis = json::array();
         for (const std::size_t word : def.emphasis) emphasis.push_back(word);
-        const bool hasUnsupportedTextAnimatorRotation = std::any_of(
-                def.textAnimators.begin(), def.textAnimators.end(), [](const auto& animator) {
-                    return std::any_of(animator.properties.begin(), animator.properties.end(),
-                                       [](const PhraseTrack& track) {
-                                           return track.property == "rotation";
-                                       });
-                });
-        json targets = nullptr;
-        if (!hasUnsupportedTextAnimatorRotation) {
-            targets = json::array({"short_phrase"});
-            if (!def.textAnimators.empty()) targets.push_back("caption");
+        const auto& spec = recipeSpec(def.id);
+        json targets = json::array();
+        for (const char* target : spec.targets) {
+            if (target == nullptr || std::string(target).empty()) fail(def.id + ": empty target in recipe spec");
+            targets.push_back(target);
         }
+        if (targets.empty()) fail(def.id + ": recipe spec must declare at least one target");
         json overlays = json::array();
         for (const auto& overlay : def.textOverlays) {
             json overlayTracks = json::array();
@@ -236,6 +239,7 @@ namespace {
                 {"family", familyId(def.id)},
                 {"subcategory", subcategoryId(def.id)},
                 {"targets", targets},
+                {"runtime_enabled", spec.runtime_enabled},
                 {"title", def.title},
                 {"phrase", def.phrase},
                 {"enter", def.enter},
@@ -248,7 +252,6 @@ namespace {
                 {"font_size", def.font_size},
                 {"light", def.light},
                 {"white_background", def.white_background},
-                {"paper_background", def.paper_background},
                 {"emphasis", emphasis},
                 {"exit", exitId(def.exit)},
                 {"decor", def.decor == ShortPhraseDecor::None ? json(nullptr) : json(decorId(def.decor))},
@@ -289,13 +292,39 @@ namespace {
 
 int main() {
     try {
+        const auto& specs = chronontemplate::shortPhraseRecipeSpecs();
         const std::vector<ShortPhraseAnimation> animations = chronontemplate::shortPhraseAnimations();
-        if (animations.size() != 49) fail("expected twelve original, fourteen editorial, and twenty-three product-motion short-phrase archetypes");
+        if (animations.size() != specs.size()) fail("recipe specs and animation list have different sizes");
+        std::set<std::string> specIds;
+        for (const auto& spec : specs) {
+            if (spec.id == nullptr || std::string(spec.id).empty() || !specIds.insert(spec.id).second)
+                fail("recipe specs must carry unique non-empty ids");
+            if (spec.family == nullptr || std::string(spec.family).empty()) fail(std::string(spec.id) + ": missing family");
+            if (spec.min_words < 1 || spec.max_words < spec.min_words || spec.max_words > 5)
+                fail(std::string(spec.id) + ": invalid word-count range");
+            if (spec.targets.empty()) fail(std::string(spec.id) + ": recipe spec must declare at least one target");
+            for (const char* target : spec.targets) {
+                if (target == nullptr || std::string(target).empty())
+                    fail(std::string(spec.id) + ": recipe spec contains an empty target");
+            }
+        }
 
         std::set<std::string> ids;
         json recipes = json::array();
-        for (const ShortPhraseAnimation animation : animations) {
-            recipes.push_back(recipeJson(animation, ids));
+        for (std::size_t index = 0; index < animations.size(); ++index) {
+            const auto& spec = specs[index];
+            if (animations[index] != spec.animation || chronontemplate::name(spec.animation) != spec.id)
+                fail(std::string(spec.id) + ": recipe spec, enum handle and public name disagree");
+            const bool hasShortPhraseTarget = std::any_of(
+                spec.targets.begin(), spec.targets.end(),
+                [](const char* target) { return target != nullptr && std::string(target) == "short_phrase"; });
+            if (spec.runtime_enabled && !hasShortPhraseTarget)
+                fail(std::string(spec.id) + ": runtime-enabled recipe must declare short_phrase target");
+            const auto definition = chronontemplate::definition(spec.animation);
+            const auto wordCount = static_cast<int>(chronontemplate::shortPhraseWordCount(definition.phrase));
+            if (wordCount < spec.min_words || wordCount > spec.max_words)
+                fail(std::string(spec.id) + ": authored phrase word count is outside its family spec");
+            recipes.push_back(recipeJson(animations[index], ids));
         }
 
         if (!chronontemplate::shortPhraseSuggestions(0).empty() ||

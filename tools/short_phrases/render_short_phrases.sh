@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Render the short-phrase family on the GPU.
 #
-# The twelve archetypes live in C++ (ShortPhrasePack.hpp);
+# The surviving archetypes live in C++ (ShortPhrasePack.hpp);
 # chronontemplate_emit_short_phrase_plans lowers them to chronon.render-plan.v2
 # plans and chronon3d_cli draws them with the Vulkan backend
 # (--gpu-hot-path-mode require_gpu_native fails closed if the GPU lane cannot
@@ -43,10 +43,8 @@ if [[ "$FILTER" == "--emit-only" ]]; then
 fi
 
 shopt -s nullglob
-if [[ "$FILTER" == "--claude-only" ]]; then
-  plans=("$OUT"/short_phrase_editorial_claude_*.plan.json)
-elif [[ "$FILTER" == "--paper-only" ]]; then
-  plans=("$OUT"/short_phrase_editorial_paper_*.plan.json)
+if [[ "$FILTER" == "--terminal-only" ]]; then
+  plans=("$OUT"/short_phrase_editorial_claude_terminal_focus.plan.json)
 else
   plans=("$OUT"/short_phrase_*.plan.json)
 fi

@@ -4,10 +4,12 @@
 // how such a phrase LOOKS and the motion vocabulary every family animates it
 // with. One file per family from here on:
 //
-//   TypewriterPhrasePack.hpp— the fifteen typed animations with the `_` cursor
 //   ApplePhrasePack.hpp     — the restrained modern presets
-//   PhraseHighlightPack.hpp — long phrases with animated accents
 //   DidoneTitlesPack.hpp    — editorial Didone titles
+//
+// The former TypewriterPhrasePack.hpp and PhraseHighlightPack.hpp families
+// were retired (2026-10-14): their typewriter/highlight motions rendered
+// unreadable on the installed Vulkan lane.
 //
 // The packs are data, not rendering: Chronon3D shapes the run and draws
 // the single native glow.

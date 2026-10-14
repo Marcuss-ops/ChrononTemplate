@@ -529,14 +529,62 @@ def build_glow_line_cinematic_plan() -> Dict[str, Any]:
         "output": {"path": "GlowLine_Cinematic.mp4", "format": "mp4"}
     }
 
+def build_docus_premium_documentary_layers(
+    layer_id: str,
+    points: List[Tuple[float, float]],
+    start_frame: int,
+    end_frame: int,
+    frames: int,
+    color: str = "#A87542",
+) -> List[Dict[str, Any]]:
+    """Build a restrained editorial connector using the canonical path stroke.
+
+    Documentary scenes need a precise, warm connector—not the neon comparison
+    treatment used by the legacy tier gallery. This keeps the same path/stroke
+    and trim primitives while limiting the treatment to a fine core and subtle
+    5 px underlay. No glow filter, moving flare, grid, or decorative pulse.
+    """
+    if len(points) < 2 or not (0 <= start_frame < end_frame < frames):
+        raise ValueError("documentary connector needs a path and valid reveal interval")
+    def make_layer(suffix: str, width: float, opacity: float) -> Dict[str, Any]:
+        commands = [{"type": "move_to" if i == 0 else "line_to",
+                     "point": [round(x - HX, 3), round(y - HY, 3)]}
+                    for i, (x, y) in enumerate(points)]
+        return {
+            "id": layer_id + suffix,
+            "type": "shape",
+            "position": [0, 0],
+            "size": [W, H],
+            "start_frame": 0,
+            "duration_frames": frames,
+            "opacity": opacity,
+            "shape": {"type": "path", "path": commands,
+                      "stroke": {"color": color, "width": width,
+                                 "cap": "round", "join": "round"},
+                      "operators": [{"kind": "trim", "params": {
+                          "start": 0.0, "end": 0.0,
+                          "animation": {"easing": "in_out_sine", "keyframes": [
+                              {"frame": start_frame, "value": [0.0, 0.0]},
+                              {"frame": end_frame, "value": [0.0, 1.0]}]}}}]}
+        }
+    return [make_layer("_soft", 5.0, 0.14), make_layer("_core", 1.8, 0.92)]
+
+
 # ---------------------------------------------------------------------------
 # Tier 03: GlowLine_DocusPremium (The Documentary Flagship)
 # ---------------------------------------------------------------------------
+# The premium editorial treatment above is intentionally distinct from this
+# neon comparison-gallery recipe retained for backwards-compatible demos.
+# ---------------------------------------------------------------------------
+# Tier 03: GlowLine_DocusPremium (The Documentary Flagship)
+# ---------------------------------------------------------------------------
+
+# legacy comparison gallery implementation follows.
 def ease_in_out_cubic(p: float) -> float:
     p = max(0.0, min(1.0, float(p)))
     return 4.0 * p * p * p if p < 0.5 else 1.0 - math.pow(-2.0 * p + 2.0, 3.0) / 2.0
 
-def build_glow_line_docus_premium_plan() -> Dict[str, Any]:
+def _build_glow_line_docus_premium_legacy_plan() -> Dict[str, Any]:
     """Tier 3: The complete Docus / Reacts flagship experience.
     Features:
       - Multi-layer glow (ultra-crisp white core 2.0px + saturated halo + wide aura)
@@ -801,3 +849,67 @@ def build_glow_line_docus_premium_plan() -> Dict[str, Any]:
         "layers": layers,
         "output": {"path": "GlowLine_DocusPremium.mp4", "format": "mp4"}
     }
+
+
+def build_glow_line_docus_premium_plan() -> Dict[str, Any]:
+    """Documentary-quality evidence connector, authored as a finished scene.
+
+    The original neon comparison reel remains available internally as
+    ``_build_glow_line_docus_premium_legacy_plan``. This public preset keeps
+    the canonical multi-layer path stroke but places it in an editorial scene
+    and removes the grid, electric blue, blooms, flares, ripples, and pulses.
+    """
+    frames = 240
+    layers: List[Dict[str, Any]] = [
+        {"id": "archive_photo", "type": "image",
+         "asset": "Chronon3d/assets/editorial/industrial_port_dawn.png",
+         "size": [1120, 760], "position": [100, 150], "fit": "cover",
+         "start_frame": 0, "duration_frames": frames,
+         "animation": {"tracks": [{"property": "scale", "easing": "in_out_sine",
+             "keyframes": [{"frame": 0, "value": 1.0}, {"frame": 239, "value": 1.025}]}]}},
+        {"id": "page_tint", "type": "color", "color": [0.055, 0.057, 0.056, 1.0],
+         "size": [1920, 1080], "position": [0, 0], "screen_space": True,
+         "start_frame": 0, "duration_frames": frames},
+        {"id": "chapter", "type": "text", "text": "ARCHIVE / INDUSTRIAL PORT",
+         "position": [1360, 180], "size": [850, 42], "screen_space": True,
+         "start_frame": 0, "duration_frames": frames,
+         "style": {"font": "Chronon3d/assets/fonts/Inter-Bold.ttf", "font_size": 26,
+                   "fill": "#C9A777"}},
+        {"id": "headline", "type": "text", "text": "A quiet change\nin the shipping record",
+         "position": [1360, 310], "size": [850, 210], "screen_space": True,
+         "start_frame": 0, "duration_frames": frames,
+         "style": {"font": "Chronon3d/assets/fonts/Inter-Bold.ttf", "font_size": 66,
+                   "fill": "#F1EEE6"}},
+        {"id": "caption", "type": "text",
+         "text": "The image is the source. The line connects it to the record being examined.",
+         "position": [1360, 525], "size": [760, 118], "screen_space": True,
+         "start_frame": 0, "duration_frames": frames,
+         "style": {"font": "Chronon3d/assets/fonts/Inter-Regular.ttf", "font_size": 34,
+                   "fill": "#D0CEC7"}},
+        {"id": "source_label", "type": "text", "text": "SOURCE FRAME  /  01",
+         "position": [130, 875], "size": [560, 44], "screen_space": True,
+         "start_frame": 0, "duration_frames": frames,
+         "style": {"font": "Chronon3d/assets/fonts/Inter-Regular.ttf", "font_size": 24,
+                   "fill": "#D0CEC7"}},
+        {"id": "record_label", "type": "text", "text": "SHIPPING RECORD  /  02",
+         "position": [1260, 770], "size": [570, 44], "screen_space": True,
+         "start_frame": 0, "duration_frames": frames,
+         "style": {"font": "Chronon3d/assets/fonts/Inter-Regular.ttf", "font_size": 24,
+                   "fill": "#D0CEC7"}},
+    ]
+    layers.extend(build_docus_premium_documentary_layers(
+        "evidence_link", [(650.0, 760.0), (840.0, 760.0), (1040.0, 690.0),
+                          (1200.0, 690.0)], 72, 142, frames, "#C9A777"))
+    plan = {"schema": "chronon.render-plan.v3", "version": 3,
+            "job_id": "GlowLine_DocusPremium",
+            "canvas": {"width": W, "height": H, "fps_num": FPS,
+                       "fps_den": 1, "duration_frames": frames},
+            "layers": layers,
+            "output": {"path": "GlowLine_DocusPremium.mp4",
+                       "format": "mp4", "codec": "h264"}}
+    return plan
+
+
+def build_glow_line_docus_premium_legacy_plan() -> Dict[str, Any]:
+    """Compatibility entrypoint for the archived neon comparison reel."""
+    return _build_glow_line_docus_premium_legacy_plan()

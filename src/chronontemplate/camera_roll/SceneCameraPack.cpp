@@ -332,6 +332,8 @@ namespace chronontemplate {
             }
         }
 
+        chrononmotion::motion::presets::author(
+                scene.motion(), sceneCameraTransitionId(sequence.transition), [&] {
         CameraRig& rig = scene.camera().rig();
         const float fps = scene.fps();
         const Vector2 viewport = scene.canvas();
@@ -427,6 +429,7 @@ namespace chronontemplate {
                         " leaves a subject outside the safe area");
             }
         }
+        });
     }
 
 }// namespace chronontemplate

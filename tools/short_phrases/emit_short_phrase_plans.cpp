@@ -448,12 +448,7 @@ namespace {
         }
 
         const float phraseFontSize = definition.font_size > 0.f ? definition.font_size : style.font_size;
-        const bool sentence = definition.id.find("two_line") != std::string::npos ||
-                              definition.id.find("build_focus") != std::string::npos ||
-                              definition.id.find("chain_curve") != std::string::npos ||
-                              definition.id.find("progressive") != std::string::npos ||
-                              definition.id.find("write_on") != std::string::npos ||
-                              definition.id.find("cascade_sentence") != std::string::npos;
+        const bool sentence = definition.id == "short_phrase_product_depth_parallax";
         const std::string fontPath = definition.id == "short_phrase_editorial_claude_terminal_focus"
                                    ? "assets/fonts/UbuntuMono-R.ttf"
                                    : modern ? "assets/fonts/Bricolage-Grotesque.ttf"
@@ -465,11 +460,6 @@ namespace {
                        {"stroke", json{{"color", "#000000"}, {"width", 0}}},
                        {"glow", json{{"radius", 0}, {"intensity", 0}, {"color", "#000000"}}}};
         if (definition.light || definition.white_background) textStyle["fill"] = "#080808";
-        if (definition.paper_background) {
-            textStyle["font"] = "assets/fonts/Inter-SemiBold.ttf";
-            textStyle["fill"] = "#111111";
-            textStyle["stroke"] = json{{"color", "#000000"}, {"width", 1.5}};
-        }
         if (definition.id == "short_phrase_editorial_claude_terminal_focus") {
             textStyle["font"] = "assets/fonts/UbuntuMono-R.ttf";
         }
@@ -505,17 +495,7 @@ namespace {
                               {"position", json::array({0, 0})},
                               {"start_frame", 0},
                               {"duration_frames", kDurationFrames}});
-        if (definition.paper_background) {
-            // High fidelity living documentary paper background video (animated grain, drifting specks, breathing light)
-            layers[0] = json{{"id", "background"},
-                             {"type", "video"},
-                             {"source", "assets/images/documentary_paper_alive.mp4"},
-                             {"size", json::array({kWidth, kHeight})},
-                             {"fit", "cover"},
-                             {"position", json::array({0, 0})},
-                             {"start_frame", 0},
-                             {"duration_frames", kDurationFrames}};
-        } else if (modern) {
+        if (modern) {
             const auto bg = definition.white_background ? json::array({1.0, 1.0, 1.0, 1.0})
                 : definition.light ? json::array({0.96, 0.95, 0.93, 1.0})
                 : definition.id == "short_phrase_product_text_match_cut"
@@ -627,14 +607,6 @@ namespace {
                                     {"duration_frames", kDurationFrames}}},
                     {"layers", layers},
                     {"output", json{{"path", definition.id + ".mp4"}, {"format", "mp4"}, {"codec", "h264"}}}};
-        if (definition.id == "short_phrase_product_fold_text") {
-            for (auto& layer : result["layers"]) {
-                if (layer.value("type", std::string{}) == "text") layer["enable_3d"] = true;
-            }
-            result["camera"] = json{{"type", "perspective"}, {"position", json::array({0,0,-1700})},
-                                    {"rotation_deg", json::array({0,0,0})}, {"fov_deg", 45},
-                                    {"near", 0.1}, {"far", 10000}};
-        }
         if (definition.id == "short_phrase_product_perspective_marquee") {
             for (auto& layer : result["layers"]) {
                 if (layer.value("type", std::string{}) == "text") layer["enable_3d"] = true;
@@ -681,9 +653,9 @@ int main(int argc, char** argv) try {
     if (argc < 2 || argc > 3 || (argc == 3 && std::string(argv[2]) != "--editorial-only" &&
                                 std::string(argv[2]) != "--product-only" &&
                                 std::string(argv[2]) != "--react-text-only" &&
-                                std::string(argv[2]) != "--claude-only" &&
-                                std::string(argv[2]) != "--paper-only")) {
-        std::cerr << "usage: chronontemplate_emit_short_phrase_plans <output-directory> [--editorial-only|--product-only|--react-text-only|--claude-only|--paper-only]\n";
+                                std::string(argv[2]) != "--terminal-only" &&
+                                std::string(argv[2]) != "--runtime-only")) {
+        std::cerr << "usage: chronontemplate_emit_short_phrase_plans <output-directory> [--editorial-only|--product-only|--react-text-only|--terminal-only|--runtime-only]\n";
         return 2;
     }
     const std::filesystem::path outDir = argv[1];
@@ -699,32 +671,24 @@ int main(int argc, char** argv) try {
                          {"canvas", json{{"width", kWidth}, {"height", kHeight},
                                          {"fps", kFps}, {"duration_frames", kDurationFrames}}},
                          {"animations", json::array()}};
-    if (argc == 3 && std::string(argv[2]) == "--claude-only") {
-        manifest["pipeline"] = "ChrononTemplate C++ pack -> chronon.render-plan.v3 -> Chronon3D GPU";
-        manifest["style"]["fill"] = "#080808";
-        manifest["style"]["background"] = "#FFFFFF";
-    }
-
     for (const ShortPhraseAnimation animation : chronontemplate::shortPhraseAnimations()) {
         const ShortPhraseDefinition definition = chronontemplate::definition(animation);
         if (argc == 3 && std::string(argv[2]) == "--editorial-only" &&
             definition.id.rfind("short_phrase_editorial_", 0) != 0) continue;
         if (argc == 3 && std::string(argv[2]) == "--product-only" &&
             definition.id.rfind("short_phrase_product_", 0) != 0) continue;
+        if (argc == 3 && std::string(argv[2]) == "--runtime-only" &&
+            std::find_if(chronontemplate::shortPhraseRecipeSpecs().begin(),
+                         chronontemplate::shortPhraseRecipeSpecs().end(),
+                         [&](const auto& spec) { return spec.animation == animation && spec.runtime_enabled; }) ==
+                    chronontemplate::shortPhraseRecipeSpecs().end()) continue;
         if (argc == 3 && std::string(argv[2]) == "--react-text-only" &&
             definition.id != "short_phrase_product_masked_heading" &&
             definition.id != "short_phrase_product_split_flap_text" &&
-            definition.id != "short_phrase_product_warp_text" &&
-            definition.id != "short_phrase_product_fold_text" &&
-            definition.id != "short_phrase_product_decrypted_text" &&
             definition.id != "short_phrase_product_scroll_reveal" &&
             definition.id != "short_phrase_product_scrambled_text") continue;
-        if (argc == 3 && std::string(argv[2]) == "--claude-only" &&
-            definition.id != "short_phrase_editorial_claude_prompt_response" &&
-            definition.id != "short_phrase_editorial_claude_diff_patch" &&
+        if (argc == 3 && std::string(argv[2]) == "--terminal-only" &&
             definition.id != "short_phrase_editorial_claude_terminal_focus") continue;
-        if (argc == 3 && std::string(argv[2]) == "--paper-only" &&
-            !definition.paper_background) continue;
         const std::string expected = chronontemplate::name(animation);
         if (definition.id != expected) {
             fail("definition id \"" + definition.id + "\" is published as \"" + expected + "\"");
@@ -747,7 +711,6 @@ int main(int argc, char** argv) try {
                 {"decor", decorName(definition.decor)},
                 {"adaptation_note", definition.adaptation_note},
                 {"white_background", definition.white_background},
-                {"paper_background", definition.paper_background},
                 {"emphasis", emphasis},
                 {"plan", planName},
                 {"render", definition.id + ".mp4"}});

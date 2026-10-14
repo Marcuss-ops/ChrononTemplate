@@ -24,3 +24,31 @@ Source: https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admi
 Source: https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/
 
 The map renderer uses an equirectangular crop spanning longitude -100°…50° and latitude 8°…72°. Pins, routes, fills, and boundaries share that projection. The perspective canary applies one homography to both the map and its geographic overlays.
+
+## Offline YouTube geography catalog
+
+`geographic_catalog.v1.sqlite` is the query-ready hierarchy for map/video generation. The checked-in snapshot (built 2026-10-14) contains 7 continents, 252 country/territory records, 3,865 ADM1 regions, and 225,581 city/locality records. It intentionally includes only four levels: continent → country/territory → first-level administrative region (ADM1) → city/locality. It does not include ADM2 provinces/counties, postal codes, neighborhoods, cadastral parcels, routes, or thematic zones. These are source-record counts, not a promise that every name resolves uniquely: the automatic geocoder refuses ambiguous matches.
+
+The catalog is built by `tools/map/build_geographic_catalog.py` and read offline with `tools/map/geo_catalog.py`. SQLite indexes support lookup by ISO country code, ADM1 code/name, city name, country, and region; city coordinates are WGS84 latitude/longitude (EPSG:4326 / OGC:CRS84). Region boundary geometry is included when a GeoNames ADM1 ID matches exactly one Natural Earth ADM1 feature; unmatched/ambiguous boundaries remain unset rather than guessed. In the checked-in snapshot, 3,183 of 3,865 regions have geometry; regions without geometry are still searchable but cannot be centered from a boundary by the offline map geocoder. ADM1 fly-to coordinates, when available, are the boundary bounding-box center and are intended for map framing, not as surveyed population centers or guaranteed interior points.
+
+Sources and scope:
+
+- GeoNames `countryInfo.txt` and `admin1CodesASCII.txt`: 252 ISO-coded country/geography entries and the ADM1 hierarchy. The entries include ISO-coded territories and other country-like geographies, not only sovereign states.
+- GeoNames `cities500.zip`: 225,581 records in the checked-in snapshot, generally settlements with population >500 plus administrative seats down to PPLA4. This is a global video-oriented city/locality set, not every named place or every settlement; micro-localities (`PPLX`, e.g. quarters) are excluded. Localized GeoNames alternate names are retained for lookup; automatic coordinate resolution requires an exact, unambiguous city match (or a unique national-capital match). GeoNames is updated daily and describes the data as provided “as is.”
+- Natural Earth 10m Admin 1 States/Provinces v5.1.1: global ADM1 boundary source, public domain. Boundaries are linked by GeoNames `gn_id` only when that ID is unique in the boundary file.
+
+GeoNames data is CC BY 4.0 and requires attribution. Include “GeoNames (www.geonames.org)” and “Natural Earth (www.naturalearthdata.com)” in project/video credits when the catalog data is used. Source documentation: https://www.geonames.org/export/ and https://download.geonames.org/export/dump/readme.txt. Natural Earth source: https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-1-states-provinces/.
+
+To refresh intentionally (network required): `python3 ChrononTemplate/tools/map/build_geographic_catalog.py`. The build writes atomically to `catalog/geographic_catalog.v1.sqlite`; ordinary rendering/query code uses the checked-in database without network access.
+
+Example:
+
+```python
+from tools.map.geo_catalog import GeographicCatalog
+
+with GeographicCatalog() as geo:
+    italy = geo.countries(query="Italy")
+    rome = geo.cities("Roma", country_iso2="IT", limit=5)
+```
+
+The catalog is UTF-8/SQLite and stores cities by stable GeoNames ID, with parent links through ISO 3166-1 alpha-2 and GeoNames ADM1 code. The dataset release date and counts are stored in its `metadata` table.

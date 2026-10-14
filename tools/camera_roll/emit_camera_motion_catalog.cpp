@@ -115,38 +115,17 @@ namespace {
 
 int main() {
     try {
+        const std::vector<CameraMotionPreset> presets = chronontemplate::cameraMotionPresets();
         const std::vector<std::string> ids = chronontemplate::cameraMotionPresetIds();
-        if (ids.size() != 50) fail("expected fifty camera motion presets");
+        if (presets.size() != 50 || ids.size() != presets.size()) fail("expected fifty camera motion presets");
 
         std::set<std::string> seen;
         json recipes = json::array();
-        for (const CameraMotionPreset preset : {
-                     CameraMotionPreset::SoftPushIn, CameraMotionPreset::SoftPullBack,
-                     CameraMotionPreset::EditorialDriftLeft, CameraMotionPreset::EditorialDriftRight,
-                     CameraMotionPreset::TitleRise, CameraMotionPreset::TitleDescend,
-                     CameraMotionPreset::QuietDiagonalDrift, CameraMotionPreset::TypeDepthFocus,
-                     CameraMotionPreset::TypeMicroOrbit, CameraMotionPreset::ImpactPunchSettle,
-                     CameraMotionPreset::KenBurnsIn, CameraMotionPreset::KenBurnsOut,
-                     CameraMotionPreset::PortraitUpwardTrack, CameraMotionPreset::PortraitDownwardTrack,
-                     CameraMotionPreset::PhotoRevealLeft, CameraMotionPreset::PhotoRevealRight,
-                     CameraMotionPreset::LowAnglePhotoReveal, CameraMotionPreset::PortraitHeroArc,
-                     CameraMotionPreset::DocumentaryParallax, CameraMotionPreset::PhotoRackFocus,
-                     CameraMotionPreset::MapRegionPush, CameraMotionPreset::MapRegionPull,
-                     CameraMotionPreset::MapEastwardTrack, CameraMotionPreset::MapWestwardTrack,
-                     CameraMotionPreset::MapNorthwardTrack, CameraMotionPreset::MapSouthwardTrack,
-                     CameraMotionPreset::RouteCameraSweep, CameraMotionPreset::CountryFocusLock,
-                     CameraMotionPreset::CountryComparisonPan, CameraMotionPreset::GeopoliticalTiltReveal,
-                     CameraMotionPreset::UiPanelPush, CameraMotionPreset::DashboardPan,
-                     CameraMotionPreset::CardStackParallax, CameraMotionPreset::CornerDetailInspect,
-                     CameraMotionPreset::DataDetailZoom, CameraMotionPreset::UiOverviewPull,
-                     CameraMotionPreset::SideBySideCompare, CameraMotionPreset::PanelAngledPeek,
-                     CameraMotionPreset::ChartTraverse, CameraMotionPreset::ProductUiMicroFloat,
-                     CameraMotionPreset::WhipPanLeft, CameraMotionPreset::WhipPanRight,
-                     CameraMotionPreset::WhipPanUp, CameraMotionPreset::WhipPanDown,
-                     CameraMotionPreset::FastDollyThrough, CameraMotionPreset::ReverseDollyReveal,
-                     CameraMotionPreset::RollMatchCut, CameraMotionPreset::OrbitHandoff,
-                     CameraMotionPreset::ForegroundOcclusionPass, CameraMotionPreset::FocusHandoff}) {
-            recipes.push_back(recipeJson(chronontemplate::cameraMotionSpecFor(preset), seen));
+        for (std::size_t index = 0; index < presets.size(); ++index) {
+            const CameraMotionPreset preset = presets[index];
+            const CameraMotionSpec& spec = chronontemplate::cameraMotionSpecFor(preset);
+            if (spec.id == nullptr || ids[index] != spec.id) fail("roster ids and motion spec order disagree");
+            recipes.push_back(recipeJson(spec, seen));
         }
 
         json selection = json::object();

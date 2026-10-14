@@ -8,25 +8,17 @@ ShortPhraseDefinition blurOutUp();
 ShortPhraseDefinition bottomUpLetters();
 ShortPhraseDefinition focusBlurResolve();
 ShortPhraseDefinition kineticCenterBuild();
-ShortPhraseDefinition lineByLineSlide();
 ShortPhraseDefinition perWordRise();
 ShortPhraseDefinition perspectiveMarquee();
-ShortPhraseDefinition scrambleReveal();
 ShortPhraseDefinition strikethroughReplace();
 ShortPhraseDefinition textMatchCut();
 ShortPhraseDefinition textShimmer();
-ShortPhraseDefinition weightWave();
 ShortPhraseDefinition chromaticFringeTitle();
 ShortPhraseDefinition maskedHeading();
 ShortPhraseDefinition splitFlapText();
-ShortPhraseDefinition warpText();
-ShortPhraseDefinition foldText();
-ShortPhraseDefinition decryptedText();
 ShortPhraseDefinition scrollReveal();
 ShortPhraseDefinition scrambledText();
-ShortPhraseDefinition glareHover();
 ShortPhraseDefinition gradualBlur();
-ShortPhraseDefinition shapeBlur();
 }
 
 #endif

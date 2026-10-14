@@ -12,6 +12,7 @@ import sys
 import math
 import time
 import json
+import os
 import urllib.request
 import urllib.parse
 import subprocess
@@ -31,6 +32,7 @@ OUT_MP4 = OUT_DIR / "dynamic_map_3d_orbit_colosseum_epic.mp4"
 TOKEN_PATH = BASE_DIR / "refactored/token.json"
 CREDS_PATH = BASE_DIR / "refactored/credentials.json"
 DRIVE_FOLDER_ID = "1ATL0bnJXijNqFlKkgWye3PEAdAuQa1HI"
+DRIVE_UPLOAD = BASE_DIR / "RenderingGen" / "bin" / "drive-upload"
 
 WIDTH = 1920
 HEIGHT = 1080
@@ -70,35 +72,39 @@ def refresh_drive_token():
 
 
 def upload_to_drive(file_path, token, folder_id):
-    boundary = "-------ChrononDynamicMapUpload3D777"
-    fname = file_path.name
-    metadata = {"name": fname, "parents": [folder_id]}
-    meta_json = json.dumps(metadata)
-    file_bytes = file_path.read_bytes()
-
-    body = (
-        f"--{boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{meta_json}\r\n"
-        f"--{boundary}\r\nContent-Type: video/mp4\r\n\r\n"
-    ).encode("utf-8") + file_bytes + f"\r\n--{boundary}--\r\n".encode("utf-8")
-
-    url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink"
-    req = urllib.request.Request(
-        url, data=body,
-        headers={"Authorization": f"Bearer {token}", "Content-Type": f"multipart/related; boundary={boundary}", "Content-Length": str(len(body))}
+    """Upload using RenderingGen's content-addressed Drive publisher."""
+    del token
+    credentials = Path(os.environ.get("CHRONON_DRIVE_CREDENTIALS", str(CREDS_PATH)))
+    token_path = Path(os.environ.get("CHRONON_DRIVE_TOKEN", str(TOKEN_PATH)))
+    if not credentials.is_file() or not token_path.is_file():
+        raise RuntimeError(
+            "Drive OAuth files are missing; set CHRONON_DRIVE_CREDENTIALS and "
+            "CHRONON_DRIVE_TOKEN or provision the configured local credentials")
+    if not DRIVE_UPLOAD.is_file():
+        raise RuntimeError(f"canonical drive-upload executable is missing: {DRIVE_UPLOAD}")
+    proc = subprocess.run(
+        [str(DRIVE_UPLOAD), "-credentials", str(credentials),
+         "-token", str(token_path), "-folder", folder_id, "-file", str(file_path),
+         "-name", Path(file_path).name], cwd=BASE_DIR, text=True,
+        capture_output=True, check=False,
     )
-    with urllib.request.urlopen(req) as resp:
-        res = json.load(resp)
-        fid = res.get("id")
-        try:
-            perm_url = f"https://www.googleapis.com/drive/v3/files/{fid}/permissions"
-            perm_req = urllib.request.Request(
-                perm_url, data=json.dumps({"role": "reader", "type": "anyone"}).encode("utf-8"),
-                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-                method="POST"
-            )
-            with urllib.request.urlopen(perm_req): pass
-        except Exception: pass
-        return res
+    if proc.returncode:
+        raise RuntimeError(f"canonical drive-upload failed: {proc.stderr.strip()}")
+    output = proc.stdout.strip()
+    if not output.startswith("DRIVE_UPLOAD_PASS "):
+        raise RuntimeError(f"canonical drive-upload returned invalid telemetry: {output!r}")
+    fields = dict(part.split("=", 1) for part in output.split()[1:] if "=" in part)
+    required = ("id", "link", "parent", "sha256", "bytes")
+    missing = [key for key in required if not fields.get(key)]
+    if missing:
+        raise RuntimeError(f"canonical drive-upload telemetry missing fields: {', '.join(missing)}")
+    if fields["parent"] != folder_id:
+        raise RuntimeError("canonical drive-upload returned an unexpected parent folder")
+    if len(fields["sha256"]) != 64:
+        raise RuntimeError("canonical drive-upload returned an invalid SHA-256 content address")
+    return {"id": fields["id"], "webViewLink": fields["link"],
+            "parent": fields["parent"], "sha256": fields["sha256"],
+            "bytes": int(fields["bytes"])}
 
 
 def compute_perspective_homography(pitch_deg: float, yaw_deg: float, roll_deg: float,

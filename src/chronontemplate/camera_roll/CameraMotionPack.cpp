@@ -35,464 +35,42 @@ namespace chronontemplate {
                    std::isfinite(subject.halfHeight);
         }
 
-        // ------------------------------------------------- the 50 rows ----
-        // Durations are frames at 30 fps; distances are fractions of the
-        // reference framing; X/Y are fractions of the frame width/height
-        // (X+ = body right, Y+ = body down); angles are degrees; focus is
-        // percent of the configured depth interval. Values transcribed from
-        // the camera motion pack spec, families 1–5 in order.
+        // Preset data is authored once in CameraMotionPresets.def and
+        // projected below into the executable spec table.
+        struct AuthoredCameraMotionPreset {
+            CameraMotionPreset preset;
+            const char* id;
+            CameraMotionFamily family;
+            CameraMotionSpec spec;
+        };
+
+        constexpr AuthoredCameraMotionPreset kAuthoredCameraMotionPresets[] = {
+#define CAMERA_MOTION_PRESET(key, id, family, ...) \
+            {CameraMotionPreset::key, id, CameraMotionFamily::family, [] { \
+                CameraMotionSpec spec; __VA_ARGS__ return spec; }()},
+#include "chronontemplate/camera_roll/CameraMotionPresets.def"
+#undef CAMERA_MOTION_PRESET
+        };
+
+        constexpr std::size_t kCameraMotionPresetCount =
+                sizeof(kAuthoredCameraMotionPresets) / sizeof(kAuthoredCameraMotionPresets[0]);
+
+        [[nodiscard]] const AuthoredCameraMotionPreset* rosterEntry(CameraMotionPreset preset) noexcept {
+            const auto ordinal = static_cast<std::size_t>(preset);
+            if (ordinal >= kCameraMotionPresetCount || kAuthoredCameraMotionPresets[ordinal].preset != preset) return nullptr;
+            return &kAuthoredCameraMotionPresets[ordinal];
+        }
+
+        [[nodiscard]] CameraMotionSpec specFor(const AuthoredCameraMotionPreset& row) {
+            CameraMotionSpec spec = row.spec;
+            spec.id = row.id;
+            spec.family = row.family;
+            return spec;
+        }
 
         [[nodiscard]] CameraMotionSpec specFor(CameraMotionPreset preset) {
-            CameraMotionSpec spec;
-            switch (preset) {
-                // ── Family 1: editorial titles ──
-                case CameraMotionPreset::SoftPushIn:
-                    spec.id = "camera_motion_soft_push_in";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 75;
-                    spec.distStart = 1.09f; spec.distEnd = 1.00f;
-                    spec.easing = "cinematic";
-                    break;
-                case CameraMotionPreset::SoftPullBack:
-                    spec.id = "camera_motion_soft_pull_back";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 75;
-                    spec.distStart = 0.94f; spec.distEnd = 1.06f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::EditorialDriftLeft:
-                    spec.id = "camera_motion_editorial_drift_left";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 84;
-                    spec.xStart = 0.075f; spec.xEnd = -0.075f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::EditorialDriftRight:
-                    spec.id = "camera_motion_editorial_drift_right";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 84;
-                    spec.xStart = -0.075f; spec.xEnd = 0.075f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::TitleRise:
-                    spec.id = "camera_motion_title_rise";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 50;
-                    spec.distStart = 1.035f; spec.distEnd = 1.00f;
-                    spec.yStart = 0.085f; spec.yEnd = 0.f;
-                    spec.easing = "gentle_out";
-                    break;
-                case CameraMotionPreset::TitleDescend:
-                    spec.id = "camera_motion_title_descend";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 50;
-                    spec.distStart = 1.035f; spec.distEnd = 1.00f;
-                    spec.yStart = -0.08f; spec.yEnd = 0.f;
-                    spec.easing = "gentle_out";
-                    break;
-                case CameraMotionPreset::QuietDiagonalDrift:
-                    spec.id = "camera_motion_quiet_diagonal_drift";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 90;
-                    spec.xStart = -0.045f; spec.xEnd = 0.045f;
-                    spec.yStart = 0.045f; spec.yEnd = -0.045f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::TypeDepthFocus:
-                    spec.id = "camera_motion_type_depth_focus";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 70;
-                    spec.distStart = 1.04f; spec.distEnd = 1.00f;
-                    spec.focusStart = 10.f; spec.focusEnd = 90.f;
-                    spec.needsDof = true;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::TypeMicroOrbit:
-                    spec.id = "camera_motion_type_micro_orbit";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 100;
-                    spec.distStart = 1.05f; spec.distMid = 1.00f; spec.distMidAt = 0.5f;
-                    spec.distEnd = 1.03f;
-                    spec.xStart = -0.025f; spec.xMid = 0.f; spec.xEnd = 0.025f;
-                    spec.yawStart = -2.f; spec.yawEnd = 2.f;
-                    spec.needs25D = true;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::ImpactPunchSettle:
-                    spec.id = "camera_motion_impact_punch_settle";
-                    spec.family = CameraMotionFamily::EditorialTitle;
-                    spec.durationFrames = 22;
-                    spec.distStart = 1.28f; spec.distMid = 0.975f; spec.distMidAt = 8.f / 22.f;
-                    spec.distEnd = 1.00f;
-                    spec.highEnergy = true;
-                    spec.easing = "snappy_out";
-                    break;
-                // ── Family 2: photo documentary ──
-                case CameraMotionPreset::KenBurnsIn:
-                    spec.id = "camera_motion_ken_burns_in";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 120;
-                    spec.distStart = 1.07f; spec.distEnd = 0.91f;
-                    spec.xStart = -0.045f; spec.xEnd = 0.055f;
-                    spec.yStart = 0.035f; spec.yEnd = -0.03f;
-                    spec.easing = "cinematic";
-                    break;
-                case CameraMotionPreset::KenBurnsOut:
-                    spec.id = "camera_motion_ken_burns_out";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 120;
-                    spec.distStart = 0.90f; spec.distEnd = 1.07f;
-                    spec.xStart = 0.035f; spec.xEnd = -0.04f;
-                    spec.yStart = -0.04f; spec.yEnd = 0.03f;
-                    spec.easing = "cinematic";
-                    break;
-                case CameraMotionPreset::PortraitUpwardTrack:
-                    spec.id = "camera_motion_portrait_upward_track";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 85;
-                    spec.distStart = 0.93f; spec.distEnd = 0.94f;
-                    spec.yStart = 0.20f; spec.yEnd = -0.08f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::PortraitDownwardTrack:
-                    spec.id = "camera_motion_portrait_downward_track";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 85;
-                    spec.distStart = 0.95f; spec.distEnd = 0.95f;
-                    spec.yStart = -0.14f; spec.yEnd = 0.14f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::PhotoRevealLeft:
-                    spec.id = "camera_motion_photo_reveal_left";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 70;
-                    spec.distStart = 0.90f; spec.distEnd = 0.94f;
-                    spec.xStart = 0.18f; spec.xEnd = -0.10f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::PhotoRevealRight:
-                    spec.id = "camera_motion_photo_reveal_right";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 70;
-                    spec.distStart = 0.90f; spec.distEnd = 0.94f;
-                    spec.xStart = -0.18f; spec.xEnd = 0.10f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::LowAnglePhotoReveal:
-                    spec.id = "camera_motion_low_angle_photo_reveal";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 72;
-                    spec.distStart = 1.10f; spec.distEnd = 0.98f;
-                    spec.yStart = 0.13f; spec.yEnd = 0.f;
-                    spec.pitchStart = 5.f; spec.pitchEnd = 0.f;
-                    spec.needs25D = true;
-                    spec.easing = "gentle_out";
-                    break;
-                case CameraMotionPreset::PortraitHeroArc:
-                    spec.id = "camera_motion_portrait_hero_arc";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 100;
-                    spec.distStart = 1.02f; spec.distMid = 0.97f; spec.distMidAt = 0.5f;
-                    spec.distEnd = 1.04f;
-                    spec.xStart = -0.11f; spec.xMid = 0.f; spec.xEnd = 0.10f;
-                    spec.yawStart = -5.f; spec.yawEnd = 5.f;
-                    spec.needs25D = true;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::DocumentaryParallax:
-                    spec.id = "camera_motion_documentary_parallax";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 105;
-                    spec.distStart = 1.02f; spec.distEnd = 0.98f;
-                    spec.xStart = -0.10f; spec.xEnd = 0.10f;
-                    spec.needsMultiPlane = true;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::PhotoRackFocus:
-                    spec.id = "camera_motion_photo_rack_focus";
-                    spec.family = CameraMotionFamily::PhotoDocumentary;
-                    spec.durationFrames = 78;
-                    spec.focusStart = 95.f; spec.focusEnd = 10.f;
-                    spec.needsDof = true;
-                    spec.easing = "smooth";
-                    break;
-                // ── Family 3: geo maps ──
-                case CameraMotionPreset::MapRegionPush:
-                    spec.id = "camera_motion_map_region_push";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 90;
-                    spec.distStart = 1.16f; spec.distEnd = 0.82f;
-                    spec.easing = "cinematic";
-                    break;
-                case CameraMotionPreset::MapRegionPull:
-                    spec.id = "camera_motion_map_region_pull";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 100;
-                    spec.distStart = 0.78f; spec.distEnd = 1.20f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::MapEastwardTrack:
-                    spec.id = "camera_motion_map_eastward_track";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 105;
-                    spec.distStart = 0.92f; spec.distEnd = 0.92f;
-                    spec.xStart = -0.25f; spec.xEnd = 0.22f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::MapWestwardTrack:
-                    spec.id = "camera_motion_map_westward_track";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 105;
-                    spec.distStart = 0.92f; spec.distEnd = 0.92f;
-                    spec.xStart = 0.24f; spec.xEnd = -0.23f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::MapNorthwardTrack:
-                    spec.id = "camera_motion_map_northward_track";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 95;
-                    spec.distStart = 0.95f; spec.distEnd = 0.95f;
-                    spec.yStart = 0.24f; spec.yEnd = -0.21f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::MapSouthwardTrack:
-                    spec.id = "camera_motion_map_southward_track";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 95;
-                    spec.distStart = 0.95f; spec.distEnd = 0.95f;
-                    spec.yStart = -0.22f; spec.yEnd = 0.24f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::RouteCameraSweep:
-                    spec.id = "camera_motion_route_camera_sweep";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 120;
-                    spec.distStart = 1.10f; spec.distMid = 0.88f; spec.distMidAt = 0.5f;
-                    spec.distEnd = 0.93f;
-                    spec.xStart = -0.20f; spec.xMid = 0.f; spec.xEnd = 0.20f;
-                    spec.yStart = 0.10f; spec.yMid = 0.f; spec.yEnd = -0.10f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::CountryFocusLock:
-                    spec.id = "camera_motion_country_focus_lock";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 82;
-                    spec.distStart = 1.16f; spec.distMid = 0.83f; spec.distMidAt = 0.65f;
-                    spec.distEnd = 0.84f;
-                    spec.xStart = -0.13f; spec.xEnd = 0.f;
-                    spec.yStart = 0.04f; spec.yEnd = 0.f;
-                    spec.easing = "snappy_out";
-                    break;
-                case CameraMotionPreset::CountryComparisonPan:
-                    spec.id = "camera_motion_country_comparison_pan";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 110;
-                    spec.distStart = 0.96f; spec.distEnd = 0.96f;
-                    spec.xStart = -0.23f; spec.xEnd = 0.23f;
-                    spec.travelStart = 0.20f; spec.travelEnd = 0.85f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::GeopoliticalTiltReveal:
-                    spec.id = "camera_motion_geopolitical_tilt_reveal";
-                    spec.family = CameraMotionFamily::MapGeo;
-                    spec.durationFrames = 98;
-                    spec.distStart = 1.15f; spec.distEnd = 0.95f;
-                    spec.yStart = 0.08f; spec.yEnd = 0.f;
-                    spec.pitchStart = 7.f; spec.pitchEnd = 0.f;
-                    spec.needs25D = true;
-                    spec.easing = "gentle_out";
-                    break;
-                // ── Family 4: dashboard UI ──
-                case CameraMotionPreset::UiPanelPush:
-                    spec.id = "camera_motion_ui_panel_push";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 63;
-                    spec.distStart = 1.16f; spec.distEnd = 0.91f;
-                    spec.easing = "gentle_out";
-                    break;
-                case CameraMotionPreset::DashboardPan:
-                    spec.id = "camera_motion_dashboard_pan";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 100;
-                    spec.distStart = 0.96f; spec.distEnd = 0.96f;
-                    spec.xStart = -0.18f; spec.xEnd = 0.18f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::CardStackParallax:
-                    spec.id = "camera_motion_card_stack_parallax";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 86;
-                    spec.distStart = 1.08f; spec.distEnd = 0.92f;
-                    spec.xStart = -0.08f; spec.xEnd = 0.10f;
-                    spec.yawStart = -2.5f; spec.yawEnd = 2.5f;
-                    spec.needs25D = true;
-                    spec.needsMultiPlane = true;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::CornerDetailInspect:
-                    spec.id = "camera_motion_corner_detail_inspect";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 77;
-                    spec.distStart = 1.18f; spec.distEnd = 0.83f;
-                    spec.xStart = -0.02f; spec.xEnd = 0.15f;
-                    spec.yStart = -0.02f; spec.yEnd = -0.12f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::DataDetailZoom:
-                    spec.id = "camera_motion_data_detail_zoom";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 70;
-                    spec.distStart = 1.15f; spec.distMid = 0.85f; spec.distMidAt = 0.72f;
-                    spec.distEnd = 0.87f;
-                    spec.easing = "snappy_out";
-                    break;
-                case CameraMotionPreset::UiOverviewPull:
-                    spec.id = "camera_motion_ui_overview_pull";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 90;
-                    spec.distStart = 0.80f; spec.distEnd = 1.20f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::SideBySideCompare:
-                    spec.id = "camera_motion_side_by_side_compare";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 110;
-                    spec.distStart = 0.95f; spec.distMid = 0.98f; spec.distMidAt = 0.45f;
-                    spec.distEnd = 0.95f;
-                    spec.xStart = -0.25f; spec.xMid = 0.f; spec.xEnd = 0.25f;
-                    spec.posMidAt = 0.45f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::PanelAngledPeek:
-                    spec.id = "camera_motion_panel_angled_peek";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 76;
-                    spec.distStart = 1.08f; spec.distEnd = 0.98f;
-                    spec.xStart = -0.06f; spec.xEnd = 0.f;
-                    spec.yawStart = -6.f; spec.yawEnd = 0.f;
-                    spec.needs25D = true;
-                    spec.easing = "gentle_out";
-                    break;
-                case CameraMotionPreset::ChartTraverse:
-                    spec.id = "camera_motion_chart_traverse";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 105;
-                    spec.distStart = 0.88f; spec.distEnd = 0.88f;
-                    spec.xStart = -0.30f; spec.xMid = -0.08f; spec.xEnd = 0.30f;
-                    spec.posMidAt = 0.40f;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::ProductUiMicroFloat:
-                    spec.id = "camera_motion_product_ui_micro_float";
-                    spec.family = CameraMotionFamily::DashboardUI;
-                    spec.durationFrames = 150;
-                    spec.distStart = 1.02f; spec.distMid = 0.99f; spec.distMidAt = 0.5f;
-                    spec.distEnd = 1.02f;
-                    spec.xStart = -0.015f; spec.xMid = 0.014f; spec.xEnd = -0.015f;
-                    spec.yStart = 0.015f; spec.yMid = -0.014f; spec.yEnd = 0.015f;
-                    spec.needs25D = true;
-                    spec.easing = "smooth";
-                    break;
-                // ── Family 5: two-shot transitions ──
-                // Rows state the OUT leg (start → end); the resolver mirrors
-                // the out end across the rest pose for the IN leg start and
-                // settles both legs onto the rest framing.
-                case CameraMotionPreset::WhipPanLeft:
-                    spec.id = "camera_motion_whip_pan_left";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 14;
-                    spec.xStart = 0.f; spec.xEnd = -0.38f;
-                    spec.twoShot = true; spec.highEnergy = true;
-                    spec.snapIn = true;
-                    spec.easing = "whip_in";
-                    break;
-                case CameraMotionPreset::WhipPanRight:
-                    spec.id = "camera_motion_whip_pan_right";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 14;
-                    spec.xStart = 0.f; spec.xEnd = 0.38f;
-                    spec.twoShot = true; spec.highEnergy = true;
-                    spec.snapIn = true;
-                    spec.easing = "whip_in";
-                    break;
-                case CameraMotionPreset::WhipPanUp:
-                    spec.id = "camera_motion_whip_pan_up";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 16;
-                    spec.yStart = 0.f; spec.yEnd = -0.32f;
-                    spec.twoShot = true; spec.highEnergy = true;
-                    spec.snapIn = true;
-                    spec.easing = "whip_in";
-                    break;
-                case CameraMotionPreset::WhipPanDown:
-                    spec.id = "camera_motion_whip_pan_down";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 16;
-                    spec.yStart = 0.f; spec.yEnd = 0.32f;
-                    spec.twoShot = true; spec.highEnergy = true;
-                    spec.snapIn = true;
-                    spec.easing = "whip_in";
-                    break;
-                case CameraMotionPreset::FastDollyThrough:
-                    spec.id = "camera_motion_fast_dolly_through";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 22;
-                    spec.distStart = 1.00f; spec.distEnd = 0.48f;
-                    spec.twoShot = true; spec.highEnergy = true;
-                    spec.needsMultiPlane = true;
-                    spec.snapIn = true;
-                    spec.easing = "whip_in";
-                    break;
-                case CameraMotionPreset::ReverseDollyReveal:
-                    spec.id = "camera_motion_reverse_dolly_reveal";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 22;
-                    spec.distStart = 1.00f; spec.distEnd = 1.46f;
-                    spec.twoShot = true;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::RollMatchCut:
-                    spec.id = "camera_motion_roll_match_cut";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 19;
-                    spec.rollStart = 0.f; spec.rollPeak = kNoMid; spec.rollEnd = 15.f;
-                    spec.twoShot = true;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::OrbitHandoff:
-                    spec.id = "camera_motion_orbit_handoff";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 24;
-                    spec.distStart = 1.00f; spec.distEnd = 0.95f;
-                    spec.xStart = 0.f; spec.xEnd = 0.13f;
-                    spec.yawStart = 0.f; spec.yawEnd = 13.f;
-                    spec.twoShot = true;
-                    spec.needs25D = true;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::ForegroundOcclusionPass:
-                    spec.id = "camera_motion_foreground_occlusion_pass";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 22;
-                    spec.distStart = 1.00f; spec.distEnd = 0.70f;
-                    spec.xStart = 0.f; spec.xEnd = 0.18f;
-                    spec.twoShot = true;
-                    spec.needsMultiPlane = true;
-                    spec.needsOccluder = true;
-                    spec.snapIn = true;
-                    spec.easing = "smooth";
-                    break;
-                case CameraMotionPreset::FocusHandoff:
-                    spec.id = "camera_motion_focus_handoff";
-                    spec.family = CameraMotionFamily::Transition;
-                    spec.durationFrames = 28;
-                    spec.focusStart = 15.f; spec.focusEnd = 95.f;
-                    spec.twoShot = true;
-                    spec.needsDof = true;
-                    spec.easing = "smooth";
-                    break;
-            }
-            return spec;
+            const auto* entry = rosterEntry(preset);
+            return entry == nullptr ? CameraMotionSpec{} : specFor(*entry);
         }
 
         // The resolved offsets of one leg endpoint: distance fraction already
@@ -543,41 +121,25 @@ namespace chronontemplate {
 
     }// namespace
 
+    // The canonical roster and fully-authored rows are above.
+
+
+    std::vector<CameraMotionPreset> cameraMotionPresets() {
+        std::vector<CameraMotionPreset> presets;
+        presets.reserve(kCameraMotionPresetCount);
+        for (const auto& entry : kAuthoredCameraMotionPresets) presets.push_back(entry.preset);
+        return presets;
+    }
+
     const char* cameraMotionPresetId(CameraMotionPreset preset) noexcept {
-        return specFor(preset).id;
+        const auto* entry = rosterEntry(preset);
+        return entry == nullptr ? nullptr : entry->id;
     }
 
     std::vector<std::string> cameraMotionPresetIds() {
         std::vector<std::string> ids;
-        ids.reserve(50);
-        for (const CameraMotionPreset preset : {
-                     CameraMotionPreset::SoftPushIn, CameraMotionPreset::SoftPullBack,
-                     CameraMotionPreset::EditorialDriftLeft, CameraMotionPreset::EditorialDriftRight,
-                     CameraMotionPreset::TitleRise, CameraMotionPreset::TitleDescend,
-                     CameraMotionPreset::QuietDiagonalDrift, CameraMotionPreset::TypeDepthFocus,
-                     CameraMotionPreset::TypeMicroOrbit, CameraMotionPreset::ImpactPunchSettle,
-                     CameraMotionPreset::KenBurnsIn, CameraMotionPreset::KenBurnsOut,
-                     CameraMotionPreset::PortraitUpwardTrack, CameraMotionPreset::PortraitDownwardTrack,
-                     CameraMotionPreset::PhotoRevealLeft, CameraMotionPreset::PhotoRevealRight,
-                     CameraMotionPreset::LowAnglePhotoReveal, CameraMotionPreset::PortraitHeroArc,
-                     CameraMotionPreset::DocumentaryParallax, CameraMotionPreset::PhotoRackFocus,
-                     CameraMotionPreset::MapRegionPush, CameraMotionPreset::MapRegionPull,
-                     CameraMotionPreset::MapEastwardTrack, CameraMotionPreset::MapWestwardTrack,
-                     CameraMotionPreset::MapNorthwardTrack, CameraMotionPreset::MapSouthwardTrack,
-                     CameraMotionPreset::RouteCameraSweep, CameraMotionPreset::CountryFocusLock,
-                     CameraMotionPreset::CountryComparisonPan, CameraMotionPreset::GeopoliticalTiltReveal,
-                     CameraMotionPreset::UiPanelPush, CameraMotionPreset::DashboardPan,
-                     CameraMotionPreset::CardStackParallax, CameraMotionPreset::CornerDetailInspect,
-                     CameraMotionPreset::DataDetailZoom, CameraMotionPreset::UiOverviewPull,
-                     CameraMotionPreset::SideBySideCompare, CameraMotionPreset::PanelAngledPeek,
-                     CameraMotionPreset::ChartTraverse, CameraMotionPreset::ProductUiMicroFloat,
-                     CameraMotionPreset::WhipPanLeft, CameraMotionPreset::WhipPanRight,
-                     CameraMotionPreset::WhipPanUp, CameraMotionPreset::WhipPanDown,
-                     CameraMotionPreset::FastDollyThrough, CameraMotionPreset::ReverseDollyReveal,
-                     CameraMotionPreset::RollMatchCut, CameraMotionPreset::OrbitHandoff,
-                     CameraMotionPreset::ForegroundOcclusionPass, CameraMotionPreset::FocusHandoff}) {
-            ids.emplace_back(cameraMotionPresetId(preset));
-        }
+        ids.reserve(kCameraMotionPresetCount);
+        for (const auto& entry : kAuthoredCameraMotionPresets) ids.emplace_back(entry.id);
         return ids;
     }
 
@@ -591,45 +153,19 @@ namespace chronontemplate {
 
     const CameraMotionSpec& cameraMotionSpecFor(CameraMotionPreset preset) {
         static const CameraMotionSpec kEmpty{};
-        // The table is the authority: resolve once per preset into statics.
-        // (A switch-built static keeps the row next to its preset.)
-        static bool initialised = false;
-        static CameraMotionSpec table[50];
-        if (!initialised) {
-            int index = 0;
-            for (const CameraMotionPreset value : {
-                         CameraMotionPreset::SoftPushIn, CameraMotionPreset::SoftPullBack,
-                         CameraMotionPreset::EditorialDriftLeft, CameraMotionPreset::EditorialDriftRight,
-                         CameraMotionPreset::TitleRise, CameraMotionPreset::TitleDescend,
-                         CameraMotionPreset::QuietDiagonalDrift, CameraMotionPreset::TypeDepthFocus,
-                         CameraMotionPreset::TypeMicroOrbit, CameraMotionPreset::ImpactPunchSettle,
-                         CameraMotionPreset::KenBurnsIn, CameraMotionPreset::KenBurnsOut,
-                         CameraMotionPreset::PortraitUpwardTrack, CameraMotionPreset::PortraitDownwardTrack,
-                         CameraMotionPreset::PhotoRevealLeft, CameraMotionPreset::PhotoRevealRight,
-                         CameraMotionPreset::LowAnglePhotoReveal, CameraMotionPreset::PortraitHeroArc,
-                         CameraMotionPreset::DocumentaryParallax, CameraMotionPreset::PhotoRackFocus,
-                         CameraMotionPreset::MapRegionPush, CameraMotionPreset::MapRegionPull,
-                         CameraMotionPreset::MapEastwardTrack, CameraMotionPreset::MapWestwardTrack,
-                         CameraMotionPreset::MapNorthwardTrack, CameraMotionPreset::MapSouthwardTrack,
-                         CameraMotionPreset::RouteCameraSweep, CameraMotionPreset::CountryFocusLock,
-                         CameraMotionPreset::CountryComparisonPan, CameraMotionPreset::GeopoliticalTiltReveal,
-                         CameraMotionPreset::UiPanelPush, CameraMotionPreset::DashboardPan,
-                         CameraMotionPreset::CardStackParallax, CameraMotionPreset::CornerDetailInspect,
-                         CameraMotionPreset::DataDetailZoom, CameraMotionPreset::UiOverviewPull,
-                         CameraMotionPreset::SideBySideCompare, CameraMotionPreset::PanelAngledPeek,
-                         CameraMotionPreset::ChartTraverse, CameraMotionPreset::ProductUiMicroFloat,
-                         CameraMotionPreset::WhipPanLeft, CameraMotionPreset::WhipPanRight,
-                         CameraMotionPreset::WhipPanUp, CameraMotionPreset::WhipPanDown,
-                         CameraMotionPreset::FastDollyThrough, CameraMotionPreset::ReverseDollyReveal,
-                         CameraMotionPreset::RollMatchCut, CameraMotionPreset::OrbitHandoff,
-                         CameraMotionPreset::ForegroundOcclusionPass, CameraMotionPreset::FocusHandoff}) {
-                table[index++] = specFor(value);
+        // Function-local static initialization is guaranteed thread-safe by
+        // C++11. Keep the canonical enum order here: the public preset values
+        // are stable ordinals consumed by the generated catalog.
+        static const std::array<CameraMotionSpec, kCameraMotionPresetCount> table = [] {
+            std::array<CameraMotionSpec, kCameraMotionPresetCount> rows{};
+            for (std::size_t index = 0; index < kCameraMotionPresetCount; ++index) {
+                rows[index] = specFor(kAuthoredCameraMotionPresets[index]);
             }
-            initialised = true;
-        }
-        const int ordinal = static_cast<int>(preset);
-        if (ordinal < 0 || ordinal >= 50) return kEmpty;
-        return table[ordinal];
+            return rows;
+        }();
+        const auto* entry = rosterEntry(preset);
+        if (entry == nullptr) return kEmpty;
+        return table[static_cast<std::size_t>(preset)];
     }
 
     float cameraMotionIntensityFactor(CameraMotionIntensity intensity) noexcept {
@@ -910,11 +446,13 @@ namespace chronontemplate {
         if (spec.twoShot && (!(spec.cutAt > 0.f) || !(spec.cutAt < 1.f))) {
             throw std::invalid_argument("applyCameraMotionShot: cutAt must be inside (0, 1)");
         }
-        if (spec.twoShot) {
-            applyTwoShot(scene, spec, shot, duration);
-        } else {
-            applySingleShot(scene, spec, shot, duration);
-        }
+        chrononmotion::motion::presets::author(scene.motion(), spec.id, [&] {
+            if (spec.twoShot) {
+                applyTwoShot(scene, spec, shot, duration);
+            } else {
+                applySingleShot(scene, spec, shot, duration);
+            }
+        });
     }
 
 }// namespace chronontemplate
