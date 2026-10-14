@@ -244,11 +244,19 @@ namespace {
         particleSpec.particleVx = 0.25f;
         particleSpec.particleColor = "#DDEEFF";
         const BackgroundComposition particles = addBackground(particleScene, particleSpec);
-        check(particles.accents.size() == 12,
+        // Accents hold the deterministic Perlin/grain field plus one layer
+        // per dot (see the 97-layer default-quantity contract above).
+        check(particles.accents.size() == 13,
               "Particles quantity directly controls the authored dot count");
-        check(!particles.accents.empty() &&
-                      particles.accents.front()->layer().tracks.position.keys().size() == 2,
-              "each particle gets a deterministic drift motion track");
+        int dotCount = 0;
+        bool allDrift = true;
+        for (const LayerHandle* accent : particles.accents) {
+            if (accent->name().find("_particle_") == std::string::npos) continue;
+            ++dotCount;
+            if (accent->layer().tracks.position.keys().size() != 2) allDrift = false;
+        }
+        check(dotCount == 12, "twelve particle dots are authored for quantity 12");
+        check(allDrift, "each particle gets a deterministic drift motion track");
         check(particleHost.lastShapeRequest().fillColor == "#DDEEFF",
               "Particles uses the caller-selected native shape color");
         check(particleScene.validate().empty(), "animated particle scene validates");

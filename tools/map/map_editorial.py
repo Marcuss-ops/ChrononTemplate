@@ -126,6 +126,7 @@ def _font(name: str, size: int):
 # ---------------------------------------------------------------------------
 
 _BORDERS: dict | None = None
+_BORDER_FALLBACK_CACHE: dict[str, dict] = {}
 
 
 def load_borders() -> dict:
@@ -137,10 +138,42 @@ def load_borders() -> dict:
     return _BORDERS
 
 
+def load_border(iso: str) -> dict:
+    """Load a vendored border, falling back to the full Natural Earth catalog."""
+    code = str(iso).upper()
+    data = load_borders().get(code)
+    if data:
+        return data
+    if code in _BORDER_FALLBACK_CACHE:
+        return _BORDER_FALLBACK_CACHE[code]
+    catalog = HERE.parents[1] / "catalog" / "ne_50m_admin_0_countries.geojson"
+    with catalog.open(encoding="utf-8") as f:
+        features = json.load(f).get("features", [])
+    for feature in features:
+        props = feature.get("properties", {})
+        if code not in {str(props.get(k, "")).upper()
+                        for k in ("ADM0_A3", "ISO_A3", "SOV_A3")}:
+            continue
+        geom = feature.get("geometry") or {}
+        coords = geom.get("coordinates", [])
+        if geom.get("type") == "Polygon":
+            groups = [coords]
+        elif geom.get("type") == "MultiPolygon":
+            groups = coords
+        else:
+            groups = []
+        rings = [polygon[0] for polygon in groups if polygon and len(polygon[0]) >= 4]
+        if rings:
+            data = {"name": props.get("ADMIN", code), "polygons": rings}
+            _BORDER_FALLBACK_CACHE[code] = data
+            return data
+    raise KeyError(f"Natural Earth geometry missing for ISO {code}")
+
+
 def country_polygons_screen(iso: str, project) -> list[list[tuple[int, int]]]:
     """Project a country's rings to screen; drop rings fully off-screen."""
     polys = []
-    for ring in load_borders()[iso]["polygons"]:
+    for ring in load_border(iso)["polygons"]:
         pts = [project(lat, lon) for lon, lat in ring]
         polys.append([(int(x), int(y)) for x, y in pts])
     return polys

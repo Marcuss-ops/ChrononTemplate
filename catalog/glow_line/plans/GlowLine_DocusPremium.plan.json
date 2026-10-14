@@ -1,0 +1,3578 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "glow_line_03_docus_premium",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 150
+  },
+  "layers": [
+    {
+      "id": "bg_base",
+      "type": "color",
+      "color": [
+        0.027450980392156862,
+        0.03529411764705882,
+        0.054901960784313725,
+        1.0
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "effects": [
+        {
+          "type": "vignette",
+          "radius": 0.85,
+          "softness": 0.55,
+          "amount": 0.45
+        }
+      ]
+    },
+    {
+      "id": "bg_grid",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.045,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -800.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -800.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -640.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -640.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -480.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -480.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -320.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -320.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -160.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -160.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              0.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              0.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              160.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              160.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              320.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              320.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              480.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              480.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              640.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              640.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              800.0,
+              -540.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              800.0,
+              540.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -960.0,
+              -420.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              960.0,
+              -420.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -960.0,
+              -300.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              960.0,
+              -300.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -960.0,
+              -180.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              960.0,
+              -180.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -960.0,
+              -60.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              960.0,
+              -60.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -960.0,
+              60.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              960.0,
+              60.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -960.0,
+              180.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              960.0,
+              180.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -960.0,
+              300.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              960.0,
+              300.0
+            ]
+          },
+          {
+            "type": "move_to",
+            "point": [
+              -960.0,
+              420.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              960.0,
+              420.0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#80A0C0",
+          "width": 1.0
+        }
+      }
+    },
+    {
+      "id": "doc_header_badge",
+      "type": "shape",
+      "position": [
+        -780.0,
+        -450.0
+      ],
+      "size": [
+        180,
+        26
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.8,
+      "shape": {
+        "type": "rect",
+        "fill": [
+          0.06274509803921569,
+          0.08627450980392157,
+          0.13333333333333333,
+          0.8
+        ],
+        "stroke": {
+          "color": "#00A2FF",
+          "width": 1.0
+        }
+      }
+    },
+    {
+      "id": "doc_header_text",
+      "type": "text",
+      "text": "DOCUS // GLOW LINE COMPARISON",
+      "position": [
+        180.0,
+        95.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.85,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Regular.ttf",
+        "font_size": 13.0,
+        "fill": "#A8D4FF"
+      }
+    },
+    {
+      "id": "wp_marker_wp_01",
+      "type": "shape",
+      "position": [
+        -660.0,
+        200.0
+      ],
+      "size": [
+        16,
+        16
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 1.0,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.0392156862745098,
+          0.07058823529411765,
+          0.11764705882352941,
+          0.9
+        ],
+        "stroke": {
+          "color": "#00D2FF",
+          "width": 1.8
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.6,
+          "color": [
+            0.0,
+            0.8235294117647058,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.25
+              },
+              {
+                "frame": 13,
+                "value": 0.25
+              },
+              {
+                "frame": 21,
+                "value": 1.0
+              },
+              {
+                "frame": 149,
+                "value": 0.9
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "wp_center_wp_01",
+      "type": "shape",
+      "position": [
+        -660.0,
+        200.0
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.9,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "id": "wp_label_wp_01",
+      "type": "text",
+      "text": "WP-01: ALPHA // LAT 45.42",
+      "position": [
+        316.0,
+        756.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.85,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Regular.ttf",
+        "font_size": 11.5,
+        "fill": "#A0C4E8"
+      }
+    },
+    {
+      "id": "wp_ripple_wp_01",
+      "type": "shape",
+      "position": [
+        -660.0,
+        200.0
+      ],
+      "size": [
+        24,
+        24
+      ],
+      "start_frame": 15,
+      "duration_frames": 24,
+      "shape": {
+        "type": "ellipse",
+        "stroke": {
+          "color": "#80F0FF",
+          "width": 1.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 16.0,
+          "intensity": 0.8,
+          "color": [
+            0.0,
+            0.8235294117647058,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 15,
+                "value": 0.2
+              },
+              {
+                "frame": 37,
+                "value": 3.8
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 15,
+                "value": 1.0
+              },
+              {
+                "frame": 37,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "wp_marker_wp_02",
+      "type": "shape",
+      "position": [
+        -240.0,
+        -180.0
+      ],
+      "size": [
+        16,
+        16
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 1.0,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.0392156862745098,
+          0.07058823529411765,
+          0.11764705882352941,
+          0.9
+        ],
+        "stroke": {
+          "color": "#00D2FF",
+          "width": 1.8
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.6,
+          "color": [
+            0.0,
+            0.8235294117647058,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.25
+              },
+              {
+                "frame": 53,
+                "value": 0.25
+              },
+              {
+                "frame": 61,
+                "value": 1.0
+              },
+              {
+                "frame": 149,
+                "value": 0.9
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "wp_center_wp_02",
+      "type": "shape",
+      "position": [
+        -240.0,
+        -180.0
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.9,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "id": "wp_label_wp_02",
+      "type": "text",
+      "text": "WP-02: NODE-B // DELTA +1.8",
+      "position": [
+        736.0,
+        376.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.85,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Regular.ttf",
+        "font_size": 11.5,
+        "fill": "#A0C4E8"
+      }
+    },
+    {
+      "id": "wp_ripple_wp_02",
+      "type": "shape",
+      "position": [
+        -240.0,
+        -180.0
+      ],
+      "size": [
+        24,
+        24
+      ],
+      "start_frame": 55,
+      "duration_frames": 24,
+      "shape": {
+        "type": "ellipse",
+        "stroke": {
+          "color": "#80F0FF",
+          "width": 1.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 16.0,
+          "intensity": 0.8,
+          "color": [
+            0.0,
+            0.8235294117647058,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 55,
+                "value": 0.2
+              },
+              {
+                "frame": 77,
+                "value": 3.8
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 55,
+                "value": 1.0
+              },
+              {
+                "frame": 77,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "wp_marker_wp_03",
+      "type": "shape",
+      "position": [
+        260.0,
+        160.0
+      ],
+      "size": [
+        16,
+        16
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 1.0,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.0392156862745098,
+          0.07058823529411765,
+          0.11764705882352941,
+          0.9
+        ],
+        "stroke": {
+          "color": "#00D2FF",
+          "width": 1.8
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.6,
+          "color": [
+            0.0,
+            0.8235294117647058,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.25
+              },
+              {
+                "frame": 64,
+                "value": 0.25
+              },
+              {
+                "frame": 72,
+                "value": 1.0
+              },
+              {
+                "frame": 149,
+                "value": 0.9
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "wp_center_wp_03",
+      "type": "shape",
+      "position": [
+        260.0,
+        160.0
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.9,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "id": "wp_label_wp_03",
+      "type": "text",
+      "text": "WP-03: VECTOR // SECTOR 07",
+      "position": [
+        1236.0,
+        716.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.85,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Regular.ttf",
+        "font_size": 11.5,
+        "fill": "#A0C4E8"
+      }
+    },
+    {
+      "id": "wp_ripple_wp_03",
+      "type": "shape",
+      "position": [
+        260.0,
+        160.0
+      ],
+      "size": [
+        24,
+        24
+      ],
+      "start_frame": 66,
+      "duration_frames": 24,
+      "shape": {
+        "type": "ellipse",
+        "stroke": {
+          "color": "#80F0FF",
+          "width": 1.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 16.0,
+          "intensity": 0.8,
+          "color": [
+            0.0,
+            0.8235294117647058,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 66,
+                "value": 0.2
+              },
+              {
+                "frame": 88,
+                "value": 3.8
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 66,
+                "value": 1.0
+              },
+              {
+                "frame": 88,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "wp_marker_wp_04",
+      "type": "shape",
+      "position": [
+        680.0,
+        -200.0
+      ],
+      "size": [
+        16,
+        16
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 1.0,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.0392156862745098,
+          0.07058823529411765,
+          0.11764705882352941,
+          0.9
+        ],
+        "stroke": {
+          "color": "#00D2FF",
+          "width": 1.8
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.6,
+          "color": [
+            0.0,
+            0.8235294117647058,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.25
+              },
+              {
+                "frame": 103,
+                "value": 0.25
+              },
+              {
+                "frame": 111,
+                "value": 1.0
+              },
+              {
+                "frame": 149,
+                "value": 0.9
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "wp_center_wp_04",
+      "type": "shape",
+      "position": [
+        680.0,
+        -200.0
+      ],
+      "size": [
+        5,
+        5
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.9,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "id": "wp_label_wp_04",
+      "type": "text",
+      "text": "WP-04: TERMINAL // TARGET",
+      "position": [
+        1656.0,
+        356.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.85,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Regular.ttf",
+        "font_size": 11.5,
+        "fill": "#A0C4E8"
+      }
+    },
+    {
+      "id": "wp_ripple_wp_04",
+      "type": "shape",
+      "position": [
+        680.0,
+        -200.0
+      ],
+      "size": [
+        24,
+        24
+      ],
+      "start_frame": 105,
+      "duration_frames": 24,
+      "shape": {
+        "type": "ellipse",
+        "stroke": {
+          "color": "#80F0FF",
+          "width": 1.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 16.0,
+          "intensity": 0.8,
+          "color": [
+            0.0,
+            0.8235294117647058,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 105,
+                "value": 0.2
+              },
+              {
+                "frame": 127,
+                "value": 3.8
+              }
+            ]
+          },
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 105,
+                "value": 1.0
+              },
+              {
+                "frame": 127,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "tier_badge",
+      "type": "text",
+      "text": "03 // GlowLine_DocusPremium (Multi-Layer + Light Head + Node Ripple Flash + Energy Pulses)",
+      "position": [
+        960.0,
+        1020.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.95,
+      "style": {
+        "font": "Chronon3d/assets/fonts/Inter-Regular.ttf",
+        "font_size": 15.0,
+        "fill": "#55FFD2"
+      }
+    },
+    {
+      "id": "premium_wide_aura",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.6,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -660.0,
+              200.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -623.55,
+              191.87
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -591.27,
+              172.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -562.75,
+              148.3
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -536.82,
+              121.08
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -512.55,
+              92.37
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -489.36,
+              62.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -466.77,
+              32.71
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -444.44,
+              2.46
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -422.03,
+              -27.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -399.19,
+              -57.6
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -375.52,
+              -86.82
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -350.51,
+              -114.89
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -323.43,
+              -140.96
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -293.18,
+              -163.21
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -258.69,
+              -177.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -221.39,
+              -178.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -185.83,
+              -166.18
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -152.94,
+              -148.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -122.08,
+              -126.55
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -92.64,
+              -103.16
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -64.15,
+              -78.62
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -36.29,
+              -53.38
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -8.79,
+              -27.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              18.56,
+              -1.92
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              45.97,
+              23.81
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              73.67,
+              49.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              101.89,
+              74.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              130.93,
+              97.97
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              161.2,
+              120.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              193.24,
+              139.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              227.76,
+              154.66
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              264.79,
+              159.8
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              300.96,
+              150.36
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              333.12,
+              131.02
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              361.81,
+              106.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              388.13,
+              79.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              412.88,
+              51.61
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              436.67,
+              22.49
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              459.92,
+              -7.06
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              483.03,
+              -36.72
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              506.33,
+              -66.23
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              530.21,
+              -95.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              555.12,
+              -123.44
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              581.68,
+              -150.04
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              610.75,
+              -173.85
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              643.45,
+              -192.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              680.0,
+              -200.0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#0066FF",
+          "width": 16.0,
+          "cap": "round",
+          "join": "round"
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "in_out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 15,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 105,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 48.0,
+          "intensity": 0.38,
+          "color": [
+            0.0,
+            0.4666666666666667,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "premium_tight_halo",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 0.88,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -660.0,
+              200.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -623.55,
+              191.87
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -591.27,
+              172.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -562.75,
+              148.3
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -536.82,
+              121.08
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -512.55,
+              92.37
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -489.36,
+              62.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -466.77,
+              32.71
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -444.44,
+              2.46
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -422.03,
+              -27.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -399.19,
+              -57.6
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -375.52,
+              -86.82
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -350.51,
+              -114.89
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -323.43,
+              -140.96
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -293.18,
+              -163.21
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -258.69,
+              -177.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -221.39,
+              -178.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -185.83,
+              -166.18
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -152.94,
+              -148.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -122.08,
+              -126.55
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -92.64,
+              -103.16
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -64.15,
+              -78.62
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -36.29,
+              -53.38
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -8.79,
+              -27.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              18.56,
+              -1.92
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              45.97,
+              23.81
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              73.67,
+              49.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              101.89,
+              74.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              130.93,
+              97.97
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              161.2,
+              120.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              193.24,
+              139.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              227.76,
+              154.66
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              264.79,
+              159.8
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              300.96,
+              150.36
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              333.12,
+              131.02
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              361.81,
+              106.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              388.13,
+              79.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              412.88,
+              51.61
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              436.67,
+              22.49
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              459.92,
+              -7.06
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              483.03,
+              -36.72
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              506.33,
+              -66.23
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              530.21,
+              -95.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              555.12,
+              -123.44
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              581.68,
+              -150.04
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              610.75,
+              -173.85
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              643.45,
+              -192.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              680.0,
+              -200.0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#00E0FF",
+          "width": 5.2,
+          "cap": "round",
+          "join": "round"
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "in_out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 15,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 105,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            0.0,
+            0.9411764705882353,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "premium_sharp_core",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "opacity": 1.0,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -660.0,
+              200.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -623.55,
+              191.87
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -591.27,
+              172.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -562.75,
+              148.3
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -536.82,
+              121.08
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -512.55,
+              92.37
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -489.36,
+              62.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -466.77,
+              32.71
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -444.44,
+              2.46
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -422.03,
+              -27.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -399.19,
+              -57.6
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -375.52,
+              -86.82
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -350.51,
+              -114.89
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -323.43,
+              -140.96
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -293.18,
+              -163.21
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -258.69,
+              -177.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -221.39,
+              -178.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -185.83,
+              -166.18
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -152.94,
+              -148.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -122.08,
+              -126.55
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -92.64,
+              -103.16
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -64.15,
+              -78.62
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -36.29,
+              -53.38
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -8.79,
+              -27.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              18.56,
+              -1.92
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              45.97,
+              23.81
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              73.67,
+              49.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              101.89,
+              74.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              130.93,
+              97.97
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              161.2,
+              120.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              193.24,
+              139.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              227.76,
+              154.66
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              264.79,
+              159.8
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              300.96,
+              150.36
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              333.12,
+              131.02
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              361.81,
+              106.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              388.13,
+              79.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              412.88,
+              51.61
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              436.67,
+              22.49
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              459.92,
+              -7.06
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              483.03,
+              -36.72
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              506.33,
+              -66.23
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              530.21,
+              -95.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              555.12,
+              -123.44
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              581.68,
+              -150.04
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              610.75,
+              -173.85
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              643.45,
+              -192.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              680.0,
+              -200.0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 2.0,
+          "cap": "round",
+          "join": "round",
+          "taper_start": 0.4,
+          "taper_end": 0.2
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "in_out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 15,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 105,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "bloom",
+          "threshold": 0.7,
+          "radius": 18.0,
+          "intensity": 0.45
+        }
+      ]
+    },
+    {
+      "id": "premium_energy_pulse",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 108,
+      "duration_frames": 38,
+      "opacity": 0.8,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -660.0,
+              200.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -623.55,
+              191.87
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -591.27,
+              172.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -562.75,
+              148.3
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -536.82,
+              121.08
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -512.55,
+              92.37
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -489.36,
+              62.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -466.77,
+              32.71
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -444.44,
+              2.46
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -422.03,
+              -27.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -399.19,
+              -57.6
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -375.52,
+              -86.82
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -350.51,
+              -114.89
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -323.43,
+              -140.96
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -293.18,
+              -163.21
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -258.69,
+              -177.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -221.39,
+              -178.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -185.83,
+              -166.18
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -152.94,
+              -148.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -122.08,
+              -126.55
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -92.64,
+              -103.16
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -64.15,
+              -78.62
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -36.29,
+              -53.38
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -8.79,
+              -27.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              18.56,
+              -1.92
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              45.97,
+              23.81
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              73.67,
+              49.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              101.89,
+              74.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              130.93,
+              97.97
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              161.2,
+              120.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              193.24,
+              139.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              227.76,
+              154.66
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              264.79,
+              159.8
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              300.96,
+              150.36
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              333.12,
+              131.02
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              361.81,
+              106.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              388.13,
+              79.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              412.88,
+              51.61
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              436.67,
+              22.49
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              459.92,
+              -7.06
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              483.03,
+              -36.72
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              506.33,
+              -66.23
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              530.21,
+              -95.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              555.12,
+              -123.44
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              581.68,
+              -150.04
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              610.75,
+              -173.85
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              643.45,
+              -192.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              680.0,
+              -200.0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 2.8,
+          "cap": "round",
+          "join": "round"
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 108,
+                    "value": [
+                      0.0,
+                      0.12,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 142,
+                    "value": [
+                      0.88,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 18.0,
+          "intensity": 0.9,
+          "color": [
+            0.0,
+            0.8980392156862745,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 108,
+                "value": 0.0
+              },
+              {
+                "frame": 118,
+                "value": 0.85
+              },
+              {
+                "frame": 138,
+                "value": 0.85
+              },
+              {
+                "frame": 145,
+                "value": 0.0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "premium_head_outer_flare",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        24,
+        24
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.0,
+          0.8980392156862745,
+          1.0,
+          0.75
+        ]
+      },
+      "follow_path": {
+        "path_commands": [
+          {
+            "type": "move_to",
+            "point": [
+              300.0,
+              740.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              336.45,
+              731.87
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              368.73,
+              712.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              397.25,
+              688.3
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              423.18,
+              661.08
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              447.45,
+              632.37
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              470.64,
+              602.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              493.23,
+              572.71
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              515.56,
+              542.46
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              537.97,
+              512.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              560.81,
+              482.4
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              584.48,
+              453.18
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              609.49,
+              425.11
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              636.57,
+              399.04
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              666.82,
+              376.79
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              701.31,
+              362.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              738.61,
+              361.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              774.17,
+              373.82
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              807.06,
+              392.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              837.92,
+              413.45
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              867.36,
+              436.84
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              895.85,
+              461.38
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              923.71,
+              486.62
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              951.21,
+              512.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              978.56,
+              538.08
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1005.97,
+              563.81
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1033.67,
+              589.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1061.89,
+              614.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1090.93,
+              637.97
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1121.2,
+              660.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1153.24,
+              679.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1187.76,
+              694.66
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1224.79,
+              699.8
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1260.96,
+              690.36
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1293.12,
+              671.02
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1321.81,
+              646.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1348.13,
+              619.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1372.88,
+              591.61
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1396.67,
+              562.49
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1419.92,
+              532.94
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1443.03,
+              503.28
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1466.33,
+              473.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1490.21,
+              444.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1515.12,
+              416.56
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1541.68,
+              389.96
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1570.75,
+              366.15
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1603.45,
+              347.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1640.0,
+              340.0
+            ]
+          }
+        ],
+        "progress": {
+          "easing": "in_out_cubic",
+          "keyframes": [
+            {
+              "frame": 15,
+              "value": 0.0
+            },
+            {
+              "frame": 105,
+              "value": 1.0
+            }
+          ]
+        },
+        "auto_orient": false,
+        "clamp_end": true
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 24.0,
+          "intensity": 0.95,
+          "color": [
+            0.0,
+            0.8235294117647058,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 15,
+                "value": 1.0
+              },
+              {
+                "frame": 105,
+                "value": 1.0
+              },
+              {
+                "frame": 120,
+                "value": 0.4
+              },
+              {
+                "frame": 149,
+                "value": 0.3
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "premium_head_core_dot",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "start_frame": 0,
+      "duration_frames": 150,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "follow_path": {
+        "path_commands": [
+          {
+            "type": "move_to",
+            "point": [
+              300.0,
+              740.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              336.45,
+              731.87
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              368.73,
+              712.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              397.25,
+              688.3
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              423.18,
+              661.08
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              447.45,
+              632.37
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              470.64,
+              602.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              493.23,
+              572.71
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              515.56,
+              542.46
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              537.97,
+              512.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              560.81,
+              482.4
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              584.48,
+              453.18
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              609.49,
+              425.11
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              636.57,
+              399.04
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              666.82,
+              376.79
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              701.31,
+              362.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              738.61,
+              361.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              774.17,
+              373.82
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              807.06,
+              392.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              837.92,
+              413.45
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              867.36,
+              436.84
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              895.85,
+              461.38
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              923.71,
+              486.62
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              951.21,
+              512.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              978.56,
+              538.08
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1005.97,
+              563.81
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1033.67,
+              589.25
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1061.89,
+              614.09
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1090.93,
+              637.97
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1121.2,
+              660.27
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1153.24,
+              679.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1187.76,
+              694.66
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1224.79,
+              699.8
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1260.96,
+              690.36
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1293.12,
+              671.02
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1321.81,
+              646.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1348.13,
+              619.91
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1372.88,
+              591.61
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1396.67,
+              562.49
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1419.92,
+              532.94
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1443.03,
+              503.28
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1466.33,
+              473.77
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1490.21,
+              444.73
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1515.12,
+              416.56
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1541.68,
+              389.96
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1570.75,
+              366.15
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1603.45,
+              347.75
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              1640.0,
+              340.0
+            ]
+          }
+        ],
+        "progress": {
+          "easing": "in_out_cubic",
+          "keyframes": [
+            {
+              "frame": 15,
+              "value": 0.0
+            },
+            {
+              "frame": 105,
+              "value": 1.0
+            }
+          ]
+        },
+        "auto_orient": false,
+        "clamp_end": true
+      },
+      "effects": [
+        {
+          "type": "bloom",
+          "threshold": 0.6,
+          "radius": 14.0,
+          "intensity": 0.7
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 15,
+                "value": 1.0
+              },
+              {
+                "frame": 105,
+                "value": 1.0
+              },
+              {
+                "frame": 120,
+                "value": 0.4
+              },
+              {
+                "frame": 149,
+                "value": 0.3
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "/home/pierone/src/go-master/projects/Pyt/VeloxEditing/output/glow_line_showcase/GlowLine_DocusPremium.mp4",
+    "format": "mp4"
+  }
+}

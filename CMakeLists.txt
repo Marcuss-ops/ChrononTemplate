@@ -103,10 +103,12 @@ add_library(chronontemplate STATIC
         src/chronontemplate/elements/ElementsCommon.cpp
         src/chronontemplate/elements/TimelineElements.cpp
         src/chronontemplate/elements/AnnotationElements.cpp
+        src/chronontemplate/elements/HighlightingV2.cpp
         src/chronontemplate/elements/WebElements.cpp
         src/chronontemplate/elements/DocumentaryElements.cpp
         src/chronontemplate/elements/DiagramElements.cpp
         src/chronontemplate/vintage_documentary/VintageDocumentaryPack.cpp
+        src/chronontemplate/vintage_documentary/VintageDocumentaryTitle01Pack.cpp
         src/chronontemplate/documentary_effects/MagnifierLoupePack.cpp
         src/chronontemplate/documentary_effects/RedactedPack.cpp
         src/chronontemplate/documentary_effects/FilmLeaderPack.cpp
@@ -119,6 +121,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/camera_roll/CameraMotionPack.cpp
         src/chronontemplate/ui_camera/UiCameraChoreography.cpp
         src/chronontemplate/entities_with_text/DocumentarySnapshotPack.cpp
+        src/chronontemplate/date_groups/DateGroupsPack.cpp
         src/chronontemplate/entities_with_text/EntityFilmstripPack.cpp
         src/chronontemplate/important_phrases/ImportantPhrasePack.cpp
         src/chronontemplate/important_phrases/typewriter/TypewriterPhrasePack.cpp
@@ -128,6 +131,7 @@ add_library(chronontemplate STATIC
         # the category packs: many images in one scene, full-frame backgrounds, modern map compositions
         src/chronontemplate/multiple_images/MultiImagePack.cpp
         src/chronontemplate/backgrounds/BackgroundPack.cpp
+        src/chronontemplate/backgrounds/ProceduralBackground.cpp
         src/chronontemplate/map/ModernMapPack.cpp
         # the short-phrase family: one vocabulary, twelve archetypes, plus the star bumper
         src/chronontemplate/short_phrases/ShortPhrasePack.cpp
@@ -285,6 +289,23 @@ if(TARGET chrononmotion_chronon3d_adapter)
             PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
 endif()
 
+add_executable(chronontemplate_emit_date_groups tools/date_groups/emit_date_groups.cpp)
+target_link_libraries(chronontemplate_emit_date_groups PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_date_groups PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_DATE_GROUPS_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_date_groups PRIVATE
+        "${CHRONONTEMPLATE_DATE_GROUPS_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_DATE_GROUPS_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_DATE_GROUPS_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_date_groups PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.
 target_include_directories(chronontemplate PUBLIC
@@ -372,6 +393,9 @@ if(CHRONONTEMPLATE_WERROR)
     target_compile_options(chronontemplate_emit_blackboard_torture_v1 PRIVATE -Werror)
 endif()
 
+add_executable(chronontemplate_emit_procedural_documentary_v2 tools/showcases/emit_procedural_documentary_v2.cpp)
+target_link_libraries(chronontemplate_emit_procedural_documentary_v2 PRIVATE chronontemplate)
+
 # Optional native-plan canary for deterministic BackgroundPack V3 emission.
 add_executable(chronontemplate_background_canary_v1 tools/backgrounds/background_canary_v1.cpp)
 target_link_libraries(chronontemplate_background_canary_v1 PRIVATE chronontemplate)
@@ -429,6 +453,9 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         add_test(NAME chronontemplate_entity_presentation_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/entities_with_text/test_entity_presentation_v1.py")
+        add_test(NAME chronontemplate_entity_with_text_v2_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/entities_with_text/test_entity_with_text_v2.py")
         add_test(NAME chronontemplate_kinetic_type_editorial_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/important_phrases/test_kinetic_type_editorial_v1.py")
@@ -471,6 +498,10 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_templates_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_templates_test COMMAND chronontemplate_templates_test)
 
+    add_executable(chronontemplate_procedural_documentary_v2_test tests/procedural_documentary_v2.cpp)
+    target_link_libraries(chronontemplate_procedural_documentary_v2_test PRIVATE chronontemplate)
+    add_test(NAME chronontemplate_procedural_documentary_v2_test COMMAND chronontemplate_procedural_documentary_v2_test)
+
     add_executable(chronontemplate_native_primitives_test tests/native_primitives.cpp)
     target_link_libraries(chronontemplate_native_primitives_test PRIVATE chronontemplate)
     add_test(NAME chronontemplate_native_primitives_test COMMAND chronontemplate_native_primitives_test)
@@ -507,6 +538,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_elements_timeline_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_elements_timeline_test COMMAND chronontemplate_elements_timeline_test)
 
+    add_executable(chronontemplate_date_groups_pack_test tests/date_groups_pack.cpp)
+    target_link_libraries(chronontemplate_date_groups_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_date_groups_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_date_groups_pack_test COMMAND chronontemplate_date_groups_pack_test)
+
     add_executable(chronontemplate_elements_annotation_test tests/elements_annotation.cpp)
     target_link_libraries(chronontemplate_elements_annotation_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_elements_annotation_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -531,6 +567,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_vintage_documentary_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_vintage_documentary_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_vintage_documentary_pack_test COMMAND chronontemplate_vintage_documentary_pack_test)
+
+    add_executable(chronontemplate_vintage_documentary_title_01_pack_test tests/vintage_documentary_title_01_pack.cpp)
+    target_link_libraries(chronontemplate_vintage_documentary_title_01_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_vintage_documentary_title_01_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_vintage_documentary_title_01_pack_test COMMAND chronontemplate_vintage_documentary_title_01_pack_test)
 
     add_executable(chronontemplate_archival_lens_look_test tests/archival_lens_look.cpp)
     target_link_libraries(chronontemplate_archival_lens_look_test PRIVATE chronontemplate)

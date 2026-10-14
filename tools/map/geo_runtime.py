@@ -206,6 +206,77 @@ def _smootherstep(p: float) -> float:
     return t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
 
 
+def _draw_country_outline(frame, iso: str, anchor, zoom: float, alpha: float) -> None:
+    """Draw a real Natural Earth country border over the live tile camera."""
+    import cv2
+    import numpy as np
+    from map_editorial import load_border
+    from map_editorial_gpu import geo_project
+
+    height, width = frame.shape[:2]
+    border = load_border(iso)
+    stroke = np.zeros_like(frame)
+    for ring in border["polygons"]:
+        pts = np.asarray([
+            geo_project(lat, lon, anchor, zoom, width, height)
+            for lon, lat in ring
+        ], dtype=np.int32)
+        if len(pts) < 4:
+            continue
+        if (pts[:, 0].max() < -8 or pts[:, 0].min() > width + 8 or
+                pts[:, 1].max() < -8 or pts[:, 1].min() > height + 8):
+            continue
+        cv2.polylines(stroke, [pts.reshape(-1, 1, 2)], True,
+                      (247, 249, 250), 2, cv2.LINE_AA)
+    if not np.any(stroke):
+        return
+    halo = cv2.GaussianBlur(stroke, (0, 0), 5.0)
+    cv2.addWeighted(frame, 1.0, halo, 0.32 * alpha, 0, dst=frame)
+    cv2.addWeighted(frame, 1.0, stroke, 0.86 * alpha, 0, dst=frame)
+
+
+_MUNICIPAL_BOUNDARIES = None
+
+
+def _draw_municipal_outline(frame, municipality: str, anchor, zoom: float,
+                            alpha: float) -> None:
+    """Draw only the selected Italian comune perimeter on the live map."""
+    import cv2
+    import numpy as np
+    from pathlib import Path
+    from map_editorial_gpu import geo_project
+
+    global _MUNICIPAL_BOUNDARIES
+    if _MUNICIPAL_BOUNDARIES is None:
+        path = (Path(__file__).resolve().parents[2] / "catalog" /
+                "municipal_boundaries_garlasco_vigevano_pavia.geojson")
+        _MUNICIPAL_BOUNDARIES = json.loads(path.read_text(encoding="utf-8"))
+    key = " ".join(str(municipality).casefold().replace("’", "'").split())
+    feature = next((f for f in _MUNICIPAL_BOUNDARIES["features"]
+                    if " ".join(f["properties"]["name"].casefold().split()) == key), None)
+    if feature is None:
+        return
+    height, width = frame.shape[:2]
+    geometry = feature["geometry"]
+    polygons = geometry["coordinates"] if geometry["type"] == "MultiPolygon" else [geometry["coordinates"]]
+    stroke = np.zeros_like(frame)
+    for polygon in polygons:
+        # The first ring is the commune's exterior; holes are not borders to
+        # emphasize in this city locator treatment.
+        ring = polygon[0]
+        pts = np.asarray([geo_project(lat, lon, anchor, zoom, width, height)
+                          for lon, lat in ring], dtype=np.int32)
+        if len(pts) < 4 or (pts[:, 0].max() < -8 or pts[:, 0].min() > width + 8 or
+                            pts[:, 1].max() < -8 or pts[:, 1].min() > height + 8):
+            continue
+        cv2.polylines(stroke, [pts.reshape(-1, 1, 2)], True,
+                      (247, 249, 250), 2, cv2.LINE_AA)
+    if np.any(stroke):
+        halo = cv2.GaussianBlur(stroke, (0, 0), 5.0)
+        cv2.addWeighted(frame, 1.0, halo, 0.20 * alpha, 0, dst=frame)
+        cv2.addWeighted(frame, 1.0, stroke, 0.90 * alpha, 0, dst=frame)
+
+
 def _roll_bank(p: float) -> float:
     """Banking during post-dive phases: a sine that returns to zero."""
     return -8.0 * math.sin(max(0.0, min(1.0, p)) * math.pi)
@@ -460,11 +531,7 @@ class TourBuilder:
     # timeline: [dive i][travel i->i+1][dive i+1]...
     def _schedule(self):
         frames_per = int(self.sps * self.FPS)
-        initial_frames = max(
-            frames_per,
-            int(getattr(self, "initial_stop_frames", frames_per)),
-        )
-        leg = max(1, int(self.travel * self.FPS))
+        initial_frames = max(2, int(getattr(self, "initial_stop_frames", frames_per)))
         marks = []
         f = 0
         for i in range(len(self.stops)):
@@ -472,6 +539,10 @@ class TourBuilder:
             marks.append((f, f + stop_frames, i))
             f += stop_frames
             if i < len(self.stops) - 1:
+                travel_seconds = (getattr(self, "initial_travel_seconds", self.travel)
+                                  if i == 0 and getattr(self, "country_intro", False)
+                                  else self.travel)
+                leg = max(1, int(round(travel_seconds * self.FPS)))
                 marks.append((f, f + leg, i, i + 1))
                 f += leg
         return marks
@@ -487,9 +558,22 @@ class TourBuilder:
             if len(mark) == 3:
                 active_end = (mark[0] + round((mark[1] - mark[0]) * self.stop_dive_fraction)
                               if self.stop_dive_fraction < 1.0 else mark[1])
-                phases.append((mark[0], min(mark[1], max(mark[0] + 1, active_end))))
+                stop_reveal_zooms = getattr(self, "stop_reveal_zooms", None)
+                if stop_reveal_zooms is not None:
+                    span = min(mark[1], max(mark[0] + 1, active_end)) - mark[0]
+                    first = mark[0] + max(1, round(span * self.stop_reveal_start_fraction))
+                    second = mark[0] + max(first - mark[0] + 1,
+                                           round(span * self.stop_reveal_hold_fraction))
+                    phases.extend(((mark[0], min(first, active_end)),
+                                   (min(second, active_end - 1), active_end)))
+                else:
+                    phases.append((mark[0], min(mark[1], max(mark[0] + 1, active_end))))
                 continue
             start, end = mark[0], mark[1]
+            if (len(mark) == 4 and mark[2] == 0
+                    and getattr(self, "country_intro", False)):
+                phases.append((start, end))
+                continue
             span = end - start
             out_end = min(end - 2, max(start + 1, start + round(span * 0.40)))
             in_start = min(end - 1, max(out_end + 1, start + round(span * 0.60)))
@@ -504,14 +588,35 @@ class TourBuilder:
                     i = m[2]
                     s = self.stops[i]
                     target = self.stop_end_zooms[i]
-                    z_start = (5.2 + (target - 5.2) * self.initial_zoom_fraction
-                               if i == 0 else self.stop_end_zooms[i - 1])
+                    stop_start_zooms = getattr(self, "stop_start_zooms", None)
+                    if stop_start_zooms is not None:
+                        z_start = stop_start_zooms[i]
+                    else:
+                        z_start = (5.2 + (target - 5.2) * self.initial_zoom_fraction
+                                   if i == 0 else self.stop_end_zooms[i - 1])
+                    if getattr(self, "country_intro", False) and i == 1:
+                        z_start = target
                     active_end = (m[0] + round((m[1] - m[0]) * self.stop_dive_fraction)
                                   if self.stop_dive_fraction < 1.0 else m[1])
                     active_end = min(m[1], max(m[0] + 1, active_end))
                     active_frames = active_end - m[0]
                     phase = (1.0 if active_frames <= 1 else
                              (f - m[0]) / (active_frames - 1))
+                    reveal_zooms = getattr(self, "stop_reveal_zooms", None)
+                    if reveal_zooms is not None:
+                        reveal_zoom = reveal_zooms[i]
+                        reveal_start = self.stop_reveal_start_fraction
+                        reveal_hold_end = self.stop_reveal_hold_fraction
+                        if phase < reveal_start:
+                            q = smootherstep(phase / max(reveal_start, 1e-6))
+                            zoom_here = z_start + (reveal_zoom - z_start) * q
+                        elif phase < reveal_hold_end:
+                            zoom_here = reveal_zoom
+                        else:
+                            q = smootherstep((phase - reveal_hold_end) /
+                                             max(1e-6, 1.0 - reveal_hold_end))
+                            zoom_here = reveal_zoom + (target - reveal_zoom) * q
+                        return (s.lat, s.lon, zoom_here)
                     dive = smootherstep(min(1.0, phase))
                     return (s.lat, s.lon, z_start + (target - z_start) * dive)
                 # travel leg i -> i+1: pull out to the midpoint zoom, glide,
@@ -522,6 +627,13 @@ class TourBuilder:
                 i, j = m[2], m[3]
                 a, b = self.stops[i], self.stops[j]
                 raw = (f - m[0]) / max(1, m[1] - m[0] - 1)
+                if i == 0 and getattr(self, "country_intro", False):
+                    p = smootherstep(raw)
+                    start_zoom = self.stop_end_zooms[0]
+                    end_zoom = self.stop_end_zooms[1]
+                    return (a.lat + (b.lat - a.lat) * p,
+                            a.lon + (b.lon - a.lon) * p,
+                            start_zoom + (end_zoom - start_zoom) * p)
                 # Pull back before panning so the complete leg stays visible,
                 # then dive toward the next stop. The old 1.2-level pullback
                 # left the camera nearly at street scale while crossing whole
@@ -535,13 +647,22 @@ class TourBuilder:
                 # Nearby destinations already fit at the landing scale. A
                 # fractional-level pullback creates a visible bobble and a
                 # non-zero phase seam; pan smoothly at constant zoom instead.
+                stop_start_zooms = getattr(self, "stop_start_zooms", None)
+                settled_start_i = (self.stop_end_zooms[i] if stop_start_zooms is None
+                                   else stop_start_zooms[i])
+                settled_start_j = (self.stop_end_zooms[j] if stop_start_zooms is None
+                                   else stop_start_zooms[j])
                 if (abs(self.stop_end_zooms[i] - self.stop_end_zooms[j]) < 1e-9
+                        and abs(settled_start_i - self.stop_end_zooms[i]) < 1e-9
+                        and abs(settled_start_j - self.stop_end_zooms[j]) < 1e-9
                         and route_zoom >= self.stop_end_zooms[i] - 1.0):
                     p = smootherstep(raw)
                     return (a.lat + (b.lat - a.lat) * p,
                             a.lon + (b.lon - a.lon) * p,
                             self.stop_end_zooms[i])
-                arrival_zoom = self.stop_end_zooms[j - 1] if j > 0 else self.end_zoom
+                stop_start_zooms = getattr(self, "stop_start_zooms", None)
+                arrival_zoom = (stop_start_zooms[j] if stop_start_zooms is not None
+                                else (self.stop_end_zooms[j - 1] if j > 0 else self.end_zoom))
                 out_end = min(m[1] - 2, max(m[0] + 1,
                                             m[0] + round((m[1] - m[0]) * 0.40)))
                 in_start = min(m[1] - 1, max(out_end + 1,
@@ -591,14 +712,23 @@ class TourBuilder:
                 raise RuntimeError("editorial map requires the OpenCL GPU map sampler")
             location_name = ""
             active_stop = None
+            label_progress = progress
             for mark in self._schedule():
                 if len(mark) == 3 and mark[0] <= f < mark[1]:
+                    if mark[2] in getattr(self, "hidden_stop_indices", ()):
+                        break
                     active_stop = self.stops[mark[2]]
                     location_name = active_stop.display_name or active_stop.query
+                    label_progress = (f - mark[0]) / max(1, mark[1] - mark[0] - 1)
                     break
-            if active_stop is None and self.stops:
+            # Keep the final city visible during the renderer's reserved tail
+            # hold. During travel, hide the previous pin/label so it cannot
+            # appear to identify the destination the camera is approaching.
+            schedule = self._schedule()
+            if active_stop is None and self.stops and f >= schedule[-1][1]:
                 active_stop = self.stops[-1]
                 location_name = active_stop.display_name or active_stop.query
+                label_progress = 1.0
             composition = getattr(self, "map_composition", "") or ""
             if composition:
                 # Geo-anchored outlines/routes use the identical tile-sampler
@@ -608,45 +738,83 @@ class TourBuilder:
                     draw_editorial_scene_gpu, geo_project, gpu_counters,
                 )
                 from map_editorial import MAP_EDITORIAL_SCENES
-                if composition not in MAP_EDITORIAL_SCENES:
-                    raise ValueError(f"unsupported GPU editorial scene: {composition}")
-                lat_c, lon_c, zoom_c = lat, lon, zoom
-                extras = list(getattr(self, "map_pin_extras", []))
-                pins = []
-                for i, s in enumerate(self.stops):
-                    sx, sy = geo_project(s.lat, s.lon, (lat_c, lon_c),
-                                         zoom_c, WIDTH, HEIGHT)
-                    if composition in ("ed_yemen_markers",):
-                        ex = extras[i] if i < len(extras) else {}
-                        pins.append({"latitude": s.lat, "longitude": s.lon,
-                                     "label": s.display_name or s.query, **ex})
-                    elif -200 <= sx <= WIDTH + 200 and -200 <= sy <= HEIGHT + 200:
-                        ex = extras[i] if i < len(extras) else {}
-                        pins.append({"latitude": s.lat, "longitude": s.lon,
-                                     "label": s.display_name or s.query, **ex})
-                if pins or composition in ("ed_saudi_base", "ed_iran_glow",
-                                             "ed_yemen_fill", "ed_hormuz_routes",
-                                             "ed_mocha_tactical"):
-                    anchor = (lat_c, lon_c)
+                if composition in MAP_EDITORIAL_SCENES:
+                    lat_c, lon_c, zoom_c = lat, lon, zoom
+                    extras = list(getattr(self, "map_pin_extras", []))
+                    pins = []
+                    for i, s in enumerate(self.stops):
+                        sx, sy = geo_project(s.lat, s.lon, (lat_c, lon_c),
+                                             zoom_c, WIDTH, HEIGHT)
+                        if composition in ("ed_yemen_markers",):
+                            ex = extras[i] if i < len(extras) else {}
+                            pins.append({"latitude": s.lat, "longitude": s.lon,
+                                         "label": s.display_name or s.query, **ex})
+                        elif -200 <= sx <= WIDTH + 200 and -200 <= sy <= HEIGHT + 200:
+                            ex = extras[i] if i < len(extras) else {}
+                            pins.append({"latitude": s.lat, "longitude": s.lon,
+                                         "label": s.display_name or s.query, **ex})
+                    if pins or composition in ("ed_saudi_base", "ed_iran_glow",
+                                                 "ed_yemen_fill", "ed_hormuz_routes",
+                                                 "ed_mocha_tactical"):
+                        anchor = (lat_c, lon_c)
 
-                    def _project(lat, lon, _a=anchor, _z=zoom_c):
-                        return geo_project(lat, lon, _a, _z, WIDTH, HEIGHT)
+                        def _project(lat, lon, _a=anchor, _z=zoom_c):
+                            return geo_project(lat, lon, _a, _z, WIDTH, HEIGHT)
 
-                    frame = draw_editorial_scene_gpu(frame, composition, {
-                        "W": WIDTH, "H": HEIGHT, "project": _project,
-                        "pins": pins,
-                    }, progress)
-                self._last_gpu_overlay_counters = gpu_counters()
-                return frame
+                        frame = draw_editorial_scene_gpu(frame, composition, {
+                            "W": WIDTH, "H": HEIGHT, "project": _project,
+                            "pins": pins,
+                        }, progress)
+                    self._last_gpu_overlay_counters = gpu_counters()
+                    return frame
+                # The production path uses OpenCL for its tile plate. Classic
+                # compositions without a dedicated GPU scene keep their camera
+                # move and use the standard GPU-safe place caption.
+                from map_compositions import MAP_COMPOSITIONS
+                if composition not in MAP_COMPOSITIONS:
+                    raise ValueError(f"unsupported map composition: {composition}")
+                print(
+                    f"[dynamic-map] composition {composition!r} has no GPU scene; "
+                    "using the standard map caption",
+                    flush=True,
+                )
+            # Editorial captions and the attribution helper are Pillow/NumPy
+            # overlays and inspect ndarray dimensions. Keep the tile sample
+            # and camera on OpenCL, but cross to host memory for these final
+            # layers, then restore UMat for the GPU encoder.
+            was_gpu_frame = isinstance(frame, cv2.UMat)
+            if was_gpu_frame:
+                frame = frame.get()
             label_animation = getattr(self, "map_label_animation", "gentle_fade")
             frame = draw_editorial_map_caption(
-                frame, location_name, progress, getattr(self, "map_typography", {}),
+                frame, location_name, label_progress, getattr(self, "map_typography", {}),
                 label_animation)
             if label_animation in MARKER_DRAWN_STYLES:
                 draw_map_location_marker(
                     frame, (WIDTH // 2, HEIGHT // 2), location_name,
-                    progress, label_animation)
+                    label_progress, label_animation)
+            country_iso = getattr(self, "country_outline_iso", "")
+            if country_iso and zoom <= 8.2:
+                outline_alpha = min(1.0, (f + 1) / max(1.0, self.FPS * 0.25))
+                _draw_country_outline(frame, country_iso, (lat, lon), zoom,
+                                      outline_alpha)
+            municipal_outline = bool(getattr(self, "municipal_outline", False))
+            if municipal_outline and active_stop is not None:
+                # First settle on the comune, reveal its border, then dissolve
+                # the border during the final city zoom. Travel frames have no
+                # active_stop, so neither the outline nor previous tag leaks
+                # into the next destination.
+                glow_start = getattr(self, "stop_reveal_start_fraction", 0.25)
+                glow_end = glow_start + 0.05
+                outline_alpha = min(1.0, max(0.0,
+                                     (label_progress - glow_start) / (glow_end - glow_start)))
+                fade = max(0.0, min(1.0, (11.8 - zoom) / 0.9))
+                outline_alpha *= fade
+                _draw_municipal_outline(frame, active_stop.query,
+                                        (lat, lon), zoom, outline_alpha)
             _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
+            if was_gpu_frame:
+                frame = cv2.UMat(frame)
             return frame
 
         # the route so far, glowing under the camera

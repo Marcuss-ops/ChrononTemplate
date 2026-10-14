@@ -206,4 +206,70 @@ namespace chronontemplate::elements {
         return root;
     }
 
+    LayerHandle& addGlowLine(TemplateScene& scene, const GlowLineSpec& spec) {
+        require(spec.length > 0.f, "addGlowLine: a positive length is required");
+        require(spec.coreWidth > 0.f, "addGlowLine: a positive core width is required");
+        require(!spec.coreColor.empty(), "addGlowLine: a core color is required");
+        require(!spec.haloColor.empty(), "addGlowLine: a halo color is required");
+
+        LayerHandle& root = scene.group(spec.name);
+        root.alive(0, 150);
+
+        // 1. Wide diffuse halo layer (ambient dispersion / soft aura)
+        const float wideR = std::min(spec.wideHaloWidth * 0.5f, spec.length * 0.5f);
+        LayerHandle& wideHalo = addBar(scene, root.id(), spec.name + "_wide_halo",
+                                       spec.length, spec.wideHaloWidth, 0.f, 0.f,
+                                       spec.wideHaloColor, wideR);
+        wideHalo.opacity(0.24f);
+        applyElementMotion(wideHalo, spec.motion, scene.fps(), 0);
+
+        // 2. Tight luminous halo layer (vibrant color concentration)
+        const float haloR = std::min(spec.haloWidth * 0.5f, spec.length * 0.5f);
+        LayerHandle& halo = addBar(scene, root.id(), spec.name + "_halo",
+                                   spec.length, spec.haloWidth, 0.f, 0.f,
+                                   spec.haloColor, haloR);
+        halo.opacity(0.68f);
+        applyElementMotion(halo, spec.motion, scene.fps(), 1);
+
+        // 3. Ultra-sharp white core layer (structural razor-sharp center)
+        const float coreR = std::min(spec.coreWidth * 0.5f, spec.length * 0.5f);
+        LayerHandle& core = addBar(scene, root.id(), spec.name + "_core",
+                                   spec.length, spec.coreWidth, 0.f, 0.f,
+                                   spec.coreColor, coreR);
+        core.opacity(1.0f);
+        applyElementMotion(core, spec.motion, scene.fps(), 2);
+
+        // 4. Leading light head (energy flare at tip)
+        if (spec.headEnabled) {
+            // Hot halo on head
+            LayerHandle& headHalo = scene.shape(ShapeSpec{
+                    .size = chrononmotion::Vector2(spec.headRadius * 4.f, spec.headRadius * 4.f),
+                    .fillColor = spec.haloColor,
+                    .name = spec.name + "_head_halo",
+                    .cornerRadius = spec.headRadius * 2.f,
+                    .geometry = ShapeGeometry::Ellipse});
+            headHalo.parent(root.id());
+            headHalo.position(spec.length * 0.5f, 0.f);
+            headHalo.opacity(0.75f);
+            headHalo.alive(0, 150);
+            applyElementMotion(headHalo, spec.motion, scene.fps(), 3);
+
+            // Diamond white core head
+            LayerHandle& headCore = scene.shape(ShapeSpec{
+                    .size = chrononmotion::Vector2(spec.headRadius * 2.f, spec.headRadius * 2.f),
+                    .fillColor = spec.coreColor,
+                    .name = spec.name + "_head_core",
+                    .cornerRadius = spec.headRadius,
+                    .geometry = ShapeGeometry::Ellipse});
+            headCore.parent(root.id());
+            headCore.position(spec.length * 0.5f, 0.f);
+            headCore.opacity(1.0f);
+            headCore.alive(0, 150);
+            applyElementMotion(headCore, spec.motion, scene.fps(), 3);
+        }
+
+        return root;
+    }
+
 }// namespace chronontemplate::elements
+

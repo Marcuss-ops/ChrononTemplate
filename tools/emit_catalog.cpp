@@ -28,6 +28,8 @@
 
 #include "chrononmotion/templates/Templates.hpp"
 #include "chronontemplate/core/Presets.hpp"
+#include "chronontemplate/backgrounds/ProceduralBackground.hpp"
+#include "chronontemplate/elements/HighlightingV2.hpp"
 #include "chronontemplate/important_phrases/apple/ApplePhrasePack.hpp"
 #include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
 #include "chronontemplate/important_phrases/ImportantPhrasePack.hpp"
@@ -820,6 +822,13 @@ int main(int argc, char** argv) {
         emitted["abstract_backgrounds"] = abstractBackgrounds;
         emitted["photo_motion"] = photoMotion;
         emitted["tech_backgrounds"] = techBackgrounds;
+        emitted["procedural_backgrounds"] = {
+            {"schema","chronontemplate.procedural-backgrounds.v1"},
+            {"recipes",chronontemplate::native::proceduralBackgroundPresets()}};
+        emitted["documentary_highlighting"] = {
+            {"schema","chronontemplate.documentary-highlighting.v2"},
+            {"style_tokens",chronontemplate::native::highlightingPresets()},
+            {"gpu_native_certification","NOT RUN"}};
         emitted["rgb_motion"] = rgbMotion;
         emitted["transitions"] = transitions;
         emitted["motions"] = motions;
