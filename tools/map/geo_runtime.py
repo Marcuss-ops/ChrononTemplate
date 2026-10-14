@@ -62,6 +62,23 @@ def _smootherstep(p: float) -> float:
     return t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
 
 
+def _latlon_to_global_px(lat: float, lon: float, zoom: int) -> tuple[float, float]:
+    """Pure Web Mercator projection matching dynamic_tile_pyramid exactly.
+
+    The tour pose/gate only needs coordinate math, not the tile engine. Keeping
+    this small operation local preserves the offline contract and avoids
+    importing OpenCV just to compute a route zoom.
+    """
+    lat = max(-85.05112878, min(85.05112878, lat))
+    lon = max(-180.0, min(180.0, lon))
+    scale = 256.0 * (2 ** zoom)
+    x = (lon + 180.0) / 360.0 * scale
+    lat_rad = math.radians(lat)
+    y = (1.0 - math.log(math.tan(lat_rad) + 1.0 / math.cos(lat_rad)) / math.pi) * 0.5 * scale
+    return x, y
+
+
+
 def _draw_country_outline(frame, iso: str, anchor, zoom: float, alpha: float) -> None:
     """Draw a real Natural Earth country border over the live tile camera."""
     import cv2
@@ -383,6 +400,24 @@ class TourBuilder:
         self.stop_end_zooms = [self.end_zoom] * len(self.stops)
         self.initial_zoom_fraction = 0.0
         self.stop_dive_fraction = 1.0
+        # Route glow samples are static geographic points. Cache their base
+        # zoom projection once; each integer map zoom is an exact power-of-two
+        # scale of this Web Mercator pixel grid.
+        self._route_points_by_zoom = {
+            zoom: [
+                tuple(_latlon_to_global_px(
+                    a.lat + (b.lat - a.lat) * (sample / 25.0),
+                    a.lon + (b.lon - a.lon) * (sample / 25.0), zoom)
+                      for sample in range(26))
+                for a, b in zip(self.stops, self.stops[1:])
+            ]
+            for zoom in range(5, 19)
+        }
+        self._stop_points_by_zoom = {
+            zoom: tuple(_latlon_to_global_px(stop.lat, stop.lon, zoom)
+                        for stop in self.stops)
+            for zoom in range(5, 19)
+        }
 
     # timeline: [dive i][travel i->i+1][dive i+1]...
     def _schedule(self):
@@ -390,8 +425,12 @@ class TourBuilder:
         initial_frames = max(2, int(getattr(self, "initial_stop_frames", frames_per)))
         marks = []
         f = 0
+        reductions = getattr(self, "_stop_frame_reductions", ())
         for i in range(len(self.stops)):
             stop_frames = initial_frames if i == 0 else frames_per
+            if i < len(reductions):
+                stop_frames -= int(reductions[i])
+            stop_frames = max(2, stop_frames)
             marks.append((f, f + stop_frames, i))
             f += stop_frames
             if i < len(self.stops) - 1:
@@ -494,9 +533,8 @@ class TourBuilder:
                 # then dive toward the next stop. The old 1.2-level pullback
                 # left the camera nearly at street scale while crossing whole
                 # regions, which looked like a broken infinite zoom.
-                from dynamic_tile_pyramid import latlon_to_global_px
-                ax, ay = latlon_to_global_px(a.lat, a.lon, 5)
-                bx, by = latlon_to_global_px(b.lat, b.lon, 5)
+                ax, ay = _latlon_to_global_px(a.lat, a.lon, 5)
+                bx, by = _latlon_to_global_px(b.lat, b.lon, 5)
                 distance = math.hypot(bx - ax, by - ay)
                 route_zoom = 5.0 + math.log2((0.72 * self.WIDTH) / max(distance, 1.0))
                 route_zoom = max(5.2, min(self.end_zoom, route_zoom))
@@ -554,8 +592,6 @@ class TourBuilder:
             draw_editorial_map_caption, MARKER_DRAWN_STYLES,
             draw_route_glow, draw_spring_pin,
         )
-        from dynamic_tile_pyramid import latlon_to_global_px
-
         lat, lon, zoom = self.pose(f)
         progress = f / (self.FRAMES_TOTAL - 1)
         gpu_map = bool(getattr(self, "minimal_map", False) and
@@ -676,16 +712,26 @@ class TourBuilder:
         # the route so far, glowing under the camera
         zf = int(zoom // 1)
         scale = 2.0 ** (zoom - zf)
-        ax, ay = latlon_to_global_px(lat, lon, zf)
+        ax, ay = _latlon_to_global_px(lat, lon, zf)
+        route_points = self._route_points_by_zoom.get(zf)
+        stop_points = self._stop_points_by_zoom.get(zf)
+        if route_points is None or stop_points is None:
+            # Production cameras are clamped to integer zooms 5..18; retain a
+            # correct uncommon out-of-band behavior for direct API callers.
+            route_points = [
+                tuple(_latlon_to_global_px(
+                    a.lat + (b.lat - a.lat) * (sample / 25.0),
+                    a.lon + (b.lon - a.lon) * (sample / 25.0), zf)
+                      for sample in range(26))
+                for a, b in zip(self.stops, self.stops[1:])
+            ]
+            stop_points = tuple(_latlon_to_global_px(stop.lat, stop.lon, zf)
+                                for stop in self.stops)
         overlay = np.zeros_like(frame)
         done_until = f
         for (m0, m1, *idx) in self._schedule():
             if len(idx) == 2 and m1 <= f:  # finished travel leg: full glow
-                a, b = self.stops[idx[0]], self.stops[idx[1]]
-                for t in range(26):
-                    tt = t / 25
-                    px, py = latlon_to_global_px(a.lat + (b.lat - a.lat) * tt,
-                                                 a.lon + (b.lon - a.lon) * tt, zf)
+                for px, py in route_points[idx[0]]:
                     sx, sy = int(WIDTH / 2 + (px - ax) * scale), int(HEIGHT / 2 + (py - ay) * scale)
                     if 0 <= sx < WIDTH and 0 <= sy < HEIGHT:
                         cv2.circle(overlay, (sx, sy), 4, (60, 240, 255), -1, cv2.LINE_AA)
@@ -694,9 +740,9 @@ class TourBuilder:
         # arrival pin on the stop the camera is diving into
         for (m0, m1, *idx) in self._schedule():
             if len(idx) == 1 and m0 <= f < m1 + int(0.4 * self.FPS):
-                s = self.stops[idx[0]]
-                sx = int(WIDTH / 2 + (latlon_to_global_px(s.lat, s.lon, zf)[0] - ax) * scale)
-                sy = int(HEIGHT / 2 + (latlon_to_global_px(s.lat, s.lon, zf)[1] - ay) * scale)
+                stop_px, stop_py = stop_points[idx[0]]
+                sx = int(WIDTH / 2 + (stop_px - ax) * scale)
+                sy = int(HEIGHT / 2 + (stop_py - ay) * scale)
                 if 0 <= sx < WIDTH and 0 <= sy < HEIGHT:
                     draw_spring_pin(frame, (sx, sy), (f - m0 + int(0.4 * self.FPS))
                                     / (m1 - m0 + int(0.4 * self.FPS)), fire=0.80, span=0.12)
@@ -744,18 +790,40 @@ def fit_initial_stop_frames(builder, minimum_final_hold_frames: int = 0) -> int:
     base_frames = max(int(builder.sps * builder.FPS),
                       int(getattr(builder, "initial_stop_frames", 0)))
     builder.initial_stop_frames = base_frames
+    base_stop_frames = max(2, int(builder.sps * builder.FPS))
     first_error = None
     for candidate in range(base_frames, base_frames + 8):
+        # Opening-frame quantization can miss the strict slope limit by a
+        # fraction of one frame. Reclaim those frame(s) from later camera
+        # holds so the authored shot duration and reserved destination hold
+        # remain unchanged; never relax the velocity gate.
+        extra = candidate - base_frames
+        reductions = [0] * len(builder.stops)
+        remaining = extra
+        for index in sorted(range(1, len(builder.stops)),
+                            key=lambda i: (base_stop_frames - reductions[i], -i),
+                            reverse=True):
+            available = max(0, base_stop_frames - 2 - reductions[index])
+            taken = min(available, remaining)
+            reductions[index] += taken
+            remaining -= taken
+            if remaining == 0:
+                break
+        if remaining:
+            break
         builder.initial_stop_frames = candidate
+        builder._stop_frame_reductions = reductions
         scheduled_end = builder._schedule()[-1][1]
         if builder.TOTAL_FRAMES - scheduled_end < minimum_final_hold_frames:
-            break
+            continue
         try:
             check_velocity_strict(builder)
             return candidate
         except RuntimeError as exc:
             if first_error is None:
                 first_error = exc
+    builder._stop_frame_reductions = [0] * len(builder.stops)
+    builder.initial_stop_frames = base_frames
     if first_error is not None:
         raise first_error
     raise RuntimeError("no initial stop duration fits before the reserved final hold")
@@ -1028,6 +1096,17 @@ def self_test() -> int:
     check(covered == tb.TOTAL_FRAMES and contiguous,
           f"tour phases cover the timeline without gaps/overlaps "
           f"({covered} == {tb.TOTAL_FRAMES})")
+    route_points_exact = all(
+        cached == tuple(_latlon_to_global_px(
+            a.lat + (b.lat - a.lat) * (sample / 25.0),
+            a.lon + (b.lon - a.lon) * (sample / 25.0), zoom)
+                        for sample in range(26))
+        for zoom, routes in tb._route_points_by_zoom.items()
+        for route_index, (a, b) in enumerate(zip(stops, stops[1:]))
+        for cached in (routes[route_index],)
+    )
+    check(route_points_exact,
+          "cached tour glow projections exactly match the Web Mercator route geometry")
     last = tb.pose(tb.TOTAL_FRAMES - 1)
     check(abs(last[0] - stops[-1].lat) < 1e-9 and abs(last[1] - stops[-1].lon) < 1e-9
           and abs(last[2] - tb.end_zoom) < 1e-9,

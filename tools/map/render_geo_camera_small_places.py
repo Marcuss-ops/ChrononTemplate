@@ -40,6 +40,40 @@ from render_geo_camera_canary import (  # noqa: E402
 )
 
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
+
+
+def _blend_layer_at(frame: np.ndarray, rgba: np.ndarray, ox: int = 0, oy: int = 0) -> None:
+    """Composite an RGBA Pillow/NumPy layer over a uint8 BGR frame.
+
+    Same arithmetic as the historical float32 full-frame blend
+    (frame*(1-a) + layer*a), restricted to the layer's nonzero-alpha
+    bounding box and evaluated in uint16 with rounded integer division:
+    a caption rail covering a few percent of the frame no longer pays
+    six-million-voxel float maths per frame. Deviation vs the float path
+    is at most 1 LSB on the blended channels.
+    """
+    if rgba.ndim != 3 or rgba.shape[2] != 4:
+        return
+    alpha = rgba[:, :, 3]
+    if not alpha.any():
+        return
+    ys, xs = np.nonzero(alpha)
+    ay0, ay1 = int(ys.min()), int(ys.max()) + 1
+    ax0, ax1 = int(xs.min()), int(xs.max()) + 1
+    a = alpha[ay0:ay1, ax0:ax1].astype(np.uint32)[:, :, None]
+    bgr = rgba[ay0:ay1, ax0:ax1, :3][:, :, ::-1].astype(np.uint32)
+    fy0, fy1, fx0, fx1 = ay0 + oy, ay1 + oy, ax0 + ox, ax1 + ox
+    roi = frame[fy0:fy1, fx0:fx1]
+    out = ((roi.astype(np.uint32) * (255 - a) + bgr * a + 127) // 255).astype(np.uint8)
+    frame[fy0:fy1, fx0:fx1] = out
+
+
+@lru_cache(maxsize=64)
+def _label_font(path: str, size: int):
+    """Hair been per-frame: Pillow keeps no glyph cache across truetype loads,
+    and markers reloaded the same .ttf for every frame of a clip."""
+    from PIL import ImageFont
+    return ImageFont.truetype(path, size)
 CYAN = (0, 240, 255)
 
 LUG = (45.38271, 12.12881)     # Lughetto - frazione, 422 anime
@@ -136,8 +170,6 @@ def draw_spring_pin(frame: np.ndarray, point: tuple[int, int], progress: float,
 def draw_location_glow(frame: np.ndarray, point: tuple[int, int], progress: float,
                        area_radius_px: int = 0) -> None:
     """Pulsing amber beacon with a bright core and optional area halo."""
-    import cv2
-    import numpy as np
     cx, cy = point
     t = max(0.0, min(1.0, progress))
     pulse = 0.5 + 0.5 * math.sin(t * math.tau * 1.7)
@@ -145,19 +177,32 @@ def draw_location_glow(frame: np.ndarray, point: tuple[int, int], progress: floa
     # OpenCV uses BGR: this is #FFD166. Keep the center visibly warm instead
     # of drawing the near-black target dot that disappeared on dark basemaps.
     accent = (102, 209, 255)
+    # Both blurred sprites interact with the frame only inside radius +
+    # kernel-half of the sigma-16 blur (ksize 97 on CV_8U), so render and
+    # blend them in a small local window with a generous margin instead of
+    # two full-frame zeros_like + GaussianBlur + addWeighted passes per
+    # frame (the historical path cost over 200ms/frame at 1080p).
+    m = radius + 6 * 16 + 4
+    h, w = frame.shape[:2]
+    x0, x1 = max(0, cx - m), min(w, cx + m)
+    y0, y1 = max(0, cy - m), min(h, cy + m)
+    if x0 >= x1 or y0 >= y1:
+        return
+    roi = frame[y0:y1, x0:x1]
+    lx, ly = cx - x0, cy - y0
     # Keep the ring crisp while adding a soft halo in the same map accent.
-    light = np.zeros_like(frame)
-    cv2.circle(light, (cx, cy), radius, accent, 4, cv2.LINE_AA)
+    light = np.zeros_like(roi)
+    cv2.circle(light, (lx, ly), radius, accent, 4, cv2.LINE_AA)
     light = cv2.GaussianBlur(light, (0, 0), 16)
-    cv2.addWeighted(frame, 1.0, light, 0.66, 0, dst=frame)
-    cv2.circle(frame, (cx, cy), radius, accent, 3, cv2.LINE_AA)
+    roi[:] = cv2.addWeighted(roi, 1.0, light, 0.66, 0)
+    cv2.circle(roi, (lx, ly), radius, accent, 3, cv2.LINE_AA)
     # Keep the geographic cue as a hollow beacon. A filled center reads as a
     # pin/dot at this scale, so use only a quiet diffuse core and thin ring.
-    core = np.zeros_like(frame)
-    cv2.circle(core, (cx, cy), 13, accent, -1, cv2.LINE_AA)
+    core = np.zeros_like(roi)
+    cv2.circle(core, (lx, ly), 13, accent, -1, cv2.LINE_AA)
     core = cv2.GaussianBlur(core, (0, 0), 8)
-    cv2.addWeighted(frame, 1.0, core, 0.42, 0, dst=frame)
-    cv2.circle(frame, (cx, cy), 8, accent, 2, cv2.LINE_AA)
+    roi[:] = cv2.addWeighted(roi, 1.0, core, 0.42, 0)
+    cv2.circle(roi, (lx, ly), 8, accent, 2, cv2.LINE_AA)
 
 
 MAP_LABEL_ANIMATIONS = (
@@ -351,20 +396,29 @@ def draw_diffuse_city_beacon(frame: np.ndarray, point: tuple[int, int],
         return
     pulse = 0.5 + 0.5 * math.sin(max(0.0, progress - 0.68) * math.tau * 1.2)
     radius = max(24, round(min(h, w) * (0.044 + 0.005 * pulse)))
-    glow = np.zeros_like(frame)
-    cv2.circle(glow, (cx, cy), radius, (8, 20, 245), -1, cv2.LINE_AA)
-    cv2.ellipse(glow, (cx - radius // 5, cy + radius // 8),
+    halo_extent = max(round(radius * 0.62 * 6) + radius + 2,
+                      (area_radius_px + max(4, area_radius_px // 5 * 3) + 2
+                       if area_radius_px > 0 else 0))
+    x0, x1 = max(0, cx - halo_extent), min(w, cx + halo_extent + 1)
+    y0, y1 = max(0, cy - halo_extent), min(h, cy + halo_extent + 1)
+    if x0 >= x1 or y0 >= y1:
+        return
+    roi = frame[y0:y1, x0:x1]
+    local = (cx - x0, cy - y0)
+    glow = np.zeros_like(roi)
+    cv2.circle(glow, local, radius, (8, 20, 245), -1, cv2.LINE_AA)
+    cv2.ellipse(glow, (local[0] - radius // 5, local[1] + radius // 8),
                 (int(radius * 0.75), int(radius * 0.52)), -17, 0, 360,
                 (8, 12, 255), -1, cv2.LINE_AA)
     glow = cv2.GaussianBlur(glow, (0, 0), max(8.0, radius * 0.62))
-    cv2.addWeighted(frame, 1.0, glow, fade * (0.78 + 0.18 * pulse), 0, dst=frame)
+    cv2.addWeighted(roi, 1.0, glow, fade * (0.78 + 0.18 * pulse), 0, dst=roi)
     if area_radius_px > 0:
-        area = np.zeros_like(frame)
-        cv2.circle(area, (cx, cy), area_radius_px, (8, 18, 210), 2, cv2.LINE_AA)
+        area = np.zeros_like(roi)
+        cv2.circle(area, local, area_radius_px, (8, 18, 210), 2, cv2.LINE_AA)
         area = cv2.GaussianBlur(area, (0, 0), max(4, area_radius_px // 5))
-        cv2.addWeighted(frame, 1.0, area, fade * 0.34, 0, dst=frame)
-    cv2.circle(frame, (cx, cy), 4, (12, 26, 255), -1, cv2.LINE_AA)
-    cv2.circle(frame, (cx, cy), 2, (135, 165, 255), -1, cv2.LINE_AA)
+        cv2.addWeighted(roi, 1.0, area, fade * 0.34, 0, dst=roi)
+    cv2.circle(roi, local, 4, (12, 26, 255), -1, cv2.LINE_AA)
+    cv2.circle(roi, local, 2, (135, 165, 255), -1, cv2.LINE_AA)
 
 
 def draw_reaction_glow(frame: np.ndarray, point: tuple[int, int],
@@ -544,22 +598,37 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
     box_y1_eff = box_y0_eff + box_h
     box_x1 = box_x0 + box_w
 
-    layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    # Canvas-localized render: the capsule, its shadow and the tracked text
+    # all live inside box extents + shadow spill + entrance drift, so the
+    # 1920x1080 Pillow surface (and its full-frame GaussianBlur) collapses
+    # here to a window a few hundred pixels tall.
+    blur_r = max(4, round(8 * w / 1920))
+    margin = 4 * blur_r + 8
+    lx0 = max(0, box_x0 - margin)
+    ly0 = max(0, box_y0_eff - margin)
+    lx1 = min(w, box_x1 + margin)
+    ly1 = min(h, box_y1_eff + 4 + 3 * blur_r + margin)
+    ow, oh = lx1 - lx0, ly1 - ly0
+    if ow <= 0 or oh <= 0:
+        return restore_frame(frame)
+    TX, TY = lx0, ly0  # frame -> canvas translation
+
+    layer = Image.new("RGBA", (ow, oh), (0, 0, 0, 0))
 
     # 1. Soft blurred drop shadow (radius 5, blur 8, alpha up to 130)
-    shadow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    shadow = Image.new("RGBA", (ow, oh), (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadow)
     sd.rounded_rectangle(
-        (box_x0, box_y0_eff + 4, box_x1, box_y1_eff + 4),
+        (box_x0 - TX, box_y0_eff + 4 - TY, box_x1 - TX, box_y1_eff + 4 - TY),
         radius=max(4, round(5 * w / 1920)),
         fill=(0, 0, 0, int(130 * reveal)),
     )
-    layer.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(max(4, round(8 * w / 1920)))))
+    layer.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(blur_r)))
 
     # 2. Translucent dark capsule box + 1px subtle keyline
     draw = ImageDraw.Draw(layer)
     draw.rounded_rectangle(
-        (box_x0, box_y0_eff, box_x1, box_y1_eff),
+        (box_x0 - TX, box_y0_eff - TY, box_x1 - TX, box_y1_eff - TY),
         radius=max(4, round(4 * w / 1920)),
         fill=(10, 16, 22, int(242 * reveal)),
         outline=(221, 230, 232, int(100 * reveal)),
@@ -567,8 +636,8 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
     )
 
     # 3. Tracked uppercase text with 1px stroke
-    tx = box_x0 + pad_x
-    ty = box_y0_eff + pad_y - bbox[1]
+    tx = box_x0 + pad_x - TX
+    ty = box_y0_eff + pad_y - bbox[1] - TY
     ink = (242, 244, 238, int(255 * reveal))
     stroke_ink = (3, 8, 12, int(210 * reveal))
     for ch, (cw, cb) in zip(label_upper, char_boxes):
@@ -578,13 +647,7 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
         )
         tx += cw + letter_spacing
 
-    rgba_layer = np.asarray(layer)
-    alpha_mask = rgba_layer[:, :, 3:4].astype(np.float32) / 255.0
-    bgr = rgba_layer[:, :, :3][:, :, ::-1]
-    frame[:] = np.clip(
-        frame.astype(np.float32) * (1.0 - alpha_mask) + bgr * alpha_mask,
-        0, 255,
-    ).astype(np.uint8)
+    _blend_layer_at(frame, np.asarray(layer), ox=lx0, oy=ly0)
     return restore_frame(frame)
 
 
@@ -607,17 +670,38 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
     cx, cy = point
 
     def font(name: str, size: int):
-        return ImageFont.truetype(str(BASE_DIR / "Chronon3d/assets/fonts" / name), size)
+        return _label_font(str(BASE_DIR / "Chronon3d/assets/fonts" / name), size)
 
-    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(overlay)
+    overlay = None
+    draw = None
+
+    overlay_origin = None
+
+    def ensure_overlay(bounds: tuple[int, int, int, int]):
+        nonlocal overlay, draw, overlay_origin
+        x0, y0, x1, y1 = bounds
+        margin = 24
+        ox0, oy0 = max(0, x0 - margin), max(0, y0 - margin)
+        ox1, oy1 = min(w, x1 + margin), min(h, y1 + margin)
+        if overlay is not None:
+            old_x0, old_y0, old_x1, old_y1 = overlay_origin
+            if old_x0 <= ox0 and old_y0 <= oy0 and old_x1 >= ox1 and old_y1 >= oy1:
+                return overlay_origin
+            ox0, oy0 = min(ox0, old_x0), min(oy0, old_y0)
+            ox1, oy1 = max(ox1, old_x1), max(oy1, old_y1)
+            expanded = Image.new("RGBA", (ox1 - ox0, oy1 - oy0), (0, 0, 0, 0))
+            expanded.alpha_composite(overlay, (old_x0 - ox0, old_y0 - oy0))
+            overlay = expanded
+        else:
+            overlay = Image.new("RGBA", (ox1 - ox0, oy1 - oy0), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
+        overlay_origin = (ox0, oy0, ox1, oy1)
+        return overlay_origin
 
     def composite() -> None:
-        rgba = np.asarray(overlay)
-        mask = rgba[:, :, 3:4].astype(np.float32) / 255.0
-        bgr = rgba[:, :, :3][:, :, ::-1].copy()
-        frame[:] = np.clip(frame.astype(np.float32) * (1.0 - mask) + bgr * mask,
-                           0, 255).astype(np.uint8)
+        if overlay is not None:
+            _blend_layer_at(frame, np.asarray(overlay), ox=overlay_origin[0],
+                            oy=overlay_origin[1])
 
     if animation == "gpin_bubble":
         # Google-style red teardrop pin dropping onto the point, white
@@ -627,10 +711,15 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
         py = cy - round(170 * (1.0 - drop))
         pa = int(255 * drop)
         if pa > 1:
-            draw.ellipse((cx - 30, py - 68, cx + 30, py - 8), fill=(220, 30, 30, pa))
-            draw.polygon([(cx - 23, py - 26), (cx + 23, py - 26), (cx, py + 8)],
+            overlay_origin = ensure_overlay((cx - 32, py - 70, cx + 32, py + 10))
+            ox, oy = overlay_origin[:2]
+            draw.ellipse((cx - 30 - ox, py - 68 - oy, cx + 30 - ox, py - 8 - oy),
                          fill=(220, 30, 30, pa))
-            draw.ellipse((cx - 11, py - 49, cx + 11, py - 29), fill=(255, 255, 255, pa))
+            draw.polygon([(cx - 23 - ox, py - 26 - oy),
+                          (cx + 23 - ox, py - 26 - oy), (cx - ox, py + 8 - oy)],
+                         fill=(220, 30, 30, pa))
+            draw.ellipse((cx - 11 - ox, py - 49 - oy, cx + 11 - ox, py - 29 - oy),
+                         fill=(255, 255, 255, pa))
         # Bring the place name in almost with the falling pin. The camera is
         # still moving at this point, so the label reads as part of the arrival.
         tb = max(0.0, min(1.0, (t - 0.05) / 0.70))
@@ -646,11 +735,14 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
             by1 = py - 84
             by0 = by1 - bh
             bia = int(255 * ba)
-            draw.rounded_rectangle((bx0, by0, bx0 + bw, by1), radius=22,
+            overlay_origin = ensure_overlay((min(bx0, cx - 32), min(by0, py - 70),
+                                              max(bx0 + bw, cx + 32), max(by1 + 20, py + 10)))
+            ox, oy = overlay_origin[:2]
+            draw.rounded_rectangle((bx0 - ox, by0 - oy, bx0 + bw - ox, by1 - oy), radius=22,
                                    fill=(255, 255, 255, bia))
-            draw.polygon([(cx - 12, by1 - 2), (cx + 12, by1 - 2), (cx, by1 + 20)],
-                         fill=(255, 255, 255, bia))
-            draw.text((bx0 + 36 - bbox[0], by0 + 20 - bbox[1]), label, font=f,
+            draw.polygon([(cx - 12 - ox, by1 - 2 - oy), (cx + 12 - ox, by1 - 2 - oy),
+                          (cx - ox, by1 + 20 - oy)], fill=(255, 255, 255, bia))
+            draw.text((bx0 + 36 - bbox[0] - ox, by0 + 20 - bbox[1] - oy), label, font=f,
                       fill=(17, 24, 39, bia))
     elif animation == "card_glass":
         # Frosted dark card, left-center, cyan border, white text.
@@ -667,13 +759,16 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
                 blurred = cv2.GaussianBlur(roi, (31, 31), 0)
                 tint = np.full_like(roi, (12, 22, 30))
                 frame[y0:y1, x0:x1] = cv2.addWeighted(blurred, 0.45, tint, 0.55, 0)
-            draw.rounded_rectangle((x0, y0, x1, y1), radius=20,
+            overlay_origin = ensure_overlay((x0 - 20, y0 - 20, x1 + 20, y1 + 20))
+            ox, oy = overlay_origin[:2]
+            draw.rounded_rectangle((x0 - ox, y0 - oy, x1 - ox, y1 - oy), radius=20,
                                    outline=(102, 209, 255, a), width=3)
-            draw.line((x0 + 34, y0 + th + 78, x0 + 134, y0 + th + 78),
+            draw.line((x0 + 34 - ox, y0 + th + 78 - oy, x0 + 134 - ox, y0 + th + 78 - oy),
                       fill=(102, 209, 255, a), width=4)
-            draw.text((x0 + 60 - bbox[0], y0 + 34 - bbox[1]), label, font=f,
+            draw.text((x0 + 60 - bbox[0] - ox, y0 + 34 - bbox[1] - oy), label, font=f,
                       fill=(255, 255, 255, a))
-            draw.ellipse((cx - 7, cy - 7, cx + 7, cy + 7), fill=(255, 255, 255, a))
+            draw.ellipse((cx - 7 - ox, cy - 7 - oy, cx + 7 - ox, cy + 7 - oy),
+                         fill=(255, 255, 255, a))
     elif animation == "bare_big":
         # Naked display type, no rectangle, no stroke, soft offset shadow.
         a = int(255 * ease)
@@ -683,11 +778,15 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
             tw = bbox[2] - bbox[0]
             x = max(20, min(w - tw - 20, w // 2 - tw // 2))
             y = int(h * 0.40)
-            draw.text((x - bbox[0] + 5, y - bbox[1] + 7), label, font=f,
+            overlay_origin = ensure_overlay((min(x - 8, cx - 8), y - 8,
+                                             max(x + tw + 8, cx + 8), int(h * 0.40) + 128))
+            ox, oy = overlay_origin[:2]
+            draw.text((x - bbox[0] + 5 - ox, y - bbox[1] + 7 - oy), label, font=f,
                       fill=(0, 0, 0, int(120 * ease)))
-            draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+            draw.text((x - bbox[0] - ox, y - bbox[1] - oy), label, font=f,
                       fill=(255, 255, 255, a))
-            draw.ellipse((cx - 6, cy - 6, cx + 6, cy + 6), fill=(255, 255, 255, a))
+            draw.ellipse((cx - 6 - ox, cy - 6 - oy, cx + 6 - ox, cy + 6 - oy),
+                         fill=(255, 255, 255, a))
     elif animation == "ribbon":
         # Full-width band wiping in from the left, centered bold text.
         a = int(255 * ease)
@@ -696,16 +795,20 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
             bbox = f.getbbox(label)
             tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
             band_h, band_y = 170, 210
-            draw.rectangle((0, band_y, w, band_y + band_h), fill=(7, 16, 24, int(205 * ease)))
-            draw.line((0, band_y, w, band_y), fill=(102, 209, 255, a), width=4)
-            draw.line((0, band_y + band_h, w, band_y + band_h), fill=(102, 209, 255, a), width=4)
-            draw.text((w // 2 - tw // 2 - bbox[0], band_y + (band_h - th) // 2 - bbox[1]),
-                      label, font=f, fill=(255, 255, 255, a))
-            # Wipe reveal from the left.
-            rgba = np.asarray(overlay)
             cut = int(w * ease)
-            rgba[:, cut:, 3] = 0
-            draw.ellipse((cx - 7, cy - 7, cx + 7, cy + 7), fill=(255, 255, 255, a))
+            overlay_origin = ensure_overlay((0, band_y - 4, max(1, cut), band_y + band_h + 4))
+            ox, oy = overlay_origin[:2]
+            local_cut = max(0, min(overlay.width, cut - ox))
+            draw.rectangle((0, band_y - oy, local_cut, band_y + band_h - oy),
+                           fill=(7, 16, 24, int(205 * ease)))
+            draw.line((0, band_y - oy, local_cut, band_y - oy), fill=(102, 209, 255, a), width=4)
+            draw.line((0, band_y + band_h - oy, local_cut, band_y + band_h - oy),
+                      fill=(102, 209, 255, a), width=4)
+            draw.text((w // 2 - tw // 2 - bbox[0] - ox,
+                       band_y + (band_h - th) // 2 - bbox[1] - oy),
+                      label, font=f, fill=(255, 255, 255, a))
+            draw.ellipse((cx - 7 - ox, cy - 7 - oy, cx + 7 - ox, cy + 7 - oy),
+                         fill=(255, 255, 255, a))
     elif animation == "dot_ring":
         # Ultra-minimal: small dot, thin pulsing ring, tiny text, nothing else.
         import math
@@ -713,12 +816,17 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
         if a > 1:
             pulse = 0.5 + 0.5 * math.sin(t * math.tau * 1.5)
             r = int(14 + 12 * pulse)
-            draw.ellipse((cx - r, cy - r, cx + r, cy + r),
-                         outline=(102, 209, 255, a), width=2)
-            draw.ellipse((cx - 6, cy - 6, cx + 6, cy + 6), fill=(255, 255, 255, a))
             f = font("Inter-Medium.ttf", 28)
             bbox = f.getbbox(label)
-            draw.text((cx + 30 - bbox[0], cy - 44 - bbox[1]), label, font=f,
+            tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            overlay_origin = ensure_overlay((cx - r - 4, cy - r - 4,
+                                             cx + 30 + tw + 5, cy + r + 4))
+            ox, oy = overlay_origin[:2]
+            draw.ellipse((cx - r - ox, cy - r - oy, cx + r - ox, cy + r - oy),
+                         outline=(102, 209, 255, a), width=2)
+            draw.ellipse((cx - 6 - ox, cy - 6 - oy, cx + 6 - ox, cy + 6 - oy),
+                         fill=(255, 255, 255, a))
+            draw.text((cx + 30 - bbox[0] - ox, cy - 44 - bbox[1] - oy), label, font=f,
                       fill=(255, 255, 255, a), stroke_width=2,
                       stroke_fill=(6, 20, 28, int(230 * ease)))
     elif animation == "outline_box":
@@ -732,15 +840,21 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
             x = max(20, min(w - tw - 20, cx - tw // 2))
             y = max(20, min(h - th - 20, cy + 76))
             x0, y0, x1, y1 = x - pad, y - pad + 6, x + tw + pad, y + th + pad + 6
-            draw.rectangle((x0, y0, x1, y1), outline=(102, 209, 255, a), width=2)
+            overlay_origin = ensure_overlay((x0 - 4, y0 - 4, x1 + 4, y1 + 4))
+            ox, oy = overlay_origin[:2]
+            draw.rectangle((x0 - ox, y0 - oy, x1 - ox, y1 - oy),
+                           outline=(102, 209, 255, a), width=2)
             L = 26
-            for cx0, cy0, dx, dy in ((x0, y0, 1, 1), (x1, y0, -1, 1),
-                                     (x0, y1, 1, -1), (x1, y1, -1, -1)):
-                draw.line((cx0, cy0, cx0 + dx * L, cy0), fill=(255, 255, 255, a), width=5)
-                draw.line((cx0, cy0, cx0, cy0 + dy * L), fill=(255, 255, 255, a), width=5)
-            draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+            for px, py, dx, dy in ((x0, y0, 1, 1), (x1, y0, -1, 1),
+                                   (x0, y1, 1, -1), (x1, y1, -1, -1)):
+                draw.line((px - ox, py - oy, px + dx * L - ox, py - oy),
+                          fill=(255, 255, 255, a), width=5)
+                draw.line((px - ox, py - oy, px - ox, py + dy * L - oy),
+                          fill=(255, 255, 255, a), width=5)
+            draw.text((x - bbox[0] - ox, y - bbox[1] - oy), label, font=f,
                       fill=(255, 255, 255, a))
-            draw.ellipse((cx - 6, cy - 6, cx + 6, cy + 6), fill=(255, 255, 255, a))
+            draw.ellipse((cx - 6 - ox, cy - 6 - oy, cx + 6 - ox, cy + 6 - oy),
+                         fill=(255, 255, 255, a))
     else:
         return
     composite()
@@ -764,25 +878,33 @@ def _draw_distinct_label_style(frame: np.ndarray, point: tuple[int, int],
     a = int(255 * max(0.0, min(1.0, alpha)))
     if a <= 1:
         return
-    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(overlay)
+    overlay = None
+    draw = None
+    ox0 = oy0 = 0
 
     def font(name: str, size: int):
-        return ImageFont.truetype(str(BASE_DIR / "Chronon3d/assets/fonts" / name), size)
+        return _label_font(str(BASE_DIR / "Chronon3d/assets/fonts" / name), size)
+
+    def begin_roi(bounds: tuple[int, int, int, int]) -> None:
+        nonlocal overlay, draw, ox0, oy0
+        x0, y0, x1, y1 = bounds
+        margin = 24
+        ox0, oy0 = max(0, x0 - margin), max(0, y0 - margin)
+        ox1, oy1 = min(w, x1 + margin), min(h, y1 + margin)
+        overlay = Image.new("RGBA", (ox1 - ox0, oy1 - oy0), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
 
     def composite() -> None:
-        rgba = np.asarray(overlay)
-        mask = rgba[:, :, 3:4].astype(np.float32) / 255.0
-        bgr = rgba[:, :, :3][:, :, ::-1].copy()
-        frame[:] = np.clip(frame.astype(np.float32) * (1.0 - mask) + bgr * mask,
-                           0, 255).astype(np.uint8)
+        if overlay is not None:
+            _blend_layer_at(frame, np.asarray(overlay), ox=ox0, oy=oy0)
 
     if animation == "title_top":
         f = font("Inter-Bold.ttf", 84)
         bbox = f.getbbox(label)
-        tw = bbox[2] - bbox[0]
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
         x = max(20, min(w - tw - 20, w // 2 - tw // 2))
-        draw.text((x - bbox[0], 110 - bbox[1]), label, font=f,
+        begin_roi((x - 5, 105, x + tw + 5, 110 + th + 8))
+        draw.text((x - bbox[0] - ox0, 110 - bbox[1] - oy0), label, font=f,
                   fill=(255, 255, 255, a), stroke_width=3,
                   stroke_fill=(6, 20, 28, int(230 * alpha)))
     elif animation == "badge_side":
@@ -792,6 +914,8 @@ def _draw_distinct_label_style(frame: np.ndarray, point: tuple[int, int],
         padx, pady = 24, 12
         x0, y0 = cx + 66, cy - th // 2 - pady - 10
         x1, y1 = x0 + tw + padx * 2, y0 + th + pady * 2
+        begin_roi((x0 - 4, y0 - 4, x1 + 4, y1 + 4))
+        x0 -= ox0; x1 -= ox0; y0 -= oy0; y1 -= oy0
         draw.rounded_rectangle((x0, y0, x1, y1), radius=(y1 - y0) // 2,
                                fill=(7, 16, 24, int(225 * alpha)),
                                outline=(102, 209, 255, a), width=3)
@@ -800,12 +924,13 @@ def _draw_distinct_label_style(frame: np.ndarray, point: tuple[int, int],
     elif animation == "huge_center":
         f = font("AbrilFatface-Regular.ttf", 150)
         bbox = f.getbbox(label)
-        tw = bbox[2] - bbox[0]
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
         x = max(20, min(w - tw - 20, w // 2 - tw // 2))
         y = int(h * 0.24)
-        draw.text((x - bbox[0] + 4, y - bbox[1] + 6), label, font=f,
+        begin_roi((x - 8, y - 8, x + tw + 8, y + th + 10))
+        draw.text((x - bbox[0] + 4 - ox0, y - bbox[1] + 6 - oy0), label, font=f,
                   fill=(0, 0, 0, int(110 * alpha)))
-        draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+        draw.text((x - bbox[0] - ox0, y - bbox[1] - oy0), label, font=f,
                   fill=(250, 246, 235, a), stroke_width=2,
                   stroke_fill=(6, 20, 28, int(200 * alpha)))
     elif animation == "small_above":
@@ -814,10 +939,11 @@ def _draw_distinct_label_style(frame: np.ndarray, point: tuple[int, int],
         tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
         x = max(20, min(w - tw - 20, cx - tw // 2))
         y = max(20, cy - 122)
-        draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+        begin_roi((x - 4, y - 4, x + tw + 4, y + th + 14))
+        draw.text((x - bbox[0] - ox0, y - bbox[1] - oy0), label, font=f,
                   fill=(255, 255, 255, a), stroke_width=2,
                   stroke_fill=(6, 20, 28, int(230 * alpha)))
-        draw.line((x, y + th + 8, x + tw, y + th + 8),
+        draw.line((x - ox0, y + th + 8 - oy0, x + tw - ox0, y + th + 8 - oy0),
                   fill=(102, 209, 255, a), width=3)
     elif animation == "caption_card":
         f = font("Inter-SemiBold.ttf", 46)
@@ -825,6 +951,8 @@ def _draw_distinct_label_style(frame: np.ndarray, point: tuple[int, int],
         tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
         x0, y0 = 60, 128
         x1, y1 = x0 + tw + 120, y0 + th + 56
+        begin_roi((x0 - 4, y0 - 4, x1 + 4, y1 + 4))
+        x0 -= ox0; x1 -= ox0; y0 -= oy0; y1 -= oy0
         draw.rounded_rectangle((x0, y0, x1, y1), radius=18,
                                fill=(7, 16, 20, int(224 * alpha)))
         draw.rounded_rectangle((x0 + 20, y0 + 22, x0 + 28, y1 - 22), radius=4,
@@ -839,9 +967,10 @@ def _draw_distinct_label_style(frame: np.ndarray, point: tuple[int, int],
         slide = round(20 * (1.0 - ease))
         x = max(20, min(w - tw - 20, cx - tw // 2))
         y = max(20, min(h - th - 20, cy + 72 + slide))
-        draw.text((x - bbox[0] + 3, y - bbox[1] + 4), label, font=f,
+        begin_roi((x - 6, y - 6, x + tw + 6, y + th + 6))
+        draw.text((x - bbox[0] + 3 - ox0, y - bbox[1] + 4 - oy0), label, font=f,
                   fill=(0, 0, 0, int(140 * alpha)))
-        draw.text((x - bbox[0], y - bbox[1]), label, font=f,
+        draw.text((x - bbox[0] - ox0, y - bbox[1] - oy0), label, font=f,
                   fill=(250, 249, 238, a), stroke_width=2,
                   stroke_fill=(0, 14, 7, int(230 * alpha)))
     else:
@@ -979,22 +1108,21 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
         return
     if animation == "diffuse_city_beacon":
         font_path = BASE_DIR / "Chronon3d/assets/fonts/DM-Serif-Display-Italic.ttf"
-        font = ImageFont.truetype(str(font_path), max(24, round(min(h, w) * 0.052)))
+        font = _label_font(str(font_path), max(24, round(min(h, w) * 0.052)))
         bbox = font.getbbox(label)
         tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
         text_x = max(20, min(w - tw - 20, cx - tw // 2))
         text_y = max(20, min(h - th - 20, cy + max(52, round(h * 0.065))))
-        overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        margin = 8
+        x0, y0 = max(0, text_x - margin), max(0, text_y - margin)
+        x1, y1 = min(w, text_x + tw + margin), min(h, text_y + th + margin)
+        overlay = Image.new("RGBA", (x1 - x0, y1 - y0), (0, 0, 0, 0))
         draw = ImageDraw.Draw(overlay)
-        draw.text((text_x - bbox[0], text_y - bbox[1]), label, font=font,
+        draw.text((text_x - bbox[0] - x0, text_y - bbox[1] - y0), label, font=font,
                   fill=(250, 249, 238, int(255 * alpha)),
                   stroke_width=max(1, round(min(h, w) / 540)),
                   stroke_fill=(0, 14, 7, int(230 * alpha)))
-        rgba = np.asarray(overlay)
-        mask = rgba[:, :, 3:4].astype(np.float32) / 255.0
-        bgr = rgba[:, :, :3][:, :, ::-1].copy()
-        frame[:] = np.clip(frame.astype(np.float32) * (1.0 - mask) + bgr * mask,
-                           0, 255).astype(np.uint8)
+        _blend_layer_at(frame, np.asarray(overlay), ox=x0, oy=y0)
         return
     # 01_ed_saudi_base capsule style for marker label:
     label_upper = label.upper()
@@ -1002,7 +1130,7 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     if not font_path.is_file():
         font_path = BASE_DIR / "Chronon3d/assets/fonts/Inter-Bold.ttf"
     font_size = max(24, round(32.0 * min(w, h) / 1080))
-    font = ImageFont.truetype(str(font_path), font_size)
+    font = _label_font(str(font_path), font_size)
 
     pad_x = max(14, round(18.0 * w / 1920))
     pad_y = max(6, round(8.0 * h / 1080))
@@ -1039,21 +1167,27 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     box_y1_eff = box_y0_eff + box_h
     box_x1 = box_x0 + box_w
 
-    # Clean leader line connecting pin center to top edge of box
-    overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    # Allocate a clipped local canvas around the leader, capsule and shadow.
+    roi_margin = 24
+    rx0 = max(0, min(cx, box_x0) - roi_margin)
+    ry0 = max(0, min(cy + 10, box_y0_eff) - roi_margin)
+    rx1 = min(w, max(cx + 1, box_x1) + roi_margin)
+    ry1 = min(h, max(cy + 10, box_y1_eff + 10) + roi_margin)
+    overlay = Image.new("RGBA", (rx1 - rx0, ry1 - ry0), (0, 0, 0, 0))
     draw_ov = ImageDraw.Draw(overlay)
     if box_y0_eff > cy + 10:
         draw_ov.line(
-            (cx, cy + 10, cx, box_y0_eff),
+            (cx - rx0, cy + 10 - ry0, cx - rx0, box_y0_eff - ry0),
             fill=(221, 230, 232, int(160 * alpha)),
             width=1,
         )
 
     # 1. Soft blurred drop shadow
-    shadow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    shadow = Image.new("RGBA", overlay.size, (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadow)
     sd.rounded_rectangle(
-        (box_x0, box_y0_eff + 4, box_x1, box_y1_eff + 4),
+        (box_x0 - rx0, box_y0_eff + 4 - ry0,
+         box_x1 - rx0, box_y1_eff + 4 - ry0),
         radius=4,
         fill=(0, 0, 0, int(130 * alpha)),
     )
@@ -1062,7 +1196,8 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     # 2. Translucent dark rounded box + 1px subtle keyline
     draw_ov = ImageDraw.Draw(overlay)
     draw_ov.rounded_rectangle(
-        (box_x0, box_y0_eff, box_x1, box_y1_eff),
+        (box_x0 - rx0, box_y0_eff - ry0,
+         box_x1 - rx0, box_y1_eff - ry0),
         radius=4,
         fill=(10, 16, 22, int(242 * alpha)),
         outline=(221, 230, 232, int(100 * alpha)),
@@ -1070,8 +1205,8 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     )
 
     # 3. Tracked uppercase bold text
-    tx = box_x0 + pad_x
-    ty = box_y0_eff + pad_y - bbox[1]
+    tx = box_x0 + pad_x - rx0
+    ty = box_y0_eff + pad_y - bbox[1] - ry0
     ink = (242, 244, 238, int(255 * alpha))
     stroke_ink = (3, 8, 12, int(210 * alpha))
     for ch, (cw, cb) in zip(label_upper, char_boxes):
@@ -1081,13 +1216,7 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
         )
         tx += cw + letter_spacing
 
-    rgba = np.asarray(overlay)
-    mask = rgba[:, :, 3:4].astype(np.float32) / 255.0
-    bgr = rgba[:, :, :3][:, :, ::-1].copy()
-    frame[:] = np.clip(
-        frame.astype(np.float32) * (1.0 - mask) + bgr * mask,
-        0, 255,
-    ).astype(np.uint8)
+    _blend_layer_at(frame, np.asarray(overlay), ox=rx0, oy=ry0)
 
 
 def draw_route_glow(frame: np.ndarray, frm: tuple[float, float], to: tuple[float, float],

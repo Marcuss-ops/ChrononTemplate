@@ -474,6 +474,12 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         add_test(NAME chronontemplate_rgb_motion_v1_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/backgrounds/test_rgb_motion_v1.py")
+        add_test(NAME chronontemplate_vintage_documentary_title_01_plan_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/backgrounds/test_vintage_documentary_title_01.py"
+                    --catalog "${CMAKE_CURRENT_SOURCE_DIR}/catalog/vintage_documentary_title_01"
+                    --assets-root "${CMAKE_CURRENT_SOURCE_DIR}/.."
+                    --cli "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli")
         add_test(NAME chronontemplate_map_motion_family_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/map/test_map_motion_family_v1.py")

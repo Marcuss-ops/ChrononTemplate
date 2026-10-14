@@ -121,10 +121,10 @@ int main() {
     const auto scribbleOp=revealAnimation(RevealMode::Scribble,base);
     const auto sweepOp=revealAnimation(RevealMode::Sweep,base);
     const auto traceOp=revealAnimation(RevealMode::Trace,base);
-    check(drawOp["params"]["animation"]["easing"]=="ease_in_out","draw uses eased reveal");
+    check(drawOp["params"]["animation"]["easing"]=="in_out_sine","draw uses canonical eased reveal");
     check(wipeOp["params"]["animation"]["easing"]=="linear","wipe uses linear reveal");
-    check(sweepOp["params"]["animation"]["easing"]=="ease_out","sweep uses ease-out");
-    check(traceOp["params"]["animation"]["easing"]=="ease_in_out","trace uses ease-in-out");
+    check(sweepOp["params"]["animation"]["easing"]=="out_sine","sweep uses canonical ease-out");
+    check(traceOp["params"]["animation"]["easing"]=="in_out_sine","trace uses canonical ease-in-out");
     check(scribbleOp==wipeOp || scribbleOp["params"]["animation"]["easing"]=="linear",
           "scribble trim stays decoder-safe");
     rejects([&]{(void)revealAnimation(RevealMode::Pulse,base);});

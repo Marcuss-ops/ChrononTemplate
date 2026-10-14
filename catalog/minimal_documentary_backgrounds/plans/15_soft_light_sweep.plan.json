@@ -1,0 +1,67 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "15_soft_light_sweep",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 240
+  },
+  "output": {
+    "path": "/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/catalog/minimal_documentary_backgrounds/out/15_soft_light_sweep.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  },
+  "layers": [
+    {
+      "id": "15_soft_light_sweep_plate",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/minimal_documentary_backgrounds/assets/15_soft_light_sweep_plate.png",
+      "size": [
+        2000.0,
+        1125.0
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 240,
+      "enable_3d": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -45.0
+              },
+              {
+                "frame": 239,
+                "value": 45.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 239,
+                "value": 1.01
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "14_muted_olive",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 240
+  },
+  "output": {
+    "path": "/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/catalog/minimal_documentary_backgrounds/out/14_muted_olive.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  },
+  "layers": [
+    {
+      "id": "14_muted_olive_plate",
+      "type": "image",
+      "asset": "ChrononTemplate/catalog/minimal_documentary_backgrounds/assets/14_muted_olive_plate.png",
+      "size": [
+        2000.0,
+        1125.0
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 240,
+      "enable_3d": true,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -10.0
+              },
+              {
+                "frame": 239,
+                "value": 10.0
+              }
+            ]
+          },
+          {
+            "property": "position_y",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 8.0
+              },
+              {
+                "frame": 239,
+                "value": -8.0
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 239,
+                "value": 1.012
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
