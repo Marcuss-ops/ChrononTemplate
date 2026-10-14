@@ -253,7 +253,13 @@ namespace {
         for (const LayerHandle* accent : particles.accents) {
             if (accent->name().find("_particle_") == std::string::npos) continue;
             ++dotCount;
-            if (accent->layer().tracks.position.keys().size() != 2) allDrift = false;
+            // Perlin drift authors a deterministic multi-key curved path
+            // (4..9 keys), not the legacy two-point linear drift.
+            const auto& keys = accent->layer().tracks.position.keys();
+            if (keys.size() < 4 || keys.size() > 9) allDrift = false;
+            for (std::size_t k = 1; k < keys.size() && allDrift; ++k)
+                if (!(keys[k].time > keys[k-1].time) || !std::isfinite(keys[k].value.x) ||
+                    !std::isfinite(keys[k].value.y)) allDrift = false;
         }
         check(dotCount == 12, "twelve particle dots are authored for quantity 12");
         check(allDrift, "each particle gets a deterministic drift motion track");
