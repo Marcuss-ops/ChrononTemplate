@@ -30,62 +30,31 @@
 
 namespace chronontemplate {
 
-    /// The short-phrase archetypes. The ids are the wire names the
-    /// catalog and the emitter consume (`short_phrase_*`).
+    /// Short-phrase recipe key. Catalog publication, family membership,
+    /// word-count eligibility and picker suggestions are authored together in
+    /// `shortPhraseRecipeSpecs()`; this enum is the stable C++ handle.
     enum class ShortPhraseAnimation {
-        ScaleSettleWord,         ///< scale + grey→white settle, for one strong word
-        ShapePhraseWipe,         ///< phrase revealed while a shape crosses it
-        SemanticTwoLine,         ///< two lines, the emphasised words lead in accent
-        PhraseBuildFocus,        ///< the phrase builds in blocks, some words focused
-        CharacterTrackingReveal, ///< almost letter by letter, wide tracking → normal
-        WordMaskSequence,        ///< one word at a time in a fixed slot (leave → your → message)
-        CharacterCascadeShapes,  ///< glyph cascade while decor shapes rotate
-        WordCascadeSentence,     ///< word after word in, then out in the same order
-        SemanticChainCurve,      ///< word cascade that folds away along an arc
-        SimpleProgressivePhrase, ///< very clean progressive build, exits from the left
-        SingleWordSwap,          ///< one word slot swaps out for the next
-        CharacterWriteOn,        ///< an elegant glyph write-on, like typing
-        EditorialBaselineRise,
-        EditorialSideGlide,
-        EditorialTrackingClose,
-        EditorialFocusResolve,
-        EditorialUnderlineDraw,
-        EditorialRuleHandoff,
-        EditorialGlyphCurtain,
-        EditorialContrastSweep,
-        EditorialQuietZoom,
-        EditorialLiftAndRule,   ///< clean editorial recipes, append-only wire ids
-        ProductHardMaskSlideUp,
-        ProductKineticBlurIn,
-        ProductWordStagger,
-        ProductTrackingPullIn,
-        ProductGradientSweep,
-        ProductSubtitleDissolve,
-        ProductDualToneReveal,
-        ProductScaleSnap,
-        ProductRadialExpansion,
-        ProductDepthParallax,
-        ProductGlintPass,     ///< product-motion recipes, append-only wire ids
-        ProductLetterRise,
-        ProductDigitalAssembly,
-        ProductMaskedHeading,
-        ProductSplitFlapText,
-        ProductWarpText,
-        ProductFoldText,
-        ProductDecryptedText,
-        ProductScrollReveal,
-        ProductScrambledText,
-        ProductGlareHover,
-        ProductGradualBlur,
-        ProductShapeBlur,
-        EditorialPromptResponse,
-        EditorialDiffPatch,
-        EditorialTerminalFocus,
-        EditorialPaperTitleCard  ///< minimal documentary card: off-white paper, ink text, soft shadow
+#define SHORT_PHRASE_RECIPE(key, id, family, min_words, max_words, suggested, caption_target, runtime_enabled) key,
+#include "chronontemplate/short_phrases/ShortPhraseRecipes.def"
+#undef SHORT_PHRASE_RECIPE
     };
 
     /// How the phrase leaves. The entrance is the recipe; the exit is the beat
     /// the short-phrase families share.
+    struct ShortPhraseRecipeSpec {
+        ShortPhraseAnimation animation;
+        const char* id;
+        const char* family;
+        int min_words;
+        int max_words;
+        bool suggested;
+        std::vector<const char*> targets;
+        bool runtime_enabled;
+    };
+
+    /// The one declarative roster used to audit ShortPhrase families and routing.
+    const std::vector<ShortPhraseRecipeSpec>& shortPhraseRecipeSpecs() noexcept;
+
     enum class ShortPhraseExit : std::uint8_t {
         Reverse,      ///< words leave in the same order they arrived
         Forward,      ///< words leave from the last to the first
@@ -139,9 +108,6 @@ namespace chronontemplate {
         std::string adaptation_note{};
         /// White editorial paper palette with ink-black typography.
         bool white_background{false};
-        /// Off-white paper stack (solid + noise/dust/vignette texture), ink text (#131313)
-        /// and a two-layer soft shadow. Mutually exclusive with `white_background`.
-        bool paper_background{false};
     };
 
     /// The decor bumper, kept out of the text engine as its own definition.

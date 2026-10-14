@@ -19,7 +19,6 @@
 #include "chronontemplate/core/NativePrimitives.hpp"
 #include "chronontemplate/core/PlanLowering.hpp"
 #include "chronontemplate/core/RenderPlanContentHost.hpp"
-#include "chronontemplate/important_phrases/highlight/PhraseHighlightPack.hpp"
 #include "chronontemplate/short_phrases/ShortPhrasePack.hpp"
 #include "chronontemplate/core/Presets.hpp"
 #include "chronontemplate/transitions/TransitionPack.hpp"

@@ -21,6 +21,7 @@ import time
 import subprocess
 from functools import lru_cache
 from pathlib import Path
+from threading import local
 
 import numpy as np
 import cv2
@@ -177,11 +178,8 @@ def draw_location_glow(frame: np.ndarray, point: tuple[int, int], progress: floa
     # OpenCV uses BGR: this is #FFD166. Keep the center visibly warm instead
     # of drawing the near-black target dot that disappeared on dark basemaps.
     accent = (102, 209, 255)
-    # Both blurred sprites interact with the frame only inside radius +
-    # kernel-half of the sigma-16 blur (ksize 97 on CV_8U), so render and
-    # blend them in a small local window with a generous margin instead of
-    # two full-frame zeros_like + GaussianBlur + addWeighted passes per
-    # frame (the historical path cost over 200ms/frame at 1080p).
+    # Both filtered masks are rendered and blended in a small local window
+    # with a generous margin rather than allocating full-frame buffers.
     m = radius + 6 * 16 + 4
     h, w = frame.shape[:2]
     x0, x1 = max(0, cx - m), min(w, cx + m)
@@ -191,54 +189,64 @@ def draw_location_glow(frame: np.ndarray, point: tuple[int, int], progress: floa
     roi = frame[y0:y1, x0:x1]
     lx, ly = cx - x0, cy - y0
     # Keep the ring crisp while adding a soft halo in the same map accent.
-    light = np.zeros_like(roi)
-    cv2.circle(light, (lx, ly), radius, accent, 4, cv2.LINE_AA)
-    light = cv2.GaussianBlur(light, (0, 0), 16)
-    roi[:] = cv2.addWeighted(roi, 1.0, light, 0.66, 0)
+    light = np.zeros(roi.shape[:2], dtype=np.uint8)
+    cv2.circle(light, (lx, ly), radius, 255, 4, cv2.LINE_AA)
+    from glow_primitive import composite_halo
+    composite_halo(roi, light, accent, sigma=16, intensity=0.66)
     cv2.circle(roi, (lx, ly), radius, accent, 3, cv2.LINE_AA)
     # Keep the geographic cue as a hollow beacon. A filled center reads as a
     # pin/dot at this scale, so use only a quiet diffuse core and thin ring.
-    core = np.zeros_like(roi)
-    cv2.circle(core, (lx, ly), 13, accent, -1, cv2.LINE_AA)
-    core = cv2.GaussianBlur(core, (0, 0), 8)
-    roi[:] = cv2.addWeighted(roi, 1.0, core, 0.42, 0)
+    core = np.zeros(roi.shape[:2], dtype=np.uint8)
+    cv2.circle(core, (lx, ly), 13, 255, -1, cv2.LINE_AA)
+    composite_halo(roi, core, accent, sigma=8, intensity=0.42)
     cv2.circle(roi, (lx, ly), 8, accent, 2, cv2.LINE_AA)
 
 
-MAP_LABEL_ANIMATIONS = (
-    "gentle_fade", "soft_glow", "clean_fade", "word_soft_fade",
-    "slow_fade", "quiet_bloom", "quick_fade", "silky_fade",
-    "subtle_halo", "cinematic_fade", "diffuse_city_beacon",
-    "rise_up", "pop_in", "soft_tracking",
-    "title_top", "badge_side", "huge_center",
-    "small_above", "caption_card", "editorial_serif",
-    "gpin_bubble", "card_glass", "bare_big", "glow_react", "editorial_tag",
-    "ribbon", "dot_ring", "outline_box",
+# One authoring table for every map label treatment. Optional rail timing is
+# used by the bottom caption renderer; marker timing is used by the camera-nadir
+# marker renderer. Renderer lane and marker routing derive the public selector
+# sets below, so adding a style requires one row and its drawing implementation.
+MAP_LABEL_SPECS = (
+    # id, renderer lane, marker drawn, rail timing, marker timing
+    ("gentle_fade", "standard", False, (0.78, 0.16), (0.80, 0.16)),
+    ("soft_glow", "standard", False, (0.75, 0.20), (0.80, 0.16)),
+    ("clean_fade", "standard", False, (0.81, 0.13), (0.80, 0.16)),
+    ("word_soft_fade", "standard", False, (0.76, 0.18), (0.80, 0.16)),
+    ("slow_fade", "standard", False, (0.67, 0.29), (0.80, 0.16)),
+    ("quiet_bloom", "standard", False, (0.72, 0.22), (0.80, 0.16)),
+    ("quick_fade", "standard", False, (0.84, 0.08), (0.80, 0.16)),
+    ("silky_fade", "standard", False, (0.74, 0.21), (0.80, 0.16)),
+    ("subtle_halo", "standard", False, (0.77, 0.17), (0.80, 0.16)),
+    ("cinematic_fade", "standard", False, (0.70, 0.25), (0.80, 0.16)),
+    ("diffuse_city_beacon", "beacon", False, (0.78, 0.16), (0.80, 0.13)),
+    ("rise_up", "standard", False, (0.74, 0.20), (0.76, 0.18)),
+    ("pop_in", "standard", False, (0.82, 0.10), (0.82, 0.10)),
+    ("soft_tracking", "standard", False, (0.68, 0.26), (0.72, 0.22)),
+    ("title_top", "geometry", True, (0.70, 0.22), (0.70, 0.22)),
+    ("badge_side", "geometry", True, (0.78, 0.16), (0.78, 0.16)),
+    ("huge_center", "geometry", True, (0.66, 0.28), (0.66, 0.28)),
+    ("small_above", "geometry", True, (0.80, 0.14), (0.80, 0.14)),
+    ("caption_card", "geometry", True, (0.74, 0.20), (0.74, 0.20)),
+    ("editorial_serif", "geometry", True, (0.72, 0.22), (0.72, 0.22)),
+    ("gpin_bubble", "composition", True, None, (0.12, 0.36)),
+    ("card_glass", "composition", True, None, (0.70, 0.20)),
+    ("bare_big", "composition", True, None, (0.72, 0.22)),
+    ("glow_react", "reactive", True, None, (0.0, 0.18)),
+    ("editorial_tag", "editorial", True, None, (0.08, 0.24)),
+    ("ribbon", "composition", True, None, (0.68, 0.20)),
+    ("dot_ring", "composition", True, None, (0.76, 0.16)),
+    ("outline_box", "composition", True, None, (0.74, 0.20)),
 )
 
-# Distinct-geometry label styles: different size, position and typeface.
-# The ten calm fades share one geometry; these six do not.
-NEW_LABEL_GEOMETRIES = (
-    "title_top", "badge_side", "huge_center",
-    "small_above", "caption_card", "editorial_serif",
-)
-
-# Full marker compositions: own marker + own text shape, no standard beacon,
-# no bottom rail (the rail is suppressed for these in
-# draw_editorial_map_caption). gpin_bubble is a Google-style red pin with a
-# white bubble; card_glass a frosted card; bare_big naked display type;
-# ribbon a full-width band; dot_ring an ultra-minimal dot; outline_box an
-# empty wireframe box with corner ticks.
-COMPOSITION_STYLES = (
-    "gpin_bubble", "card_glass", "bare_big",
-    "ribbon", "dot_ring", "outline_box",
-)
-
-# Styles drawn through the marker path in production minimal_map renders
-# (geo_runtime calls draw_map_location_marker at the camera nadir for
-# these): the 6 distinct geometries plus the 6 full compositions. Every
-# other animation keeps the approved rail-only production look.
-MARKER_DRAWN_STYLES = NEW_LABEL_GEOMETRIES + COMPOSITION_STYLES + ("glow_react", "editorial_tag")
+MAP_LABEL_ANIMATIONS = tuple(spec[0] for spec in MAP_LABEL_SPECS)
+NEW_LABEL_GEOMETRIES = tuple(spec[0] for spec in MAP_LABEL_SPECS if spec[1] == "geometry")
+COMPOSITION_STYLES = tuple(spec[0] for spec in MAP_LABEL_SPECS if spec[1] == "composition")
+MARKER_DRAWN_STYLES = tuple(spec[0] for spec in MAP_LABEL_SPECS if spec[2])
+MAP_LABEL_RAIL_TIMING = {spec[0]: spec[3] for spec in MAP_LABEL_SPECS if spec[3] is not None}
+MAP_LABEL_MARKER_TIMING = {spec[0]: spec[4] for spec in MAP_LABEL_SPECS if spec[4] is not None}
+MAP_LABEL_SPEC_BY_ID = {spec[0]: spec for spec in MAP_LABEL_SPECS}
+if len(MAP_LABEL_SPEC_BY_ID) != len(MAP_LABEL_SPECS):
+    raise RuntimeError("map label roster contains duplicate animation ids")
 
 
 def apply_city_beacon_map_style(frame: np.ndarray, progress: float) -> None:
@@ -315,10 +323,12 @@ def draw_map_location_marker_opencl(frame, point: tuple[int, int], name: str,
     key = (w, h, cx, cy, radius)
     cached = _OPENCL_BEACON_CACHE.get(key)
     if cached is None:
-        glow_host = np.zeros((h, w, 3), dtype=np.uint8)
+        glow_mask = np.zeros((h, w), dtype=np.uint8)
         accent = (18, 174, 255)  # vivid amber in OpenCV's BGR order
-        cv2.circle(glow_host, (cx, cy), radius + 12, accent, -1, cv2.LINE_AA)
-        glow_host = cv2.GaussianBlur(glow_host, (0, 0), max(8.0, radius * 0.62))
+        cv2.circle(glow_mask, (cx, cy), radius + 12, 255, -1, cv2.LINE_AA)
+        from glow_primitive import gaussian_halo
+        glow_host = gaussian_halo(glow_mask, accent,
+                                  sigma=max(8.0, radius * 0.62))
         marker_host = np.zeros((h, w, 3), dtype=np.uint8)
         marker_mask = np.zeros((h, w), dtype=np.uint8)
         # Opaque strokes stay visible over pale topographic tiles; the
@@ -405,18 +415,20 @@ def draw_diffuse_city_beacon(frame: np.ndarray, point: tuple[int, int],
         return
     roi = frame[y0:y1, x0:x1]
     local = (cx - x0, cy - y0)
-    glow = np.zeros_like(roi)
-    cv2.circle(glow, local, radius, (8, 20, 245), -1, cv2.LINE_AA)
-    cv2.ellipse(glow, (local[0] - radius // 5, local[1] + radius // 8),
+    glow_mask = np.zeros(roi.shape[:2], dtype=np.uint8)
+    cv2.circle(glow_mask, local, radius, 255, -1, cv2.LINE_AA)
+    cv2.ellipse(glow_mask, (local[0] - radius // 5, local[1] + radius // 8),
                 (int(radius * 0.75), int(radius * 0.52)), -17, 0, 360,
-                (8, 12, 255), -1, cv2.LINE_AA)
-    glow = cv2.GaussianBlur(glow, (0, 0), max(8.0, radius * 0.62))
-    cv2.addWeighted(roi, 1.0, glow, fade * (0.78 + 0.18 * pulse), 0, dst=roi)
+                255, -1, cv2.LINE_AA)
+    from glow_primitive import composite_halo
+    composite_halo(roi, glow_mask, (8, 20, 245),
+                   sigma=max(8.0, radius * 0.62),
+                   intensity=fade * (0.78 + 0.18 * pulse))
     if area_radius_px > 0:
-        area = np.zeros_like(roi)
-        cv2.circle(area, local, area_radius_px, (8, 18, 210), 2, cv2.LINE_AA)
-        area = cv2.GaussianBlur(area, (0, 0), max(4, area_radius_px // 5))
-        cv2.addWeighted(roi, 1.0, area, fade * 0.34, 0, dst=roi)
+        area = np.zeros(roi.shape[:2], dtype=np.uint8)
+        cv2.circle(area, local, area_radius_px, 255, 2, cv2.LINE_AA)
+        composite_halo(roi, area, (8, 18, 210),
+                       sigma=max(4, area_radius_px // 5), intensity=fade * 0.34)
     cv2.circle(roi, local, 4, (12, 26, 255), -1, cv2.LINE_AA)
     cv2.circle(roi, local, 2, (135, 165, 255), -1, cv2.LINE_AA)
 
@@ -442,20 +454,20 @@ def draw_reaction_glow(frame: np.ndarray, point: tuple[int, int],
     y0, y1 = max(0, cy - extent), min(h, cy + extent + 1)
     roi = frame[y0:y1, x0:x1]
     center = (cx - x0, cy - y0)
-    bloom = np.zeros_like(roi)
-    cv2.circle(bloom, center, 58 + round(9 * pulse), accent, -1, cv2.LINE_AA)
-    bloom = cv2.GaussianBlur(bloom, (0, 0), 27)
-    cv2.addWeighted(roi, 1.0, bloom, reveal * (0.52 + 0.16 * pulse), 0, dst=roi)
+    bloom = np.zeros(roi.shape[:2], dtype=np.uint8)
+    cv2.circle(bloom, center, 58 + round(9 * pulse), 255, -1, cv2.LINE_AA)
+    from glow_primitive import composite_halo
+    composite_halo(roi, bloom, accent, sigma=27,
+                   intensity=reveal * (0.52 + 0.16 * pulse))
 
     # Two staggered waves keep the point alive during the spoken city beat.
     for offset in (0.0, 0.5):
         phase = (p * 1.10 + offset) % 1.0
         radius = 12 + round(62 * phase)
-        ring = np.zeros_like(roi)
-        cv2.circle(ring, center, radius, accent, 3, cv2.LINE_AA)
-        ring = cv2.GaussianBlur(ring, (0, 0), 3.5)
-        cv2.addWeighted(roi, 1.0, ring, reveal * (0.82 * (1.0 - phase)),
-                        0, dst=roi)
+        ring = np.zeros(roi.shape[:2], dtype=np.uint8)
+        cv2.circle(ring, center, radius, 255, 3, cv2.LINE_AA)
+        composite_halo(roi, ring, accent, sigma=3.5,
+                       intensity=reveal * (0.82 * (1.0 - phase)))
 
     # A crisp luminous core provides a precise target without a pin silhouette.
     cv2.circle(roi, center, 10 + round(2 * pulse), accent, -1, cv2.LINE_AA)
@@ -541,22 +553,9 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
     center_x = w // 2
     text_x = center_x - text_w // 2
     text_y = (rail_h - text_h) // 2 - bbox[1]
-    animation_timing = {
-        "gentle_fade": (0.78, 0.16), "soft_glow": (0.75, 0.20),
-        "clean_fade": (0.81, 0.13), "word_soft_fade": (0.76, 0.18),
-        "slow_fade": (0.67, 0.29), "quiet_bloom": (0.72, 0.22),
-        "quick_fade": (0.84, 0.08), "silky_fade": (0.74, 0.21),
-        "subtle_halo": (0.77, 0.17), "cinematic_fade": (0.70, 0.25),
-        "diffuse_city_beacon": (0.78, 0.16),
-        "rise_up": (0.74, 0.20), "pop_in": (0.82, 0.10),
-        "soft_tracking": (0.68, 0.26),
-        "title_top": (0.70, 0.22), "badge_side": (0.78, 0.16),
-        "huge_center": (0.66, 0.28), "small_above": (0.80, 0.14),
-        "caption_card": (0.74, 0.20), "editorial_serif": (0.72, 0.22),
-    }
-    if animation not in animation_timing:
-        raise ValueError(f"unknown map caption animation: {animation}")
-    start, duration = animation_timing[animation]
+    if animation not in MAP_LABEL_RAIL_TIMING:
+        raise ValueError(f"map label animation {animation!r} has no rail-caption timing")
+    start, duration = MAP_LABEL_RAIL_TIMING[animation]
     reveal = max(0.0, min(1.0, (progress - start) / duration))
     alpha = int(255 * reveal * reveal * (3.0 - 2.0 * reveal))
     if alpha <= 0:
@@ -681,8 +680,10 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
         nonlocal overlay, draw, overlay_origin
         x0, y0, x1, y1 = bounds
         margin = 24
-        ox0, oy0 = max(0, x0 - margin), max(0, y0 - margin)
-        ox1, oy1 = min(w, x1 + margin), min(h, y1 + margin)
+        ox0 = max(0, min(w - 1, x0 - margin))
+        oy0 = max(0, min(h - 1, y0 - margin))
+        ox1 = max(ox0 + 1, min(w, x1 + margin))
+        oy1 = max(oy0 + 1, min(h, y1 + margin))
         if overlay is not None:
             old_x0, old_y0, old_x1, old_y1 = overlay_origin
             if old_x0 <= ox0 and old_y0 <= oy0 and old_x1 >= ox1 and old_y1 >= oy1:
@@ -759,7 +760,8 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
                 blurred = cv2.GaussianBlur(roi, (31, 31), 0)
                 tint = np.full_like(roi, (12, 22, 30))
                 frame[y0:y1, x0:x1] = cv2.addWeighted(blurred, 0.45, tint, 0.55, 0)
-            overlay_origin = ensure_overlay((x0 - 20, y0 - 20, x1 + 20, y1 + 20))
+            overlay_origin = ensure_overlay((min(x0 - 20, cx - 8), min(y0 - 20, cy - 8),
+                                              max(x1 + 20, cx + 8), max(y1 + 20, cy + 8)))
             ox, oy = overlay_origin[:2]
             draw.rounded_rectangle((x0 - ox, y0 - oy, x1 - ox, y1 - oy), radius=20,
                                    outline=(102, 209, 255, a), width=3)
@@ -796,7 +798,9 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
             tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
             band_h, band_y = 170, 210
             cut = int(w * ease)
-            overlay_origin = ensure_overlay((0, band_y - 4, max(1, cut), band_y + band_h + 4))
+            overlay_origin = ensure_overlay((min(0, cx - 8), min(band_y - 4, cy - 8),
+                                              max(max(1, cut), cx + 8),
+                                              max(band_y + band_h + 4, cy + 8)))
             ox, oy = overlay_origin[:2]
             local_cut = max(0, min(overlay.width, cut - ox))
             draw.rectangle((0, band_y - oy, local_cut, band_y + band_h - oy),
@@ -840,7 +844,8 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
             x = max(20, min(w - tw - 20, cx - tw // 2))
             y = max(20, min(h - th - 20, cy + 76))
             x0, y0, x1, y1 = x - pad, y - pad + 6, x + tw + pad, y + th + pad + 6
-            overlay_origin = ensure_overlay((x0 - 4, y0 - 4, x1 + 4, y1 + 4))
+            overlay_origin = ensure_overlay((min(x0 - 4, cx - 8), min(y0 - 4, cy - 8),
+                                              max(x1 + 4, cx + 8), max(y1 + 4, cy + 8)))
             ox, oy = overlay_origin[:2]
             draw.rectangle((x0 - ox, y0 - oy, x1 - ox, y1 - oy),
                            outline=(102, 209, 255, a), width=2)
@@ -889,8 +894,10 @@ def _draw_distinct_label_style(frame: np.ndarray, point: tuple[int, int],
         nonlocal overlay, draw, ox0, oy0
         x0, y0, x1, y1 = bounds
         margin = 24
-        ox0, oy0 = max(0, x0 - margin), max(0, y0 - margin)
-        ox1, oy1 = min(w, x1 + margin), min(h, y1 + margin)
+        ox0 = max(0, min(w - 1, x0 - margin))
+        oy0 = max(0, min(h - 1, y0 - margin))
+        ox1 = max(ox0 + 1, min(w, x1 + margin))
+        oy1 = max(oy0 + 1, min(h, y1 + margin))
         overlay = Image.new("RGBA", (ox1 - ox0, oy1 - oy0), (0, 0, 0, 0))
         draw = ImageDraw.Draw(overlay)
 
@@ -995,28 +1002,9 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     # the same size and at the same screen coordinate for every frame.
     # The camera has settled at 62% and the marker has been visible since
     # 68%; delay every label treatment until 80% so it cannot race the zoom.
-    timing = {
-        "gentle_fade": (0.80, 0.16), "soft_glow": (0.80, 0.16),
-        "clean_fade": (0.80, 0.16), "word_soft_fade": (0.80, 0.16),
-        "slow_fade": (0.80, 0.16), "quiet_bloom": (0.80, 0.16),
-        "quick_fade": (0.80, 0.16), "silky_fade": (0.80, 0.16),
-        "subtle_halo": (0.80, 0.16), "cinematic_fade": (0.80, 0.16),
-        "diffuse_city_beacon": (0.80, 0.13),
-        "rise_up": (0.76, 0.18), "pop_in": (0.82, 0.10),
-        "soft_tracking": (0.72, 0.22),
-        "title_top": (0.70, 0.22), "badge_side": (0.78, 0.16),
-        "huge_center": (0.66, 0.28), "small_above": (0.80, 0.14),
-        "caption_card": (0.74, 0.20), "editorial_serif": (0.72, 0.22),
-        # Show the location pin and its text while the slow camera is still
-        # approaching. Waiting until 60% meant the marker only appeared after
-        # the camera had already settled on short map clips.
-        "gpin_bubble": (0.12, 0.36), "card_glass": (0.70, 0.20),
-        "glow_react": (0.0, 0.18),
-        "editorial_tag": (0.08, 0.24),
-        "bare_big": (0.72, 0.22), "ribbon": (0.68, 0.20),
-        "dot_ring": (0.76, 0.16), "outline_box": (0.74, 0.20),
-    }
-    start, duration = timing[animation]
+    if animation not in MAP_LABEL_MARKER_TIMING:
+        raise ValueError(f"map label animation {animation!r} has no marker timing")
+    start, duration = MAP_LABEL_MARKER_TIMING[animation]
     t = max(0.0, min(1.0, (progress - start) / duration))
     ease = t * t * (3.0 - 2.0 * t)
     alpha = ease
@@ -1219,14 +1207,25 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
     _blend_layer_at(frame, np.asarray(overlay), ox=rx0, oy=ry0)
 
 
+_ROUTE_GLOW_SCRATCH = local()
+
+
 def draw_route_glow(frame: np.ndarray, frm: tuple[float, float], to: tuple[float, float],
                     anchor: tuple[float, float], zoom: float, reveal: float) -> None:
-    """Glow sprites walking the straight mercator line from frm to to."""
+    """Glow sprites walking the straight mercator line from frm to to.
+
+    A per-render-thread scratch canvas avoids allocating a 6 MB overlay for
+    every frame without sharing mutable pixels between concurrent workers.
+    """
     if reveal <= 0.01:
         return
     sprites = 26
     front = reveal * (sprites + 4)
-    overlay = np.zeros_like(frame)
+    overlay = getattr(_ROUTE_GLOW_SCRATCH, "buffer", None)
+    if overlay is None or overlay.shape != frame.shape or overlay.dtype != frame.dtype:
+        overlay = np.empty_like(frame)
+        _ROUTE_GLOW_SCRATCH.buffer = overlay
+    overlay.fill(0)
     for i in range(sprites):
         if i > front:
             break
@@ -1239,8 +1238,8 @@ def draw_route_glow(frame: np.ndarray, frm: tuple[float, float], to: tuple[float
         head = max(0.0, 1.0 - abs(front - i) * 0.35)
         strength = 0.55 + 0.45 * head
         for r, a in ((18, 0.20 * strength), (10, 0.45 * strength), (4, 0.95 * strength)):
-            overlay = cv2.circle(overlay, (sx, sy), r,
-                                 (int(60 * a), int(240 * a), int(255 * a)), -1, cv2.LINE_AA)
+            cv2.circle(overlay, (sx, sy), r,
+                       (int(60 * a), int(240 * a), int(255 * a)), -1, cv2.LINE_AA)
     cv2.addWeighted(overlay, 1.0, frame, 1.0, 0, dst=frame)
 
 

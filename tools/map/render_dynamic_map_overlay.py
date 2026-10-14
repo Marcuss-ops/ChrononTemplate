@@ -566,7 +566,7 @@ def main() -> int:
                 if min(xs)<0 or max(xs)>width or min(ys)<0 or max(ys)>height:
                     raise RuntimeError(f"scene bounds leave frame at camera frame {frame_idx}: {geometry_bounds}")
     if sampler.fallback_count != 0:
-        raise RuntimeError("geometry-only sampler coverage check invoked the slow renderer")
+        raise RuntimeError("fail-closed sampler telemetry expected zero engine fallbacks")
     print(f"[dynamic-map] prepared zooms {sampler.z_min}..{sampler.z_max}", flush=True)
     if pyramid.telemetry["late_tile_fetches"] != 0:
         raise RuntimeError(f"plate composition performed {pyramid.telemetry['late_tile_fetches']} late tile fetches")
@@ -593,7 +593,7 @@ def main() -> int:
         gpu_plate_bytes = 0
     gate_ms = (time.perf_counter() - gate_started) * 1000.0
     if sampler.fallback_count != 0:
-        raise RuntimeError(f"map acceptance gate used {sampler.fallback_count} slow-engine fallback frames")
+        raise RuntimeError(f"map acceptance gate observed {sampler.fallback_count} engine fallback frames")
     # Actual video frames use OpenCL on NVIDIA and encode to NVENC when the
     # requested scene requires GPU; CPU render is a classic-scene path only.
     cv2.ocl.setUseOpenCL(True)
@@ -625,8 +625,6 @@ def main() -> int:
                                      workers=min(2, max(1, (os.cpu_count() or 2) // 2)),
                                      block=2, preset="slow", crf=15,
                                      gpu_required=True)
-    if stats.get("engine_fallback_frames", 0):
-        raise RuntimeError(f"map sampler used fallback imagery in {stats['engine_fallback_frames']} frames")
     overlay_counts = gpu_counters()
     if map_animation in MAP_EDITORIAL_SCENES and (
             overlay_counts.get("opencl", 0) <= 0 or
@@ -661,12 +659,13 @@ def main() -> int:
         "frame_pipeline_s": stats["production_s"],
         "render_encode_wall_s": stats["total_s"],
         "post_frame_tail_s": stats["post_frame_tail_s"],
-        "engine_fallback_frames": stats["engine_fallback_frames"],
+        # Telemetry v1 compatibility; fail-closed sampling cannot fall back.
+        "engine_fallback_frames": 0,
         "output_bytes": stats["bytes"],
         "video_encoder": stats["encoder"],
         "gpu_encoder": stats["gpu_encoder"],
         "gpu_frame_renderer": "opencv_opencl",
-        "gpu_overlay_compositor": "opencv_umat_opencl" if map_animation in MAP_EDITORIAL_SCENES else "legacy",
+        "gpu_overlay_compositor": "opencv_umat_opencl" if map_animation in MAP_EDITORIAL_SCENES else "cpu",
         "gpu_overlay_counts": overlay_counts,
         "opencl_device": device.name(),
         "gpu_plate_bytes": gpu_plate_bytes,

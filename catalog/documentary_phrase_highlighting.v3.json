@@ -1,0 +1,21 @@
+{
+  "schema": "chronontemplate.documentary-phrase-highlighting.v3",
+  "version": 3,
+  "catalog_id": "documentary_phrase_highlighting_v3",
+  "source": "ChrononTemplate/tools/showcases/documentary_phrase_highlighting_v3.py",
+  "canvas": {"width": 1920, "height": 1080, "fps": 30, "duration_seconds": 6},
+  "background_variants": ["dark", "ivory"],
+  "presets": [
+    {"id": "01_single_phrase_highlight", "targeting": "UTF-8 phrase spans", "highlight": "underline"},
+    {"id": "02_soft_marker_reveal", "targeting": "UTF-8 phrase spans", "highlight": "marker"},
+    {"id": "03_multi_phrase_connection", "targeting": "UTF-8 phrase spans", "routing": "curved"},
+    {"id": "04_investigative_keyword_network", "targeting": "UTF-8 phrase spans", "routing": "curved"},
+    {"id": "05_word_by_word_focus", "targeting": "UTF-8 phrase spans", "highlight": "focus"},
+    {"id": "06_hand_drawn_underline", "targeting": "UTF-8 phrase spans", "highlight": "hand-drawn underline"},
+    {"id": "07_phrase_to_phrase_trace", "targeting": "UTF-8 phrase spans", "routing": "curved"},
+    {"id": "08_precision_bracket_highlight", "targeting": "UTF-8 phrase spans", "highlight": "bracket"},
+    {"id": "09_sequential_statement_highlight", "targeting": "UTF-8 phrase spans", "highlight": "sequential"},
+    {"id": "10_documentary_phrase_master", "targeting": "UTF-8 phrase spans", "routing": "curved"}
+  ],
+  "delivery": {"format": "H.264 MP4", "duration_seconds": 6, "frame_count": 180, "upload": false}
+}

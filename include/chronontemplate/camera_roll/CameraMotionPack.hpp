@@ -45,56 +45,9 @@ namespace chronontemplate {
     /// The fifty presets, in spec order. Values are stable ids: they reach
     /// the catalog and the contract test verbatim, so they are append-only.
     enum class CameraMotionPreset : std::uint16_t {
-        SoftPushIn,            ///< camera_motion_soft_push_in (01)
-        SoftPullBack,          ///< camera_motion_soft_pull_back (02)
-        EditorialDriftLeft,    ///< camera_motion_editorial_drift_left (03)
-        EditorialDriftRight,   ///< camera_motion_editorial_drift_right (04)
-        TitleRise,             ///< camera_motion_title_rise (05)
-        TitleDescend,          ///< camera_motion_title_descend (06)
-        QuietDiagonalDrift,    ///< camera_motion_quiet_diagonal_drift (07)
-        TypeDepthFocus,        ///< camera_motion_type_depth_focus (08, DOF)
-        TypeMicroOrbit,        ///< camera_motion_type_micro_orbit (09, 2.5D)
-        ImpactPunchSettle,     ///< camera_motion_impact_punch_settle (10)
-        KenBurnsIn,            ///< camera_motion_ken_burns_in (11)
-        KenBurnsOut,           ///< camera_motion_ken_burns_out (12)
-        PortraitUpwardTrack,   ///< camera_motion_portrait_upward_track (13)
-        PortraitDownwardTrack, ///< camera_motion_portrait_downward_track (14)
-        PhotoRevealLeft,       ///< camera_motion_photo_reveal_left (15)
-        PhotoRevealRight,      ///< camera_motion_photo_reveal_right (16)
-        LowAnglePhotoReveal,   ///< camera_motion_low_angle_photo_reveal (17, 2.5D)
-        PortraitHeroArc,       ///< camera_motion_portrait_hero_arc (18, 2.5D)
-        DocumentaryParallax,   ///< camera_motion_documentary_parallax (19, planes)
-        PhotoRackFocus,        ///< camera_motion_photo_rack_focus (20, DOF)
-        MapRegionPush,         ///< camera_motion_map_region_push (21)
-        MapRegionPull,         ///< camera_motion_map_region_pull (22)
-        MapEastwardTrack,      ///< camera_motion_map_eastward_track (23)
-        MapWestwardTrack,      ///< camera_motion_map_westward_track (24)
-        MapNorthwardTrack,     ///< camera_motion_map_northward_track (25)
-        MapSouthwardTrack,     ///< camera_motion_map_southward_track (26)
-        RouteCameraSweep,      ///< camera_motion_route_camera_sweep (27)
-        CountryFocusLock,      ///< camera_motion_country_focus_lock (28)
-        CountryComparisonPan,  ///< camera_motion_country_comparison_pan (29)
-        GeopoliticalTiltReveal,///< camera_motion_geopolitical_tilt_reveal (30, 2.5D)
-        UiPanelPush,           ///< camera_motion_ui_panel_push (31)
-        DashboardPan,          ///< camera_motion_dashboard_pan (32)
-        CardStackParallax,     ///< camera_motion_card_stack_parallax (33, 2.5D)
-        CornerDetailInspect,   ///< camera_motion_corner_detail_inspect (34)
-        DataDetailZoom,        ///< camera_motion_data_detail_zoom (35)
-        UiOverviewPull,        ///< camera_motion_ui_overview_pull (36)
-        SideBySideCompare,     ///< camera_motion_side_by_side_compare (37)
-        PanelAngledPeek,       ///< camera_motion_panel_angled_peek (38, 2.5D)
-        ChartTraverse,         ///< camera_motion_chart_traverse (39)
-        ProductUiMicroFloat,   ///< camera_motion_product_ui_micro_float (40, loop)
-        WhipPanLeft,           ///< camera_motion_whip_pan_left (41, two-shot)
-        WhipPanRight,          ///< camera_motion_whip_pan_right (42, two-shot)
-        WhipPanUp,             ///< camera_motion_whip_pan_up (43, two-shot)
-        WhipPanDown,           ///< camera_motion_whip_pan_down (44, two-shot)
-        FastDollyThrough,      ///< camera_motion_fast_dolly_through (45, two-shot)
-        ReverseDollyReveal,    ///< camera_motion_reverse_dolly_reveal (46, two-shot)
-        RollMatchCut,          ///< camera_motion_roll_match_cut (47, two-shot)
-        OrbitHandoff,          ///< camera_motion_orbit_handoff (48, two-shot, 2.5D)
-        ForegroundOcclusionPass,///< camera_motion_foreground_occlusion_pass (49, two-shot)
-        FocusHandoff           ///< camera_motion_focus_handoff (50, two-shot, DOF)
+#define CAMERA_MOTION_PRESET(key, id, family, ...) key,
+#include "chronontemplate/camera_roll/CameraMotionPresets.def"
+#undef CAMERA_MOTION_PRESET
     };
 
     /// Planner loudness: one preset, three strengths. Amplitudes (distance
@@ -192,6 +145,10 @@ namespace chronontemplate {
         /// in-out — whips and pass-throughs, not settles and reveals.
         bool snapIn{false};
     };
+
+    /// Every preset in canonical roster order. The roster also generates the
+    /// enum ordinals and supplies stable id/family metadata.
+    [[nodiscard]] std::vector<CameraMotionPreset> cameraMotionPresets();
 
     /// Stable snake-case id of a preset (the catalog/consumer-facing name).
     [[nodiscard]] const char* cameraMotionPresetId(CameraMotionPreset preset) noexcept;

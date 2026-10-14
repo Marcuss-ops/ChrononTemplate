@@ -1,0 +1,64 @@
+{
+  "schema": "chronontemplate.bulletpoints-3d.v1",
+  "version": 1,
+  "catalog_id": "bulletpoints_3d_v1",
+  "source": "chronontemplate::Bulletpoints3DPack",
+  "canvas": { "width": 1920, "height": 1080, "fps": 30, "duration_s": 5, "frames": 150 },
+  "font": {
+    "family": "Play",
+    "title_asset": "assets/fonts/Play-Bold.ttf",
+    "body_asset": "assets/fonts/Play-Regular.ttf",
+    "designer": "Jonas Hecksher (OFL)"
+  },
+  "section_3d": {
+    "renderer": "multi-plane parallax (bg 0.3x / mid-dust 0.6x / fg-card 1.0x)",
+    "camera": "documentary: slow, damped, handheld residue, ease-out cubic + smootherstep",
+    "depth_cues": ["differential parallax", "vignette", "film grain", "dust bokeh", "soft shadow"]
+  },
+  "demo_content": {
+    "kicker": "PUNTI CHIAVE",
+    "title": "Cosa resta agli atti",
+    "bullets": [
+      "Il luogo e la data fissano la scena",
+      "Le prove tecniche guidano l'indagine",
+      "Ogni ipotesi va verificata alle fonti"
+    ]
+  },
+  "recipes": [
+    {
+      "id": "bullet_3d_doc_push_in",
+      "title": "Doc Push-In Parallax",
+      "camera": { "move": "slow push-in 1.08 -> 1.00", "drift": "micro drift x +8px, y +5px", "easing": "smootherstep" },
+      "layers": { "bg": 0.3, "mid": 0.6, "fg": 1.0 },
+      "text": { "title_in": "rise 26px + fade, ease-out", "bullets_in": "stagger 12f each, rise 30px + fade", "accent": "amber underline sweep 0.6s smootherstep" }
+    },
+    {
+      "id": "bullet_3d_doc_lateral_track",
+      "title": "Doc Lateral Track",
+      "camera": { "move": "track left->right 90px over 5s", "parallax": "bg 27px / mid 54px / fg 90px", "easing": "smootherstep" },
+      "layers": { "bg": 0.3, "mid": 0.6, "fg": 1.0 },
+      "text": { "title_in": "slide from left 60px + fade", "bullets_in": "slide from right 70px, stagger 14f, fade" }
+    },
+    {
+      "id": "bullet_3d_doc_crane_rise",
+      "title": "Doc Crane Rise",
+      "camera": { "move": "crane up 70px (bg 21 / mid 42 / fg 70)", "easing": "ease-out cubic" },
+      "layers": { "bg": 0.3, "mid": 0.6, "fg": 1.0 },
+      "text": { "title_in": "rise 30px + fade", "bullets_in": "bottom-up cascade, marker line draws left->right" }
+    },
+    {
+      "id": "bullet_3d_doc_micro_orbit",
+      "title": "Doc Micro Orbit + Focus Pull",
+      "camera": { "move": "yaw illusion +-2deg: differential x sine +-18px fg, +-6px bg + breathing 1.00->1.015->1.00", "easing": "in-out sine" },
+      "layers": { "bg": 0.33, "mid": 0.6, "fg": 1.0 },
+      "text": { "title_in": "blur 10px -> 0 + fade", "bullets_in": "blur 8px -> 0 staggered, rise 18px" }
+    },
+    {
+      "id": "bullet_3d_doc_handheld_settle",
+      "title": "Doc Handheld Settle",
+      "camera": { "move": "handheld decaying sine (amp 14px -> 0 by f90) + push 1.04->1.00", "easing": "damped settle" },
+      "layers": { "bg": 0.3, "mid": 0.6, "fg": 1.0 },
+      "text": { "title_in": "punch 1.06->1.00 + fade", "bullets_in": "punch-settle stagger, opacity snap" }
+    }
+  ]
+}

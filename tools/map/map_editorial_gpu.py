@@ -446,18 +446,17 @@ def composite_rgba(frame, rgba):
     return frame
 
 
-def glow_mask(frame, stroke_mask, color_bgr, strength=1.0):
-    """GPU medium/wide glow + crisp core from one geographic path."""
+def glow_mask(frame, stroke_mask, color_bgr, strength=1.0, sigma=22.0):
+    """Add the canonical linear-premultiplied halo, then composite its crisp path."""
     if strength <= 0.001:
         return frame
     _assert_gpu(frame)
-    H, W = stroke_mask.shape
-    mask = _upload_mask(stroke_mask)
-    wide = cv2.GaussianBlur(mask, (0, 0), 22)
-    mid = cv2.GaussianBlur(mask, (0, 0), 9)
-    _GPU_OPS["blur"] += 2
-    frame = composite_mask(frame, wide, color_bgr, 0.18 * strength)
-    frame = composite_mask(frame, mid, color_bgr, 0.42 * strength)
+    from glow_primitive import gaussian_halo
+    host_mask = stroke_mask.get() if isinstance(stroke_mask, cv2.UMat) else stroke_mask
+    halo = gaussian_halo(host_mask, tuple(color_bgr), sigma=sigma,
+                         intensity=0.18 * strength)
+    frame = cv2.add(frame, cv2.UMat(halo))
+    _GPU_OPS["opencl"] += 1
     frame = composite_mask(frame, stroke_mask, color_bgr, 1.0)
     return frame
 
@@ -674,7 +673,8 @@ def _marker(frame, point, progress, W, H, color=RED, radius=7):
         halo_r = int(round(r + 5 + (1.0 - p) * 5))
         halo_mask = _blank_mask(W, H)
         cv2.circle(halo_mask, (x, y), halo_r, 255, 1, cv2.LINE_AA)
-        frame = composite_mask(frame, halo_mask, color, 0.38 * (1.0 - 0.4 * p))
+        frame = glow_mask(frame, halo_mask, color,
+                          0.38 * (1.0 - 0.4 * p), sigma=2.5)
 
     ring_mask = _blank_mask(W, H)
     cv2.circle(ring_mask, (x, y), r, 255, 2, cv2.LINE_AA)

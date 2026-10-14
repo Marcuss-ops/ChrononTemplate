@@ -88,47 +88,72 @@ def main() -> int:
 
     print("== the short-phrase recipes")
     recipes = document.get("recipes") or []
-    check("twelve originals, fourteen editorial, and twenty-three product recipes", len(recipes) == 49, str(len(recipes)))
+    retired_ids = {
+        "short_phrase_editorial_claude_diff_patch",
+        "short_phrase_editorial_claude_prompt_response",
+        "short_phrase_editorial_lift_and_rule",
+        "short_phrase_editorial_rule_handoff",
+        "short_phrase_editorial_underline_draw",
+        "short_phrase_phrase_build_focus",
+        "short_phrase_product_decrypted_text",
+        "short_phrase_product_fold_text",
+        "short_phrase_product_glare_hover",
+        "short_phrase_product_line_by_line_slide",
+        "short_phrase_product_scramble_reveal",
+        "short_phrase_product_shape_blur",
+        "short_phrase_product_warp_text",
+        "short_phrase_product_weight_wave",
+        "short_phrase_scale_settle_word",
+        "short_phrase_semantic_chain_curve",
+        "short_phrase_semantic_two_line",
+        "short_phrase_simple_progressive_phrase",
+        "short_phrase_single_word_swap",
+        "short_phrase_word_cascade_sentence",
+        "short_phrase_word_mask_sequence",
+        "short_phrase_character_write_on",
+        "short_phrase_editorial_paper_title_card",
+    }
+    check("none of the retired motions is published", not retired_ids.intersection({r["id"] for r in recipes}))
+    check("27 surviving recipes", len(recipes) == 27, str(len(recipes)))
     editorial = [r for r in recipes if r["id"].startswith("short_phrase_editorial_")]
     product = [r for r in recipes if r["id"].startswith("short_phrase_product_")]
-    check("exactly fourteen editorial recipes", len(editorial) == 14)
-    check("fourteen existing, seven text adaptations and three visual adaptations", len(product) == 23)
-    expected_product_ids = {
-        "short_phrase_product_masked_heading",
-        "short_phrase_product_split_flap_text",
-        "short_phrase_product_warp_text",
-        "short_phrase_product_fold_text",
-        "short_phrase_product_decrypted_text",
-        "short_phrase_product_scroll_reveal",
-        "short_phrase_product_scrambled_text",
-        "short_phrase_product_glare_hover",
-        "short_phrase_product_gradual_blur",
-        "short_phrase_product_shape_blur",
+    check("surviving editorial recipes", len(editorial) == 8, str(len(editorial)))
+    check("surviving product recipes", len(product) == 15, str(len(product)))
+    check("exact surviving id set", {recipe.get("id") for recipe in recipes} == {
+        "short_phrase_shape_phrase_wipe",
+        "short_phrase_character_tracking_reveal",
+        "short_phrase_character_cascade_shapes",
+        "short_phrase_editorial_baseline_rise",
+        "short_phrase_editorial_side_glide",
+        "short_phrase_editorial_tracking_close",
+        "short_phrase_editorial_focus_resolve",
+        "short_phrase_editorial_glyph_curtain",
+        "short_phrase_editorial_contrast_sweep",
+        "short_phrase_editorial_quiet_zoom",
+        "short_phrase_product_blur_out_up",
+        "short_phrase_product_bottom_up_letters",
+        "short_phrase_product_focus_blur_resolve",
+        "short_phrase_product_kinetic_center_build",
         "short_phrase_product_per_word_rise",
         "short_phrase_product_perspective_marquee",
         "short_phrase_product_strikethrough_replace",
+        "short_phrase_product_text_match_cut",
         "short_phrase_product_text_shimmer",
-    }
-    check("all seven pasted effects and nine existing source adaptations are registered",
-          expected_product_ids.issubset({r["id"] for r in product}))
-    check("the seven new React-derived recipes document their fidelity limits",
-          all(any(term in r.get("adaptation_note", "") for term in
-                  ("not represented", "not available", "not supported", "native eased entrance"))
-              for r in product if r["id"] in {
-                  "short_phrase_product_masked_heading", "short_phrase_product_split_flap_text",
-                  "short_phrase_product_warp_text", "short_phrase_product_fold_text",
-                  "short_phrase_product_decrypted_text", "short_phrase_product_scroll_reveal",
-                  "short_phrase_product_scrambled_text", "short_phrase_product_glare_hover",
-                  "short_phrase_product_gradual_blur",
-                  "short_phrase_product_shape_blur"}))
+        "short_phrase_product_chromatic_fringe_title",
+        "short_phrase_product_masked_heading",
+        "short_phrase_product_split_flap_text",
+        "short_phrase_product_scroll_reveal",
+        "short_phrase_product_scrambled_text",
+        "short_phrase_product_gradual_blur",
+        "short_phrase_editorial_claude_terminal_focus",
+        "short_phrase_burst",
+    })
     adapted_product_ids = {
         "short_phrase_product_masked_heading", "short_phrase_product_split_flap_text",
-        "short_phrase_product_warp_text", "short_phrase_product_fold_text",
-        "short_phrase_product_decrypted_text", "short_phrase_product_scroll_reveal",
-        "short_phrase_product_scrambled_text", "short_phrase_product_glare_hover",
+        "short_phrase_product_scroll_reveal", "short_phrase_product_scrambled_text",
         "short_phrase_product_gradual_blur",
-        "short_phrase_product_shape_blur",
     }
+    check("adapted products are registered", adapted_product_ids.issubset({r["id"] for r in product}))
     for recipe in product:
         if recipe["id"] in adapted_product_ids:
             check(f"{recipe['id']} has an adaptation note", bool(recipe.get("adaptation_note")))
@@ -140,32 +165,11 @@ def main() -> int:
             }:
                 check(f"{recipe['id']} uses a three-second entrance", recipe.get("enter") == 90,
                       str(recipe.get("enter")))
-    adapted_ids = {
-        "short_phrase_product_masked_heading",
-        "short_phrase_product_split_flap_text",
-        "short_phrase_product_warp_text",
-        "short_phrase_product_fold_text",
-        "short_phrase_product_decrypted_text",
-        "short_phrase_product_scroll_reveal",
-        "short_phrase_product_scrambled_text",
-    }
-    check("all seven pasted React effects are published", adapted_ids.issubset({r["id"] for r in product}))
-    check("all seven pasted React effects declare their fidelity limits",
-          all(any(term in r.get("adaptation_note", "") for term in
-                  ("not represented", "not available", "not supported", "native eased entrance"))
-              for r in product if r["id"] in adapted_ids))
     check("every recipe is categorized", all(r.get("family") and r.get("subcategory") for r in recipes))
-    check("three animation families", {r.get("family") for r in recipes} == {"classic", "editorial", "product_video"})
-    check("computer and letter-build subcategories are available",
-          {"computer_character_assembly", "letter_by_letter_reveal"}.issubset({r.get("subcategory") for r in recipes}))
-    claude_ids = {"short_phrase_editorial_claude_prompt_response", "short_phrase_editorial_claude_diff_patch", "short_phrase_editorial_claude_terminal_focus"}
-    check("Claude-inspired trio is registered", claude_ids.issubset({r["id"] for r in editorial}))
-    check("Claude-inspired trio declares pure white background", all(r.get("white_background") is True for r in editorial if r["id"] in claude_ids))
-    diff_recipe = next(r for r in editorial if r["id"] == "short_phrase_editorial_claude_diff_patch")
-    check("diff patch orange selector points at the real third word", diff_recipe["text_animators"][1]["selector"]["window"] == "pick:2:3")
-    check("diff patch orange track exists", diff_recipe["text_animators"][1]["properties"][0]["property"] == "fill_orange")
+    check("surviving animation families", {r.get("family") for r in recipes} == {"classic", "editorial", "product_video"})
+    check("computer-character assembly remains available",
+          "computer_character_assembly" in {r.get("subcategory") for r in recipes})
     check("editorial recipes retain their render style", all(r.get("font_size", 0) > 0 and isinstance(r.get("light"), bool) for r in editorial))
-    check("three editorial recipes carry native accents", sum(bool(r.get("accents")) for r in editorial) == 3)
     ids = [r.get("id") for r in recipes]
     check("ids are unique", len(set(ids)) == len(ids))
     check("ids carry the short_phrase_ prefix", all(str(i).startswith("short_phrase_") for i in ids))
@@ -175,6 +179,7 @@ def main() -> int:
         rid = recipe.get("id", "?")
         check(f"{rid} has a title and phrase",
               bool(recipe.get("title")) and bool(recipe.get("phrase")))
+        check(f"{rid} omits removed paper-background metadata", "paper_background" not in recipe)
         if rid in adapted_product_ids:
             check(f"{rid} documents omitted interactivity/shader behavior",
                   any(term in recipe.get("adaptation_note", "") for term in
@@ -255,6 +260,9 @@ def main() -> int:
     if not catalog.is_file():
         check("catalog file exists", False, str(catalog))
     else:
+        committed = json.loads(catalog.read_text())
+        committed_ids = {recipe.get("id") for recipe in committed.get("recipes", [])}
+        check("committed catalog omits retired ids", not retired_ids.intersection(committed_ids))
         check("catalog matches the emitter output", catalog.read_text() == first.stdout,
               "catalog/short_phrase_motion.v1.json is stale — regenerate it")
     second = subprocess.run([str(tool)], capture_output=True, text=True)

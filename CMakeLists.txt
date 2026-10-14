@@ -119,45 +119,37 @@ add_library(chronontemplate STATIC
         src/chronontemplate/camera_roll/TitleCameraPack.cpp
         src/chronontemplate/camera_roll/SceneCameraPack.cpp
         src/chronontemplate/camera_roll/CameraMotionPack.cpp
+        include/chronontemplate/camera_roll/CameraMotionPresets.def
         src/chronontemplate/ui_camera/UiCameraChoreography.cpp
         src/chronontemplate/entities_with_text/DocumentarySnapshotPack.cpp
         src/chronontemplate/date_groups/DateGroupsPack.cpp
         src/chronontemplate/entities_with_text/EntityFilmstripPack.cpp
         src/chronontemplate/important_phrases/ImportantPhrasePack.cpp
-        src/chronontemplate/important_phrases/typewriter/TypewriterPhrasePack.cpp
         src/chronontemplate/important_phrases/apple/ApplePhrasePack.cpp
-        src/chronontemplate/important_phrases/highlight/PhraseHighlightPack.cpp
         src/chronontemplate/important_phrases/didone/DidoneTitlesPack.cpp
         # the category packs: many images in one scene, full-frame backgrounds, modern map compositions
         src/chronontemplate/multiple_images/MultiImagePack.cpp
         src/chronontemplate/backgrounds/BackgroundPack.cpp
         src/chronontemplate/backgrounds/ProceduralBackground.cpp
         src/chronontemplate/map/ModernMapPack.cpp
-        # the short-phrase family: one vocabulary, twelve archetypes, plus the star bumper
+        # the short-phrase family: surviving recipes plus the star bumper
         src/chronontemplate/short_phrases/ShortPhrasePack.cpp
+        include/chronontemplate/short_phrases/ShortPhraseRecipes.def
         src/chronontemplate/short_phrases/animations/BlurOutUp.cpp
         src/chronontemplate/short_phrases/animations/BottomUpLetters.cpp
         src/chronontemplate/short_phrases/animations/FocusBlurResolve.cpp
         src/chronontemplate/short_phrases/animations/KineticCenterBuild.cpp
-        src/chronontemplate/short_phrases/animations/LineByLineSlide.cpp
         src/chronontemplate/short_phrases/animations/PerWordRise.cpp
         src/chronontemplate/short_phrases/animations/PerspectiveMarquee.cpp
-        src/chronontemplate/short_phrases/animations/ScrambleReveal.cpp
         src/chronontemplate/short_phrases/animations/StrikethroughReplace.cpp
         src/chronontemplate/short_phrases/animations/TextMatchCut.cpp
         src/chronontemplate/short_phrases/animations/TextShimmer.cpp
-        src/chronontemplate/short_phrases/animations/WeightWave.cpp
         src/chronontemplate/short_phrases/animations/ChromaticFringeTitle.cpp
         src/chronontemplate/short_phrases/animations/MaskedHeading.cpp
         src/chronontemplate/short_phrases/animations/SplitFlapText.cpp
-        src/chronontemplate/short_phrases/animations/WarpText.cpp
-        src/chronontemplate/short_phrases/animations/FoldText.cpp
-        src/chronontemplate/short_phrases/animations/DecryptedText.cpp
         src/chronontemplate/short_phrases/animations/ScrollReveal.cpp
         src/chronontemplate/short_phrases/animations/ScrambledText.cpp
-        src/chronontemplate/short_phrases/animations/GlareHover.cpp
         src/chronontemplate/short_phrases/animations/GradualBlur.cpp
-        src/chronontemplate/short_phrases/animations/ShapeBlur.cpp
         # the packs a template author starts from
         src/chronontemplate/entities_with_text/YouTubeSubscribe.cpp
         # native layout composers: flex rows, columns and grids plus FLIP moves
@@ -359,7 +351,7 @@ if(CHRONONTEMPLATE_BUILD_CATALOG_TOOL)
         target_compile_options(chronontemplate_emit_important_phrase_plans PRIVATE -Werror)
     endif()
 
-    # The short-phrase catalog: twelve archetypes + the decor bumper, projected
+    # The short-phrase catalog: surviving recipes + the decor bumper, projected
     # from the C++ pack into catalog/short_phrase_motion.v1.json.
     add_executable(chronontemplate_emit_short_phrase_catalog
             tools/short_phrases/emit_short_phrase_catalog.cpp)
@@ -686,22 +678,10 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     add_test(NAME chronontemplate_documentary_snapshot_pack_test
             COMMAND chronontemplate_documentary_snapshot_pack_test)
 
-    # The important-phrase families: the shared white-on-black look plus the
-    # fifteen Typewriter definitions with their underscore cursor.
-    add_executable(chronontemplate_typewriter_phrase_pack_test tests/typewriter_phrase_pack.cpp)
-    target_link_libraries(chronontemplate_typewriter_phrase_pack_test PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_typewriter_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    add_test(NAME chronontemplate_typewriter_phrase_pack_test COMMAND chronontemplate_typewriter_phrase_pack_test)
-
     add_executable(chronontemplate_apple_phrase_pack_test tests/apple_phrase_pack.cpp)
     target_link_libraries(chronontemplate_apple_phrase_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_apple_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_apple_phrase_pack_test COMMAND chronontemplate_apple_phrase_pack_test)
-
-    add_executable(chronontemplate_highlight_phrase_pack_test tests/highlight_phrase_pack.cpp)
-    target_link_libraries(chronontemplate_highlight_phrase_pack_test PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_highlight_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    add_test(NAME chronontemplate_highlight_phrase_pack_test COMMAND chronontemplate_highlight_phrase_pack_test)
 
     # The first pack: the subscribe card, its controller-driven entrance/exit and
     # the click pulse that only holds because a preset appends keys.

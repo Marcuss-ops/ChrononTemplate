@@ -50,7 +50,7 @@ important_phrases/          phrasing and titling, one subdir per family
   apple/                         modern restrained phrase presets
   highlight/                     long phrases with animated under-phrase accents
   didone/                        editorial Didone title pack
-short_phrases/              ShortPhrasePack — 12 archetypes for phrases of 1–7 words
+short_phrases/              ShortPhrasePack — 26 surviving recipes for phrases of 1–5 words
                             (+ short_phrase.decor.star_bumper, semantic emphasis, exit modes)
 single_images/              ImageAnimationPack — one-image 2.5D entrances
 multiple_images/            MultiImagePack — duo/trio/quad/penta boards with captions
@@ -84,14 +84,12 @@ tools/
 
 ## Clean editorial short phrases
 
-The original twelve recipes are preserved; ten append-only
-`short_phrase_editorial_*` choices add Baseline Rise, Side Glide, Tracking Close,
-Focus Resolve, Underline Draw, Rule Handoff, Glyph Curtain, Contrast Sweep,
-Quiet Zoom and Lift And Rule. They use plain ink/ivory backgrounds, restrained
-motion, shrink-only text fitting and a stationary reading hold. Accent rules
-are native V3 shapes; focus blur is a native text animator, not a layer effect.
-All ten are available through `shortPhraseAnimations()` and the word-count
-suggestion table, with their style and accent tracks in the generated catalog.
+The surviving short-phrase pack contains 26 recipes across the classic,
+editorial and product-video families. The eight editorial recipes use restrained
+motion, shrink-only text fitting and a stationary reading hold. Focus blur is a
+native text animator, not a layer effect. All surviving recipes are available
+through `shortPhraseAnimations()` and the word-count suggestion table, with
+style and motion tracks in the generated catalog.
 
 Generate just the new preview set (1920×1080, 30 fps, 150 frames each):
 
@@ -110,16 +108,16 @@ DRIVE_FOLDER_ID=12uXxT3uTNlLFclxsDxndq9U8KhF98CN_ \\
   tools/short_phrases/upload_short_phrases_drive.sh out/short_phrase_editorial_v1
 ```
 
-The verifier checks the exact ten-file set, H.264, resolution, frame count,
-five-second duration, visible foreground inside the safe area, a moving entrance,
+The verifier checks the expected file set, H.264, resolution, frame count,
+clip duration, visible foreground inside the safe area, a moving entrance,
 a stable hold and fully disappeared first/last frames. It writes
 `verification.json` with pixel measurements and SHA-256 evidence. Upload sends
 only MP4s via the existing configured Drive uploader.
 
 ## Short-phrase catalog
 
-`catalog/short_phrase_motion.v1.json` holds the short-phrase archetypes (the
-twelve originals plus the append-only editorial and product-video families),
+`catalog/short_phrase_motion.v1.json` holds the surviving short-phrase
+archetypes across the classic, editorial and product-video families,
 the five exit modes, the decor bumper and the selection table RenderingGen uses
 to pick a recipe by word count. It is **generated from the C++ pack**, not
 hand-maintained:
@@ -137,22 +135,17 @@ the committed file drifts from what the C++ pack emits today.
 
 ### React text-effect adaptations
 
-Seven supplied React components have deterministic native short-phrase recipes:
+Four supplied React components have deterministic native short-phrase recipes:
 `short_phrase_product_masked_heading`, `short_phrase_product_split_flap_text`,
-`short_phrase_product_warp_text`, `short_phrase_product_fold_text`,
-`short_phrase_product_decrypted_text`, `short_phrase_product_scroll_reveal`,
-and `short_phrase_product_scrambled_text`. Their `adaptation_note` appears in
-the catalog and generated manifest. The video/image text fill and pointer
-parallax in MaskedHeading, live randomized split-flap tiles, WarpText's WebGL
-shader and pointer response, per-unit FoldText hinges/crease, DecryptedText's
-interactive triggers, viewport-driven ScrollReveal scrub, and pointer-distance
-ScrambledText are not capabilities of these offline RenderPlans. The C++ pack
-uses native glyph/word transforms, frame-based reveals, perspective at phrase
-level, and fixed encoded-text stages where appropriate; it does not claim those
-browser-only interactions are preserved.
+`short_phrase_product_scroll_reveal`, and `short_phrase_product_scrambled_text`.
+Their `adaptation_note` appears in the catalog and generated manifest. Live
+randomized split-flap tiles, viewport-driven ScrollReveal scrubbing, and
+pointer-distance ScrambledText are not capabilities of these offline
+RenderPlans. The C++ pack uses native glyph/word transforms and frame-based
+reveals; it does not claim those browser-only interactions are preserved.
 
-Build the emitters, regenerate the canonical catalog and emit only the seven
-React-derived V3 plans (1920×1080, 30 fps, 210 frames):
+Build the emitters, regenerate the canonical catalog and emit only the four
+surviving React-derived V3 plans (1920×1080, 30 fps, 210 frames):
 
 ```shell
 cmake --build build/dev --target chronontemplate_emit_short_phrase_catalog chronontemplate_emit_short_phrase_plans
@@ -169,7 +162,7 @@ done
 ```
 
 The renders are H.264 at 1920×1080, 30 fps, seven seconds each; Chronon3D
-writes a per-frame timing sidecar beside each MP4. The short-phrase pack and Python catalog contract pin all seven stable IDs,
+writes a per-frame timing sidecar beside each MP4. The short-phrase pack and Python catalog contract pin the surviving IDs,
 well-formed native tracks/overlay text, explicit fidelity notes, deterministic
 catalog bytes and selection-table references.
 
@@ -853,14 +846,12 @@ font system or Windows toolchain is required.
 RenderingGen names the editorial kind (IMPORTANT_PHRASE);
 `include/chronontemplate/important_phrases/ImportantPhrasePack.hpp` owns how such a phrase looks
 and moves: white Montserrat Bold face with a soft white glow and a slight
-black stroke on the black canvas. `Typewriter` types the phrase glyph by
-glyph while the `_` underscore cursor trails, blinks, leads or holds:
-fifteen animations with `typewriter_*` ids. `Apple` is the restrained modern
-family, `Highlight` carries animated under-phrase accents and `Didone` the
-editorial Didone titles. One file per family (`TypewriterPhrasePack.*`,
-`ApplePhrasePack.*`, …) on the shared look and motion vocabulary of
+black stroke on the black canvas. `Apple` is the restrained modern
+family and `Didone` the editorial Didone titles. One file per family
+(`ApplePhrasePack.*`, …) on the shared look and motion vocabulary of
 `ImportantPhrasePack.*`, so a pipeline can render one family while the others
-stay ready.
+stay ready. (The former `Typewriter` and `Highlight` families were retired:
+their animations rendered unreadable on the installed Vulkan lane.)
 
 The packs are data; `tools/important_phrases/emit_important_phrase_plans.cpp` lowers them to
 `chronon.render-plan.v2` for showcase MP4s on the Vulkan lane (GPU-native text, `require_gpu_native`).

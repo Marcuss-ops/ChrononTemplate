@@ -308,6 +308,7 @@ namespace chronontemplate {
             throw std::invalid_argument("applyTitleCameraShot: the anchor must be finite");
         }
 
+        chrononmotion::motion::presets::author(scene.motion(), titleCameraMoveId(move), [&] {
         CameraRig& rig = scene.camera().rig();
         const float fps = scene.fps();
         const TitleCameraPlan plan = planFor(move, shot);
@@ -471,6 +472,7 @@ namespace chronontemplate {
                         " leaves the title anchor outside the safe area");
             }
         }
+        });
     }
 
 }// namespace chronontemplate

@@ -21,6 +21,8 @@
 //       and the spec's priority thirteen are all present.
 
 #include "chronontemplate/camera_roll/CameraMotionPack.hpp"
+#include "chronontemplate/camera_roll/SceneCameraPack.hpp"
+#include "chronontemplate/camera_roll/TitleCameraPack.hpp"
 
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"
@@ -29,9 +31,12 @@
 #include "chrononmotion/math/Vector3.hpp"
 
 #include <algorithm>
+#include <array>
+#include <atomic>
 #include <cmath>
 #include <set>
 #include <string>
+#include <thread>
 #include <vector>
 
 using namespace chronontemplate;
@@ -54,33 +59,44 @@ namespace {
         float roll{0.f};
     };
 
-    // All fifty presets in spec order.
+    // The roster is the sole source of preset ordinals/order.
     [[nodiscard]] std::vector<CameraMotionPreset> allPresets() {
-        return {CameraMotionPreset::SoftPushIn, CameraMotionPreset::SoftPullBack,
-                CameraMotionPreset::EditorialDriftLeft, CameraMotionPreset::EditorialDriftRight,
-                CameraMotionPreset::TitleRise, CameraMotionPreset::TitleDescend,
-                CameraMotionPreset::QuietDiagonalDrift, CameraMotionPreset::TypeDepthFocus,
-                CameraMotionPreset::TypeMicroOrbit, CameraMotionPreset::ImpactPunchSettle,
-                CameraMotionPreset::KenBurnsIn, CameraMotionPreset::KenBurnsOut,
-                CameraMotionPreset::PortraitUpwardTrack, CameraMotionPreset::PortraitDownwardTrack,
-                CameraMotionPreset::PhotoRevealLeft, CameraMotionPreset::PhotoRevealRight,
-                CameraMotionPreset::LowAnglePhotoReveal, CameraMotionPreset::PortraitHeroArc,
-                CameraMotionPreset::DocumentaryParallax, CameraMotionPreset::PhotoRackFocus,
-                CameraMotionPreset::MapRegionPush, CameraMotionPreset::MapRegionPull,
-                CameraMotionPreset::MapEastwardTrack, CameraMotionPreset::MapWestwardTrack,
-                CameraMotionPreset::MapNorthwardTrack, CameraMotionPreset::MapSouthwardTrack,
-                CameraMotionPreset::RouteCameraSweep, CameraMotionPreset::CountryFocusLock,
-                CameraMotionPreset::CountryComparisonPan, CameraMotionPreset::GeopoliticalTiltReveal,
-                CameraMotionPreset::UiPanelPush, CameraMotionPreset::DashboardPan,
-                CameraMotionPreset::CardStackParallax, CameraMotionPreset::CornerDetailInspect,
-                CameraMotionPreset::DataDetailZoom, CameraMotionPreset::UiOverviewPull,
-                CameraMotionPreset::SideBySideCompare, CameraMotionPreset::PanelAngledPeek,
-                CameraMotionPreset::ChartTraverse, CameraMotionPreset::ProductUiMicroFloat,
-                CameraMotionPreset::WhipPanLeft, CameraMotionPreset::WhipPanRight,
-                CameraMotionPreset::WhipPanUp, CameraMotionPreset::WhipPanDown,
-                CameraMotionPreset::FastDollyThrough, CameraMotionPreset::ReverseDollyReveal,
-                CameraMotionPreset::RollMatchCut, CameraMotionPreset::OrbitHandoff,
-                CameraMotionPreset::ForegroundOcclusionPass, CameraMotionPreset::FocusHandoff};
+        return cameraMotionPresets();
+    }
+
+    void concurrentColdPresetLookupsAreStable() {
+        section("concurrent cold preset lookups");
+        constexpr std::size_t kWorkerCount = 16;
+        constexpr std::size_t kPresetCount = 50;
+        std::atomic<bool> start{false};
+        std::array<bool, kWorkerCount> valid{};
+        std::vector<std::thread> workers;
+        workers.reserve(kWorkerCount);
+        for (std::size_t i = 0; i < kWorkerCount; ++i) {
+            workers.emplace_back([i, &start, &valid] {
+                while (!start.load(std::memory_order_acquire)) std::this_thread::yield();
+                const auto preset = static_cast<CameraMotionPreset>(i);
+                const auto& spec = cameraMotionSpecFor(preset);
+                valid[i] = spec.id != nullptr &&
+                           std::string(spec.id) == cameraMotionPresetId(preset) &&
+                           spec.durationFrames == cameraMotionDuration(preset) &&
+                           spec.family == cameraMotionFamily(preset);
+            });
+        }
+        start.store(true, std::memory_order_release);
+        for (auto& worker : workers) worker.join();
+        for (std::size_t i = 0; i < valid.size(); ++i) {
+            check(valid[i], (std::string("concurrent lookup preserves enum ordinal ") +
+                             std::to_string(i)).c_str());
+        }
+        for (std::size_t i = 0; i < kPresetCount; ++i) {
+            const auto preset = static_cast<CameraMotionPreset>(i);
+            const auto& spec = cameraMotionSpecFor(preset);
+            check(spec.id != nullptr && spec.durationFrames == cameraMotionDuration(preset) &&
+                      spec.family == cameraMotionFamily(preset),
+                  (std::string("initialized catalog row is valid: ") +
+                   cameraMotionPresetId(preset)).c_str());
+        }
     }
 
     [[nodiscard]] std::vector<RigSample> samplePreset(CameraMotionPreset preset, int duration,
@@ -134,10 +150,48 @@ namespace {
         check(ids.size() == 50, "preset ids are unique");
         for (const auto& id : ids) {
             check(id.rfind("camera_motion_", 0) == 0, "wire ids carry the camera_motion_ prefix");
+            check(chrononmotion::motion::presets::known(id),
+                  (id + " is registered in ChrononMotion3D presets::catalog()").c_str());
+        }
+        for (const auto& id : titleCameraMoveIds()) {
+            check(chrononmotion::motion::presets::known(id),
+                  (id + " is registered in ChrononMotion3D presets::catalog()").c_str());
+        }
+        for (const auto& id : sceneCameraTransitionIds()) {
+            check(chrononmotion::motion::presets::known(id),
+                  (id + " is registered in ChrononMotion3D presets::catalog()").c_str());
+        }
+        {
+            FakeContentHost host;
+            TemplateScene governed("governed_camera", 30.f, host, kViewportW, kViewportH);
+            chrononmotion::motion::AuthoringPolicy policy;
+            policy.allowedPresets = {"camera_motion_soft_push_in"};
+            governed.motion().setAuthoringPolicy(policy);
+            CameraMotionShot shot;
+            applyCameraMotionShot(governed, CameraMotionPreset::SoftPushIn, shot);
+            bool denied = false;
+            try {
+                applyCameraMotionShot(governed, CameraMotionPreset::WhipPanLeft, shot);
+            } catch (const std::invalid_argument&) {
+                denied = true;
+            }
+            check(denied, "applyCameraMotionShot enforces AuthoringPolicy allowlist through presets::author");
         }
         const auto catalog = cameraMotionPresetIds();
         check(std::set<std::string>(catalog.begin(), catalog.end()) == ids,
               "the id catalog matches the preset table");
+        check(catalog.size() == presets.size(), "id and preset rosters have the same number of rows");
+        for (std::size_t i = 0; i < presets.size(); ++i) {
+            const auto& spec = cameraMotionSpecFor(presets[i]);
+            check(spec.id != nullptr && catalog[i] == spec.id,
+                  "the declarative roster order matches the executable spec order");
+            check(spec.family == cameraMotionFamily(presets[i]),
+                  "the declarative family matches the executable camera recipe");
+        }
+        check(cameraMotionPresetId(static_cast<CameraMotionPreset>(50)) == nullptr,
+              "out-of-range preset ids do not resolve through the roster");
+        check(cameraMotionSpecFor(static_cast<CameraMotionPreset>(50)).id == nullptr,
+              "out-of-range preset specs stay empty");
         int perFamily[5] = {0, 0, 0, 0, 0};
         int twoShot = 0;
         for (const auto preset : presets) {
@@ -363,6 +417,7 @@ namespace {
 }// namespace
 
 int main() {
+    concurrentColdPresetLookupsAreStable();
     theSpecTableIsComplete();
     theIntensityLadderIsSpec();
     everyPresetAnimatesCleanly();

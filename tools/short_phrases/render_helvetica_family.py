@@ -21,7 +21,7 @@ UPLOADER_PATH = os.path.join(ROOT_DIR, "RenderingGen/bin/drive-upload")
 CREDS_PATH = os.path.join(ROOT_DIR, "RenderingGen/UploadDrive/credentials.json")
 TOKEN_PATH = os.path.join(ROOT_DIR, "RenderingGen/UploadDrive/token.json")
 DRIVE_FOLDER = "1Jln16q_OoGM208-PjZHZXyMzuMpBOua4"
-BASE_PLAN_PATH = os.path.join(CHRONON_TEMPLATE_DIR, "out/paper_helvetica/short_phrase_editorial_paper_title_card.plan.json")
+BASE_PLAN_PATH = os.path.join(CHRONON_TEMPLATE_DIR, "out/short_phrase_plans/short_phrase_product_text_shimmer.plan.json")
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
