@@ -8,11 +8,59 @@ text-to-place pipeline can be tested without loading OpenCV or tile renderers.
 from __future__ import annotations
 
 import json
+import os
 import re
+import tempfile
+import time
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
+from threading import Lock
+
+
+NOMINATIM_MIN_INTERVAL_SECONDS = 1.0
+_GEOCODE_TIMEOUT_SECONDS = 12
+_GEOCODE_CACHE_VERSION = 1
+_GEOCODE_LOCK = Lock()
+_LAST_GEOCODE_REQUEST = 0.0
+
+
+def _geocode_cache_path() -> Path:
+    configured = os.environ.get("CHRONON_GEOCODE_CACHE")
+    if configured:
+        return Path(configured).expanduser()
+    cache_home = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
+    return cache_home / "chronontemplate" / "nominatim_geocodes.v1.json"
+
+
+def _load_geocode_cache(path: Path) -> dict:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if (not isinstance(payload, dict)
+            or payload.get("version") != _GEOCODE_CACHE_VERSION
+            or not isinstance(payload.get("entries"), dict)):
+        return {}
+    return payload["entries"]
+
+
+def _save_geocode_cache(path: Path, entries: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps({"version": _GEOCODE_CACHE_VERSION, "entries": entries},
+                         ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    fd, temporary = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as output:
+            output.write(payload)
+            output.write("\n")
+        os.replace(temporary, path)
+    finally:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
 
 
 @dataclass
@@ -120,27 +168,57 @@ def extract_places(text: str) -> list[Place]:
 
 
 def geocode(place: Place, language: str = "it") -> Place:
-    """Resolve one place with Nominatim, keeping failures as unresolved places."""
-    query = urllib.parse.urlencode({"q": place.query, "format": "json", "limit": 1,
-                                   "accept-language": language})
-    request = urllib.request.Request(
-        f"https://nominatim.openstreetmap.org/search?{query}",
-        headers={"User-Agent": "ChrononGeoCameraRuntime/1.0"})
-    try:
-        rows = json.load(urllib.request.urlopen(request, timeout=12))
-    except Exception as exc:  # offline: keep the place unresolvable
-        print(f"  [geocode] {place.query}: UNREACHABLE ({exc})", flush=True)
+    """Resolve with Nominatim, using a persistent cache and its 1 req/s policy."""
+    global _LAST_GEOCODE_REQUEST
+    normalized_query = " ".join(place.query.casefold().split())
+    cache_key = json.dumps([normalized_query, language.casefold()], ensure_ascii=False,
+                           separators=(",", ":"))
+    cache_path = _geocode_cache_path()
+    with _GEOCODE_LOCK:
+        entries = _load_geocode_cache(cache_path)
+        if cache_key in entries:
+            row = entries[cache_key]
+            if row is not None:
+                place.display_name = str(row["display_name"])
+                place.lat, place.lon = float(row["lat"]), float(row["lon"])
+                place.ok = True
+                print(f"  [geocode] {place.query} -> {place.display_name.split(',')[0]} "
+                      f"({place.lat:.5f}, {place.lon:.5f}) [cache]", flush=True)
+            else:
+                print(f"  [geocode] {place.query}: NOT FOUND [cache]", flush=True)
+            return place
+
+        remaining = NOMINATIM_MIN_INTERVAL_SECONDS - (time.monotonic() - _LAST_GEOCODE_REQUEST)
+        if _LAST_GEOCODE_REQUEST and remaining > 0:
+            time.sleep(remaining)
+        query = urllib.parse.urlencode({"q": place.query, "format": "json", "limit": 1,
+                                        "accept-language": language})
+        request = urllib.request.Request(
+            f"https://nominatim.openstreetmap.org/search?{query}",
+            headers={"User-Agent": "ChrononGeoCameraRuntime/1.0"})
+        _LAST_GEOCODE_REQUEST = time.monotonic()
+        try:
+            with urllib.request.urlopen(request, timeout=_GEOCODE_TIMEOUT_SECONDS) as response:
+                rows = json.load(response)
+        except Exception as exc:  # transient errors must not poison persistent cache
+            print(f"  [geocode] {place.query}: UNREACHABLE ({exc})", flush=True)
+            return place
+
+        if not rows:
+            entries[cache_key] = None
+            _save_geocode_cache(cache_path, entries)
+            print(f"  [geocode] {place.query}: NOT FOUND", flush=True)
+            return place
+        row = rows[0]
+        place.display_name = str(row["display_name"])
+        place.lat, place.lon = float(row["lat"]), float(row["lon"])
+        place.ok = True
+        entries[cache_key] = {"display_name": place.display_name,
+                              "lat": place.lat, "lon": place.lon}
+        _save_geocode_cache(cache_path, entries)
+        print(f"  [geocode] {place.query} -> {place.display_name.split(',')[0]} "
+              f"({place.lat:.5f}, {place.lon:.5f})", flush=True)
         return place
-    if not rows:
-        print(f"  [geocode] {place.query}: NOT FOUND", flush=True)
-        return place
-    row = rows[0]
-    place.display_name = row["display_name"]
-    place.lat, place.lon = float(row["lat"]), float(row["lon"])
-    place.ok = True
-    print(f"  [geocode] {place.query} -> {place.display_name.split(',')[0]} "
-          f"({place.lat:.5f}, {place.lon:.5f})", flush=True)
-    return place
 
 
 __all__ = ["Place", "Tour", "extract_places", "geocode"]

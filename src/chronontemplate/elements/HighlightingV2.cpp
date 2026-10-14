@@ -265,7 +265,7 @@ Json revealAnimation(RevealMode mode,const HighlightTiming& t,const Json& target
     auto& anim=params["animation"];
     auto& keys=anim["keyframes"];
     if (mode==RevealMode::Draw) {
-        anim["easing"]="ease_in_out";
+        anim["easing"]="in_out_sine";
     } else if (mode==RevealMode::Wipe) {
         anim["easing"]="linear";
     } else if (mode==RevealMode::Scribble) {
@@ -278,11 +278,11 @@ Json revealAnimation(RevealMode mode,const HighlightTiming& t,const Json& target
         keys=Json::array({{{"frame",t.start},{"value",{.5f,.5f}}},
                          {{"frame",t.revealEnd},{"value",{0.f,1.f}}}});
     } else if (mode==RevealMode::Sweep) {
-        anim["easing"]="ease_out";
+        anim["easing"]="out_sine";
         keys=Json::array({{{"frame",t.start},{"value",{0.f,0.f}}},
                          {{"frame",t.revealEnd},{"value",{.85f,1.f}}}});
     } else if (mode==RevealMode::Trace) {
-        anim["easing"]="ease_in_out";
+        anim["easing"]="in_out_sine";
         keys=Json::array({{{"frame",t.start},{"value",{0.f,0.f}}},
                          {{"frame",t.revealEnd},{"value",{.85f,1.f}}}});
     } else if (mode==RevealMode::Pulse || mode==RevealMode::FocusFollow || mode==RevealMode::Stagger) {

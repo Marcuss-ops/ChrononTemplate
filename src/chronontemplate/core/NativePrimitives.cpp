@@ -125,7 +125,8 @@ Json Paths::trim(int startFrame, int endFrame) {
     if (startFrame<0 || endFrame<=startFrame) throw std::invalid_argument("trim interval requires 0 <= start < end");
     return {{"kind","trim"},{"params",{{"start",0.f},{"end",0.f},
         {"animation",{{"easing","linear"},{"keyframes",Json::array({
-            {{"frame",startFrame},{"value",0.f}},{{"frame",endFrame},{"value",1.f}}})}}}}}};
+            {{"frame",startFrame},{"value",{0.f,0.f}}},
+            {{"frame",endFrame},{"value",{0.f,1.f}}}})}}}}}};
 }
 
 Json Paths::strokeLayer(const std::string& id, const Json& commands, int startFrame, int endFrame,
