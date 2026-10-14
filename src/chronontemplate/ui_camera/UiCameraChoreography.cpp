@@ -23,18 +23,16 @@ namespace chronontemplate {
 
     namespace {
 
-        [[nodiscard]] float checkedPositive(float value, const char* what) {
+        void checkedPositive(float value, const char* what) {
             if (!std::isfinite(value) || value <= 0.f)
                 throw std::invalid_argument(std::string("UiCameraChoreography: ") + what +
                                             " must be finite and positive");
-            return value;
         }
 
-        [[nodiscard]] float checkedFinite(float value, const char* what) {
+        void checkedFinite(float value, const char* what) {
             if (!std::isfinite(value))
                 throw std::invalid_argument(std::string("UiCameraChoreography: ") + what +
                                             " must be finite");
-            return value;
         }
 
         void checkWindow(int inFrame, int duration, int totalFrames, const char* what) {
@@ -295,8 +293,8 @@ namespace chronontemplate {
             fail("camera never settles: end speed is not below mid-travel speed");
 
         // 3. Animated parenting end-to-end: children follow the Null root.
-        // The children carry no position keys of their own outside the stagger
-        // offsets, so between stamps their world delta must equal the root's.
+        // Remove the child's authored local stagger delta before comparing
+        // with root translation: the title has its own entrance position keys.
         const std::vector<int> stamps = {spec.panelInFrame, spec.panelInFrame + spec.panelDuration,
                                          spec.zoomInFrame + spec.zoomDuration,
                                          spec.panInFrame + spec.panDuration, spec.totalFrames};
@@ -309,7 +307,10 @@ namespace chronontemplate {
             const Vector3 rootB = translationOf(scene.motion().worldMatrix(panel.root));
             const Vector3 titleB = translationOf(scene.motion().worldMatrix(panel.title));
             const Vector3 rootDelta = rootB - rootA;
-            const Vector3 titleDelta = titleB - titleA;
+            const auto* title = scene.motion().findLayer(panel.title);
+            const Vector3 localDelta = title->sample(static_cast<float>(stamps[i]) / fps).position -
+                title->sample(static_cast<float>(stamps[i - 1]) / fps).position;
+            const Vector3 titleDelta = titleB - titleA - localDelta;
             if (lengthOf(rootDelta) < 1e-3f)
                 continue;
             parentingChecked = true;

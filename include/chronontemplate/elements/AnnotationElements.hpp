@@ -93,6 +93,30 @@ namespace chronontemplate::elements {
     [[nodiscard]] LayerHandle& addFocusBracket(TemplateScene& scene,
                                                const FocusBracketSpec& spec);
 
+    /// 13 DocusGlowLine: Multi-layer documentary glow line architecture (Docus / Reacts style).
+    /// Features:
+    ///  - Multi-layer glow: ultra-crisp white core (2.0px), tight saturated halo, diffuse wide halo
+    ///  - Animated leading light head with bloom and subtle trail
+    ///  - Linear color-space bloom compatibility
+    struct GlowLineSpec {
+        float length{640.f};
+        float coreWidth{2.0f};
+        std::string coreColor{"#FFFFFF"};
+        float haloWidth{12.0f};
+        std::string haloColor{"#00E5FF"};
+        float wideHaloWidth{36.0f};
+        std::string wideHaloColor{"#0072FF"};
+        bool headEnabled{true};
+        float headRadius{4.5f};
+        bool pulseEnabled{true};
+        ElementStyle style{ElementStyle::DocumentaryDark};
+        ElementMotion motion{};
+        std::string name{"glow_line"};
+    };
+    [[nodiscard]] LayerHandle& addGlowLine(TemplateScene& scene,
+                                           const GlowLineSpec& spec);
+
 }// namespace chronontemplate::elements
 
 #endif//CHRONONTEMPLATE_ANNOTATION_ELEMENTS_HPP
+

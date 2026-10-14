@@ -21,7 +21,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from map_editorial import load_borders
+from map_editorial import load_border
 
 STYLE = {
     "country_px": 54,
@@ -343,9 +343,10 @@ def _polygon_masks(iso, project, W, H, reveal=1.0, width=0):
     Reveal uses the linearly sampled arc-length prefix; mask fill always uses
     the complete country geometry, never a circle/ellipse substitute.
     """
-    data = load_borders().get(iso)
-    if not data:
-        raise ValueError(f"country geometry missing for ISO {iso}")
+    try:
+        data = load_border(iso)
+    except KeyError as exc:
+        raise ValueError(f"country geometry missing for ISO {iso}") from exc
     fill = _blank_mask(W, H)
     stroke = _blank_mask(W, H)
     for ring in data["polygons"]:
@@ -576,9 +577,10 @@ def _mask_rings(rings, W, H, reveal=1.0, stroke=3):
 def _country(frame, iso, project, progress, W, H, *, fill=None, glow=None,
              stroke_px=2, reveal_start=0.12, reveal_duration=0.32,
              fill_start=0.34, fill_duration=0.24):
-    data = load_borders().get(iso)
-    if not data:
-        raise ValueError(f"Natural Earth geometry missing: {iso}")
+    try:
+        data = load_border(iso)
+    except KeyError as exc:
+        raise ValueError(f"Natural Earth geometry missing: {iso}") from exc
     rings = []
     fill_mask = _blank_mask(W, H)
     cache_key=None

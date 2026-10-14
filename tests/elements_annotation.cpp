@@ -113,6 +113,25 @@ namespace {
         check(corner != nullptr, "corner bars use stable names");
     }
 
+    void glowLineComposes() {
+        section("13 docus glow line");
+        FakeContentHost host;
+        TemplateScene scene("el_glow_line", 30.f, host, 1920.f, 1080.f);
+        GlowLineSpec spec;
+        spec.length = 640.f;
+        LayerHandle& root = addGlowLine(scene, spec);
+        root.position(960.f, 540.f);
+        submitsThrough("the glow line root submits across the clip", scene, root);
+        // root, wide halo, tight halo, core, head halo, head core -> 6 layers
+        check(scene.submit(48).layers.size() == 6, "wide halo, halo, core and light head compose six layers");
+        const auto* core = host.findShapeRequest("glow_line_core");
+        check(core && core->fillColor == "#FFFFFF", "the glow line core is razor sharp white");
+        const auto* halo = host.findShapeRequest("glow_line_halo");
+        check(halo && halo->fillColor == "#00E5FF", "the tight halo keeps vibrant cyan");
+        const auto* wide = host.findShapeRequest("glow_line_wide_halo");
+        check(wide && wide->fillColor == "#0072FF", "the wide halo keeps deep blue aura");
+    }
+
 }// namespace
 
 int main() {
@@ -122,5 +141,7 @@ int main() {
     roughCircleComposes();
     curvedArrowComposes();
     focusBracketComposes();
+    glowLineComposes();
     return chrononmotion_test::report();
 }
+

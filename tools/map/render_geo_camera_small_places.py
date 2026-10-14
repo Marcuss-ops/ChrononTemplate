@@ -167,7 +167,7 @@ MAP_LABEL_ANIMATIONS = (
     "rise_up", "pop_in", "soft_tracking",
     "title_top", "badge_side", "huge_center",
     "small_above", "caption_card", "editorial_serif",
-    "gpin_bubble", "card_glass", "bare_big",
+    "gpin_bubble", "card_glass", "bare_big", "glow_react", "editorial_tag",
     "ribbon", "dot_ring", "outline_box",
 )
 
@@ -193,7 +193,7 @@ COMPOSITION_STYLES = (
 # (geo_runtime calls draw_map_location_marker at the camera nadir for
 # these): the 6 distinct geometries plus the 6 full compositions. Every
 # other animation keeps the approved rail-only production look.
-MARKER_DRAWN_STYLES = NEW_LABEL_GEOMETRIES + COMPOSITION_STYLES
+MARKER_DRAWN_STYLES = NEW_LABEL_GEOMETRIES + COMPOSITION_STYLES + ("glow_react", "editorial_tag")
 
 
 def apply_city_beacon_map_style(frame: np.ndarray, progress: float) -> None:
@@ -367,6 +367,47 @@ def draw_diffuse_city_beacon(frame: np.ndarray, point: tuple[int, int],
     cv2.circle(frame, (cx, cy), 2, (135, 165, 255), -1, cv2.LINE_AA)
 
 
+def draw_reaction_glow(frame: np.ndarray, point: tuple[int, int],
+                       progress: float) -> None:
+    """Animate a luminous map target with a soft bloom and expanding ripples."""
+    h, w = frame.shape[:2]
+    cx, cy = point
+    p = max(0.0, min(1.0, float(progress)))
+    reveal = max(0.0, min(1.0, p / 0.20))
+    reveal = reveal * reveal * (3.0 - 2.0 * reveal)
+    if reveal <= 0.001:
+        return
+
+    pulse = 0.5 + 0.5 * math.sin(math.tau * p * 1.8)
+    accent = (18, 72, 255)  # vivid coral red in OpenCV BGR
+
+    # Keep blur/compositing local to the beacon. Full-frame glow buffers made
+    # this lightweight marker dominate each 1080p route frame's render time.
+    extent = 144
+    x0, x1 = max(0, cx - extent), min(w, cx + extent + 1)
+    y0, y1 = max(0, cy - extent), min(h, cy + extent + 1)
+    roi = frame[y0:y1, x0:x1]
+    center = (cx - x0, cy - y0)
+    bloom = np.zeros_like(roi)
+    cv2.circle(bloom, center, 58 + round(9 * pulse), accent, -1, cv2.LINE_AA)
+    bloom = cv2.GaussianBlur(bloom, (0, 0), 27)
+    cv2.addWeighted(roi, 1.0, bloom, reveal * (0.52 + 0.16 * pulse), 0, dst=roi)
+
+    # Two staggered waves keep the point alive during the spoken city beat.
+    for offset in (0.0, 0.5):
+        phase = (p * 1.10 + offset) % 1.0
+        radius = 12 + round(62 * phase)
+        ring = np.zeros_like(roi)
+        cv2.circle(ring, center, radius, accent, 3, cv2.LINE_AA)
+        ring = cv2.GaussianBlur(ring, (0, 0), 3.5)
+        cv2.addWeighted(roi, 1.0, ring, reveal * (0.82 * (1.0 - phase)),
+                        0, dst=roi)
+
+    # A crisp luminous core provides a precise target without a pin silhouette.
+    cv2.circle(roi, center, 10 + round(2 * pulse), accent, -1, cv2.LINE_AA)
+    cv2.circle(roi, center, 5, (238, 248, 255), -1, cv2.LINE_AA)
+
+
 def draw_map_location_marker(frame: np.ndarray, point: tuple[int, int],
                              name: str, progress: float,
                              animation: str = "gentle_fade",
@@ -374,6 +415,13 @@ def draw_map_location_marker(frame: np.ndarray, point: tuple[int, int],
     if animation in COMPOSITION_STYLES:
         # Compositions own their marker: no standard amber beacon, otherwise
         # every treatment would share the same glow and look identical.
+        draw_map_marker_label(frame, point, name, progress, animation)
+        return
+    if animation == "glow_react":
+        draw_reaction_glow(frame, point, progress)
+        draw_map_marker_label(frame, point, name, progress, animation)
+        return
+    if animation == "editorial_tag":
         draw_map_marker_label(frame, point, name, progress, animation)
         return
     if animation == "diffuse_city_beacon":
@@ -389,12 +437,23 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
     """Render the place name in a Chronon-style rail below the map imagery."""
     from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
+    # The classic dynamic-map renderer keeps OpenCL frames in cv2.UMat until
+    # its final caption pass. Pillow/NumPy need a host array, so round-trip the
+    # frame here and restore UMat on return; callers can continue using the GPU
+    # encode path without relying on UMat exposing ndarray.shape/astype.
+    was_umat = isinstance(frame, cv2.UMat)
+    if was_umat:
+        frame = frame.get()
+
+    def restore_frame(value: np.ndarray) -> np.ndarray:
+        return cv2.UMat(value) if was_umat else value
+
     label = " ".join(str(text or "").split())
     if not label or animation == "none" or animation in MARKER_DRAWN_STYLES:
         # Marker-drawn styles carry their own name at the camera nadir
         # (drawn by draw_map_location_marker); the standard rail would
         # duplicate it and make every treatment look the same.
-        return frame
+        return restore_frame(frame)
     h, w = frame.shape[:2]
     # These values come from the run-level OverlayStyle payload projected by
     # PipelineGen; fallback values match its canonical Bricolage phrase style.
@@ -447,7 +506,7 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
     reveal = max(0.0, min(1.0, (progress - start) / duration))
     alpha = int(255 * reveal * reveal * (3.0 - 2.0 * reveal))
     if alpha <= 0:
-        return frame
+        return restore_frame(frame)
 
     # 01_ed_saudi_base capsule style:
     # Compact rounded box with Gaussian blurred drop shadow, 1px keyline,
@@ -526,7 +585,7 @@ def draw_editorial_map_caption(frame: np.ndarray, text: str, progress: float,
         frame.astype(np.float32) * (1.0 - alpha_mask) + bgr * alpha_mask,
         0, 255,
     ).astype(np.uint8)
-    return frame
+    return restore_frame(frame)
 
 
 @lru_cache(maxsize=16)
@@ -572,7 +631,9 @@ def _draw_composition(frame: np.ndarray, point: tuple[int, int],
             draw.polygon([(cx - 23, py - 26), (cx + 23, py - 26), (cx, py + 8)],
                          fill=(220, 30, 30, pa))
             draw.ellipse((cx - 11, py - 49, cx + 11, py - 29), fill=(255, 255, 255, pa))
-        tb = max(0.0, min(1.0, (t - 0.30) / 0.70))
+        # Bring the place name in almost with the falling pin. The camera is
+        # still moving at this point, so the label reads as part of the arrival.
+        tb = max(0.0, min(1.0, (t - 0.05) / 0.70))
         tb = tb * tb * (3.0 - 2.0 * tb)
         over = 1.0 + 0.25 * math.sin(min(1.0, tb * 1.15) * math.pi)
         ba = max(0.0, min(1.0, tb * over))
@@ -817,7 +878,12 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
         "title_top": (0.70, 0.22), "badge_side": (0.78, 0.16),
         "huge_center": (0.66, 0.28), "small_above": (0.80, 0.14),
         "caption_card": (0.74, 0.20), "editorial_serif": (0.72, 0.22),
-        "gpin_bubble": (0.60, 0.20), "card_glass": (0.70, 0.20),
+        # Show the location pin and its text while the slow camera is still
+        # approaching. Waiting until 60% meant the marker only appeared after
+        # the camera had already settled on short map clips.
+        "gpin_bubble": (0.12, 0.36), "card_glass": (0.70, 0.20),
+        "glow_react": (0.0, 0.18),
+        "editorial_tag": (0.08, 0.24),
         "bare_big": (0.72, 0.22), "ribbon": (0.68, 0.20),
         "dot_ring": (0.76, 0.16), "outline_box": (0.74, 0.20),
     }
@@ -829,6 +895,84 @@ def draw_map_marker_label(frame: np.ndarray, point: tuple[int, int], text: str,
         return
     if animation in COMPOSITION_STYLES:
         _draw_composition(frame, point, label, t, ease, animation)
+        return
+    if animation == "editorial_tag":
+        # Yemen/Saudi/Iran editorial callout: tracked condensed uppercase,
+        # dark plate, red accent bar, fine leader and a restrained target.
+        from PIL import Image, ImageDraw, ImageFont, ImageFilter
+        font_path = BASE_DIR / "Chronon3d/assets/fonts/Oswald-Bold.ttf"
+        if not font_path.is_file():
+            font_path = BASE_DIR / "Chronon3d/assets/fonts/Inter-Bold.ttf"
+        font = ImageFont.truetype(str(font_path), max(24, round(34 * h / 1080)))
+        title = label.upper()
+        spacing = max(1, round(2 * w / 1920))
+        dummy = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+        bounds = [dummy.textbbox((0, 0), ch, font=font) for ch in title]
+        widths = [b[2] - b[0] for b in bounds]
+        text_w = sum(widths) + spacing * max(0, len(title) - 1)
+        text_h = font.getbbox(title)[3] - font.getbbox(title)[1]
+        pad_x, pad_y = max(16, round(20 * w / 1920)), max(7, round(9 * h / 1080))
+        box_w, box_h = text_w + 2 * pad_x + 5, text_h + 2 * pad_y
+        box_x = max(18, min(w - box_w - 18, cx - box_w // 2))
+        box_y = cy + max(48, round(56 * h / 1080))
+        if box_y + box_h > h - 18:
+            box_y = max(18, cy - max(48, round(56 * h / 1080)) - box_h)
+        x0, x1 = max(0, box_x - 36), min(w, box_x + box_w + 36)
+        y0, y1 = max(0, min(cy, box_y) - 32), min(h, max(cy + 12, box_y + box_h) + 32)
+        base = Image.fromarray(cv2.cvtColor(frame[y0:y1, x0:x1], cv2.COLOR_BGR2RGB)).convert("RGBA")
+        layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(layer)
+        bx0, by0, bx1, by1 = box_x - x0, box_y - y0, box_x - x0 + box_w, box_y - y0 + box_h
+        ax, ay = cx - x0, cy - y0
+        edge_y = by0 if by0 > ay else by1
+        draw.line((ax, ay, ax, edge_y),
+                  fill=(245, 247, 250, int(245 * alpha)), width=2)
+        shadow = Image.new("RGBA", layer.size, (0, 0, 0, 0))
+        ImageDraw.Draw(shadow).rounded_rectangle((bx0, by0 + 7, bx1, by1 + 7),
+            radius=4, fill=(0, 0, 0, int(145 * alpha)))
+        layer.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(10)))
+        draw = ImageDraw.Draw(layer)
+        draw.rounded_rectangle((bx0, by0, bx1, by1), radius=4,
+            fill=(10, 16, 22, int(242 * alpha)),
+            outline=(221, 230, 232, int(100 * alpha)), width=1)
+        draw.rectangle((bx0 + 1, by0 + 4, bx0 + 5, by1 - 4),
+                       fill=(242, 48, 38, int(255 * alpha)))
+        tx = bx0 + pad_x + 5
+        ty = by0 + pad_y - font.getbbox(title)[1]
+        glow = Image.new("RGBA", layer.size, (0, 0, 0, 0))
+        glow_draw = ImageDraw.Draw(glow)
+        gx = tx
+        for ch, cw in zip(title, widths):
+            glow_draw.text((gx, ty), ch, font=font,
+                fill=(220, 238, 255, int(105 * alpha)))
+            gx += cw + spacing
+        layer.alpha_composite(glow.filter(ImageFilter.GaussianBlur(5)))
+        draw = ImageDraw.Draw(layer)
+        for ch, cw, cb in zip(title, widths, bounds):
+            draw.text((tx, ty), ch, font=font,
+                fill=(242, 244, 238, int(255 * alpha)), stroke_width=1,
+                stroke_fill=(3, 8, 12, int(210 * alpha)))
+            tx += cw + spacing
+        base.alpha_composite(layer)
+        frame[y0:y1, x0:x1] = cv2.cvtColor(np.asarray(base.convert("RGB")), cv2.COLOR_RGB2BGR)
+        return
+    if animation == "glow_react":
+        scale, thickness = 1.12, 2
+        (tw, th), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX,
+                                             scale, thickness)
+        x = max(28, min(w - tw - 28, cx - tw // 2))
+        base_y = max(th + baseline + 12, cy - 86)
+        tx0, tx1 = max(0, x - 8), min(w, x + tw + 8)
+        ty0, ty1 = max(0, base_y - th - baseline - 6), min(h, base_y + 6)
+        text_roi = frame[ty0:ty1, tx0:tx1]
+        text_layer = text_roi.copy()
+        local_origin = (x - tx0, base_y - ty0)
+        cv2.putText(text_layer, label, (local_origin[0] + 2, local_origin[1] + 3),
+                    cv2.FONT_HERSHEY_SIMPLEX, scale, (0, 0, 0), thickness + 2,
+                    cv2.LINE_AA)
+        cv2.putText(text_layer, label, local_origin, cv2.FONT_HERSHEY_SIMPLEX,
+                    scale, (255, 255, 255), thickness, cv2.LINE_AA)
+        cv2.addWeighted(text_roi, 1.0 - alpha, text_layer, alpha, 0, dst=text_roi)
         return
     if animation in NEW_LABEL_GEOMETRIES:
         _draw_distinct_label_style(frame, point, label, alpha, ease, animation)

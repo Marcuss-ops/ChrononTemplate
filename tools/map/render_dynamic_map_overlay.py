@@ -43,6 +43,46 @@ def main() -> int:
     # source timeline's frame rate for deterministic overlay synchronization.
     fps_num, fps_den = int(payload["fps_num"]), int(payload["fps_den"])
     duration_us = int(payload["duration_us"])
+    route_timing = payload.get("route_timing")
+    country_context = payload.get("country_context")
+    if country_context is not None:
+        if not isinstance(country_context, dict):
+            raise ValueError("country_context must be an object")
+        try:
+            country_context = {
+                "iso": str(country_context["iso"]).upper(),
+                "latitude": float(country_context["latitude"]),
+                "longitude": float(country_context["longitude"]),
+                "zoom": float(country_context.get("zoom", 5.8)),
+                "hold_seconds": float(country_context["hold_seconds"]),
+                "travel_seconds": float(country_context["travel_seconds"]),
+            }
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("country_context requires iso, center, hold_seconds and travel_seconds") from exc
+        if route_timing is None:
+            raise ValueError("country_context requires explicit route_timing")
+        if (not all(math.isfinite(v) for v in country_context.values()
+                    if isinstance(v, float))
+                or not -85 < country_context["latitude"] < 85
+                or not -180 <= country_context["longitude"] <= 180
+                or country_context["zoom"] < 5.0
+                or country_context["hold_seconds"] <= 0
+                or country_context["travel_seconds"] <= 0):
+            raise ValueError("country_context camera/timing values are outside valid ranges")
+    if route_timing is not None:
+        if not isinstance(route_timing, dict):
+            raise ValueError("route_timing must be an object")
+        try:
+            route_stop_seconds = float(route_timing["seconds_per_city"])
+            route_travel_seconds = float(route_timing["travel_seconds"])
+            route_final_hold_seconds = float(route_timing.get("final_hold_seconds", 0.0))
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("route_timing requires numeric seconds_per_city and travel_seconds") from exc
+        if (not all(math.isfinite(v) for v in
+                    (route_stop_seconds, route_travel_seconds, route_final_hold_seconds))
+                or route_stop_seconds <= 0 or route_travel_seconds <= 0
+                or route_final_hold_seconds < 0):
+            raise ValueError("route_timing durations must be finite, with positive city/travel times and nonnegative final hold")
     raw_pins = payload.get("pins", [])
     # Keep a route map focused: repeated mentions of the same place are one
     # stop, and no tour may contain more than five distinct stops. This cap
@@ -102,6 +142,8 @@ def main() -> int:
                 raise ValueError(f"map pin value must be a number: {value}")
     if width < 16 or height < 16 or fps_num <= 0 or fps_den <= 0 or duration_us <= 0 or not pins:
         raise ValueError("dynamic map requires valid canvas, frame rate, duration and at least one pin")
+    if route_timing is not None and len(pins) < 2:
+        raise ValueError("route_timing requires at least two unique city stops")
     if not math.isfinite(area_glow_radius_km) or not 0.0 <= area_glow_radius_km <= 1000.0:
         raise ValueError("area_glow_radius_km must be finite and in [0, 1000]")
     if any(not math.isfinite(float(p[k])) for p in pins for k in ("latitude", "longitude")):
@@ -127,6 +169,19 @@ def main() -> int:
     cv2.setNumThreads(1)
     geo.WIDTH, geo.HEIGHT, geo.FPS = width, height, fps_num / fps_den
     total_frames = max(2, round(duration_us * fps_num / (1_000_000 * fps_den)))
+    if route_timing is not None:
+        expected_seconds = (route_stop_seconds * len(pins)
+                            + route_travel_seconds * (len(pins) - 1)
+                            + route_final_hold_seconds
+                            + (country_context["hold_seconds"]
+                               + country_context["travel_seconds"]
+                               if country_context else 0.0))
+        expected_frames = round(expected_seconds * fps_num / fps_den)
+        if abs(expected_frames - total_frames) > 1:
+            raise ValueError(
+                f"duration_us gives {total_frames} frames but route_timing requires "
+                f"{expected_frames} ({expected_seconds:.3f}s)"
+            )
     stops = [geo.Place(
         query=str(pin.get("label") or pin["id"]),
         display_name=str(pin.get("label") or pin["id"]),
@@ -135,14 +190,24 @@ def main() -> int:
 
     def map_level(pin):
         scope = str(pin.get("scope") or "").strip().lower()
-        if scope in {"continent", "country", "region", "city"}:
+        if scope in {"continent", "country", "region", "municipality", "city"}:
             return scope
         return "city"
 
     # Keep country and region maps at a broad reference scale. City maps land
     # near street level; 17.0 is within the certified local tile pyramid.
-    level_zoom = {"continent": 2.5, "country": 5.0, "region": 8.0, "city": 17.0}
+    level_zoom = {"continent": 2.5, "country": 5.0, "region": 8.0,
+                  "municipality": 10.5, "city": 17.0}
     stop_zooms = [level_zoom[map_level(pin)] for pin in pins]
+    municipal_outline = bool(payload.get("municipal_outline", False))
+    municipal_zoom = float(payload.get("municipal_outline_zoom", 10.5))
+    municipal_glow_zoom = float(payload.get("municipal_glow_zoom", 10.9))
+    municipal_city_zoom = float(payload.get("municipal_city_zoom", 12.2))
+    # Each municipal stop opens wide enough to read its own perimeter, then
+    # spends the spoken two-second beat moving into the city itself.
+    if municipal_outline:
+        stop_zooms = [municipal_city_zoom if map_level(pin) == "municipality" else zoom
+                      for pin, zoom in zip(pins, stop_zooms)]
     # A short map beat cannot carry a multi-stop tour and still reserve the
     # authored final hold. Keep the lead location as a single animated map
     # instead of failing the whole video during TourBuilder's strict gate.
@@ -151,6 +216,7 @@ def main() -> int:
     if (
         len(stops) > 1
         and total_frames / geo.FPS < minimum_tour_seconds
+        and route_timing is None
         and map_animation not in MULTI_PIN_SYSTEMS
         and map_animation not in MULTI_PIN_SCENES
     ):
@@ -232,6 +298,11 @@ def main() -> int:
             elif camera_animation == "fast_push":
                 # Quicker 2-level push for short map beats.
                 builder.start_zoom = max(8.0, builder.end_zoom - 2.0)
+            elif camera_animation == "slow_approach":
+                # Keep the town readable while it approaches. Three zoom
+                # levels in the opening beat still felt abrupt on small
+                # places, so this explicit calm move travels only 1.4 levels.
+                builder.start_zoom = max(8.0, builder.end_zoom - 1.4)
             else:
                 # Open closer to town scale: a 5.5-level dive reads as a
                 # sudden drop and the clip feels rushed. A 3-level approach
@@ -269,57 +340,114 @@ def main() -> int:
         builder.full_duration_zoom = True
         if camera_animation == "steady_hold":
             builder.terminal_hold_frames = round(total_frames * 0.70)
+        elif camera_animation == "slow_approach":
+            # Use 60% of the clip for the approach, then hold the target for
+            # the remaining 40%. This gives the early pin and label time to
+            # arrive while the camera is still moving.
+            builder.terminal_hold_frames = round(total_frames * 0.40)
         elif camera_animation in ("fast_push", "signature_dive"):
             builder.terminal_hold_frames = round(total_frames * 0.50)
         else:
             builder.terminal_hold_frames = round(total_frames * 0.58)
     else:
-        # Keep the previous five-second camera tour, then hold the final
-        # destination for another 1.5 seconds. The builder's timeline ends
-        # before TOTAL_FRAMES, so its final-pose fallback supplies that hold.
-        tour_seconds = max(1.0, duration_us / 1_000_000 - 1.5)
-        # Give close-zoom transitions a little more room: the strict camera
-        # velocity gate caught a small zoom snap at a five-stop city route.
-        # Keep the authored tour duration fixed by taking that time from the
-        # per-stop holds, and reserve the final 1.5 s for the destination hold.
-        # Five-stop close-zoom routes need at least 1.2 s per leg to stay
-        # inside the strict zoom-velocity gate. Multi-stop tours involve more
-        # ground to cover, so give each leg 1.8-2.4 s: slower legs stay far
-        # inside the gate and remain readable. Borrow the extra time from
-        # per-stop holds; keep the authored tour and final 1.5 s hold intact.
-        travel_seconds = min(2.4, max(1.8, tour_seconds / (1.9 * (len(stops) - 1))))
-        stop_seconds = max(0.15, (tour_seconds - travel_seconds * (len(stops) - 1)) / len(stops))
-        builder = geo.TourBuilder(stops, seconds_per_stop=stop_seconds,
-                                  travel_seconds=travel_seconds, end_zoom=max(stop_zooms))
-        builder.stop_end_zooms = stop_zooms
-        # Start much closer to the first city: this avoids a steep opening
-        # zoom step on short, multi-stop routes and matches the requested
-        # city-first framing.
-        builder.initial_zoom_fraction = 0.90
-        # Use the full stop window for each city dive. The default short
-        # 0.58 fraction quantized to fewer than two useful frames on dense
-        # five-stop routes and tripped the strict velocity gate at frame 0.
-        builder.stop_dive_fraction = 1.0
-        if camera_animation == "tilt_reveal":
-            builder.initial_zoom_fraction = 0.90
+        if route_timing is not None:
+            camera_stops = list(stops)
+            camera_stop_zooms = list(stop_zooms)
+            if country_context:
+                from map_editorial import load_border
+                load_border(country_context["iso"])
+                camera_stops.insert(0, geo.Place(
+                    query=country_context["iso"],
+                    display_name=country_context["iso"],
+                    lat=country_context["latitude"],
+                    lon=country_context["longitude"], ok=True,
+                ))
+                camera_stop_zooms.insert(0, country_context["zoom"])
+            builder = geo.TourBuilder(
+                camera_stops,
+                seconds_per_stop=route_stop_seconds,
+                travel_seconds=route_travel_seconds,
+                end_zoom=max(camera_stop_zooms),
+            )
+            builder.stop_end_zooms = camera_stop_zooms
+            if municipal_outline:
+                builder.stop_start_zooms = [
+                    municipal_zoom if map_level(pin) == "municipality" else zoom
+                    for pin, zoom in zip(pins, camera_stop_zooms)
+                ]
+                builder.stop_reveal_zooms = [
+                    municipal_glow_zoom if map_level(pin) == "municipality" else zoom
+                    for pin, zoom in zip(pins, camera_stop_zooms)
+                ]
+                builder.stop_reveal_start_fraction = 0.25
+                builder.stop_reveal_hold_fraction = 0.35
+            # Begin already settled on the first town. Each stop then remains
+            # on screen for exactly the spoken duration before the slow flight
+            # to the following destination.
+            builder.initial_zoom_fraction = 1.0
             builder.stop_dive_fraction = 1.0
-        elif camera_animation == "orbit_arrival":
+            builder.end_zoom = max(camera_stop_zooms)
+            if country_context:
+                builder.country_intro = True
+                builder.initial_stop_frames = round(country_context["hold_seconds"] * geo.FPS)
+                builder.initial_travel_seconds = country_context["travel_seconds"]
+                builder.PREPARE_ZMIN = 5
+                builder.PREPARE_ZMAX = 18
+                builder.hidden_stop_indices = {0}
+                builder.country_outline_iso = country_context["iso"]
+            builder.TOTAL_FRAMES = total_frames
+            builder.FRAMES_TOTAL = total_frames
+            geo.check_velocity_strict(builder)
+        else:
+            # Keep the previous five-second camera tour, then hold the final
+            # destination for another 1.5 seconds. The builder's timeline ends
+            # before TOTAL_FRAMES, so its final-pose fallback supplies that hold.
+            tour_seconds = max(1.0, duration_us / 1_000_000 - 1.5)
+            # Give close-zoom transitions a little more room: the strict camera
+            # velocity gate caught a small zoom snap at a five-stop city route.
+            # Keep the authored tour duration fixed by taking that time from the
+            # per-stop holds, and reserve the final 1.5 s for the destination hold.
+            # Five-stop close-zoom routes need at least 1.2 s per leg to stay
+            # inside the strict zoom-velocity gate. Multi-stop tours involve more
+            # ground to cover, so give each leg 1.8-2.4 s: slower legs stay far
+            # inside the gate and remain readable. Borrow the extra time from
+            # per-stop holds; keep the authored tour and final 1.5 s hold intact.
+            travel_seconds = min(2.4, max(1.8, tour_seconds / (1.9 * (len(stops) - 1))))
+            stop_seconds = max(0.15, (tour_seconds - travel_seconds * (len(stops) - 1)) / len(stops))
+            builder = geo.TourBuilder(stops, seconds_per_stop=stop_seconds,
+                                      travel_seconds=travel_seconds, end_zoom=max(stop_zooms))
+            builder.stop_end_zooms = stop_zooms
+            # Start much closer to the first city: this avoids a steep opening
+            # zoom step on short, multi-stop routes and matches the requested
+            # city-first framing.
             builder.initial_zoom_fraction = 0.90
+            # Use the full stop window for each city dive. The default short
+            # 0.58 fraction quantized to fewer than two useful frames on dense
+            # five-stop routes and tripped the strict velocity gate at frame 0.
             builder.stop_dive_fraction = 1.0
-        elif camera_animation == "slow_approach":
-            builder.initial_zoom_fraction = 0.90
-            builder.stop_dive_fraction = 1.0
-        elif camera_animation in ("signature_dive", "steady_hold", "fast_push"):
-            builder.initial_zoom_fraction = 0.90
-            builder.stop_dive_fraction = 1.0
-        elif camera_animation == "wide_context":
-            builder.stop_end_zooms = [max(5.8, zoom - 1.7) for zoom in stop_zooms]
-        builder.end_zoom = max(builder.stop_end_zooms)
-        # Honor the frozen overlay duration exactly; the tour builder computes
-        # its own frame count from stop/travel phases.
-        builder.TOTAL_FRAMES = total_frames
-        builder.FRAMES_TOTAL = total_frames
-        geo.fit_initial_stop_frames(builder, minimum_final_hold_frames=round(1.5 * builder.FPS))
+            if camera_animation == "tilt_reveal":
+                builder.initial_zoom_fraction = 0.90
+                builder.stop_dive_fraction = 1.0
+            elif camera_animation == "orbit_arrival":
+                builder.initial_zoom_fraction = 0.90
+                builder.stop_dive_fraction = 1.0
+            elif camera_animation == "slow_approach":
+                builder.initial_zoom_fraction = 0.90
+                builder.stop_dive_fraction = 1.0
+            elif camera_animation in ("signature_dive", "steady_hold", "fast_push"):
+                builder.initial_zoom_fraction = 0.90
+                builder.stop_dive_fraction = 1.0
+            elif camera_animation == "wide_context":
+                builder.stop_end_zooms = [max(5.8, zoom - 1.7) for zoom in stop_zooms]
+            builder.end_zoom = max(builder.stop_end_zooms)
+            # Honor the frozen overlay duration exactly; the tour builder computes
+            # its own frame count from stop/travel phases.
+            builder.TOTAL_FRAMES = total_frames
+            builder.FRAMES_TOTAL = total_frames
+            geo.fit_initial_stop_frames(builder, minimum_final_hold_frames=round(1.5 * builder.FPS))
+
+    camera_stops = list(getattr(builder, "stops", stops))
+    camera_stop_zooms = list(getattr(builder, "stop_end_zooms", stop_zooms))
 
     # Production map overlays are clean satellite imagery. Editorial country
     # scenes get one fixed regional view rather than a stop-by-stop city tour;
@@ -328,6 +456,7 @@ def main() -> int:
     builder.map_basemap = basemap
     builder.map_area_glow_radius_km = area_glow_radius_km
     builder.map_label_animation = label_animation
+    builder.municipal_outline = municipal_outline
     builder.map_composition = map_animation
     builder.editorial_bounds_telemetry = bounds_telemetry
     builder.editorial_pins = [dict(pin) for pin in pins]
@@ -356,28 +485,28 @@ def main() -> int:
     # The camera pans through each route midpoint. Include each midpoint in the
     # plate union so every camera center on a linearly interpolated route is
     # covered by the coarse leg plate.
-    for index in range(len(stops) - 1):
-        a, b = stops[index], stops[index + 1]
+    for index in range(len(camera_stops) - 1):
+        a, b = camera_stops[index], camera_stops[index + 1]
         anchors.append(((a.lat + b.lat) / 2, (a.lon + b.lon) / 2))
     # Only prepare levels the animation can sample. Fractional zoom blends
     # z and z+1, so include the next integer above the deepest stop.
-    prepare_zmin = min(builder.PREPARE_ZMIN, max(0, math.floor(min(stop_zooms))))
+    prepare_zmin = min(builder.PREPARE_ZMIN, max(0, math.floor(min(camera_stop_zooms))))
     # The current frame sampler cannot consume zooms below its historic z=5
     # floor; clamp the authored flight to that certified floor instead of
     # allocating world-sized plates or falling back during a coarse shot.
     if prepare_zmin < 5:
-        if len(stops) == 1:
+        if len(camera_stops) == 1:
             builder.end_zoom = max(5.0, builder.end_zoom)
         else:
             builder.stop_end_zooms = [max(5.0, zoom) for zoom in builder.stop_end_zooms]
             builder.end_zoom = max(builder.stop_end_zooms)
-        stop_zooms = [max(5.0, zoom) for zoom in stop_zooms]
+        camera_stop_zooms = [max(5.0, zoom) for zoom in camera_stop_zooms]
         prepare_zmin = 5
     # Regional routes use a lower zoom while crossing distance, but each stop
     # still needs its local high-zoom tiles for the city arrival. Do not cap
     # the prepared pyramid at the route builder's broad-span limit.
     prepare_zmax = min(18, max(builder.PREPARE_ZMAX,
-                               6, math.ceil(max(stop_zooms)) + 1))
+                               6, math.ceil(max(camera_stop_zooms)) + 1))
     if prepare_zmax < prepare_zmin:
         prepare_zmax = prepare_zmin
 
@@ -385,11 +514,11 @@ def main() -> int:
     # frame trajectory at the integer-sampling boundary before encoding; never
     # rely on the sampler's slow fallback to hide an undersized plate.
     if map_animation not in editorial_country_scenes:
-      for leg_index in range(len(stops) - 1):
-        a, b = stops[leg_index], stops[leg_index + 1]
+      for leg_index in range(len(camera_stops) - 1):
+        a, b = camera_stops[leg_index], camera_stops[leg_index + 1]
         ax, ay = dyn.latlon_to_global_px(a.lat, a.lon, 5)
         bx, by = dyn.latlon_to_global_px(b.lat, b.lon, 5)
-        leg_zoom = max(5.2, min(max(stop_zooms), 5.0 + math.log2(
+        leg_zoom = max(5.2, min(max(camera_stop_zooms), 5.0 + math.log2(
             (0.72 * width) / max(math.hypot(bx - ax, by - ay), 1.0))))
         prepare_zmax = max(prepare_zmax, math.ceil(leg_zoom) + 1)
 
@@ -400,10 +529,10 @@ def main() -> int:
         if map_animation in editorial_country_scenes:
             zoom = builder.pose(frame_idx)[0]
             lat, lon = builder.place.lat, builder.place.lon
-        elif len(stops) > 1:
+        elif len(camera_stops) > 1:
             lat, lon, zoom = builder.pose(frame_idx)
         else:
-            lat, lon = stops[0].lat, stops[0].lon
+            lat, lon = camera_stops[0].lat, camera_stops[0].lon
             zoom = builder.pose(frame_idx)[0]
         if not sampler.can_sample(lat, lon, zoom, width, height):
             raise RuntimeError(
@@ -503,6 +632,18 @@ def main() -> int:
             overlay_counts.get("opencl", 0) <= 0 or
             overlay_counts.get("composites", 0) <= 0):
         raise RuntimeError(f"editorial GPU scene did not register OpenCL composites: {overlay_counts}")
+    if isinstance(builder, geo.TourBuilder):
+        # A multi-stop map is a TourBuilder: its camera pose is (lat, lon,
+        # zoom), and it has no single-place start_zoom/place fields.
+        start_zoom = float(builder.pose(0)[2])
+        end_zoom = float(builder.pose(total_frames - 1)[2])
+        center = [builder.stops[0].lat, builder.stops[0].lon]
+        terminal_hold_frames = max(0, total_frames - builder._schedule()[-1][1])
+    else:
+        start_zoom = float(builder.start_zoom)
+        end_zoom = float(builder.end_zoom)
+        center = [builder.place.lat, builder.place.lon]
+        terminal_hold_frames = int(getattr(builder, "terminal_hold_frames", 0))
     summary = {
         "schema": "chronon.dynamic-map-telemetry.v1",
         "basemap": basemap,
@@ -510,10 +651,10 @@ def main() -> int:
         "dimensions": {"width": width, "height": height},
         "fps": {"num": fps_num, "den": fps_den},
         "tile": dict(pyramid.telemetry),
-        "camera": {"start_zoom": builder.start_zoom,
-                   "end_zoom": builder.end_zoom,
-                   "terminal_hold_frames": builder.terminal_hold_frames,
-                   "center": [builder.place.lat, builder.place.lon],
+        "camera": {"start_zoom": start_zoom,
+                   "end_zoom": end_zoom,
+                   "terminal_hold_frames": terminal_hold_frames,
+                   "center": center,
                    "fit_bounds": getattr(builder,"editorial_bounds_telemetry",None)},
         "plates": dict(sampler.prepare_telemetry),
         "gate_ms": gate_ms,
