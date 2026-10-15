@@ -126,6 +126,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/entities_with_text/EntityFilmstripPack.cpp
         src/chronontemplate/important_phrases/ImportantPhrasePack.cpp
         src/chronontemplate/important_phrases/apple/ApplePhrasePack.cpp
+        src/chronontemplate/important_phrases/highlight/HighlightPhrasePack.cpp
         src/chronontemplate/important_phrases/didone/DidoneTitlesPack.cpp
         # the category packs: many images in one scene, full-frame backgrounds, modern map compositions
         src/chronontemplate/multiple_images/MultiImagePack.cpp
@@ -682,6 +683,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_apple_phrase_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_apple_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_apple_phrase_pack_test COMMAND chronontemplate_apple_phrase_pack_test)
+
+    add_executable(chronontemplate_highlight_phrase_pack_test tests/highlight_phrase_pack.cpp)
+    target_link_libraries(chronontemplate_highlight_phrase_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_highlight_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_highlight_phrase_pack_test COMMAND chronontemplate_highlight_phrase_pack_test)
 
     # The first pack: the subscribe card, its controller-driven entrance/exit and
     # the click pulse that only holds because a preset appends keys.
