@@ -123,6 +123,7 @@ namespace chronontemplate {
         float radius{4.f};
         float opacity{1.f};
         std::vector<PhraseTrack> tracks{};
+        float x_offset{0.f};
     };
 
     /// The entrance length every important-phrase family shares: two seconds

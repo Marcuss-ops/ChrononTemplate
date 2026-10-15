@@ -20,6 +20,7 @@
 
 #include "chronontemplate/important_phrases/ImportantPhrasePack.hpp"
 #include "chronontemplate/important_phrases/apple/ApplePhrasePack.hpp"
+#include "chronontemplate/important_phrases/highlight/HighlightPhrasePack.hpp"
 
 #include <cmath>
 #include <filesystem>
@@ -286,10 +287,10 @@ namespace {
                                                   {"color", style.glow}}}};
         if (!definition.accents.empty()) {
             textStyle["fit_mode"] = "shrink_only";
-            textStyle["min_font_size"] = 68.f * canvasScale;
+            textStyle["min_font_size"] = std::min(40.f, phraseFontSize * 0.8f) * canvasScale;
             textStyle["max_font_size"] = phraseFontSize * canvasScale;
-            textStyle["glow"]["radius"] = 16.f * canvasScale;
-            textStyle["glow"]["intensity"] = .12f;
+            textStyle["glow"]["radius"] = style.glow_radius * canvasScale;
+            textStyle["glow"]["intensity"] = style.glow_intensity;
         }
         json phrase = json{
                 {"id", "phrase"},
@@ -319,7 +320,8 @@ namespace {
             // effect passes that can flicker or leave stale pixels on GPU.
             layers.push_back(json{{"id", "documentary_background"},
                                   {"type", "color"},
-                                  {"color", json::array({.042f, .038f, .034f, 1.f})},
+                                  {"color", json::array({style.background[0], style.background[1],
+                                                         style.background[2], style.background[3]})},
                                   {"size", json::array({kWidth * canvasScale, kHeight * canvasScale})},
                                   {"start_frame", 0},
                                   {"duration_frames", kDurationFrames}});
@@ -346,7 +348,7 @@ namespace {
                                              {"fill", json::array({channel(1), channel(3), channel(5), 1.f})},
                                              {"radius", accent.radius * canvasScale}}},
                              {"size", json::array({accent.width * canvasScale, accent.height * canvasScale})},
-                             {"position", json::array({style.position[0] * canvasScale,
+                             {"position", json::array({(style.position[0] + accent.x_offset) * canvasScale,
                                                         (style.position[1] + accent.y_offset) * canvasScale})},
                              {"opacity", accent.opacity},
                              {"start_frame", 0},
@@ -439,8 +441,18 @@ int main(int argc, char** argv) try {
             if (definition.id != expected) {
                 fail("definition id \"" + definition.id + "\" is published as \"" + expected + "\"");
             }
-            const ClassicPhraseStyle familyStyle = family == "apple" ? chronontemplate::applePhraseStyle()
-                                                                      : chronontemplate::classicPhraseStyle();
+            ClassicPhraseStyle familyStyle;
+            if (family == "apple") {
+                familyStyle = chronontemplate::applePhraseStyle();
+            } else if (family == "highlight") {
+                if constexpr (std::is_same_v<std::decay_t<decltype(animation)>, chronontemplate::HighlightPhraseAnimation>) {
+                    familyStyle = chronontemplate::highlightPhraseStyle(animation);
+                } else {
+                    familyStyle = chronontemplate::highlightPhraseStyle();
+                }
+            } else {
+                familyStyle = chronontemplate::classicPhraseStyle();
+            }
             const json plan = makePlan(definition, familyStyle);
             const std::string planName = definition.id + ".plan.json";
             writeFile(outDir / planName, plan.dump(2) + "\n");
@@ -459,6 +471,7 @@ int main(int argc, char** argv) try {
     };
     if (!staticOnly) {
         emitFamily(chronontemplate::applePhraseAnimations(), "apple");
+        emitFamily(chronontemplate::highlightPhraseAnimations(), "highlight");
     }
     if (mode == "--editorial-static" || mode == "--editorial-word-reveal" ||
         mode == "--editorial-layer-rise") {
