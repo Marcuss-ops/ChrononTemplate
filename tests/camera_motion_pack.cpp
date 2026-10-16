@@ -2,23 +2,23 @@
 //
 // Gates, sampled per frame across the whole window of every preset:
 //
-//   1. the spec table is complete — 50 unique `camera_motion_*` ids, ten per
+//   1. the spec table is complete — 15 unique `camera_motion_*` ids, three per
 //      family, spec durations, two-shot only in family 5;
 //   2. intensity is the spec ladder — 0.5 / 1.0 / 1.5 amplitude factors;
 //   3. the subjects never animate — every layer track stays empty;
-//   4. the camera really animates — body travel for 48 presets, focus travel
-//      for the two focus-only presets (photo_rack_focus, focus_handoff);
+//   4. the camera really animates — body travel for every single-shot preset,
+//      focus travel for the rack-focus preset;
 //   5. poses stay finite — no NaN anywhere in the window;
 //   6. velocity continuity — no teleports between neighbor frames, except
 //      inside the declared cut window of two-shot transitions and except the
-//      high-energy whip/punch presets (a loud move is their point);
-//   7. the end settle — the last beat is slower than mid-travel, except
-//      two-shot transitions (they cut) and high-energy presets;
+//      high-energy whip/handoff presets (a loud move is their point);
+//   7. the end settle — the last beat is slower than peak travel, except
+//      loops, two-shot transitions (they cut) and high-energy presets;
 //   8. the micro-float loops — first and last body pose coincide;
 //   9. the cut structure — two-shot presets jump at the cut and are
 //      continuous on both legs outside it;
 //   10. the selection table — every content kind suggests real presets only,
-//       and the spec's priority thirteen are all present.
+//       and every preset is suggested for at least one content kind.
 
 #include "chronontemplate/camera_roll/CameraMotionPack.hpp"
 #include "chronontemplate/camera_roll/SceneCameraPack.hpp"
@@ -52,6 +52,7 @@ namespace {
 
     constexpr float kViewportW = 1920.f;
     constexpr float kViewportH = 1080.f;
+    constexpr std::size_t kPresetCount = 15;
 
     struct RigSample {
         Vector3 position{0.f, 0.f, 0.f};
@@ -66,13 +67,11 @@ namespace {
 
     void concurrentColdPresetLookupsAreStable() {
         section("concurrent cold preset lookups");
-        constexpr std::size_t kWorkerCount = 16;
-        constexpr std::size_t kPresetCount = 50;
         std::atomic<bool> start{false};
-        std::array<bool, kWorkerCount> valid{};
+        std::array<bool, kPresetCount> valid{};
         std::vector<std::thread> workers;
-        workers.reserve(kWorkerCount);
-        for (std::size_t i = 0; i < kWorkerCount; ++i) {
+        workers.reserve(kPresetCount);
+        for (std::size_t i = 0; i < kPresetCount; ++i) {
             workers.emplace_back([i, &start, &valid] {
                 while (!start.load(std::memory_order_acquire)) std::this_thread::yield();
                 const auto preset = static_cast<CameraMotionPreset>(i);
@@ -88,14 +87,6 @@ namespace {
         for (std::size_t i = 0; i < valid.size(); ++i) {
             check(valid[i], (std::string("concurrent lookup preserves enum ordinal ") +
                              std::to_string(i)).c_str());
-        }
-        for (std::size_t i = 0; i < kPresetCount; ++i) {
-            const auto preset = static_cast<CameraMotionPreset>(i);
-            const auto& spec = cameraMotionSpecFor(preset);
-            check(spec.id != nullptr && spec.durationFrames == cameraMotionDuration(preset) &&
-                      spec.family == cameraMotionFamily(preset),
-                  (std::string("initialized catalog row is valid: ") +
-                   cameraMotionPresetId(preset)).c_str());
         }
     }
 
@@ -143,11 +134,11 @@ namespace {
     void theSpecTableIsComplete() {
         section("spec table");
         const auto presets = allPresets();
-        check(presets.size() == 50, "the pack holds fifty presets");
-        check(cameraMotionPresetIds().size() == 50, "the id catalog holds fifty ids");
+        check(presets.size() == kPresetCount, "the pack holds fifteen presets");
+        check(cameraMotionPresetIds().size() == kPresetCount, "the id catalog holds fifteen ids");
         std::set<std::string> ids;
         for (const auto preset : presets) ids.insert(cameraMotionPresetId(preset));
-        check(ids.size() == 50, "preset ids are unique");
+        check(ids.size() == kPresetCount, "preset ids are unique");
         for (const auto& id : ids) {
             check(id.rfind("camera_motion_", 0) == 0, "wire ids carry the camera_motion_ prefix");
             check(chrononmotion::motion::presets::known(id),
@@ -165,10 +156,10 @@ namespace {
             FakeContentHost host;
             TemplateScene governed("governed_camera", 30.f, host, kViewportW, kViewportH);
             chrononmotion::motion::AuthoringPolicy policy;
-            policy.allowedPresets = {"camera_motion_soft_push_in"};
+            policy.allowedPresets = {"camera_motion_title_slow_push"};
             governed.motion().setAuthoringPolicy(policy);
             CameraMotionShot shot;
-            applyCameraMotionShot(governed, CameraMotionPreset::SoftPushIn, shot);
+            applyCameraMotionShot(governed, CameraMotionPreset::TitleSlowPush, shot);
             bool denied = false;
             try {
                 applyCameraMotionShot(governed, CameraMotionPreset::WhipPanLeft, shot);
@@ -188,9 +179,9 @@ namespace {
             check(spec.family == cameraMotionFamily(presets[i]),
                   "the declarative family matches the executable camera recipe");
         }
-        check(cameraMotionPresetId(static_cast<CameraMotionPreset>(50)) == nullptr,
+        check(cameraMotionPresetId(static_cast<CameraMotionPreset>(kPresetCount)) == nullptr,
               "out-of-range preset ids do not resolve through the roster");
-        check(cameraMotionSpecFor(static_cast<CameraMotionPreset>(50)).id == nullptr,
+        check(cameraMotionSpecFor(static_cast<CameraMotionPreset>(kPresetCount)).id == nullptr,
               "out-of-range preset specs stay empty");
         int perFamily[5] = {0, 0, 0, 0, 0};
         int twoShot = 0;
@@ -208,15 +199,12 @@ namespace {
             cameraMotionEasingFor(spec.easing);
         }
         for (int f = 0; f < 5; ++f) {
-            check(perFamily[f] == 10, "every family holds exactly ten presets");
+            check(perFamily[f] == 3, "every family holds exactly three presets");
         }
-        check(twoShot == 10, "exactly the ten transitions are two-shot");
-        // Pin the spec durations family by family.
-        const int expected[50] = {75, 75, 84, 84, 50, 50, 90, 70, 100, 22,
-                                  120, 120, 85, 85, 70, 70, 72, 100, 105, 78,
-                                  90, 100, 105, 105, 95, 95, 120, 82, 110, 98,
-                                  63, 100, 86, 77, 70, 90, 110, 76, 105, 150,
-                                  14, 14, 16, 16, 22, 22, 19, 24, 22, 28};
+        check(twoShot == 3, "exactly the three transitions are two-shot");
+        // Pin the spec durations, in roster order.
+        const int expected[kPresetCount] = {90, 96, 72, 108, 84, 78, 96, 120, 100, 64,
+                                            90, 150, 14, 14, 22};
         for (std::size_t i = 0; i < presets.size(); ++i) {
             check(cameraMotionDuration(presets[i]) == expected[i],
                   std::string(cameraMotionPresetId(presets[i])).append(" keeps its spec duration").c_str());
@@ -225,13 +213,9 @@ namespace {
         for (const auto preset : presets) {
             const auto& spec = cameraMotionSpecFor(preset);
             const std::string id = cameraMotionPresetId(preset);
-            const bool dof = id == "camera_motion_type_depth_focus" ||
-                             id == "camera_motion_photo_rack_focus" ||
-                             id == "camera_motion_focus_handoff";
+            const bool dof = preset == CameraMotionPreset::RackFocusPortrait;
             check(spec.needsDof == dof, (id + " declares DOF exactly when specified").c_str());
         }
-        check(cameraMotionSpecFor(CameraMotionPreset::ForegroundOcclusionPass).needsOccluder,
-              "the occlusion pass declares its occluder");
     }
 
     void theIntensityLadderIsSpec() {
@@ -245,20 +229,17 @@ namespace {
         // Amplitude really scales: the same preset travels twice as far at
         // Normal as at Subtle.
         FakeContentHost host;
-        const auto subtle = samplePreset(CameraMotionPreset::KenBurnsIn, 120, host);
-        const auto normal = samplePreset(CameraMotionPreset::KenBurnsIn, 120, host);
-        (void)subtle;
-        (void)normal;
         TemplateScene sub("k_sub", 30.f, host, kViewportW, kViewportH);
         TemplateScene nor("k_nor", 30.f, host, kViewportW, kViewportH);
         CameraMotionShot subShot, norShot;
         subShot.intensity = CameraMotionIntensity::Subtle;
         norShot.intensity = CameraMotionIntensity::Normal;
-        applyCameraMotionShot(sub, CameraMotionPreset::EditorialDriftLeft, subShot);
-        applyCameraMotionShot(nor, CameraMotionPreset::EditorialDriftLeft, norShot);
-        const float subTravel = std::fabs(sub.camera().rig().sample(84.f / 30.f).position.x -
+        applyCameraMotionShot(sub, CameraMotionPreset::TitleLateralDrift, subShot);
+        applyCameraMotionShot(nor, CameraMotionPreset::TitleLateralDrift, norShot);
+        const float end = static_cast<float>(cameraMotionDuration(CameraMotionPreset::TitleLateralDrift)) / 30.f;
+        const float subTravel = std::fabs(sub.camera().rig().sample(end).position.x -
                                           sub.camera().rig().sample(0.f).position.x);
-        const float norTravel = std::fabs(nor.camera().rig().sample(84.f / 30.f).position.x -
+        const float norTravel = std::fabs(nor.camera().rig().sample(end).position.x -
                                           nor.camera().rig().sample(0.f).position.x);
         check(subTravel > 1.f, "subtle drift still travels");
         checkNear(norTravel / subTravel, 2.f, 0.02f, "normal travels twice the subtle amplitude");
@@ -280,31 +261,22 @@ namespace {
                       (id + " samples finite poses").c_str());
             }
 
-            // Gate 4: body travel, or focus travel for focus-only presets.
-            const bool focusOnly = preset == CameraMotionPreset::PhotoRackFocus ||
-                                   preset == CameraMotionPreset::FocusHandoff;
-            const bool rollOnly = preset == CameraMotionPreset::RollMatchCut;
-            float bodyTravel = 0.f;
-            for (std::size_t i = 1; i < samples.size(); ++i) {
-                bodyTravel = std::max(bodyTravel, stepLength(samples[i - 1], samples[i]));
-                const float dx = std::fabs(samples[i].position.x - samples[0].position.x);
-                const float dy = std::fabs(samples[i].position.y - samples[0].position.y);
-                const float dz = std::fabs(samples[i].position.z - samples[0].position.z);
-                bodyTravel = std::max({bodyTravel, dx, dy, dz});
-            }
-            if (rollOnly) {
-                float rollTravel = 0.f;
-                for (const auto& rs : samples) {
-                    rollTravel = std::max(rollTravel, std::fabs(rs.roll - samples[0].roll));
-                }
-                check(rollTravel > 0.05f, (id + " rolls through the cut").c_str());
-            } else if (focusOnly) {
+            // Gate 4: body travel, or focus travel for the rack-focus preset.
+            if (preset == CameraMotionPreset::RackFocusPortrait) {
                 float focusTravel = 0.f;
                 for (const auto& s : samples) {
                     focusTravel = std::max(focusTravel, std::fabs(s.focus - samples[0].focus));
                 }
                 check(focusTravel > 1.f, (id + " racks focus").c_str());
             } else {
+                float bodyTravel = 0.f;
+                for (std::size_t i = 1; i < samples.size(); ++i) {
+                    bodyTravel = std::max(bodyTravel, stepLength(samples[i - 1], samples[i]));
+                    const float dx = std::fabs(samples[i].position.x - samples[0].position.x);
+                    const float dy = std::fabs(samples[i].position.y - samples[0].position.y);
+                    const float dz = std::fabs(samples[i].position.z - samples[0].position.z);
+                    bodyTravel = std::max({bodyTravel, dx, dy, dz});
+                }
                 check(bodyTravel > 1.f, (id + " moves the camera body").c_str());
             }
 
@@ -328,7 +300,7 @@ namespace {
             // Gate 7: the settle — last beat slower than peak travel.
             // Loops never settle by design; transitions cut instead.
             const bool loop = spec.distStart == spec.distEnd && spec.xStart == spec.xEnd &&
-                              spec.yStart == spec.yEnd;
+                              spec.yStart == spec.yEnd && spec.xMid < -900.f && spec.yMid < -900.f;
             if (!spec.twoShot && !spec.highEnergy && !loop && duration >= 20) {
                 float peakRate = 0.f;
                 for (std::size_t i = 1; i + 1 < samples.size(); ++i) {
@@ -346,7 +318,7 @@ namespace {
         FakeContentHost host;
         // Gate 8: the micro-float returns exactly to its start pose.
         {
-            const auto samples = samplePreset(CameraMotionPreset::ProductUiMicroFloat, 150, host);
+            const auto samples = samplePreset(CameraMotionPreset::UiMicroFloat, 150, host);
             checkNear(samples.front().position.x, samples.back().position.x, 1e-2f,
                       "micro-float loops in X");
             checkNear(samples.front().position.y, samples.back().position.y, 1e-2f,
@@ -376,8 +348,14 @@ namespace {
         {
             const auto left = samplePreset(CameraMotionPreset::WhipPanLeft, 14, host);
             const auto right = samplePreset(CameraMotionPreset::WhipPanRight, 14, host);
-            check(left.back().position.x * right.back().position.x <= 0.f,
-                  "whip left/right settle on opposite sides or centre");
+            // The out-leg peak of each whip sits at the cut; the two peaks must
+            // be strictly on opposite sides and mirror each other in X.
+            float leftPeak = 0.f, rightPeak = 0.f;
+            for (const auto& s : left) leftPeak = std::min(leftPeak, s.position.x);
+            for (const auto& s : right) rightPeak = std::max(rightPeak, s.position.x);
+            check(leftPeak < -100.f && rightPeak > 100.f,
+                  "whip left/right peaks sit on strictly opposite sides of the subject");
+            checkNear(leftPeak, -rightPeak, 1.f, "whip left/right peaks mirror in X");
             check(std::fabs(left.front().position.x - right.front().position.x) < 60.f,
                   "both whips start from the rest framing");
         }
@@ -399,18 +377,11 @@ namespace {
                 suggested.insert(cameraMotionPresetId(preset));
             }
         }
-        // Gate 10: the spec's priority thirteen are all suggested somewhere.
-        const std::vector<std::string> priority = {
-            "camera_motion_soft_push_in", "camera_motion_impact_punch_settle",
-            "camera_motion_ken_burns_in", "camera_motion_portrait_hero_arc",
-            "camera_motion_documentary_parallax", "camera_motion_map_region_push",
-            "camera_motion_route_camera_sweep", "camera_motion_country_focus_lock",
-            "camera_motion_card_stack_parallax", "camera_motion_data_detail_zoom",
-            "camera_motion_whip_pan_left", "camera_motion_fast_dolly_through",
-            "camera_motion_foreground_occlusion_pass"};
-        for (const auto& id : priority) {
+        // Gate 10: every preset is selectable for at least one content kind.
+        for (const auto preset : allPresets()) {
+            const std::string id = cameraMotionPresetId(preset);
             check(suggested.count(id) == 1,
-                  std::string("priority preset is selectable: ").append(id).c_str());
+                  std::string("preset is selectable by content: ").append(id).c_str());
         }
     }
 

@@ -6,11 +6,11 @@ C++-owned pack by `chronontemplate_emit_camera_motion_catalog`. This test pins
 the contract without needing the CLI or a GPU:
 
   1.  the emitter exits 0 and prints valid JSON;
-  2.  the document holds fifty recipes, ten per family, with unique
+  2.  the document holds fifteen recipes, three per family, with unique
       `camera_motion_*` ids and the spec durations;
   3.  every recipe carries easing, requirements and valid windows;
-  4.  the selection table covers the thirteen content kinds and only names
-      real recipes, including the spec's priority thirteen;
+  4.  the selection table covers the thirteen content kinds, only names
+      real recipes, and every recipe is selectable from some content kind;
   5.  the committed catalog is byte-for-byte what the emitter produces today —
       the file is generated, not hand-maintained.
 """
@@ -35,41 +35,16 @@ def check(name: str, condition: bool, detail: str = "") -> None:
 
 
 EXPECTED_DURATIONS = {
-    "camera_motion_soft_push_in": 75, "camera_motion_soft_pull_back": 75,
-    "camera_motion_editorial_drift_left": 84, "camera_motion_editorial_drift_right": 84,
-    "camera_motion_title_rise": 50, "camera_motion_title_descend": 50,
-    "camera_motion_quiet_diagonal_drift": 90, "camera_motion_type_depth_focus": 70,
-    "camera_motion_type_micro_orbit": 100, "camera_motion_impact_punch_settle": 22,
-    "camera_motion_ken_burns_in": 120, "camera_motion_ken_burns_out": 120,
-    "camera_motion_portrait_upward_track": 85, "camera_motion_portrait_downward_track": 85,
-    "camera_motion_photo_reveal_left": 70, "camera_motion_photo_reveal_right": 70,
-    "camera_motion_low_angle_photo_reveal": 72, "camera_motion_portrait_hero_arc": 100,
-    "camera_motion_documentary_parallax": 105, "camera_motion_photo_rack_focus": 78,
-    "camera_motion_map_region_push": 90, "camera_motion_map_region_pull": 100,
-    "camera_motion_map_eastward_track": 105, "camera_motion_map_westward_track": 105,
-    "camera_motion_map_northward_track": 95, "camera_motion_map_southward_track": 95,
-    "camera_motion_route_camera_sweep": 120, "camera_motion_country_focus_lock": 82,
-    "camera_motion_country_comparison_pan": 110, "camera_motion_geopolitical_tilt_reveal": 98,
-    "camera_motion_ui_panel_push": 63, "camera_motion_dashboard_pan": 100,
-    "camera_motion_card_stack_parallax": 86, "camera_motion_corner_detail_inspect": 77,
-    "camera_motion_data_detail_zoom": 70, "camera_motion_ui_overview_pull": 90,
-    "camera_motion_side_by_side_compare": 110, "camera_motion_panel_angled_peek": 76,
-    "camera_motion_chart_traverse": 105, "camera_motion_product_ui_micro_float": 150,
+    "camera_motion_title_slow_push": 90, "camera_motion_title_lateral_drift": 96,
+    "camera_motion_title_rise_settle": 72,
+    "camera_motion_portrait_arc": 108, "camera_motion_archive_reveal": 84,
+    "camera_motion_rack_focus_portrait": 78,
+    "camera_motion_map_region_push": 96, "camera_motion_map_route_track": 120,
+    "camera_motion_map_country_tilt": 100,
+    "camera_motion_ui_panel_push": 64, "camera_motion_ui_card_parallax": 90,
+    "camera_motion_ui_micro_float": 150,
     "camera_motion_whip_pan_left": 14, "camera_motion_whip_pan_right": 14,
-    "camera_motion_whip_pan_up": 16, "camera_motion_whip_pan_down": 16,
-    "camera_motion_fast_dolly_through": 22, "camera_motion_reverse_dolly_reveal": 22,
-    "camera_motion_roll_match_cut": 19, "camera_motion_orbit_handoff": 24,
-    "camera_motion_foreground_occlusion_pass": 22, "camera_motion_focus_handoff": 28,
-}
-
-PRIORITY_THIRTEEN = {
-    "camera_motion_soft_push_in", "camera_motion_impact_punch_settle",
-    "camera_motion_ken_burns_in", "camera_motion_portrait_hero_arc",
-    "camera_motion_documentary_parallax", "camera_motion_map_region_push",
-    "camera_motion_route_camera_sweep", "camera_motion_country_focus_lock",
-    "camera_motion_card_stack_parallax", "camera_motion_data_detail_zoom",
-    "camera_motion_whip_pan_left", "camera_motion_fast_dolly_through",
-    "camera_motion_foreground_occlusion_pass",
+    "camera_motion_dolly_handoff": 22,
 }
 
 
@@ -105,9 +80,9 @@ def main() -> int:
     check("intensity ladder", document.get("intensity_ladder") == {"subtle": 0.5, "normal": 1.0, "strong": 1.5},
           str(document.get("intensity_ladder")))
 
-    print("== the fifty recipes")
+    print("== the fifteen recipes")
     recipes = document.get("recipes") or []
-    check("fifty recipes", len(recipes) == 50, str(len(recipes)))
+    check("fifteen recipes", len(recipes) == 15, str(len(recipes)))
     ids = [r.get("id") for r in recipes]
     check("ids are unique", len(set(ids)) == len(ids))
     check("ids carry the camera_motion_ prefix", all(str(i).startswith("camera_motion_") for i in ids))
@@ -124,12 +99,12 @@ def main() -> int:
         travel = recipe.get("travel_window") or {}
         check(f"{recipe.get('id')} travel window is ordered",
               0 <= travel.get("start", -1) < travel.get("end", -1) <= 1, str(travel))
-    check("ten recipes per family",
-          families == {"editorial_title": 10, "photo_documentary": 10, "map_geo": 10,
-                       "dashboard_ui": 10, "transition": 10}, str(families))
+    check("three recipes per family",
+          families == {"editorial_title": 3, "photo_documentary": 3, "map_geo": 3,
+                       "dashboard_ui": 3, "transition": 3}, str(families))
     two_shot = {r["id"] for r in recipes if (r.get("requirements") or {}).get("two_shot")}
     check("two-shot only in the transition family",
-          two_shot == {r["id"] for r in recipes if r.get("family") == "transition"} and len(two_shot) == 10)
+          two_shot == {r["id"] for r in recipes if r.get("family") == "transition"} and len(two_shot) == 3)
 
     print("== the selection table")
     selection = document.get("selection") or {}
@@ -140,7 +115,7 @@ def main() -> int:
         check(f"{kind} suggests at least one preset", bool(picks))
         check(f"{kind} only suggests real presets", all(p in known_ids for p in picks), str(picks))
         suggested.update(picks)
-    check("the priority thirteen are selectable", PRIORITY_THIRTEEN.issubset(suggested))
+    check("every recipe is selectable", known_ids <= suggested, str(sorted(known_ids - suggested)))
 
     print("== the committed catalog is generated from the C++ pack")
     if not catalog.is_file():

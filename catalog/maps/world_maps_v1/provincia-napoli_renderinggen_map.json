@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-provincia-napoli",
+  "video_id": "editorial-world-provincia-napoli",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-provincia-napoli",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "provincia-napoli-basemap",
+          "sha256": "1035b898d09b533b698d4005f8118d922c60c7167f381697d25e133d1c3c48d3",
+          "url": "assets/maps/provincia-napoli_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/istat-ne",
+        "source_license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 40.7948266659629,
+          "longitude": 14.344097837326132
+        },
+        "zoom": 10,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: ISTAT/geoBoundaries, Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "provincia-napoli",
+            "label": "Napoli",
+            "latitude": 40.85216,
+            "longitude": 14.26811,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}

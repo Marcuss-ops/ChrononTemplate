@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-germania",
+  "video_id": "editorial-world-germania",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-germania",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "germania-basemap",
+          "sha256": "213885fd51b35ef4d97f91c6555101dd13a9b92f6ae9c0f308ce380378105567",
+          "url": "assets/maps/germania_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/ne-geonames",
+        "source_license": "Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 51.2488053928921,
+          "longitude": 10.437061
+        },
+        "zoom": 6,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "germania",
+            "label": "Berlin",
+            "latitude": 52.52437,
+            "longitude": 13.41053,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}

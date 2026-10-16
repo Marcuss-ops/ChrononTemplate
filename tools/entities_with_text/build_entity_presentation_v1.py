@@ -576,6 +576,61 @@ def build_date_gallery_4x5(family: dict) -> dict:
     return scene_plan("date_v1_gallery_4x5", layers, duration)
 
 
+TIMELINE_RAIL_Y = 540
+TIMELINE_MIN_GAP_PX = 260
+TIMELINE_SPAN_PX = (240, 1680)
+TIMELINE_REVEAL_STAGGER = 8
+TIMELINE_EVENT_DURATION = 72
+
+
+def timeline_positions(years: list[int]) -> list[float]:
+    """X positions for events sorted by year on one rail.
+
+    Positions are proportional to the year, then pushed apart so neighbours
+    closer than TIMELINE_MIN_GAP_PX never overlap. The block is re-centred
+    afterwards, so the layout is deterministic for any input.
+    """
+    if not years:
+        return []
+    lo, hi = TIMELINE_SPAN_PX
+    first, last = years[0], years[-1]
+    if last == first:
+        xs = [(lo + hi) / 2.0] * len(years)
+    else:
+        xs = [lo + (y - first) * (hi - lo) / (last - first) for y in years]
+    for i in range(1, len(xs)):
+        if xs[i] - xs[i - 1] < TIMELINE_MIN_GAP_PX:
+            xs[i] = xs[i - 1] + TIMELINE_MIN_GAP_PX
+    shift = 960 - (xs[0] + xs[-1]) / 2.0
+    return [x + shift for x in xs]
+
+
+def build_timeline_scene(events: list[dict]) -> dict:
+    """Timeline: the year sits below the rail, the full date above it.
+
+    Each event is {"year": int, "date": str}. Events are revealed in
+    chronological order, one stagger step apart, so dates that land close
+    together appear one after another instead of stacking.
+    """
+    ordered = sorted(events, key=lambda e: e["year"])
+    xs = timeline_positions([e["year"] for e in ordered])
+    count = len(ordered)
+    total = TIMELINE_EVENT_DURATION + TIMELINE_REVEAL_STAGGER * max(0, count - 1)
+    layers = []
+    if xs:
+        rail_left, rail_right = xs[0] - 40, xs[-1] + 40
+        layers.append(color_layer("timeline-rail", [int(rail_right - rail_left), 4], [int((rail_left + rail_right) / 2), TIMELINE_RAIL_Y], 0, total, [0.38, 0.34, 0.29, 1], [track("scale_x", [(0, 0.01), (28, 1), (total - 1, 1)], "out_cubic")]))
+    for index, (event, x) in enumerate(zip(ordered, xs)):
+        start = index * TIMELINE_REVEAL_STAGGER
+        local = total - start
+        year_id = f"timeline-year-{index}"
+        date_id = f"timeline-date-{index}"
+        layers.append(color_layer(f"timeline-tick-{index}", [14, 14], [int(x), TIMELINE_RAIL_Y], start, local, [0.43, 0.84, 0.76, 1], [track("scale", [(0, 0.2), (14, 1), (local - 1, 1)], "out_cubic")]))
+        layers.append(layer_text(year_id, str(event["year"]), [200, 52], [int(x), TIMELINE_RAIL_Y + 70], start, local, font_size=34, fill="#BEB4A6", tracks=[track("opacity", [(0, 0), (14, 1), (local - 1, 1)], "out_cubic")]))
+        layers.append(layer_text(date_id, str(event["date"]).upper(), [340, 70], [int(x), TIMELINE_RAIL_Y - 70], start, local, font_size=44, min_font_size=28, fill="#F3EFE7", tracks=[track("opacity", [(0, 0), (14, 1), (local - 1, 1)], "out_cubic"), track("position_y", [(0, 18), (14, 0), (local - 1, 0)], "out_cubic")]))
+    return scene_plan("timeline_date_v1", layers, total)
+
+
 def entity_image_tracks(preset: dict, duration: int) -> list[dict]:
     """Apply each preset's subject motion to the portrait/frame, not its caption."""
     preset_id = preset["id"]
@@ -716,8 +771,8 @@ def build_two_entity_canary() -> dict:
 def load_families() -> dict[str, dict]:
     data = json.loads(CATALOG.read_text(encoding="utf-8"))
     families = {family["id"]: family for family in data["families"]}
-    if set(families) != {"metric_v1", "date_v1", "entity_card_v1", "metric_didone_v1", "date_didone_v1"}:
-        raise ValueError("presentation catalog must define exactly metric_v1, date_v1, entity_card_v1, metric_didone_v1 and date_didone_v1")
+    if set(families) != {"metric_v1", "date_v1", "entity_card_v1", "metric_didone_v1", "date_didone_v1", "metric_typewriter_v1", "date_typewriter_v1"}:
+        raise ValueError("presentation catalog must define exactly metric_v1, date_v1, entity_card_v1, metric_didone_v1, date_didone_v1, metric_typewriter_v1 and date_typewriter_v1")
     return families
 
 

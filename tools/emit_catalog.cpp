@@ -680,14 +680,13 @@ int main(int argc, char** argv) {
             requireObject(family, "entity_presentation family");
             const std::string familyID = family.value("id", "");
             if (familyID != "metric_v1" && familyID != "date_v1" && familyID != "entity_card_v1" &&
-                familyID != "metric_didone_v1" && familyID != "date_didone_v1") {
+                familyID != "metric_didone_v1" && familyID != "date_didone_v1" &&
+                familyID != "metric_typewriter_v1" && familyID != "date_typewriter_v1") {
                 fail("entity presentation catalog declares unknown family " + familyID);
             }
             if (!presentationFamilies.insert(familyID).second) fail("duplicate entity presentation family " + familyID);
-            const bool didone = familyID == "metric_didone_v1" || familyID == "date_didone_v1";
-            const std::size_t expectedPresets = (familyID == "entity_card_v1" || didone) ? 10 : 20;
-            if (!family.contains("presets") || !family["presets"].is_array() || family["presets"].size() != expectedPresets) {
-                fail("entity presentation family " + familyID + " must define exactly " + std::to_string(expectedPresets) + " presets");
+            if (!family.contains("presets") || !family["presets"].is_array() || family["presets"].empty()) {
+                fail("entity presentation family " + familyID + " must define at least one preset");
             }
             for (const auto& preset : family["presets"]) {
                 requireObject(preset, "entity_presentation preset");
@@ -697,7 +696,7 @@ int main(int argc, char** argv) {
                 for (const auto& track : preset["tracks"]) validateTrack(track, "entity presentation motion " + id + ".tracks");
             }
         }
-        if (presentationFamilies.size() != 5) fail("entity presentation catalog must contain exactly the five V1 families");
+        if (presentationFamilies.size() != 7) fail("entity presentation catalog must contain exactly the seven V1 families");
 
         json motions = data["motions"];
         for (const auto& family : entityPresentation["families"]) {

@@ -3,33 +3,6 @@
   "version": 1,
   "maps": [
     {
-      "id": "natural_earth_hypso_relief_water",
-      "name": "Natural Earth Hypsometric Relief",
-      "asset": "natural_earth_hypso_relief_water.jpg",
-      "width": 1480,
-      "height": 630,
-      "source": "Natural Earth 1:10m Cross-Blended Hypsometric Tints",
-      "license": "Public domain"
-    },
-    {
-      "id": "natural_earth_landcover_relief_water",
-      "name": "Natural Earth Landcover Relief",
-      "asset": "natural_earth_landcover_relief_water.jpg",
-      "width": 1480,
-      "height": 630,
-      "source": "Natural Earth 1:10m Natural Earth I with shaded relief and water",
-      "license": "Public domain"
-    },
-    {
-      "id": "nasa_blue_marble_august",
-      "name": "NASA Blue Marble August 2004",
-      "asset": "nasa_blue_marble_august.jpg",
-      "width": 1480,
-      "height": 630,
-      "source": "NASA Blue Marble Next Generation, Terra/MODIS",
-      "license": "NASA freely available imagery"
-    },
-    {
       "id": "white_claude_map",
       "name": "White Claude Map",
       "asset": "white_claude_map.png",
@@ -39,6 +12,538 @@
       "license": "CC BY-SA; attribution is embedded in the animated map",
       "region": "Lombardy, Italy",
       "plan": "../vintage_documentary_map_italy/vintage_documentary_map_italy.plan.json"
+    },
+    {
+      "id": "lombardia",
+      "name": "Lombardia — Milano",
+      "asset": "world_maps_v1/lombardia_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Lombardia, Italy",
+      "plan": "world_maps_v1/lombardia_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "sicilia",
+      "name": "Sicilia — Palermo",
+      "asset": "world_maps_v1/sicilia_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Sicilia, Italy",
+      "plan": "world_maps_v1/sicilia_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "campania",
+      "name": "Campania — Napoli",
+      "asset": "world_maps_v1/campania_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Campania, Italy",
+      "plan": "world_maps_v1/campania_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "calabria",
+      "name": "Calabria — Reggio Calabria",
+      "asset": "world_maps_v1/calabria_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Calabria, Italy",
+      "plan": "world_maps_v1/calabria_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "puglia",
+      "name": "Puglia — Bari",
+      "asset": "world_maps_v1/puglia_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Puglia, Italy",
+      "plan": "world_maps_v1/puglia_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "lazio",
+      "name": "Lazio — Roma",
+      "asset": "world_maps_v1/lazio_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Lazio, Italy",
+      "plan": "world_maps_v1/lazio_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "veneto",
+      "name": "Veneto — Verona",
+      "asset": "world_maps_v1/veneto_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Veneto, Italy",
+      "plan": "world_maps_v1/veneto_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "piemonte",
+      "name": "Piemonte — Torino",
+      "asset": "world_maps_v1/piemonte_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Piemonte, Italy",
+      "plan": "world_maps_v1/piemonte_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "emilia-romagna",
+      "name": "Emilia-Romagna — Bologna",
+      "asset": "world_maps_v1/emilia-romagna_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Emilia-Romagna, Italy",
+      "plan": "world_maps_v1/emilia-romagna_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "toscana",
+      "name": "Toscana — Firenze",
+      "asset": "world_maps_v1/toscana_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Toscana, Italy",
+      "plan": "world_maps_v1/toscana_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "liguria",
+      "name": "Liguria — Genova",
+      "asset": "world_maps_v1/liguria_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Liguria, Italy",
+      "plan": "world_maps_v1/liguria_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "sardegna",
+      "name": "Sardegna — Cagliari",
+      "asset": "world_maps_v1/sardegna_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Sardegna, Italy",
+      "plan": "world_maps_v1/sardegna_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "provincia-napoli",
+      "name": "Napoli — Napoli",
+      "asset": "world_maps_v1/provincia-napoli_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Napoli, Italy",
+      "plan": "world_maps_v1/provincia-napoli_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "provincia-palermo",
+      "name": "Palermo — Palermo",
+      "asset": "world_maps_v1/provincia-palermo_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Palermo, Italy",
+      "plan": "world_maps_v1/provincia-palermo_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "provincia-foggia",
+      "name": "Foggia — Foggia",
+      "asset": "world_maps_v1/provincia-foggia_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Foggia, Italy",
+      "plan": "world_maps_v1/provincia-foggia_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "provincia-milano",
+      "name": "Milano — Milano",
+      "asset": "world_maps_v1/provincia-milano_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Milano, Italy",
+      "plan": "world_maps_v1/provincia-milano_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "francia",
+      "name": "Francia — Paris",
+      "asset": "world_maps_v1/francia_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Francia",
+      "plan": "world_maps_v1/francia_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "spagna",
+      "name": "Spagna — Madrid",
+      "asset": "world_maps_v1/spagna_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Spagna",
+      "plan": "world_maps_v1/spagna_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "germania",
+      "name": "Germania — Berlin",
+      "asset": "world_maps_v1/germania_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Germania",
+      "plan": "world_maps_v1/germania_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "regno-unito",
+      "name": "Regno Unito — London",
+      "asset": "world_maps_v1/regno-unito_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Regno Unito",
+      "plan": "world_maps_v1/regno-unito_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "giappone",
+      "name": "Giappone — Tokyo",
+      "asset": "world_maps_v1/giappone_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Giappone",
+      "plan": "world_maps_v1/giappone_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "egitto",
+      "name": "Egitto — Cairo",
+      "asset": "world_maps_v1/egitto_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Egitto",
+      "plan": "world_maps_v1/egitto_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "india",
+      "name": "India — Mumbai",
+      "asset": "world_maps_v1/india_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "India",
+      "plan": "world_maps_v1/india_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "australia",
+      "name": "Australia — Sydney",
+      "asset": "world_maps_v1/australia_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Australia",
+      "plan": "world_maps_v1/australia_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "argentina",
+      "name": "Argentina — Buenos Aires",
+      "asset": "world_maps_v1/argentina_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Argentina",
+      "plan": "world_maps_v1/argentina_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "usa-new-york",
+      "name": "Stati Uniti — New York City",
+      "asset": "world_maps_v1/usa-new-york_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Stati Uniti",
+      "plan": "world_maps_v1/usa-new-york_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "texas",
+      "name": "Texas — Fort Worth",
+      "asset": "world_maps_v1/texas_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Texas",
+      "plan": "world_maps_v1/texas_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
+    },
+    {
+      "id": "baviera",
+      "name": "Baviera — Munich",
+      "asset": "world_maps_v1/baviera_basemap.png",
+      "width": 1920,
+      "height": 1080,
+      "source": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "license": "Natural Earth public domain; GeoNames CC BY 4.0",
+      "region": "Baviera",
+      "plan": "world_maps_v1/baviera_renderinggen_map.json",
+      "map_pack": "ModernMapPack",
+      "camera_moves": [
+        "map_hold",
+        "map_push_in",
+        "map_orbit_settle",
+        "map_lateral_drift",
+        "map_pull_back"
+      ]
     }
   ]
 }

@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-baviera",
+  "video_id": "editorial-world-baviera",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-baviera",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "baviera-basemap",
+          "sha256": "3c724356fa73a38771b3dd2ba89cbf570cb5fa56f58ecffee59102bcd087b18d",
+          "url": "assets/maps/baviera_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/ne-geonames",
+        "source_license": "Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 48.944120331297384,
+          "longitude": 11.396725500000002
+        },
+        "zoom": 7,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "baviera",
+            "label": "Munich",
+            "latitude": 48.13743,
+            "longitude": 11.57549,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}

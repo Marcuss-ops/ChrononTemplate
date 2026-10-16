@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-provincia-milano",
+  "video_id": "editorial-world-provincia-milano",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-provincia-milano",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "provincia-milano-basemap",
+          "sha256": "a76d5a5c3cc2975fd3cece2315d7de24d5f57abebd90b2d3da066d74beb1f4f8",
+          "url": "assets/maps/provincia-milano_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/istat-ne",
+        "source_license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 45.45414699640788,
+          "longitude": 9.128863393232791
+        },
+        "zoom": 10,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: ISTAT/geoBoundaries, Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "provincia-milano",
+            "label": "Milano",
+            "latitude": 45.46427,
+            "longitude": 9.18951,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}
