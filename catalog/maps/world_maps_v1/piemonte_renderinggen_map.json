@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-piemonte",
+  "video_id": "editorial-world-piemonte",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-piemonte",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "piemonte-basemap",
+          "sha256": "ada4cbfad3348fe2a467edee835501f97f603b23d00a98b31e895f0d1a2bd9ab",
+          "url": "assets/maps/piemonte_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/istat-ne",
+        "source_license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 45.27508611016549,
+          "longitude": 7.92043089845933
+        },
+        "zoom": 8,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: ISTAT/geoBoundaries, Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "piemonte",
+            "label": "Torino",
+            "latitude": 45.07049,
+            "longitude": 7.68682,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}

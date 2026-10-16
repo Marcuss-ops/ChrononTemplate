@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-india",
+  "video_id": "editorial-world-india",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-india",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "india-basemap",
+          "sha256": "0ab95c9ae6460565d8c5218f3df48c2e1bb600eac35c1fd7f2b44a4aece9ea29",
+          "url": "assets/maps/india_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/ne-geonames",
+        "source_license": "Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 22.460241695739363,
+          "longitude": 82.75429699999995
+        },
+        "zoom": 5,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "india",
+            "label": "Mumbai",
+            "latitude": 19.07283,
+            "longitude": 72.88261,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}

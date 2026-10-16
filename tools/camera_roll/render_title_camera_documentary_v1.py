@@ -32,8 +32,8 @@ def sampled_poses():
             row = [float(v) for v in next(lines).split()]
             rows.append(row)
         result[move] = rows
-    if len(result) != 20:
-        raise RuntimeError(f"expected poses for 20 presets, got {len(result)}")
+    if len(result) != 25:
+        raise RuntimeError(f"expected poses for 25 presets, got {len(result)}")
     return result
 
 
@@ -73,7 +73,7 @@ def plan_for(move, title_id, title, rows):
           "size": [WIDTH, HEIGHT], "screen_space": True, "start_frame": 0,
           "duration_frames": DURATION}
     title_layer = {"id": "hero-title", "type": "text", "text": title,
-        "size": [1520, 270 if short else 200], "position": [960, 540, 0],
+        "size": [1520, 270 if short else 200], "position": [960, 470, 0],
         "start_frame": 0, "duration_frames": DURATION, "enable_3d": True,
         "style": {"font": "assets/fonts/Inter-Bold.ttf", "font_size": title_size,
                   "fill": "#F2F0E8", "fit_mode": "shrink_only", "min_font_size": 54,
@@ -132,7 +132,7 @@ def main():
             futures = [pool.submit(render, job) for job in render_jobs]
             for future in as_completed(futures):
                 print(future.result(), flush=True)
-    print(f"Generated 40 render plans under {OUT}")
+    print(f"Generated {len(poses) * len(TITLES)} render plans under {OUT}")
 
 
 if __name__ == "__main__":

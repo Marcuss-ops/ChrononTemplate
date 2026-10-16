@@ -114,9 +114,12 @@ add_library(chronontemplate STATIC
         src/chronontemplate/documentary_effects/FilmLeaderPack.cpp
         src/chronontemplate/documentary_effects/DepthParallaxPack.cpp
         src/chronontemplate/documentary_effects/RouteDrawingPack.cpp
+        src/chronontemplate/documentary_effects/ArchivalTimelinePack.cpp
         src/chronontemplate/documentary_effects/BeforeAfterPack.cpp
         src/chronontemplate/documentary_effects/AnimatedCountersPack.cpp
         src/chronontemplate/camera_roll/TitleCameraPack.cpp
+        src/chronontemplate/bullet_list/BulletListPack.cpp
+        src/chronontemplate/effects/EffectsPack.cpp
         src/chronontemplate/camera_roll/SceneCameraPack.cpp
         src/chronontemplate/camera_roll/CameraMotionPack.cpp
         include/chronontemplate/camera_roll/CameraMotionPresets.def
@@ -247,6 +250,44 @@ else()
 endif()
 target_compile_options(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE -Wall -Wextra)
 
+add_executable(chronontemplate_emit_bullet_list_demo
+        tools/bullet_list/emit_bullet_list_demo.cpp)
+target_link_libraries(chronontemplate_emit_bullet_list_demo PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_bullet_list_demo PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_bullet_list_demo PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_bullet_list_demo PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_bullet_list_demo PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_archival_timeline_reveal
+        tools/documentary_effects/emit_archival_timeline_reveal.cpp)
+target_link_libraries(chronontemplate_emit_archival_timeline_reveal PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_archival_timeline_reveal PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_archival_timeline_reveal PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_archival_timeline_reveal PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_archival_timeline_reveal PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_entity_filmstrip_reference
         tools/entities_with_text/emit_entity_filmstrip_reference.cpp)
 target_link_libraries(chronontemplate_emit_entity_filmstrip_reference PRIVATE chronontemplate)
@@ -280,6 +321,23 @@ if(TARGET chrononmotion_chronon3d_adapter)
             tools/captions_dataviz/emit_dataviz_sample.cpp)
     target_link_libraries(chronontemplate_emit_dataviz_sample
             PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
+endif()
+
+add_executable(chronontemplate_emit_effects_overlays tools/effects_overlays/emit_effects_overlays.cpp)
+target_link_libraries(chronontemplate_emit_effects_overlays PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_effects_overlays PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_EFFECTS_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_effects_overlays PRIVATE
+        "${CHRONONTEMPLATE_EFFECTS_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_EFFECTS_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_EFFECTS_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_effects_overlays PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 endif()
 
 add_executable(chronontemplate_emit_date_groups tools/date_groups/emit_date_groups.cpp)
@@ -525,6 +583,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_plan_lowering_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_plan_lowering_test COMMAND chronontemplate_plan_lowering_test)
 
+    add_executable(chronontemplate_bullet_list_pack_test tests/bullet_list_pack.cpp)
+    target_link_libraries(chronontemplate_bullet_list_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_bullet_list_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_bullet_list_pack_test COMMAND chronontemplate_bullet_list_pack_test)
+
     add_executable(chronontemplate_image_animation_pack_test tests/image_animation_pack.cpp)
     target_link_libraries(chronontemplate_image_animation_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_image_animation_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -589,6 +652,16 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_doc_effects_graphic_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_doc_effects_graphic_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_doc_effects_graphic_test COMMAND chronontemplate_doc_effects_graphic_test)
+
+    add_executable(chronontemplate_archival_timeline_pack_test tests/archival_timeline_pack.cpp)
+    target_link_libraries(chronontemplate_archival_timeline_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_archival_timeline_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_archival_timeline_pack_test COMMAND chronontemplate_archival_timeline_pack_test)
+
+    add_executable(chronontemplate_effects_pack_test tests/effects_pack.cpp)
+    target_link_libraries(chronontemplate_effects_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_effects_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_effects_pack_test COMMAND chronontemplate_effects_pack_test)
 
     # The title-camera documentary family: the title never animates, the camera
     # is the only authored motion, and the eight family gates hold for all

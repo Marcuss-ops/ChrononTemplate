@@ -24,7 +24,7 @@ from typing import Any
 from PIL import Image, ImageEnhance
 
 HERE = Path(__file__).resolve().parent
-TEMPLATE = HERE.parent
+TEMPLATE = HERE.parent.parent
 WORKSPACE = TEMPLATE.parent
 CHRONON = WORKSPACE / "Chronon3d"
 CATALOG = TEMPLATE / "catalog"

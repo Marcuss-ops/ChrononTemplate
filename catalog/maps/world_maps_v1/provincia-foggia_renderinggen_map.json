@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-provincia-foggia",
+  "video_id": "editorial-world-provincia-foggia",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-provincia-foggia",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "provincia-foggia-basemap",
+          "sha256": "3b5f4e0e79eff51b0c3adbe453d5395375bd05c8db176ec07cf5aa30b16a3199",
+          "url": "assets/maps/provincia-foggia_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/istat-ne",
+        "source_license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 41.5046931415254,
+          "longitude": 15.566936135738956
+        },
+        "zoom": 9,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: ISTAT/geoBoundaries, Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "provincia-foggia",
+            "label": "Foggia",
+            "latitude": 41.45845,
+            "longitude": 15.55188,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}
