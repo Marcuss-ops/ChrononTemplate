@@ -1,7 +1,7 @@
 // ChrononTemplate — camera motion catalog emitter.
 //
 // Prints `catalog/camera_motion_pack.v1.json` to stdout from the C++-owned
-// CameraMotionPack: the fifty spec rows (durations, distance fractions,
+// CameraMotionPack: the fifteen spec rows (durations, distance fractions,
 // frame-fraction travel, degrees, focus percents, easing names, backend
 // requirements), the family order, the planner selection table, the
 // intensity ladder and the easing map.
@@ -117,7 +117,7 @@ int main() {
     try {
         const std::vector<CameraMotionPreset> presets = chronontemplate::cameraMotionPresets();
         const std::vector<std::string> ids = chronontemplate::cameraMotionPresetIds();
-        if (presets.size() != 50 || ids.size() != presets.size()) fail("expected fifty camera motion presets");
+        if (presets.size() != 15 || ids.size() != presets.size()) fail("expected fifteen camera motion presets");
 
         std::set<std::string> seen;
         json recipes = json::array();

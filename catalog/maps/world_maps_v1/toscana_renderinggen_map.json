@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-toscana",
+  "video_id": "editorial-world-toscana",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-toscana",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "toscana-basemap",
+          "sha256": "ef3b93560f05fa1a07ffed587fbe4dd1d4c84accd09218efdf0bd3959af6facc",
+          "url": "assets/maps/toscana_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/istat-ne",
+        "source_license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 43.42609619752894,
+          "longitude": 11.029010267371433
+        },
+        "zoom": 8,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: ISTAT/geoBoundaries, Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "toscana",
+            "label": "Firenze",
+            "latitude": 43.77925,
+            "longitude": 11.24626,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}

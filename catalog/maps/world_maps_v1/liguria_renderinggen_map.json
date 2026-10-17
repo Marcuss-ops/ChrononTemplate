@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-liguria",
+  "video_id": "editorial-world-liguria",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-liguria",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "liguria-basemap",
+          "sha256": "02083ef23c96dea6d03d10a1ebac70164424c5602813391f6bd686753ba51852",
+          "url": "assets/maps/liguria_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/istat-ne",
+        "source_license": "ISTAT/geoBoundaries CC BY 3.0; Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 44.22776626997285,
+          "longitude": 8.782850781931757
+        },
+        "zoom": 9,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: ISTAT/geoBoundaries, Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "liguria",
+            "label": "Genova",
+            "latitude": 44.40478,
+            "longitude": 8.94439,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}

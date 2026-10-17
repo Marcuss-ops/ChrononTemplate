@@ -36,6 +36,8 @@ EXPECTED = {
     "date_v1": {"date_fade_rise", "date_year_count", "date_calendar_flip", "date_segment_stagger", "date_timeline_tick", "date_range_draw", "date_marker_drop", "date_underline_focus", "date_history_stack", "date_chronology_focus", "date_page_turn", "date_calendar_drop", "date_month_wipe", "date_timeline_sweep", "date_marker_pop", "date_split_year", "date_bracket_draw", "date_stamp_reveal", "date_era_zoom", "date_digit_flip"},
     "entity_card_v1": {"entity_caption_rise", "entity_depth_caption", "entity_yaw_caption", "entity_split_side", "entity_border_then_caption", "entity_glow_focus", "entity_name_underline", "entity_name_pill", "entity_parallax_caption", "entity_focus_frame"},
     "metric_didone_v1": {"metric_didone_hairline_rise", "metric_didone_ink_settle", "metric_didone_tracking_open", "metric_didone_rule_wipe", "metric_didone_numeral_settle", "metric_didone_drop_in", "metric_didone_column_rise", "metric_didone_focus_pull", "metric_didone_side_slide", "metric_didone_hold_breathe"},
+    "metric_typewriter_v1": {"metric_typewriter_stepped_reveal", "metric_typewriter_cursor_in", "metric_typewriter_digit_tick", "metric_typewriter_carriage_slide", "metric_typewriter_backspace_settle", "metric_typewriter_line_feed", "metric_typewriter_ribbon_strike", "metric_typewriter_letter_drop", "metric_typewriter_ink_stamp", "metric_typewriter_key_strike"},
+    "date_typewriter_v1": {"date_typewriter_year_type", "date_typewriter_day_stamp", "date_typewriter_month_strike", "date_typewriter_era_carriage", "date_typewriter_range_type", "date_typewriter_bracket_tap", "date_typewriter_timeline_feed", "date_typewriter_underline_key", "date_typewriter_margin_return", "date_typewriter_ink_stamp"},
     "date_didone_v1": {"date_didone_archive_fade", "date_didone_rule_draw", "date_didone_era_settle", "date_didone_year_slide", "date_didone_stamp_drop", "date_didone_margin_wipe", "date_didone_underline_hold", "date_didone_fade_tracking", "date_didone_chronicle_rise", "date_didone_focus_hold"},
 }
 
@@ -52,7 +54,7 @@ class EntityPresentationCatalogTests(unittest.TestCase):
         for family_id, family in self.families.items():
             ids = [preset["id"] for preset in family["presets"]]
             self.assertEqual(set(ids), EXPECTED[family_id])
-            self.assertEqual(len(ids), 10 if family_id in ("entity_card_v1", "metric_didone_v1", "date_didone_v1") else 20)
+            self.assertEqual(len(ids), 10 if family_id in ("entity_card_v1", "metric_didone_v1", "date_didone_v1", "metric_typewriter_v1", "date_typewriter_v1") else 20)
             self.assertEqual(len(ids), len(set(ids)))
             self.assertFalse(seen.intersection(ids))
             seen.update(ids)
@@ -455,6 +457,30 @@ class EntityPresentationCatalogTests(unittest.TestCase):
             self.assertEqual(style["fit_mode"], "shrink_only")
             self.assertLess(style["min_font_size"], style["font_size"])
             self.assertGreaterEqual(layer["size"][0], 240)
+
+
+class TimelineLayoutTests(unittest.TestCase):
+    def test_close_dates_are_pushed_apart_without_overlap(self):
+        xs = BUILDER.timeline_positions([2025, 2025, 2026])
+        for left, right in zip(xs, xs[1:]):
+            self.assertGreaterEqual(right - left, BUILDER.TIMELINE_MIN_GAP_PX)
+
+    def test_positions_are_centred_on_canvas(self):
+        xs = BUILDER.timeline_positions([1990, 2000, 2026])
+        self.assertAlmostEqual((xs[0] + xs[-1]) / 2.0, 960.0, places=6)
+
+    def test_scene_puts_year_below_and_date_above_the_rail(self):
+        plan = BUILDER.build_timeline_scene([{"year": 2025, "date": "12 DEC 2025"}, {"year": 2026, "date": "3 JAN 2026"}])
+        layers = {layer["id"]: layer for layer in plan["layers"]}
+        self.assertGreater(layers["timeline-year-0"]["position"][1], BUILDER.TIMELINE_RAIL_Y)
+        self.assertLess(layers["timeline-date-0"]["position"][1], BUILDER.TIMELINE_RAIL_Y)
+
+    def test_close_events_reveal_in_sequence(self):
+        plan = BUILDER.build_timeline_scene([{"year": 2025, "date": "A"}, {"year": 2025, "date": "B"}, {"year": 2026, "date": "C"}])
+        layers = {layer["id"]: layer for layer in plan["layers"]}
+        starts = [layers[f"timeline-date-{i}"]["start_frame"] for i in range(3)]
+        self.assertEqual(starts, sorted(starts))
+        self.assertEqual(len(set(starts)), 3)
 
 
 if __name__ == "__main__":

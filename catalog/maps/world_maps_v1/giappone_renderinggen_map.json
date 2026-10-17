@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-giappone",
+  "video_id": "editorial-world-giappone",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-giappone",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "giappone-basemap",
+          "sha256": "c59137f2b044fcc08a1a9dc681c2be46c9acb5272d3b0c30bdb7858cd71c2111",
+          "url": "assets/maps/giappone_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/ne-geonames",
+        "source_license": "Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 37.604185945219434,
+          "longitude": 136.44121100000007
+        },
+        "zoom": 6,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "giappone",
+            "label": "Tokyo",
+            "latitude": 35.6895,
+            "longitude": 139.69171,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}

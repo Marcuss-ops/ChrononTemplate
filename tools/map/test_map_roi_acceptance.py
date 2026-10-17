@@ -48,24 +48,62 @@ def _load_baseline():
     tree = ast.parse(historical)
     frozen = {}
 
-    def evaluate(node):
+    def compare(node, env):
+        left = evaluate(node.left, env)
+        for op, comparator in zip(node.ops, node.comparators):
+            right = evaluate(comparator, env)
+            ok = {ast.Eq: left == right, ast.NotEq: left != right,
+                  ast.Is: left is right, ast.IsNot: left is not right}.get(type(op))
+            if ok is None:
+                raise ValueError(f"unsupported comparison: {ast.dump(op)}")
+            if not ok:
+                return False
+            left = right
+        return True
+
+    def comprehension_items(generator, env):
+        if len(generator.generators) != 1:
+            raise ValueError("only single-clause comprehensions are supported")
+        clause = generator.generators[0]
+        for item in evaluate(clause.iter, env):
+            local = {**env, clause.target.id: item}
+            if all(evaluate(cond, local) for cond in clause.ifs):
+                yield local
+
+    def evaluate(node, env=None):
+        env = env or {}
+        if isinstance(node, ast.Name) and node.id in env:
+            return env[node.id]
+        if isinstance(node, ast.Subscript):
+            return evaluate(node.value, env)[evaluate(node.slice, env)]
+        if isinstance(node, ast.Compare):
+            return compare(node, env)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) \
+                and node.func.id == "tuple" and len(node.args) == 1 \
+                and isinstance(node.args[0], ast.GeneratorExp):
+            gen = node.args[0]
+            return tuple(evaluate(gen.elt, local) for local in comprehension_items(gen, env))
+        if isinstance(node, ast.DictComp):
+            return {evaluate(node.key, local): evaluate(node.value, local)
+                    for local in comprehension_items(
+                        ast.GeneratorExp(elt=node.key, generators=node.generators), env)}
         if isinstance(node, ast.Dict):
-            return {evaluate(key): evaluate(value)
+            return {evaluate(key, env): evaluate(value, env)
                     for key, value in zip(node.keys, node.values)}
         if isinstance(node, (ast.Tuple, ast.List)):
-            values = [evaluate(value) for value in node.elts]
+            values = [evaluate(value, env) for value in node.elts]
             return tuple(values) if isinstance(node, ast.Tuple) else values
         if isinstance(node, ast.Constant):
             return node.value
         if isinstance(node, ast.Name) and node.id in frozen:
             return frozen[node.id]
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-            return evaluate(node.left) + evaluate(node.right)
+            return evaluate(node.left, env) + evaluate(node.right, env)
         if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.USub, ast.UAdd)):
-            value = evaluate(node.operand)
+            value = evaluate(node.operand, env)
             return -value if isinstance(node.op, ast.USub) else value
         if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
-            return evaluate(node.left) / evaluate(node.right)
+            return evaluate(node.left, env) / evaluate(node.right, env)
         raise ValueError(f"unsupported historical table expression: {ast.dump(node)}")
 
     for node in tree.body:
@@ -73,7 +111,7 @@ def _load_baseline():
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id in {
                     "MAP_LABEL_ANIMATIONS", "NEW_LABEL_GEOMETRIES", "COMPOSITION_STYLES",
-                    "MARKER_DRAWN_STYLES",
+                    "MARKER_DRAWN_STYLES", "MAP_LABEL_SPECS",
                 }:
                     frozen[target.id] = evaluate(node.value)
         if isinstance(node, ast.FunctionDef):

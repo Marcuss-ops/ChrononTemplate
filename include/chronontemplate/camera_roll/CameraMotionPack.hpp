@@ -1,8 +1,8 @@
 // ChrononTemplate — the camera motion pack (camera_motion_pack_v1).
 //
-// Fifty narrative camera presets in five families (editorial titles, photo
+// Fifteen narrative camera presets in five families (editorial titles, photo
 // documentary, geo maps, dashboard UI, two-shot transitions) as *recipes*,
-// not fifty renderer functions. Every preset is one row of spec numbers —
+// not fifteen renderer functions. Every preset is one row of spec numbers —
 // durations at 30 fps, distances as fractions of the reference framing,
 // lateral/vertical travel as fractions of the frame, angles in degrees, focus
 // as percent of the configured depth interval — lowered by one generic
@@ -33,17 +33,17 @@
 
 namespace chronontemplate {
 
-    /// The five narrative families, in spec order.
+    /// The five narrative families, in spec order (three presets each).
     enum class CameraMotionFamily : std::uint8_t {
-        EditorialTitle,   ///< 01–10: quotes, numbers, documentary titles
-        PhotoDocumentary, ///< 11–20: portraits, archive, buildings, cutouts
-        MapGeo,           ///< 21–30: regions, routes, country focus
-        DashboardUI,      ///< 31–40: panels, cards, charts, product UI
-        Transition        ///< 41–50: two-shot handoffs between scenes
+        EditorialTitle,   ///< titles and quotes
+        PhotoDocumentary, ///< portraits and archive stills
+        MapGeo,           ///< regions and routes
+        DashboardUI,      ///< panels, cards and product UI
+        Transition        ///< two-shot handoffs between scenes
     };
 
-    /// The fifty presets, in spec order. Values are stable ids: they reach
-    /// the catalog and the contract test verbatim, so they are append-only.
+    /// The fifteen presets, in spec order. Values are stable ids: they reach
+    /// the catalog and the contract test verbatim.
     enum class CameraMotionPreset : std::uint16_t {
 #define CAMERA_MOTION_PRESET(key, id, family, ...) key,
 #include "chronontemplate/camera_roll/CameraMotionPresets.def"
@@ -62,19 +62,19 @@ namespace chronontemplate {
     /// What the planner recognised in the scene. The selection table maps
     /// each kind to the spec's recommended presets.
     enum class CameraContentKind : std::uint8_t {
-        TitleOnWhite,        ///< title on plain background → 01, 02, 05, 06
-        ImpactWord,          ///< number / stressed word → 10, 35
-        SinglePortrait,      ///< one face / figure → 11, 13, 18
-        PortraitBuildingText,///< portrait + building + text → 18, 19
-        ArchivePhoto,        ///< document / archive still → 11, 12, 15, 16
-        MapCountry,          ///< map, one country lit → 21, 28
-        MapTwoCountries,     ///< map, two countries → 23, 24, 29
-        MapRoute,            ///< map with a route → 27
-        DashboardChart,      ///< dashboard / chart → 31, 32, 35, 39
-        PremiumUI3D,         ///< premium 3D UI → 33, 38, 40
-        FastCut,             ///< fast change of image → 41–44
-        ObjectPass,          ///< transition through an object → 45, 49
-        BlurPass             ///< transition with defocus → 50
+        TitleOnWhite,        ///< title on plain background
+        ImpactWord,          ///< number / stressed word
+        SinglePortrait,      ///< one face / figure
+        PortraitBuildingText,///< portrait + building + text
+        ArchivePhoto,        ///< document / archive still
+        MapCountry,          ///< map, one country lit
+        MapTwoCountries,     ///< map, two countries
+        MapRoute,            ///< map with a route
+        DashboardChart,      ///< dashboard / chart
+        PremiumUI3D,         ///< premium 3D UI
+        FastCut,             ///< fast change of image
+        ObjectPass,          ///< transition through an object
+        BlurPass             ///< transition with defocus
     };
 
     /// What a shot frames: the subject's optical centre and half-extents in
@@ -99,7 +99,7 @@ namespace chronontemplate {
         int durationOverride{0};
     };
 
-    /// One row of the fifty: the whole recipe as spec numbers. Distances are
+    /// One row of the roster: the whole recipe as spec numbers. Distances are
     /// fractions of the reference framing (1.00 = reference); lateral (X) and
     /// vertical (Y) travel are fractions of the frame width/height, signed as
     /// seen by the camera (X+ = body right, Y+ = body down); angles are

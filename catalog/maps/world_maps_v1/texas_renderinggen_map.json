@@ -1,0 +1,49 @@
+{
+  "schema_version": "renderinggen.overlay-plan.v1",
+  "plan_id": "editorial-world-texas",
+  "video_id": "editorial-world-texas",
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "items": [
+    {
+      "id": "map-texas",
+      "kind": "map",
+      "template_id": "MAP",
+      "start_ms": 0,
+      "end_ms": 5000,
+      "asset_refs": [
+        {
+          "asset_id": "texas-basemap",
+          "sha256": "80e3b70b7577e1052b0fef3b812f03ca146b3b5f3bfb63777eb39bfcff854052",
+          "url": "assets/maps/texas_basemap.png",
+          "media_type": "image/png"
+        }
+      ],
+      "map": {
+        "provider": "local",
+        "source_id": "editorial-world-map/ne-geonames",
+        "source_license": "Natural Earth public domain; GeoNames CC BY 4.0",
+        "center": {
+          "latitude": 31.32258513081642,
+          "longitude": -100.0884705
+        },
+        "zoom": 6,
+        "width": 1920,
+        "height": 1080,
+        "attribution": "Boundaries: Natural Earth. Places: GeoNames (www.geonames.org).",
+        "pins": [
+          {
+            "id": "texas",
+            "label": "Fort Worth",
+            "latitude": 32.72541,
+            "longitude": -97.32085,
+            "color": "#161616",
+            "radius_px": 7.0
+          }
+        ]
+      }
+    }
+  ]
+}
