@@ -296,6 +296,10 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     add_executable(chronontemplate_didone_titles_pack_test tests/didone_titles_pack.cpp)
     target_link_libraries(chronontemplate_didone_titles_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_didone_titles_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    # Absolute location of the Chronon3D checkout, so the font-file existence
+    # check resolves on any machine instead of a hardcoded developer path.
+    target_compile_definitions(chronontemplate_didone_titles_pack_test PRIVATE
+        CHRONONTEMPLATE_CHRONON3D_DIR="${CHRONONTEMPLATE_CHRONON3D_DIR}")
     add_test(NAME chronontemplate_didone_titles_pack_test COMMAND chronontemplate_didone_titles_pack_test)
 
     # The category packs: the multi-image board, full-frame backgrounds and the
