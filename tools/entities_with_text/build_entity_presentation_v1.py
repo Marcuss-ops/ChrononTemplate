@@ -14,14 +14,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE = ROOT / "ChrononTemplate"
 CATALOG = TEMPLATE / "catalog/entity_presentation.v1.json"
-DEFAULT_ASSETS = ROOT / "RenderingGen/renderinggen/out/editorial_v1"
+# Keep the catalog self-contained; these fonts and the canary portrait ship with ChrononTemplate.
+DEFAULT_ASSETS = TEMPLATE
 DEFAULT_OUT = TEMPLATE / "golden_plans/entity_presentation_v1"
 DEFAULT_PREVIEW_DIR = TEMPLATE / "out/entity_presentation_v1_gpu_certified"
 DEFAULT_DRIVE_UPLOADER = ROOT / "RenderingGen/bin/drive-upload"
 DEFAULT_DRIVE_CREDENTIALS = Path.home() / ".config/velox/credentials.json"
 DEFAULT_DRIVE_TOKEN = Path.home() / ".config/velox/token.json"
 UPLOAD_FAMILIES = ("metric_v1", "date_v1")
-CANARY_IMAGE = "assets/canary/people-demo-portrait.png"
+CANARY_IMAGE = "assets/images/people_sample_portrait_b.png"
 FONT = "assets/fonts/Poppins-Bold.ttf"
 SMALL_FONT = "assets/fonts/DejaVuSans.ttf"
 
