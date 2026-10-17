@@ -163,6 +163,42 @@ namespace chronontemplate {
             return result;
         }
 
+        Composition tableSidelightOrbit(const Final3DData& data) {
+            using namespace chrononmotion;
+            using namespace chrononmotion::motion;
+            MotionScene scene("table_sidelight_orbit", data.fps);
+            auto& table = scene.addMesh(kPrimary, "table_glb", MeshAttachment{data.assetId});
+            table.positionedAt(Vector3(0.f, -1.56f, 0.f)).alive(lifetime(data));
+
+            auto& ambient = scene.addAmbientLight(50, "soft_fill");
+            ambient.color = Color(0xffffff);
+            ambient.intensity = 0.8f;
+            auto& key = scene.addDirectionalLight(51, "warm_side_key");
+            key.color.setRGB(1.f, 0.78f, 0.56f, ColorSpace::Linear);
+            key.intensity = 2.5f;
+            key.transform.position = Vector3(-5.f, 8.f, 4.f);
+            key.targetId = table.id;
+
+            CameraRig camera(100, 30.f, 16.f / 9.f, 0.1f, 1000.f);
+            camera.setTarget(Vector3(0.f, 0.f, 0.f));
+            constexpr int orbitSteps = 12;
+            const float radius = 12.25f;
+            const float elevation = 0.48f;
+            const float start = frameToTime(data.startFrame, data.fps);
+            const float end = frameToTime(endFrame(data), data.fps);
+            for (int i = 0; i <= orbitSteps; ++i) {
+                const float t = float(i) / float(orbitSteps);
+                const float angle = t * 2.f * math::PI;
+                const Vector3 position(radius * std::sin(angle), radius * elevation,
+                                       radius * std::cos(angle));
+                const float time = start + (end - start) * t;
+                camera.positionTrack().add(time, position);
+                camera.targetTrack().add(time, Vector3(0.f, 0.f, 0.f));
+            }
+            return Composition{std::move(scene), std::move(camera),
+                               MaterialDescriptor::lambert(12, Color(0xffffff)), {}};
+        }
+
     }// namespace
 
     void Final3DData::validate() const {
@@ -196,6 +232,7 @@ namespace chronontemplate {
             case Final3DPreset::YouTubeCanary: return "youtube_canary";
             case Final3DPreset::TextStatic: return "text_static";
             case Final3DPreset::TextDollyOrbitGlow: return "text_dolly_orbit_glow";
+            case Final3DPreset::TableSidelightOrbit: return "table_sidelight_orbit";
         }
         throw std::invalid_argument("chronontemplate::name: unknown final 3D preset");
     }
@@ -203,7 +240,7 @@ namespace chronontemplate {
     std::vector<Final3DPreset> final3DPresets() {
         return {Final3DPreset::Typewriter3DGlow, Final3DPreset::CleanRed,
                 Final3DPreset::YouTubeCanary, Final3DPreset::TextStatic,
-                Final3DPreset::TextDollyOrbitGlow};
+                Final3DPreset::TextDollyOrbitGlow, Final3DPreset::TableSidelightOrbit};
     }
 
     namespace {
@@ -255,6 +292,8 @@ namespace chronontemplate {
                 verifyCatalogContract(composition);
                 return composition;
             }
+            case Final3DPreset::TableSidelightOrbit:
+                return tableSidelightOrbit(data);
         }
         throw std::invalid_argument("chronontemplate::build: unknown final 3D preset");
     }
