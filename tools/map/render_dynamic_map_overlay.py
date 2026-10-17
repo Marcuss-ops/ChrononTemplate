@@ -309,6 +309,10 @@ def main() -> int:
     # near street level; 17.0 is within the certified local tile pyramid.
     level_zoom = {"continent": 2.5, "country": 5.0, "region": 8.0,
                   "municipality": 10.5, "city": 17.0}
+    # Keep nearby towns visible in Chronon's editorial place-and-region view.
+    if basemap == "chronon_editorial":
+        level_zoom["municipality"] = 9.7
+        level_zoom["city"] = 9.7
     stop_zooms = [level_zoom[map_level(pin)] for pin in pins]
     municipal_outline = bool(payload.get("municipal_outline", False))
     municipal_zoom = float(payload.get("municipal_outline_zoom", 10.5))
