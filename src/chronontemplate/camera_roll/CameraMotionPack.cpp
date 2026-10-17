@@ -1,6 +1,6 @@
 // ChrononTemplate — the camera motion pack, implementation.
 //
-// Fifty recipes, one resolver. Every preset is a row of spec numbers
+// Fifteen recipes, one resolver. Every preset is a row of spec numbers
 // (specFor); resolveShot lowers a row × intensity onto rig poses; the
 // single-shot and two-shot appliers key those poses onto the CameraRig.
 // Subject layers are never touched: the camera is the only animated thing.
@@ -208,31 +208,31 @@ namespace chronontemplate {
         using P = CameraMotionPreset;
         switch (kind) {
             case CameraContentKind::TitleOnWhite:
-                return {P::SoftPushIn, P::SoftPullBack, P::TitleRise, P::TitleDescend};
+                return {P::TitleSlowPush, P::TitleLateralDrift, P::TitleRiseSettle};
             case CameraContentKind::ImpactWord:
-                return {P::ImpactPunchSettle, P::DataDetailZoom};
+                return {P::TitleSlowPush, P::TitleRiseSettle};
             case CameraContentKind::SinglePortrait:
-                return {P::KenBurnsIn, P::PortraitUpwardTrack, P::PortraitHeroArc};
+                return {P::PortraitArc, P::RackFocusPortrait};
             case CameraContentKind::PortraitBuildingText:
-                return {P::PortraitHeroArc, P::DocumentaryParallax};
+                return {P::PortraitArc, P::RackFocusPortrait};
             case CameraContentKind::ArchivePhoto:
-                return {P::KenBurnsIn, P::KenBurnsOut, P::PhotoRevealLeft, P::PhotoRevealRight};
+                return {P::ArchiveReveal, P::RackFocusPortrait};
             case CameraContentKind::MapCountry:
-                return {P::MapRegionPush, P::CountryFocusLock};
+                return {P::MapRegionPush, P::MapCountryTilt};
             case CameraContentKind::MapTwoCountries:
-                return {P::MapEastwardTrack, P::MapWestwardTrack, P::CountryComparisonPan};
+                return {P::MapRouteTrack, P::MapRegionPush};
             case CameraContentKind::MapRoute:
-                return {P::RouteCameraSweep};
+                return {P::MapRouteTrack};
             case CameraContentKind::DashboardChart:
-                return {P::UiPanelPush, P::DashboardPan, P::DataDetailZoom, P::ChartTraverse};
+                return {P::UiPanelPush, P::UiCardParallax};
             case CameraContentKind::PremiumUI3D:
-                return {P::CardStackParallax, P::PanelAngledPeek, P::ProductUiMicroFloat};
+                return {P::UiCardParallax, P::UiMicroFloat};
             case CameraContentKind::FastCut:
-                return {P::WhipPanLeft, P::WhipPanRight, P::WhipPanUp, P::WhipPanDown};
+                return {P::WhipPanLeft, P::WhipPanRight};
             case CameraContentKind::ObjectPass:
-                return {P::FastDollyThrough, P::ForegroundOcclusionPass};
+                return {P::DollyHandoff};
             case CameraContentKind::BlurPass:
-                return {P::FocusHandoff};
+                return {P::RackFocusPortrait};
         }
         return {};
     }
@@ -313,25 +313,23 @@ namespace chronontemplate {
                 throw std::invalid_argument("applyCameraMotionShot: focusFar must exceed focusNear");
             }
 
-            const Easing firstHalf = useMid ? ((std::string(spec.easing) == "snappy_out")
-                    ? Easing::expoOut() : Easing::easeIn()) : travel;
-            const Easing secondHalf = useMid ? Easing::easeOut() : travel;
-            keyLeg(rig, startPose, rollStart, hasRoll, focusStart, hasFocus, at(t0, fps), firstHalf);
+            // Every travel segment follows the declared easing. A mid-leg key is
+            // a waypoint on that same curve, not a forced easeIn/easeOut split.
+            keyLeg(rig, startPose, rollStart, hasRoll, focusStart, hasFocus, at(t0, fps), travel);
             if (tTravel0 != t0) {
-                keyLeg(rig, startPose, rollStart, hasRoll, focusStart, hasFocus, at(tTravel0, fps), firstHalf);
+                keyLeg(rig, startPose, rollStart, hasRoll, focusStart, hasFocus, at(tTravel0, fps), travel);
             }
             if (useMid) {
                 const int tMid = in + static_cast<int>(std::round(
                         duration * (hasDistMid ? spec.distMidAt : spec.posMidAt)));
-                keyLeg(rig, midPose, rollMid, hasRoll, focusMid, hasFocus, at(tMid, fps), secondHalf);
-                if (hasRoll && hasMid(spec.rollPeak)) {
-                    rig.rollTrack().add(at(tMid, fps), degToRad(spec.rollPeak * k), travel);
-                }
+                // One key per instant: the peak roll replaces the mid roll when present.
+                const float rollAtMid = hasMid(spec.rollPeak) ? degToRad(spec.rollPeak * k) : rollMid;
+                keyLeg(rig, midPose, rollAtMid, hasRoll, focusMid, hasFocus, at(tMid, fps), travel);
             } else if (hasRoll && hasMid(spec.rollPeak)) {
                 const int tMid = (tTravel0 + tTravel1) / 2;
                 rig.rollTrack().add(at(tMid, fps), degToRad(spec.rollPeak * k), travel);
             }
-            keyLeg(rig, endPose, rollEnd, hasRoll, focusEnd, hasFocus, at(tTravel1, fps), secondHalf);
+            keyLeg(rig, endPose, rollEnd, hasRoll, focusEnd, hasFocus, at(tTravel1, fps), travel);
             // Settle hold: the endpoint, decelerating into the hold.
             keyLeg(rig, endPose, rollEnd, hasRoll, focusEnd, hasFocus, at(tEnd, fps), Easing::linear());
 

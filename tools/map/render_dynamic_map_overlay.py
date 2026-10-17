@@ -28,6 +28,14 @@ sys.path.insert(0, str(ROOT / "Chronon3d/tools/cartography"))
 sys.path.insert(0, str(HERE))
 
 
+def frame_workers() -> int:
+    """Forked frame workers. Default stays at the certified 2; override with DYNAMIC_MAP_WORKERS."""
+    raw = os.environ.get("DYNAMIC_MAP_WORKERS")
+    if raw:
+        return max(1, int(raw))
+    return min(2, max(1, (os.cpu_count() or 2) // 2))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
@@ -534,10 +542,9 @@ def main() -> int:
         else:
             lat, lon = camera_stops[0].lat, camera_stops[0].lon
             zoom = builder.pose(frame_idx)[0]
-        if not sampler.can_sample(lat, lon, zoom, width, height):
-            raise RuntimeError(
-                f"prepared map plates do not cover camera frame {frame_idx} "
-                f"at zoom {zoom:.3f}; refusing slow fallback")
+        # Uncovered zooms are clamped to the prepared plates (with a warning)
+        # instead of aborting; the frame renderer applies the same clamp.
+        zoom = geo.covered_zoom(sampler, lat, lon, zoom, width, height)
         if map_animation in editorial_country_scenes:
             def project(y, x, _a=(lat, lon), _z=zoom):
                 return geo_project(y,x,_a,_z,width,height)
@@ -622,7 +629,7 @@ def main() -> int:
         sampler.editorial_scene = map_animation
     reset_gpu_counters()
     stats = harness.encode_with_pool(builder, sampler, args.output,
-                                     workers=min(2, max(1, (os.cpu_count() or 2) // 2)),
+                                     workers=frame_workers(),
                                      block=2, preset="slow", crf=15,
                                      gpu_required=True)
     overlay_counts = gpu_counters()

@@ -1,0 +1,10 @@
+{
+  "job_id": "documentary_map_italy_rome_1_milione_v1",
+  "highlight_country": "Italy",
+  "bbox": [6.0, 19.0, 35.5, 47.5],
+  "camera": {"zoom": 2.6, "lon": 12.5, "lat": 42.0},
+  "city": {"name": "Roma", "lon": 12.4964, "lat": 41.9028},
+  "label": "Roma",
+  "editorial_text": "1 milione",
+  "caption": "04   /   One city, one number."
+}

@@ -24,6 +24,27 @@ from fast_plate_sampler import FastPlateSampler
 from geo_documentary import draw_geojson_regions
 
 
+class CoveredZoomTests(unittest.TestCase):
+    def test_uncovered_zoom_clamps_with_warning(self):
+        class Sampler:
+            z_min = 5
+            def can_sample(self, lat, lon, zoom, width=None, height=None):
+                return zoom <= 12.0
+
+        with self.assertWarns(RuntimeWarning):
+            zoom = geo.covered_zoom(Sampler(), 0.0, 0.0, 15.0, 64, 48)
+        self.assertLessEqual(zoom, 12.0)
+        self.assertGreater(zoom, 11.9)
+
+    def test_covered_zoom_is_unchanged_without_warning(self):
+        class Sampler:
+            z_min = 5
+            def can_sample(self, lat, lon, zoom, width=None, height=None):
+                return True
+
+        self.assertEqual(geo.covered_zoom(Sampler(), 0.0, 0.0, 9.5, 64, 48), 9.5)
+
+
 class RuntimeDocumentaryContracts(unittest.TestCase):
     def test_runtime_resolve_uses_offline_geography_catalog_before_remote(self):
         runtime = geo.GeoRuntime(

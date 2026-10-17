@@ -665,7 +665,7 @@ Every preset carries its certification metadata in the emitted motions:
 - `RenderingGen .../internal/motion/presentation_catalog_test.go` — catalog
   parity, 20/20/10 presets, unknown-preset fail-closed, exact final pose
 - `RenderingGen .../internal/motion/presentation_pose_certification_test.go`
-  — start/mid/end poses for all 50 presets, the `entity_yaw_caption`
+  — start/mid/end poses for all 15 presets, the `entity_yaw_caption`
   scenario, counter no-overshoot, sampling determinism
 - `RenderingGen .../internal/motion/presentation_multi_entity_test.go` — one
   scene for two entities, captions remain visible, focus A→B, no overlap

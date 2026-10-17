@@ -1,7 +1,6 @@
 // ChrononTemplate — camera motion certification plan emitter.
 //
-// Lowers the spec's priority thirteen (01, 10, 11, 18, 19, 21, 27, 28, 33,
-// 35, 41, 45, 49) to chronon.render-plan.v3 documents over one shared
+// Lowers the whole fifteen-preset pack, in roster order, to chronon.render-plan.v3 documents over one shared
 // canary look (deep-ink background, warm-white hero title, preset caption).
 // The camera keys are sampled straight from the C++ CameraRig, so a render
 // through chronon3d_cli certifies the authored move on the real backend.
@@ -252,35 +251,8 @@ int main(int argc, char** argv) {
         return 2;
     }
 
-    // The whole pack: the priority thirteen first, then the remaining
-    // thirty-seven in spec order.
-    const std::vector<CameraMotionPreset> priority = {
-        CameraMotionPreset::SoftPushIn, CameraMotionPreset::ImpactPunchSettle,
-        CameraMotionPreset::KenBurnsIn, CameraMotionPreset::PortraitHeroArc,
-        CameraMotionPreset::DocumentaryParallax, CameraMotionPreset::MapRegionPush,
-        CameraMotionPreset::RouteCameraSweep, CameraMotionPreset::CountryFocusLock,
-        CameraMotionPreset::CardStackParallax, CameraMotionPreset::DataDetailZoom,
-        CameraMotionPreset::WhipPanLeft, CameraMotionPreset::FastDollyThrough,
-        CameraMotionPreset::ForegroundOcclusionPass,
-        CameraMotionPreset::SoftPullBack, CameraMotionPreset::EditorialDriftLeft,
-        CameraMotionPreset::EditorialDriftRight, CameraMotionPreset::TitleRise,
-        CameraMotionPreset::TitleDescend, CameraMotionPreset::QuietDiagonalDrift,
-        CameraMotionPreset::TypeDepthFocus, CameraMotionPreset::TypeMicroOrbit,
-        CameraMotionPreset::KenBurnsOut, CameraMotionPreset::PortraitUpwardTrack,
-        CameraMotionPreset::PortraitDownwardTrack, CameraMotionPreset::PhotoRevealLeft,
-        CameraMotionPreset::PhotoRevealRight, CameraMotionPreset::LowAnglePhotoReveal,
-        CameraMotionPreset::PhotoRackFocus, CameraMotionPreset::MapRegionPull,
-        CameraMotionPreset::MapEastwardTrack, CameraMotionPreset::MapWestwardTrack,
-        CameraMotionPreset::MapNorthwardTrack, CameraMotionPreset::MapSouthwardTrack,
-        CameraMotionPreset::CountryComparisonPan, CameraMotionPreset::GeopoliticalTiltReveal,
-        CameraMotionPreset::UiPanelPush, CameraMotionPreset::DashboardPan,
-        CameraMotionPreset::CornerDetailInspect, CameraMotionPreset::UiOverviewPull,
-        CameraMotionPreset::SideBySideCompare, CameraMotionPreset::PanelAngledPeek,
-        CameraMotionPreset::ChartTraverse, CameraMotionPreset::ProductUiMicroFloat,
-        CameraMotionPreset::WhipPanRight, CameraMotionPreset::WhipPanUp,
-        CameraMotionPreset::WhipPanDown, CameraMotionPreset::ReverseDollyReveal,
-        CameraMotionPreset::RollMatchCut, CameraMotionPreset::OrbitHandoff,
-        CameraMotionPreset::FocusHandoff};
+    // The whole pack, in roster order.
+    const std::vector<CameraMotionPreset> priority = chronontemplate::cameraMotionPresets();
 
     const fs::path out = argv[1];
     std::error_code ec;
@@ -295,11 +267,7 @@ int main(int argc, char** argv) {
     for (const CameraMotionPreset preset : priority) {
         const std::string id = cameraMotionPresetId(preset);
         const int frames = cameraMotionDuration(preset);
-        const Foreground foreground = preset == CameraMotionPreset::DocumentaryParallax
-                                        ? Foreground::StaticBar
-                                        : (preset == CameraMotionPreset::ForegroundOcclusionPass
-                                                   ? Foreground::OcclusionSweep
-                                                   : Foreground::None);
+        const Foreground foreground = Foreground::None;
 
         Host host;
         TemplateScene scene("camera_motion_cert", static_cast<float>(kFps), host,

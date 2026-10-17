@@ -45,6 +45,30 @@ for p in (str(ROOT / "Chronon3d/tools/cartography"), str(HERE)):
 
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
 
+
+def covered_zoom(sampler, lat: float, lon: float, zoom: float,
+                 width: int = WIDTH, height: int = HEIGHT) -> float:
+    """Return the zoom a prepared plate can actually show for this camera pose.
+
+    When the camera zooms beyond the prepared tile coverage, the frame is
+    rendered at the closest covered zoom instead of aborting the whole run.
+    A RuntimeWarning is emitted so the lower detail is visible in the logs.
+    """
+    if sampler.can_sample(lat, lon, zoom, width, height):
+        return zoom
+    import warnings
+    z_min = float(sampler.z_min)
+    candidate = float(zoom)
+    while candidate > z_min:
+        candidate = max(z_min, candidate - 0.05)
+        if sampler.can_sample(lat, lon, candidate, width, height):
+            break
+    warnings.warn(
+        f"map zoom {zoom:.3f} is not covered by the prepared plates; "
+        f"rendering at zoom {candidate:.3f} instead (lower detail)",
+        RuntimeWarning, stacklevel=2)
+    return candidate
+
 # ---------------------------------------------------------------------------
 # Place parsing and catalog/Nominatim lookup live in geo_places; keep these
 # imported names visible here as a compatibility facade for existing map scripts.
@@ -686,6 +710,7 @@ class TourBuilder:
             draw_route_glow, draw_spring_pin,
         )
         lat, lon, zoom = self.pose(f)
+        zoom = covered_zoom(sampler, lat, lon, zoom, WIDTH, HEIGHT)
         progress = f / (self.FRAMES_TOTAL - 1)
         gpu_map = bool(getattr(self, "minimal_map", False) and
                        getattr(sampler, "gpu_map_enabled", False))
