@@ -717,56 +717,6 @@ def draw_editorial_scene_gpu(frame, scene, ctx, progress):
     frame=_base_grade(frame)
     frame=_draw_grid(frame,W,H,_stage(progress,0.0,0.18))
     pin_entries=_pin_entries(ctx,project,progress,scene)
-    if scene in ("location_focus", "location_pulse"):
-        # A short title lead establishes the place before the map comes up.
-        # The text/panel is rasterized as a mask on the host; the title blend,
-        # map reveal, marker glow and all full-frame effects stay OpenCL/UMat.
-        from PIL import Image, ImageDraw
-        pulse_variant = scene == "location_pulse"
-        map_reveal = _ease(_stage(progress, .07 if pulse_variant else .10,
-                                   .15 if pulse_variant else .12))
-        if map_reveal < 1.0:
-            frame = cv2.addWeighted(frame, map_reveal, _solid(W,H,DARK),
-                                    1.0-map_reveal, 0)
-            _GPU_OPS["opencl"] += 1
-        pin = pin_entries[0][0] if pin_entries else {"label":"Località"}
-        point = pin_entries[0][1] if pin_entries else (W//2,H//2)
-        title_plate = Image.new("RGBA", (W,H), (0,0,0,0))
-        title_draw = ImageDraw.Draw(title_plate)
-        title_e = 1.0 - _ease(_stage(progress, .08, .10))
-        if title_e > .01:
-            f_title = _font(max(44, round(102*W/1920)), True)
-            title = str(pin.get("label") or "LOCALITÀ").upper()
-            bbox=title_draw.textbbox((0,0),title,font=f_title)
-            title_h=bbox[3]-bbox[1]
-            title_w=bbox[2]-bbox[0]
-            x = int(W*.085) if not pulse_variant else max(42,(W-title_w)//2)
-            y = int(H*.43) if not pulse_variant else int(H*.18)
-            title_draw.rounded_rectangle((x-28,y-28,min(W-50,x+title_w+56),y+title_h+64),
-                                         radius=8,fill=(10,16,22,int(225*title_e)),
-                                         outline=(221,230,232,int(90*title_e)),width=1)
-            title_draw.text((x,y), title, font=f_title,
-                            fill=(248,245,234,int(255*title_e)))
-        if np.any(np.asarray(title_plate)[:,:,3]):
-            frame = composite_rgba(frame, np.asarray(title_plate))
-        reveal = _ease(_stage(progress,.22 if pulse_variant else .25,.13))
-        if reveal > .01:
-            x,y=map(int,point)
-            frame=_marker(frame,(x,y),reveal,W,H,YELLOW,8)
-        # The basemap already labels the town. A second floating callout on
-        # the same marker duplicates the name and covers nearby roads.
-        credits = {
-            "esri_street": "Sources: Esri, DeLorme, HERE, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), MapmyIndia, TomTom",
-            "esri_topo": "Sources: Esri, DeLorme, HERE, TomTom, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, swisstopo, MapmyIndia, GIS User Community",
-            "esri_sat": "Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
-        }
-        credit = credits.get(ctx.get("basemap", "esri_street"), "Sources: Esri and the GIS User Community")
-        credit_plate=Image.new("RGBA",(W,H),(0,0,0,0))
-        credit_draw=ImageDraw.Draw(credit_plate)
-        credit_draw.text((18,H-25),credit,font=_font(max(10,round(13*W/1920)),False),
-                         fill=(248,246,236,220),stroke_width=1,stroke_fill=(0,0,0,220))
-        frame=composite_rgba(frame,np.asarray(credit_plate))
-        return frame
     if scene == "ed_yemen_markers" and len(pin_entries) < 3:
         raise ValueError("ed_yemen_markers requires three grounded pins")
     labels=[]
@@ -843,48 +793,44 @@ def draw_editorial_scene_gpu(frame, scene, ctx, progress):
                  "role":"route","reveal":_stage(progress,.44,.14),"accent":GREEN},
             ])
 
-    elif scene in ("ed_hormuz_routes","ed_hormuz_focus"):
+    elif scene == "ed_hormuz_routes":
         for iso in ("SAU","IRN","YEM","OMN","ARE"):
             frame,_,_=_country(frame,iso,project,progress,W,H,stroke_px=2)
-        if scene=="ed_hormuz_focus":
-            hp=project(26.55,56.27); frame=_marker(frame,hp,_stage(progress,.20,.16),W,H,RED,10)
-            labels=[{"text":"STRAIT OF HORMUZ","center":hp,"role":"route","reveal":_stage(progress,.36,.16),"accent":RED}]
-        else:
-            # 1. Chokepoint Hormuz hotspot + label
-            hp=project(26.55,56.27)
-            e_hp=_stage(progress,.10,.12)
-            if e_hp>0:
-                frame=_marker(frame,hp,e_hp,W,H,RED,8)
-            labels.append({"text":"HORMUZ","center":hp,"role":"route",
-                           "reveal":e_hp,"accent":RED,
-                           "leader":hp,"candidate_distance":64,
-                           "candidate_offsets":((0,-1),(1,0),(-1,0),(0,1))})
+        # Chokepoint Hormuz hotspot + label
+        hp=project(26.55,56.27)
+        e_hp=_stage(progress,.10,.12)
+        if e_hp>0:
+            frame=_marker(frame,hp,e_hp,W,H,RED,8)
+        labels.append({"text":"HORMUZ","center":hp,"role":"route",
+                       "reveal":e_hp,"accent":RED,
+                       "leader":hp,"candidate_distance":64,
+                       "candidate_offsets":((0,-1),(1,0),(-1,0),(0,1))})
 
-            # 2. Blue maritime route: TO ASIA
-            frame=_route(frame,[(26.5,56.3),(24.3,58.8),(21.5,62.0),(17.5,66.0),(12.0,68.5),(7.0,72.5)],
-                         project,W,H,progress,BLUE,.22,duration=.18,width=6,arrow=True,glow_strength=.45)
-            labels.append({"text":"TO ASIA","center":project(15.0,68.0),"role":"route",
-                           "reveal":_stage(progress,.32,.12),"accent":BLUE,"candidate_distance":58})
+        # Blue maritime route: TO ASIA
+        frame=_route(frame,[(26.5,56.3),(24.3,58.8),(21.5,62.0),(17.5,66.0),(12.0,68.5),(7.0,72.5)],
+                     project,W,H,progress,BLUE,.22,duration=.18,width=6,arrow=True,glow_strength=.45)
+        labels.append({"text":"TO ASIA","center":project(15.0,68.0),"role":"route",
+                       "reveal":_stage(progress,.32,.12),"accent":BLUE,"candidate_distance":58})
 
-            # 3. Magenta pipeline: EAST-WEST PIPELINE
-            frame=_route(frame,[(26.6,50.2),(24.8,47.8),(23.2,44.8),(22.2,41.8),(21.6,39.4)],
-                         project,W,H,progress,MAGENTA,.38,duration=.16,width=6,arrow=True,glow_strength=.45)
-            labels.append({"text":"EAST-WEST PIPELINE","center":project(23.1,44.0),"role":"route",
-                           "reveal":_stage(progress,.46,.12),"accent":MAGENTA,"candidate_distance":54})
+        # Magenta pipeline: EAST-WEST PIPELINE
+        frame=_route(frame,[(26.6,50.2),(24.8,47.8),(23.2,44.8),(22.2,41.8),(21.6,39.4)],
+                     project,W,H,progress,MAGENTA,.38,duration=.16,width=6,arrow=True,glow_strength=.45)
+        labels.append({"text":"EAST-WEST PIPELINE","center":project(23.1,44.0),"role":"route",
+                       "reveal":_stage(progress,.46,.12),"accent":MAGENTA,"candidate_distance":54})
 
-            # 4. Red Sea corridor / Bab el-Mandeb: TO EUROPE
-            frame=_route(frame,[(12.58,43.35),(14.8,41.8),(18.5,39.0),(22.5,37.0),(27.7,34.6)],
-                         project,W,H,progress,CYAN,.52,duration=.16,width=5,arrow=True,dashed=True,glow_strength=.40)
-            bmp=project(12.58,43.35)
-            e_bm=_stage(progress,.58,.10)
-            if e_bm>0:
-                frame=_marker(frame,bmp,e_bm,W,H,RED,7)
-            labels.extend([
-                {"text":"BAB EL-MANDEB","center":bmp,"role":"route",
-                 "reveal":e_bm,"accent":RED,"leader":bmp,"candidate_distance":62},
-                {"text":"TO EUROPE","center":project(25.5,35.5),"role":"route",
-                 "reveal":_stage(progress,.62,.10),"accent":CYAN,"candidate_distance":58},
-            ])
+        # Red Sea corridor / Bab el-Mandeb: TO EUROPE
+        frame=_route(frame,[(12.58,43.35),(14.8,41.8),(18.5,39.0),(22.5,37.0),(27.7,34.6)],
+                     project,W,H,progress,CYAN,.52,duration=.16,width=5,arrow=True,dashed=True,glow_strength=.40)
+        bmp=project(12.58,43.35)
+        e_bm=_stage(progress,.58,.10)
+        if e_bm>0:
+            frame=_marker(frame,bmp,e_bm,W,H,RED,7)
+        labels.extend([
+            {"text":"BAB EL-MANDEB","center":bmp,"role":"route",
+             "reveal":e_bm,"accent":RED,"leader":bmp,"candidate_distance":62},
+            {"text":"TO EUROPE","center":project(25.5,35.5),"role":"route",
+             "reveal":_stage(progress,.62,.10),"accent":CYAN,"candidate_distance":58},
+        ])
 
     elif scene=="ed_mocha_tactical":
         frame,_,_=_country(frame,"YEM",project,progress,W,H,stroke_px=2,

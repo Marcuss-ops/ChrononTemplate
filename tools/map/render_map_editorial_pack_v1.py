@@ -16,7 +16,7 @@ TEMPLATE = HERE.parents[1]
 OUT = TEMPLATE / "out" / "map_editorial_v1"
 RENDERER = HERE / "render_dynamic_map_overlay.py"
 
-CAMERA_ANIMATION = "steady_hold"
+CAMERA_ANIMATION = "slow_approach"
 BASEMAP = "esri_sat"
 STD_US = 5_000_000
 

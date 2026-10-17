@@ -278,9 +278,8 @@ class _ShotBuilder:
             draw_metric_reveal, draw_hud_overlay, warp_matrix, OVERSIZE,
         )
         from render_geo_camera_small_places import (
-            apply_city_beacon_map_style, draw_map_location_marker,
-            apply_city_beacon_map_style_opencl, draw_map_location_marker_opencl,
-            draw_editorial_map_caption, MARKER_DRAWN_STYLES,
+            draw_map_location_marker, draw_editorial_map_caption,
+            MARKER_DRAWN_STYLES,
         )
         import cv2
         zoom, pitch, yaw, roll = self.pose(f)
@@ -342,21 +341,33 @@ class _ShotBuilder:
                 from map_compositions import MAP_COMPOSITIONS
                 if composition not in MAP_COMPOSITIONS:
                     raise ValueError(f"unsupported map composition: {composition}")
-                # Generic compositions are certified for the CPU map renderer,
-                # while this production path uses OpenCL. Preserve camera and
-                # label animation with the standard map caption rather than
-                # rejecting a valid deterministic composition id.
-                print(
-                    f"[dynamic-map] composition {composition!r} has no GPU scene; "
-                    "using the GPU-safe map caption",
-                    flush=True,
-                )
+                from map_compositions import draw_composition
+                from map_editorial_gpu import geo_project
+                if isinstance(frame, cv2.UMat):
+                    frame = frame.get()
+                anchor = (self.place.lat, self.place.lon)
+                extras = list(getattr(self, "map_pin_extras", []))
+                source_pins = list(getattr(self, "editorial_pins", [])) or [{
+                    "latitude": self.place.lat, "longitude": self.place.lon,
+                    "label": self.place.display_name or self.place.query,
+                }]
+                pins = []
+                for i, p in enumerate(source_pins):
+                    lat = float(p.get("latitude", self.place.lat))
+                    lon = float(p.get("longitude", self.place.lon))
+                    x, y = geo_project(lat, lon, anchor, zoom, WIDTH, HEIGHT)
+                    pins.append({**p, **(extras[i] if i < len(extras) else {}),
+                                 "x": int(round(x)), "y": int(round(y)),
+                                 "label": str(p.get("label") or p.get("id") or "Location")})
+                draw_composition(frame, composition, pins, progress, WIDTH, HEIGHT)
+                _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
+                return cv2.UMat(frame) if gpu_map else frame
             # The standard caption/marker helpers use NumPy and Pillow. OpenCL
             # sampling returns cv2.UMat, so download only this fallback frame
             # before applying those CPU overlays.
             if gpu_map:
                 frame = frame.get()
-            label_animation = getattr(self, "map_label_animation", "gentle_fade")
+            label_animation = getattr(self, "map_label_animation", "none")
             frame = draw_editorial_map_caption(
                 frame, self.place.display_name or self.place.query, progress,
                 getattr(self, "map_typography", {}), label_animation)
@@ -704,9 +715,8 @@ class TourBuilder:
         import cv2
         from render_geo_camera_canary import draw_metric_reveal, draw_hud_overlay
         from render_geo_camera_small_places import (
-            apply_city_beacon_map_style, draw_map_location_marker,
-            apply_city_beacon_map_style_opencl, draw_map_location_marker_opencl,
-            draw_editorial_map_caption, MARKER_DRAWN_STYLES,
+            draw_map_location_marker, draw_editorial_map_caption,
+            MARKER_DRAWN_STYLES,
             draw_route_glow, draw_spring_pin,
         )
         lat, lon, zoom = self.pose(f)
@@ -792,11 +802,23 @@ class TourBuilder:
                 from map_compositions import MAP_COMPOSITIONS
                 if composition not in MAP_COMPOSITIONS:
                     raise ValueError(f"unsupported map composition: {composition}")
-                print(
-                    f"[dynamic-map] composition {composition!r} has no GPU scene; "
-                    "using the standard map caption",
-                    flush=True,
-                )
+                from map_compositions import draw_composition
+                from map_editorial_gpu import geo_project
+                was_gpu_frame = isinstance(frame, cv2.UMat)
+                if was_gpu_frame:
+                    frame = frame.get()
+                extras = list(getattr(self, "map_pin_extras", []))
+                pins = []
+                for i, stop in enumerate(self.stops):
+                    x, y = geo_project(stop.lat, stop.lon, (lat, lon), zoom,
+                                       WIDTH, HEIGHT)
+                    ex = extras[i] if i < len(extras) else {}
+                    pins.append({"latitude": stop.lat, "longitude": stop.lon,
+                                 "label": stop.display_name or stop.query,
+                                 **ex, "x": int(round(x)), "y": int(round(y))})
+                draw_composition(frame, composition, pins, progress, WIDTH, HEIGHT)
+                _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
+                return cv2.UMat(frame) if was_gpu_frame else frame
             # Editorial captions and the attribution helper are Pillow/NumPy
             # overlays and inspect ndarray dimensions. Keep the tile sample
             # and camera on OpenCL, but cross to host memory for these final
@@ -804,7 +826,7 @@ class TourBuilder:
             was_gpu_frame = isinstance(frame, cv2.UMat)
             if was_gpu_frame:
                 frame = frame.get()
-            label_animation = getattr(self, "map_label_animation", "gentle_fade")
+            label_animation = getattr(self, "map_label_animation", "none")
             frame = draw_editorial_map_caption(
                 frame, location_name, label_progress, getattr(self, "map_typography", {}),
                 label_animation)

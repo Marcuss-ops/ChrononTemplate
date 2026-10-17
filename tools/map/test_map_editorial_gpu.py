@@ -160,15 +160,12 @@ class EditorialProjectionTests(unittest.TestCase):
         self.assertIn("US NAVAL BLOCKADE OF IRAN",gpu_source)
         self.assertIn("EAST-WEST PIPELINE",gpu_source)
 
-    def test_scene_registry_contains_six_editorial_and_two_location_ids(self):
+    def test_scene_registry_contains_only_the_six_retained_editorial_ids(self):
         editorial_scenes = {
             "ed_saudi_base", "ed_iran_glow", "ed_yemen_fill",
             "ed_yemen_markers", "ed_hormuz_routes", "ed_mocha_tactical",
         }
-        location_scenes = {"location_focus", "location_pulse"}
-        self.assertEqual(set(MAP_EDITORIAL_SCENES), editorial_scenes | location_scenes)
-        self.assertTrue(editorial_scenes.issubset(MAP_EDITORIAL_SCENES))
-        self.assertTrue(location_scenes.issubset(MAP_EDITORIAL_SCENES))
+        self.assertEqual(set(MAP_EDITORIAL_SCENES), editorial_scenes)
 
 
 if __name__ == "__main__":
