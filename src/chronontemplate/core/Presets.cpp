@@ -2,6 +2,7 @@
 
 #include "chrononmotion/motion/Presets.hpp"
 #include "chrononmotion/math/MathUtils.hpp"
+#include "chrononmotion/geometries/PlaneGeometry.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -199,6 +200,52 @@ namespace chronontemplate {
                                MaterialDescriptor::lambert(12, Color(0xffffff)), {}};
         }
 
+        Composition tablePaperPushIn(const Final3DData& data) {
+            using namespace chrononmotion;
+            using namespace chrononmotion::motion;
+            MotionScene scene("table_paper_push_in", data.fps);
+            auto& table = scene.addMesh(kPrimary, "table_glb", MeshAttachment{data.assetId});
+            table.positionedAt(Vector3(0.f, -1.56f, 0.f)).alive(lifetime(data));
+
+            auto& paper = scene.addMesh(kSecondary, "archival_sheet",
+                    MeshAttachment{"", PlaneGeometry::create(1.85f, 1.35f),
+                                   MaterialDescriptor::lambert(13, Color(0x666666))});
+            paper.positionedAt(Vector3(0.f, 1.69f, 0.f))
+                    .rotated(Vector3(-math::PI * 0.5f, 0.f, 0.f))
+                    .alive(lifetime(data)).opacityAt(0.f);
+            const float start = frameToTime(data.startFrame, data.fps);
+            const float duration = frameToTime(data.duration, data.fps);
+            paper.tracks.opacity.add(start + duration * 0.52f, 0.f);
+            paper.tracks.opacity.add(start + duration * 0.60f, 1.f);
+
+            auto& ambient = scene.addAmbientLight(50, "low_ambient_fill");
+            ambient.color = Color(0xd0d0d0);
+            ambient.intensity = 0.25f;
+            auto& key = scene.addDirectionalLight(51, "soft_window_side_key");
+            key.color = Color(0xe0e0e0);
+            key.intensity = 0.85f;
+            key.transform.position = Vector3(-5.f, 8.f, -4.f);
+            key.targetId = table.id;
+
+            CameraRig camera(100, 45.f, 16.f / 9.f, 0.1f, 1000.f);
+            camera.setTarget(Vector3(0.f, 0.f, 0.f));
+            const auto addCameraKey = [&](float t, const Vector3& position,
+                                          const Vector3& target, float fov) {
+                const float time = start + duration * t;
+                camera.positionTrack().add(time, position);
+                camera.targetTrack().add(time, target);
+                camera.fovTrack().add(time, fov);
+            };
+            addCameraKey(0.f, Vector3(8.f, 3.2f, 12.f), Vector3(0.f, 0.1f, 0.f), 45.f);
+            addCameraKey(0.21f, Vector3(6.f, 7.8f, 8.f), Vector3(0.f, 0.65f, 0.f), 43.f);
+            addCameraKey(0.43f, Vector3(3.f, 9.8f, 5.5f), Vector3(0.f, 1.65f, 0.f), 38.f);
+            addCameraKey(0.67f, Vector3(1.f, 7.5f, 4.f), Vector3(0.f, 1.65f, 0.f), 30.f);
+            addCameraKey(0.80f, Vector3(0.4f, 6.5f, 3.f), Vector3(0.f, 1.65f, 0.f), 26.f);
+            addCameraKey(1.f, Vector3(0.f, 4.2f, 1.8f), Vector3(0.f, 1.65f, 0.f), 24.f);
+            return Composition{std::move(scene), std::move(camera),
+                               MaterialDescriptor::lambert(12, Color(0x777777)), {}};
+        }
+
     }// namespace
 
     void Final3DData::validate() const {
@@ -233,6 +280,7 @@ namespace chronontemplate {
             case Final3DPreset::TextStatic: return "text_static";
             case Final3DPreset::TextDollyOrbitGlow: return "text_dolly_orbit_glow";
             case Final3DPreset::TableSidelightOrbit: return "table_sidelight_orbit";
+            case Final3DPreset::TablePaperPushIn: return "table_paper_push_in";
         }
         throw std::invalid_argument("chronontemplate::name: unknown final 3D preset");
     }
@@ -240,7 +288,8 @@ namespace chronontemplate {
     std::vector<Final3DPreset> final3DPresets() {
         return {Final3DPreset::Typewriter3DGlow, Final3DPreset::CleanRed,
                 Final3DPreset::YouTubeCanary, Final3DPreset::TextStatic,
-                Final3DPreset::TextDollyOrbitGlow, Final3DPreset::TableSidelightOrbit};
+                Final3DPreset::TextDollyOrbitGlow, Final3DPreset::TableSidelightOrbit,
+                Final3DPreset::TablePaperPushIn};
     }
 
     namespace {
@@ -294,6 +343,8 @@ namespace chronontemplate {
             }
             case Final3DPreset::TableSidelightOrbit:
                 return tableSidelightOrbit(data);
+            case Final3DPreset::TablePaperPushIn:
+                return tablePaperPushIn(data);
         }
         throw std::invalid_argument("chronontemplate::build: unknown final 3D preset");
     }

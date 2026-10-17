@@ -26,7 +26,7 @@ namespace {
 
     void finalCatalog() {
         section("final 3D preset catalog");
-        check(final3DPresets().size() == 6, "final 3D catalog exposes six modern presets");
+        check(final3DPresets().size() == 7, "final 3D catalog exposes seven modern presets");
         check(std::string(name(Final3DPreset::Typewriter3DGlow)) == "typewriter_3d_glow",
               "typewriter preset has a stable wire name");
         check(std::string(name(Final3DPreset::CleanRed)) == "clean_red",
@@ -37,6 +37,8 @@ namespace {
               "text dolly/orbit glow has a stable wire name");
         check(std::string(name(Final3DPreset::TableSidelightOrbit)) == "table_sidelight_orbit",
               "table sidelight orbit has a stable wire name");
+        check(std::string(name(Final3DPreset::TablePaperPushIn)) == "table_paper_push_in",
+              "table paper push-in has a stable wire name");
 
         for (const Final3DPreset preset : final3DPresets()) {
             Composition composition = build(preset, finalData());
@@ -76,6 +78,14 @@ namespace {
         const auto middlePose = table.camera.sample(70.f / 30.f);
         check(startPose.position.x != middlePose.position.x || startPose.position.z != middlePose.position.z,
               "table orbit camera advances around the asset");
+        Composition pushIn = build(Final3DPreset::TablePaperPushIn, finalData());
+        check(pushIn.scene.findLayer(2)->mesh.assetId == "product.asset" &&
+                      static_cast<bool>(pushIn.scene.findLayer(3)->mesh.geometry),
+              "table push-in binds the GLB and creates a native paper plane");
+        const auto pushStart = pushIn.camera.sample(10.f / 30.f);
+        const auto pushEnd = pushIn.camera.sample(130.f / 30.f);
+        check(pushEnd.position.z < pushStart.position.z && pushEnd.fov < pushStart.fov,
+              "table push-in rises toward the surface and tightens its framing");
     }
 
     void stylePresets() {

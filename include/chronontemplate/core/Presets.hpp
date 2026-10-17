@@ -91,7 +91,8 @@ namespace chronontemplate {
         YouTubeCanary,
         TextStatic,
         TextDollyOrbitGlow,
-        TableSidelightOrbit
+        TableSidelightOrbit,
+        TablePaperPushIn
     };
 
     [[nodiscard]] const char* name(Final3DPreset preset);
