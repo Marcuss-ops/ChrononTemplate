@@ -4,12 +4,17 @@ __pycache__/
 *.py[cod]
 .venv/
 
-# Generated render outputs of local fixture runs.
+# Generated render outputs of local fixture runs. Certified JSON goldens and
+# fixtures stay tracked; renders, previews, timings and binary frames under
+# output dirs do not (tracked files are unaffected by these rules).
 /output/
+/out/
+tools/**/out/
+short_phrase/**/out/
 catalog/**/out/
+output/**/*.png
+output/**/*.mp4
+out/**/*.log
 
-# Local CTest output and generated previews belong to working directories,
-# not to the source tree or the canonical catalog.
+# Local CTest output belongs to working directories, not the source tree.
 /Testing/
-/tools/**/out/
-/short_phrase/out/

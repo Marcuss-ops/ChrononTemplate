@@ -38,6 +38,13 @@ namespace chronontemplate {
         ScalePop    ///< each card pops from below then settles
     };
 
+    /// Stable ids of the group choreographies a layout certifies. Each id is a
+    /// real choreography of the layout's tiles, not just a catalog name.
+    [[nodiscard]] std::vector<std::string> multiImageMotionIds(MultiImageLayout layout);
+
+    /// True when `motionId` is one of the layout's certified choreographies.
+    [[nodiscard]] bool isMultiImageMotion(MultiImageLayout layout, const std::string& motionId);
+
     struct MultiImageTile {
         std::string path{};
         std::string caption{};  ///< optional caption under the tile; empty derives it from the path
@@ -48,6 +55,9 @@ namespace chronontemplate {
         std::vector<MultiImageTile> tiles{};
         MultiImageLayout layout{MultiImageLayout::Duo};
         MultiImageEntrance entrance{MultiImageEntrance::Rise};
+        /// The certified group choreography. Empty keeps the shared `entrance`
+        /// stagger; otherwise it must be one of `multiImageMotionIds(layout)`.
+        std::string motionId{};
         float tileWidth{560.f};
         float tileHeight{315.f};
         float gap{48.f};

@@ -34,6 +34,42 @@ set(CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI "${CMAKE_CURRENT_SOURCE_DIR}/../Chron
     CACHE FILEPATH "Chronon3D CLI used to validate the editorial benchmark plans")
 set(CHRONONTEMPLATE_CHRONON3D_LIBRARY "" CACHE FILEPATH
     "Chronon3D library used by the optional live adapter test")
+# ── Renderer checkout: the one explicit Chronon3D dependency ─────────────────
+#
+# A headless template build still reads the renderer's neutral value types
+# (`chronon/abi.h`, `chronon3d/graphics/*`) from this checkout. It is a
+# checkout dependency, not a silent sibling-folder assumption: every
+# `../Chronon3d` reference below goes through this variable, and a missing
+# checkout fails here with the fix instead of a stray header error later.
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d")
+    set(CHRONONTEMPLATE_CHRONON3D_DEFAULT "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d")
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3D")
+    set(CHRONONTEMPLATE_CHRONON3D_DEFAULT "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3D")
+else()
+    set(CHRONONTEMPLATE_CHRONON3D_DEFAULT "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d")
+endif()
+set(CHRONONTEMPLATE_CHRONON3D_DIR "${CHRONONTEMPLATE_CHRONON3D_DEFAULT}"
+    CACHE PATH "Chronon3D checkout providing chronon/abi.h and chronon3d/graphics/*")
+if(NOT EXISTS "${CHRONONTEMPLATE_CHRONON3D_DIR}/include/chronon/abi.h")
+    message(FATAL_ERROR
+            "ChrononTemplate needs chronon/abi.h from a Chronon3D checkout at "
+            "'${CHRONONTEMPLATE_CHRONON3D_DIR}': set CHRONONTEMPLATE_CHRONON3D_DIR to one "
+            "(CI checks out Marcuss-ops/Chronon3d next to this repo).")
+endif()
+if(NOT EXISTS "${CHRONONTEMPLATE_CHRONON3D_DIR}/include/chronon3d/graphics/field2d.hpp")
+    message(FATAL_ERROR
+            "ChrononTemplate needs chronon3d/graphics/field2d.hpp from a Chronon3D checkout at "
+            "'${CHRONONTEMPLATE_CHRONON3D_DIR}'.")
+endif()
+# GLM comes from the system first (CI: libglm-dev); the Chronon3D vcpkg tree
+# is the fallback so a checkout without system headers still configures.
+find_path(CHRONONTEMPLATE_GLM_DIR glm/glm.hpp
+          HINTS "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-fast-dev/x64-linux/include")
+if(NOT CHRONONTEMPLATE_GLM_DIR)
+    message(FATAL_ERROR
+            "ChrononTemplate needs glm/glm.hpp (CI installs libglm-dev): no system GLM found "
+            "and no vendored copy under '${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed'.")
+endif()
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../ChrononMotion3D")
     set(CHRONONTEMPLATE_CHRONONMOTION_DEFAULT "${CMAKE_CURRENT_SOURCE_DIR}/../ChrononMotion3D")
 else()
@@ -86,10 +122,10 @@ add_library(chronontemplate STATIC
         src/chronontemplate/core/Presets.cpp
         src/chronontemplate/core/NativePrimitives.cpp
         # the orchestration layer: bindings, the bridge, the template API
+        # (the live C-ABI handoff lives in chronontemplate_live_adapter below,
+        # so the pure template core has no renderer-link dependency)
         src/chronontemplate/core/ContentBinding.cpp
         src/chronontemplate/core/MotionBridge.cpp
-        src/chronontemplate/core/ChrononMotionContract.cpp
-        src/chronontemplate/core/ChrononRenderAdapter.cpp
         src/chronontemplate/core/TemplateScene.cpp
         src/chronontemplate/core/PlanLowering.cpp
         src/chronontemplate/core/RenderPlanContentHost.cpp
@@ -167,205 +203,43 @@ add_library(chronontemplate STATIC
 
 add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 
-add_executable(chronontemplate_dump_title_camera_poses tools/camera_roll/dump_title_camera_poses.cpp)
-target_link_libraries(chronontemplate_dump_title_camera_poses PRIVATE chronontemplate)
 
-add_executable(chronontemplate_dump_scene_camera_poses tools/camera_roll/dump_scene_camera_poses.cpp)
-target_link_libraries(chronontemplate_dump_scene_camera_poses PRIVATE chronontemplate)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tools.cmake)
 
-add_executable(chronontemplate_emit_title_camera_v2 tools/camera_roll/emit_title_camera_v2.cpp)
-target_link_libraries(chronontemplate_emit_title_camera_v2 PRIVATE chronontemplate)
-target_include_directories(chronontemplate_emit_title_camera_v2 PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-target_compile_options(chronontemplate_emit_title_camera_v2 PRIVATE -Wall -Wextra)
-
-add_executable(chronontemplate_sequence_from_json tools/camera_roll/sequence_from_json.cpp)
-target_link_libraries(chronontemplate_sequence_from_json PRIVATE chronontemplate)
-target_include_directories(chronontemplate_sequence_from_json PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-
-add_executable(chronontemplate_emit_ui_choreography_canary tools/ui_camera/emit_ui_choreography_canary.cpp)
-target_link_libraries(chronontemplate_emit_ui_choreography_canary PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_emit_ui_choreography_canary PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
-    target_sources(chronontemplate_emit_ui_choreography_canary PRIVATE
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_emit_ui_choreography_canary PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
-target_compile_options(chronontemplate_emit_ui_choreography_canary PRIVATE -Wall -Wextra)
-
-add_executable(chronontemplate_emit_camera_1950_story tools/camera_roll/emit_camera_1950_story.cpp)
-target_link_libraries(chronontemplate_emit_camera_1950_story PRIVATE chronontemplate)
-target_include_directories(chronontemplate_emit_camera_1950_story PRIVATE
-    "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/vcpkg_installed/linux-video-fast-dev/x64-linux/include")
-
-# Native C++ examples for the vector-map, date-marker, and fading-image samples.
-add_executable(chronontemplate_emit_oil_crisis_reference_plans
-        tools/showcases/emit_oil_crisis_reference_plans.cpp)
-target_include_directories(chronontemplate_emit_oil_crisis_reference_plans PRIVATE
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-target_compile_features(chronontemplate_emit_oil_crisis_reference_plans PRIVATE cxx_std_20)
-target_compile_options(chronontemplate_emit_oil_crisis_reference_plans PRIVATE -Wall -Wextra)
-
-add_executable(chronontemplate_emit_truett_cathy_legacy_v1
-        tools/entities_with_text/emit_truett_cathy_legacy_v1.cpp)
-target_link_libraries(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
-    target_sources(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
-target_compile_options(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE -Wall -Wextra)
-
-add_executable(chronontemplate_emit_usa_atmospheric_backlight_v1
-        tools/map/emit_usa_atmospheric_backlight_v1.cpp)
-target_link_libraries(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    target_sources(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
-target_compile_options(chronontemplate_emit_usa_atmospheric_backlight_v1 PRIVATE -Wall -Wextra)
-
-add_executable(chronontemplate_emit_bullet_list_demo
-        tools/bullet_list/emit_bullet_list_demo.cpp)
-target_link_libraries(chronontemplate_emit_bullet_list_demo PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_emit_bullet_list_demo PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
-    target_sources(chronontemplate_emit_bullet_list_demo PRIVATE
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_emit_bullet_list_demo PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
-target_compile_options(chronontemplate_emit_bullet_list_demo PRIVATE -Wall -Wextra)
-
-add_executable(chronontemplate_emit_archival_timeline_reveal
-        tools/documentary_effects/emit_archival_timeline_reveal.cpp)
-target_link_libraries(chronontemplate_emit_archival_timeline_reveal PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_emit_archival_timeline_reveal PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
-    target_sources(chronontemplate_emit_archival_timeline_reveal PRIVATE
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_emit_archival_timeline_reveal PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
-target_compile_options(chronontemplate_emit_archival_timeline_reveal PRIVATE -Wall -Wextra)
-
-add_executable(chronontemplate_emit_entity_filmstrip_reference
-        tools/entities_with_text/emit_entity_filmstrip_reference.cpp)
-target_link_libraries(chronontemplate_emit_entity_filmstrip_reference PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_emit_entity_filmstrip_reference PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
-    target_sources(chronontemplate_emit_entity_filmstrip_reference PRIVATE
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_emit_entity_filmstrip_reference PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
-target_compile_options(chronontemplate_emit_entity_filmstrip_reference PRIVATE -Wall -Wextra)
-
-add_executable(chronontemplate_dump_documentary_snapshot_pose
-        tools/entities_with_text/dump_documentary_snapshot_pose.cpp)
-target_link_libraries(chronontemplate_dump_documentary_snapshot_pose PRIVATE chronontemplate)
-
-# The full native CLI canary needs ChrononMotion's optional typed JSON writer.
-if(TARGET chrononmotion_chronon3d_adapter)
-    add_executable(chronontemplate_dump_documentary_snapshot_plan
-            tools/entities_with_text/dump_documentary_snapshot_plan.cpp)
-    target_link_libraries(chronontemplate_dump_documentary_snapshot_plan
-            PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
-    add_executable(chronontemplate_emit_dataviz_sample
-            tools/captions_dataviz/emit_dataviz_sample.cpp)
-    target_link_libraries(chronontemplate_emit_dataviz_sample
-            PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
-endif()
-
-add_executable(chronontemplate_emit_effects_overlays tools/effects_overlays/emit_effects_overlays.cpp)
-target_link_libraries(chronontemplate_emit_effects_overlays PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_emit_effects_overlays PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    set(CHRONONTEMPLATE_EFFECTS_EMISSION_DIR
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
-    target_sources(chronontemplate_emit_effects_overlays PRIVATE
-        "${CHRONONTEMPLATE_EFFECTS_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_EFFECTS_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_EFFECTS_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_emit_effects_overlays PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
-
-add_executable(chronontemplate_emit_date_groups tools/date_groups/emit_date_groups.cpp)
-target_link_libraries(chronontemplate_emit_date_groups PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_emit_date_groups PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    set(CHRONONTEMPLATE_DATE_GROUPS_EMISSION_DIR
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
-    target_sources(chronontemplate_emit_date_groups PRIVATE
-        "${CHRONONTEMPLATE_DATE_GROUPS_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_DATE_GROUPS_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_DATE_GROUPS_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_emit_date_groups PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.
 target_include_directories(chronontemplate PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include>
+        $<BUILD_INTERFACE:${CHRONONTEMPLATE_CHRONON3D_DIR}/include>
+        $<BUILD_INTERFACE:${CHRONONTEMPLATE_GLM_DIR}>
         $<BUILD_INTERFACE:${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}>
         $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(chronontemplate PUBLIC ChrononMotion::chrononmotion)
+# ── Live Chronon3D adapter: the pure/adapter boundary ────────────────────────
+#
+# Pure template recipes (the library above) never link the renderer. The two
+# C-ABI handoff units sit in this adapter target instead: it links the pure
+# core above and the Chronon3D headers, and only it mentions the live
+# `chronon_engine`/`chronon_plan` handles. Headless builds (CI) compile and
+# test the core without ever needing a Chronon3D library binary.
+add_library(chronontemplate_live_adapter STATIC
+        src/chronontemplate/core/ChrononMotionContract.cpp
+        src/chronontemplate/core/ChrononRenderAdapter.cpp)
+add_library(ChrononTemplate::live_adapter ALIAS chronontemplate_live_adapter)
+target_link_libraries(chronontemplate_live_adapter PUBLIC chronontemplate)
+target_include_directories(chronontemplate_live_adapter PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CHRONONTEMPLATE_CHRONON3D_DIR}/include>
+        $<BUILD_INTERFACE:${CHRONONTEMPLATE_GLM_DIR}>
+        $<BUILD_INTERFACE:${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}>
+        $<INSTALL_INTERFACE:include>)
+target_compile_features(chronontemplate_live_adapter PUBLIC cxx_std_20)
+target_compile_options(chronontemplate_live_adapter PRIVATE -Wall -Wextra)
+if(CHRONONTEMPLATE_WERROR)
+    target_compile_options(chronontemplate_live_adapter PRIVATE -Werror)
+endif()
 target_compile_features(chronontemplate PUBLIC cxx_std_20)
 
 target_compile_options(chronontemplate PRIVATE -Wall -Wextra)
@@ -373,117 +247,5 @@ if(CHRONONTEMPLATE_WERROR)
     target_compile_options(chronontemplate PRIVATE -Werror)
 endif()
 
-# ── Canonical catalog emitter ────────────────────────────────────────────────
-#
-# The catalog the renderer consumes is produced here rather than maintained by
-# hand: this target validates `catalog/motion_catalog.v1.json` and merges the
-# lists that are genuinely C++-owned (the template catalog and the composition
-# presets). It needs a header-only JSON parser; point
-# CHRONONTEMPLATE_NLOHMANN_JSON_INCLUDE_DIR at one when it is not on the
-# default search path. The tool is a development artifact — the emitted file is
-# what a consumer reads — so a checkout without the parser can still build the
-# library by switching CHRONONTEMPLATE_BUILD_CATALOG_TOOL off.
-option(CHRONONTEMPLATE_BUILD_CATALOG_TOOL "Build the canonical catalog emitter" ON)
 
-if(CHRONONTEMPLATE_BUILD_CATALOG_TOOL)
-    add_executable(chronontemplate_emit_catalog tools/emit_catalog.cpp)
-    target_link_libraries(chronontemplate_emit_catalog PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_emit_catalog PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-    target_compile_definitions(chronontemplate_emit_catalog PRIVATE
-            CHRONONTEMPLATE_CATALOG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/motion_catalog.v1.json"
-            CHRONONTEMPLATE_ENTITY_PRESENTATION_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/entity_presentation.v1.json"
-            CHRONONTEMPLATE_ANIMATION_SECTIONS_FILE="${CMAKE_CURRENT_SOURCE_DIR}/catalog/animation_sections.v1.json")
-    target_compile_options(chronontemplate_emit_catalog PRIVATE -Wall -Wextra)
-    if(CHRONONTEMPLATE_WERROR)
-        target_compile_options(chronontemplate_emit_catalog PRIVATE -Werror)
-    endif()
-
-    # The important-phrase plans: Typewriter, Highlight and Apple families
-    # lowered to chronon.render-plan.v2 plans; the renderer draws the glow.
-    add_executable(chronontemplate_emit_important_phrase_plans
-            tools/important_phrases/emit_important_phrase_plans.cpp)
-    target_link_libraries(chronontemplate_emit_important_phrase_plans PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_emit_important_phrase_plans PRIVATE
-            "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-    target_compile_options(chronontemplate_emit_important_phrase_plans PRIVATE -Wall -Wextra)
-    if(CHRONONTEMPLATE_WERROR)
-        target_compile_options(chronontemplate_emit_important_phrase_plans PRIVATE -Werror)
-    endif()
-
-    # The short-phrase catalog: surviving recipes + the decor bumper, projected
-    # from the C++ pack into catalog/short_phrase_motion.v1.json.
-    add_executable(chronontemplate_emit_short_phrase_catalog
-            tools/short_phrases/emit_short_phrase_catalog.cpp)
-    target_link_libraries(chronontemplate_emit_short_phrase_catalog PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_emit_short_phrase_catalog PRIVATE
-            "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-    target_compile_options(chronontemplate_emit_short_phrase_catalog PRIVATE -Wall -Wextra)
-    if(CHRONONTEMPLATE_WERROR)
-        target_compile_options(chronontemplate_emit_short_phrase_catalog PRIVATE -Werror)
-    endif()
-
-    # The short-phrase render plans: one chronon.render-plan.v2 per archetype,
-    # ready for the Chronon3D GPU CLI. See render_short_phrases.sh.
-    add_executable(chronontemplate_emit_short_phrase_plans
-            tools/short_phrases/emit_short_phrase_plans.cpp)
-    target_link_libraries(chronontemplate_emit_short_phrase_plans PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_emit_short_phrase_plans PRIVATE
-            "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-    target_compile_options(chronontemplate_emit_short_phrase_plans PRIVATE -Wall -Wextra)
-    if(CHRONONTEMPLATE_WERROR)
-        target_compile_options(chronontemplate_emit_short_phrase_plans PRIVATE -Werror)
-    endif()
-
-endif()
-
-add_executable(chronontemplate_emit_blackboard_torture_v1
-        tools/emit_blackboard_torture_v1.cpp)
-target_link_libraries(chronontemplate_emit_blackboard_torture_v1 PRIVATE chronontemplate)
-target_compile_options(chronontemplate_emit_blackboard_torture_v1 PRIVATE -Wall -Wextra)
-if(CHRONONTEMPLATE_WERROR)
-    target_compile_options(chronontemplate_emit_blackboard_torture_v1 PRIVATE -Werror)
-endif()
-
-add_executable(chronontemplate_emit_procedural_documentary_v2 tools/showcases/emit_procedural_documentary_v2.cpp)
-target_link_libraries(chronontemplate_emit_procedural_documentary_v2 PRIVATE chronontemplate)
-
-# Optional native-plan canary for deterministic BackgroundPack V3 emission.
-add_executable(chronontemplate_background_canary_v1 tools/backgrounds/background_canary_v1.cpp)
-target_link_libraries(chronontemplate_background_canary_v1 PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_background_canary_v1 PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
-    target_sources(chronontemplate_background_canary_v1 PRIVATE
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_background_canary_v1 PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
-target_compile_options(chronontemplate_background_canary_v1 PRIVATE -Wall -Wextra)
-
-# Optional native-plan canary for rapid transition frame-range validation.
-add_executable(chronontemplate_transition_canary_v1 tools/transitions/transition_canary_v1.cpp)
-target_link_libraries(chronontemplate_transition_canary_v1 PRIVATE chronontemplate)
-if(TARGET chrononmotion_chronon3d_adapter)
-    target_link_libraries(chronontemplate_transition_canary_v1 PRIVATE chrononmotion_chronon3d_adapter)
-else()
-    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
-    target_sources(chronontemplate_transition_canary_v1 PRIVATE
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
-        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
-    target_include_directories(chronontemplate_transition_canary_v1 PRIVATE
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-endif()
-
-# Standalone and contract tests are organized in a dedicated CMake module.
-# Include preserves the original target names, options and source-directory scope.
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tests.cmake")
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tests.cmake)

@@ -36,6 +36,119 @@ def frame_workers() -> int:
     return min(2, max(1, (os.cpu_count() or 2) // 2))
 
 
+# One map group may show at most this many unique stops: it is the camera's
+# authored route budget (the planner splits larger groups into consecutive
+# map groups, losing no place). Exceeding it here is a FAIL-CLOSED error — the
+# renderer never silently drops a grounded place.
+MAX_UNIQUE_STOPS = 5
+
+
+def normalize_map_pins(raw_pins):
+    """Deduplicate repeated mentions (one stop per coordinate) and fail closed
+    above the five-stop budget, naming every stop that would be lost."""
+    pins = []
+    seen_pin_coords = set()
+    for pin in raw_pins:
+        coordinate_key = (round(float(pin["latitude"]), 4), round(float(pin["longitude"]), 4))
+        if coordinate_key in seen_pin_coords:
+            continue
+        seen_pin_coords.add(coordinate_key)
+        pins.append(pin)
+    if len(pins) > MAX_UNIQUE_STOPS:
+        dropped = [str(pin.get("label") or pin.get("id")) for pin in pins[MAX_UNIQUE_STOPS:]]
+        raise ValueError(
+            f"dynamic-map: {len(pins)} unique stops exceed the {MAX_UNIQUE_STOPS}-stop "
+            f"budget; would drop {dropped!r}. Split the map group — the renderer "
+            f"never drops a grounded place silently.")
+    return pins
+
+
+def parse_pin_timing(pins, pin_timing, duration_us):
+    """Validate the voiceover's per-pin schedule and return it aligned with
+    pins as a list of (start_s, duration_s). Every grounded pin must be timed;
+    the schedule must fit inside the clip. Absent timing returns None."""
+    if pin_timing is None:
+        return None
+    if not isinstance(pin_timing, list):
+        raise ValueError("pin_timing must be a list of {id,start_s,duration_s} entries")
+    clip_seconds = duration_us / 1_000_000.0
+    by_id = {}
+    for entry in pin_timing:
+        if not isinstance(entry, dict):
+            raise ValueError("pin_timing entries must be objects")
+        try:
+            pin_id = str(entry["id"])
+            start_s = float(entry["start_s"])
+            duration_s = float(entry["duration_s"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("pin_timing entries require numeric start_s and duration_s") from exc
+        if (not math.isfinite(start_s) or not math.isfinite(duration_s)
+                or start_s < 0.0 or duration_s <= 0.0):
+            raise ValueError(f"pin_timing entry {pin_id!r} has non-finite or non-positive timing")
+        if start_s + duration_s > clip_seconds + 1e-6:
+            raise ValueError(f"pin_timing entry {pin_id!r} runs past the {clip_seconds:.3f}s clip")
+        if pin_id in by_id:
+            raise ValueError(f"pin_timing duplicates pin id {pin_id!r}")
+        by_id[pin_id] = (start_s, duration_s)
+    schedule = []
+    for pin in pins:
+        pin_id = str(pin.get("id"))
+        if pin_id not in by_id:
+            raise ValueError(f"pin_timing is missing grounded pin {pin_id!r}")
+        schedule.append(by_id[pin_id])
+    return schedule
+
+
+def tour_timing_from_pin_timing(schedule, fps):
+    """Project the spoken schedule onto the tour builder: every stop is held
+    exactly while its place is spoken, and travel legs take the spoken gaps.
+    Returns (seconds_per_stop, travel_seconds, stop_frame_reductions)."""
+    durations = [duration for _, duration in schedule]
+    seconds_per_stop = max(durations)
+    gaps = []
+    for index in range(len(schedule) - 1):
+        current_end = schedule[index][0] + schedule[index][1]
+        gaps.append(max(0.0, schedule[index + 1][0] - current_end))
+    travel_seconds = (min(2.4, max(1.0, sum(gaps) / len(gaps))) if gaps else 1.5)
+    reductions = tuple(max(0, int(round((seconds_per_stop - duration) * fps)))
+                       for duration in durations)
+    return seconds_per_stop, travel_seconds, reductions
+
+
+def resolve_declared_composition(map_animation, fallbacks, pin_count,
+                                 certified, multi_pin_systems, certified_scenes, multi_pin_scenes):
+    """Resolve the composition honoring DECLARED fallbacks: an explicit id is
+    validated and fails closed when its documented pin count cannot run; only
+    then may the first compatible DECLARED fallback replace it, and the swap
+    is returned as (composition, source) — never silent."""
+    requested = str(map_animation or "").strip()
+    if requested and requested not in certified and requested not in certified_scenes:
+        raise ValueError(f"unsupported map_animation: {requested}")
+
+    def compatible(composition):
+        if composition in multi_pin_systems and pin_count < 2:
+            return False
+        if composition in multi_pin_scenes and pin_count < 2:
+            return False
+        if composition == "ed_yemen_markers" and pin_count != 3:
+            return False
+        return True
+
+    if requested:
+        if compatible(requested):
+            return requested, "explicit"
+        for fallback in fallbacks or []:
+            candidate = str(fallback or "").strip()
+            if candidate and candidate in certified and compatible(candidate):
+                print(f"[dynamic-map] declared fallback {candidate!r} replaces incompatible {requested!r}",
+                      flush=True)
+                return candidate, "declared_fallback"
+        raise ValueError(
+            f"map_animation {requested!r} cannot run for {pin_count} pins and no "
+            f"declared fallback is compatible")
+    return "", "none"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
@@ -92,22 +205,15 @@ def main() -> int:
                 or route_final_hold_seconds < 0):
             raise ValueError("route_timing durations must be finite, with positive city/travel times and nonnegative final hold")
     raw_pins = payload.get("pins", [])
-    # Keep a route map focused: repeated mentions of the same place are one
-    # stop, and no tour may contain more than five distinct stops. This cap
-    # is part of the camera's authored 6.5-second route budget; seven stops
-    # cannot preserve the 1.5-second terminal hold inside that window.
-    pins = []
-    seen_pin_coords = set()
-    for pin in raw_pins:
-        coordinate_key = (round(float(pin["latitude"]), 4), round(float(pin["longitude"]), 4))
-        if coordinate_key in seen_pin_coords:
-            continue
-        seen_pin_coords.add(coordinate_key)
-        pins.append(pin)
-        if len(pins) == 5:
-            break
+    # Repeated mentions are one stop per coordinate. Above the five-stop
+    # budget the renderer FAILS CLOSED (see normalize_map_pins): it never
+    # silently drops a grounded place — the planner splits the map group.
+    pins = normalize_map_pins(raw_pins)
     if len(pins) != len(raw_pins):
-        print(f"[dynamic-map] limited route to {len(pins)} unique stops from {len(raw_pins)} mentions", flush=True)
+        print(f"[dynamic-map] folded {len(raw_pins)} mentions into {len(pins)} unique stops", flush=True)
+    # The voiceover's own per-pin schedule: every place activates exactly when
+    # it is spoken. The renderer follows it; it never invents timing.
+    pin_timing = parse_pin_timing(pins, payload.get("pin_timing"), duration_us)
     area_glow_radius_km = float(payload.get("area_glow_radius_km", 0.0))
     # Keep one predictable camera move available while map compositions are
     # being reviewed. Other camera variants are retired from runtime selection.
@@ -124,15 +230,12 @@ def main() -> int:
         raise ValueError(f"unsupported camera_animation: {camera_animation}")
     if label_animation != "none" and label_animation not in MAP_LABEL_ANIMATIONS:
         raise ValueError(f"unsupported label_animation: {label_animation}")
-    if map_animation and map_animation not in MAP_COMPOSITIONS \
-            and map_animation not in MAP_EDITORIAL_SCENES:
-        raise ValueError(f"unsupported map_animation: {map_animation}")
-    if map_animation in MULTI_PIN_SYSTEMS and len(pins) < 2:
-        raise ValueError(f"map_animation {map_animation} requires at least two pins")
-    if map_animation in MULTI_PIN_SCENES and len(pins) < 2:
-        raise ValueError(f"map_animation {map_animation} requires at least two pins")
-    if map_animation == "ed_yemen_markers" and len(pins) != 3:
-        raise ValueError("ed_yemen_markers requires exactly three grounded pins")
+    # Composition admission honors DECLARED fallbacks: an explicit id that
+    # cannot run for this pin count is replaced only by a declared compatible
+    # fallback (recorded below), and otherwise fails closed.
+    map_animation, composition_source = resolve_declared_composition(
+        map_animation, payload.get("fallbacks"), len(pins),
+        MAP_COMPOSITIONS, MULTI_PIN_SYSTEMS, MAP_EDITORIAL_SCENES, MULTI_PIN_SCENES)
     if map_animation in MAP_EDITORIAL_SCENES and label_animation != "none":
         raise ValueError("certified editorial map scenes require label_animation='none'")
     # Photo slots only accept real assets: a specified photo that does not
@@ -217,26 +320,25 @@ def main() -> int:
         stop_zooms = [municipal_city_zoom if map_level(pin) == "municipality" else zoom
                       for pin, zoom in zip(pins, stop_zooms)]
     # A short map beat cannot carry a multi-stop tour and still reserve the
-    # authored final hold. Keep the lead location as a single animated map
-    # instead of failing the whole video during TourBuilder's strict gate.
-    # Dedicated multi-pin compositions keep their pins and fail closed above.
+    # authored final hold. Dedicated multi-pin compositions keep their pins;
+    # every other short multi-stop beat fails closed below (no silent drop).
     minimum_tour_seconds = 3.0 + 4.5 * (len(stops) - 1)
     if (
         len(stops) > 1
         and total_frames / geo.FPS < minimum_tour_seconds
         and route_timing is None
+        and pin_timing is None
         and map_animation not in MULTI_PIN_SYSTEMS
         and map_animation not in MULTI_PIN_SCENES
     ):
-        print(
-            f"[dynamic-map] short beat ({total_frames / geo.FPS:.2f}s): "
-            f"using lead location {stops[0].display_name!r} instead of "
-            f"a {len(stops)}-stop tour",
-            flush=True,
+        # Never drop places silently: the planner must split or re-time the
+        # sequence before rendering. Fail closed with the names that would be lost.
+        dropped = [stop.display_name for stop in stops[1:]]
+        raise ValueError(
+            f"dynamic-map: beat of {total_frames / geo.FPS:.2f}s cannot show "
+            f"{len(stops)} stops (needs {minimum_tour_seconds:.1f}s); "
+            f"would drop {dropped!r}. Split the map group or extend the beat."
         )
-        pins = pins[:1]
-        stops = stops[:1]
-        stop_zooms = stop_zooms[:1]
     # Candidate-area bounds keep each authored camera focused on its subject.
     editorial_country_scenes = set(MAP_EDITORIAL_SCENES)
     scene_camera_bounds = {
@@ -363,7 +465,16 @@ def main() -> int:
             # Keep the previous five-second camera tour, then hold the final
             # destination for another 1.5 seconds. The builder's timeline ends
             # before TOTAL_FRAMES, so its final-pose fallback supplies that hold.
-            tour_seconds = max(1.0, duration_us / 1_000_000 - 1.5)
+            pin_reductions = ()
+            if pin_timing is not None:
+                # Per-pin spoken timing paces the camera: each stop is held
+                # exactly while its place is spoken, and travel legs take the
+                # spoken gaps. The renderer follows the voiceover, never the
+                # reverse.
+                stop_seconds, travel_seconds, pin_reductions = tour_timing_from_pin_timing(pin_timing, geo.FPS)
+                tour_seconds = 0.0
+            else:
+                tour_seconds = max(1.0, duration_us / 1_000_000 - 1.5)
             # Give close-zoom transitions a little more room: the strict camera
             # velocity gate caught a small zoom snap at a five-stop city route.
             # Keep the authored tour duration fixed by taking that time from the
@@ -373,11 +484,14 @@ def main() -> int:
             # ground to cover, so give each leg 1.8-2.4 s: slower legs stay far
             # inside the gate and remain readable. Borrow the extra time from
             # per-stop holds; keep the authored tour and final 1.5 s hold intact.
-            travel_seconds = min(2.4, max(1.8, tour_seconds / (1.9 * (len(stops) - 1))))
-            stop_seconds = max(0.15, (tour_seconds - travel_seconds * (len(stops) - 1)) / len(stops))
+            if pin_timing is None:
+                travel_seconds = min(2.4, max(1.8, tour_seconds / (1.9 * (len(stops) - 1))))
+                stop_seconds = max(0.15, (tour_seconds - travel_seconds * (len(stops) - 1)) / len(stops))
             builder = geo.TourBuilder(stops, seconds_per_stop=stop_seconds,
                                       travel_seconds=travel_seconds, end_zoom=max(stop_zooms))
             builder.stop_end_zooms = stop_zooms
+            if pin_reductions:
+                builder._stop_frame_reductions = pin_reductions
             # Start much closer to the first city: this avoids a steep opening
             # zoom step on short, multi-stop routes and matches the requested
             # city-first framing.
@@ -591,6 +705,17 @@ def main() -> int:
     summary = {
         "schema": "chronon.dynamic-map-telemetry.v1",
         "basemap": basemap,
+        # Map decision mirror: the group identity, the planner's declared
+        # strategy, the composition family and any declared fallback decision
+        # ride the telemetry so one report explains this render end to end.
+        "map_group": payload.get("map_group"),
+        "map_group_strategy": payload.get("map_group_strategy"),
+        "composition_family": payload.get("composition_family"),
+        "composition_fallback": payload.get("composition_fallback"),
+        "composition_source": composition_source,
+        "pin_timing": ([{"id": str(pin.get("id")), "start_s": start_s, "duration_s": duration_s}
+                        for pin, (start_s, duration_s) in zip(pins, pin_timing)]
+                       if pin_timing is not None else None),
         "frames": total_frames,
         "dimensions": {"width": width, "height": height},
         "fps": {"num": fps_num, "den": fps_den},

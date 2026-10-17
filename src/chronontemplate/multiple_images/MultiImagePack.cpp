@@ -11,6 +11,7 @@ namespace chronontemplate {
     namespace {
 
         using chrononmotion::Vector2;
+        using Direction = chrononmotion::motion::presets::Direction;
 
         /// `assets/card_trio_1.png` -> `CARD TRIO 1` (no directory, no extension).
         std::string labelFromPath(const std::string& assetPath) {
@@ -39,6 +40,92 @@ namespace chronontemplate {
 
         [[nodiscard]] int exitFramesFor(const MultiImageSpec& spec) {
             return std::max(1, std::min(18, spec.holdFrames + 1));
+        }
+
+        /// How one tile enters: a slide along a direction, a pop, or a plain rise.
+        enum class Enter : std::uint8_t { Slide, Pop, Rise };
+
+        struct Beat {
+            int start{0};        ///< frame offset from the board's inFrame
+            int enter{1};        ///< frames the entrance takes
+            Enter kind{Enter::Rise};
+            Direction dir{Direction::Up};
+        };
+
+        /// The certified choreography of each layout as a per-tile beat schedule.
+        /// `s` is the stagger step; every start stays inside the duration.
+        std::vector<Beat> beatsFor(MultiImageLayout layout, const std::string& motionId,
+                                   int count, int duration) {
+            const int s = std::max(1, duration / (count + 1));
+            const int half = std::max(1, s / 2);
+            std::vector<Beat> beats(static_cast<std::size_t>(count));
+            auto at = [&](std::size_t i) -> Beat& { return beats[i]; };
+
+            switch (layout) {
+                case MultiImageLayout::Duo:
+                    if (motionId == "duo_split_reveal") {
+                        // Both cards slide in from opposite edges at once.
+                        at(0) = {0, std::max(1, duration / 2), Enter::Slide, Direction::Right};
+                        at(1) = {0, std::max(1, duration / 2), Enter::Slide, Direction::Left};
+                    } else {  // duo_cross_focus: the first pops, then the second cross-focuses in
+                        at(0) = {0, s, Enter::Pop, Direction::Up};
+                        at(1) = {s, s, Enter::Pop, Direction::Up};
+                    }
+                    break;
+                case MultiImageLayout::Trio:
+                    if (motionId == "trio_fan_reveal") {
+                        // The three cards fan up in reading order.
+                        for (std::size_t i = 0; i < 3; ++i) {
+                            at(i) = {static_cast<int>(i) * s, s, Enter::Slide, Direction::Up};
+                        }
+                    } else {  // trio_center_priority: the hero pops first, the sides follow
+                        at(1) = {0, s, Enter::Pop, Direction::Up};
+                        at(0) = {s, s, Enter::Slide, Direction::Right};
+                        at(2) = {s, s, Enter::Slide, Direction::Left};
+                    }
+                    break;
+                case MultiImageLayout::Quad:
+                    if (motionId == "quad_grid_assemble") {
+                        // Reading order cascade: each card rises into its cell.
+                        for (std::size_t i = 0; i < 4; ++i) {
+                            at(i) = {static_cast<int>(i) * s, s, Enter::Rise, Direction::Up};
+                        }
+                    } else {  // quad_corner_converge: the left column slides in, the right follows
+                        at(0) = {0, s, Enter::Slide, Direction::Right};
+                        at(2) = {0, s, Enter::Slide, Direction::Right};
+                        at(1) = {s, s, Enter::Slide, Direction::Left};
+                        at(3) = {s, s, Enter::Slide, Direction::Left};
+                    }
+                    break;
+                case MultiImageLayout::Penta:
+                    if (motionId == "penta_hero_plus_four") {
+                        // The top-left hero pops first; the other four rise after it.
+                        at(0) = {0, 2 * s, Enter::Pop, Direction::Up};
+                        for (std::size_t i = 1; i < 5; ++i) {
+                            at(i) = {2 * s + static_cast<int>(i - 1) * half, s, Enter::Rise, Direction::Up};
+                        }
+                    } else {  // penta_priority_cycle: each card pops in priority order
+                        for (std::size_t i = 0; i < 5; ++i) {
+                            at(i) = {static_cast<int>(i) * s, s, Enter::Pop, Direction::Up};
+                        }
+                    }
+                    break;
+            }
+            return beats;
+        }
+
+        const std::vector<std::string>& motionIdsFor(MultiImageLayout layout) {
+            static const std::vector<std::string> duo{"duo_split_reveal", "duo_cross_focus"};
+            static const std::vector<std::string> trio{"trio_fan_reveal", "trio_center_priority"};
+            static const std::vector<std::string> quad{"quad_grid_assemble", "quad_corner_converge"};
+            static const std::vector<std::string> penta{"penta_hero_plus_four", "penta_priority_cycle"};
+            switch (layout) {
+                case MultiImageLayout::Duo: return duo;
+                case MultiImageLayout::Trio: return trio;
+                case MultiImageLayout::Quad: return quad;
+                case MultiImageLayout::Penta: return penta;
+            }
+            throw std::invalid_argument("motionIdsFor: unknown layout");
         }
 
     }// namespace
@@ -77,6 +164,15 @@ namespace chronontemplate {
         return "unknown";
     }
 
+    std::vector<std::string> multiImageMotionIds(MultiImageLayout layout) {
+        return motionIdsFor(layout);
+    }
+
+    bool isMultiImageMotion(MultiImageLayout layout, const std::string& motionId) {
+        const std::vector<std::string>& ids = motionIdsFor(layout);
+        return std::find(ids.begin(), ids.end(), motionId) != ids.end();
+    }
+
     std::string multiImageTileLabel(const std::string& assetPath) {
         return labelFromPath(assetPath);
     }
@@ -92,6 +188,10 @@ namespace chronontemplate {
             throw std::invalid_argument(
                     "addMultiImageBoard: positive tile size and duration are required");
         }
+        if (!spec.motionId.empty() && !isMultiImageMotion(spec.layout, spec.motionId)) {
+            throw std::invalid_argument(
+                    "addMultiImageBoard: the motion is not certified for this layout");
+        }
         for (const MultiImageTile& tile : spec.tiles) {
             if (tile.path.empty()) {
                 throw std::invalid_argument("addMultiImageBoard: every tile needs an asset path");
@@ -106,6 +206,12 @@ namespace chronontemplate {
         const int exitFrames = exitFramesFor(spec);
         const int exitStart = endFrame - exitFrames;
 
+        // With no certified motion the shared entrance staggers the grid as before.
+        const bool certified = !spec.motionId.empty();
+        const std::vector<Beat> beats = certified
+                ? beatsFor(spec.layout, spec.motionId, count, spec.duration)
+                : std::vector<Beat>{};
+
         MultiImageBoard board;
         board.inFrame = spec.inFrame;
         board.tiles.reserve(cells.size());
@@ -116,9 +222,20 @@ namespace chronontemplate {
             const Vector2 cell = cells[i];
             const float x = canvas.x * cell.x;
             const float y = canvas.y * cell.y;
-            const int start = spec.inFrame + static_cast<int>(i) * stagger;
-            const int enterDuration = std::max(1, stagger);
-            const int moveDuration = std::max(2, stagger * 2);
+
+            int start = spec.inFrame + static_cast<int>(i) * stagger;
+            int enterDuration = std::max(1, stagger);
+            int moveDuration = std::max(2, stagger * 2);
+            Enter kind = Enter::Rise;
+            Direction dir = Direction::Up;
+            if (certified) {
+                const Beat& beat = beats[i];
+                start = spec.inFrame + beat.start;
+                enterDuration = beat.enter;
+                moveDuration = std::max(2, beat.enter);
+                kind = beat.kind;
+                dir = beat.dir;
+            }
 
             LayerHandle& image = scene.image(ImageSpec{
                     .path = tile.path,
@@ -127,23 +244,48 @@ namespace chronontemplate {
                     .targetSize = Vector2(spec.tileWidth, spec.tileHeight)});
             image.position(x, y);
             image.alive(spec.inFrame, endFrame);
-            switch (spec.entrance) {
-                case MultiImageEntrance::Fade:
-                    image.animate(FadeIn{.inFrame = start, .duration = enterDuration});
-                    break;
-                case MultiImageEntrance::Rise:
-                    image.animate(SlideIn{
-                                     .direction = chrononmotion::motion::presets::Direction::Up,
-                                     .inFrame = start,
-                                     .duration = moveDuration,
-                                     .distance = spec.tileHeight * 0.5f})
-                            .animate(FadeIn{.inFrame = start, .duration = enterDuration});
-                    break;
-                case MultiImageEntrance::ScalePop:
-                    image.animate(ScalePop{.inFrame = start, .duration = moveDuration,
-                                           .from = 0.72f, .to = 1.f})
-                            .animate(FadeIn{.inFrame = start, .duration = enterDuration});
-                    break;
+
+            if (certified) {
+                switch (kind) {
+                    case Enter::Slide:
+                        image.animate(SlideIn{.direction = dir,
+                                              .inFrame = start,
+                                              .duration = moveDuration,
+                                              .distance = spec.tileWidth * 0.5f})
+                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
+                        break;
+                    case Enter::Pop:
+                        image.animate(ScalePop{.inFrame = start, .duration = moveDuration,
+                                               .from = 0.72f, .to = 1.f})
+                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
+                        break;
+                    case Enter::Rise:
+                        image.animate(SlideIn{.direction = Direction::Up,
+                                              .inFrame = start,
+                                              .duration = moveDuration,
+                                              .distance = spec.tileHeight * 0.5f})
+                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
+                        break;
+                }
+            } else {
+                switch (spec.entrance) {
+                    case MultiImageEntrance::Fade:
+                        image.animate(FadeIn{.inFrame = start, .duration = enterDuration});
+                        break;
+                    case MultiImageEntrance::Rise:
+                        image.animate(SlideIn{
+                                         .direction = Direction::Up,
+                                         .inFrame = start,
+                                         .duration = moveDuration,
+                                         .distance = spec.tileHeight * 0.5f})
+                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
+                        break;
+                    case MultiImageEntrance::ScalePop:
+                        image.animate(ScalePop{.inFrame = start, .duration = moveDuration,
+                                               .from = 0.72f, .to = 1.f})
+                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
+                        break;
+                }
             }
             image.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
             board.tiles.push_back(&image);
@@ -158,8 +300,8 @@ namespace chronontemplate {
                                                         .name = "caption_" + std::to_string(i)});
                 text.position(x, y + spec.tileHeight * 0.5f + spec.captionOffset);
                 text.alive(spec.inFrame, endFrame);
-                text.animate(FadeIn{.inFrame = start + std::max(1, stagger / 2),
-                                    .duration = enterDuration});
+                text.animate(FadeIn{.inFrame = start + std::max(1, enterDuration / 2),
+                                    .duration = std::max(1, enterDuration)});
                 text.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
                 board.captions.push_back(&text);
             }
