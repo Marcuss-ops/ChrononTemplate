@@ -1,6 +1,5 @@
-# ChrononTemplate tests (moved unchanged from root CMakeLists.txt).
-# CMAKE_CURRENT_SOURCE_DIR remains the repository root because this module
-# is included rather than added as a subdirectory.
+# ChrononTemplate tests (extracted from CMakeLists.txt; identical targets).
+# Included at the end of CMakeLists.txt.
 if(CHRONONTEMPLATE_BUILD_TESTS)
     enable_testing()
 
@@ -54,6 +53,9 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         add_test(NAME chronontemplate_geo_places_contract
             COMMAND "${Python3_EXECUTABLE}"
                     "${CMAKE_CURRENT_SOURCE_DIR}/tools/map/test_geo_places.py")
+        add_test(NAME chronontemplate_dynamic_map_payload_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/map/test_render_dynamic_map_payload.py")
     endif()
     if(Python3_Interpreter_FOUND AND EXISTS "${CHRONONTEMPLATE_EDITORIAL_RENDERER_CLI}")
         add_test(NAME chronontemplate_editorial_benchmark_contract
@@ -287,7 +289,7 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     add_test(NAME chronontemplate_youtube_subscribe_test COMMAND chronontemplate_youtube_subscribe_test)
 
     add_executable(chronontemplate_chronon_motion_contract_test tests/chronon_motion_contract.cpp)
-    target_link_libraries(chronontemplate_chronon_motion_contract_test PRIVATE chronontemplate)
+    target_link_libraries(chronontemplate_chronon_motion_contract_test PRIVATE chronontemplate_live_adapter)
     target_include_directories(chronontemplate_chronon_motion_contract_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_chronon_motion_contract_test COMMAND chronontemplate_chronon_motion_contract_test)
 
@@ -350,8 +352,9 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
         endif()
         add_executable(chronontemplate_chronon_render_adapter_test tests/chronon_render_adapter.cpp)
         target_link_libraries(chronontemplate_chronon_render_adapter_test PRIVATE
-                chronontemplate "${CHRONONTEMPLATE_CHRONON3D_LIBRARY}")
+                chronontemplate_live_adapter "${CHRONONTEMPLATE_CHRONON3D_LIBRARY}")
         target_include_directories(chronontemplate_chronon_render_adapter_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
         add_test(NAME chronontemplate_chronon_render_adapter_test COMMAND chronontemplate_chronon_render_adapter_test)
     endif()
 endif()
+

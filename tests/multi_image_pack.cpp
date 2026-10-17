@@ -108,6 +108,81 @@ namespace {
         check(threw, "a quad with three tiles is rejected");
     }
 
+    /// Opacity of every tile sampled every 10 frames: the choreography's signature.
+    std::vector<float> tileOpacityTimeline(const MultiImageSpec& spec, std::size_t tileIndex) {
+        FakeContentHost host;
+        TemplateScene scene("timeline", 30.f, host, 1920.f, 1080.f);
+        const MultiImageBoard board = addMultiImageBoard(scene, spec);
+        std::vector<float> out;
+        for (int frame = 0; frame <= 140; frame += 10) {
+            const FrameSubmission sub = scene.submit(frame);
+            const BoundLayer* layer = findLayer(sub, board.tiles[tileIndex]->id());
+            out.push_back(layer ? layer->transform.opacity : -1.f);
+        }
+        return out;
+    }
+
+    void theGroupMotionsAreCertifiedPerLayout() {
+        section("group motions are certified per layout");
+        constexpr std::array<MultiImageLayout, 4> layouts{
+                MultiImageLayout::Duo, MultiImageLayout::Trio,
+                MultiImageLayout::Quad, MultiImageLayout::Penta};
+        for (const MultiImageLayout layout : layouts) {
+            const std::vector<std::string> ids = multiImageMotionIds(layout);
+            check(ids.size() == 2, "each layout certifies exactly two group motions");
+            for (const std::string& id : ids) {
+                check(isMultiImageMotion(layout, id), "a certified motion is accepted by its layout");
+                MultiImageSpec spec = specFor(layout);
+                spec.motionId = id;
+                FakeContentHost host;
+                TemplateScene scene("motion_" + id, 30.f, host, 1920.f, 1080.f);
+                const MultiImageBoard board = addMultiImageBoard(scene, spec);
+                check(board.tiles.size() == multiImageTileCount(layout),
+                      "a certified motion authors one layer per tile");
+                check(scene.validate().empty(), "a certified motion builds a valid scene");
+
+                const FrameSubmission settled = scene.submit(100);
+                for (LayerHandle* tile : board.tiles) {
+                    const BoundLayer* layer = findLayer(settled, tile->id());
+                    check(layer && layer->transform.opacity >= 0.95f,
+                          "every tile is fully visible by mid-board");
+                }
+            }
+            bool threw = false;
+            MultiImageSpec bad = specFor(layout);
+            bad.motionId = "not_a_real_motion";
+            try {
+                FakeContentHost host;
+                TemplateScene scene("bad_motion", 30.f, host, 1920.f, 1080.f);
+                (void) addMultiImageBoard(scene, bad);
+            } catch (const std::invalid_argument&) {
+                threw = true;
+            }
+            check(threw, "an uncertified motion id is rejected");
+        }
+    }
+
+    void theTwoMotionsOfALayoutDiffer() {
+        section("the two motions of a layout produce different choreographies");
+        constexpr std::array<MultiImageLayout, 4> layouts{
+                MultiImageLayout::Duo, MultiImageLayout::Trio,
+                MultiImageLayout::Quad, MultiImageLayout::Penta};
+        for (const MultiImageLayout layout : layouts) {
+            const std::vector<std::string> ids = multiImageMotionIds(layout);
+            MultiImageSpec first = specFor(layout);
+            first.motionId = ids[0];
+            MultiImageSpec second = specFor(layout);
+            second.motionId = ids[1];
+            bool differs = false;
+            for (std::size_t tile = 0; tile < multiImageTileCount(layout); ++tile) {
+                if (tileOpacityTimeline(first, tile) != tileOpacityTimeline(second, tile)) {
+                    differs = true;
+                }
+            }
+            check(differs, "the two certified motions stagger the tiles differently");
+        }
+    }
+
     void theTileLabelIsDerivedFromThePath() {
         section("multi-image tile labels");
         check(multiImageTileLabel("assets/card_trio_1.png") == "CARD TRIO 1",
@@ -123,5 +198,7 @@ int main() {
     theBoardsAssembleAndSubmit();
     theBoardRejectsAMismatchedTileCount();
     theTileLabelIsDerivedFromThePath();
+    theGroupMotionsAreCertifiedPerLayout();
+    theTwoMotionsOfALayoutDiffer();
     return chrononmotion_test::report();
 }

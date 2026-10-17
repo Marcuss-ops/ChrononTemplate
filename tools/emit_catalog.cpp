@@ -28,6 +28,7 @@
 
 #include "chrononmotion/templates/Templates.hpp"
 #include "chronontemplate/core/Presets.hpp"
+#include "chronontemplate/multiple_images/MultiImagePack.hpp"
 #include "chronontemplate/backgrounds/ProceduralBackground.hpp"
 #include "chronontemplate/elements/HighlightingV2.hpp"
 #include "chronontemplate/important_phrases/apple/ApplePhrasePack.hpp"
@@ -367,6 +368,42 @@ namespace {
             const std::string motion = row["motion"].get<std::string>();
             if (motionIDs.find(motion) == motionIDs.end()) {
                 fail(where + " names unknown motion \"" + motion + "\"");
+            }
+        }
+    }
+
+    /// The image-group motions are certified in exactly one place: the C++
+    /// pack (`multiImageMotionIds`, two choreographies per layout). The data
+    /// file owns the keyframe payload, but every certified id must resolve to
+    /// an `image_group_v1` motion there, and no `image_group_v1` motion may
+    /// exist without C++ certification — otherwise the catalog would offer a
+    /// group animation the pack rejects (or the pack would animate an id the
+    /// catalog never offers for random group-animation selection).
+    void validateMultiImageGroupMotions(const json& motions) {
+        constexpr chronontemplate::MultiImageLayout kLayouts[]{
+            chronontemplate::MultiImageLayout::Duo, chronontemplate::MultiImageLayout::Trio,
+            chronontemplate::MultiImageLayout::Quad, chronontemplate::MultiImageLayout::Penta};
+        std::set<std::string> certified;
+        for (const auto layout : kLayouts) {
+            const std::vector<std::string> ids = chronontemplate::multiImageMotionIds(layout);
+            if (ids.size() != 2) fail("each multi-image layout must certify exactly two group motions");
+            for (const auto& id : ids) {
+                if (!certified.insert(id).second) fail("group motion \"" + id + "\" is certified twice");
+            }
+        }
+        std::set<std::string> catalogued;
+        for (const auto& motion : motions) {
+            if (motion.value("category", "") != "image_group_v1") continue;
+            const std::string id = motion.value("id", "");
+            if (id.empty() || !catalogued.insert(id).second) fail("empty or duplicate image_group_v1 motion \"" + id + "\"");
+            if (certified.find(id) == certified.end()) {
+                fail("image_group_v1 motion \"" + id + "\" is not certified by the C++ pack; "
+                     "add the choreography to MultiImagePack or retire the catalog row");
+            }
+        }
+        for (const auto& id : certified) {
+            if (catalogued.find(id) == catalogued.end()) {
+                fail("certified group motion \"" + id + "\" has no image_group_v1 row in the data catalog");
             }
         }
     }
@@ -758,6 +795,7 @@ int main(int argc, char** argv) {
         const std::set<std::string> imagePresetIDs = validatePresetIDs(presets["image"], "overlay_presets.image");
 
         validateSelections(data["selections"], motionIDs, imagePresetIDs);
+        validateMultiImageGroupMotions(motions);
 
         const json packRows = templateCatalog();
         const json presetRows = final3DPresets();

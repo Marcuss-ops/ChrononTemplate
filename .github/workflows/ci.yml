@@ -39,7 +39,8 @@ jobs:
             -DCHRONONTEMPLATE_BUILD_TESTS=ON \
             -DCHRONONTEMPLATE_BUILD_LIVE_ADAPTER_TEST=OFF \
             -DCHRONONTEMPLATE_NLOHMANN_JSON_INCLUDE_DIR=/usr/include \
-            -DCHRONONTEMPLATE_CHRONONMOTION_DIR=${{ github.workspace }}/ChrononMotion3D
+            -DCHRONONTEMPLATE_CHRONONMOTION_DIR=${{ github.workspace }}/ChrononMotion3D \
+            -DCHRONONTEMPLATE_CHRONON3D_DIR=${{ github.workspace }}/Chronon3d
 
       - name: Build
         run: cmake --build /tmp/chronontemplate-build
@@ -49,9 +50,14 @@ jobs:
 
       - name: Motion catalog byte-compare (emitter parity)
         run: |
-          if cmake --build /tmp/chronontemplate-build --target help 2>/dev/null | grep -q chronontemplate_emit_catalog; then
-            cmake --build /tmp/chronontemplate-build --target chronontemplate_emit_catalog
-            /tmp/chronontemplate-build/chronontemplate_emit_catalog --check || /tmp/chronontemplate-build/chronontemplate_emit_catalog | cmp - ChrononTemplate/catalog/motion_catalog.v1.json
-          else
-            echo "emit_catalog target not present; skipping byte-compare"
-          fi
+          # emit_catalog reads catalog/motion_catalog.v1.json (data) and is the
+          # only writer of catalog/chronontemplate_catalog.v1.json (emitted):
+          # parity means the committed emitted file is exactly what the C++
+          # packs project today. Any drift fails the build instead of shipping
+          # a catalog the renderer would resolve to nothing.
+          cmake --build /tmp/chronontemplate-build --target chronontemplate_emit_catalog
+          /tmp/chronontemplate-build/chronontemplate_emit_catalog --out /tmp/chronontemplate_catalog.check.json
+          cmp /tmp/chronontemplate_catalog.check.json ChrononTemplate/catalog/chronontemplate_catalog.v1.json
+          cmake --build /tmp/chronontemplate-build --target chronontemplate_emit_short_phrase_catalog chronontemplate_emit_camera_motion_catalog
+          /tmp/chronontemplate-build/chronontemplate_emit_short_phrase_catalog | cmp - ChrononTemplate/catalog/short_phrase_motion.v1.json
+          /tmp/chronontemplate-build/chronontemplate_emit_camera_motion_catalog | cmp - ChrononTemplate/catalog/camera_motion_pack.v1.json
