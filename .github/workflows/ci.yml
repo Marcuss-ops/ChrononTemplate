@@ -22,6 +22,12 @@ jobs:
           repository: Marcuss-ops/ChrononMotion3d
           path: ChrononMotion3D
 
+      - name: Checkout Chronon3D (headers required by template adapter)
+        uses: actions/checkout@v4
+        with:
+          repository: Marcuss-ops/Chronon3d
+          path: Chronon3d
+
       - name: Install build deps
         run: |
           sudo apt-get update
