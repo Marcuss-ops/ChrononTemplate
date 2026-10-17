@@ -55,6 +55,14 @@ namespace chronontemplate {
         float halfHeight{270.f};
     };
 
+    /// Measure a content layer in world space so a camera preset can frame the
+    /// actual inserted subject. Uses the host-measured content rectangle and
+    /// the compiled world transform (including parents); callers do not repeat
+    /// width/height math.
+    [[nodiscard]] SceneSubject sceneSubjectFromLayer(
+        TemplateScene& scene, const LayerHandle& layer,
+        SubjectKind kind = SubjectKind::Image, int frame = 0);
+
     /// The travel from one stacco to the next. Stable ids: they reach the
     /// catalog and the contract test verbatim, so they are append-only.
     enum class SceneCameraTransition : std::uint8_t {

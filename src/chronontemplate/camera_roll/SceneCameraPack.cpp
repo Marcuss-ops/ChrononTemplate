@@ -297,6 +297,37 @@ namespace chronontemplate {
         return 55.f;
     }
 
+    SceneSubject sceneSubjectFromLayer(TemplateScene& scene, const LayerHandle& handle,
+                                       SubjectKind kind, int frame) {
+        if (frame < 0) throw std::invalid_argument("sceneSubjectFromLayer: frame must be non-negative");
+        const auto submission = scene.submit(frame);
+        const auto found = std::find_if(submission.layers.begin(), submission.layers.end(),
+            [&](const BoundLayer& bound) { return bound.transform.id == handle.id(); });
+        if (found == submission.layers.end())
+            throw std::invalid_argument("sceneSubjectFromLayer: layer is not in the compiled scene");
+        const float width = found->content.metrics.naturalSize.x;
+        const float height = found->content.metrics.naturalSize.y;
+        if (found->content.empty() || !std::isfinite(width) || !std::isfinite(height) ||
+            width <= 0.f || height <= 0.f) {
+            throw std::invalid_argument("sceneSubjectFromLayer: layer needs measured positive content bounds");
+        }
+
+        Vector3 corners[] = {Vector3(0.f, 0.f, 0.f), Vector3(width, 0.f, 0.f),
+                             Vector3(0.f, height, 0.f), Vector3(width, height, 0.f)};
+        for (Vector3& corner : corners) corner.applyMatrix4(found->transform.world);
+        float minX = corners[0].x, maxX = corners[0].x;
+        float minY = corners[0].y, maxY = corners[0].y;
+        float minZ = corners[0].z, maxZ = corners[0].z;
+        for (const Vector3& corner : corners) {
+            minX = std::min(minX, corner.x); maxX = std::max(maxX, corner.x);
+            minY = std::min(minY, corner.y); maxY = std::max(maxY, corner.y);
+            minZ = std::min(minZ, corner.z); maxZ = std::max(maxZ, corner.z);
+        }
+        return SceneSubject{kind,
+            Vector3((minX + maxX) * 0.5f, (minY + maxY) * 0.5f, (minZ + maxZ) * 0.5f),
+            (maxX - minX) * 0.5f, (maxY - minY) * 0.5f};
+    }
+
     float sceneFramingDistance(const SceneSubject& subject, float fovDegrees,
                                const Vector2& viewport, float frameFill) {
         // A subject of half-extents (hw, hh) at depth d spans
