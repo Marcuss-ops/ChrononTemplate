@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""map_editorial - reusable modern primitives + six certified Middle East scenes.
+"""map_editorial - reusable primitives and retained Saudi/Yemen map scenes.
 
-The six scenes (Saudi base, Iran red glow, Yemen fill, Yemen markers,
-Hormuz routes, Mocha tactical overlay) are built
+The six retained Saudi/Middle East scenes are built
 from ONE set of shared components, not 8 bespoke renderers:
 
   GeoMapBackground (tiles, owned by geo_runtime) + vignette + grid
@@ -41,8 +40,6 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 
 MAP_EDITORIAL_SCENES = (
-    "location_focus",
-    "location_pulse",
     "ed_saudi_base",
     "ed_iran_glow",
     "ed_yemen_fill",
@@ -817,53 +814,6 @@ def _scene_yemen_markers(frame, ctx, progress) -> None:
     vignette(frame, 0.30)
 
 
-def _scene_oil_flows(frame, ctx, progress) -> None:
-    W, H, project = ctx["W"], ctx["H"], ctx["project"]
-    pins = _visible_pins(ctx["pins"], W, H)
-    grid_overlay(frame, alpha=0.10 * _ease(_stage(progress, 0.0, 0.2)))
-    for iso in ("SAU", "IRN", "YEM", "OMN", "ARE"):
-        polys = country_polygons_screen(iso, project)
-        draw_country_outline(frame, polys, _stage(progress, 0.03, 0.25), W,
-                             H, width=2)
-    blue = _projected(project, ROUTE_BLUE)
-    pipe = _projected(project, ROUTE_PIPELINE)
-    pink = _projected(project, ROUTE_PINK)
-    redsea = _projected(project, ROUTE_RED_SEA)
-    hx, hy = project(*HORMUZ)
-    bx, by = project(*BAB_EL_MANDEB)
-    hotspot(frame, int(hx), int(hy), (60, 60, 220),
-             _stage(progress, 0.25, 0.15), progress * 1.5)
-    route_path(frame, blue, W, H, WIND_BLUE, _stage(progress, 0.35, 0.25),
-               flow_phase=progress * 2.0)
-    route_path(frame, pipe, W, H, PIPELINE_CYAN,
-               _stage(progress, 0.45, 0.25), flow_phase=progress * 2.0 + 0.4)
-    route_path(frame, pink, W, H, ROUTE_PINK_C,
-               _stage(progress, 0.55, 0.22), flow_phase=progress * 2.0 + 0.7)
-    route_path(frame, redsea, W, H, WIND_BLUE,
-               _stage(progress, 0.60, 0.20), flow_phase=progress * 2.0 + 0.2,
-               width=4, arrow=False)
-    path_repeater(frame, pipe, W, H, _stage(progress, 0.68, 0.15))
-    marker_target(frame, int(bx), int(by), (60, 60, 220),
-                  _stage(progress, 0.62, 0.12))
-    rgba, draw = _pil_overlay(frame)
-    for (g, txt) in ((RIYADH, "SAUDI ARABIA"), (TEHRAN, "IRAN"),
-                     ((15.8, 47.5), "YEMEN")):
-        gx, gy = project(*g)
-        label_capsule(draw, gx, gy, txt, W, H,
-                      _stage(progress, 0.12, 0.25), font_size=30)
-    for p in pins[:4]:
-        label_capsule(draw, p["x"], p["y"] - 58, p["name"], W, H,
-                      _stage(progress, 0.66, 0.15), font_size=26,
-                      accent_bgr=(60, 60, 220))
-    label_capsule(draw, hx, hy - 70, "STRAIT OF HORMUZ", W, H,
-                  _stage(progress, 0.70, 0.15), font_size=26,
-                  accent_bgr=(60, 60, 220))
-    legend_panel(draw, 60, H - 260, [
-        (WIND_BLUE, "Crude route"), (PIPELINE_CYAN, "East-west pipeline"),
-        (ROUTE_PINK_C, "Product route"), ((60, 60, 220), "Chokepoint"),
-    ], _stage(progress, 0.78, 0.18))
-    _flush(frame, rgba)
-    vignette(frame, 0.30)
 
 
 def _scene_mocha_tactical(frame, ctx, progress) -> None:
@@ -942,44 +892,8 @@ def _scene_routes_clean(frame, ctx, progress) -> None:
     vignette(frame, 0.30)
 
 
-def _scene_hormuz_focus(frame, ctx, progress) -> None:
-    W, H, project = ctx["W"], ctx["H"], ctx["project"]
-    grid_overlay(frame, alpha=0.10 * _ease(_stage(progress, 0.0, 0.25)))
-    for iso in ("SAU", "IRN", "OMN", "ARE"):
-        polys = country_polygons_screen(iso, project)
-        draw_country_outline(frame, polys, _stage(progress, 0.05, 0.30), W,
-                             H, width=2)
-    hx, hy = project(*HORMUZ)
-    hotspot(frame, int(hx), int(hy), (60, 60, 220),
-             _stage(progress, 0.30, 0.20), progress * 1.5)
-    rgba, draw = _pil_overlay(frame)
-    for (g, txt) in (((27.5, 45.0), "SAUDI ARABIA"),
-                     ((31.0, 54.5), "IRAN")):
-        gx, gy = project(*g)
-        label_capsule(draw, gx, gy, txt, W, H,
-                      _stage(progress, 0.15, 0.25), font_size=30)
-    label_capsule(draw, hx, hy - 84, "STRAIT OF HORMUZ", W, H,
-                  _stage(progress, 0.48, 0.22), font_size=30,
-                  accent_bgr=(60, 60, 220),
-                  leader_from=(int(hx), int(hy) - 18))
-    _flush(frame, rgba)
-    vignette(frame, 0.30)
 
 
-def _scene_wide_minimal(frame, ctx, progress) -> None:
-    W, H, project = ctx["W"], ctx["H"], ctx["project"]
-    grid_overlay(frame, alpha=0.10 * _ease(_stage(progress, 0.0, 0.3)))
-    for iso in ("SAU", "IRN"):
-        polys = country_polygons_screen(iso, project)
-        draw_country_outline(frame, polys, _stage(progress, 0.10, 0.45), W,
-                             H)
-    rgba, draw = _pil_overlay(frame)
-    for (g, txt) in ((RIYADH, "SAUDI ARABIA"), (TEHRAN, "IRAN")):
-        gx, gy = project(*g)
-        label_capsule(draw, gx, gy, txt, W, H,
-                      _stage(progress, 0.45, 0.35), font_size=34)
-    _flush(frame, rgba)
-    vignette(frame, 0.30)
 
 
 _SCENE_DRAW = {
@@ -993,7 +907,7 @@ _SCENE_DRAW = {
 
 def draw_editorial_scene(frame, scene: str, ctx: dict,
                          progress: float) -> None:
-    """Draw one of the six certified editorial map scenes in place."""
+    """Draw one of the six retained editorial map scenes in place."""
     try:
         fn = _SCENE_DRAW[scene]
     except KeyError:

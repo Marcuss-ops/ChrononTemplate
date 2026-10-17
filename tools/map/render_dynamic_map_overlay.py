@@ -109,15 +109,15 @@ def main() -> int:
     if len(pins) != len(raw_pins):
         print(f"[dynamic-map] limited route to {len(pins)} unique stops from {len(raw_pins)} mentions", flush=True)
     area_glow_radius_km = float(payload.get("area_glow_radius_km", 0.0))
-    camera_animations = {"signature_dive", "tilt_reveal", "orbit_arrival",
-                         "slow_approach", "wide_context", "steady_hold",
-                         "fast_push"}
+    # Keep one predictable camera move available while map compositions are
+    # being reviewed. Other camera variants are retired from runtime selection.
+    camera_animations = {"slow_approach"}
     from render_geo_camera_small_places import MAP_LABEL_ANIMATIONS
     from map_compositions import MAP_COMPOSITIONS, MULTI_PIN_SYSTEMS
     from map_editorial import MAP_EDITORIAL_SCENES, MULTI_PIN_SCENES
     from map_editorial_gpu import reset_gpu_counters, gpu_counters, geo_project
-    camera_animation = str(payload.get("camera_animation", "signature_dive"))
-    label_animation = str(payload.get("label_animation", "gentle_fade"))
+    camera_animation = str(payload.get("camera_animation", "slow_approach"))
+    label_animation = str(payload.get("label_animation", "none"))
     map_animation = str(payload.get("map_animation", "") or "")
     basemap = str(payload.get("basemap", "esri_sat"))
     if camera_animation not in camera_animations:
@@ -251,18 +251,10 @@ def main() -> int:
     if map_animation in editorial_country_scenes:
         from geo_runtime import Place
         from map_editorial_gpu import fit_geo_bounds
-        if map_animation in ("location_focus", "location_pulse"):
-            # Frame a grounded town-scale context around the actual spoken pin.
-            focus = stops[0]
-            bounds = (focus.lat-.020, focus.lon-.030,
-                      focus.lat+.020, focus.lon+.030)
-        else:
-            bounds = scene_camera_bounds.get(map_animation,
-                        (6.0, 36.0, 40.0, 66.0))
+        bounds = scene_camera_bounds.get(map_animation,
+                    (6.0, 36.0, 40.0, 66.0))
         if map_animation == "ed_yemen_fill":
             width_fraction, height_fraction = 0.55, 0.86
-        elif map_animation in ("location_focus", "location_pulse"):
-            width_fraction, height_fraction = 0.70, 0.72
         elif map_animation == "ed_yemen_markers":
             width_fraction, height_fraction = 0.70, 0.74
         elif map_animation == "ed_iran_glow":
@@ -274,67 +266,36 @@ def main() -> int:
         center_lat, center_lon, fitted_zoom, bounds_telemetry = fit_geo_bounds(
             bounds,width,height,width_fraction=width_fraction,
             height_fraction=height_fraction,min_zoom=5.0,
-            max_zoom=15.0 if map_animation in ("location_focus", "location_pulse") else 8.0)
+            max_zoom=8.0)
         camera_place = Place(query="Editorial map bounds", display_name="Editorial map bounds",
                              lat=center_lat, lon=center_lon, ok=True)
         builder = geo._ShotBuilder(camera_place, "dive", total_frames)
-        builder.start_zoom = max(8.0,fitted_zoom-(1.8 if map_animation in ("location_focus", "location_pulse") else 0.32))
+        # Start at a wider (lower zoom) view than the fitted target. The old
+        # hard floor of z=8 could put country scenes inside their target zoom,
+        # clipping the authored bounds at frame zero.
+        builder.start_zoom = max(5.0, fitted_zoom-1.1)
         builder.end_zoom = fitted_zoom
         builder.ANCHORS = tuple((s.lat,s.lon) for s in stops) + ((center_lat,center_lon),)
         builder.PREPARE_ZMIN, builder.PREPARE_ZMAX = 5, max(8,math.ceil(fitted_zoom)+1)
         builder.full_duration_zoom = True
-        builder.terminal_hold_frames = round(total_frames*(.48 if map_animation in ("location_focus", "location_pulse") else .52))
+        builder.terminal_hold_frames = round(total_frames*.52)
+        # Hormuz is an overlay-authored route animation; the path itself
+        # moves through time even when the optimal wide geography uses one
+        # quantized tile zoom for the whole shot.
+        builder.allow_zoom_hold = map_animation == "ed_hormuz_routes"
         builder._editorial_stops = stops
     elif len(stops) == 1:
-        preset = {"tilt_reveal": "tilt", "orbit_arrival": "orbit"}.get(camera_animation, "dive")
-        builder = geo._ShotBuilder(stops[0], preset, total_frames)
+        builder = geo._ShotBuilder(stops[0], "dive", total_frames)
         builder.end_zoom = stop_zooms[0]
         # Start city approaches at metro scale and finish at street scale;
         # regional and national views stay at their authored overview zoom.
-        # City maps should arrive at a useful street scale quickly. The old
-        # wide_context target stayed two zoom levels above the destination,
-        # making the place feel distant even at the end of the clip.
         if map_level(pins[0]) == "city":
             builder.end_zoom = min(17.0, stop_zooms[0])
-            if camera_animation == "signature_dive":
-                # Classic wide satellite dive: opens far above town scale.
-                # Explicit choice only (never in the Go random pool).
-                builder.start_zoom = max(8.0, builder.end_zoom - 5.5)
-            elif camera_animation == "steady_hold":
-                # Nearly static: a 0.8-level drift, then a long readable hold.
-                builder.start_zoom = max(8.0, builder.end_zoom - 0.8)
-            elif camera_animation == "fast_push":
-                # Quicker 2-level push for short map beats.
-                builder.start_zoom = max(8.0, builder.end_zoom - 2.0)
-            elif camera_animation == "slow_approach":
-                # Keep the town readable while it approaches. Three zoom
-                # levels in the opening beat still felt abrupt on small
-                # places, so this explicit calm move travels only 1.4 levels.
-                builder.start_zoom = max(8.0, builder.end_zoom - 1.4)
-            else:
-                # Open closer to town scale: a 5.5-level dive reads as a
-                # sudden drop and the clip feels rushed. A 3-level approach
-                # keeps the same arrival window but nearly halves peak zoom
-                # velocity, so the flight stays readable.
-                builder.start_zoom = max(8.0, builder.end_zoom - 3.0)
+            # Open at metro scale, then make the only retained slow approach.
+            builder.start_zoom = max(8.0, builder.end_zoom - 1.4)
         else:
-            if camera_animation == "wide_context":
-                builder.end_zoom = max(5.8, stop_zooms[0] - 2.0)
-            elif camera_animation == "slow_approach":
-                builder.end_zoom = max(5.8, stop_zooms[0] - 0.9)
-            elif camera_animation == "signature_dive":
-                builder.end_zoom = max(5.8, stop_zooms[0])
-                builder.start_zoom = max(5.8, builder.end_zoom - 5.5)
-            elif camera_animation == "steady_hold":
-                builder.end_zoom = max(5.8, stop_zooms[0] - 0.5)
-                builder.start_zoom = max(5.8, builder.end_zoom - 0.8)
-            elif camera_animation == "fast_push":
-                builder.end_zoom = max(5.8, stop_zooms[0] - 0.5)
-                builder.start_zoom = max(5.8, builder.end_zoom - 2.0)
-            else:
-                builder.start_zoom = max(5.8, builder.end_zoom - 1.5)
-            if camera_animation not in ("signature_dive", "steady_hold", "fast_push"):
-                builder.start_zoom = max(5.8, builder.end_zoom - 1.5)
+            builder.end_zoom = max(5.8, stop_zooms[0] - 0.9)
+            builder.start_zoom = max(5.8, builder.end_zoom - 1.5)
             # Overview scopes (country/continent) sit at or below the 5.8
             # framing floor, which clamps start and end to the same zoom:
             # a static shot the velocity gate rightly rejects. Repair with a
@@ -346,17 +307,9 @@ def main() -> int:
         # Complete the approach in the opening 42%, then hold the destination
         # long enough for the target marker and place name to read clearly.
         builder.full_duration_zoom = True
-        if camera_animation == "steady_hold":
-            builder.terminal_hold_frames = round(total_frames * 0.70)
-        elif camera_animation == "slow_approach":
-            # Use 60% of the clip for the approach, then hold the target for
-            # the remaining 40%. This gives the early pin and label time to
-            # arrive while the camera is still moving.
-            builder.terminal_hold_frames = round(total_frames * 0.40)
-        elif camera_animation in ("fast_push", "signature_dive"):
-            builder.terminal_hold_frames = round(total_frames * 0.50)
-        else:
-            builder.terminal_hold_frames = round(total_frames * 0.58)
+        # Use 60% of the clip for the approach, then hold the target for
+        # the remaining 40% so the map animation can read at its destination.
+        builder.terminal_hold_frames = round(total_frames * 0.40)
     else:
         if route_timing is not None:
             camera_stops = list(stops)
@@ -433,20 +386,8 @@ def main() -> int:
             # 0.58 fraction quantized to fewer than two useful frames on dense
             # five-stop routes and tripped the strict velocity gate at frame 0.
             builder.stop_dive_fraction = 1.0
-            if camera_animation == "tilt_reveal":
-                builder.initial_zoom_fraction = 0.90
-                builder.stop_dive_fraction = 1.0
-            elif camera_animation == "orbit_arrival":
-                builder.initial_zoom_fraction = 0.90
-                builder.stop_dive_fraction = 1.0
-            elif camera_animation == "slow_approach":
-                builder.initial_zoom_fraction = 0.90
-                builder.stop_dive_fraction = 1.0
-            elif camera_animation in ("signature_dive", "steady_hold", "fast_push"):
-                builder.initial_zoom_fraction = 0.90
-                builder.stop_dive_fraction = 1.0
-            elif camera_animation == "wide_context":
-                builder.stop_end_zooms = [max(5.8, zoom - 1.7) for zoom in stop_zooms]
+            builder.initial_zoom_fraction = 0.90
+            builder.stop_dive_fraction = 1.0
             builder.end_zoom = max(builder.stop_end_zooms)
             # Honor the frozen overlay duration exactly; the tour builder computes
             # its own frame count from stop/travel phases.
@@ -551,8 +492,6 @@ def main() -> int:
             project.anchor=(lat,lon)
             project.zoom=zoom
             visible_geometries = {
-                "location_focus": [(float(pin["latitude"]),float(pin["longitude"])) for pin in pins],
-                "location_pulse": [(float(pin["latitude"]),float(pin["longitude"])) for pin in pins],
                 "ed_saudi_base": [(24.7136,46.6753)],
                 "ed_iran_glow": [(32.0,53.0)],
                 "ed_yemen_fill": [(15.3,47.0)],
