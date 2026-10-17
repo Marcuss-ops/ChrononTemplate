@@ -27,11 +27,18 @@ namespace {
         check(tokens.font.sha256 == "6dc5810efd4e5b5ec21b42bce000bb532fa07e26abfb0b63f4cdae74a52d3bf5",
               "font asset checksum matches pinned SHA-256");
 
-        // Verify the file actually exists on disk in the project
+        // Verify the file actually exists on disk in the project. The
+        // Chronon3D checkout location is injected by CMake, so this resolves
+        // on any machine (CI included) instead of a hardcoded developer path.
         bool exists = false;
-        const std::vector<std::string> prefixes = {"", "../", "../../", "/home/pierone/src/go-master/projects/Pyt/VeloxEditing/"};
-        for (const auto& prefix : prefixes) {
-            std::ifstream f(prefix + tokens.font.file, std::ios::binary);
+        const std::vector<std::string> candidates{
+#ifdef CHRONONTEMPLATE_CHRONON3D_DIR
+            std::string(CHRONONTEMPLATE_CHRONON3D_DIR) + "/assets/fonts/Bodoni72-BookItalic.ttf",
+#endif
+            tokens.font.file, std::string("../") + tokens.font.file,
+            std::string("../../") + tokens.font.file};
+        for (const auto& candidate : candidates) {
+            std::ifstream f(candidate, std::ios::binary);
             if (f.is_open()) {
                 exists = true;
                 break;

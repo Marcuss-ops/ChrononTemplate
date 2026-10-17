@@ -70,7 +70,10 @@ def main() -> None:
     for variant, (filename, scratches) in VARIANTS.items():
         path = args.catalog / filename
         validate_plan(path, scratches, args.assets_root)
-        if args.cli:
+        # The GPU dry-run is opportunistic: the plan contract above is the
+        # assertion, and a worker without a built chronon3d_cli skips the
+        # render instead of failing on a missing optional binary.
+        if args.cli and args.cli.is_file():
             output = subprocess.run(
                 [str(args.cli), "render", "--plan", str(path),
                  "--assets-root", str(args.assets_root), "--backend", "vulkan",
