@@ -370,8 +370,10 @@ class EntityPresentationCatalogTests(unittest.TestCase):
         self.assertEqual(BUILDER.caption_font("李小龍"), cjk)
         self.assertEqual(BUILDER.caption_font("محمد علي"), arabic)
 
-    def test_script_faces_exist_in_the_renderer_asset_bundle(self):
-        assets_root = TEMPLATE.parent / "RenderingGen/renderinggen/out/editorial_v1"
+    def test_script_faces_exist_in_the_template_asset_bundle(self):
+        assets_root = BUILDER.DEFAULT_ASSETS
+        self.assertTrue((assets_root / BUILDER.CANARY_IMAGE).is_file(),
+                        f"missing project canary portrait: {assets_root / BUILDER.CANARY_IMAGE}")
         for name in BUILDER.ENTITY_SAMPLES:
             font = assets_root / BUILDER.caption_font(name)
             self.assertTrue(font.is_file(), f"missing bundled font for {name}: {font}")

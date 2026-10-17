@@ -33,7 +33,7 @@
     {
       "id": "entity-0-image",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         500,
         590
@@ -161,7 +161,7 @@
     {
       "id": "entity-1-image",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         500,
         590

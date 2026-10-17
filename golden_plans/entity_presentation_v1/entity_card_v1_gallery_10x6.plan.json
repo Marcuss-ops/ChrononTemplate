@@ -33,7 +33,7 @@
     {
       "id": "entity_caption_rise-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -165,7 +165,7 @@
     {
       "id": "entity_caption_rise-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -297,7 +297,7 @@
     {
       "id": "entity_caption_rise-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -429,7 +429,7 @@
     {
       "id": "entity_caption_rise-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -561,7 +561,7 @@
     {
       "id": "entity_caption_rise-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -693,7 +693,7 @@
     {
       "id": "entity_caption_rise-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -868,7 +868,7 @@
     {
       "id": "entity_depth_caption-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -1004,7 +1004,7 @@
     {
       "id": "entity_depth_caption-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -1140,7 +1140,7 @@
     {
       "id": "entity_depth_caption-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -1276,7 +1276,7 @@
     {
       "id": "entity_depth_caption-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -1412,7 +1412,7 @@
     {
       "id": "entity_depth_caption-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -1548,7 +1548,7 @@
     {
       "id": "entity_depth_caption-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -1727,7 +1727,7 @@
     {
       "id": "entity_yaw_caption-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -1889,7 +1889,7 @@
     {
       "id": "entity_yaw_caption-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -2051,7 +2051,7 @@
     {
       "id": "entity_yaw_caption-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -2213,7 +2213,7 @@
     {
       "id": "entity_yaw_caption-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -2375,7 +2375,7 @@
     {
       "id": "entity_yaw_caption-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -2537,7 +2537,7 @@
     {
       "id": "entity_yaw_caption-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -2742,7 +2742,7 @@
     {
       "id": "entity_split_side-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -2882,7 +2882,7 @@
     {
       "id": "entity_split_side-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -3022,7 +3022,7 @@
     {
       "id": "entity_split_side-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -3162,7 +3162,7 @@
     {
       "id": "entity_split_side-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -3302,7 +3302,7 @@
     {
       "id": "entity_split_side-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -3442,7 +3442,7 @@
     {
       "id": "entity_split_side-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -3691,7 +3691,7 @@
     {
       "id": "entity_border_then_caption-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -3897,7 +3897,7 @@
     {
       "id": "entity_border_then_caption-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -4103,7 +4103,7 @@
     {
       "id": "entity_border_then_caption-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -4309,7 +4309,7 @@
     {
       "id": "entity_border_then_caption-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -4515,7 +4515,7 @@
     {
       "id": "entity_border_then_caption-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -4721,7 +4721,7 @@
     {
       "id": "entity_border_then_caption-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -4904,7 +4904,7 @@
     {
       "id": "entity_glow_focus-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -5056,7 +5056,7 @@
     {
       "id": "entity_glow_focus-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -5208,7 +5208,7 @@
     {
       "id": "entity_glow_focus-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -5360,7 +5360,7 @@
     {
       "id": "entity_glow_focus-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -5512,7 +5512,7 @@
     {
       "id": "entity_glow_focus-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -5664,7 +5664,7 @@
     {
       "id": "entity_glow_focus-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -5859,7 +5859,7 @@
     {
       "id": "entity_name_underline-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -6061,7 +6061,7 @@
     {
       "id": "entity_name_underline-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -6263,7 +6263,7 @@
     {
       "id": "entity_name_underline-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -6465,7 +6465,7 @@
     {
       "id": "entity_name_underline-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -6667,7 +6667,7 @@
     {
       "id": "entity_name_underline-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -6869,7 +6869,7 @@
     {
       "id": "entity_name_underline-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -7114,7 +7114,7 @@
     {
       "id": "entity_name_pill-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -7258,7 +7258,7 @@
     {
       "id": "entity_name_pill-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -7402,7 +7402,7 @@
     {
       "id": "entity_name_pill-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -7546,7 +7546,7 @@
     {
       "id": "entity_name_pill-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -7690,7 +7690,7 @@
     {
       "id": "entity_name_pill-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -7834,7 +7834,7 @@
     {
       "id": "entity_name_pill-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -8021,7 +8021,7 @@
     {
       "id": "entity_parallax_caption-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -8157,7 +8157,7 @@
     {
       "id": "entity_parallax_caption-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -8293,7 +8293,7 @@
     {
       "id": "entity_parallax_caption-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -8429,7 +8429,7 @@
     {
       "id": "entity_parallax_caption-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -8565,7 +8565,7 @@
     {
       "id": "entity_parallax_caption-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -8701,7 +8701,7 @@
     {
       "id": "entity_parallax_caption-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -8880,7 +8880,7 @@
     {
       "id": "entity_focus_frame-portrait-0",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -9020,7 +9020,7 @@
     {
       "id": "entity_focus_frame-portrait-1",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -9160,7 +9160,7 @@
     {
       "id": "entity_focus_frame-portrait-2",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -9300,7 +9300,7 @@
     {
       "id": "entity_focus_frame-portrait-3",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -9440,7 +9440,7 @@
     {
       "id": "entity_focus_frame-portrait-4",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
@@ -9580,7 +9580,7 @@
     {
       "id": "entity_focus_frame-portrait-5",
       "type": "image",
-      "asset": "assets/canary/people-demo-portrait.png",
+      "asset": "assets/images/people_sample_portrait_b.png",
       "size": [
         300,
         215
