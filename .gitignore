@@ -7,3 +7,9 @@ __pycache__/
 # Generated render outputs of local fixture runs.
 /output/
 catalog/**/out/
+
+# Local CTest output and generated previews belong to working directories,
+# not to the source tree or the canonical catalog.
+/Testing/
+/tools/**/out/
+/short_phrase/out/
