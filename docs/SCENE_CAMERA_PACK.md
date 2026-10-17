@@ -17,6 +17,13 @@ animano mai: l'unica cosa che si muove è la lente (contratto P0 testato).
 | `tools/camera_roll/render_scene_camera_sequencer_v1.py` | dump → piani `chronon.render-plan.v3` → render CLI Chronon3D |
 | `../../RenderingGen/UploadDrive/upload_scene_camera_sequencer_v1.sh` | pubblicazione Drive con verifica SHA-256 |
 
+## Coordinate
+
+ChrononMotion usa unità in pixel, X verso destra, Y verso il basso e camera sul
+lato +Z che guarda verso -Z. Il RenderPlan di Chronon3D usa la camera rivolta
+verso +Z: il lowering canonico specchia la coordinata Z e l'orientamento della
+camera. Non applicare inversioni manuali prima o dopo `lowerToRenderPlan`.
+
 ## Le otto transizioni
 
 `scene_camera_push_through` (tuffo attraverso la cucitura) ·
@@ -53,6 +60,21 @@ soggetto con una sola legge ottica (`sceneFramingDistance`, riempimento
 0.62+0.10·intensità dell'asse corto) e dalla lente del tipo
 (`sceneSubjectFov`: Phrase 50°, Image 62°, Text 44°, Card 56°): frase,
 immagine e titolo si incorniciano da soli, senza coordinate da autare.
+
+Per un layer di contenuto misurato, `sceneSubjectFromLayer(scene, layer)` legge
+la sua misura dal ContentHost e la trasformazione world dal frame compilato,
+includendo scala, rotazione e parent. Il chiamante non reinserisce larghezza,
+altezza e centro nei beat:
+
+```cpp
+auto& presenter = scene.image(presenterSpec);
+presenter.position(118.f, 9.f).scale(0.51f);
+const SceneSubject bounds = sceneSubjectFromLayer(scene, presenter);
+```
+
+Per una regione interna al layer, come il volto dentro un ritratto, si parte dai
+bounds misurati e si definisce il rettangolo della regione desiderata; il pack
+continua a derivare distanza e lente dalla viewport.
 
 ## Mappe pre-configurate da JSON (senza ricompilare)
 

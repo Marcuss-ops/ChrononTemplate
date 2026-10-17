@@ -251,6 +251,19 @@ add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tools.cmake)
 
+add_executable(chronontemplate_emit_beast_land_subject_reframe
+        tools/documentary_effects/emit_beast_land_subject_reframe.cpp
+        src/chronontemplate/core/ContentBinding.cpp
+        src/chronontemplate/core/MotionBridge.cpp
+        src/chronontemplate/core/TemplateScene.cpp
+        src/chronontemplate/camera_roll/SceneCameraPack.cpp)
+target_link_libraries(chronontemplate_emit_beast_land_subject_reframe PRIVATE ChrononMotion::chrononmotion)
+target_include_directories(chronontemplate_emit_beast_land_subject_reframe PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_beast_land_subject_reframe PRIVATE -Wall -Wextra)
+
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.
