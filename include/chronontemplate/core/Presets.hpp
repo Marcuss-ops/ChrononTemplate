@@ -90,7 +90,8 @@ namespace chronontemplate {
         CleanRed,
         YouTubeCanary,
         TextStatic,
-        TextDollyOrbitGlow
+        TextDollyOrbitGlow,
+        TableSidelightOrbit
     };
 
     [[nodiscard]] const char* name(Final3DPreset preset);

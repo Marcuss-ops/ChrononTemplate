@@ -26,7 +26,7 @@ namespace {
 
     void finalCatalog() {
         section("final 3D preset catalog");
-        check(final3DPresets().size() == 5, "final 3D catalog exposes five modern presets");
+        check(final3DPresets().size() == 6, "final 3D catalog exposes six modern presets");
         check(std::string(name(Final3DPreset::Typewriter3DGlow)) == "typewriter_3d_glow",
               "typewriter preset has a stable wire name");
         check(std::string(name(Final3DPreset::CleanRed)) == "clean_red",
@@ -35,6 +35,8 @@ namespace {
               "YouTube canary has a stable wire name");
         check(std::string(name(Final3DPreset::TextDollyOrbitGlow)) == "text_dolly_orbit_glow",
               "text dolly/orbit glow has a stable wire name");
+        check(std::string(name(Final3DPreset::TableSidelightOrbit)) == "table_sidelight_orbit",
+              "table sidelight orbit has a stable wire name");
 
         for (const Final3DPreset preset : final3DPresets()) {
             Composition composition = build(preset, finalData());
@@ -65,6 +67,15 @@ namespace {
             check(composition.scene.compile().lights.size() >= 2,
                   "final 3D preset compiles evaluated light states");
         }
+
+        Composition table = build(Final3DPreset::TableSidelightOrbit, finalData());
+        check(table.scene.findLayer(2)->mesh.assetId == "product.asset",
+              "table orbit binds the requested GLB asset id");
+        check(table.scene.lightCount() == 2, "table orbit has ambient fill and one side key");
+        const auto startPose = table.camera.sample(10.f / 30.f);
+        const auto middlePose = table.camera.sample(70.f / 30.f);
+        check(startPose.position.x != middlePose.position.x || startPose.position.z != middlePose.position.z,
+              "table orbit camera advances around the asset");
     }
 
     void stylePresets() {
