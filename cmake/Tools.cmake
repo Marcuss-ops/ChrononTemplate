@@ -38,7 +38,7 @@ add_executable(chronontemplate_emit_camera_1950_story tools/camera_roll/emit_cam
 target_link_libraries(chronontemplate_emit_camera_1950_story PRIVATE chronontemplate)
 target_include_directories(chronontemplate_emit_camera_1950_story PRIVATE
     "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/vcpkg_installed/linux-video-fast-dev/x64-linux/include")
+    "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-video-fast-dev/x64-linux/include")
 
 # Native C++ examples for the vector-map, date-marker, and fading-image samples.
 add_executable(chronontemplate_emit_oil_crisis_reference_plans
