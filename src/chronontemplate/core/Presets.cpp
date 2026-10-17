@@ -226,6 +226,11 @@ namespace chronontemplate {
             key.intensity = 0.85f;
             key.transform.position = Vector3(-5.f, 8.f, -4.f);
             key.targetId = table.id;
+            auto& overhead = scene.addDirectionalLight(52, "soft_overhead_fill");
+            overhead.color = Color(0xfff3df);
+            overhead.intensity = 0.7f;
+            overhead.transform.position = Vector3(0.f, 10.f, 0.2f);
+            overhead.targetId = table.id;
 
             CameraRig camera(100, 45.f, 16.f / 9.f, 0.1f, 1000.f);
             camera.setTarget(Vector3(0.f, 0.f, 0.f));
