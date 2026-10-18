@@ -12,6 +12,26 @@ target_link_libraries(chronontemplate_emit_title_camera_v2 PRIVATE chronontempla
 target_include_directories(chronontemplate_emit_title_camera_v2 PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_title_camera_v2 PRIVATE -Wall -Wextra)
 
+add_executable(chronontemplate_emit_word_lens_reference
+        tools/camera_roll/emit_word_lens_reference.cpp)
+target_link_libraries(chronontemplate_emit_word_lens_reference PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_word_lens_reference
+            PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_word_lens_reference PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_word_lens_reference PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_word_lens_reference PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_sequence_from_json tools/camera_roll/sequence_from_json.cpp)
 target_link_libraries(chronontemplate_sequence_from_json PRIVATE chronontemplate)
 target_include_directories(chronontemplate_sequence_from_json PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")

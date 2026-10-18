@@ -229,7 +229,10 @@ def make_phrase_bg(refnum,index):
     p=save_plate(index,bg.convert('RGBA')); return p
 
 def build_phrase(index,refnum,text,small=False):
-    LAYERS.clear(); bg=make_phrase_bg(refnum,index); LAYERS.append({'id':f'cinema-background-{index}','type':'image','asset':str(bg.relative_to(OUT)),'size':[W,H],'fit':'cover','position':[0,0],'start_frame':0,'duration_frames':N,'animation':{'tracks':[kf('scale',[(0,1.03),(149,1.0)],'in_out_sine')]}})
+    LAYERS.clear(); bg=make_phrase_bg(refnum,index); LAYERS.append({'id':f'cinema-background-{index}','type':'image','asset':str(bg.relative_to(OUT)),'size':[W,H],'fit':'cover','position':[0,0],'start_frame':0,'duration_frames':N})
+    # The plate is static: the clean background is sized exactly to the canvas
+    # (ImageOps.fit above) and must not be zoomed, or the subject drifts relative
+    # to the reference frames.
     font='PlayfairDisplay-Italic.ttf'; fs=52 if small else 68
     # A full-frame text box gives Chronon's native text layout a stable visual
     # center for these long italic lines (a narrow box clips the glyphs at the

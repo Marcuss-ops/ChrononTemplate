@@ -18,3 +18,4 @@ out/**/*.log
 
 # Local CTest output belongs to working directories, not the source tree.
 /Testing/
+assets/screenrecording_word_lens/frame_*.png
