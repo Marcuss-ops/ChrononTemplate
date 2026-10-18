@@ -547,7 +547,16 @@ def main() -> int:
 
     if builder.WIDTH != width or builder.HEIGHT != height:
         raise ValueError("Chronon geo camera output dimensions do not match the overlay canvas")
-    pyramid = dyn.DynamicTilePyramid(provider=basemap)
+    if basemap == "chronon_editorial":
+        # The editorial map is a fully offline vector plate (paper +
+        # Natural Earth/ISTAT boundaries): no Esri raster, no provider credit
+        # burnt into the frame. Provenance rides the telemetry instead.
+        from vector_plate_pyramid import VectorPlatePyramid, PROVENANCE
+        pyramid = VectorPlatePyramid()
+        basemap_provenance = PROVENANCE
+    else:
+        pyramid = dyn.DynamicTilePyramid(provider=basemap)
+        basemap_provenance = "Esri raster tiles (attribution burnt into frame)"
     anchors = list(builder.ANCHORS)
     # The camera pans through each route midpoint. Include each midpoint in the
     # plate union so every camera center on a linearly interpolated route is
@@ -724,6 +733,7 @@ def main() -> int:
         "dimensions": {"width": width, "height": height},
         "fps": {"num": fps_num, "den": fps_den},
         "tile": dict(pyramid.telemetry),
+        "basemap_provenance": basemap_provenance,
         "camera": {"start_zoom": start_zoom,
                    "end_zoom": end_zoom,
                    "terminal_hold_frames": terminal_hold_frames,

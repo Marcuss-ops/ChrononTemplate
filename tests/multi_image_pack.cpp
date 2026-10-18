@@ -162,6 +162,35 @@ namespace {
         }
     }
 
+    void randomGroupMotionsAreStableAndApplied() {
+        section("random group motions are stable and applied");
+        constexpr std::array<MultiImageLayout, 4> layouts{
+                MultiImageLayout::Duo, MultiImageLayout::Trio,
+                MultiImageLayout::Quad, MultiImageLayout::Penta};
+        for (const MultiImageLayout layout : layouts) {
+            const std::vector<std::string> ids = multiImageMotionIds(layout);
+            const std::string first = selectMultiImageMotion(layout, "story-a");
+            check(isMultiImageMotion(layout, first), "random selection returns a certified motion");
+            check(selectMultiImageMotion(layout, "story-a") == first,
+                  "the same seed selects the same motion");
+            check(selectMultiImageMotion(layout, "story-a", first) != first,
+                  "a prior motion is avoided when another candidate exists");
+
+            bool sawAlternative = false;
+            for (int seed = 0; seed < 32 && !sawAlternative; ++seed) {
+                sawAlternative = selectMultiImageMotion(layout, "story-" + std::to_string(seed)) != first;
+            }
+            check(sawAlternative && ids.size() > 1, "different seeds can choose different motions");
+
+            MultiImageSpec spec = specFor(layout);
+            spec.motionSeed = "story-a";
+            FakeContentHost host;
+            TemplateScene scene("random_motion", 30.f, host, 1920.f, 1080.f);
+            const MultiImageBoard board = addMultiImageBoard(scene, spec);
+            check(board.motionId == first, "board exposes its resolved random motion");
+        }
+    }
+
     void theTwoMotionsOfALayoutDiffer() {
         section("the two motions of a layout produce different choreographies");
         constexpr std::array<MultiImageLayout, 4> layouts{
@@ -199,6 +228,7 @@ int main() {
     theBoardRejectsAMismatchedTileCount();
     theTileLabelIsDerivedFromThePath();
     theGroupMotionsAreCertifiedPerLayout();
+    randomGroupMotionsAreStableAndApplied();
     theTwoMotionsOfALayoutDiffer();
     return chrononmotion_test::report();
 }

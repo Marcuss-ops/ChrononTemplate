@@ -184,8 +184,12 @@ def _roll_bank(p: float) -> float:
 
 def _draw_map_attribution(frame, basemap: str = "esri_sat") -> None:  # noqa: ANN001 - numpy/OpenCV image
     import cv2
+    if basemap == "chronon_editorial":
+        # Offline vector plate: no provider raster, so no credit is burnt
+        # into the frame. Provenance (Natural Earth, ISTAT/geoBoundaries)
+        # rides the render telemetry instead.
+        return
     credits = {
-        "chronon_editorial": "Map data: Esri",
         "esri_street": "Sources: Esri, DeLorme, HERE, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), MapmyIndia, TomTom",
         "esri_topo": "Sources: Esri, DeLorme, HERE, TomTom, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, swisstopo, MapmyIndia, GIS User Community",
         "esri_sat": "Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community",
@@ -299,17 +303,10 @@ class _ShotBuilder:
             frame = cv2.warpPerspective(plate, H, (WIDTH, HEIGHT),
                                         flags=cv2.INTER_LINEAR,
                                         borderMode=cv2.BORDER_REFLECT_101)
-        if getattr(self, "map_basemap", "") == "chronon_editorial":
-            # Retain grounded Esri geography and labels, with Chronon's pale,
-            # restrained editorial palette.
-            if isinstance(frame, cv2.UMat):
-                frame = frame.get()
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            paper = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
-            frame = cv2.addWeighted(paper, 0.72, frame, 0.28, 0)
-            frame = cv2.convertScaleAbs(frame, alpha=0.86, beta=28)
-            if gpu_map:
-                frame = cv2.UMat(frame)
+        # NOTE: chronon_editorial plates arrive as vector paper from
+        # VectorPlatePyramid (offline boundaries, no Esri raster): no recolor
+        # here, and no provider credit burnt into the frame. Provenance
+        # (Natural Earth, ISTAT/geoBoundaries) rides the render telemetry.
         if getattr(self, "minimal_map", False):
             if getattr(self, "require_gpu_editorial", False) and not gpu_map:
                 raise RuntimeError("editorial map requires the OpenCL GPU map sampler")
@@ -371,7 +368,8 @@ class _ShotBuilder:
                     pins.append({**p, **(extras[i] if i < len(extras) else {}),
                                  "x": int(round(x)), "y": int(round(y)),
                                  "label": str(p.get("label") or p.get("id") or "Location")})
-                draw_composition(frame, composition, pins, progress, WIDTH, HEIGHT)
+                draw_composition(frame, composition, pins, progress, WIDTH, HEIGHT,
+                                 basemap=getattr(self, "map_basemap", ""))
                 _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
                 return cv2.UMat(frame) if gpu_map else frame
             # The standard caption/marker helpers use NumPy and Pillow. OpenCL
@@ -828,7 +826,8 @@ class TourBuilder:
                     pins.append({"latitude": stop.lat, "longitude": stop.lon,
                                  "label": stop.display_name or stop.query,
                                  **ex, "x": int(round(x)), "y": int(round(y))})
-                draw_composition(frame, composition, pins, progress, WIDTH, HEIGHT)
+                draw_composition(frame, composition, pins, progress, WIDTH, HEIGHT,
+                                 basemap=getattr(self, "map_basemap", ""))
                 _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
                 return cv2.UMat(frame) if was_gpu_frame else frame
             # Editorial captions and the attribution helper are Pillow/NumPy

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 #include <stdexcept>
 
 namespace chronontemplate {
@@ -173,6 +174,32 @@ namespace chronontemplate {
         return std::find(ids.begin(), ids.end(), motionId) != ids.end();
     }
 
+    std::string selectMultiImageMotion(MultiImageLayout layout, const std::string& seed,
+                                       const std::string& previous) {
+        const std::vector<std::string>& ids = motionIdsFor(layout);
+        std::vector<const std::string*> candidates;
+        candidates.reserve(ids.size());
+        for (const std::string& id : ids) {
+            if (id != previous) candidates.push_back(&id);
+        }
+        if (candidates.empty()) {
+            for (const std::string& id : ids) candidates.push_back(&id);
+        }
+        // FNV-1a is used here instead of std::hash so a saved seed selects the
+        // same choreography across processes, standard libraries and retries.
+        std::uint64_t hash = 1469598103934665ULL;
+        for (const unsigned char byte : seed) {
+            hash ^= byte;
+            hash *= 1099511628211ULL;
+        }
+        const std::string layoutName = multiImageLayoutId(layout);
+        for (const unsigned char byte : layoutName) {
+            hash ^= byte;
+            hash *= 1099511628211ULL;
+        }
+        return *candidates[static_cast<std::size_t>(hash % candidates.size())];
+    }
+
     std::string multiImageTileLabel(const std::string& assetPath) {
         return labelFromPath(assetPath);
     }
@@ -188,7 +215,21 @@ namespace chronontemplate {
             throw std::invalid_argument(
                     "addMultiImageBoard: positive tile size and duration are required");
         }
-        if (!spec.motionId.empty() && !isMultiImageMotion(spec.layout, spec.motionId)) {
+        std::string selectedMotion = spec.motionId;
+        if (selectedMotion == "random") {
+            std::string seed = spec.motionSeed;
+            if (seed.empty()) {
+                seed = scene.name();
+                seed.push_back('\0');
+                seed += multiImageLayoutId(spec.layout);
+                for (const MultiImageTile& tile : spec.tiles) {
+                    seed.push_back('\0');
+                    seed += tile.path;
+                }
+            }
+            selectedMotion = selectMultiImageMotion(spec.layout, seed);
+        }
+        if (!selectedMotion.empty() && !isMultiImageMotion(spec.layout, selectedMotion)) {
             throw std::invalid_argument(
                     "addMultiImageBoard: the motion is not certified for this layout");
         }
@@ -207,12 +248,13 @@ namespace chronontemplate {
         const int exitStart = endFrame - exitFrames;
 
         // With no certified motion the shared entrance staggers the grid as before.
-        const bool certified = !spec.motionId.empty();
+        const bool certified = !selectedMotion.empty();
         const std::vector<Beat> beats = certified
-                ? beatsFor(spec.layout, spec.motionId, count, spec.duration)
+                ? beatsFor(spec.layout, selectedMotion, count, spec.duration)
                 : std::vector<Beat>{};
 
         MultiImageBoard board;
+        board.motionId = selectedMotion;
         board.inFrame = spec.inFrame;
         board.tiles.reserve(cells.size());
         board.captions.reserve(cells.size());

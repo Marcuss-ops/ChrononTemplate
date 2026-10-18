@@ -45,6 +45,13 @@ namespace chronontemplate {
     /// True when `motionId` is one of the layout's certified choreographies.
     [[nodiscard]] bool isMultiImageMotion(MultiImageLayout layout, const std::string& motionId);
 
+    /// Select one certified choreography with a stable pseudo-random draw.
+    /// The same seed/layout returns the same id; a previous id is avoided when
+    /// the layout has another candidate.
+    [[nodiscard]] std::string selectMultiImageMotion(MultiImageLayout layout,
+                                                     const std::string& seed,
+                                                     const std::string& previous = {});
+
     struct MultiImageTile {
         std::string path{};
         std::string caption{};  ///< optional caption under the tile; empty derives it from the path
@@ -55,9 +62,12 @@ namespace chronontemplate {
         std::vector<MultiImageTile> tiles{};
         MultiImageLayout layout{MultiImageLayout::Duo};
         MultiImageEntrance entrance{MultiImageEntrance::Rise};
-        /// The certified group choreography. Empty keeps the shared `entrance`
-        /// stagger; otherwise it must be one of `multiImageMotionIds(layout)`.
-        std::string motionId{};
+        /// Certified group choreography, or `random` to select one from the
+        /// layout's catalog. Random selection is stable for motionSeed; when
+        /// motionSeed is empty the scene and tile paths provide the seed.
+        /// Empty explicitly keeps the shared `entrance` stagger.
+        std::string motionId{"random"};
+        std::string motionSeed{};
         float tileWidth{560.f};
         float tileHeight{315.f};
         float gap{48.f};
@@ -75,6 +85,7 @@ namespace chronontemplate {
     struct MultiImageBoard {
         std::vector<LayerHandle*> tiles{};
         std::vector<LayerHandle*> captions{};
+        std::string motionId{}; ///< resolved choreography; empty for legacy entrance
         int inFrame{0};
         int endFrame{0};
     };

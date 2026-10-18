@@ -198,6 +198,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/documentary_effects/BeforeAfterPack.cpp
         src/chronontemplate/documentary_effects/AnimatedCountersPack.cpp
         src/chronontemplate/camera_roll/TitleCameraPack.cpp
+        src/chronontemplate/camera_roll/WordLensPack.cpp
         src/chronontemplate/bullet_list/BulletListPack.cpp
         src/chronontemplate/effects/EffectsPack.cpp
         src/chronontemplate/camera_roll/SceneCameraPack.cpp

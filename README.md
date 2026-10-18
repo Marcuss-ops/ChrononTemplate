@@ -1128,6 +1128,18 @@ SHA-256 evidence. Fast contract checks run as part of CTest when Python 3 is
 available, and can also be run directly with
 `python3 tools/multiple_images/test_multi_image_duo_v1.py`.
 
+### Multi-image group motion selection
+
+`chronontemplate::MultiImageSpec` covers grouped boards with two to five
+images (duo, trio, quad, penta). Its default `motionId` is `"random"`, which
+selects one of the two certified choreographies for that image count. The
+selection is reproducible: set `motionSeed` to the group identity or job seed;
+when it is empty, the scene name, layout and ordered image paths form the seed.
+The resolved choreography is returned as `MultiImageBoard::motionId`. Pass a
+specific catalog ID to pin a choreography, or set `motionId` to an empty string
+to retain the older shared entrance. A single image stays on the single-image
+animation path and does not need a one-member group recipe.
+
 ### Responsive Social Motion V1
 
 `tools/important_phrases/build_social_motion_pack_v1.py` creates eighteen five-second, 30 fps

@@ -40,6 +40,7 @@
 #include "chronontemplate/backgrounds/BackgroundPack.hpp"
 #include "chronontemplate/map/ModernMapPack.hpp"
 #include "chronontemplate/camera_roll/TitleCameraPack.hpp"
+#include "chronontemplate/camera_roll/WordLensPack.hpp"
 #include "chronontemplate/camera_roll/SceneCameraPack.hpp"
 #include "chronontemplate/ui_camera/UiCameraChoreography.hpp"
 #include "chronontemplate/vintage_documentary/VintageDocumentaryPack.hpp"

@@ -132,6 +132,77 @@ def _accent_rgb(pin: dict) -> tuple[int, int, int]:
     return (r, g, b)
 
 
+def _paper_card(draw, box: tuple[int, int, int, int], radius: int,
+                alpha: float) -> None:
+    """Light paper card for the Chronon editorial map: warm paper fill
+    #F7F7F5, hard ink text, thin ink border. No glow, no dark capsule."""
+    if alpha <= 0.01:
+        return
+    from PIL import Image, ImageDraw, ImageFilter
+    x0, y0, x1, y1 = box
+    e = max(0.0, min(1.0, alpha))
+    shadow = Image.new("RGBA", draw._image.size, (0, 0, 0, 0))
+    sh = ImageDraw.Draw(shadow)
+    sh.rounded_rectangle([x0, y0 + 5, x1, y1 + 5], radius=radius,
+                         fill=(0, 0, 0, int(90 * e)))
+    shadow = shadow.filter(ImageFilter.GaussianBlur(8))
+    draw._image.alpha_composite(shadow)
+    layer = Image.new("RGBA", draw._image.size, (0, 0, 0, 0))
+    lay = ImageDraw.Draw(layer)
+    lay.rounded_rectangle(box, radius=radius, fill=(247, 247, 245, int(255 * e)),
+                          outline=(22, 22, 22, int(255 * e)), width=2)
+    draw._image.alpha_composite(layer)
+
+
+def _editorial_pin(draw, frame, cx: int, cy: int, name: str,
+                   progress: float, W: int, H: int, side: int = 0) -> None:
+    """Chronon editorial pin: ink dot + leader + card.
+
+    Same grammar as the Egypt/1-tonnellata scene (dot -> leader -> box).
+    Label sits offset from the point so nearby towns
+    (Garlasco/Pavia) stay readable.
+
+    Everything lands on the PIL layer: callers snapshot the frame into
+    RGBA before this runs and write it back after, so cv2 strokes on
+    `frame` here would be silently discarded (that is why renders showed
+    only the leader line and the white card, with no dot)."""
+    _ = frame
+    dot_e = _ease(_stage(progress, 0.15, 0.15))
+    if dot_e > 0.01:
+        r = max(1, int(7 * dot_e))
+        e = int(255 * min(1.0, dot_e * 2.0))
+        # Paper halo keeps the ink dot legible over the basemap.
+        draw.ellipse([cx - r - 3, cy - r - 3, cx + r + 3, cy + r + 3],
+                     fill=(247, 247, 245, e))
+        draw.ellipse([cx - r, cy - r, cx + r, cy + r],
+                     fill=(22, 22, 22, e))
+    label_e = _ease(_stage(progress, 0.45, 0.20))
+    if label_e <= 0.01 or not name:
+        return
+    f_title = _font("cond", 34)
+    tw = draw.textbbox((0, 0), name.upper(), font=f_title)[2]
+    pad_x, pad_y = 26, 14
+    bw, bh = tw + pad_x * 2, 34 + pad_y * 2
+    # Offset box away from the point (Egypt scene grammar: BOX_DX, BOX_DY).
+    # Alternate sides per pin so nearby towns (Garlasco/Pavia) never stack.
+    if side % 2 == 0:
+        bx = int(min(max(cx + 28, 24), W - bw - 24))
+        by = int(min(max(cy - bh - 40, 24), H - bh - 24))
+    else:
+        bx = int(min(max(cx + 28, 24), W - bw - 24))
+        by = int(min(max(cy + 32, 24), H - bh - 24))
+    # Leader line: box edge -> point, drawn under the card.
+    from PIL import Image as _Image, ImageDraw as _ID
+    line_layer = _Image.new("RGBA", draw._image.size, (0, 0, 0, 0))
+    _lay = _ID.Draw(line_layer)
+    _lay.line([(bx + 12, by + bh), (cx, cy)],
+              fill=(22, 22, 22, int(255 * label_e)), width=2)
+    draw._image.alpha_composite(line_layer)
+    _paper_card(draw, (bx, by, bx + bw, by + bh), 4, label_e)
+    _text(draw, (bx + pad_x, by + pad_y - 2), name.upper(), f_title,
+          fill=(22, 22, 22), shadow=False, tracking=3)
+
+
 def _panel(draw, box: tuple[int, int, int, int], radius: int,
            alpha: float, outline=None, outline_w: int = 0) -> None:
     """Dark label background #080D12 with a soft drop shadow and a hairline
@@ -210,10 +281,20 @@ def _region_centroid(pins) -> tuple[int, int]:
     return (sum(xs) // len(xs), sum(ys) // len(ys))
 
 
-def _comp_region_zoom(frame, pins, progress, W, H) -> None:
+def _comp_region_zoom(frame, pins, progress, W, H, basemap: str = "") -> None:
     import cv2
     import numpy as np
     from PIL import Image, ImageDraw
+    if basemap == "chronon_editorial":
+        # Editorial grammar: one minimal pin per place, no region circle.
+        rgba = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).convert("RGBA")
+        draw = ImageDraw.Draw(rgba)
+        draw._image = rgba
+        for i, pin in enumerate(pins):
+            _editorial_pin(draw, frame, int(pin["x"]), int(pin["y"]),
+                           _pin_name(pin), progress, W, H, side=i)
+        frame[:] = cv2.cvtColor(np.array(rgba.convert("RGB")), cv2.COLOR_RGB2BGR)
+        return
     cx, cy = _region_centroid(pins)
     R = 300
     # Frames 30-58/90: outline draws progressively (TrimPath approximated
@@ -287,10 +368,19 @@ def _draw_photo_into(draw, photo_path: str, box: tuple[int, int, int, int],
 # ---------------------------------------------------------------------------
 # 05. Animated Pulse: looping concentric rings + label
 # ---------------------------------------------------------------------------
-def _comp_pulse_marker(frame, pins, progress, W, H) -> None:
+def _comp_pulse_marker(frame, pins, progress, W, H, basemap: str = "") -> None:
     import cv2
     import numpy as np
     from PIL import Image, ImageDraw
+    if basemap == "chronon_editorial":
+        rgba = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).convert("RGBA")
+        draw = ImageDraw.Draw(rgba)
+        draw._image = rgba
+        for i, pin in enumerate(pins):
+            _editorial_pin(draw, frame, int(pin["x"]), int(pin["y"]),
+                           _pin_name(pin), progress, W, H, side=i)
+        frame[:] = cv2.cvtColor(np.array(rgba.convert("RGB")), cv2.COLOR_RGB2BGR)
+        return
     pin = pins[0]
     cx, cy = pin["x"], pin["y"]
     accent = _accent_bgr(pin)
@@ -347,10 +437,19 @@ def _bezier(p0, p1, p2, t):
 # ---------------------------------------------------------------------------
 # 09. Spotlight Circle: darken exterior, focus circle + label
 # ---------------------------------------------------------------------------
-def _comp_spotlight(frame, pins, progress, W, H) -> None:
+def _comp_spotlight(frame, pins, progress, W, H, basemap: str = "") -> None:
     import cv2
     import numpy as np
     from PIL import Image, ImageDraw
+    if basemap == "chronon_editorial":
+        rgba = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).convert("RGBA")
+        draw = ImageDraw.Draw(rgba)
+        draw._image = rgba
+        for i, pin in enumerate(pins):
+            _editorial_pin(draw, frame, int(pin["x"]), int(pin["y"]),
+                           _pin_name(pin), progress, W, H, side=i)
+        frame[:] = cv2.cvtColor(np.array(rgba.convert("RGB")), cv2.COLOR_RGB2BGR)
+        return
     pin = pins[0]
     cx, cy = pin["x"], pin["y"]
     grow = _ease(_stage(progress, 0.16, 0.38))
@@ -458,8 +557,12 @@ _COMPOSITION_DRAW = {
 
 
 def draw_composition(frame, composition: str, pins: list[dict],
-                     progress: float, width: int, height: int) -> None:
-    """Draw one of the 3 retained map systems in place. Raises on unknown id."""
+                     progress: float, width: int, height: int,
+                     basemap: str = "") -> None:
+    """Draw one of the 3 retained map systems in place. Raises on unknown id.
+
+    basemap selects the marker grammar: chronon_editorial uses the Egypt-scene
+    minimal pin (dot + leader + paper card) instead of pulse/glow circles."""
     try:
         fn = _COMPOSITION_DRAW[composition]
     except KeyError:
@@ -468,4 +571,5 @@ def draw_composition(frame, composition: str, pins: list[dict],
         raise ValueError(f"map_animation {composition} requires at least one pin")
     if composition in MULTI_PIN_SYSTEMS and len(pins) < 2:
         raise ValueError(f"map_animation {composition} requires at least two pins")
-    fn(frame, pins, max(0.0, min(1.0, progress)), width, height)
+    fn(frame, pins, max(0.0, min(1.0, progress)), width, height,
+       basemap=basemap)
