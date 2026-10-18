@@ -373,12 +373,13 @@ namespace {
     }
 
     /// The image-group motions are certified in exactly one place: the C++
-    /// pack (`multiImageMotionIds`, two choreographies per layout). The data
-    /// file owns the keyframe payload, but every certified id must resolve to
-    /// an `image_group_v1` motion there, and no `image_group_v1` motion may
-    /// exist without C++ certification — otherwise the catalog would offer a
-    /// group animation the pack rejects (or the pack would animate an id the
-    /// catalog never offers for random group-animation selection).
+    /// pack (`multiImageMotionIds`, at least two choreographies per layout).
+    /// The data file owns the keyframe payload, but every certified id must
+    /// resolve to an `image_group_v1` motion there, and no `image_group_v1`
+    /// motion may exist without C++ certification — otherwise the catalog
+    /// would offer a group animation the pack rejects (or the pack would
+    /// animate an id the catalog never offers for random group-animation
+    /// selection).
     void validateMultiImageGroupMotions(const json& motions) {
         constexpr chronontemplate::MultiImageLayout kLayouts[]{
             chronontemplate::MultiImageLayout::Duo, chronontemplate::MultiImageLayout::Trio,
@@ -386,7 +387,7 @@ namespace {
         std::set<std::string> certified;
         for (const auto layout : kLayouts) {
             const std::vector<std::string> ids = chronontemplate::multiImageMotionIds(layout);
-            if (ids.size() != 2) fail("each multi-image layout must certify exactly two group motions");
+            if (ids.size() < 2) fail("each multi-image layout must certify at least two group motions");
             for (const auto& id : ids) {
                 if (!certified.insert(id).second) fail("group motion \"" + id + "\" is certified twice");
             }

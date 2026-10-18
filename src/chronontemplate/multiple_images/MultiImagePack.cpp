@@ -68,6 +68,30 @@ namespace chronontemplate {
                         // Both cards slide in from opposite edges at once.
                         at(0) = {0, std::max(1, duration / 2), Enter::Slide, Direction::Right};
                         at(1) = {0, std::max(1, duration / 2), Enter::Slide, Direction::Left};
+                    } else if (motionId == "duo_soft_bloom_rise") {
+                        // Soft bloom rise, left leads: both cards rise from below,
+                        // the right card follows half a stagger step later.
+                        at(0) = {0, std::max(1, duration / 2), Enter::Rise, Direction::Up};
+                        at(1) = {half, std::max(1, duration / 2), Enter::Rise, Direction::Up};
+                    } else if (motionId == "duo_soft_drift_settle") {
+                        // Slow lateral drift inward: the cards settle from the
+                        // outer edges, the right card a stagger step later.
+                        at(0) = {0, std::max(1, duration / 2), Enter::Slide, Direction::Left};
+                        at(1) = {s, s, Enter::Slide, Direction::Right};
+                    } else if (motionId == "duo_soft_cross_bloom") {
+                        // Simultaneous soft bloom: both cards bloom in place together.
+                        at(0) = {0, std::max(1, duration / 2), Enter::Pop, Direction::Up};
+                        at(1) = {0, std::max(1, duration / 2), Enter::Pop, Direction::Up};
+                    } else if (motionId == "duo_soft_breathe_hold") {
+                        // Joint fade with calm settle: both cards rise together
+                        // over a long shared entrance.
+                        at(0) = {0, 2 * s, Enter::Rise, Direction::Up};
+                        at(1) = {0, 2 * s, Enter::Rise, Direction::Up};
+                    } else if (motionId == "duo_soft_stagger_glow") {
+                        // Staggered opacity-led entrances: the left card glows
+                        // in first over a long entrance, the right card follows.
+                        at(0) = {0, 2 * s, Enter::Pop, Direction::Up};
+                        at(1) = {s, s, Enter::Pop, Direction::Up};
                     } else {  // duo_cross_focus: the first pops, then the second cross-focuses in
                         at(0) = {0, s, Enter::Pop, Direction::Up};
                         at(1) = {s, s, Enter::Pop, Direction::Up};
@@ -116,7 +140,10 @@ namespace chronontemplate {
         }
 
         const std::vector<std::string>& motionIdsFor(MultiImageLayout layout) {
-            static const std::vector<std::string> duo{"duo_split_reveal", "duo_cross_focus"};
+            static const std::vector<std::string> duo{"duo_split_reveal", "duo_cross_focus",
+                                                      "duo_soft_bloom_rise", "duo_soft_drift_settle",
+                                                      "duo_soft_cross_bloom", "duo_soft_breathe_hold",
+                                                      "duo_soft_stagger_glow"};
             static const std::vector<std::string> trio{"trio_fan_reveal", "trio_center_priority"};
             static const std::vector<std::string> quad{"quad_grid_assemble", "quad_corner_converge"};
             static const std::vector<std::string> penta{"penta_hero_plus_four", "penta_priority_cycle"};
