@@ -264,6 +264,45 @@ target_include_directories(chronontemplate_emit_beast_land_subject_reframe PRIVA
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_beast_land_subject_reframe PRIVATE -Wall -Wextra)
 
+add_executable(chronontemplate_emit_screen_recording_camera_recreation
+        tools/camera_roll/emit_screen_recording_camera_recreation.cpp)
+target_link_libraries(chronontemplate_emit_screen_recording_camera_recreation PRIVATE ChrononMotion::chrononmotion)
+target_include_directories(chronontemplate_emit_screen_recording_camera_recreation PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_screen_recording_camera_recreation PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_ai_tabletop_camera
+        tools/camera_roll/emit_ai_tabletop_camera.cpp)
+target_link_libraries(chronontemplate_emit_ai_tabletop_camera PRIVATE ChrononMotion::chrononmotion)
+target_include_directories(chronontemplate_emit_ai_tabletop_camera PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_ai_tabletop_camera PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_bounded_box
+        tools/web_presets/emit_bounded_box.cpp)
+target_link_libraries(chronontemplate_emit_bounded_box PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_bounded_box PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_bounded_box PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_camera_bullet_focus
+        tools/web_presets/emit_camera_bullet_focus.cpp)
+target_link_libraries(chronontemplate_emit_camera_bullet_focus PRIVATE ChrononMotion::chrononmotion)
+target_include_directories(chronontemplate_emit_camera_bullet_focus PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_camera_bullet_focus PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_bullet_camera_10
+        tools/bulletpoints_3d/emit_bullet_camera_10.cpp)
+target_link_libraries(chronontemplate_emit_bullet_camera_10 PRIVATE ChrononMotion::chrononmotion)
+target_compile_options(chronontemplate_emit_bullet_camera_10 PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_web_article_fold
+        tools/web_presets/emit_web_article_fold.cpp)
+target_include_directories(chronontemplate_emit_web_article_fold PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_web_article_fold PRIVATE -Wall -Wextra)
+
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.

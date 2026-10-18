@@ -43,13 +43,14 @@ namespace chronontemplate::elements {
             case ElementKind::RelationConnector: return "diagram.relation_connector";
             case ElementKind::BeforeAfterSplit: return "diagram.before_after_split";
             case ElementKind::FlowDiagramNode: return "diagram.flow_diagram_node";
+            case ElementKind::BoundedBox: return "web.bounded_box";
             default: return "unknown.unknown";
         }
     }
 
     std::vector<std::string> allElementIds() {
         std::vector<std::string> ids;
-        for (int i = 0; i <= static_cast<int>(ElementKind::FlowDiagramNode); ++i) {
+        for (int i = 0; i <= static_cast<int>(ElementKind::BoundedBox); ++i) {
             ids.emplace_back(elementId(static_cast<ElementKind>(i)));
         }
         return ids;

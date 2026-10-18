@@ -1,7 +1,7 @@
 // ChrononTemplate — camera motion catalog emitter.
 //
 // Prints `catalog/camera_motion_pack.v1.json` to stdout from the C++-owned
-// CameraMotionPack: the fifteen spec rows (durations, distance fractions,
+// CameraMotionPack: its spec rows (durations, distance fractions,
 // frame-fraction travel, degrees, focus percents, easing names, backend
 // requirements), the family order, the planner selection table, the
 // intensity ladder and the easing map.
@@ -46,6 +46,7 @@ namespace {
             case CameraMotionFamily::MapGeo: return "map_geo";
             case CameraMotionFamily::DashboardUI: return "dashboard_ui";
             case CameraMotionFamily::Transition: return "transition";
+            case CameraMotionFamily::Web3D: return "web3d";
         }
         return "unknown";
     }
@@ -66,6 +67,7 @@ namespace {
             case K::FastCut: return "fast_cut";
             case K::ObjectPass: return "object_pass";
             case K::BlurPass: return "blur_pass";
+            case K::Web3DObject: return "web3d_object";
         }
         return "unknown";
     }
@@ -117,7 +119,7 @@ int main() {
     try {
         const std::vector<CameraMotionPreset> presets = chronontemplate::cameraMotionPresets();
         const std::vector<std::string> ids = chronontemplate::cameraMotionPresetIds();
-        if (presets.size() != 15 || ids.size() != presets.size()) fail("expected fifteen camera motion presets");
+        if (presets.size() != 25 || ids.size() != presets.size()) fail("expected twenty-five camera motion presets");
 
         std::set<std::string> seen;
         json recipes = json::array();
@@ -155,7 +157,7 @@ int main() {
                              {"gentle_out", "easeOut"}, {"snappy_out", "expoOut"},
                              {"whip_in", "easeIn"}, {"whip_out", "expoOut"}};
         out["families"] = {"editorial_title", "photo_documentary", "map_geo", "dashboard_ui",
-                           "transition"};
+                           "transition", "web3d"};
         out["recipes"] = std::move(recipes);
         out["selection"] = std::move(selection);
 

@@ -1,8 +1,9 @@
 // ChrononTemplate — the camera motion pack (camera_motion_pack_v1).
 //
-// Fifteen narrative camera presets in five families (editorial titles, photo
-// documentary, geo maps, dashboard UI, two-shot transitions) as *recipes*,
-// not fifteen renderer functions. Every preset is one row of spec numbers —
+// Narrative camera presets plus ten Web3D recipes across six families (editorial
+// titles, photo documentary, geo maps, dashboard UI, transitions, product shots),
+// all expressed as *recipes*,
+// not one renderer function per move. Every preset is one row of spec numbers —
 // durations at 30 fps, distances as fractions of the reference framing,
 // lateral/vertical travel as fractions of the frame, angles in degrees, focus
 // as percent of the configured depth interval — lowered by one generic
@@ -33,17 +34,18 @@
 
 namespace chronontemplate {
 
-    /// The five narrative families, in spec order (three presets each).
+    /// Narrative camera families. Web3D contains ten object-aware recipes.
     enum class CameraMotionFamily : std::uint8_t {
         EditorialTitle,   ///< titles and quotes
         PhotoDocumentary, ///< portraits and archive stills
         MapGeo,           ///< regions and routes
         DashboardUI,      ///< panels, cards and product UI
-        Transition        ///< two-shot handoffs between scenes
+        Transition,       ///< two-shot handoffs between scenes
+        Web3D             ///< product and web-object camera moves
     };
 
-    /// The fifteen presets, in spec order. Values are stable ids: they reach
-    /// the catalog and the contract test verbatim.
+    /// Presets in spec order. Values are stable ids: they reach the catalog
+    /// and the contract test verbatim.
     enum class CameraMotionPreset : std::uint16_t {
 #define CAMERA_MOTION_PRESET(key, id, family, ...) key,
 #include "chronontemplate/camera_roll/CameraMotionPresets.def"
@@ -74,7 +76,8 @@ namespace chronontemplate {
         PremiumUI3D,         ///< premium 3D UI
         FastCut,             ///< fast change of image
         ObjectPass,          ///< transition through an object
-        BlurPass             ///< transition with defocus
+        BlurPass,            ///< transition with defocus
+        Web3DObject          ///< a real 3D asset such as table.glb
     };
 
     /// What a shot frames: the subject's optical centre and half-extents in

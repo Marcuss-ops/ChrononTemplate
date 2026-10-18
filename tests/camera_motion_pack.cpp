@@ -2,8 +2,8 @@
 //
 // Gates, sampled per frame across the whole window of every preset:
 //
-//   1. the spec table is complete — 15 unique `camera_motion_*` ids, three per
-//      family, spec durations, two-shot only in family 5;
+//   1. the spec table is complete — 25 unique `camera_motion_*` ids, three per
+//      legacy family plus ten Web3D recipes, two-shot only in transitions;
 //   2. intensity is the spec ladder — 0.5 / 1.0 / 1.5 amplitude factors;
 //   3. the subjects never animate — every layer track stays empty;
 //   4. the camera really animates — body travel for every single-shot preset,
@@ -52,7 +52,7 @@ namespace {
 
     constexpr float kViewportW = 1920.f;
     constexpr float kViewportH = 1080.f;
-    constexpr std::size_t kPresetCount = 15;
+    constexpr std::size_t kPresetCount = 25;
 
     struct RigSample {
         Vector3 position{0.f, 0.f, 0.f};
@@ -134,8 +134,8 @@ namespace {
     void theSpecTableIsComplete() {
         section("spec table");
         const auto presets = allPresets();
-        check(presets.size() == kPresetCount, "the pack holds fifteen presets");
-        check(cameraMotionPresetIds().size() == kPresetCount, "the id catalog holds fifteen ids");
+        check(presets.size() == kPresetCount, "the pack holds twenty-five presets");
+        check(cameraMotionPresetIds().size() == kPresetCount, "the id catalog holds twenty-five ids");
         std::set<std::string> ids;
         for (const auto preset : presets) ids.insert(cameraMotionPresetId(preset));
         check(ids.size() == kPresetCount, "preset ids are unique");
@@ -183,7 +183,7 @@ namespace {
               "out-of-range preset ids do not resolve through the roster");
         check(cameraMotionSpecFor(static_cast<CameraMotionPreset>(kPresetCount)).id == nullptr,
               "out-of-range preset specs stay empty");
-        int perFamily[5] = {0, 0, 0, 0, 0};
+        int perFamily[6] = {0, 0, 0, 0, 0, 0};
         int twoShot = 0;
         for (const auto preset : presets) {
             const auto& spec = cameraMotionSpecFor(preset);
@@ -201,10 +201,12 @@ namespace {
         for (int f = 0; f < 5; ++f) {
             check(perFamily[f] == 3, "every family holds exactly three presets");
         }
+        check(perFamily[5] == 10, "Web3D family holds ten object camera presets");
         check(twoShot == 3, "exactly the three transitions are two-shot");
         // Pin the spec durations, in roster order.
         const int expected[kPresetCount] = {90, 96, 72, 108, 84, 78, 96, 120, 100, 64,
-                                            90, 150, 14, 14, 22};
+                                            90, 150, 14, 14, 22, 96, 120, 105, 105, 90,
+                                            108, 96, 90, 100, 150};
         for (std::size_t i = 0; i < presets.size(); ++i) {
             check(cameraMotionDuration(presets[i]) == expected[i],
                   std::string(cameraMotionPresetId(presets[i])).append(" keeps its spec duration").c_str());

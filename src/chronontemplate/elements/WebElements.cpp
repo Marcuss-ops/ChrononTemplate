@@ -228,4 +228,35 @@ namespace chronontemplate::elements {
         return root;
     }
 
+    LayerHandle& addBoundedBox(TemplateScene& scene, const BoundedBoxSpec& spec) {
+        require(!spec.text.empty(), "addBoundedBox: text is required");
+        require(spec.width > 0.f && spec.height > 0.f && spec.fontSize > 0.f,
+                "addBoundedBox: width, height and font size must be positive");
+        require(!spec.fill.empty() && !spec.textColor.empty(),
+                "addBoundedBox: fill and text color are required");
+        require(!spec.font.empty(), "addBoundedBox: font is required");
+        require(spec.durationFrames > 0, "addBoundedBox: duration must be positive");
+
+        LayerHandle& root = scene.group(spec.name);
+        root.alive(0, spec.durationFrames - 1);
+
+        LayerHandle& plate = scene.shape(ShapeSpec{
+                .size = chrononmotion::Vector2(spec.width, spec.height),
+                .fillColor = spec.fill,
+                .name = spec.name + "_plate"});
+        plate.parent(root.id());
+        plate.position(0.f, 0.f);
+        plate.alive(0, spec.durationFrames - 1);
+        applyElementMotion(plate, spec.motion, scene.fps());
+
+        LayerHandle& label = scene.text(TextSpec{
+                .text = spec.text, .font = spec.font, .fontSize = spec.fontSize,
+                .color = spec.textColor, .name = spec.name + "_text"});
+        label.parent(root.id());
+        label.position(0.f, 0.f);
+        label.alive(0, spec.durationFrames - 1);
+        applyElementMotion(label, spec.motion, scene.fps(), 1);
+        return root;
+    }
+
 }// namespace chronontemplate::elements

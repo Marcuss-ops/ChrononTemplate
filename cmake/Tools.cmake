@@ -171,10 +171,25 @@ if(TARGET chrononmotion_chronon3d_adapter)
             tools/entities_with_text/dump_documentary_snapshot_plan.cpp)
     target_link_libraries(chronontemplate_dump_documentary_snapshot_plan
             PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
-    add_executable(chronontemplate_emit_dataviz_sample
-            tools/captions_dataviz/emit_dataviz_sample.cpp)
+endif()
+
+add_executable(chronontemplate_emit_dataviz_sample
+        tools/captions_dataviz/emit_dataviz_sample.cpp)
+target_link_libraries(chronontemplate_emit_dataviz_sample PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
     target_link_libraries(chronontemplate_emit_dataviz_sample
-            PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
+            PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_DATAVIZ_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_dataviz_sample PRIVATE
+        "${CHRONONTEMPLATE_DATAVIZ_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_DATAVIZ_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_DATAVIZ_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_dataviz_sample PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 endif()
 
 add_executable(chronontemplate_emit_effects_overlays tools/effects_overlays/emit_effects_overlays.cpp)

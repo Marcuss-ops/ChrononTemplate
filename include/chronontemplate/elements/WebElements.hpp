@@ -94,6 +94,22 @@ namespace chronontemplate::elements {
     [[nodiscard]] LayerHandle& addWebScreenshotFocus(TemplateScene& scene,
                                                      const WebScreenshotFocusSpec& spec);
 
+    /// BoundedBox: a plain square-corner rectangle with centered editable text.
+    struct BoundedBoxSpec {
+        std::string text{};
+        float width{920.f};
+        float height{300.f};
+        float fontSize{62.f};
+        std::string font{"assets/fonts/Inter-Bold.ttf"};
+        std::string fill{"#FFFFFF"};
+        std::string textColor{"#17191F"};
+        int durationFrames{300};
+        ElementMotion motion{};
+        std::string name{"bounded_box"};
+    };
+    [[nodiscard]] LayerHandle& addBoundedBox(TemplateScene& scene,
+                                             const BoundedBoxSpec& spec);
+
 }// namespace chronontemplate::elements
 
 #endif//CHRONONTEMPLATE_WEB_ELEMENTS_HPP
