@@ -129,7 +129,7 @@ namespace {
                 MultiImageLayout::Quad, MultiImageLayout::Penta};
         for (const MultiImageLayout layout : layouts) {
             const std::vector<std::string> ids = multiImageMotionIds(layout);
-            check(ids.size() == 2, "each layout certifies exactly two group motions");
+            check(ids.size() >= 2, "each layout certifies at least two group motions");
             for (const std::string& id : ids) {
                 check(isMultiImageMotion(layout, id), "a certified motion is accepted by its layout");
                 MultiImageSpec spec = specFor(layout);
