@@ -125,8 +125,8 @@ Json Paths::trim(int startFrame, int endFrame) {
     if (startFrame<0 || endFrame<=startFrame) throw std::invalid_argument("trim interval requires 0 <= start < end");
     return {{"kind","trim"},{"params",{{"start",0.f},{"end",0.f},
         {"animation",{{"easing","linear"},{"keyframes",Json::array({
-            {{"frame",startFrame},{"value",{0.f,0.f}}},
-            {{"frame",endFrame},{"value",{0.f,1.f}}}})}}}}}};
+            {{"frame",startFrame},{"value",{0.f,0.f,0.f}}},
+            {{"frame",endFrame},{"value",{0.f,1.f,0.f}}}})}}}}}};
 }
 
 Json Paths::strokeLayer(const std::string& id, const Json& commands, int startFrame, int endFrame,
@@ -136,9 +136,11 @@ Json Paths::strokeLayer(const std::string& id, const Json& commands, int startFr
     requirePositive(static_cast<float>(canvasWidth),"canvas width"); requirePositive(static_cast<float>(canvasHeight),"canvas height");
     if (!commands.is_array() || commands.empty()) throw std::invalid_argument("path commands must be a non-empty array");
     Json layer={{"id",id},{"type","shape"},{"shape",{{"type","path"},{"path",commands},
+        {"fill",{0.f,0.f,0.f,0.f}},
         {"stroke",{{"color",color},{"width",width},{"cap","round"},{"join","round"}}},
         {"operators",Json::array({trim(startFrame,endFrame)})}}},
         {"size",{canvasWidth,canvasHeight}},{"position",{0,0}},
+        {"color",{1.f,1.f,1.f,1.f}},{"screen_space",true},
         {"start_frame",0},{"duration_frames",durationFrames}};
     if (!opacityKeys.empty()) {
         std::vector<Keyframe> keys;

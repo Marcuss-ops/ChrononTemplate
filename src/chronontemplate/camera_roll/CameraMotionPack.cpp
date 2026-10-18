@@ -226,7 +226,13 @@ namespace chronontemplate {
             case CameraContentKind::DashboardChart:
                 return {P::UiPanelPush, P::UiCardParallax};
             case CameraContentKind::PremiumUI3D:
-                return {P::UiCardParallax, P::UiMicroFloat};
+                return {P::UiCardParallax, P::UiMicroFloat, P::Web3DProductPush,
+                        P::Web3DOrbit, P::Web3DSlowDrift};
+            case CameraContentKind::Web3DObject:
+                return {P::Web3DProductPush, P::Web3DOrbit, P::Web3DArcLeft,
+                        P::Web3DArcRight, P::Web3DRiseReveal, P::Web3DTopDown,
+                        P::Web3DLateralSlide, P::Web3DDollyArc, P::Web3DCraneDown,
+                        P::Web3DSlowDrift};
             case CameraContentKind::FastCut:
                 return {P::WhipPanLeft, P::WhipPanRight};
             case CameraContentKind::ObjectPass:
@@ -244,7 +250,7 @@ namespace chronontemplate {
                 CameraContentKind::MapTwoCountries, CameraContentKind::MapRoute,
                 CameraContentKind::DashboardChart, CameraContentKind::PremiumUI3D,
                 CameraContentKind::FastCut, CameraContentKind::ObjectPass,
-                CameraContentKind::BlurPass};
+                CameraContentKind::BlurPass, CameraContentKind::Web3DObject};
     }
 
     namespace {

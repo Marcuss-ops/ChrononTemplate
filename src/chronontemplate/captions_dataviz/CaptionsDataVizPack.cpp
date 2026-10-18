@@ -175,7 +175,7 @@ namespace chronontemplate {
         const int peak = inFrame + std::max(1, spec.duration / 2);
         const int endFrame = inFrame + spec.duration;
         const float chartH = canvas.y * spec.chartHeightFraction;
-        const float floorY = canvas.y * 0.82f;
+        const float floorY = canvas.y * 0.18f;
         const float left = canvas.x * spec.marginX;
         const float width = canvas.x * (1.f - 2.f * spec.marginX);
         const std::size_t n = spec.values.size();
@@ -213,26 +213,28 @@ namespace chronontemplate {
             // expressed as a position track that mirrors the scale easing:
             // both tracks share frames and easing, so the base stays glued
             // to the floor exactly as an anchored growth would.
-            bar.position(cx - 0.01f * barW, floorY - 0.02f * height, 0.f)
+            bar.position(cx, floorY + 0.01f * height, 0.f)
                .alive(inFrame, endFrame);
             Track<Vector3>& scale = bar.layer().tracks.scale;
             scale.add(frameTime(start, fps), Vector3(0.02f, 0.02f, 1.f), Easing::overshoot());
             scale.add(frameTime(start + grow, fps), Vector3(1.f, 1.f, 1.f), Easing::overshoot());
             Track<Vector3>& barPos = bar.layer().tracks.position;
-            barPos.add(frameTime(start, fps), Vector3(cx - 0.01f * barW, floorY - 0.02f * height, 0.f), Easing::overshoot());
-            barPos.add(frameTime(start + grow, fps), Vector3(cx - 0.5f * barW, floorY - height, 0.f), Easing::overshoot());
+            barPos.add(frameTime(start, fps), Vector3(cx, floorY + 0.01f * height, 0.f), Easing::overshoot());
+            barPos.add(frameTime(start + grow, fps), Vector3(cx, floorY + 0.5f * height, 0.f), Easing::overshoot());
 
-            LayerHandle& label = scene.text(TextSpec{.text = valueText(i),
-                                                     .font = spec.labelFont,
-                                                     .fontSize = fontSize,
-                                                     .color = spec.labelColor,
-                                                     .name = spec.name + "_label_" + std::to_string(i)});
-            label.position(cx, floorY - height - fontSize * 0.7f, 0.f)
-                 .alive(start + grow, endFrame);
-            label.animateOpacity(start + grow, std::max(1, grow / 2), 0.f, 1.f, Easing::easeOut());
+            if (spec.showValueLabels) {
+                LayerHandle& label = scene.text(TextSpec{.text = valueText(i),
+                                                         .font = spec.labelFont,
+                                                         .fontSize = fontSize,
+                                                         .color = spec.labelColor,
+                                                         .name = spec.name + "_label_" + std::to_string(i)});
+                label.position(cx, floorY + height + fontSize * 0.7f, 0.f)
+                     .alive(start + grow, endFrame);
+                label.animateOpacity(start + grow, std::max(1, grow / 2), 0.f, 1.f, Easing::easeOut());
+                out.valueLabels.push_back(&label);
+            }
 
             out.bars.push_back(&bar);
-            out.valueLabels.push_back(&label);
         }
 
         // The highlighted bar carries a slow, readable opacity pulse train after
@@ -252,14 +254,14 @@ namespace chronontemplate {
         if (spec.showTrendLine && n > 1) {
             float sum = 0.f;
             for (const float v : spec.values) sum += v;
-            const float avgY = floorY - chartH * (sum / static_cast<float>(n)) / max;
+            const float avgY = floorY + chartH * (sum / static_cast<float>(n)) / max;
             LayerHandle& rule = scene.shape(ShapeSpec{.size = Vector2(width, std::max(2.f, canvas.y * 0.0035f)),
                                                       .fillColor = spec.accentColor,
                                                       .name = spec.name + "_trend"});
             // Scale X from nothing to full width about the left edge: with a
             // zero anchor the local origin is the left edge, so the same
             // scale track draws the rule itself with no pivot to represent.
-            rule.position(left, avgY, 0.f)
+            rule.position(left + width * 0.5f, avgY, 0.f)
                 .alive(peak - grow, endFrame);
             Track<Vector3>& scale = rule.layer().tracks.scale;
             scale.add(frameTime(peak - grow, fps), Vector3(0.02f, 1.f, 1.f), Easing::easeInOut());
@@ -273,7 +275,7 @@ namespace chronontemplate {
                                                      .fontSize = fontSize * 1.6f,
                                                      .color = spec.labelColor,
                                                      .name = spec.name + "_title"});
-            title.position(canvas.x * 0.5f, canvas.y * 0.10f, 0.f)
+            title.position(canvas.x * 0.5f, canvas.y * 0.90f, 0.f)
                  .alive(inFrame, endFrame);
             title.animate(FadeIn{.inFrame = inFrame, .duration = 12});
             pm::slideIn(title.layer(), pm::Direction::Left, inFrame, 18, canvas.x * 0.06f, fps);
@@ -290,7 +292,7 @@ namespace chronontemplate {
                     spec.values.begin(), std::max_element(spec.values.begin(), spec.values.end()));
             const float peakX = left + step * (static_cast<float>(peakIndex) + 0.5f);
             const float peakH = std::max(chartH * 0.02f, chartH * (spec.values[peakIndex] / max));
-            ping.position(peakX, floorY - peakH - fontSize * 0.7f, 0.f)
+            ping.position(peakX, floorY + peakH + fontSize * 0.7f, 0.f)
                 .opacity(0.f)
                 .alive(peak, endFrame);
             pm::radarPing(ping.layer(), peak, endFrame - peak, 2, 0.2f, 1.f, fps);
@@ -326,7 +328,7 @@ namespace chronontemplate {
         const int peak = inFrame + std::max(1, spec.duration / 2);
         const int endFrame = inFrame + spec.duration;
         const float chartH = canvas.y * spec.chartHeightFraction;
-        const float floorY = canvas.y * 0.82f;
+        const float floorY = canvas.y * 0.18f;
         const float left = canvas.x * spec.marginX;
         const float width = canvas.x * (1.f - 2.f * spec.marginX);
         const std::size_t n = spec.values.size();
@@ -342,7 +344,7 @@ namespace chronontemplate {
         out.peakFrame = peak;
 
         const auto levelY = [&](std::size_t i) {
-            return floorY - chartH * (spec.values[i] / max);
+            return floorY + chartH * (spec.values[i] / max);
         };
         const auto valueText = [&](std::size_t i) {
             if (i < spec.labels.size() && !spec.labels[i].empty()) return spec.labels[i];
@@ -376,15 +378,17 @@ namespace chronontemplate {
             }
             out.dots.push_back(&dot);
 
-            LayerHandle& label = scene.text(TextSpec{.text = valueText(i),
-                                                     .font = spec.labelFont,
-                                                     .fontSize = fontSize,
-                                                     .color = spec.labelColor,
-                                                     .name = spec.name + "_line_label_" + std::to_string(i)});
-            label.position(x, y - fontSize * 1.1f, 0.f)
-                 .alive(land, endFrame);
-            label.animateOpacity(land, std::max(1, grow / 2), 0.f, 1.f, Easing::easeOut());
-            out.valueLabels.push_back(&label);
+            if (spec.showValueLabels) {
+                LayerHandle& label = scene.text(TextSpec{.text = valueText(i),
+                                                         .font = spec.labelFont,
+                                                         .fontSize = fontSize,
+                                                         .color = spec.labelColor,
+                                                         .name = spec.name + "_line_label_" + std::to_string(i)});
+            label.position(x, y + fontSize * 1.1f, 0.f)
+                     .alive(land, endFrame);
+                label.animateOpacity(land, std::max(1, grow / 2), 0.f, 1.f, Easing::easeOut());
+                out.valueLabels.push_back(&label);
+            }
         }
 
         // Runs and risers between consecutive values, drawn left-to-right with
@@ -402,23 +406,23 @@ namespace chronontemplate {
                                                      .name = spec.name + "_line_run_" + std::to_string(i)});
             // Zero anchor: the local origin is the run's left edge, so the
             // scale track draws it left-to-right with no pivot to represent.
-            run.position(x0, y0, 0.f)
+            run.position((x0 + x1) * 0.5f, y0, 0.f)
                .alive(inFrame, endFrame);
             Track<Vector3>& runScale = run.layer().tracks.scale;
             runScale.add(frameTime(start, fps), Vector3(0.02f, 1.f, 1.f), Easing::easeInOut());
             runScale.add(frameTime(start + grow, fps), Vector3(1.f, 1.f, 1.f), Easing::easeInOut());
             out.runs.push_back(&run);
 
-            const float rise = y0 - y1;
+            const float rise = y1 - y0;
             if (std::fabs(rise) >= 0.5f) {
-                const float top = std::min(y0, y1);
+                const float bottom = std::min(y0, y1);
                 LayerHandle& riser = scene.shape(ShapeSpec{.size = Vector2(thickness, std::fabs(rise)),
                                                            .fillColor = spec.accentColor,
                                                            .name = spec.name + "_line_riser_" + std::to_string(i)});
                 // Zero anchor: the position track mirrors the scale easing so
                 // the riser grows about its middle exactly as before.
                 const float riseH = std::fabs(rise);
-                riser.position(x1, top + riseH * 0.49f, 0.f)
+                riser.position(x1, bottom + riseH * 0.5f, 0.f)
                      .alive(inFrame, endFrame);
                 Track<Vector3>& riseScale = riser.layer().tracks.scale;
                 riseScale.add(frameTime(start + grow / 2, fps), Vector3(1.f, 0.02f, 1.f),
@@ -426,9 +430,9 @@ namespace chronontemplate {
                 riseScale.add(frameTime(start + grow, fps), Vector3(1.f, 1.f, 1.f),
                               Easing::easeInOut());
                 Track<Vector3>& risePos = riser.layer().tracks.position;
-                risePos.add(frameTime(start + grow / 2, fps), Vector3(x1, top + riseH * 0.49f, 0.f),
+                risePos.add(frameTime(start + grow / 2, fps), Vector3(x1, bottom + riseH * 0.5f, 0.f),
                             Easing::easeInOut());
-                risePos.add(frameTime(start + grow, fps), Vector3(x1, top, 0.f),
+                risePos.add(frameTime(start + grow, fps), Vector3(x1, bottom + riseH * 0.5f, 0.f),
                             Easing::easeInOut());
                 out.risers.push_back(&riser);
             }
@@ -440,7 +444,7 @@ namespace chronontemplate {
                                                      .fontSize = fontSize * 1.6f,
                                                      .color = spec.labelColor,
                                                      .name = spec.name + "_line_title"});
-            title.position(canvas.x * 0.5f, canvas.y * 0.10f, 0.f)
+            title.position(canvas.x * 0.5f, canvas.y * 0.90f, 0.f)
                  .alive(inFrame, endFrame);
             title.animate(FadeIn{.inFrame = inFrame, .duration = 12});
             out.title = &title;

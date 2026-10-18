@@ -83,16 +83,22 @@ int main(int argc, char** argv) {
                                                      assets.parent_path()).generic_string();
         const std::string presenterAsset = fs::relative(assets / "mrbeast_cutout_clean.png",
                                                          assets.parent_path()).generic_string();
-        const bool preview = argc < 4 || std::string(argv[3]) == "preview";
-        if (argc >= 4 && !preview && std::string(argv[3]) != "video")
-            throw std::runtime_error("mode must be preview or video");
+        const std::string mode = argc < 4 ? "preview" : argv[3];
+        const bool textPreview = mode == "text-preview";
+        const bool preview = mode == "preview" || textPreview;
+        const bool proxy = mode == "proxy";
+        const bool video = mode == "video" || proxy || textPreview;
+        if (!preview && !video)
+            throw std::runtime_error("mode must be preview, proxy, or video");
         fs::create_directories(destination.parent_path());
 
         constexpr float fps = 30.f;
-        const float width = preview ? 854.f : 1920.f;
-        const float height = preview ? 480.f : 1080.f;
+        const float width = (preview || proxy) ? 854.f : 1920.f;
+        const float height = (preview || proxy) ? 480.f : 1080.f;
         const float scaleX = width / 854.f, scaleY = height / 480.f;
-        constexpr int wideHold = 75, travel = 54, closeHold = 45;
+        // Match the supplied sequence: a long presenter hold, the lower caption
+        // types on, then a slow push into his face carries the caption below frame.
+        constexpr int wideHold = 326, travel = 25, closeHold = 39;
         AssetBackend backend;
         class Host final : public ContentHost {
         public:
@@ -134,8 +140,8 @@ int main(int argc, char** argv) {
             measured.halfHeight * .55f};
         applySceneCameraSequence(scene, SceneCameraSequence{
             .beats = {{measured, wideHold}, {closeFace, closeHold}},
-            .transition = SceneCameraTransition::OrbitHandoff,
-            .intensity = .82f,
+            .transition = SceneCameraTransition::FocusRack,
+            .intensity = .42f,
             .travelFrames = travel,
             .inFrame = 0});
 
@@ -179,10 +185,66 @@ int main(int argc, char** argv) {
         for (int channel = 0; channel < 7; ++channel)
             cameraTracks.push_back({{"property", properties[channel]}, {"easing", "linear"},
                                     {"keyframes", std::move(keys[channel])}});
-        Json outputSpec = {{"path", preview
-            ? (destination.parent_path() / "beast_land_subject_preview.png").string()
-            : (destination.parent_path() / "beast_land_subject_reframe.mp4").string()},
-            {"format", preview ? "png" : "mp4"}};
+        Json outputSpec = {{"path", textPreview
+            ? (destination.parent_path() / "beast_land_text_preview.mp4").string()
+            : preview ? (destination.parent_path() / "beast_land_subject_preview.png").string()
+            : (destination.parent_path() / (proxy ? "beast_land_subject_text_proxy.mp4"
+                                                  : "beast_land_subject_text_reframe.mp4")).string()},
+            {"format", preview && !textPreview ? "png" : "mp4"}};
+        constexpr const char* captionText = "calories or ingredients";
+        constexpr float captionFontSize = 24.f;
+        const float glyphAdvance = captionFontSize * .60f * scaleX;
+        const float captionStartX = 180.f * scaleX;
+        const int captionStartFrame = 126;
+        const int captionFrameStep = 2;
+        Json layers = Json::array({
+                {{"id", "beast_land_background"}, {"type", "image"}, {"asset", plateAsset},
+                 {"size", {width * 2.40f, height * 2.40f}},
+                 {"position", {0.f, 0.f, 180.f}},
+                 {"scale", {2.2f, 2.2f, 1.f}},
+                 {"fit", "cover"}, {"enable_3d", true}, {"start_frame", 0}, {"duration_frames", duration}},
+                {{"id", "mrbeast_foreground"}, {"type", "image"}, {"asset", presenterAsset},
+                 {"size", {618.f * scaleX, 471.f * scaleY}},
+                 {"position", {0.f, 245.f * scaleY - height * .5f - 52.5f * scaleY, 0.f}},
+                 {"scale", {1.2f, 1.2f, 1.f}},
+                 {"fit", "contain"}, {"enable_3d", true}, {"start_frame", 0}, {"duration_frames", duration}},
+            });
+        for (std::size_t i = 0; captionText[i] != '\0'; ++i) {
+            if (captionText[i] == ' ') continue;
+            const int revealFrame = preview ? 0 : captionStartFrame + static_cast<int>(i) * captionFrameStep;
+            Json captionOpacityKeys = preview
+                ? Json::array({{{"frame", 0}, {"value", 1}}})
+                : Json::array({{{"frame", 0}, {"value", 0}},
+                               {{"frame", revealFrame}, {"value", 0}},
+                               {{"frame", revealFrame + 2}, {"value", 1}},
+                               {{"frame", duration - 1}, {"value", 1}}});
+            Json captionYKeys = Json::array({{{"frame", 0}, {"value", 0}}});
+            if (!preview) {
+                captionYKeys.push_back({{"frame", wideHold}, {"value", 0}});
+                captionYKeys.push_back({{"frame", wideHold + travel},
+                                        {"value", 150.f * scaleY}});
+                captionYKeys.push_back({{"frame", duration - 1},
+                                        {"value", 180.f * scaleY}});
+            }
+            layers.push_back({{"id", "caption_glyph_" + std::to_string(i)}, {"type", "text"},
+                {"text", std::string(1, captionText[i])},
+                {"size", {glyphAdvance * 1.8f, 55.f * scaleY}},
+                {"position", {captionStartX + (static_cast<float>(i) + .5f) * glyphAdvance,
+                               365.f * scaleY}},
+                {"start_frame", 0},
+                {"duration_frames", duration},
+                {"animation", {{"tracks", Json::array({
+                    {{"property", "opacity"}, {"easing", "linear"},
+                     {"keyframes", captionOpacityKeys}},
+                    {{"property", "position_y"}, {"easing", "in_out_cubic"},
+                     {"keyframes", captionYKeys}}
+                })}}},
+                {"style", {{"font", "assets/fonts/DejaVuSansMono-Bold.ttf"},
+                            {"font_size", captionFontSize * scaleY}, {"fill", "#42C9F1"},
+                            {"stroke", {{"color", "#071724"}, {"width", 1.f * scaleY}}},
+                            {"glow", {{"radius", 4.f * scaleY}, {"intensity", 0.28}, {"color", "#27AFFF"}}}}}
+            });
+        }
         Json plan = {
             {"schema", "chronon.render-plan.v3"}, {"version", 3},
             {"job_id", "beast_land_subject_reframe_v1"},
@@ -197,25 +259,15 @@ int main(int argc, char** argv) {
                                            eulerDegrees(firstPose.orientation).z}},
                          {"fov_deg", firstPose.fov}, {"near", 1.0}, {"far", 10000.0}, {"zoom", 1.0}}},
             {"camera_animation", {{"tracks", std::move(cameraTracks)}}},
-            {"layers", Json::array({
-                {{"id", "beast_land_background"}, {"type", "image"}, {"asset", plateAsset},
-                {"size", {width * 2.40f, height * 2.40f}},
-                 {"position", {0.f, 0.f, 180.f}},
-                 {"scale", {2.2f, 2.2f, 1.f}},
-                 {"fit", "cover"}, {"enable_3d", true}, {"start_frame", 0}, {"duration_frames", duration}},
-                {{"id", "mrbeast_foreground"}, {"type", "image"}, {"asset", presenterAsset},
-                 {"size", {618.f * scaleX, 471.f * scaleY}},
-                 {"position", {0.f, 245.f * scaleY - height * .5f - 52.5f * scaleY, 0.f}},
-                 {"scale", {1.2f, 1.2f, 1.f}},
-                 {"fit", "contain"}, {"enable_3d", true}, {"start_frame", 0}, {"duration_frames", duration}}
-            })},
+            {"layers", std::move(layers)},
             {"output", std::move(outputSpec)}
         };
         std::ofstream output(destination, std::ios::binary | std::ios::trunc);
         if (!output || !(output << plan.dump(2) << '\n'))
             throw std::runtime_error("could not write plan: " + destination.string());
         std::cout << "Wrote " << destination << " mode=" << (preview ? "preview" : "video")
-                  << " layers=2 subject-bounds="
+                  << " layers=" << (2 + std::string(captionText).size() - 2)
+                  << " subject-bounds="
                   << measured.halfWidth * 2.f << 'x' << measured.halfHeight * 2.f << '\n';
     } catch (const std::exception& e) {
         std::cerr << "beast-land subject reframe: " << e.what() << '\n';

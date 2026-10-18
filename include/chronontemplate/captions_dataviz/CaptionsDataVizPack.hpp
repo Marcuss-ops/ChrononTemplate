@@ -102,6 +102,7 @@ namespace chronontemplate {
         float marginX{0.08f};                 ///< side margin as a fraction of the canvas
         bool showTrendLine{true};             ///< a rule that draws itself to the average
         bool pingPeak{true};                  ///< a two-pulse ping on the highlighted bar
+        bool showValueLabels{true};           ///< display a label beside each value or point
         std::string name{"dataviz"};
         int inFrame{0};
         int duration{150};                    ///< bars finish growing halfway through

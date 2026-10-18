@@ -20,7 +20,7 @@
 
 namespace chronontemplate::elements {
 
-    /// Stable registry of the 30 graphics objects, in spec order.
+    /// Stable registry of the 31 graphics objects, in spec order.
     enum class ElementKind {
         DataTimeline = 0,
         MilestoneCard,
@@ -51,7 +51,8 @@ namespace chronontemplate::elements {
         RouteStrokeLegend,
         RelationConnector,
         BeforeAfterSplit,
-        FlowDiagramNode
+        FlowDiagramNode,
+        BoundedBox
     };
 
     /// Stable dotted ID for an object, e.g. "annotation.glow_brush_trace".
