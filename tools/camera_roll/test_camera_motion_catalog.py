@@ -6,8 +6,8 @@ C++-owned pack by `chronontemplate_emit_camera_motion_catalog`. This test pins
 the contract without needing the CLI or a GPU:
 
   1.  the emitter exits 0 and prints valid JSON;
-  2.  the document holds fifteen recipes, three per family, with unique
-      `camera_motion_*` ids and the spec durations;
+  2.  the document holds twenty-five recipes (fifteen editorial + ten web3d),
+      with unique `camera_motion_*` ids and the spec durations;
   3.  every recipe carries easing, requirements and valid windows;
   4.  the selection table covers the thirteen content kinds, only names
       real recipes, and every recipe is selectable from some content kind;
@@ -45,6 +45,11 @@ EXPECTED_DURATIONS = {
     "camera_motion_ui_micro_float": 150,
     "camera_motion_whip_pan_left": 14, "camera_motion_whip_pan_right": 14,
     "camera_motion_dolly_handoff": 22,
+    "camera_motion_web3d_product_push": 96, "camera_motion_web3d_orbit": 120,
+    "camera_motion_web3d_arc_left": 105, "camera_motion_web3d_arc_right": 105,
+    "camera_motion_web3d_rise_reveal": 90, "camera_motion_web3d_top_down": 108,
+    "camera_motion_web3d_lateral_slide": 96, "camera_motion_web3d_dolly_arc": 90,
+    "camera_motion_web3d_crane_down": 100, "camera_motion_web3d_slow_drift": 150,
 }
 
 
@@ -80,9 +85,9 @@ def main() -> int:
     check("intensity ladder", document.get("intensity_ladder") == {"subtle": 0.5, "normal": 1.0, "strong": 1.5},
           str(document.get("intensity_ladder")))
 
-    print("== the fifteen recipes")
+    print("== the twenty-five recipes")
     recipes = document.get("recipes") or []
-    check("fifteen recipes", len(recipes) == 15, str(len(recipes)))
+    check("twenty-five recipes", len(recipes) == 25, str(len(recipes)))
     ids = [r.get("id") for r in recipes]
     check("ids are unique", len(set(ids)) == len(ids))
     check("ids carry the camera_motion_ prefix", all(str(i).startswith("camera_motion_") for i in ids))
@@ -99,16 +104,16 @@ def main() -> int:
         travel = recipe.get("travel_window") or {}
         check(f"{recipe.get('id')} travel window is ordered",
               0 <= travel.get("start", -1) < travel.get("end", -1) <= 1, str(travel))
-    check("three recipes per family",
+    check("recipes per family",
           families == {"editorial_title": 3, "photo_documentary": 3, "map_geo": 3,
-                       "dashboard_ui": 3, "transition": 3}, str(families))
+                       "dashboard_ui": 3, "transition": 3, "web3d": 10}, str(families))
     two_shot = {r["id"] for r in recipes if (r.get("requirements") or {}).get("two_shot")}
     check("two-shot only in the transition family",
           two_shot == {r["id"] for r in recipes if r.get("family") == "transition"} and len(two_shot) == 3)
 
     print("== the selection table")
     selection = document.get("selection") or {}
-    check("thirteen content kinds", len(selection) == 13, str(sorted(selection)))
+    check("fourteen content kinds", len(selection) == 14, str(sorted(selection)))
     known_ids = set(ids)
     suggested: set[str] = set()
     for kind, picks in selection.items():

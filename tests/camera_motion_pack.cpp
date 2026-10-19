@@ -366,7 +366,7 @@ namespace {
     void theSelectionTableCoversContent() {
         section("selection table");
         const auto kinds = cameraContentKinds();
-        check(kinds.size() == 13, "thirteen recognised content kinds");
+        check(kinds.size() == 14, "fourteen recognised content kinds");
         std::set<std::string> known;
         for (const auto id : cameraMotionPresetIds()) known.insert(id);
         std::set<std::string> suggested;
