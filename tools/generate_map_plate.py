@@ -1,1 +1,0 @@
-map/generate_map_plate.py
