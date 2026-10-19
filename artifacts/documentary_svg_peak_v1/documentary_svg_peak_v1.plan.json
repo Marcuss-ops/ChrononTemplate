@@ -38,34 +38,18 @@
         -0.0
       ],
       "size": [
-        854,
-        480
+        854.0,
+        480.0
       ],
       "start_frame": 0,
       "duration_frames": 150,
-      "animation": {
-        "tracks": [
-          {
-            "property": "opacity",
-            "keyframes": [
-              {
-                "frame": 0,
-                "value": 1.0
-              },
-              {
-                "frame": 149,
-                "value": 1.0
-              }
-            ]
-          }
-        ]
-      },
       "shape": {
         "type": "path",
         "asset": "documentary_svg_peak_v1.svg",
         "operators": [
           {
             "kind": "trim",
+            "target": "peak_line",
             "params": {
               "start": 0,
               "end": 0,

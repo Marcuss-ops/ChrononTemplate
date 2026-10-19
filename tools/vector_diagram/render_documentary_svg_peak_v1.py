@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import filecmp
 import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from PIL import Image
@@ -29,6 +31,8 @@ def main() -> int:
     parser.add_argument("--cli", type=Path, default=Path(os.environ.get("CHRONON_CLI", "")))
     parser.add_argument("--preset", default="documentary_svg_peak_v1",
                         help="preset id from the documentary SVG scene catalog")
+    parser.add_argument("--keep-raw", action="store_true",
+                        help="retain the full RGBA render for forensic inspection")
     args = parser.parse_args()
     if not args.cli.is_file():
         parser.error("pass --cli or set CHRONON_CLI to an SVG-enabled chronon3d_cli")
@@ -58,6 +62,15 @@ def main() -> int:
     raw_data = raw.read_bytes()
     if len(raw_data) != frame_bytes * frames:
         raise RuntimeError(f"expected {frames} full frames, got {len(raw_data)//frame_bytes}")
+    with tempfile.TemporaryDirectory(prefix=f"{args.preset}_repeat_") as temp_dir:
+        repeated_raw = Path(temp_dir) / "repeat.rgba"
+        run([args.cli, "render", "--plan", plan_path,
+             "--assets-root", out, "--backend", "software", "--video-sink", "raw",
+             "--pipe-pixfmt", "rgba", "--fps", fps, "--start-frame", 0,
+             "--end-frame", frames-1, "--log-level", "warn", "--output", repeated_raw])
+        if not filecmp.cmp(raw, repeated_raw, shallow=False):
+            raise RuntimeError("repeated 150-frame SVG graph renders differ pixel-for-pixel")
+    print(f"SVG-08 full-plan repeat: PASS ({frames} raw RGBA frames match exactly)")
     white_counts = []
     yellow_centroids = []
     check_frames = tuple(sorted(set((0, trim_start,
@@ -113,7 +126,8 @@ def main() -> int:
         draw.rectangle((0, height*row, 145, height*row+28), fill="#101216")
         draw.text((10, height*row+6), f"frame {frame_index}", fill="#E8EBF0")
     contact.save(out / "contact_sheet.png")
-    raw.unlink()
+    if not args.keep_raw:
+        raw.unlink()
     Path(str(raw) + ".timing.json").unlink(missing_ok=True)
     print(f"SVG path white pixels at {check_frames}: {white_counts}")
     print(f"Rendered {video_path} ({width}x{height}, {fps} fps, {frames/fps:.1f}s)")

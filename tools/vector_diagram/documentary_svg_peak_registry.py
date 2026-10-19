@@ -103,11 +103,14 @@ def build_plan(preset: dict | None = None) -> dict:
             math.isfinite(value) and 0.0 <= value <= 1.0 for value in marker_fill):
         raise ValueError("marker fill must be four normalized RGBA values")
 
+    # The imported SVG viewBox is already mapped into the canvas-centered
+    # local coordinate system. Keep the layer at the origin and express
+    # framing offsets in screen coordinates while layer Y points upward.
     svg = {"id": "peak_svg", "type": "shape", "position": [offset_x, -offset_y],
            "size": [width * scale, height * scale],
            "start_frame": 0, "duration_frames": frames,
            "shape": {"type": "path", "asset": Path(preset["asset"]).name,
-                     "operators": [{"kind": "trim", "params": {
+                     "operators": [{"kind": "trim", "target": "peak_line", "params": {
                          "start": 0, "end": 0,
                          "animation": {"easing": "linear", "keyframes": [
                              {"frame": trim_start, "value": [0, 0]},

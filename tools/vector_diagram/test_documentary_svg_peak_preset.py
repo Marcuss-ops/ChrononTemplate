@@ -53,6 +53,8 @@ def test_catalog_parameters_lower_into_timing_geometry_glow_and_framing():
     assert marker["effects"][0]["type"] == "glow"
     assert "animation" not in by_id(plan, "peak_svg")
     assert by_id(plan, "peak_svg")["position"] == [12.0, 8.0]
+    trim = by_id(plan, "peak_svg")["shape"]["operators"][0]
+    assert trim["kind"] == "trim" and trim["target"] == "peak_line"
     assert by_id(plan, "peak_svg")["size"] == [854 * 1.2, 480 * 1.2]
     assert marker["follow_path"]["path_commands"][0]["point"] == [
         12 + (106 - 854 / 2) * 1.2 + 854 / 2,
