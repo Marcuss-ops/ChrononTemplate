@@ -779,6 +779,38 @@ scene handoff overlap, palette/type/background coverage and renderer-native
 plan schemas. A renderer validation or canary establishes contract support,
 not pixel equivalence to an unprovided reference-video frame.
 
+## Web page highlight pack — `web_page_{complete|highlight3d|longphraseblurred}_{light|dark}_v1`
+
+`include/chronontemplate/web/WebPageHighlightPack.hpp` composes a **full web page natively**
+(nav bar, kicker, two-line headline, byline, two-column serif body, sidebar picks card,
+footer) as render-plan V3 data. No Pillow plate, no browser, no screenshot: the page is
+authored in C++ and rasterized by Chronon3D. Three recipes share one grammar — everything
+that is not the point of the shot stays blurred (a full-window linear-blur text animator),
+the important center phrase stays sharp:
+
+- `Complete` — the page assembles with staggered fade/rise entrances, the headline
+  folds in per-glyph 3D;
+- `Highlight3D` — the complete page plus the accent marker sweep behind the headline;
+- `LongPhraseBlurred` — a quiet plate: long context phrases blurred at the top and
+  bottom, the important center phrase sharp with an accent underline wipe.
+
+`WebPageTheme::Light|Dark` inverts ink and page paper (dark text on the light page,
+paper-light text on the dark page), re-checked by
+`chronontemplate_web_page_highlight_pack_test` together with the blur grammar, the
+baked-linear blur keyframes and the fail-closed spec gates.
+
+```shell
+cmake --build build/dev-fast --target chronontemplate_emit_web_page_highlight
+./build/dev-fast/chronontemplate_emit_web_page_highlight out/web_page_highlight_v1
+../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli \
+    validate --plan "$PWD/out/web_page_highlight_v1/web_page_highlight3d_light_v1.plan.json" \
+    --assets-root "$PWD/../Chronon3d"
+```
+
+Render the clips on a GPU/NVENC host with the bounded raw-NV12 flow
+(`--video-sink raw --pipe-pixfmt nv12 --chunks 1 --fb-pool-budget-mb 512`) and
+encode with ffmpeg, as the other editorial packs do.
+
 ## Boundary
 
 This module owns recipes. The motion core owns space/time evaluation, and

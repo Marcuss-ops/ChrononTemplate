@@ -101,8 +101,10 @@ namespace chronontemplate::web {
                 const int begin = offset + i * kFoldStagger;
                 const double lo = 100.0 * i / n, hi = 100.0 * (i + 1) / n;
                 Json selector = fullWindowSelector("glyph_fold_" + std::to_string(i));
-                selector["start"]["keyframes"].push_back({{"frame", begin}, {"value", lo}});
-                selector["end"]["keyframes"].push_back({{"frame", begin}, {"value", hi}});
+                if (begin > 0) {
+                    selector["start"]["keyframes"].push_back({{"frame", begin}, {"value", lo}});
+                    selector["end"]["keyframes"].push_back({{"frame", begin}, {"value", hi}});
+                }
                 Json rot = Json::array(), pos = Json::array(), opacity = Json::array();
                 auto sample = [&](int frame) {
                     const double p = static_cast<double>(std::clamp(frame - begin, 0, kFoldFrames)) / kFoldFrames;
@@ -312,8 +314,10 @@ namespace chronontemplate::web {
             headline("headline_line_1", spec.headlineLineOne, 212.f, 0);
             if (!spec.headlineLineTwo.empty()) {
                 headline("headline_line_2", spec.headlineLineTwo, 300.f, 44);
-                layers.push_back(rect("headline_marker", kMargin - 14.f, 296.f, 566.f, 108.f,
-                                      pal.highlight, 0.5f, markerSweepTracks(566.f)));
+                if (spec.recipe == WebPageRecipe::Highlight3D) {
+                    layers.push_back(rect("headline_marker", kMargin - 14.f, 296.f, 566.f, 108.f,
+                                          pal.highlight, 0.5f, markerSweepTracks(566.f)));
+                }
             }
             layers.push_back(textLayer("masthead_byline", spec.byline, kMargin, 380.f, 20.f,
                                        kBold, pal.ink, duration, 2.4f, 6));
