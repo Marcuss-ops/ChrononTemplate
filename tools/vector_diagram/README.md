@@ -39,16 +39,59 @@ With trajectory `pos=[0,0]`, `rel=ABS-half`, follow commands `ABS`,
 both describe world line `ABS`: `dot_on_path` holds by construction and is
 checked per-frame by `test_vector_diagram.py` (<=1px).
 
-## Backend limits found (this build, software lane, honest scope)
+## Verification scope
 
-- path-stroke layers do not rasterize pixels here (rect/ellipse do);
-  trim evaluation itself is covered by the Lottie L5 C-ABI/CLI gates.
-- any `opacity` animation track on a shape ellipse hides it entirely here;
-  visibility is therefore driven by `start_frame`/`duration_frames` windows.
-- `follow_path` validates but the head renders at base position (progress
-  ignored) in this lane; movement is certified by the shared-geometry gate
-  plus the baked-variant pixel walk
-  (head `(192,885)->(524,577)->(1140,157)->(1652,769)->(1688,842)`).
+Older notes in this section described failures from a previous software build.
+They are not current guarantees. The raw software sink was manually checked
+against `vector_documentary_diagram.native_v3.plan.json` at frames 12–60: the
+yellow marker moves and its measured centroid follows the path sampler within
+0.8 px. `test_vector_diagram.py` remains a geometry/composition test and does
+not claim renderer pixel truth.
+
+`svg_peak_pixel_gate.py` is the focused automated pixel gate for imported SVG
+pixels, rendered marker alignment, moving-marker glow halo/residue, and repeat
+determinism. Run it against an SVG-enabled CLI build:
+
+```sh
+python3 tools/vector_diagram/svg_peak_pixel_gate.py --cli /path/to/chronon3d_cli
+```
+
+This synthetic 320×180 gate does not certify the supplied 19.63-second video,
+target-scene glow, vehicle pivots, footage compositing, GPU parity, or reference fidelity.
+The original footage is not stored in this repository, so those checks need
+the source video and an approved scene contract.
+
+## Documentary SVG graph study
+
+`assets/documentary_svg_peak_v1.svg` and
+`render_documentary_svg_peak_v1.py` produce a five-second 854×480 animation
+using Chronon3D's software renderer, including imported-SVG Trim Paths and a
+marker following the same path geometry. Generate it with:
+
+```sh
+python3 tools/vector_diagram/render_documentary_svg_peak_v1.py \
+  --cli /path/to/chronon3d_cli
+```
+
+The preset lives in `catalog/documentary_svg_peak_v1.json`; edit its canvas,
+trim timing, marker, optional glow, or framing values and rerun the renderer.
+The follow-path points are resolved from `#peak_line` in the SVG, so the chart
+geometry is not duplicated in the generator. The resolver currently accepts
+explicit `M`/`L` path data and fails closed on other path commands.
+
+The H.264 MP4, editable RenderPlan, sampled PNGs and contact sheet are in
+`artifacts/documentary_svg_peak_v1/`. The sequential path loss was traced to
+the compiler treating `Composite` nodes as static bake candidates even though
+the executor bypasses inter-frame caching for them. The compiler now excludes
+composites from static bakes, and `svg_peak_pixel_gate.py` requires path pixels
+to remain visible in an unguarded sequence with a moving marker. The preset's
+constant-opacity workaround has been removed; its encoded artifacts are being
+rerendered against the fixed source. This graph study is not a recreation of
+the complete reference video. The registered preset is defined in
+`catalog/documentary_svg_peak_v1.json` and lowered by
+`documentary_svg_peak_registry.py`; its catalog controls cover geometry derived
+from the SVG, timing, marker styling/glow, and framing. The synthetic glow
+pixel gate passes; target-scene glow remains open.
 
 Vulkan/NVENC, Drive publication, Edge-TTS voiceover and footage pixels are
 out of scope for this headless ticket (same boundary as TICKET-LOTTIE-ANIMATED:
