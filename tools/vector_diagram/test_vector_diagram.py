@@ -55,26 +55,27 @@ check("follow.shared_geometry_exact", traj_path == dot_path)
 prog = dot["follow_path"]["progress"]
 check("follow.frames_12_60", prog["keyframes"][0]["frame"] == 12 and prog["keyframes"][-1]["frame"] == 60)
 check("follow.native_prop", prog["property"] == "follow_path_progress")
-# dot_on_path: interpolate progress linearly, compare driver pos vs sampler pos
+# Geometry-only unit check. Runtime marker placement needs an encoded-pixel gate;
+# this check only confirms that the standalone arc-length sampler returns a
+# point on its own source polyline.
 def prog_at(frame):
     k0, k1 = prog["keyframes"][0], prog["keyframes"][-1]
     f0, f1 = k0["frame"], k1["frame"]
     if frame <= f0: return k0["value"][0]
     if frame >= f1: return k1["value"][0]
     return k0["value"][0] + (k1["value"][0] - k0["value"][0]) * (frame - f0) / (f1 - f0)
-max_err = 0.0
+max_cross_track_error = 0.0
 for fr in (12, 24, 36, 48, 60):
     t = prog_at(fr)
     s = sample_normalized(PTS, t)["position"]
-    # driver position at frame fr IS the sampler position by construction (same path, same t)
-    err = 0.0  # construction guarantee; verify sampler is on-segment instead
-    # verify s lies within 1px of some segment
     best = min(
         abs((PTS[i+1][0]-PTS[i][0])*(PTS[i][1]-s[1])-(PTS[i][0]-s[0])*(PTS[i+1][1]-PTS[i][1])) /
         (math.hypot(PTS[i+1][0]-PTS[i][0], PTS[i+1][1]-PTS[i][1]) or 1.0)
         for i in range(len(PTS)-1))
-    max_err = max(max_err, best)
-check("follow.dot_on_path_le_1px", max_err <= 1.0, f"max_err={max_err}")
+    max_cross_track_error = max(max_cross_track_error, best)
+check("follow.sampler_on_source_polyline_le_1px",
+      max_cross_track_error <= 1.0,
+      f"cross_track_error={max_cross_track_error:.6f}px")
 
 # G3 glow
 for lid, rp, inten in (("traveling_dot", 22, 0.5), ("peak_marker", 18, 0.45)):
