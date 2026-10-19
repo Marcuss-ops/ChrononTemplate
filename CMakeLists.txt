@@ -237,6 +237,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/short_phrases/animations/GradualBlur.cpp
         # the packs a template author starts from
         src/chronontemplate/entities_with_text/YouTubeSubscribe.cpp
+        # the native web-page family: complete page + highlight 3D + blurred phrases
+        src/chronontemplate/web/WebPageHighlightPack.cpp
         # native layout composers: flex rows, columns and grids plus FLIP moves
         src/chronontemplate/composers/LayoutComposer.cpp
         # declarative transitions (BACKLOG item 4): sweep/dip/blinds/iris/glitch/leak
@@ -302,6 +304,13 @@ add_executable(chronontemplate_emit_web_article_fold
 target_include_directories(chronontemplate_emit_web_article_fold PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_web_article_fold PRIVATE -Wall -Wextra)
+
+# The native web-page family: three recipes x two themes, all pure C++ V3
+# plans — no Pillow plate, no browser, no screenshot.
+add_executable(chronontemplate_emit_web_page_highlight
+        tools/web_presets/emit_web_page_highlight.cpp)
+target_link_libraries(chronontemplate_emit_web_page_highlight PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_page_highlight PRIVATE -Wall -Wextra)
 
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
