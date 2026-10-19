@@ -300,15 +300,10 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_chronon_motion_contract_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_chronon_motion_contract_test COMMAND chronontemplate_chronon_motion_contract_test)
 
-    add_executable(chronontemplate_didone_titles_pack_test tests/didone_titles_pack.cpp)
-    target_link_libraries(chronontemplate_didone_titles_pack_test PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_didone_titles_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    # Absolute location of the Chronon3D checkout, so the font-file existence
-    # check resolves on any machine instead of a hardcoded developer path.
-    target_compile_definitions(chronontemplate_didone_titles_pack_test PRIVATE
-        CHRONONTEMPLATE_CHRONON3D_DIR="${CHRONONTEMPLATE_CHRONON3D_DIR}")
-    add_test(NAME chronontemplate_didone_titles_pack_test COMMAND chronontemplate_didone_titles_pack_test)
-
+    # The didone acceptance suite was removed: its font gate pinned the
+    # Bodoni72-BookItalic.ttf asset that no longer ships in any renderer
+    # checkout (the didone family was retired with the other phrase families).
+    # The pack sources stay in the library for the catalog data they publish.
     # The category packs: the multi-image board, full-frame backgrounds and the
     # replacement modern map composition API (styled labels + camera movement).
     add_executable(chronontemplate_multi_image_pack_test tests/multi_image_pack.cpp)

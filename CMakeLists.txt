@@ -312,6 +312,11 @@ add_executable(chronontemplate_emit_web_page_highlight
 target_link_libraries(chronontemplate_emit_web_page_highlight PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_page_highlight PRIVATE -Wall -Wextra)
 
+add_executable(chronontemplate_emit_web_classic_home
+        tools/web_presets/emit_web_classic_home.cpp)
+target_link_libraries(chronontemplate_emit_web_classic_home PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_classic_home PRIVATE -Wall -Wextra)
+
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.

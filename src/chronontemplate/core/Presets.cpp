@@ -167,21 +167,25 @@ namespace chronontemplate {
         Composition tableSidelightOrbit(const Final3DData& data) {
             using namespace chrononmotion;
             using namespace chrononmotion::motion;
-            MotionScene scene("table_sidelight_orbit", data.fps);
-            auto& table = scene.addMesh(kPrimary, "table_glb", MeshAttachment{data.assetId});
+            // The preset is parameters over the shared recipe: root, title layer
+            // and the key/fill ids come from baseComposition; the table mesh,
+            // the warm orbit and the light retune are this preset's own story.
+            Composition result = baseComposition(
+                    data, "table_sidelight_orbit", MaterialDescriptor::lambert(12, Color(0xffffff)));
+            result.scene.findLayer(kPrimary)->alive(data.startFrame, data.startFrame);
+            auto& table = result.scene.addMesh(kSecondary, "table_glb", MeshAttachment{data.assetId});
             table.positionedAt(Vector3(0.f, -1.56f, 0.f)).alive(lifetime(data));
 
-            auto& ambient = scene.addAmbientLight(50, "soft_fill");
-            ambient.color = Color(0xffffff);
-            ambient.intensity = 0.8f;
-            auto& key = scene.addDirectionalLight(51, "warm_side_key");
+            auto& key = static_cast<DirectionalLight&>(*result.scene.lights().front());
             key.color.setRGB(1.f, 0.78f, 0.56f, ColorSpace::Linear);
             key.intensity = 2.5f;
             key.transform.position = Vector3(-5.f, 8.f, 4.f);
             key.targetId = table.id;
+            auto& ambient = static_cast<AmbientLight&>(*result.scene.lights().back());
+            ambient.color = Color(0xffffff);
+            ambient.intensity = 0.8f;
 
-            CameraRig camera(100, 30.f, 16.f / 9.f, 0.1f, 1000.f);
-            camera.setTarget(Vector3(0.f, 0.f, 0.f));
+            CameraRig& camera = result.camera.setFov(30.f).setTarget(Vector3(0.f, 0.f, 0.f));
             constexpr int orbitSteps = 12;
             const float radius = 12.25f;
             const float elevation = 0.48f;
@@ -196,18 +200,22 @@ namespace chronontemplate {
                 camera.positionTrack().add(time, position);
                 camera.targetTrack().add(time, Vector3(0.f, 0.f, 0.f));
             }
-            return Composition{std::move(scene), std::move(camera),
-                               MaterialDescriptor::lambert(12, Color(0xffffff)), {}};
+            return result;
         }
 
         Composition tablePaperPushIn(const Final3DData& data) {
             using namespace chrononmotion;
             using namespace chrononmotion::motion;
-            MotionScene scene("table_paper_push_in", data.fps);
-            auto& table = scene.addMesh(kPrimary, "table_glb", MeshAttachment{data.assetId});
+            // Parameters over the shared recipe: the archival sheet reveal and
+            // the push-in keys ride the base's root and light ids; the title
+            // hangs over the sheet and fades with the start of the push.
+            Composition result = baseComposition(
+                    data, "table_paper_push_in", MaterialDescriptor::lambert(12, Color(0x777777)));
+            result.scene.findLayer(kPrimary)->alive(data.startFrame, data.startFrame);
+            auto& table = result.scene.addMesh(kSecondary, "table_glb", MeshAttachment{data.assetId});
             table.positionedAt(Vector3(0.f, -1.56f, 0.f)).alive(lifetime(data));
 
-            auto& paper = scene.addMesh(kSecondary, "archival_sheet",
+            auto& paper = result.scene.addMesh(4, "archival_sheet",
                     MeshAttachment{"", PlaneGeometry::create(1.85f, 1.35f),
                                    MaterialDescriptor::lambert(13, Color(0x666666))});
             paper.positionedAt(Vector3(0.f, 1.69f, 0.f))
@@ -218,22 +226,21 @@ namespace chronontemplate {
             paper.tracks.opacity.add(start + duration * 0.52f, 0.f);
             paper.tracks.opacity.add(start + duration * 0.60f, 1.f);
 
-            auto& ambient = scene.addAmbientLight(50, "low_ambient_fill");
-            ambient.color = Color(0xd0d0d0);
-            ambient.intensity = 0.25f;
-            auto& key = scene.addDirectionalLight(51, "soft_window_side_key");
+            auto& key = static_cast<DirectionalLight&>(*result.scene.lights().front());
             key.color = Color(0xe0e0e0);
             key.intensity = 0.85f;
             key.transform.position = Vector3(-5.f, 8.f, -4.f);
             key.targetId = table.id;
-            auto& overhead = scene.addDirectionalLight(52, "soft_overhead_fill");
+            auto& ambient = static_cast<AmbientLight&>(*result.scene.lights().back());
+            ambient.color = Color(0xd0d0d0);
+            ambient.intensity = 0.25f;
+            auto& overhead = result.scene.addDirectionalLight(52, "soft_overhead_fill");
             overhead.color = Color(0xfff3df);
             overhead.intensity = 0.7f;
             overhead.transform.position = Vector3(0.f, 10.f, 0.2f);
             overhead.targetId = table.id;
 
-            CameraRig camera(100, 45.f, 16.f / 9.f, 0.1f, 1000.f);
-            camera.setTarget(Vector3(0.f, 0.f, 0.f));
+            CameraRig& camera = result.camera.setFov(45.f).setTarget(Vector3(0.f, 0.f, 0.f));
             const auto addCameraKey = [&](float t, const Vector3& position,
                                           const Vector3& target, float fov) {
                 const float time = start + duration * t;
@@ -247,8 +254,7 @@ namespace chronontemplate {
             addCameraKey(0.67f, Vector3(1.f, 7.5f, 4.f), Vector3(0.f, 1.65f, 0.f), 30.f);
             addCameraKey(0.80f, Vector3(0.4f, 6.5f, 3.f), Vector3(0.f, 1.65f, 0.f), 26.f);
             addCameraKey(1.f, Vector3(0.f, 4.2f, 1.8f), Vector3(0.f, 1.65f, 0.f), 24.f);
-            return Composition{std::move(scene), std::move(camera),
-                               MaterialDescriptor::lambert(12, Color(0x777777)), {}};
+            return result;
         }
 
     }// namespace

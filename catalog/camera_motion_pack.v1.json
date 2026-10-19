@@ -28,7 +28,8 @@
     "photo_documentary",
     "map_geo",
     "dashboard_ui",
-    "transition"
+    "transition",
+    "web3d"
   ],
   "recipes": [
     {
@@ -551,7 +552,7 @@
       "requirements": {
         "dof": false,
         "planes_25d": false,
-        "multi_plane": true,
+        "multi_plane": false,
         "two_shot": false,
         "occluder": false,
         "high_energy": false
@@ -743,13 +744,493 @@
       "requirements": {
         "dof": false,
         "planes_25d": false,
-        "multi_plane": true,
+        "multi_plane": false,
         "two_shot": true,
         "occluder": false,
         "high_energy": true
       },
       "cut_at": 0.5,
       "snap_in": true
+    },
+    {
+      "id": "camera_motion_web3d_product_push",
+      "family": "web3d",
+      "duration_frames": 96,
+      "distance": {
+        "start": 1.1399999856948853,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 0.8799999952316284
+      },
+      "lateral": {
+        "x_start": 0.0,
+        "x_mid": -1000.0,
+        "x_end": 0.0,
+        "y_start": 0.0,
+        "y_mid": -1000.0,
+        "y_end": 0.0,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": 0.0,
+        "yaw_end": 0.0,
+        "pitch_start": 0.0,
+        "pitch_end": 0.0,
+        "roll_start": 0.0,
+        "roll_peak": -1000.0,
+        "roll_end": 0.0
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "cinematic",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": false
+      },
+      "cut_at": 0.5,
+      "snap_in": false
+    },
+    {
+      "id": "camera_motion_web3d_orbit",
+      "family": "web3d",
+      "duration_frames": 120,
+      "distance": {
+        "start": 1.0,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 1.0
+      },
+      "lateral": {
+        "x_start": 0.0,
+        "x_mid": -1000.0,
+        "x_end": 0.0,
+        "y_start": 0.0,
+        "y_mid": -1000.0,
+        "y_end": 0.0,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": -24.0,
+        "yaw_end": 24.0,
+        "pitch_start": 0.0,
+        "pitch_end": 0.0,
+        "roll_start": 0.0,
+        "roll_peak": -1000.0,
+        "roll_end": 0.0
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "smooth",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": false
+      },
+      "cut_at": 0.5,
+      "snap_in": false
+    },
+    {
+      "id": "camera_motion_web3d_arc_left",
+      "family": "web3d",
+      "duration_frames": 105,
+      "distance": {
+        "start": 1.0399999618530273,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 1.0
+      },
+      "lateral": {
+        "x_start": 0.0,
+        "x_mid": -1000.0,
+        "x_end": 0.0,
+        "y_start": 0.0,
+        "y_mid": -1000.0,
+        "y_end": 0.0,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": 8.0,
+        "yaw_end": -22.0,
+        "pitch_start": 0.0,
+        "pitch_end": 0.0,
+        "roll_start": 0.0,
+        "roll_peak": -1000.0,
+        "roll_end": 0.0
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "smooth",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": false
+      },
+      "cut_at": 0.5,
+      "snap_in": false
+    },
+    {
+      "id": "camera_motion_web3d_arc_right",
+      "family": "web3d",
+      "duration_frames": 105,
+      "distance": {
+        "start": 1.0399999618530273,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 1.0
+      },
+      "lateral": {
+        "x_start": 0.0,
+        "x_mid": -1000.0,
+        "x_end": 0.0,
+        "y_start": 0.0,
+        "y_mid": -1000.0,
+        "y_end": 0.0,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": -8.0,
+        "yaw_end": 22.0,
+        "pitch_start": 0.0,
+        "pitch_end": 0.0,
+        "roll_start": 0.0,
+        "roll_peak": -1000.0,
+        "roll_end": 0.0
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "smooth",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": false
+      },
+      "cut_at": 0.5,
+      "snap_in": false
+    },
+    {
+      "id": "camera_motion_web3d_rise_reveal",
+      "family": "web3d",
+      "duration_frames": 90,
+      "distance": {
+        "start": 1.0,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 1.0
+      },
+      "lateral": {
+        "x_start": 0.0,
+        "x_mid": -1000.0,
+        "x_end": 0.0,
+        "y_start": 0.10000000149011612,
+        "y_mid": -1000.0,
+        "y_end": -0.02500000037252903,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": 0.0,
+        "yaw_end": 0.0,
+        "pitch_start": -12.0,
+        "pitch_end": 3.0,
+        "roll_start": 0.0,
+        "roll_peak": -1000.0,
+        "roll_end": 0.0
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "gentle_out",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": false
+      },
+      "cut_at": 0.5,
+      "snap_in": false
+    },
+    {
+      "id": "camera_motion_web3d_top_down",
+      "family": "web3d",
+      "duration_frames": 108,
+      "distance": {
+        "start": 1.0800000429153442,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 1.1799999475479126
+      },
+      "lateral": {
+        "x_start": 0.0,
+        "x_mid": -1000.0,
+        "x_end": 0.0,
+        "y_start": 0.0,
+        "y_mid": -1000.0,
+        "y_end": 0.0,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": 0.0,
+        "yaw_end": 0.0,
+        "pitch_start": 38.0,
+        "pitch_end": 82.0,
+        "roll_start": 0.0,
+        "roll_peak": -1000.0,
+        "roll_end": 0.0
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "cinematic",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": false
+      },
+      "cut_at": 0.5,
+      "snap_in": false
+    },
+    {
+      "id": "camera_motion_web3d_lateral_slide",
+      "family": "web3d",
+      "duration_frames": 96,
+      "distance": {
+        "start": 1.0,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 1.0
+      },
+      "lateral": {
+        "x_start": -0.11999999731779099,
+        "x_mid": -1000.0,
+        "x_end": 0.11999999731779099,
+        "y_start": 0.0,
+        "y_mid": -1000.0,
+        "y_end": 0.0,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": 5.0,
+        "yaw_end": -5.0,
+        "pitch_start": 0.0,
+        "pitch_end": 0.0,
+        "roll_start": 0.0,
+        "roll_peak": -1000.0,
+        "roll_end": 0.0
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "smooth",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": false
+      },
+      "cut_at": 0.5,
+      "snap_in": false
+    },
+    {
+      "id": "camera_motion_web3d_dolly_arc",
+      "family": "web3d",
+      "duration_frames": 90,
+      "distance": {
+        "start": 1.2200000286102295,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 0.8199999928474426
+      },
+      "lateral": {
+        "x_start": 0.0,
+        "x_mid": -1000.0,
+        "x_end": 0.0,
+        "y_start": 0.0,
+        "y_mid": -1000.0,
+        "y_end": 0.0,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": -4.0,
+        "yaw_end": 4.0,
+        "pitch_start": 0.0,
+        "pitch_end": 0.0,
+        "roll_start": 0.0,
+        "roll_peak": -1000.0,
+        "roll_end": 0.0
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "cinematic",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": true
+      },
+      "cut_at": 0.5,
+      "snap_in": false
+    },
+    {
+      "id": "camera_motion_web3d_crane_down",
+      "family": "web3d",
+      "duration_frames": 100,
+      "distance": {
+        "start": 1.0,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 1.0
+      },
+      "lateral": {
+        "x_start": 0.0,
+        "x_mid": -1000.0,
+        "x_end": 0.0,
+        "y_start": -0.1599999964237213,
+        "y_mid": -1000.0,
+        "y_end": 0.03999999910593033,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": 0.0,
+        "yaw_end": 0.0,
+        "pitch_start": 16.0,
+        "pitch_end": -6.0,
+        "roll_start": 0.0,
+        "roll_peak": -1000.0,
+        "roll_end": 0.0
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "gentle_out",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": false
+      },
+      "cut_at": 0.5,
+      "snap_in": false
+    },
+    {
+      "id": "camera_motion_web3d_slow_drift",
+      "family": "web3d",
+      "duration_frames": 150,
+      "distance": {
+        "start": 1.0,
+        "mid": -1000.0,
+        "mid_at": 0.5,
+        "end": 1.0
+      },
+      "lateral": {
+        "x_start": -0.04500000178813934,
+        "x_mid": -1000.0,
+        "x_end": 0.04500000178813934,
+        "y_start": 0.0,
+        "y_mid": -1000.0,
+        "y_end": 0.0,
+        "pos_mid_at": 0.5
+      },
+      "travel_window": {
+        "start": 0.0,
+        "end": 1.0
+      },
+      "angles_deg": {
+        "yaw_start": -5.0,
+        "yaw_end": 5.0,
+        "pitch_start": 0.0,
+        "pitch_end": 0.0,
+        "roll_start": -1.5,
+        "roll_peak": -1000.0,
+        "roll_end": 1.5
+      },
+      "focus_pct": {
+        "start": -1.0,
+        "end": -1.0
+      },
+      "easing": "smooth",
+      "requirements": {
+        "dof": false,
+        "planes_25d": false,
+        "multi_plane": false,
+        "two_shot": false,
+        "occluder": false,
+        "high_energy": false
+      },
+      "cut_at": 0.5,
+      "snap_in": false
     }
   ],
   "selection": {
@@ -791,7 +1272,10 @@
     ],
     "premium_ui_3d": [
       "camera_motion_ui_card_parallax",
-      "camera_motion_ui_micro_float"
+      "camera_motion_ui_micro_float",
+      "camera_motion_web3d_product_push",
+      "camera_motion_web3d_orbit",
+      "camera_motion_web3d_slow_drift"
     ],
     "fast_cut": [
       "camera_motion_whip_pan_left",
@@ -802,6 +1286,18 @@
     ],
     "blur_pass": [
       "camera_motion_rack_focus_portrait"
+    ],
+    "web3d_object": [
+      "camera_motion_web3d_product_push",
+      "camera_motion_web3d_orbit",
+      "camera_motion_web3d_arc_left",
+      "camera_motion_web3d_arc_right",
+      "camera_motion_web3d_rise_reveal",
+      "camera_motion_web3d_top_down",
+      "camera_motion_web3d_lateral_slide",
+      "camera_motion_web3d_dolly_arc",
+      "camera_motion_web3d_crane_down",
+      "camera_motion_web3d_slow_drift"
     ]
   }
 }

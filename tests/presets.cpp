@@ -71,7 +71,7 @@ namespace {
         }
 
         Composition table = build(Final3DPreset::TableSidelightOrbit, finalData());
-        check(table.scene.findLayer(2)->mesh.assetId == "product.asset",
+        check(table.scene.findLayer(3)->mesh.assetId == "product.asset",
               "table orbit binds the requested GLB asset id");
         check(table.scene.lightCount() == 2, "table orbit has ambient fill and one side key");
         const auto startPose = table.camera.sample(10.f / 30.f);
@@ -79,9 +79,11 @@ namespace {
         check(startPose.position.x != middlePose.position.x || startPose.position.z != middlePose.position.z,
               "table orbit camera advances around the asset");
         Composition pushIn = build(Final3DPreset::TablePaperPushIn, finalData());
-        check(pushIn.scene.findLayer(2)->mesh.assetId == "product.asset" &&
-                      static_cast<bool>(pushIn.scene.findLayer(3)->mesh.geometry),
+        check(pushIn.scene.findLayer(3)->mesh.assetId == "product.asset" &&
+                      static_cast<bool>(pushIn.scene.findLayer(4)->mesh.geometry),
               "table push-in binds the GLB and creates a native paper plane");
+        check(pushIn.scene.findLayer(2)->content.isText(),
+              "table push-in keeps the shared text layer on the base recipe root");
         const auto pushStart = pushIn.camera.sample(10.f / 30.f);
         const auto pushEnd = pushIn.camera.sample(130.f / 30.f);
         check(pushEnd.position.z < pushStart.position.z && pushEnd.fov < pushStart.fov,
