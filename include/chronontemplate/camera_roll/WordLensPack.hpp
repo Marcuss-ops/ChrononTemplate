@@ -36,8 +36,8 @@ namespace chronontemplate {
         float baseFovDegrees{48.f};
         float focusFovDegrees{38.f};
         float cameraDistance{1080.f};
-        // RenderPlan's supported DOF aperture channel is normalized to [0, 1].
-        float aperture{0.18f};
+        // Legacy defocus gain consumed by the renderer; normalized to [0, 1].
+        float legacyDefocusStrength{0.18f};
         float fStop{5.6f};
         float maxBlurPixels{10.f};
         float highlightGain{1.25f};

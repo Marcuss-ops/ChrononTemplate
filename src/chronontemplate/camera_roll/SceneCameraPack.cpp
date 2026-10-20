@@ -59,7 +59,7 @@ namespace chronontemplate {
             float rollPeak{0.f};  ///< roll at the apex (radians, returns to 0)
             float fovPeak{0.f};   ///< fov at the apex (0 = untouched)
             float focusShift{0.f};///< focus-distance delta applied over the leg (A → B focus)
-            float aperture{0.f};  ///< aperture keyed during the leg (0 = untouched)
+            float fStop{0.f};     ///< physical lens f-number keyed during the leg
             bool aimBoth{true};   ///< false: mid-travel aim interpolates between the centres
             float travelEase{0.f};///< >0: one loud acquisition (whip) on the first half
         };
@@ -140,7 +140,7 @@ namespace chronontemplate {
                     // lens hands focus (and attention) from A to B.
                     plan.lateral = 26.f * loudness;
                     plan.focusShift = 1.f; // marker: focus keyed A → B
-                    plan.aperture = 14.f;
+                    plan.fStop = 14.f;
                     break;
                 }
                 case SceneCameraTransition::PullBackReveal: {
@@ -241,19 +241,19 @@ namespace chronontemplate {
                 fov.add(t1, plan.restB.fov, Easing::easeInOut());
             }
 
-            // The lens: focus rides A → B; a rack holds the aperture open for
+            // The lens: focus rides A → B; the rack uses a physical f-stop for
             // the whole leg so the handoff is visible.
-            if (plan.focusShift != 0.f || plan.aperture != 0.f) {
+            if (plan.focusShift != 0.f || plan.fStop != 0.f) {
                 const float distA = (plan.restA.position - plan.restA.target).length();
                 const float distB = (plan.restB.position - plan.restB.target).length();
                 auto& focus = rig.focusDistanceTrack();
                 focus.add(t0, distA, Easing::easeInOut());
                 focus.add(tApex, (distA + distB) * 0.5f, Easing::easeInOut());
                 focus.add(t1, distB, Easing::easeInOut());
-                if (plan.aperture != 0.f) {
-                    auto& aperture = rig.apertureTrack();
-                    aperture.add(t0, 0.f, Easing::easeInOut());
-                    aperture.add(t1, plan.aperture, Easing::easeInOut());
+                if (plan.fStop != 0.f) {
+                    auto& fStop = rig.fStopTrack();
+                    fStop.add(t0, plan.fStop, Easing::easeInOut());
+                    fStop.add(t1, plan.fStop, Easing::easeInOut());
                 }
             }
         }

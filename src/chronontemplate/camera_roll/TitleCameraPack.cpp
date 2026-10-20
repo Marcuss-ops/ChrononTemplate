@@ -145,7 +145,7 @@ namespace chronontemplate {
                     // makes the title matter, not a glow on the text.
                     plan.dolly = plan.distance * 0.20f * loudness;
                     plan.focusPull = plan.distance * 0.20f * loudness;
-                    plan.aperture = 12.f;
+                    plan.fStop = 12.f;
                     break;
                 case TitleCameraMove::ParallaxSide:
                     // Layers behind move faster than the static title.
@@ -432,18 +432,17 @@ namespace chronontemplate {
             fov.add(t2, plan.fovEnd, Easing::linear());
         }
 
-        // --- the lens: focus + aperture ----------------------------------------
+        // --- the lens: focus + physical f-stop ---------------------------------
         if (hasFocus) {
             auto& focus = rig.focusDistanceTrack();
             focus.add(t0, plan.distance, Easing::easeInOut());
             focus.add(t1, plan.distance - plan.focusPull, Easing::easeInOut());
             focus.add(t2, plan.distance - plan.focusPull, Easing::linear());
         }
-        if (plan.aperture != 0.f) {
-            auto& aperture = rig.apertureTrack();
-            aperture.add(t0, 0.f, Easing::easeInOut());
-            aperture.add(t1, plan.aperture, Easing::easeInOut());
-            aperture.add(t2, plan.aperture, Easing::linear());
+        if (plan.fStop != 0.f) {
+            auto& fStop = rig.fStopTrack();
+            fStop.add(t1, plan.fStop, Easing::easeInOut());
+            fStop.add(t2, plan.fStop, Easing::linear());
         }
 
         // The rig's static pose agrees with where the move lands, so frames

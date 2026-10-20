@@ -250,10 +250,10 @@ namespace {
             bool dofValuesInRange = true;
             for (int frame = shot.inFrame; frame <= shot.inFrame + shot.duration; ++frame) {
                 const auto pose = scene.camera().rig().sample(static_cast<float>(frame) / scene.fps());
-                dofValuesInRange = dofValuesInRange && std::isfinite(pose.aperture) &&
-                    pose.aperture >= 0.f && pose.aperture <= 1.f &&
+                dofValuesInRange = dofValuesInRange && std::isfinite(pose.legacyDefocusStrength) &&
+                    pose.legacyDefocusStrength >= 0.f && pose.legacyDefocusStrength <= 1.f &&
                     std::isfinite(pose.focusDistance) && pose.focusDistance >= 0.f &&
-                    (pose.aperture == 0.f || pose.focusDistance > 0.f);
+                    (pose.legacyDefocusStrength == 0.f || pose.focusDistance > 0.f);
             }
             check(dofValuesInRange,
                   "all documentary recipes keep animated DOF values inside RenderPlan limits");
@@ -447,12 +447,12 @@ namespace {
                 checkNear(finalPose.position.z + finalForward.z * finalPose.focusDistance,
                           shot.snapshots.back().anchor.center.z, 1e-3f,
                           "focus-drop ends on the snapshot depth plane");
-                check(finalPose.aperture > 0.f && finalPose.aperture <= 1.f,
+                check(finalPose.legacyDefocusStrength > 0.f && finalPose.legacyDefocusStrength <= 1.f,
                       "focus-drop keeps its aperture inside the RenderPlan DOF range");
                 bool apertureInRange = true;
                 for (int frame = shot.inFrame; frame <= shot.inFrame + shot.duration; ++frame) {
                     const auto pose = scene.camera().rig().sample(static_cast<float>(frame) / scene.fps());
-                    apertureInRange = apertureInRange && pose.aperture > 0.f && pose.aperture <= 1.f;
+                    apertureInRange = apertureInRange && pose.legacyDefocusStrength > 0.f && pose.legacyDefocusStrength <= 1.f;
                 }
                 check(apertureInRange,
                       "focus-drop maintains a RenderPlan-compatible aperture throughout the handoff");
@@ -470,7 +470,7 @@ namespace {
                 checkNear(finalPose.focusDistance,
                           finalPose.position.distanceTo(finalAnchor.center), 1e-3f,
                           "split-depth settles focus exactly on the final snapshot anchor");
-                check(finalPose.aperture > 0.f && finalPose.aperture <= 1.f,
+                check(finalPose.legacyDefocusStrength > 0.f && finalPose.legacyDefocusStrength <= 1.f,
                       "split-depth opens a valid aperture after focusing on the snapshot");
             }
             if (recipe == DocumentaryRecipe::CornerTurn) {
@@ -590,7 +590,7 @@ namespace {
                                   direct.camera->target - sequential.camera->target) < 1e-8f &&
                           std::fabs(direct.camera->orientation.dot(sequential.camera->orientation)) > 0.999999f &&
                           std::fabs(direct.camera->focusDistance - sequential.camera->focusDistance) < 1e-6f &&
-                          std::fabs(direct.camera->aperture - sequential.camera->aperture) < 1e-6f &&
+                          std::fabs(direct.camera->legacyDefocusStrength - sequential.camera->legacyDefocusStrength) < 1e-6f &&
                           std::fabs(direct.camera->fov - sequential.camera->fov) < 1e-6f,
                   "direct frame evaluation matches sequential camera pose, DOF, and lens");
 

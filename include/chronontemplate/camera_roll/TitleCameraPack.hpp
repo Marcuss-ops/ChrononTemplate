@@ -149,8 +149,8 @@ namespace chronontemplate {
         /// Focus-distance travel; positive pulls the focal plane toward the
         /// anchor (0 = untouched).
         float focusPull{0.f};
-        /// Entrance pupil authored for the move in millimetres (0 = untouched).
-        float aperture{0.f};
+        /// Physical lens f-number (f/N), 0 = leave the lens unchanged.
+        float fStop{0.f};
         /// Fraction of the travel the whip spends acquiring (whip_settle only).
         float whipAcquisition{0.f};
     };
