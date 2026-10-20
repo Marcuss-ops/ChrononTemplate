@@ -27,6 +27,8 @@
 
 namespace chronontemplate::web {
 
+    struct WebTextLayout;
+
     enum class WebPageTheme { Light, Dark };
     enum class WebPageRecipe { Complete, Highlight3D, LongPhraseBlurred };
 
@@ -88,6 +90,10 @@ namespace chronontemplate::web {
     /// spec: the returned document is a complete `chronon.render-plan.v3`
     /// object, identical bytes for identical spec values.
     [[nodiscard]] nlohmann::json buildWebPageHighlightPlan(const WebPageHighlightSpec& spec);
+    /// Exact-layout overload. Uses the shared Chronon-shaped lines and their
+    /// measured baselines for the article body instead of caller-authored wraps.
+    [[nodiscard]] nlohmann::json buildWebPageHighlightPlan(
+        const WebPageHighlightSpec& spec, const WebTextLayout& bodyLayout);
 
 }// namespace chronontemplate::web
 

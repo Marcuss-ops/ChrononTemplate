@@ -205,8 +205,8 @@ namespace {
         throws(spec, "an article page without body lines fails closed");
 
         spec = baseSpec();
-        spec.bodyLines.assign(15, "too many body lines for one page");
-        throws(spec, "more than fourteen body lines fails closed");
+        spec.bodyLines.assign(81, "too many body lines for one page");
+        throws(spec, "more than eighty body lines fails closed");
 
         spec = baseSpec();
         spec.durationFrames = 60;

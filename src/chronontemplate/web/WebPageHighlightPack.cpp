@@ -8,6 +8,7 @@
 // animator; the important center phrase never does. No Python, no Pillow, no
 // browser: Chronon3D dev authoring vocabulary, the renderer rasterizes.
 #include "chronontemplate/web/WebPageHighlightPack.hpp"
+#include "chronontemplate/web/WebTextLayout.hpp"
 
 #include "chronontemplate/core/NativePrimitives.hpp"
 
@@ -30,7 +31,7 @@ namespace chronontemplate::web {
         constexpr float kContentRight = kW - kMargin;   // 1770
         constexpr const char* kBold = "assets/fonts/Inter-Bold.ttf";
         constexpr const char* kRegular = "assets/fonts/Inter-Regular.ttf";
-        constexpr const char* kSerif = "assets/fonts/FreeSerif.ttf";
+        constexpr const char* kSerif = "assets/fonts/PlayfairDisplay.ttf";
         constexpr int kFoldStagger = 2, kFoldFrames = 8;
 
         [[noreturn]] void fail(const std::string& message) {
@@ -234,7 +235,7 @@ namespace chronontemplate::web {
             if (headlineLineTwo.size() > 48) fail("headlineLineTwo is too long (<= 48 chars)");
             if (kicker.empty()) fail("kicker is required");
             if (bodyLines.empty()) fail("bodyLines is required for the article body");
-            if (bodyLines.size() > 14) fail("at most fourteen body lines");
+            if (bodyLines.size() > 80) fail("at most eighty body lines");
         } else {
             if (importantPhrase.empty()) fail("importantPhrase is required");
             if (importantPhrase.size() > 44) fail("importantPhrase is too long (<= 44 chars)");
@@ -395,6 +396,32 @@ namespace chronontemplate::web {
                 spec.planName(), kW, kH, kFps, duration, layers, camera,
                 native::Camera::animation(cameraTracks),
                 {{"path", spec.outputStem()}, {"format", "mp4"}, {"codec", "h264"}});
+    }
+
+    Json buildWebPageHighlightPlan(const WebPageHighlightSpec& spec,
+                                   const WebTextLayout& bodyLayout) {
+        if (bodyLayout.lines.empty() || bodyLayout.fontPath.empty() || bodyLayout.fontSize <= 0.f)
+            throw std::invalid_argument("exact web page layout must contain shaped body lines and font metadata");
+        WebPageHighlightSpec measured = spec;
+        measured.bodyLines.clear();
+        measured.bodyLines.reserve(bodyLayout.lines.size());
+        for (const auto& line : bodyLayout.lines) measured.bodyLines.push_back(line.text);
+        Json plan = buildWebPageHighlightPlan(measured);
+        for (std::size_t i = 0; i < bodyLayout.lines.size(); ++i) {
+            Json& layer = plan["layers"][static_cast<std::size_t>(
+                std::find_if(plan["layers"].begin(), plan["layers"].end(), [&](const Json& candidate) {
+                    return candidate.value("id", std::string{}) == "body_line_" + std::to_string(i);
+                }) - plan["layers"].begin())];
+            const auto& line = bodyLayout.lines[i];
+            if (line.width <= 0.f || line.lineHeight <= 0.f)
+                throw std::invalid_argument("exact web page line has invalid shaped dimensions");
+            layer["size"] = Json::array({line.width + 2.f, line.lineHeight});
+            layer["position"] = Json::array({line.x + (line.width + 2.f) * .5f,
+                                               line.top + line.lineHeight * .5f, 0.f});
+            layer["style"]["font"] = bodyLayout.fontPath;
+            layer["style"]["font_size"] = bodyLayout.fontSize;
+        }
+        return plan;
     }
 
 }// namespace chronontemplate::web
