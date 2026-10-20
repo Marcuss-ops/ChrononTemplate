@@ -24,9 +24,7 @@
 
 #include "chronontemplate/core/TemplateScene.hpp"
 
-#include "chrononmotion/math/Vector2.hpp"
-#include "chrononmotion/math/Vector3.hpp"
-#include "chrononmotion/motion/CameraRig.hpp"
+#include "chrononmotion/motion/CameraRecipe.hpp"
 
 #include <cstdint>
 #include <string>
@@ -52,14 +50,7 @@ namespace chronontemplate {
 #undef CAMERA_MOTION_PRESET
     };
 
-    /// Planner loudness: one preset, three strengths. Amplitudes (distance
-    /// deltas, lateral/vertical travel, angles) scale by the factor; durations
-    /// and focus depths never scale.
-    enum class CameraMotionIntensity : std::uint8_t {
-        Subtle, ///< 50% of the authored amplitude
-        Normal, ///< 100% of the authored amplitude
-        Strong  ///< 150% of the authored amplitude, clamped by framing
-    };
+    using CameraMotionIntensity = chrononmotion::motion::camera::RecipeIntensity;
 
     /// What the planner recognised in the scene. The selection table maps
     /// each kind to the spec's recommended presets.
@@ -83,24 +74,10 @@ namespace chronontemplate {
     /// What a shot frames: the subject's optical centre and half-extents in
     /// world units. Scene Framing fits the reference distance to this; the
     /// preset only describes motion *relative* to it.
-    struct CameraMotionSubject {
-        chrononmotion::Vector3 center{0.f, 0.f, 0.f};
-        float halfWidth{480.f};
-        float halfHeight{270.f};
-    };
+    using CameraMotionSubject = chrononmotion::motion::camera::RecipeSubject;
 
     /// Authoring description of one shot.
-    struct CameraMotionShot {
-        CameraMotionSubject subject{};
-        CameraMotionIntensity intensity{CameraMotionIntensity::Normal};
-        float fov{50.f};
-        /// Depth interval the focus percents resolve against (world units).
-        float focusNear{800.f};
-        float focusFar{1400.f};
-        int inFrame{0};
-        /// 0 keeps the spec duration; positive overrides it (stretches keys).
-        int durationOverride{0};
-    };
+    using CameraMotionShot = chrononmotion::motion::camera::CameraRecipeShot;
 
     /// One row of the roster: the whole recipe as spec numbers. Distances are
     /// fractions of the reference framing (1.00 = reference); lateral (X) and
@@ -108,45 +85,9 @@ namespace chronontemplate {
     /// seen by the camera (X+ = body right, Y+ = body down); angles are
     /// degrees; focus is percent of [focusNear, focusFar]. A *_mid value
     /// < -900 means "no mid key" (straight travel).
-    struct CameraMotionSpec {
+    struct CameraMotionSpec : chrononmotion::motion::camera::CameraMotionRecipe {
         const char* id{};
         CameraMotionFamily family{CameraMotionFamily::EditorialTitle};
-        int durationFrames{90};
-        float distStart{1.f};
-        float distMid{-1000.f};
-        float distMidAt{0.5f};
-        float distEnd{1.f};
-        float xStart{0.f};
-        float xMid{-1000.f};
-        float xEnd{0.f};
-        float yStart{0.f};
-        float yMid{-1000.f};
-        float yEnd{0.f};
-        float posMidAt{0.5f};
-        /// Body travel window as fractions of the duration (holds outside).
-        float travelStart{0.f};
-        float travelEnd{1.f};
-        float yawStart{0.f};
-        float yawEnd{0.f};
-        float pitchStart{0.f};
-        float pitchEnd{0.f};
-        float rollStart{0.f};
-        float rollPeak{-1000.f};
-        float rollEnd{0.f};
-        float focusStart{-1.f};
-        float focusEnd{-1.f};
-        const char* easing{"smooth"};
-        bool needsDof{false};
-        bool needs25D{false};
-        bool needsMultiPlane{false};
-        bool twoShot{false};
-        bool needsOccluder{false};
-        bool highEnergy{false};
-        /// Two-shot: fraction of the duration where scene A cuts to B.
-        float cutAt{0.5f};
-        /// Two-shot: the IN leg launches loud (expoOut) instead of easing
-        /// in-out — whips and pass-throughs, not settles and reveals.
-        bool snapIn{false};
     };
 
     /// Every preset in canonical roster order. The roster also generates the
