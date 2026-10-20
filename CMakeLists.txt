@@ -241,6 +241,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/web/WebPageHighlightPack.cpp
         src/chronontemplate/web/WebTextLayout.cpp
         src/chronontemplate/web/ArticleEvidenceReveal.cpp
+        # second generation: radians-safe fold, distinct recipes, reworked hierarchy
+        src/chronontemplate/web/WebPageV2Pack.cpp
         # native layout composers: flex rows, columns and grids plus FLIP moves
         src/chronontemplate/composers/LayoutComposer.cpp
         # declarative transitions (BACKLOG item 4): sweep/dip/blinds/iris/glitch/leak
@@ -318,6 +320,12 @@ add_executable(chronontemplate_emit_web_classic_home
         tools/web_presets/emit_web_classic_home.cpp)
 target_link_libraries(chronontemplate_emit_web_classic_home PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_classic_home PRIVATE -Wall -Wextra)
+
+# Second generation: radians-safe fold, distinct recipes, reworked hierarchy.
+add_executable(chronontemplate_emit_web_page_v2
+        tools/web_presets/emit_web_page_v2.cpp)
+target_link_libraries(chronontemplate_emit_web_page_v2 PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_page_v2 PRIVATE -Wall -Wextra)
 
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is

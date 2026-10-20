@@ -148,6 +148,13 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_web_text_layout_test PRIVATE chronontemplate)
     add_test(NAME chronontemplate_web_text_layout_test COMMAND chronontemplate_web_text_layout_test)
 
+    # Second generation: six plans build, fold rotation stays in radians
+    # (V1 authored degrees and killed video exports), recipes differ.
+    add_executable(chronontemplate_web_page_v2_pack_test tests/web_page_v2_pack.cpp)
+    target_link_libraries(chronontemplate_web_page_v2_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_web_page_v2_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_web_page_v2_pack_test COMMAND chronontemplate_web_page_v2_pack_test)
+
     add_executable(chronontemplate_elements_documentary_test tests/elements_documentary.cpp)
     target_link_libraries(chronontemplate_elements_documentary_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_elements_documentary_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
