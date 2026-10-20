@@ -407,11 +407,16 @@ namespace chronontemplate {
             spec.cornerRadius > std::min(spec.size.x, spec.size.y) * 0.5f ||
             (spec.geometry != ShapeGeometry::Rectangle && spec.geometry != ShapeGeometry::Ellipse &&
              spec.geometry != ShapeGeometry::Grid && spec.geometry != ShapeGeometry::DotGrid &&
-             spec.geometry != ShapeGeometry::Polygon))
+             spec.geometry != ShapeGeometry::Polygon && spec.geometry != ShapeGeometry::Path))
             throw std::invalid_argument("TemplateScene::shape: positive finite size and supported geometry are required");
         const bool gridGeometry = spec.geometry == ShapeGeometry::Grid;
         const bool dotGridGeometry = spec.geometry == ShapeGeometry::DotGrid;
         const bool polygonGeometry = spec.geometry == ShapeGeometry::Polygon;
+        const bool pathGeometry = spec.geometry == ShapeGeometry::Path;
+        if (pathGeometry && spec.svgAsset.empty() && spec.path.empty())
+            throw std::invalid_argument("TemplateScene::shape: path geometry requires an svgAsset or inline path commands");
+        if (!pathGeometry && (!spec.svgAsset.empty() || !spec.path.empty() || spec.trim.has_value()))
+            throw std::invalid_argument("TemplateScene::shape: svgAsset, path commands, and trim require ShapeGeometry::Path");
         if (gridGeometry || dotGridGeometry) {
             if (!std::isfinite(spec.gridSpacing) || spec.gridSpacing < 4.f || spec.gridSpacing > 512.f ||
                 (dotGridGeometry && (!std::isfinite(spec.dotRadius) || spec.dotRadius < 0.5f || spec.dotRadius > 64.f)) ||
@@ -439,8 +444,13 @@ namespace chronontemplate {
             throw std::invalid_argument("TemplateScene::shape: polygon points or rotation is outside supported bounds");
         if (!std::isfinite(spec.noiseAmount) || spec.noiseAmount < 0.f || spec.noiseAmount > 1.f ||
             !std::isfinite(spec.noiseSize) || spec.noiseSize <= 0.f || spec.noiseSize > 256.f ||
-            !std::isfinite(spec.contrast) || spec.contrast < 0.f || spec.contrast > 4.f)
-            throw std::invalid_argument("TemplateScene::shape: noise, size and contrast are outside supported bounds");
+            !std::isfinite(spec.contrast) || spec.contrast < 0.f || spec.contrast > 4.f ||
+            !std::isfinite(spec.glowRadius) || spec.glowRadius < 0.f || spec.glowRadius > 256.f ||
+            !std::isfinite(spec.glowIntensity) || spec.glowIntensity < 0.f || spec.glowIntensity > 4.f ||
+            !std::isfinite(spec.bloomThreshold) || spec.bloomThreshold < 0.f || spec.bloomThreshold > 1.f ||
+            !std::isfinite(spec.bloomRadius) || spec.bloomRadius < 0.f || spec.bloomRadius > 256.f ||
+            !std::isfinite(spec.bloomIntensity) || spec.bloomIntensity < 0.f || spec.bloomIntensity > 4.f)
+            throw std::invalid_argument("TemplateScene::shape: noise, size, contrast, glow or bloom are outside supported bounds");
         if (spec.field) {
             const auto& field = *spec.field;
             if (gridGeometry || dotGridGeometry || polygonGeometry ||
@@ -460,13 +470,13 @@ namespace chronontemplate {
             throw std::invalid_argument("TemplateScene::shape: field render scale must be 1, 2 or 4");
         if (spec.radialGradient) {
             const auto& gradient = *spec.radialGradient;
-            if (spec.geometry != ShapeGeometry::Ellipse ||
+            if ((spec.geometry != ShapeGeometry::Ellipse && spec.geometry != ShapeGeometry::Path) ||
                 !std::isfinite(gradient.center.x) || !std::isfinite(gradient.center.y) ||
                 gradient.center.x < 0.f || gradient.center.x > 1.f ||
                 gradient.center.y < 0.f || gradient.center.y > 1.f ||
                 !std::isfinite(gradient.radius) || gradient.radius <= 0.f ||
                 gradient.radius > 2.f || gradient.stops.size() < 2 || gradient.stops.size() > 16)
-                throw std::invalid_argument("TemplateScene::shape: radial gradients require an ellipse and bounded geometry/stops");
+                throw std::invalid_argument("TemplateScene::shape: radial gradients require an ellipse/path and bounded geometry/stops");
             float previousPosition = -1.f;
             for (const auto& stop : gradient.stops) {
                 const bool validHex = stop.color.size() == 7 && stop.color.front() == '#' &&
@@ -495,8 +505,18 @@ namespace chronontemplate {
         request.dotRadius = spec.dotRadius;
         request.strokeColor = spec.strokeColor;
         request.strokeWidth = spec.strokeWidth;
+        request.strokeCap = spec.strokeCap;
+        request.strokeJoin = spec.strokeJoin;
+        request.strokeDashArray = spec.strokeDashArray;
+        request.strokeDashOffset = spec.strokeDashOffset;
+        request.strokeTaperStart = spec.strokeTaperStart;
+        request.strokeTaperEnd = spec.strokeTaperEnd;
         request.polygonPoints = spec.polygonPoints;
         request.polygonRotationDegrees = spec.polygonRotationDegrees;
+        request.svgAsset = spec.svgAsset;
+        request.fillRule = spec.fillRule;
+        request.path = spec.path;
+        request.trim = spec.trim;
         request.field = spec.field;
         request.fieldRamp = spec.fieldRamp;
         request.fieldRenderScale = spec.fieldRenderScale;
@@ -507,6 +527,12 @@ namespace chronontemplate {
         request.animatedNoise = spec.animatedNoise;
         request.noiseSize = spec.noiseSize;
         request.contrast = spec.contrast;
+        request.glowRadius = spec.glowRadius;
+        request.glowIntensity = spec.glowIntensity;
+        request.glowColor = spec.glowColor;
+        request.bloomThreshold = spec.bloomThreshold;
+        request.bloomRadius = spec.bloomRadius;
+        request.bloomIntensity = spec.bloomIntensity;
         ContentHandle handle = m_host.createShape(request);
         return adopt(std::move(handle), derivedName(spec.name, "Shape"), Layer::kRoot);
     }

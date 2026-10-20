@@ -119,7 +119,49 @@ namespace chronontemplate {
         float softBlur{0.f};
     };
 
-    enum class ShapeGeometry : std::uint8_t { Rectangle, Ellipse, Grid, DotGrid, Polygon };
+    enum class ShapeGeometry : std::uint8_t { Rectangle, Ellipse, Grid, DotGrid, Polygon, Path };
+
+    enum class ShapePathCommandType : std::uint8_t { MoveTo, LineTo, QuadraticTo, CubicTo, Close };
+
+    enum class ShapeFillRule : std::uint8_t { EvenOdd, NonZero };
+
+    struct ShapePathCommand {
+        ShapePathCommandType type{ShapePathCommandType::MoveTo};
+        chrononmotion::Vector2 point{0.f, 0.f};
+        chrononmotion::Vector2 control1{0.f, 0.f};
+        chrononmotion::Vector2 control2{0.f, 0.f};
+
+        static ShapePathCommand moveTo(float x, float y) {
+            return {ShapePathCommandType::MoveTo, {x, y}, {0.f, 0.f}, {0.f, 0.f}};
+        }
+        static ShapePathCommand lineTo(float x, float y) {
+            return {ShapePathCommandType::LineTo, {x, y}, {0.f, 0.f}, {0.f, 0.f}};
+        }
+        static ShapePathCommand quadraticTo(float cx, float cy, float x, float y) {
+            return {ShapePathCommandType::QuadraticTo, {x, y}, {cx, cy}, {0.f, 0.f}};
+        }
+        static ShapePathCommand cubicTo(float c1x, float c1y, float c2x, float c2y, float x, float y) {
+            return {ShapePathCommandType::CubicTo, {x, y}, {c1x, c1y}, {c2x, c2y}};
+        }
+        static ShapePathCommand close() {
+            return {ShapePathCommandType::Close, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}};
+        }
+    };
+
+    struct ShapeTrimKeyframe {
+        int frame{0};
+        float start{0.f};
+        float end{1.f};
+        float offset{0.f};
+    };
+
+    struct ShapeTrimSpec {
+        float start{0.f};
+        float end{1.f};
+        float offset{0.f};
+        std::string easing{"linear"};
+        std::vector<ShapeTrimKeyframe> keyframes{};
+    };
 
     struct ShapeGradientStop {
         float position{0.f};
@@ -150,8 +192,18 @@ namespace chronontemplate {
         float dotRadius{3.f};
         std::string strokeColor{};
         float strokeWidth{1.f};
+        std::string strokeCap{"butt"};
+        std::string strokeJoin{"miter"};
+        std::vector<float> strokeDashArray{};
+        float strokeDashOffset{0.f};
+        float strokeTaperStart{1.f};
+        float strokeTaperEnd{1.f};
         int polygonPoints{6};
         float polygonRotationDegrees{0.f};
+        std::string svgAsset{};
+        ShapeFillRule fillRule{ShapeFillRule::EvenOdd};
+        std::vector<ShapePathCommand> path{};
+        std::optional<ShapeTrimSpec> trim{};
         std::optional<chronon3d::graphics::Field2D> field{};
         std::optional<chronon3d::graphics::GradientDefinition> fieldRamp{};
         std::uint32_t fieldRenderScale{1};
@@ -162,6 +214,12 @@ namespace chronontemplate {
         bool animatedNoise{false};
         float noiseSize{1.f};
         float contrast{1.f};
+        float glowRadius{0.f};
+        float glowIntensity{0.f};
+        std::string glowColor{"#FFFFFF"};
+        float bloomThreshold{0.8f};
+        float bloomRadius{0.f};
+        float bloomIntensity{0.f};
     };
 
     struct VideoRequest {

@@ -68,6 +68,33 @@ target_include_directories(chronontemplate_emit_oil_crisis_reference_plans PRIVA
 target_compile_features(chronontemplate_emit_oil_crisis_reference_plans PRIVATE cxx_std_20)
 target_compile_options(chronontemplate_emit_oil_crisis_reference_plans PRIVATE -Wall -Wextra)
 
+# Native C++ emitter for the Example Svg reference recreation (drive_downloads/ExampleSvg).
+add_executable(chronontemplate_emit_example_svg_recreation_plans
+        tools/showcases/emit_example_svg_recreation_plans.cpp)
+target_include_directories(chronontemplate_emit_example_svg_recreation_plans PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_example_svg_recreation_plans PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_example_svg_recreation_plans PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_svg_grain_perlin_showcase
+        tools/showcases/emit_svg_grain_perlin_showcase.cpp)
+target_link_libraries(chronontemplate_emit_svg_grain_perlin_showcase PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_svg_grain_perlin_showcase PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_svg_grain_perlin_showcase PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_svg_grain_perlin_showcase PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_svg_grain_perlin_showcase PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_truett_cathy_legacy_v1
         tools/entities_with_text/emit_truett_cathy_legacy_v1.cpp)
 target_link_libraries(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE chronontemplate)

@@ -124,8 +124,18 @@ namespace chronontemplate {
         float dotRadius{3.f};
         std::string strokeColor{};
         float strokeWidth{1.f};
+        std::string strokeCap{"butt"};
+        std::string strokeJoin{"miter"};
+        std::vector<float> strokeDashArray{};
+        float strokeDashOffset{0.f};
+        float strokeTaperStart{1.f};
+        float strokeTaperEnd{1.f};
         int polygonPoints{6};
         float polygonRotationDegrees{0.f};
+        std::string svgAsset{};
+        ShapeFillRule fillRule{ShapeFillRule::EvenOdd};
+        std::vector<ShapePathCommand> path{};
+        std::optional<ShapeTrimSpec> trim{};
         std::optional<chronon3d::graphics::Field2D> field{};
         std::optional<chronon3d::graphics::GradientDefinition> fieldRamp{};
         std::uint32_t fieldRenderScale{1};
@@ -136,6 +146,12 @@ namespace chronontemplate {
         bool animatedNoise{false};
         float noiseSize{1.f};
         float contrast{1.f};
+        float glowRadius{0.f};
+        float glowIntensity{0.f};
+        std::string glowColor{"#FFFFFF"};
+        float bloomThreshold{0.8f};
+        float bloomRadius{0.f};
+        float bloomIntensity{0.f};
     };
 
     struct VideoSpec {
