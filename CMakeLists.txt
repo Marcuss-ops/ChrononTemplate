@@ -239,6 +239,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/entities_with_text/YouTubeSubscribe.cpp
         # the native web-page family: complete page + highlight 3D + blurred phrases
         src/chronontemplate/web/WebPageHighlightPack.cpp
+        src/chronontemplate/web/WebTextLayout.cpp
+        src/chronontemplate/web/ArticleEvidenceReveal.cpp
         # native layout composers: flex rows, columns and grids plus FLIP moves
         src/chronontemplate/composers/LayoutComposer.cpp
         # declarative transitions (BACKLOG item 4): sweep/dip/blinds/iris/glitch/leak

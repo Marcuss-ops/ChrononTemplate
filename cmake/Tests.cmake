@@ -144,6 +144,10 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_web_page_highlight_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_web_page_highlight_pack_test COMMAND chronontemplate_web_page_highlight_pack_test)
 
+    add_executable(chronontemplate_web_text_layout_test tests/web_text_layout.cpp)
+    target_link_libraries(chronontemplate_web_text_layout_test PRIVATE chronontemplate)
+    add_test(NAME chronontemplate_web_text_layout_test COMMAND chronontemplate_web_text_layout_test)
+
     add_executable(chronontemplate_elements_documentary_test tests/elements_documentary.cpp)
     target_link_libraries(chronontemplate_elements_documentary_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_elements_documentary_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
