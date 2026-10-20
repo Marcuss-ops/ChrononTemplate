@@ -252,18 +252,28 @@ chronon3d::render_plan::LayerPlan makeShapeLayerPlan(
         request.cornerRadius > std::min(request.size.x, request.size.y) * 0.5f ||
         (request.geometry != ShapeGeometry::Rectangle && request.geometry != ShapeGeometry::Ellipse &&
          request.geometry != ShapeGeometry::Grid && request.geometry != ShapeGeometry::DotGrid &&
-         request.geometry != ShapeGeometry::Polygon))
+         request.geometry != ShapeGeometry::Polygon && request.geometry != ShapeGeometry::Path))
         throw std::invalid_argument("makeShapeLayerPlan: a measured shape and positive finite size are required");
     const auto fill = parse_hex_color(request.fillColor);
     const bool grid = request.geometry == ShapeGeometry::Grid;
     const bool dotGrid = request.geometry == ShapeGeometry::DotGrid;
     const bool polygon = request.geometry == ShapeGeometry::Polygon;
+    const bool pathGeom = request.geometry == ShapeGeometry::Path;
+    if (pathGeom && request.svgAsset.empty() && request.path.empty())
+        throw std::invalid_argument("makeShapeLayerPlan: path geometry requires svgAsset or path commands");
+    if (!pathGeom && (!request.svgAsset.empty() || !request.path.empty() || request.trim.has_value()))
+        throw std::invalid_argument("makeShapeLayerPlan: svgAsset, path commands and trim require ShapeGeometry::Path");
     if (request.fillEnabled && !fill && !request.radialGradient && !request.gradientMesh && !request.field)
         throw std::invalid_argument("makeShapeLayerPlan: fill color must be #RRGGBB");
     if (!std::isfinite(request.noiseAmount) || request.noiseAmount < 0.f || request.noiseAmount > 1.f ||
         !std::isfinite(request.noiseSize) || request.noiseSize <= 0.f || request.noiseSize > 256.f ||
-        !std::isfinite(request.contrast) || request.contrast < 0.f || request.contrast > 4.f)
-        throw std::invalid_argument("makeShapeLayerPlan: native grain/contrast settings are outside supported ranges");
+        !std::isfinite(request.contrast) || request.contrast < 0.f || request.contrast > 4.f ||
+        !std::isfinite(request.glowRadius) || request.glowRadius < 0.f || request.glowRadius > 256.f ||
+        !std::isfinite(request.glowIntensity) || request.glowIntensity < 0.f || request.glowIntensity > 4.f ||
+        !std::isfinite(request.bloomThreshold) || request.bloomThreshold < 0.f || request.bloomThreshold > 1.f ||
+        !std::isfinite(request.bloomRadius) || request.bloomRadius < 0.f || request.bloomRadius > 256.f ||
+        !std::isfinite(request.bloomIntensity) || request.bloomIntensity < 0.f || request.bloomIntensity > 4.f)
+        throw std::invalid_argument("makeShapeLayerPlan: native grain/contrast/glow/bloom settings are outside supported ranges");
     if ((grid || dotGrid) && (!std::isfinite(request.gridSpacing) ||
         request.gridSpacing < 4.f || request.gridSpacing > 512.f))
         throw std::invalid_argument("makeShapeLayerPlan: grid spacing must be in [4, 512]");
@@ -296,15 +306,66 @@ chronon3d::render_plan::LayerPlan makeShapeLayerPlan(
         case ShapeGeometry::Grid: shape.type = ShapeContentTypePlan::Grid; break;
         case ShapeGeometry::DotGrid: shape.type = ShapeContentTypePlan::DotGrid; break;
         case ShapeGeometry::Polygon: shape.type = ShapeContentTypePlan::Polygon; break;
+        case ShapeGeometry::Path: shape.type = ShapeContentTypePlan::Path; break;
         case ShapeGeometry::Rectangle:
             shape.type = request.cornerRadius > 0.f
                              ? ShapeContentTypePlan::RoundedRect
                              : ShapeContentTypePlan::Rect;
             break;
     }
+    if (pathGeom) {
+        shape.fill_rule = request.fillRule == ShapeFillRule::NonZero
+                              ? ShapeFillRulePlan::NonZero
+                              : ShapeFillRulePlan::EvenOdd;
+        if (!request.svgAsset.empty()) {
+            shape.svg_asset = request.svgAsset;
+        }
+        shape.path.reserve(request.path.size());
+        for (const auto& cmd : request.path) {
+            ShapePathCommandPlan loweredCmd;
+            switch (cmd.type) {
+                case ShapePathCommandType::MoveTo: loweredCmd.type = ShapePathCommandTypePlan::MoveTo; break;
+                case ShapePathCommandType::LineTo: loweredCmd.type = ShapePathCommandTypePlan::LineTo; break;
+                case ShapePathCommandType::QuadraticTo: loweredCmd.type = ShapePathCommandTypePlan::QuadraticTo; break;
+                case ShapePathCommandType::CubicTo: loweredCmd.type = ShapePathCommandTypePlan::CubicTo; break;
+                case ShapePathCommandType::Close: loweredCmd.type = ShapePathCommandTypePlan::Close; break;
+            }
+            loweredCmd.point = {cmd.point.x, cmd.point.y};
+            loweredCmd.control1 = {cmd.control1.x, cmd.control1.y};
+            loweredCmd.control2 = {cmd.control2.x, cmd.control2.y};
+            shape.path.push_back(loweredCmd);
+        }
+        if (request.trim) {
+            const auto& trimSpec = *request.trim;
+            if (!std::isfinite(trimSpec.start) || trimSpec.start < 0.f || trimSpec.start > 1.f ||
+                !std::isfinite(trimSpec.end) || trimSpec.end < trimSpec.start || trimSpec.end > 1.f ||
+                !std::isfinite(trimSpec.offset))
+                throw std::invalid_argument("makeShapeLayerPlan: trim parameters are outside supported ranges");
+            PathOperatorPlan op;
+            op.kind = PathOperatorKindPlan::Trim;
+            op.trim_start = trimSpec.start;
+            op.trim_end = trimSpec.end;
+            op.trim_offset = trimSpec.offset;
+            if (!trimSpec.keyframes.empty()) {
+                AnimationTrackPlan track;
+                track.property = "trim";
+                track.easing = trimSpec.easing.empty() ? "linear" : trimSpec.easing;
+                track.keyframes.reserve(trimSpec.keyframes.size());
+                for (const auto& kf : trimSpec.keyframes) {
+                    AnimationKeyframePlan key;
+                    key.frame = chronon3d::Frame{kf.frame};
+                    key.value = {kf.start, kf.end, kf.offset};
+                    track.keyframes.push_back(std::move(key));
+                }
+                op.trim_animation = std::move(track);
+            }
+            shape.operators.push_back(std::move(op));
+        }
+    }
     if (request.radialGradient) {
         const auto& source = *request.radialGradient;
-        if (request.geometry != ShapeGeometry::Ellipse || !std::isfinite(source.center.x) ||
+        if ((request.geometry != ShapeGeometry::Ellipse && request.geometry != ShapeGeometry::Path) ||
+            !std::isfinite(source.center.x) ||
             !std::isfinite(source.center.y) || source.center.x < 0.f || source.center.x > 1.f ||
             source.center.y < 0.f || source.center.y > 1.f || !std::isfinite(source.radius) ||
             source.radius <= 0.f || source.radius > 2.f || source.stops.size() < 2 ||
@@ -355,6 +416,12 @@ chronon3d::render_plan::LayerPlan makeShapeLayerPlan(
         StrokeStyle stroke;
         stroke.color = request.strokeColor;
         stroke.width = request.strokeWidth;
+        stroke.cap = request.strokeCap;
+        stroke.join = request.strokeJoin;
+        stroke.dash_array = request.strokeDashArray;
+        stroke.dash_offset = request.strokeDashOffset;
+        stroke.taper_start = request.strokeTaperStart;
+        stroke.taper_end = request.strokeTaperEnd;
         shape.stroke = std::move(stroke);
     }
     if (request.field) {
@@ -368,9 +435,27 @@ chronon3d::render_plan::LayerPlan makeShapeLayerPlan(
         shape.gradient_mesh = request.gradientMesh;
         shape.fill_color.reset();
     }
-    if (!request.fillEnabled && !request.field && !request.gradientMesh && !grid &&
-        request.strokeColor.empty()) {
+    if (!request.fillEnabled && !request.field && !request.gradientMesh && !grid) {
         shape.fill_color.reset();
+    }
+    if (request.glowRadius > 0.f && request.glowIntensity > 0.f) {
+        const auto glowCol = parse_hex_color(request.glowColor);
+        if (!glowCol)
+            throw std::invalid_argument("makeShapeLayerPlan: glowColor must be #RRGGBB");
+        LayerPlan::EffectPlan glow;
+        glow.kind = LayerPlan::EffectKindPlan::Glow;
+        glow.radius = request.glowRadius;
+        glow.glow_intensity = request.glowIntensity;
+        glow.effect_color = {glowCol->r, glowCol->g, glowCol->b, 1.f};
+        layer.effects.push_back(std::move(glow));
+    }
+    if (request.bloomRadius > 0.f && request.bloomIntensity > 0.f) {
+        LayerPlan::EffectPlan bloom;
+        bloom.kind = LayerPlan::EffectKindPlan::Bloom;
+        bloom.bloom_threshold = request.bloomThreshold;
+        bloom.radius = request.bloomRadius;
+        bloom.bloom_intensity = request.bloomIntensity;
+        layer.effects.push_back(std::move(bloom));
     }
     if (request.noiseAmount > 0.f) {
         LayerPlan::EffectPlan noise;
@@ -388,7 +473,9 @@ chronon3d::render_plan::LayerPlan makeShapeLayerPlan(
         contrast.canonical_params.push_back({"value", request.contrast});
         layer.effects.push_back(std::move(contrast));
     }
-    shape.radius = request.cornerRadius;
+    if (shape.type == ShapeContentTypePlan::RoundedRect) {
+        shape.radius = request.cornerRadius;
+    }
     layer.shape = std::move(shape);
     return layer;
 }

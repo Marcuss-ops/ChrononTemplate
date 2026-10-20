@@ -253,4 +253,52 @@ int main() {
     check(connectedShapePlan != connectedPlan.layers.end() && connectedShapePlan->shape &&
           connectedShapePlan->shape->fill_color.has_value(),
           "ContentHost adapter carries the red portal as a native shape plan");
+
+    ShapeSpec pathSpec;
+    pathSpec.size = {400.f, 300.f};
+    pathSpec.name = "TrimLineGraph";
+    pathSpec.geometry = ShapeGeometry::Path;
+    pathSpec.fillEnabled = false;
+    pathSpec.strokeColor = "#F8FAFC";
+    pathSpec.strokeWidth = 4.5f;
+    pathSpec.strokeCap = "round";
+    pathSpec.strokeJoin = "round";
+    pathSpec.strokeDashArray = {12.f, 6.f};
+    pathSpec.strokeDashOffset = 2.f;
+    pathSpec.path = {
+        ShapePathCommand::moveTo(-96.f, 104.f),
+        ShapePathCommand::lineTo(86.f, -96.f),
+        ShapePathCommand::lineTo(172.f, 14.f)
+    };
+    pathSpec.trim = ShapeTrimSpec{
+        .start = 0.f,
+        .end = 0.f,
+        .offset = 0.f,
+        .easing = "out_cubic",
+        .keyframes = {{0, 0.f, 0.f, 0.f}, {60, 0.f, 1.f, 0.f}}
+    };
+    pathSpec.glowRadius = 18.f;
+    pathSpec.glowIntensity = 0.75f;
+    pathSpec.glowColor = "#67E8F9";
+    pathSpec.bloomThreshold = 0.75f;
+    pathSpec.bloomRadius = 24.f;
+    pathSpec.bloomIntensity = 0.45f;
+    pathSpec.noiseAmount = 0.12f;
+    pathSpec.animatedNoise = true;
+
+    TemplateScene pathScene("path-trim-glow-lowering", 30.f, connectedHost, 1920.f, 1080.f);
+    (void)pathScene.shape(pathSpec);
+    const auto pathPlan = lowerToRenderPlan(pathScene, connectedHost);
+    check(pathPlan.layers.size() == 1 && pathPlan.layers.front().shape &&
+          pathPlan.layers.front().shape->type == ShapeContentTypePlan::Path &&
+          pathPlan.layers.front().shape->path.size() == 3 &&
+          pathPlan.layers.front().shape->stroke &&
+          pathPlan.layers.front().shape->stroke->cap == "round" &&
+          pathPlan.layers.front().shape->stroke->join == "round" &&
+          pathPlan.layers.front().shape->stroke->dash_array.size() == 2 &&
+          pathPlan.layers.front().shape->operators.size() == 1 &&
+          pathPlan.layers.front().shape->operators.front().kind == PathOperatorKindPlan::Trim &&
+          pathPlan.layers.front().shape->operators.front().trim_animation.has_value() &&
+          pathPlan.layers.front().effects.size() == 3,
+          "TemplateScene::shape lowers Path geometry, Trim animation, stroke cap/join/dash, Glow, Bloom, and Noise");
 }
