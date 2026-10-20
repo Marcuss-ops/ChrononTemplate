@@ -47,7 +47,8 @@ namespace chronontemplate {
             if (spec.backgroundImage.empty() || spec.foregroundImage.empty() || spec.words.empty() ||
                 !(spec.baseFovDegrees > 0.f && spec.baseFovDegrees < 180.f) ||
                 !(spec.focusFovDegrees > 0.f && spec.focusFovDegrees <= spec.baseFovDegrees) ||
-                !(spec.cameraDistance > 0.f) || !(spec.aperture > 0.f && spec.aperture <= 1.f) ||
+                !(spec.cameraDistance > 0.f) ||
+                !(spec.legacyDefocusStrength > 0.f && spec.legacyDefocusStrength <= 1.f) ||
                 !(spec.fStop > 0.f) || !(spec.maxBlurPixels >= 0.f) ||
                 !(spec.highlightGain >= 0.f) || spec.focusTravelFrames < 2 || spec.fadeFrames < 1) {
                 throw std::invalid_argument("addWordLensBoard: invalid camera, lens, background, or timing spec");
@@ -72,7 +73,7 @@ namespace chronontemplate {
             camera.setPosition(firstPosition)
                   .setTarget(firstTarget)
                   .setFov(spec.baseFovDegrees)
-                  .setAperture(spec.aperture)
+                  .setLegacyDefocusStrength(spec.legacyDefocusStrength)
                   .setFocusDistance(focusDistance(first, spec.cameraDistance))
                   .setFStop(spec.fStop)
                   .setIrisBlades(8)
@@ -83,7 +84,7 @@ namespace chronontemplate {
             auto& targets = camera.targetTrack();
             auto& fov = camera.fovTrack();
             auto& focus = camera.focusDistanceTrack();
-            auto& aperture = camera.apertureTrack();
+            auto& defocusStrength = camera.legacyDefocusStrengthTrack();
             const float fps = scene.fps();
             const Easing ease = Easing::easeInOut();
 
@@ -93,7 +94,7 @@ namespace chronontemplate {
             targets.add(secondsAt(first.focusFrame, fps), initialTarget, ease);
             fov.add(secondsAt(first.focusFrame, fps), spec.focusFovDegrees, ease);
             focus.add(secondsAt(first.focusFrame, fps), focusDistance(first, spec.cameraDistance), ease);
-            aperture.add(secondsAt(first.focusFrame, fps), spec.aperture, ease);
+            defocusStrength.add(secondsAt(first.focusFrame, fps), spec.legacyDefocusStrength, ease);
 
             for (std::size_t index = 1; index < spec.words.size(); ++index) {
                 const auto& previous = spec.words[index - 1];
@@ -113,8 +114,8 @@ namespace chronontemplate {
                 fov.add(t0, spec.baseFovDegrees, ease).add(t1, spec.focusFovDegrees, ease);
                 focus.add(t0, focusDistance(previous, spec.cameraDistance), ease)
                       .add(t1, focusDistance(current, spec.cameraDistance), ease);
-                aperture.add(t0, spec.aperture * 0.78f, ease)
-                         .add(t1, spec.aperture, ease);
+                defocusStrength.add(t0, spec.legacyDefocusStrength * 0.78f, ease)
+                                .add(t1, spec.legacyDefocusStrength, ease);
             }
         }
 

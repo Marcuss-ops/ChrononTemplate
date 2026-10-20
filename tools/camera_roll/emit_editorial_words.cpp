@@ -87,7 +87,7 @@ int main(int argc,char**argv) try {
     // Four 3D title planes sit at individually keyed depths; camera lives at Z=1080.
     CameraRig rig(1,55.f,static_cast<float>(W)/H,1.f,10000.f);
     rig.setPosition({600.f,540.f,1080.f}).setTarget({600.f,300.f,0.f})
-       .setFov(55.f).setAperture(0.045f).setFocusDistance(975.f).setMaxBlur(12.f);
+       .setFov(55.f).setLegacyDefocusStrength(0.045f).setFocusDistance(975.f).setMaxBlur(12.f);
     const Easing glide=Easing::cubicBezier(.22f,.72f,.20f,1.f);
     rig.positionTrack().add(0.f,{600.f,300.f,1080.f},glide)
       .add(2.05f,{590.f,460.f,1080.f},glide).add(4.10f,{610.f,620.f,1080.f},glide)
@@ -100,7 +100,7 @@ int main(int argc,char**argv) try {
     rig.focusDistanceTrack().add(0.f,975.f,glide).add(2.05f,955.f,glide)
       .add(4.10f,935.f,glide).add(6.15f,915.f,glide).add(8.15f,1000.f,Easing::circOut())
       .add(static_cast<float>(DURATION),1000.f,Easing::easeInOut());
-    rig.apertureTrack().add(0.f,.045f).add(8.15f,.035f).add(static_cast<float>(DURATION),.035f);
+    rig.legacyDefocusStrengthTrack().add(0.f,.045f).add(8.15f,.035f).add(static_cast<float>(DURATION),.035f);
     rig.maxBlurTrack().add(0.f,12.f).add(8.15f,10.f).add(static_cast<float>(DURATION),10.f);
 
     std::vector<std::vector<double>> ch(10,std::vector<double>(FRAMES));
@@ -109,7 +109,7 @@ int main(int argc,char**argv) try {
       const auto p=rig.sample(static_cast<float>(f)/FPS); const auto r=euler(p.orientation);
       ch[0][f]=p.position.x-W*.5; ch[1][f]=p.position.y-H*.5; ch[2][f]=-p.position.z+DEPTH_SHIFT;
       ch[3][f]=r.x; ch[4][f]=r.y; ch[5][f]=r.z; ch[6][f]=p.fov;
-      ch[7][f]=p.focusDistance; ch[8][f]=p.aperture; ch[9][f]=p.maxBlur;
+      ch[7][f]=p.focusDistance; ch[8][f]=p.legacyDefocusStrength; ch[9][f]=p.maxBlur;
       // Continuous, restrained hand-held drift without introducing jitter.
       ch[0][f]+=0.9*std::sin(static_cast<double>(f)/FPS*.42);
       ch[1][f]+=0.55*std::sin(static_cast<double>(f)/FPS*.31+1.2);
@@ -156,7 +156,7 @@ int main(int argc,char**argv) try {
       {"canvas",{{"width",W},{"height",H},{"fps_num",FPS},{"fps_den",1},{"duration_frames",FRAMES}}},
       {"camera",{{"type","perspective"},{"position",{p0.position.x-W*.5,p0.position.y-H*.5,-p0.position.z+DEPTH_SHIFT}},
         {"rotation_deg",{r0.x,r0.y,r0.z}},{"fov_deg",p0.fov},{"near",1},{"far",10000},{"zoom",1},
-        {"dof",{{"enabled",true},{"focus_distance",p0.focusDistance},{"aperture",p0.aperture},{"max_blur",p0.maxBlur}}}}},
+        {"dof",{{"enabled",true},{"focus_distance",p0.focusDistance},{"aperture",p0.legacyDefocusStrength},{"max_blur",p0.maxBlur}}}}},
       {"camera_animation",{{"tracks",std::move(tracks)}}},{"layers",std::move(layers)},
       {"output",{{"path","editorial_words.mp4"},{"format","mp4"},{"codec","h264"}}}};
     fs::create_directories(out.parent_path()); std::ofstream f(out); f<<plan.dump(2)<<'\n';

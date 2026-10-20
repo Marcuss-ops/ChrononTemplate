@@ -581,8 +581,8 @@ namespace chronontemplate {
                 // RenderPlan's native DOF aperture channel is normalized to
                 // [0, 1]. Keep it open throughout the handoff so the two depth
                 // planes exchange sharpness instead of briefly snapping sharp.
-                rig.apertureTrack().add(at(start, fps), 0.18f, Easing::linear());
-                rig.apertureTrack().add(at(end, fps), 0.18f, Easing::linear());
+                rig.legacyDefocusStrengthTrack().add(at(start, fps), 0.18f, Easing::linear());
+                rig.legacyDefocusStrengthTrack().add(at(end, fps), 0.18f, Easing::linear());
                 break;
             }
             case DocumentaryRecipe::Reveal90: {
@@ -671,8 +671,8 @@ namespace chronontemplate {
                 point(handoff, arc, shot.title.center, Easing::easeIn());
                 point(mid, arc, last.center, Easing::easeOut());
                 point(end, photoCam, last.center);
-                rig.apertureTrack().add(at(handoff, fps), 0.f, Easing::linear());
-                rig.apertureTrack().add(at(end, fps), 0.06f, Easing::easeInOut());
+                rig.legacyDefocusStrengthTrack().add(at(handoff, fps), 0.f, Easing::linear());
+                rig.legacyDefocusStrengthTrack().add(at(end, fps), 0.06f, Easing::easeInOut());
                 break;
             }
             case DocumentaryRecipe::ArchiveCraneReveal: {

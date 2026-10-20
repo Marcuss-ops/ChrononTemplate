@@ -8,8 +8,8 @@
 #include "chronontemplate/camera_roll/CameraMotionPack.hpp"
 
 #include "chrononmotion/math/MathUtils.hpp"
+#include "chrononmotion/motion/CameraScreenSpace.hpp"
 
-#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 
@@ -24,7 +24,6 @@ namespace chronontemplate {
 
     namespace {
 
-        constexpr float kPi = 3.14159265358979323846f;
         constexpr float kNoMid = -1000.f;
 
         [[nodiscard]] float at(int frame, float fps) { return static_cast<float>(frame) / fps; }
@@ -188,12 +187,9 @@ namespace chronontemplate {
         if (!(frameFill > 0.f) || frameFill > 1.f) {
             throw std::invalid_argument("cameraMotionReferenceDistance: frameFill must be in (0, 1]");
         }
-        const float halfFovRad = fovDegrees * 0.5f * kPi / 180.f;
-        const float tanHalf = std::tan(std::max(halfFovRad, 1e-4f));
-        const float fitWidth = subject.halfWidth * 2.f;
-        const float fitHeight = subject.halfHeight * 2.f * (viewport.x / viewport.y);
-        const float fit = std::max(fitWidth, fitHeight);
-        return fit / (2.f * tanHalf * (viewport.x / viewport.y) * frameFill);
+        return chrononmotion::motion::framingDistanceForBounds(
+                subject.halfWidth, subject.halfHeight, fovDegrees,
+                viewport.x / viewport.y, frameFill);
     }
 
     Easing cameraMotionEasingFor(const std::string& name) {
