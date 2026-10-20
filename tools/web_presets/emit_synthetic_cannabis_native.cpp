@@ -63,6 +63,11 @@ Json makePlan() {
                       {"color", {0.91, 0.91, 0.90, 1.0}}, {"size", {kWidth, kHeight}},
                       {"screen_space", true}, {"start_frame", 0}, {"duration_frames", kFrames}});
 
+    // Quiet archive chrome: one kicker above the excerpt and one source line
+    // below it, so the plate reads as a page rather than loose paragraphs.
+    layers.push_back(text("archive_kicker", "HEALTH  /  SCIENCE  /  ARCHIVE",
+                          120.0f, 20.0f, "#6E6E6E", true, false));
+
     // Context above the focal paragraph. Each row is an independently blurred native text layer.
     const char* top[] = {
         "Synthetic cannabis products are sold under a variety of names,",
@@ -92,6 +97,10 @@ Json makePlan() {
         39.0f, "#202020", false, false));
     layers.push_back(text("focus_line_3", "tremor, seizure, tachycardia,", 573.0f,
         39.0f, "#202020", false, false));
+
+    layers.push_back(text("archive_source",
+                          "Synthetic cannabis  ·  research archive  ·  source excerpt",
+                          980.0f, 22.0f, "#6E6E6E", false, false));
 
     // The continuation and nearby rows are again out of focus, like the source frame.
     const char* bottom[] = {
