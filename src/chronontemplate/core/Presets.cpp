@@ -1,6 +1,7 @@
 #include "chronontemplate/core/Presets.hpp"
 
 #include "chrononmotion/motion/Presets.hpp"
+#include "chrononmotion/motion/CameraRecipe.hpp"
 #include "chrononmotion/math/MathUtils.hpp"
 #include "chrononmotion/geometries/PlaneGeometry.hpp"
 
@@ -231,20 +232,19 @@ namespace chronontemplate {
             overhead.transform.position = Vector3(0.f, 10.f, 0.2f);
             overhead.targetId = table.id;
 
-            CameraRig& camera = result.camera.setFov(45.f).setTarget(Vector3(0.f, 0.f, 0.f));
-            const auto addCameraKey = [&](float t, const Vector3& position,
-                                          const Vector3& target, float fov) {
-                const float time = start + duration * t;
-                camera.positionTrack().add(time, position);
-                camera.targetTrack().add(time, target);
-                camera.fovTrack().add(time, fov);
-            };
-            addCameraKey(0.f, Vector3(8.f, 3.2f, 12.f), Vector3(0.f, 0.1f, 0.f), 45.f);
-            addCameraKey(0.21f, Vector3(6.f, 7.8f, 8.f), Vector3(0.f, 0.65f, 0.f), 43.f);
-            addCameraKey(0.43f, Vector3(3.f, 9.8f, 5.5f), Vector3(0.f, 1.65f, 0.f), 38.f);
-            addCameraKey(0.67f, Vector3(1.f, 7.5f, 4.f), Vector3(0.f, 1.65f, 0.f), 30.f);
-            addCameraKey(0.80f, Vector3(0.4f, 6.5f, 3.f), Vector3(0.f, 1.65f, 0.f), 26.f);
-            addCameraKey(1.f, Vector3(0.f, 4.2f, 1.8f), Vector3(0.f, 1.65f, 0.f), 24.f);
+            const auto* cameraRecipe = chrononmotion::motion::camera::findCameraMotionRecipe(
+                "camera_motion_archival_top_down_paper_push");
+            if (!cameraRecipe)
+                throw std::logic_error("tablePaperPushIn: CM3D camera recipe is not registered");
+            chrononmotion::motion::camera::CameraRecipeShot shot;
+            shot.subject.center = Vector3(0.f, 0.f, 0.f);
+            shot.subject.halfWidth = 1.f;
+            shot.subject.halfHeight = 1.f;
+            shot.fov = 45.f;
+            shot.inFrame = data.startFrame;
+            shot.durationOverride = data.duration;
+            chrononmotion::motion::camera::applyRecipe(
+                result.camera, *cameraRecipe, shot, data.fps, Vector2(1920.f, 1080.f));
             return result;
         }
 
