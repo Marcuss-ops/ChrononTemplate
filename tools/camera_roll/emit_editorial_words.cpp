@@ -1,6 +1,7 @@
 // Native C++ emitter: ChrononMotion CameraRig -> Chronon3D RenderPlan.
 #include <nlohmann/json.hpp>
 #include <chrononmotion/motion/CameraRig.hpp>
+#include <chrononmotion/motion/RenderPlanLowering.hpp>
 #include <chrononmotion/motion/Easing.hpp>
 #include <algorithm>
 #include <cmath>
@@ -24,24 +25,6 @@ constexpr double DEPTH_SHIFT = 1000.0;
 constexpr const char* FONT = "Chronon3dGPU/assets/fonts/FreeSerif.ttf";
 
 double round6(double x) { return std::round(x * 1e6) / 1e6; }
-Json keyframes(const std::vector<double>& values) {
-    Json result = Json::array();
-    for (std::size_t i=0; i<values.size(); ++i)
-        result.push_back({{"frame", i}, {"value", round6(values[i])}});
-    return result;
-}
-Json cameraTrack(const std::string& prop, const std::vector<double>& values) {
-    return {{"property", prop}, {"easing", "linear"}, {"keyframes", keyframes(values)}};
-}
-Vector3 euler(const Quaternion& orientation) {
-    constexpr float toDeg = 57.29577951308232f;
-    Quaternion q = orientation; q.invert();
-    const float x = std::atan2(2.f*(q.w*q.x-q.y*q.z),1.f-2.f*(q.x*q.x+q.y*q.y));
-    const float s = std::clamp(2.f*(q.w*q.y+q.z*q.x),-1.f,1.f);
-    const float y = std::asin(s);
-    const float z = std::atan2(2.f*(q.w*q.z-q.x*q.y),1.f-2.f*(q.y*q.y+q.z*q.z));
-    return {x*toDeg,y*toDeg,z*toDeg};
-}
 Json wordLayer(const std::string& word, int index, int frameStart, int frameEnd,
                int x, int y, int finalX, int finalY, int z) {
     Json opacity = Json::array({{{"frame",0},{"value",0.0}}});
@@ -103,22 +86,22 @@ int main(int argc,char**argv) try {
     rig.legacyDefocusStrengthTrack().add(0.f,.045f).add(8.15f,.035f).add(static_cast<float>(DURATION),.035f);
     rig.maxBlurTrack().add(0.f,12.f).add(8.15f,10.f).add(static_cast<float>(DURATION),10.f);
 
-    std::vector<std::vector<double>> ch(10,std::vector<double>(FRAMES));
-    // position xyz, rotation xyz, fov, focus distance, aperture, max blur
-    for(int f=0;f<FRAMES;++f){
-      const auto p=rig.sample(static_cast<float>(f)/FPS); const auto r=euler(p.orientation);
-      ch[0][f]=p.position.x-W*.5; ch[1][f]=p.position.y-H*.5; ch[2][f]=-p.position.z+DEPTH_SHIFT;
-      ch[3][f]=r.x; ch[4][f]=r.y; ch[5][f]=r.z; ch[6][f]=p.fov;
-      ch[7][f]=p.focusDistance; ch[8][f]=p.legacyDefocusStrength; ch[9][f]=p.maxBlur;
-      // Continuous, restrained hand-held drift without introducing jitter.
-      ch[0][f]+=0.9*std::sin(static_cast<double>(f)/FPS*.42);
-      ch[1][f]+=0.55*std::sin(static_cast<double>(f)/FPS*.31+1.2);
+    // Add the restrained handheld drift as authored CM3D rig keys; all camera
+    // sampling and pose resolution remain in the canonical motion baker.
+    for (int f = 0; f < FRAMES; ++f) {
+      const float time = static_cast<float>(f) / FPS;
+      const auto pose = rig.sample(time);
+      rig.positionTrack().add(time, Vector3(
+          pose.position.x + 0.9f * std::sin(time * 0.42f),
+          pose.position.y + 0.55f * std::sin(time * 0.31f + 1.2f),
+          pose.position.z), Easing::linear());
     }
-    const char* props[]={"camera_position_x","camera_position_y","camera_position_z",
-      "camera_rotation_x","camera_rotation_y","camera_rotation_z","camera_fov_deg",
-      "camera_focus_distance","camera_aperture","camera_max_blur"};
-    Json tracks=Json::array(); for(int i=0;i<10;++i) tracks.push_back(cameraTrack(props[i],ch[i]));
-    const auto p0=rig.sample(0.f); const auto r0=euler(p0.orientation);
+    const Json cameraSamples = cameraSamplesToJson(bakeResolvedCameraSamples(
+        rig, float(FPS), FRAMES, 1.f, 10000.f,
+        Vector3(-W * 0.5f, -H * 0.5f, -DEPTH_SHIFT)));
+    std::vector<double> cameraY(FRAMES);
+    for (int f = 0; f < FRAMES; ++f)
+      cameraY[f] = cameraSamples.at(static_cast<std::size_t>(f)).at("camera").at("position").at(1).get<double>();
     Json layers=Json::array();
     // The clean plate spans the complete camera gate and remains edge-to-edge
     // during the final pullback, avoiding a second image plane or visible seam.
@@ -135,7 +118,7 @@ int main(int argc,char**argv) try {
         {{"property","position_y"},{"easing","linear"},{"keyframes",[&](){
           Json keys=Json::array();
           for(int f=0;f<FRAMES;++f)
-            keys.push_back({{"frame",f},{"value",round6(ch[1][f]-ch[1][0])}});
+            keys.push_back({{"frame",f},{"value",round6(cameraY[f]-cameraY[0])}});
           return keys;
         }()}}
       })}}}});
@@ -154,10 +137,8 @@ int main(int argc,char**argv) try {
       })}});
     Json plan={{"schema","chronon.render-plan.v3"},{"version",3},{"job_id","editorial_words_chrononmotion_v1"},
       {"canvas",{{"width",W},{"height",H},{"fps_num",FPS},{"fps_den",1},{"duration_frames",FRAMES}}},
-      {"camera",{{"type","perspective"},{"position",{p0.position.x-W*.5,p0.position.y-H*.5,-p0.position.z+DEPTH_SHIFT}},
-        {"rotation_deg",{r0.x,r0.y,r0.z}},{"fov_deg",p0.fov},{"near",1},{"far",10000},{"zoom",1},
-        {"dof",{{"enabled",true},{"focus_distance",p0.focusDistance},{"aperture",p0.legacyDefocusStrength},{"max_blur",p0.maxBlur}}}}},
-      {"camera_animation",{{"tracks",std::move(tracks)}}},{"layers",std::move(layers)},
+      {"camera",cameraSamples.front().at("camera")},{"camera_samples",cameraSamples},
+      {"layers",std::move(layers)},
       {"output",{{"path","editorial_words.mp4"},{"format","mp4"},{"codec","h264"}}}};
     fs::create_directories(out.parent_path()); std::ofstream f(out); f<<plan.dump(2)<<'\n';
     if(!f) throw std::runtime_error("failed writing plan: "+out.string());

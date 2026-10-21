@@ -16,6 +16,7 @@
 #include <nlohmann/json.hpp>
 
 #include "chronontemplate/camera_roll/TitleCameraPack.hpp"
+#include <chrononmotion/motion/RenderPlanLowering.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -67,39 +68,6 @@ namespace {
         std::string currentFingerprint(const ContentId&) const override { return "title-camera-v2"; }
     };
 
-    Vector3 euler(const Quaternion& q) {
-        constexpr float radToDeg = 57.29577951308232f;
-        Quaternion camera = q;
-        camera.invert();
-        const float x = std::atan2(2.f * (camera.w * camera.x - camera.y * camera.z),
-                                   1.f - 2.f * (camera.x * camera.x + camera.y * camera.y));
-        const float s = std::clamp(2.f * (camera.w * camera.y + camera.z * camera.x), -1.f, 1.f);
-        const float y = std::asin(s);
-        const float z = std::atan2(2.f * (camera.w * camera.z - camera.x * camera.y),
-                                   1.f - 2.f * (camera.y * camera.y + camera.z * camera.z));
-        return Vector3(x * radToDeg, y * radToDeg, z * radToDeg);
-    }
-
-    void unwrap(std::vector<double>& values) {
-        for (std::size_t i = 1; i < values.size(); ++i) {
-            double angle = values[i];
-            const double prev = values[i - 1];
-            while (angle - prev > 180.0) angle -= 360.0;
-            while (angle - prev < -180.0) angle += 360.0;
-            values[i] = angle;
-        }
-    }
-
-    double round6(double v) { return std::round(v * 1e6) / 1e6; }
-
-    json track(const std::string& prop, const std::vector<double>& values) {
-        json keys = json::array();
-        for (std::size_t i = 0; i < values.size(); ++i) {
-            keys.push_back({{"frame", static_cast<int>(i)}, {"value", round6(values[i])}});
-        }
-        return {{"property", prop}, {"easing", "linear"}, {"keyframes", std::move(keys)}};
-    }
-
     std::string captionFor(const std::string& move) {
         constexpr const char* prefix = "title_camera_";
         std::string s = move;
@@ -117,17 +85,14 @@ namespace {
     };
 
     json planFor(const std::string& moveId, const TitleCase& titleCase,
-                 const std::vector<std::vector<double>>& channels,
-                 const std::vector<double>& firstRow) {
+                 const CameraRig& rig) {
         const bool shortTitle = titleCase.text == "ROME";
         const double titleSize = shortTitle ? 188.0 : 112.0;
         const double titleH = shortTitle ? 270.0 : 200.0;
 
-        json tracks = json::array();
-        const char* props[7] = {"camera_position_x", "camera_position_y", "camera_position_z",
-                                "camera_rotation_x", "camera_rotation_y", "camera_rotation_z",
-                                "camera_fov_deg"};
-        for (int i = 0; i < 7; ++i) tracks.push_back(track(props[i], channels[static_cast<std::size_t>(i)]));
+        const json cameraSamples = cameraSamplesToJson(bakeResolvedCameraSamples(
+            rig, float(kFps), static_cast<std::size_t>(kDurationFrames), 1.f, 10000.f,
+            Vector3(-kWidth * 0.5f, -kHeight * 0.5f, 0.f)));
 
         json bg = {{"id", "background"},
                    {"type", "color"},
@@ -182,15 +147,8 @@ namespace {
               {"fps_num", kFps},
               {"fps_den", 1},
               {"duration_frames", kDurationFrames}}},
-            {"camera",
-             {{"type", "perspective"},
-              {"position", {round6(channels[0][0]), round6(channels[1][0]), round6(channels[2][0])}},
-              {"rotation_deg", {round6(firstRow[4]), round6(firstRow[5]), round6(firstRow[6])}},
-              {"fov_deg", round6(firstRow[7])},
-              {"near", 1},
-              {"far", 10000},
-              {"zoom", 1}}},
-            {"camera_animation", {{"tracks", std::move(tracks)}}},
+            {"camera", cameraSamples.front().at("camera")},
+            {"camera_samples", cameraSamples},
             {"layers", {std::move(bg), std::move(titleLayer), std::move(caption)}},
             {"output",
              {{"path", titleCase.id + "/" + moveId + ".mp4"}, {"format", "mp4"}, {"codec", "h264"}}}};
@@ -251,30 +209,7 @@ int main(int argc, char** argv) {
                 return 1;
             }
 
-            // Sample the rig exactly like dump_title_camera_poses, then lower
-            // to render-plan camera channels with the same canvas convention
-            // the Python renderer used (canvas-centre relative, -Z forward).
-            std::vector<std::vector<double>> channels(7, std::vector<double>(kDurationFrames));
-            std::vector<double> firstRow(8, 0.0);
-            for (int f = 0; f <= kDuration; ++f) {
-                const auto pose = scene.camera().rig().sample(static_cast<float>(f) / kFps);
-                const Vector3 r = euler(pose.orientation);
-                const std::size_t i = static_cast<std::size_t>(f);
-                channels[0][i] = pose.position.x - kWidth / 2;
-                channels[1][i] = pose.position.y - kHeight / 2;
-                channels[2][i] = -pose.position.z;
-                channels[3][i] = r.x;
-                channels[4][i] = r.y;
-                channels[5][i] = r.z;
-                channels[6][i] = pose.fov;
-                if (f == 0) {
-                    firstRow = {0.0, channels[0][0], channels[1][0], channels[2][0], r.x, r.y,
-                                r.z, pose.fov};
-                }
-            }
-            for (std::size_t c = 3; c < 6; ++c) unwrap(channels[c]);
-
-            const json plan = planFor(ids[m], titleCase, channels, firstRow);
+            const json plan = planFor(ids[m], titleCase, scene.camera().rig());
             const fs::path planPath = out / titleCase.id / "plans" / (ids[m] + ".plan.json");
             fs::create_directories(planPath.parent_path(), ec);
             if (ec) {
