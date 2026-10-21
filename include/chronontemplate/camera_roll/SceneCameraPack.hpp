@@ -15,9 +15,9 @@
 // a sequence of any length is continuous by construction — no teleport at a
 // boundary, no drift into a hold.
 //
-// Boundary: the pack owns no camera math. Every move is lowered onto the
-// ChrononMotion3D CameraRig channels; the named `scene_camera_*` ids are
-// editorial vocabulary and deliberately live here, not in the motion core.
+// Boundary: the pack owns no camera math. The transition enum and stable
+// `scene_camera_*` IDs come from ChrononMotion3D; Template supplies beats and
+// selects a handoff for each sequence.
 
 #ifndef CHRONONTEMPLATE_SCENE_CAMERA_PACK_HPP
 #define CHRONONTEMPLATE_SCENE_CAMERA_PACK_HPP

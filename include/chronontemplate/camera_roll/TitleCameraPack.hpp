@@ -7,8 +7,8 @@
 // grammar the family exists for.
 //
 // Boundary: the pack owns no camera math. Every move is lowered onto the
-// ChrononMotion3D CameraRig channels; the named `title_camera_*` ids are
-// editorial vocabulary and deliberately live here, not in the motion core.
+// ChrononMotion3D CameraRig channels. The stable `title_camera_*` IDs and move
+// evaluation are owned by CM3D; Template supplies title-specific shot data.
 
 #ifndef CHRONONTEMPLATE_TITLE_CAMERA_PACK_HPP
 #define CHRONONTEMPLATE_TITLE_CAMERA_PACK_HPP
