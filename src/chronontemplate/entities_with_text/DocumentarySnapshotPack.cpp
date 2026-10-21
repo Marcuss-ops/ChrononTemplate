@@ -1,6 +1,7 @@
 #include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
 
 #include "chrononmotion/math/MathUtils.hpp"
+#include "chrononmotion/motion/CameraMotion.hpp"
 #include "chrononmotion/motion/CameraRig.hpp"
 #include "chrononmotion/motion/Easing.hpp"
 
@@ -716,7 +717,8 @@ namespace chronontemplate {
             // RenderPlan Z focus plane behind its camera during pans and turns.
             for (int frame = start; frame <= end; ++frame) {
                 const CameraPose pose = rig.sample(at(frame, fps));
-                const float distance = pose.position.distanceTo(pose.target);
+                const float distance = chrononmotion::motion::CameraFocusResolver::resolveFocus(
+                    chrononmotion::motion::CameraFocusMode::TargetDistance, pose, pose.target);
                 if (!std::isfinite(distance) || distance <= 0.f)
                     throw std::invalid_argument(
                         "addDocumentarySnapshot: camera target must stay in front of the focal plane");
