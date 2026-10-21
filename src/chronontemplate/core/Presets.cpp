@@ -186,20 +186,11 @@ namespace chronontemplate {
             ambient.intensity = 0.8f;
 
             CameraRig& camera = result.camera.setFov(30.f).setTarget(Vector3(0.f, 0.f, 0.f));
-            constexpr int orbitSteps = 12;
             const float radius = 12.25f;
             const float elevation = 0.48f;
-            const float start = frameToTime(data.startFrame, data.fps);
-            const float end = frameToTime(endFrame(data), data.fps);
-            for (int i = 0; i <= orbitSteps; ++i) {
-                const float t = float(i) / float(orbitSteps);
-                const float angle = t * 2.f * math::PI;
-                const Vector3 position(radius * std::sin(angle), radius * elevation,
-                                       radius * std::cos(angle));
-                const float time = start + (end - start) * t;
-                camera.positionTrack().add(time, position);
-                camera.targetTrack().add(time, Vector3(0.f, 0.f, 0.f));
-            }
+            camera.setPosition(Vector3(0.f, radius * elevation, radius));
+            presets::cameraOrbit(camera, data.startFrame, data.duration,
+                                 math::TWO_PI, 0.f, data.fps);
             return result;
         }
 
