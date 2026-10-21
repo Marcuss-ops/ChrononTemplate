@@ -988,13 +988,16 @@ default emits all twenty-five × two titles. Upload goes through RenderingGen's
 content-addressed `drive-upload`:
 `tools/camera_roll/upload_title_camera_v2_drive.sh`.
 
-The bake contract behind every plan: Motion tracks are sampled at integer
-frames into dense `linear` keys (the camera bake is the only passage from rig
-to renderer, mirrored Z, `chrononCameraEuler` rotation). The guarantees are
-pinned in ChrononMotion3D (`motion_renderplan_easing_parity` over all 11
-easings, `motion_projection_parity` Motion-vs-renderer < 0.02 px,
-`motion_camera_bake_roundtrip`), so a plan that validates renders the authored
-move rather than a re-spelling of it.
+The offline bake contract: Motion tracks are sampled at integer frames into
+dense `linear` keys (including camera pose, mirrored Z and
+`chrononCameraEuler` rotation). Those guarantees are pinned in ChrononMotion3D
+(`motion_renderplan_easing_parity` over all 11 easings,
+`motion_projection_parity` Motion-vs-renderer < 0.02 px,
+`motion_camera_bake_roundtrip`). For an in-process render, use
+`lowerToRuntimeRenderPlan`: it keeps the layer plan, omits dense camera tracks
+and returns an immutable CM3D camera provider for C3D's exact presentation and
+shutter sample times. The provider fingerprint must identify the camera
+authoring inputs and is part of C3D's render and scene cache identities.
 
 ### Documentary title-to-snapshot family — `documentary_title_snapshot_v1`
 
@@ -1218,9 +1221,9 @@ focus, continuous focus travel, near/far traversal, center-out and edges-in
 travel, duo rack focus, and a true-Z depth cascade. The first seven use the
 renderer-native per-word blur, opacity and scale animator; `text_focus_depth_cascade`
 also places each word on a separate 3D plane and enables the existing camera
-DOF path. RenderPlan currently exposes camera pose tracks but no animated
-focus-distance track, so traveling focus is baked as deterministic linear
-word-blur samples while true camera DOF is used on the static focus plane.
+DOF path. RenderPlan V3 supports animated camera focus distance, but this pack
+keeps its seven editorial traveling-focus treatments as deterministic
+word-blur samples; true camera DOF is used on the static focus plane.
 
 ```shell
 python3 tools/important_phrases/test_text_depth_focus_v1.py
