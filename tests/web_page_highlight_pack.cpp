@@ -84,7 +84,7 @@ namespace {
             check(ids.insert(layer.at("id").get<std::string>()).second, "layer ids are unique");
         }
         check(plan.contains("camera") && plan.at("camera").at("type") == "perspective" &&
-              plan.contains("camera_animation"),
+              plan.contains("camera_samples") && !plan.contains("camera_animation"),
               "the page rides a perspective push-in");
 
         // Blur contract per recipe: context text blurred, important text sharp.

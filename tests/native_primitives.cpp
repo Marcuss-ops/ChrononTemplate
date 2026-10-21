@@ -34,7 +34,7 @@ int main() {
     check(Text::layer("label","Chronon",{0,0,0},{200,50},"font.ttf",32,"#FFF",12).at("text")=="Chronon","text builder carries native text request");
     const auto plan=buildBlackboardTortureV1();
     check(plan.at("layers").size()==47,"blackboard composes 47 native plan layers");
-    check(plan.at("camera_animation").at("tracks").size()==2,"blackboard includes camera push and drift");
+    check(plan.at("camera_samples").size()==240 && !plan.contains("camera_animation"),"blackboard includes resolved CM3D camera samples");
     check(plan.at("canvas").at("duration_frames")==240,"blackboard duration is ten seconds at 24 fps");
     const auto circle=std::find_if(plan.at("layers").begin(),plan.at("layers").end(),
         [](const Json& layer) { return layer.value("id","")=="chalk_circle"; });

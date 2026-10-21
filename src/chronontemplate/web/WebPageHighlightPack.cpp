@@ -12,6 +12,8 @@
 
 #include "chronontemplate/core/NativePrimitives.hpp"
 
+#include <chrononmotion/motion/Presets.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -385,16 +387,23 @@ namespace chronontemplate::web {
         }
 
         // ── restrained camera: 2.6% push-in plus a slow half-degree drift ────
-        const Json camera = native::Camera::perspective({0.f, 0.f, -1320.f}, {0.f, 0.f, 0.f}, 50.f);
-        Json cameraTracks = Json::array({
-                Motion::track("camera_position_z",
-                              {{0, -1320.0}, {duration * 2 / 3, -1264.0}, {duration - 1, -1258.0}},
-                              "in_out_cubic"),
-                Motion::track("camera_rotation_y", {{0, 0.5}, {duration - 1, -0.5}}, "in_out_cubic")});
+        constexpr float kDegToRad = 0.01745329251994329577f;
+        chrononmotion::motion::CameraRig cameraRig(1, 50.f, float(kW) / float(kH), 1.f, 10000.f);
+        cameraRig.setPosition({0.f, 0.f, 1320.f});
+        chrononmotion::Quaternion initialYaw;
+        initialYaw.setFromAxisAngle(chrononmotion::Vector3(0.f, 1.f, 0.f), -0.5f * kDegToRad);
+        cameraRig.setOrientation(initialYaw);
+        chrononmotion::motion::presets::cameraPush(cameraRig, 0, duration * 2 / 3, 56.f, float(kFps));
+        chrononmotion::motion::presets::cameraPush(cameraRig, duration * 2 / 3,
+            duration - 1 - duration * 2 / 3, 6.f, float(kFps));
+        chrononmotion::motion::presets::cameraOrbit(cameraRig, 0, duration - 1,
+            1.f * kDegToRad, 0.f, float(kFps));
+        const Json cameraSamples = native::Camera::samples(cameraRig, float(kFps), duration);
+        const Json camera = cameraSamples.front().at("camera");
 
         return TemplateComposition::renderPlan(
                 spec.planName(), kW, kH, kFps, duration, layers, camera,
-                native::Camera::animation(cameraTracks),
+                cameraSamples,
                 {{"path", spec.outputStem()}, {"format", "mp4"}, {"codec", "h264"}});
     }
 
