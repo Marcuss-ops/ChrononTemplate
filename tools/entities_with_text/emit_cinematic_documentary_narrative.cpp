@@ -1,4 +1,5 @@
 #include <nlohmann/json.hpp>
+#include "chronontemplate/camera_roll/ResolvedCameraSamples.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -136,6 +137,20 @@ int main(int argc, char** argv) {
             {389, 42.0}
         })
     };
+    Json cameraChannels = Json::array();
+    for (const auto& track : cameraTracks) {
+        std::string channel = track.property;
+        if (channel.starts_with("camera_")) channel.erase(0, 7);
+        if (channel == "fov_deg") channel = "fov";
+        Json keyframes = Json::array();
+        for (const auto& key : track.keyframes)
+            keyframes.push_back({{"frame", key.frame}, {"value", key.value}});
+        cameraChannels.push_back({{"channel", channel}, {"easing", track.easing},
+                                  {"keyframes", std::move(keyframes)}});
+    }
+    const Json baseCamera{{"type", "perspective"}, {"position", {0.0, 0.0, -1050.0}},
+                          {"rotation_deg", {0.0, -2.5, 1.6}}, {"fov_deg", 46.0},
+                          {"near", 1.0}, {"far", 10000.0}, {"zoom", 1.0}};
 
     Json layers = Json::array();
 
@@ -500,18 +515,7 @@ int main(int argc, char** argv) {
             {"fps_den", 1},
             {"duration_frames", durationFrames}
         }},
-        {"camera", {
-            {"type", "perspective"},
-            {"position", {0.0, 0.0, -1050.0}},
-            {"rotation_deg", {0.0, -2.5, 1.6}},
-            {"fov_deg", 46.0},
-            {"near", 1.0},
-            {"far", 10000.0},
-            {"zoom", 1.0}
-        }},
-        {"camera_animation", {
-            {"tracks", serializeTracks(cameraTracks)}
-        }},
+        {"camera", baseCamera},
         {"output", {
             {"path", outMp4Path},
             {"format", "mp4"},
@@ -519,6 +523,9 @@ int main(int argc, char** argv) {
         }},
         {"layers", layers}
     };
+    chronontemplate::camera_roll::attachResolvedCameraSamples(
+        plan, baseCamera, cameraChannels, static_cast<float>(fps),
+        static_cast<std::size_t>(durationFrames));
 
     fs::create_directories(fs::path(outPlanPath).parent_path());
     std::ofstream ofs(outPlanPath);

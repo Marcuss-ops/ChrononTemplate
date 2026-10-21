@@ -258,17 +258,21 @@ add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tools.cmake)
 
 add_executable(chronontemplate_emit_beast_land_subject_reframe
-        tools/documentary_effects/emit_beast_land_subject_reframe.cpp
-        src/chronontemplate/core/ContentBinding.cpp
-        src/chronontemplate/core/MotionBridge.cpp
-        src/chronontemplate/core/TemplateScene.cpp
-        src/chronontemplate/camera_roll/SceneCameraPack.cpp)
-target_link_libraries(chronontemplate_emit_beast_land_subject_reframe PRIVATE ChrononMotion::chrononmotion)
+        tools/documentary_effects/emit_beast_land_subject_reframe.cpp)
+target_link_libraries(chronontemplate_emit_beast_land_subject_reframe PRIVATE chronontemplate)
 target_include_directories(chronontemplate_emit_beast_land_subject_reframe PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_beast_land_subject_reframe PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_resolve_camera_samples
+        tools/camera_roll/resolve_camera_samples.cpp)
+target_link_libraries(chronontemplate_resolve_camera_samples PRIVATE chronontemplate)
+target_include_directories(chronontemplate_resolve_camera_samples PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CHRONONTEMPLATE_NLOHMANN_JSON_DIR})
+target_compile_options(chronontemplate_resolve_camera_samples PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_screen_recording_camera_recreation
         tools/camera_roll/emit_screen_recording_camera_recreation.cpp)

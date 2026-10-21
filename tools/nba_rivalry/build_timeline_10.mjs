@@ -1,9 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { resolveCameraSamples } from '../camera_roll/camera_samples.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const out = path.join(root, 'out/nba_rivalry/nba_rivalry_timeline_10.plan.json');
+fs.mkdirSync(path.dirname(out), {recursive: true});
 const frames = 600;
 const fps = 30;
 const last = frames - 1;
@@ -98,14 +100,17 @@ const plan = {
     type: 'perspective', position: [0, 0, -1080], rotation_deg: [0, 0, 0],
     fov_deg: 53.14, near: 0.1, far: 10000, zoom: 1,
   },
-  camera_animation: {
-    tracks: [
-      track('camera_position_x', [[0, 0], [last, cameraTravel]]),
-      track('camera_rotation_y', angles),
-      track('camera_rotation_x', [[0, 0], [116, -2], [232, 2], [348, -2], [464, 2], [560, 0], [599, 0]]),
-    ],
-  },
   layers,
 };
+const cameraChannels = [
+  ['position_x', [[0, 0], [last, cameraTravel]]],
+  ['rotation_y', angles],
+  ['rotation_x', [[0, 0], [116, -2], [232, 2], [348, -2], [464, 2], [560, 0], [599, 0]]],
+].map(([channel, keyframes]) => ({
+  channel, easing: 'linear',
+  keyframes: keyframes.map(([frame, value]) => ({frame, value})),
+}));
+plan.camera_samples = resolveCameraSamples(plan.camera, cameraChannels, fps, frames);
+plan.camera = plan.camera_samples[0].camera;
 fs.writeFileSync(out, `${JSON.stringify(plan, null, 2)}\n`);
 console.log(`Wrote ${out} (${players.length} player cards, ${frames} frames)`);

@@ -25,6 +25,7 @@
 
 #include "chronontemplate/important_phrases/ImportantPhrasePack.hpp"
 #include "chronontemplate/short_phrases/ShortPhrasePack.hpp"
+#include "chronontemplate/camera_roll/ResolvedCameraSamples.hpp"
 
 #include <algorithm>
 #include <array>
@@ -611,13 +612,16 @@ namespace {
             for (auto& layer : result["layers"]) {
                 if (layer.value("type", std::string{}) == "text") layer["enable_3d"] = true;
             }
-            result["camera"] = json{{"type", "perspective"}, {"position", json::array({0,0,-1700})},
+            const json camera{{"type", "perspective"}, {"position", json::array({0,0,-1700})},
                                     {"rotation_deg", json::array({0,0,0})}, {"fov_deg", 45},
                                     {"near", 0.1}, {"far", 10000}};
-            result["camera_animation"] = json{{"tracks", json::array({
-                json{{"property", "camera_position_x"}, {"easing", "in_out_cubic"},
+            result["camera"] = camera;
+            const json channels = json::array({
+                json{{"channel", "position_x"}, {"easing", "in_out_cubic"},
                      {"keyframes", json::array({{{"frame",0},{"value",-320}},{{"frame",99},{"value",320}},{{"frame",209},{"value",320}}})}}
-            })}};
+            });
+            chronontemplate::camera_roll::attachResolvedCameraSamples(result, camera, channels,
+                                                                       kFps, kDurationFrames);
         }
         return result;
     }
