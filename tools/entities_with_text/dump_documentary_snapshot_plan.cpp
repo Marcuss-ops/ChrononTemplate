@@ -68,43 +68,24 @@ private:
 } // namespace
 
 namespace {
-std::array<float, 6> cameraPoseAt(const std::vector<CameraTrackPlan>& tracks, int frame) {
-    std::array<float, 6> pose{};
-    for (const auto& track : tracks) {
-        std::size_t channel = 6;
-        switch (track.property) {
-            case CameraPropertyPlan::PositionX: channel = 0; break;
-            case CameraPropertyPlan::PositionY: channel = 1; break;
-            case CameraPropertyPlan::PositionZ: channel = 2; break;
-            case CameraPropertyPlan::RotationX: channel = 3; break;
-            case CameraPropertyPlan::RotationY: channel = 4; break;
-            case CameraPropertyPlan::RotationZ: channel = 5; break;
-            default: break;
-        }
-        if (channel == 6 || track.keyframes.empty()) continue;
-        const auto upper = std::lower_bound(track.keyframes.begin(), track.keyframes.end(), frame,
-            [](const AnimationKeyframePlan& key, int f) { return key.frame.integral() < f; });
-        if (upper == track.keyframes.begin()) pose[channel] = upper->value.front();
-        else if (upper == track.keyframes.end()) pose[channel] = track.keyframes.back().value.front();
-        else {
-            const auto& b = *upper;
-            const auto& a = *(upper - 1);
-            const float span = static_cast<float>(b.frame.integral() - a.frame.integral());
-            const float t = span > 0.f ? (frame - a.frame.integral()) / span : 0.f;
-            pose[channel] = a.value.front() + (b.value.front() - a.value.front()) * t;
-        }
-    }
-    return pose;
+std::array<float, 6> cameraPoseAt(const std::vector<CameraSamplePlan>& samples, int frame) {
+    const auto it = std::lower_bound(samples.begin(), samples.end(), frame,
+        [](const CameraSamplePlan& sample, int f) { return sample.frame < f; });
+    const auto& sample = it == samples.end() ? samples.back() : *it;
+    const auto& camera = sample.camera;
+    return {camera.position[0], camera.position[1], camera.position[2],
+            camera.rotation_deg[0], camera.rotation_deg[1], camera.rotation_deg[2]};
 }
 
 void addCameraSynchronizedLeak(RenderPlan& plan, int durationFrames) {
-    if (!plan.camera_animation) throw std::runtime_error("snapshot plan has no camera animation");
-    const auto& tracks = *plan.camera_animation;
+    if (!plan.camera_samples || plan.camera_samples->empty())
+        throw std::runtime_error("snapshot plan has no resolved camera samples");
+    const auto& samples = *plan.camera_samples;
     std::vector<float> speed(static_cast<std::size_t>(durationFrames + 1), 0.f);
     float peakSpeed = 0.f;
     for (int frame = 1; frame <= durationFrames; ++frame) {
-        const auto previous = cameraPoseAt(tracks, frame - 1);
-        const auto current = cameraPoseAt(tracks, frame);
+        const auto previous = cameraPoseAt(samples, frame - 1);
+        const auto current = cameraPoseAt(samples, frame);
         const float dx = current[0] - previous[0];
         const float dy = current[1] - previous[1];
         const float dz = current[2] - previous[2];

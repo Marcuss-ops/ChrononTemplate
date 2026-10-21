@@ -1,6 +1,7 @@
 // ChrononTemplate web.camera_bullet_focus: CameraRig move and animated focus emphasis for title bullets.
 #include <nlohmann/json.hpp>
 #include <chrononmotion/motion/CameraRig.hpp>
+#include <chrononmotion/motion/RenderPlanLowering.hpp>
 #include <chrononmotion/motion/Easing.hpp>
 #include <algorithm>
 #include <array>
@@ -15,7 +16,6 @@
 namespace fs = std::filesystem;
 using Json = nlohmann::ordered_json;
 using namespace chrononmotion::motion;
-using chrononmotion::Quaternion;
 using chrononmotion::Vector3;
 namespace {
 constexpr int W=1920, H=1080, FPS=30, FRAMES=300, BEAT=75;
@@ -23,14 +23,6 @@ constexpr int MOVE_START_OFFSET=25, MOVE_ARRIVE_OFFSET=10;
 constexpr double DURATION=static_cast<double>(FRAMES-1)/FPS;
 constexpr const char* FONT="tests/fixtures/Inter-Bold.ttf";
 double r6(double x){return std::round(x*1e6)/1e6;}
-Vector3 euler(Quaternion q){
-  constexpr float d=57.29577951308232f; q.invert();
-  float x=std::atan2(2.f*(q.w*q.x-q.y*q.z),1.f-2.f*(q.x*q.x+q.y*q.y));
-  float sy=std::clamp(2.f*(q.w*q.y+q.z*q.x),-1.f,1.f);
-  float y=std::asin(sy), z=std::atan2(2.f*(q.w*q.z-q.x*q.y),1.f-2.f*(q.y*q.y+q.z*q.z));
-  return {x*d,y*d,z*d};
-}
-Json track(const char* prop,const std::vector<double>& values){Json k=Json::array();for(std::size_t i=0;i<values.size();++i)k.push_back({{"frame",i},{"value",r6(values[i])}});return {{"property",prop},{"easing","linear"},{"keyframes",std::move(k)}};}
 Json focusTrack(int item){
   const int start=item*BEAT, next=std::min(FRAMES-1,(item+1)*BEAT);
   Json keys=Json::array();
@@ -103,10 +95,9 @@ int main(int argc,char**argv) try {
  }
  rig.positionTrack().add(static_cast<float>(DURATION),{cx,rows[3],cz-depths[3]},Easing::easeInOut());
  rig.targetTrack().add(static_cast<float>(DURATION),{cx,rows[3],depths[3]},Easing::easeInOut());
- std::vector<std::vector<double>> ch(7,std::vector<double>(FRAMES));
- for(int f=0;f<FRAMES;++f){auto p=rig.sample(static_cast<float>(f)/FPS);auto r=euler(p.orientation);ch[0][f]=p.position.x-W*.5;ch[1][f]=p.position.y-H*.5;ch[2][f]=-p.position.z;ch[3][f]=r.x;ch[4][f]=r.y;ch[5][f]=r.z;ch[6][f]=p.fov;}
- const char* props[]={"camera_position_x","camera_position_y","camera_position_z","camera_rotation_x","camera_rotation_y","camera_rotation_z","camera_fov_deg"};
- Json cameraTracks=Json::array();for(int i=0;i<7;++i)cameraTracks.push_back(track(props[i],ch[i]));
+ const Json cameraSamples=chrononmotion::motion::cameraSamplesToJson(
+  chrononmotion::motion::bakeResolvedCameraSamples(rig,float(FPS),FRAMES,1.f,5000.f,
+   Vector3(-W*.5f,-H*.5f,0.f)));
  Json layers=Json::array();
  layers.push_back({{"id","crt_paper"},{"type","color"},{"size",{W,H}},{"color",{0.78,0.78,0.77,1.0}},
   {"start_frame",0},{"duration_frames",FRAMES}});
@@ -140,12 +131,9 @@ int main(int argc,char**argv) try {
   {"position",{320,rows[0],depths[0]}},{"enable_3d",true},{"start_frame",0},{"duration_frames",FRAMES},
   {"shape",{{"type","polygon"},{"points",3},{"rotation_degrees",90},{"fill",{0.08,0.58,0.77,1.0}}}},
   {"animation",{{"tracks",Json::array({{{"property","position_y"},{"easing","in_out_cubic"},{"keyframes",pointerKeys}},{{"property","position_z"},{"easing","in_out_cubic"},{"keyframes",pointerDepthKeys}}})}}}});
- auto p0=rig.sample(0.f);auto r0=euler(p0.orientation);
  Json plan={{"schema","chronon.render-plan.v3"},{"version",3},{"job_id","web_camera_bullet_focus_v1"},
   {"canvas",{{"width",W},{"height",H},{"fps_num",FPS},{"fps_den",1},{"duration_frames",FRAMES}}},
-  {"camera",{{"type","perspective"},{"position",{p0.position.x-W*.5,p0.position.y-H*.5,-p0.position.z}},
-   {"rotation_deg",{r0.x,r0.y,r0.z}},{"fov_deg",p0.fov},{"near",1},{"far",5000},{"zoom",1}}},
-  {"camera_animation",{{"tracks",std::move(cameraTracks)}}},{"layers",std::move(layers)},
+  {"camera",cameraSamples.front().at("camera")},{"camera_samples",cameraSamples},{"layers",std::move(layers)},
   {"output",{{"path","Web_Camera_Bullet_Focus.mp4"},{"format","mp4"},{"codec","h264"}}}};
  fs::create_directories(out.parent_path());std::ofstream f(out);if(!f)throw std::runtime_error("cannot write plan: "+out.string());f<<plan.dump(2)<<'\n';
  std::cout<<"Wrote "<<out<<" (4 editable title bullets, 10 s, 30 fps, ChrononMotion3D perspective CameraRig)\n";

@@ -300,7 +300,9 @@ target_compile_options(chronontemplate_emit_camera_bullet_focus PRIVATE -Wall -W
 
 add_executable(chronontemplate_emit_bullet_camera_10
         tools/bulletpoints_3d/emit_bullet_camera_10.cpp)
-target_link_libraries(chronontemplate_emit_bullet_camera_10 PRIVATE ChrononMotion::chrononmotion)
+target_link_libraries(chronontemplate_emit_bullet_camera_10 PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_bullet_camera_10 PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include")
 target_compile_options(chronontemplate_emit_bullet_camera_10 PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_web_article_fold

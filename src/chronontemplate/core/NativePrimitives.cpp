@@ -172,31 +172,7 @@ Json Camera::samples(const chrononmotion::motion::CameraRig& rig, float fps, int
     if (frameCount <= 0) throw std::invalid_argument("camera samples need a positive frame count");
     const auto samples = chrononmotion::motion::bakeResolvedCameraSamples(
         rig, fps, static_cast<std::size_t>(frameCount), nearPlane, farPlane);
-    Json result = Json::array();
-    for (const auto& sample : samples) {
-        const auto& camera = sample.camera;
-        Json value = {{"type", camera.type}, {"position", vec(camera.position)},
-                      {"rotation_deg", vec(camera.rotation_deg)}, {"fov_deg", camera.fov_deg},
-                      {"near", camera.near}, {"far", camera.far}, {"zoom", camera.zoom}};
-        if (camera.focal_length_mm > 0.f) value["focal_length_mm"] = camera.focal_length_mm;
-        if (camera.f_stop > 0.f) value["f_stop"] = camera.f_stop;
-        if (camera.iris_blades > 0) value["iris_blades"] = camera.iris_blades;
-        if (camera.dof_enabled || camera.dof_focus_distance != 1000.f ||
-            camera.dof_aperture != 0.015f || camera.dof_max_blur != 24.f ||
-            camera.dof_f_stop != 0.f || camera.dof_iris_blades != 0 ||
-            camera.dof_highlight_gain != 0.f) {
-            value["dof"] = {{"enabled", camera.dof_enabled},
-                             {"focus_distance", camera.dof_focus_distance},
-                             {"aperture", camera.dof_aperture},
-                             {"max_blur", camera.dof_max_blur}};
-            if (camera.dof_f_stop > 0.f) value["dof"]["f_stop"] = camera.dof_f_stop;
-            if (camera.dof_iris_blades > 0) value["dof"]["iris_blades"] = camera.dof_iris_blades;
-            if (camera.dof_highlight_gain > 0.f)
-                value["dof"]["highlight_gain"] = camera.dof_highlight_gain;
-        }
-        result.push_back({{"frame", sample.frame}, {"camera", std::move(value)}});
-    }
-    return result;
+    return chrononmotion::motion::cameraSamplesToJson(samples);
 }
 
 Json Particles::emitterLayer(const std::string& id, int count, unsigned seed, int durationFrames,
