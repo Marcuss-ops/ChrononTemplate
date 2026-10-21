@@ -7,6 +7,7 @@
 #include "chronontemplate/ui_camera/UiCameraChoreography.hpp"
 
 #include "chrononmotion/motion/CameraPanelChoreography.hpp"
+#include "chrononmotion/motion/CameraValidation.hpp"
 #include "chrononmotion/motion/CameraScreenSpace.hpp"
 #include "chrononmotion/motion/Easing.hpp"
 
@@ -165,7 +166,6 @@ namespace chronontemplate {
             throw std::invalid_argument("UiCameraChoreography: the measured panel size is invalid");
 
         const float fps = scene.fps();
-        const auto at = [fps](int frame) { return static_cast<float>(frame) / fps; };
 
         // ── Panel entrance on the Null root, staggered reveals on children ──
         LayerHandle rootHandle(&scene, panel.root);
@@ -218,34 +218,16 @@ namespace chronontemplate {
         const Vector2 viewport = scene.canvas();
         auto& rig = scene.cameraRig();
 
-        // 1. Camera continuity: no teleports between adjacent frames.
-        constexpr float kMaxStep = 240.f;
-        Vector3 previous = rig.sample(0.f).position;
-        for (int frame = 1; frame <= spec.totalFrames; ++frame) {
-            const Vector3 current = rig.sample(static_cast<float>(frame) / fps).position;
-            if (!std::isfinite(current.x) || !std::isfinite(current.y) || !std::isfinite(current.z)) {
-                fail("camera position is non-finite at frame " + std::to_string(frame));
-                break;
-            }
-            report.maxJump = std::max(report.maxJump, lengthOf(current - previous));
-            previous = current;
-        }
-        if (report.maxJump > kMaxStep)
-            fail("camera teleports: max per-frame step exceeds the continuity budget");
-
-        // 2. The camera travels, then settles.
-        for (int frame = 0; frame <= spec.totalFrames; ++frame) {
-            const float speed = lengthOf(rig.sampleDerivative(static_cast<float>(frame) / fps).linearVelocity);
-            const int third = spec.totalFrames / 3;
-            if (frame >= third && frame <= 2 * third)
-                report.midRate = std::max(report.midRate, speed);
-            if (frame >= spec.totalFrames - 12)
-                report.endRate = std::max(report.endRate, speed);
-        }
-        if (!(report.midRate > 1.f))
-            fail("camera never travels: mid-window speed is zero");
-        if (!(report.endRate < report.midRate))
-            fail("camera never settles: end speed is not below mid-travel speed");
+        // CM3D owns camera-track temporal validation. Template keeps the
+        // composition-specific parenting and safe-area checks below.
+        const auto cameraTrack = chrononmotion::motion::validateCameraTrack(
+            rig, {.totalFrames = spec.totalFrames, .settleWindowFrames = 12,
+                  .framesPerSecond = fps, .maxPositionStep = 240.f,
+                  .minimumMidTrackSpeed = 1.f});
+        report.maxJump = cameraTrack.maxPositionStep;
+        report.midRate = cameraTrack.maxMidTrackSpeed;
+        report.endRate = cameraTrack.maxSettleSpeed;
+        for (const auto& problem : cameraTrack.failures) fail(problem);
 
         // 3. Animated parenting end-to-end: children follow the Null root.
         // Remove the child's authored local stagger delta before comparing
