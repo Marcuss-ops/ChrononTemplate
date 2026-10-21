@@ -13,19 +13,17 @@ namespace chronontemplate {
 
     namespace {
 
-        // Preset data is authored once in CameraMotionPresets.def and
-        // projected below into the executable spec table.
+        // Template owns stable public enum IDs and editorial families. Numeric
+        // recipe values are looked up from the CM3D registry by stable ID.
         struct AuthoredCameraMotionPreset {
             CameraMotionPreset preset;
             const char* id;
             CameraMotionFamily family;
-            CameraMotionSpec spec;
         };
 
         constexpr AuthoredCameraMotionPreset kAuthoredCameraMotionPresets[] = {
-#define CAMERA_MOTION_PRESET(key, id, family, ...) \
-            {CameraMotionPreset::key, id, CameraMotionFamily::family, [] { \
-                CameraMotionSpec spec; __VA_ARGS__ return spec; }()},
+#define CAMERA_MOTION_PRESET(key, id, family) \
+            {CameraMotionPreset::key, id, CameraMotionFamily::family},
 #include "chronontemplate/camera_roll/CameraMotionPresets.def"
 #undef CAMERA_MOTION_PRESET
         };
@@ -40,7 +38,11 @@ namespace chronontemplate {
         }
 
         [[nodiscard]] CameraMotionSpec specFor(const AuthoredCameraMotionPreset& row) {
-            CameraMotionSpec spec = row.spec;
+            CameraMotionSpec spec;
+            const auto* recipe = chrononmotion::motion::camera::findCameraMotionRecipe(row.id);
+            if (recipe != nullptr) {
+                static_cast<chrononmotion::motion::camera::CameraMotionRecipe&>(spec) = *recipe;
+            }
             spec.id = row.id;
             spec.family = row.family;
             return spec;
@@ -86,8 +88,7 @@ namespace chronontemplate {
     const CameraMotionSpec& cameraMotionSpecFor(CameraMotionPreset preset) {
         static const CameraMotionSpec kEmpty{};
         // Function-local static initialization is guaranteed thread-safe by
-        // C++11. Keep the canonical enum order here: the public preset values
-        // are stable ordinals consumed by the generated catalog.
+        // C++11. Numeric recipe rows are sourced from the CM3D registry.
         static const std::array<CameraMotionSpec, kCameraMotionPresetCount> table = [] {
             std::array<CameraMotionSpec, kCameraMotionPresetCount> rows{};
             for (std::size_t index = 0; index < kCameraMotionPresetCount; ++index) {
