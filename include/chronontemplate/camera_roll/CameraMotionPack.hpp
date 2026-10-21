@@ -10,12 +10,11 @@
 // resolver onto the ChrononMotion3D CameraRig:
 //
 //   Scene Framing (reference distance) → Motion Resolver (spec × intensity)
-//     → PoseTracks (single shot) | ShotTimeline (two-shot cut)
-//     → CameraDescriptor → CameraProgram → Chronon Render
+//     → ChrononMotion3D camera recipe registry → CameraRig → RenderPlan
 //
-// Boundary: the pack owns no camera math and no renderer. The named
-// `camera_motion_*` ids are editorial vocabulary and live here, not in the
-// motion core. A preset never touches a subject layer: every key lands on
+// Boundary: the pack owns no camera math and no renderer. Stable recipe IDs
+// and values live in ChrononMotion3D; this pack keeps Template-facing names
+// and editorial selection metadata. A preset never touches a subject layer: every key lands on
 // the rig. Presets flagged needsDof / needs25D / needsMultiPlane /
 // needsOccluder declare backend requirements instead of faking them.
 
@@ -45,7 +44,7 @@ namespace chronontemplate {
     /// Presets in spec order. Values are stable ids: they reach the catalog
     /// and the contract test verbatim.
     enum class CameraMotionPreset : std::uint16_t {
-#define CAMERA_MOTION_PRESET(key, id, family, ...) key,
+#define CAMERA_MOTION_PRESET(key, family) key,
 #include "chronontemplate/camera_roll/CameraMotionPresets.def"
 #undef CAMERA_MOTION_PRESET
     };
@@ -94,7 +93,7 @@ namespace chronontemplate {
     /// enum ordinals and supplies stable id/family metadata.
     [[nodiscard]] std::vector<CameraMotionPreset> cameraMotionPresets();
 
-    /// Stable snake-case id of a preset (the catalog/consumer-facing name).
+    /// Stable snake-case id read from the canonical CM3D recipe registry.
     [[nodiscard]] const char* cameraMotionPresetId(CameraMotionPreset preset) noexcept;
 
     /// Every preset id in canonical (spec) order, for catalogs and tests.

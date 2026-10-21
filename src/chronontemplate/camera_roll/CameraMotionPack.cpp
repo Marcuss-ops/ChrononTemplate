@@ -17,13 +17,12 @@ namespace chronontemplate {
         // recipe values are looked up from the CM3D registry by stable ID.
         struct AuthoredCameraMotionPreset {
             CameraMotionPreset preset;
-            const char* id;
             CameraMotionFamily family;
         };
 
         constexpr AuthoredCameraMotionPreset kAuthoredCameraMotionPresets[] = {
-#define CAMERA_MOTION_PRESET(key, id, family) \
-            {CameraMotionPreset::key, id, CameraMotionFamily::family},
+#define CAMERA_MOTION_PRESET(key, family) \
+            {CameraMotionPreset::key, CameraMotionFamily::family},
 #include "chronontemplate/camera_roll/CameraMotionPresets.def"
 #undef CAMERA_MOTION_PRESET
         };
@@ -39,11 +38,13 @@ namespace chronontemplate {
 
         [[nodiscard]] CameraMotionSpec specFor(const AuthoredCameraMotionPreset& row) {
             CameraMotionSpec spec;
-            const auto* recipe = chrononmotion::motion::camera::findCameraMotionRecipe(row.id);
-            if (recipe != nullptr) {
-                static_cast<chrononmotion::motion::camera::CameraMotionRecipe&>(spec) = *recipe;
+            const auto recipes = chrononmotion::motion::camera::cameraMotionRecipeRegistry();
+            const auto ordinal = static_cast<std::size_t>(row.preset);
+            if (ordinal < recipes.size()) {
+                static_cast<chrononmotion::motion::camera::CameraMotionRecipe&>(spec) =
+                    recipes[ordinal].recipe;
+                spec.id = recipes[ordinal].id.data();
             }
-            spec.id = row.id;
             spec.family = row.family;
             return spec;
         }
@@ -67,13 +68,19 @@ namespace chronontemplate {
 
     const char* cameraMotionPresetId(CameraMotionPreset preset) noexcept {
         const auto* entry = rosterEntry(preset);
-        return entry == nullptr ? nullptr : entry->id;
+        if (entry == nullptr) return nullptr;
+        const auto recipes = chrononmotion::motion::camera::cameraMotionRecipeRegistry();
+        const auto ordinal = static_cast<std::size_t>(preset);
+        return ordinal < recipes.size() ? recipes[ordinal].id.data() : nullptr;
     }
 
     std::vector<std::string> cameraMotionPresetIds() {
         std::vector<std::string> ids;
         ids.reserve(kCameraMotionPresetCount);
-        for (const auto& entry : kAuthoredCameraMotionPresets) ids.emplace_back(entry.id);
+        for (const auto& entry : kAuthoredCameraMotionPresets) {
+            const char* id = cameraMotionPresetId(entry.preset);
+            if (id != nullptr) ids.emplace_back(id);
+        }
         return ids;
     }
 
