@@ -1,4 +1,5 @@
 #include <nlohmann/json.hpp>
+#include "chronontemplate/camera_roll/ResolvedCameraSamples.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -34,23 +35,24 @@ J makePlan(){J a=J::array();
  a.push_back(text("share_x","𝕏",145,816,43,"assets/fonts/Inter-Regular.ttf","#E8E9EA",8,139,148));
  a.push_back(text("share_f","f",258,816,43,"assets/fonts/Inter-Bold.ttf","#E8E9EA",8,144,153));
  a.push_back(text("share_link","↗",365,816,43,"assets/fonts/Inter-Regular.ttf","#E8E9EA",8,149,158));
- J cameraTracks = J::array({
-     track("camera_position_z", J::array({
+ J channels = J::array({
+     {{"channel", "position_z"}, {"easing", "in_out_cubic"}, {"keyframes", J::array({
          J{{"frame", 0}, {"value", -1320.0}},
          J{{"frame", 145}, {"value", -1320.0}},
-         J{{"frame", 239}, {"value", -1320.0}}}), "in_out_cubic"),
-     track("camera_rotation_y", J::array({
+         J{{"frame", 239}, {"value", -1320.0}}})}},
+     {{"channel", "rotation_y"}, {"easing", "in_out_cubic"}, {"keyframes", J::array({
          J{{"frame", 0}, {"value", 2.5}},
          J{{"frame", 145}, {"value", 2.5}},
-         J{{"frame", 239}, {"value", 8.0}}}), "in_out_cubic")});
+         J{{"frame", 239}, {"value", 8.0}}})}}});
+ const J camera = {{"type", "perspective"}, {"position", {0,0,-1320}},
+                   {"rotation_deg", {0,2.5,0}}, {"fov_deg",50}, {"near",1}, {"far",5000}};
  J p={{"schema","chronon.render-plan.v3"},{"version",3},
       {"job_id","dark_nba_article_card_animated_v2"},
       {"canvas",{{"width",W},{"height",H},{"fps_num",30},{"fps_den",1},{"duration_frames",N}}},
       {"layers",a},
-      {"camera",{{"type","perspective"},{"position",{0,0,-1320}},
-                  {"rotation_deg",{0,2.5,0}},{"fov_deg",50},{"near",1},{"far",5000}}},
-      {"camera_animation",{{"tracks",cameraTracks}}},
+      {"camera",camera},
       {"output",{{"path","Dark_NBA_Article_Card.mp4"},{"format","mp4"},{"codec","h264"}}}};
+ chronontemplate::camera_roll::attachResolvedCameraSamples(p, camera, channels, 30.f, N);
  return p;
 }
 int main(int argc,char**argv){try{if(argc!=2)return 2;J p=makePlan();fs::path out=fs::absolute(argv[1]);fs::create_directories(out.parent_path());std::ofstream f(out);f<<p.dump(2)<<'\n';if(!f)throw std::runtime_error("failed to write plan");return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}

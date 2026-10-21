@@ -15,6 +15,7 @@
 
 #include "chrononmotion/math/Vector2.hpp"
 #include "chrononmotion/math/Vector3.hpp"
+#include "chronontemplate/camera_roll/ResolvedCameraSamples.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -308,23 +309,23 @@ namespace {
             }
         }
 
-        auto makeTrack = [](const std::string& prop, const std::vector<double>& vals) {
+        auto makeChannel = [](const std::string& channel, const std::vector<double>& vals) {
             json kfs = json::array();
             for (size_t i = 0; i < vals.size(); ++i) {
                 kfs.push_back({{"frame", static_cast<int>(i)}, {"value", std::round(vals[i] * 10000.0) / 10000.0}});
             }
-            return json{{"property", prop}, {"easing", "linear"}, {"keyframes", kfs}};
+            return json{{"channel", channel}, {"easing", "linear"}, {"keyframes", kfs}};
         };
 
-        json cameraAnimation = {
-            {"tracks", json::array({
-                makeTrack("camera_position_x", camX),
-                makeTrack("camera_position_y", camY),
-                makeTrack("camera_position_z", camZ),
-                makeTrack("camera_rotation_y", camRy),
-                makeTrack("camera_fov_deg", camFov)
-            })}
-        };
+        const json cameraBase{{"type", "perspective"}, {"position", {camX[0], camY[0], camZ[0]}},
+                              {"rotation_deg", {0, camRy[0], 0}}, {"fov_deg", camFov[0]},
+                              {"near", 1}, {"far", 10000}, {"zoom", 1}};
+        const json cameraChannels = json::array({
+            makeChannel("position_x", camX), makeChannel("position_y", camY),
+            makeChannel("position_z", camZ), makeChannel("rotation_y", camRy),
+            makeChannel("fov", camFov)});
+        const json cameraSamples = chronontemplate::camera_roll::bakeResolvedCameraSamples(
+            cameraBase, cameraChannels, static_cast<float>(kFps), kTotalFrames);
 
         // 1. Luxury Editorial Backdrop (rich dark slate vignette)
         json bgLayer = {
@@ -515,16 +516,8 @@ namespace {
                 {"fps_den", 1},
                 {"duration_frames", kTotalFrames}
             }},
-            {"camera", {
-                {"type", "perspective"},
-                {"position", {camX[0], camY[0], camZ[0]}},
-                {"rotation_deg", {0, camRy[0], 0}},
-                {"fov_deg", camFov[0]},
-                {"near", 1},
-                {"far", 10000},
-                {"zoom", 1}
-            }},
-            {"camera_animation", cameraAnimation},
+            {"camera", cameraSamples.front().at("camera")},
+            {"camera_samples", cameraSamples},
             {"layers", json::array({
                 bgLayer,
                 photoLayer,
