@@ -6,8 +6,8 @@
 // of beat N+1, so no matter how many beats the chain is continuous at every
 // boundary — the pose a hold ends on is the pose the next leg starts from.
 //
-// Template owns the beat sequence and transition vocabulary. ChrononMotion3D
-// evaluates the transition curves, framing, focus and CameraRig tracks.
+// Template owns the beat sequence and selects a handoff. ChrononMotion3D owns
+// the handoff catalog and evaluates curves, framing, focus and CameraRig tracks.
 
 #include "chronontemplate/camera_roll/SceneCameraPack.hpp"
 
