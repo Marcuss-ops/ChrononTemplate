@@ -29,8 +29,6 @@ ASSETS = (WORKSPACE / "Chronon3d").resolve()
 OUT = ROOT / "out/scene_camera_sequencer_v1"
 
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
-PROPERTIES = ["camera_position_x", "camera_position_y", "camera_position_z",
-              "camera_rotation_x", "camera_rotation_y", "camera_rotation_z", "camera_fov_deg"]
 
 
 def sampled_poses() -> dict[str, list[list[float]]]:
@@ -61,9 +59,14 @@ def unwrap_degrees(values: list[float]) -> list[float]:
     return result
 
 
-def track(prop: str, values: list[float]) -> dict:
-    return {"property": prop, "easing": "linear",
-            "keyframes": [{"frame": i, "value": round(v, 6)} for i, v in enumerate(values)]}
+def camera_samples(channels: list[list[float]]) -> list[dict]:
+    return [{"frame": frame, "camera": {
+        "type": "perspective",
+        "position": [round(channels[c][frame], 6) for c in range(3)],
+        "rotation_deg": [round(channels[c][frame], 6) for c in range(3, 6)],
+        "fov_deg": round(channels[6][frame], 6), "near": 1, "far": 10000, "zoom": 1,
+        "sensor_width_mm": 36, "lens_shift": [0, 0]}}
+        for frame in range(len(channels[0]))]
 
 
 def caption_for(seq_id: str) -> str:
@@ -141,15 +144,12 @@ def plan_for(seq_id: str, rows: list[list[float]], master: bool) -> dict:
                "style": {"font": "assets/fonts/Inter-Bold.ttf", "font_size": 26,
                          "fill": "#92B4A6", "fit_mode": "shrink_only", "min_font_size": 20,
                          "max_font_size": 26}}
+    resolved = camera_samples(channels)
     return {"schema": "chronon.render-plan.v3", "version": 3,
             "job_id": f"scene_camera_sequencer_v1_{seq_id}",
             "canvas": {"width": WIDTH, "height": HEIGHT, "fps_num": FPS, "fps_den": 1,
                        "duration_frames": total},
-            "camera": {"type": "perspective",
-                       "position": [round(channels[i][0], 6) for i in range(3)],
-                       "rotation_deg": [round(x, 6) for x in rows[0][4:7]],
-                       "fov_deg": round(rows[0][7], 6), "near": 1, "far": 10000, "zoom": 1},
-            "camera_animation": {"tracks": [track(p, c) for p, c in zip(PROPERTIES, channels)]},
+            "camera": resolved[0]["camera"], "camera_samples": resolved,
             "layers": [background, *subjects, caption],
             "output": {"path": f"{seq_id}.mp4", "format": "mp4", "codec": "h264"}}
 
@@ -222,15 +222,12 @@ def plan_from_sequence_json(seq_path: Path, seq_id: str, rows: list[list[float]]
     channels[0] = [x - WIDTH / 2 for x in channels[0]]
     channels[1] = [y - HEIGHT / 2 for y in channels[1]]
     channels[2] = [-z for z in channels[2]]
+    resolved = camera_samples(channels)
     return {"schema": "chronon.render-plan.v3", "version": 3,
             "job_id": f"scene_camera_sequencer_v1_{seq_id}",
             "canvas": {"width": WIDTH, "height": HEIGHT, "fps_num": FPS, "fps_den": 1,
                        "duration_frames": total},
-            "camera": {"type": "perspective",
-                       "position": [round(channels[i][0], 6) for i in range(3)],
-                       "rotation_deg": [round(x, 6) for x in rows[0][4:7]],
-                       "fov_deg": round(rows[0][7], 6), "near": 1, "far": 10000, "zoom": 1},
-            "camera_animation": {"tracks": [track(p, c) for p, c in zip(PROPERTIES, channels)]},
+            "camera": resolved[0]["camera"], "camera_samples": resolved,
             "layers": [*layers, caption],
             "output": {"path": f"{seq_id}.mp4", "format": "mp4", "codec": "h264"}}
 

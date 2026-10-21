@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
+import {resolveCameraSamples} from '../camera_roll/camera_samples.mjs';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const out = path.join(root, 'out/nba_dirk_physical_fold');
@@ -82,12 +83,7 @@ for(const [frame,degrees] of [[0,48],[58,26],[120,10],[160,10],[210,58],[239,42]
 const track=(property,field)=>({property,easing:'in_out_cubic',keyframes:tracksForFlap.map(s=>key(s.frame,s[field]))});
 const img=(id,asset,position,size,animation=null)=>({id,type:'image',asset,size,position,fit:'contain',enable_3d:true,start_frame:0,duration_frames:FRAMES,...(animation?{animation}:{})});
 const pageCamera={type:'perspective',position:[0,0,-1150],rotation_deg:[0,0,0],fov_deg:53.14,near:.1,far:10000,zoom:1};
-const plan={schema:'chronon.render-plan.v3',version:3,job_id:'nba_dirk_physical_fold_v1',canvas:{width:W,height:H,fps_num:30,fps_den:1,duration_frames:FRAMES},camera:pageCamera,camera_animation:{tracks:[
- {property:'camera_position_x',easing:'in_out_cubic',keyframes:[key(0,-80),key(72,-20),key(150,0),key(239,0)]},
- {property:'camera_position_z',easing:'in_out_cubic',keyframes:[key(0,-1180),key(72,-1100),key(150,-1040),key(239,-1250)]},
- {property:'camera_rotation_y',easing:'in_out_cubic',keyframes:[key(0,5),key(72,1),key(150,-3),key(239,-8)]},
- {property:'camera_rotation_x',easing:'in_out_cubic',keyframes:[key(0,2),key(72,0),key(150,0),key(239,-3)]}
-]},layers:[
+const plan={schema:'chronon.render-plan.v3',version:3,job_id:'nba_dirk_physical_fold_v1',canvas:{width:W,height:H,fps_num:30,fps_den:1,duration_frames:FRAMES},camera:pageCamera,layers:[
  {id:'black_surround',type:'image',asset:'black_vignette.png',size:[W,H],position:[0,0],fit:'cover',screen_space:true,start_frame:0,duration_frames:FRAMES},
  img('main_backing','back_main.png',[-267,-5,8],[1208,970]),
  img('flap_backing','back_flap.png',[600,-5,8],[528,970],{tracks:[track('rotation_y','degrees'),track('position_x','x'),track('position_z','z')]}),
@@ -96,5 +92,13 @@ const plan={schema:'chronon.render-plan.v3',version:3,job_id:'nba_dirk_physical_
  {id:'headline_written_on_paper',type:'text',text:'2011 Dirk Nowitzki\nWas A GOD',size:[1100,280],position:[690,555,-4],enable_3d:true,start_frame:0,duration_frames:FRAMES,style:{font:'Georgia_Bold.ttf',font_size:84,min_font_size:84,max_font_size:84,fit_mode:'shrink_only',fill:'#261e14'},text_animators:[opacityReveal('write_headline',36,148)]},
  {id:'ink_bleed_headline',type:'text',text:'2011 Dirk Nowitzki\nWas A GOD',size:[1100,280],position:[693,552,-2],enable_3d:true,opacity:.10,start_frame:0,duration_frames:FRAMES,style:{font:'Georgia_Bold.ttf',font_size:84,min_font_size:84,max_font_size:84,fit_mode:'shrink_only',fill:'#3a2918'},text_animators:[opacityReveal('bleed_headline',36,148)]}
 ],output:{path:'NBA_Article_and_Title_Chronon.mp4',format:'mp4',codec:'h264'}};
+const cameraChannels=[
+ ['position_x',[[0,-80],[72,-20],[150,0],[239,0]]],
+ ['position_z',[[0,-1180],[72,-1100],[150,-1040],[239,-1250]]],
+ ['rotation_y',[[0,5],[72,1],[150,-3],[239,-8]]],
+ ['rotation_x',[[0,2],[72,0],[150,0],[239,-3]]],
+].map(([channel,keyframes])=>({channel,easing:'in_out_cubic',keyframes:keyframes.map(([frame,value])=>({frame,value}))}));
+plan.camera_samples=resolveCameraSamples(pageCamera,cameraChannels,30,FRAMES);
+plan.camera=plan.camera_samples[0].camera;
 fs.writeFileSync(path.join(out,'nba_dirk_physical_fold.plan.json'),JSON.stringify(plan,null,2)+'\n');
 console.log(`Wrote ${path.join(out,'nba_dirk_physical_fold.plan.json')}`);

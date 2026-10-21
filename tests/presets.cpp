@@ -1,4 +1,5 @@
 #include "chronontemplate/core/Presets.hpp"
+#include "chronontemplate/important_phrases/didone/DidoneTitlesPack.hpp"
 #include "chrononmotion/motion/CompiledScene.hpp"
 
 #include "motion_check.hpp"
@@ -243,6 +244,17 @@ namespace {
         }
     }
 
+    void didoneCameraParametersComeFromMotionAuthority() {
+        section("Didone camera plan delegates to CM3D");
+        const DidoneCameraPlan plan = didoneCameraPlanFor(2, 65);
+        check(plan.start_z == 1200.f && plan.end_z == 1120.f,
+              "Didone uses the canonical CM3D gentle push distances");
+        check(plan.start_yaw_deg == -0.8f && plan.end_yaw_deg == 0.f,
+              "Didone uses the canonical CM3D gentle push orientation");
+        check(plan.duration == 65 && plan.settle_frames == 12,
+              "Didone preserves its requested timing and settle duration");
+    }
+
 }// namespace
 
 int main() {
@@ -251,5 +263,6 @@ int main() {
     finalValidation();
     packRecipeRule();
     webCatalog();
+    didoneCameraParametersComeFromMotionAuthority();
     return chrononmotion_test::report();
 }

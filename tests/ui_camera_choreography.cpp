@@ -163,8 +163,17 @@ namespace {
         }
         check(hasController, "the Null controller lowers as a transparent color layer");
         check(childrenBaked, "card, title and icon carry baked animation tracks");
-        check(plan.camera_animation && plan.camera_animation->size() == 7,
-              "position, rotation and fov lower as native camera tracks");
+        check(plan.camera_samples && plan.camera_samples->size() == spec.totalFrames + 1,
+              "position, rotation and fov lower as CM3D-resolved camera samples");
+        if (plan.camera_samples && plan.camera_samples->size() > 2) {
+            const auto& first = plan.camera_samples->front().camera;
+            const auto& middle = plan.camera_samples->at(plan.camera_samples->size() / 2).camera;
+            const auto& last = plan.camera_samples->back().camera;
+            check(first.position != middle.position || first.rotation_deg != middle.rotation_deg ||
+                  first.fov_deg != middle.fov_deg || middle.position != last.position ||
+                  middle.rotation_deg != last.rotation_deg || middle.fov_deg != last.fov_deg,
+                  "resolved camera samples contain the authored motion");
+        }
         check(plan.temporal_motion_blur && plan.temporal_motion_blur->samples == 8,
               "the choreography declares its temporal motion blur");
     }

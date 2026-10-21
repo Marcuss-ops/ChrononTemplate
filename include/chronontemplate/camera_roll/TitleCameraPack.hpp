@@ -7,8 +7,8 @@
 // grammar the family exists for.
 //
 // Boundary: the pack owns no camera math. Every move is lowered onto the
-// ChrononMotion3D CameraRig channels; the named `title_camera_*` ids are
-// editorial vocabulary and deliberately live here, not in the motion core.
+// ChrononMotion3D CameraRig channels. The stable `title_camera_*` IDs and move
+// evaluation are owned by CM3D; Template supplies title-specific shot data.
 
 #ifndef CHRONONTEMPLATE_TITLE_CAMERA_PACK_HPP
 #define CHRONONTEMPLATE_TITLE_CAMERA_PACK_HPP
@@ -18,6 +18,7 @@
 #include "chrononmotion/math/Vector2.hpp"
 #include "chrononmotion/math/Vector3.hpp"
 #include "chrononmotion/motion/CameraRig.hpp"
+#include "chrononmotion/motion/TitleCameraRecipe.hpp"
 
 #include <cstdint>
 #include <string>
@@ -40,49 +41,14 @@ namespace chronontemplate {
     };
 
     /// How tightly the lens frames the anchor at rest.
-    enum class TitleFraming : std::uint8_t {
-        Hero,          ///< tight, the title dominates the frame
-        Medium,        ///< default documentary framing
-        Wide,          ///< title inside its context
-        ExtremeClose   ///< detail framing for short, heavy titles
-    };
+    using TitleFraming = chrononmotion::motion::camera::TitleFraming;
 
     /// Editorial loudness of the move. One preset, three strengths.
-    enum class TitleCameraIntensity : std::uint8_t {
-        Subtle,
-        Editorial,
-        Cinematic
-    };
+    using TitleCameraIntensity = chrononmotion::motion::camera::TitleIntensity;
 
     /// The title-camera presets. The values are stable ids: they reach
     /// the contract test and the catalog verbatim, so they are append-only.
-    enum class TitleCameraMove : std::uint8_t {
-        SlowPush,            ///< title_camera_slow_push
-        SlowPullOut,         ///< title_camera_slow_pull_out
-        LeftDrift,           ///< title_camera_left_drift
-        RightDrift,          ///< title_camera_right_drift
-        VerticalRise,        ///< title_camera_vertical_rise
-        VerticalDescend,     ///< title_camera_vertical_descend
-        MicroOrbitLeft,      ///< title_camera_micro_orbit_left
-        MicroOrbitRight,     ///< title_camera_micro_orbit_right
-        ArcPush,             ///< title_camera_arc_push
-        ArcPull,             ///< title_camera_arc_pull
-        LowAnglePush,        ///< title_camera_low_angle_push
-        HighAngleSettle,     ///< title_camera_high_angle_settle
-        RollSettle,          ///< title_camera_roll_settle
-        RollPass,            ///< title_camera_roll_pass
-        DollyZoomSubtle,     ///< title_camera_dolly_zoom_subtle
-        FocusPush,           ///< title_camera_focus_push
-        ParallaxSide,        ///< title_camera_parallax_side
-        ParallaxPush,        ///< title_camera_parallax_push
-        WhipSettle,          ///< title_camera_whip_settle
-        CornerReveal,        ///< title_camera_corner_reveal
-        CrashPush,           ///< title_camera_crash_push (v2: fast editorial push)
-        TopDownSettle,       ///< title_camera_top_down_settle (v2: from above)
-        HandheldMicro,       ///< title_camera_handheld_micro (v2: micro drift + roll)
-        OrbitWide,           ///< title_camera_orbit_wide (v2: wide orbit)
-        FloorRise            ///< title_camera_floor_rise (v2: low rise + push)
-    };
+    using TitleCameraMove = chrononmotion::motion::camera::TitleMove;
 
     /// Authoring description of one title shot: what is framed, how tight, how
     /// loud, how long. The camera is the only animated thing.
@@ -113,47 +79,7 @@ namespace chronontemplate {
     // The numbers a preset would author, exposed separately from keying so a
     // test can pin the vocabulary without owning any scene.
 
-    struct TitleCameraPlan {
-        /// Optical distance of the frontal rest framing, world units.
-        float distance{1000.f};
-        /// FOV of the rest framing, degrees.
-        float fov{55.f};
-        /// Dolly travel along the view axis. Positive moves the *end* pose
-        /// toward the anchor (a push); negative moves it away (a pull out).
-        float dolly{0.f};
-        /// Total lateral body crossing of a drift, world units (+ = left to
-        /// right). The camera crosses past the anchor, aimed at it throughout.
-        float panX{0.f};
-        /// Lateral start offset the move returns from, world units (arcs,
-        /// whip, corner reveal).
-        float restLateral{0.f};
-        /// Mid-travel lateral bow of an arc path, world units.
-        float arcBow{0.f};
-        /// Height offset at the start of the move, world units (negative =
-        /// below the anchor).
-        float heightOffset{0.f};
-        /// Height offset at the end of the move; 0 is the rest level. Angle
-        /// pushes retain their offset (heightEnd == heightOffset); rises and
-        /// settles shed it (heightEnd == 0).
-        float heightEnd{0.f};
-        /// Orbit yaw offsets about the anchor, radians: the micro-orbit start
-        /// and end swing, or the whip's off-axis acquisition.
-        float yawStart{0.f};
-        float yawEnd{0.f};
-        /// Roll about the view axis, radians: start, optional mid peak, end.
-        float rollStart{0.f};
-        float rollPeak{0.f};
-        float rollEnd{0.f};
-        /// FOV at the end of the move; 0 leaves the lens untouched.
-        float fovEnd{0.f};
-        /// Focus-distance travel; positive pulls the focal plane toward the
-        /// anchor (0 = untouched).
-        float focusPull{0.f};
-        /// Entrance pupil authored for the move in millimetres (0 = untouched).
-        float aperture{0.f};
-        /// Fraction of the travel the whip spends acquiring (whip_settle only).
-        float whipAcquisition{0.f};
-    };
+    using TitleCameraPlan = chrononmotion::motion::camera::TitleCameraPlan;
 
     /// The numbers `applyTitleCameraShot` would key, in world units, for the
     /// pure function pair `titleCameraDistance` + `titleCameraPlanFor`. Pure:

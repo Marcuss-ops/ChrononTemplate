@@ -2,6 +2,8 @@
 
 #include "chronontemplate/core/NativePrimitives.hpp"
 
+#include <chrononmotion/motion/Presets.hpp>
+
 #include <algorithm>
 #include <set>
 #include <stdexcept>
@@ -128,12 +130,13 @@ Json buildArticleEvidenceRevealPlan(const ArticleEvidenceSpec& spec,
                                                   198 + static_cast<int>(i) * 12);
     }
 
-    const Json camera = native::Camera::perspective({0.f, 0.f, -1320.f}, {0.f, 0.f, 0.f}, 50.f);
-    const Json cameraAnimation = native::Camera::animation(Json::array({
-        native::Motion::track("camera_position_z", {{0, -1320.0}, {45, -1320.0},
-            {90, -1260.0}, {180, -1260.0}, {239, -1260.0}}, "in_out_cubic")}));
+    chrononmotion::motion::CameraRig cameraRig(1, 50.f, float(W) / float(H), 1.f, 10000.f);
+    cameraRig.setPosition({0.f, 0.f, 1320.f});
+    chrononmotion::motion::presets::cameraPush(cameraRig, 0, 90, 60.f, float(FPS));
+    const Json cameraSamples = native::Camera::samples(cameraRig, float(FPS), FRAMES);
+    const Json camera = cameraSamples.front().at("camera");
     return native::TemplateComposition::renderPlan("article_evidence_reveal_v1", W, H, FPS,
-        FRAMES, layers, camera, cameraAnimation,
+        FRAMES, layers, camera, cameraSamples,
         {{"path", spec.output}, {"format", "mp4"}, {"codec", "h264"}});
 }
 

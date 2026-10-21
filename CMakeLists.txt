@@ -243,6 +243,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/web/WebPageHighlightPack.cpp
         src/chronontemplate/web/WebTextLayout.cpp
         src/chronontemplate/web/ArticleEvidenceReveal.cpp
+        # second generation: radians-safe fold, distinct recipes, reworked hierarchy
+        src/chronontemplate/web/WebPageV2Pack.cpp
         # native layout composers: flex rows, columns and grids plus FLIP moves
         src/chronontemplate/composers/LayoutComposer.cpp
         # declarative transitions (BACKLOG item 4): sweep/dip/blinds/iris/glitch/leak
@@ -258,17 +260,21 @@ add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tools.cmake)
 
 add_executable(chronontemplate_emit_beast_land_subject_reframe
-        tools/documentary_effects/emit_beast_land_subject_reframe.cpp
-        src/chronontemplate/core/ContentBinding.cpp
-        src/chronontemplate/core/MotionBridge.cpp
-        src/chronontemplate/core/TemplateScene.cpp
-        src/chronontemplate/camera_roll/SceneCameraPack.cpp)
-target_link_libraries(chronontemplate_emit_beast_land_subject_reframe PRIVATE ChrononMotion::chrononmotion)
+        tools/documentary_effects/emit_beast_land_subject_reframe.cpp)
+target_link_libraries(chronontemplate_emit_beast_land_subject_reframe PRIVATE chronontemplate)
 target_include_directories(chronontemplate_emit_beast_land_subject_reframe PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_beast_land_subject_reframe PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_resolve_camera_samples
+        tools/camera_roll/resolve_camera_samples.cpp)
+target_link_libraries(chronontemplate_resolve_camera_samples PRIVATE chronontemplate)
+target_include_directories(chronontemplate_resolve_camera_samples PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CHRONONTEMPLATE_NLOHMANN_JSON_DIR})
+target_compile_options(chronontemplate_resolve_camera_samples PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_screen_recording_camera_recreation
         tools/camera_roll/emit_screen_recording_camera_recreation.cpp)
@@ -300,7 +306,9 @@ target_compile_options(chronontemplate_emit_camera_bullet_focus PRIVATE -Wall -W
 
 add_executable(chronontemplate_emit_bullet_camera_10
         tools/bulletpoints_3d/emit_bullet_camera_10.cpp)
-target_link_libraries(chronontemplate_emit_bullet_camera_10 PRIVATE ChrononMotion::chrononmotion)
+target_link_libraries(chronontemplate_emit_bullet_camera_10 PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_bullet_camera_10 PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include")
 target_compile_options(chronontemplate_emit_bullet_camera_10 PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_web_article_fold
@@ -335,6 +343,12 @@ add_executable(chronontemplate_emit_web_classic_home
         tools/web_presets/emit_web_classic_home.cpp)
 target_link_libraries(chronontemplate_emit_web_classic_home PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_classic_home PRIVATE -Wall -Wextra)
+
+# Second generation: radians-safe fold, distinct recipes, reworked hierarchy.
+add_executable(chronontemplate_emit_web_page_v2
+        tools/web_presets/emit_web_page_v2.cpp)
+target_link_libraries(chronontemplate_emit_web_page_v2 PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_page_v2 PRIVATE -Wall -Wextra)
 
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is

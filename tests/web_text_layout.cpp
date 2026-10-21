@@ -92,7 +92,8 @@ int main() {
         require(plan.at("canvas").at("width") == 1920 && plan.at("canvas").at("height") == 1080 &&
                     plan.at("canvas").at("fps_num") == 30 && plan.at("canvas").at("duration_frames") == 240,
                 "article evidence scene has the requested 1080p eight-second format");
-        require(plan.contains("camera") && plan.contains("camera_animation"),
+        require(plan.contains("camera") && plan.contains("camera_samples") &&
+                    !plan.contains("camera_animation"),
                 "camera push is present with the article composition");
         std::size_t markerCount = 0, pointCount = 0;
         for (const auto& layer : plan.at("layers")) {

@@ -5,8 +5,8 @@
 //
 //   sequence_id | frame | px py pz | rx ry rz (degrees) | fov | focus
 //
-// The rows are the contract render_scene_camera_sequencer_v1.py lowers into
-// chronon.render-plan.v3 camera_animation tracks. Positions and Euler angles
+// The rows are the contract render_scene_camera_sequencer_v1.py resolves into
+// chronon.render-plan.v3 camera_samples. Positions and Euler angles
 // are canvas-authored (centre at 960,540); the Python side performs the same
 // render-plan lowering as the title-camera pack.
 

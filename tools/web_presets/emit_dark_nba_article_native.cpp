@@ -1,4 +1,5 @@
 #include <nlohmann/json.hpp>
+#include "chronontemplate/camera_roll/ResolvedCameraSamples.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -139,25 +140,26 @@ J makePlan() {
     a.push_back(text("body_line_3", "The inquiry renewed debate about one of the most disputed Finals in NBA history.",
                      145, 948, 21, "assets/fonts/Inter-Regular.ttf", "#A9ABAE", 8, 186, 196));
 
-    J cameraTracks = J::array({
-        track("camera_position_z", J::array({
+    const J camera = {{"type", "perspective"}, {"position", {0, 0, -1320}},
+                      {"rotation_deg", {0, 2.5, 0}}, {"fov_deg", 50}, {"near", 1}, {"far", 5000}};
+    const J cameraChannels = J::array({
+        {{"channel", "position_z"}, {"easing", "in_out_cubic"}, {"keyframes", J::array({
             J{{"frame", 0}, {"value", -1320.0}},
             J{{"frame", 145}, {"value", -1320.0}},
-            J{{"frame", 239}, {"value", -1320.0}}}), "in_out_cubic"),
-        track("camera_rotation_y", J::array({
+            J{{"frame", 239}, {"value", -1320.0}}})}},
+        {{"channel", "rotation_y"}, {"easing", "in_out_cubic"}, {"keyframes", J::array({
             J{{"frame", 0}, {"value", 2.5}},
             J{{"frame", 145}, {"value", 2.5}},
-            J{{"frame", 239}, {"value", 8.0}}}), "in_out_cubic")});
+            J{{"frame", 239}, {"value", 8.0}}})}}});
 
-    return {{"schema", "chronon.render-plan.v3"}, {"version", 3},
-            {"job_id", "dark_nba_article_card_animated_v3"},
-            {"canvas", {{"width", W}, {"height", H}, {"fps_num", 30}, {"fps_den", 1},
-                        {"duration_frames", N}}},
-            {"layers", a},
-            {"camera", {{"type", "perspective"}, {"position", {0, 0, -1320}},
-                        {"rotation_deg", {0, 2.5, 0}}, {"fov_deg", 50}, {"near", 1}, {"far", 5000}}},
-            {"camera_animation", {{"tracks", cameraTracks}}},
-            {"output", {{"path", "Dark_NBA_Article_Card.mp4"}, {"format", "mp4"}, {"codec", "h264"}}}};
+    J plan = {{"schema", "chronon.render-plan.v3"}, {"version", 3},
+              {"job_id", "dark_nba_article_card_animated_v3"},
+              {"canvas", {{"width", W}, {"height", H}, {"fps_num", 30}, {"fps_den", 1},
+                          {"duration_frames", N}}},
+              {"layers", a}, {"camera", camera},
+              {"output", {{"path", "Dark_NBA_Article_Card.mp4"}, {"format", "mp4"}, {"codec", "h264"}}}};
+    chronontemplate::camera_roll::attachResolvedCameraSamples(plan, camera, cameraChannels, 30.f, N);
+    return plan;
 }
 
 int main(int argc, char** argv) {

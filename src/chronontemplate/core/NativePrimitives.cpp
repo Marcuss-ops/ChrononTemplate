@@ -1,9 +1,15 @@
 #include "chronontemplate/core/NativePrimitives.hpp"
 
+#include <chrononmotion/motion/RenderPlanLowering.hpp>
+#include <chrononmotion/motion/Presets.hpp>
+#include <chrononmotion/math/MathUtils.hpp>
+#include <chrononmotion/math/Vector3.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <set>
 #include <stdexcept>
+#include <utility>
 
 namespace chronontemplate::native {
 namespace {
@@ -161,9 +167,12 @@ Json Camera::perspective(const std::array<float,3>& position, const std::array<f
             {"fov_deg",fovDeg},{"near",nearPlane},{"far",farPlane},{"zoom",zoom}};
 }
 
-Json Camera::animation(const Json& tracks) {
-    if (!tracks.is_array() || tracks.empty()) throw std::invalid_argument("camera animation needs tracks");
-    return {{"tracks",tracks}};
+Json Camera::samples(const chrononmotion::motion::CameraRig& rig, float fps, int frameCount,
+                     float nearPlane, float farPlane) {
+    if (frameCount <= 0) throw std::invalid_argument("camera samples need a positive frame count");
+    const auto samples = chrononmotion::motion::bakeResolvedCameraSamples(
+        rig, fps, static_cast<std::size_t>(frameCount), nearPlane, farPlane);
+    return chrononmotion::motion::cameraSamplesToJson(samples);
 }
 
 Json Particles::emitterLayer(const std::string& id, int count, unsigned seed, int durationFrames,
@@ -205,7 +214,7 @@ Json Text::layer(const std::string& id, const std::string& content, const std::a
 
 Json TemplateComposition::renderPlan(const std::string& jobId, int width, int height, int fps,
                                      int durationFrames, const Json& layers, const Json& camera,
-                                     const Json& cameraAnimation, const Json& output) {
+                                     const Json& cameraSamples, const Json& output) {
     requireId(jobId);
     if (width<=0 || height<=0 || fps<=0 || durationFrames<=0 || !layers.is_array())
         throw std::invalid_argument("composition canvas/layers are invalid");
@@ -228,11 +237,13 @@ Json TemplateComposition::renderPlan(const std::string& jobId, int width, int he
             }
         }
     }
+    if (!cameraSamples.is_null() && (!cameraSamples.is_array() || cameraSamples.empty() || camera.is_null()))
+        throw std::invalid_argument("camera_samples require a non-empty array and a base camera");
     Json plan={{"schema","chronon.render-plan.v3"},{"version",3},{"job_id",jobId},
         {"canvas",{{"width",width},{"height",height},{"fps_num",fps},{"fps_den",1},{"duration_frames",durationFrames}}},
         {"layers",layers},{"output",output.is_null()?Json{{"path",jobId+".mp4"},{"format","mp4"},{"codec","h264"}}:output}};
     if (!camera.is_null()) plan["camera"]=camera;
-    if (!cameraAnimation.is_null()) plan["camera_animation"]=cameraAnimation;
+    if (!cameraSamples.is_null()) plan["camera_samples"]=cameraSamples;
     return plan;
 }
 
@@ -247,11 +258,20 @@ Json buildBlackboardTortureV1() {
     layers.push_back(Geometry::boxLayer("frame_right",{36,770,70},{1698,500,-8},"#68452C",duration));
     layers.push_back(Geometry::boxLayer("chalk_tray",{1480,34,110},{960,52,-56},"#543923",duration));
 
-    const Json camera=Camera::perspective();
-    Json cameraTracks=Json::array({
-        Motion::track("camera_position_z",{{0,-2300},{24,-2050},{96,-2010},{120,-1980},{216,-1940},{239,-1940}},"in_out_cubic"),
-        Motion::track("camera_rotation_y",{{0,-3},{24,-1},{96,0},{216,1.5f},{239,1.5f}},"in_out_cubic")});
-    const Json cameraMotion=Camera::animation(cameraTracks);
+    constexpr float kDegToRad = 0.01745329251994329577f;
+    chrononmotion::motion::CameraRig cameraRig(1, 43.f, float(width) / float(height), 1.f, 10000.f);
+    cameraRig.setPosition({0.f, 0.f, 2300.f});
+    chrononmotion::Quaternion initialYaw;
+    initialYaw.setFromAxisAngle(chrononmotion::Vector3(0.f, 1.f, 0.f), 3.f * kDegToRad);
+    cameraRig.setOrientation(initialYaw);
+    chrononmotion::motion::presets::cameraPush(cameraRig, 0, 24, 250.f, float(fps));
+    chrononmotion::motion::presets::cameraPush(cameraRig, 24, 72, 40.f, float(fps));
+    chrononmotion::motion::presets::cameraPush(cameraRig, 96, 24, 30.f, float(fps));
+    chrononmotion::motion::presets::cameraPush(cameraRig, 120, 96, 40.f, float(fps));
+    chrononmotion::motion::presets::cameraOrbit(cameraRig, 0, duration - 1,
+        -4.5f * kDegToRad, 0.f, float(fps));
+    const Json cameraSamples=Camera::samples(cameraRig, float(fps), duration);
+    const Json camera=cameraSamples.front().at("camera");
     using P=Paths::Point;
     const std::vector<std::vector<P>> strokes={
         {{520,610},{520,450},{620,450}},{{520,530},{600,530}},{{520,610},{620,610}},
@@ -296,7 +316,7 @@ Json buildBlackboardTortureV1() {
     const std::array<int,4> starts{208,220,232,236}, ends{220,232,236,239};
     for (std::size_t i=0;i<next.size();++i)
         layers.push_back(Paths::strokeLayer("chalk_next_"+std::to_string(i),Paths::polyline(next[i]),starts[i],ends[i],duration));
-    return TemplateComposition::renderPlan("blackboard_torture_v1",width,height,fps,duration,layers,camera,cameraMotion,
+    return TemplateComposition::renderPlan("blackboard_torture_v1",width,height,fps,duration,layers,camera,cameraSamples,
         {{"path","blackboard_torture_v1.mp4"},{"format","mp4"},{"codec","h264"}});
 }
 

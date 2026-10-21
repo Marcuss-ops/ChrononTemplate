@@ -6,9 +6,10 @@
 
 #include "chronontemplate/ui_camera/UiCameraChoreography.hpp"
 
+#include "chrononmotion/motion/CameraPanelChoreography.hpp"
+#include "chrononmotion/motion/CameraValidation.hpp"
 #include "chrononmotion/motion/CameraScreenSpace.hpp"
 #include "chrononmotion/motion/Easing.hpp"
-#include "chrononmotion/motion/Presets.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -54,19 +55,8 @@ namespace chronontemplate {
 
     float uiFramingDistance(float subjectWidth, float fovDegrees,
                             const Vector2& viewport, float frameFill) {
-        checkedPositive(subjectWidth, "subject width");
-        checkedPositive(viewport.x, "viewport width");
-        checkedPositive(viewport.y, "viewport height");
-        if (!std::isfinite(fovDegrees) || fovDegrees <= 0.f || fovDegrees >= 180.f)
-            throw std::invalid_argument("UiCameraChoreography: fov must be finite and in (0, 180)");
-        if (!std::isfinite(frameFill) || frameFill <= 0.f || frameFill > 1.f)
-            throw std::invalid_argument("UiCameraChoreography: frame fill must be finite and in (0, 1]");
-        constexpr float kDegToRad = 0.01745329251994329577f;
-        const float verticalHalf = fovDegrees * 0.5f * kDegToRad;
-        const float horizontalTan = std::tan(verticalHalf) * (viewport.x / viewport.y);
-        if (!(horizontalTan > 0.f) || !std::isfinite(horizontalTan))
-            throw std::invalid_argument("UiCameraChoreography: framing geometry is degenerate");
-        return (subjectWidth * 0.5f / frameFill) / horizontalTan;
+        return chrononmotion::motion::camera::panelFramingDistance(
+            subjectWidth, fovDegrees, viewport, frameFill);
     }
 
     UiPanelComposition buildUiPanel(TemplateScene& scene, const UiPanelSpec& spec) {
@@ -168,18 +158,7 @@ namespace chronontemplate {
         if (spec.totalFrames <= 0)
             throw std::invalid_argument("UiCameraChoreography: totalFrames must be positive");
         checkWindow(spec.panelInFrame, spec.panelDuration, spec.totalFrames, "panel entrance");
-        checkWindow(spec.zoomInFrame, spec.zoomDuration, spec.totalFrames, "camera zoom");
-        checkWindow(spec.panInFrame, spec.panDuration, spec.totalFrames, "camera pan");
         checkedFinite(spec.panelEnterDistance, "panel enter distance");
-        checkedFinite(spec.zoomDolly, "camera dolly");
-        checkedFinite(spec.panOffset.x, "camera pan x");
-        checkedFinite(spec.panOffset.y, "camera pan y");
-        if (!std::isfinite(spec.fov) || spec.fov < 10.f || spec.fov > 120.f)
-            throw std::invalid_argument("UiCameraChoreography: fov must be finite and in [10, 120]");
-        if (!std::isfinite(spec.frameFill) || spec.frameFill <= 0.f || spec.frameFill > 1.f)
-            throw std::invalid_argument("UiCameraChoreography: frame fill must be in (0, 1]");
-        if (!std::isfinite(spec.safeMargin) || spec.safeMargin < 1.f)
-            throw std::invalid_argument("UiCameraChoreography: safe margin must be >= 1");
         if (panel.root == 0 || panel.card == 0 || panel.title == 0 || panel.icon == 0)
             throw std::invalid_argument("UiCameraChoreography: the panel composition is empty");
         if (!std::isfinite(panel.panelSize.x) || panel.panelSize.x <= 0.f ||
@@ -187,7 +166,6 @@ namespace chronontemplate {
             throw std::invalid_argument("UiCameraChoreography: the measured panel size is invalid");
 
         const float fps = scene.fps();
-        const auto at = [fps](int frame) { return static_cast<float>(frame) / fps; };
 
         // ── Panel entrance on the Null root, staggered reveals on children ──
         LayerHandle rootHandle(&scene, panel.root);
@@ -207,44 +185,21 @@ namespace chronontemplate {
         iconHandle.animate(ScalePop{.inFrame = spec.panelInFrame + 4, .duration = 12, .from = 0.6f});
         iconHandle.animate(FadeIn{.inFrame = spec.panelInFrame + 4, .duration = 12});
 
-        // ── Camera: fit the measured panel, then push, drift, settle ────────
-        auto& rig = scene.cameraRig();
-        rig.setFov(spec.fov);
-        const Vector2 viewport = scene.canvas();
-        const float required =
-            uiFramingDistance(panel.panelSize.x, spec.fov, viewport, spec.frameFill) * spec.safeMargin;
-        const Vector3 eye = rig.sample(0.f).position;
-        if (eye.z < required)
-            rig.setPosition(Vector3(eye.x, eye.y, required));
-
-        const Easing smooth = Easing::easeInOut();
-        const float zoomT0 = at(spec.zoomInFrame);
-        const float zoomT1 = at(spec.zoomInFrame + spec.zoomDuration);
-        const Vector3 zoomStart = rig.sample(zoomT0).position;
-        Vector3 zoomEnd = zoomStart;
-        zoomEnd.z -= spec.zoomDolly;
-        rig.positionTrack().add(zoomT0, zoomStart, smooth);
-        rig.positionTrack().add(zoomT1, zoomEnd, smooth);
-
-        // The pan starts while the zoom is still landing (the tutorial's
-        // overlap): sampling the rig at the pan start keeps the joint
-        // continuous by construction.
-        const float panT0 = at(spec.panInFrame);
-        const float panT1 = at(spec.panInFrame + spec.panDuration);
-        const Vector3 panStart = rig.sample(panT0).position;
-        const Vector3 panEnd = panStart + Vector3(spec.panOffset.x, spec.panOffset.y, 0.f);
-        rig.positionTrack().add(panT0, panStart, smooth);
-        rig.positionTrack().add(panT1, panEnd, smooth);
-        const Vector3 targetStart = rig.sample(panT0).target;
-        const Vector3 targetEnd = targetStart + Vector3(spec.panOffset.x, spec.panOffset.y, 0.f);
-        rig.targetTrack().add(panT0, targetStart, smooth);
-        rig.targetTrack().add(panT1, targetEnd, smooth);
-
-        // Settle beat: hold the final pose through totalFrames so the move
-        // decelerates into the hold instead of stopping dead.
-        const float endT = at(spec.totalFrames);
-        rig.positionTrack().add(endT, panEnd, smooth);
-        rig.targetTrack().add(endT, targetEnd, smooth);
+        // Camera framing and all CameraRig track evaluation belong to CM3D.
+        chrononmotion::motion::camera::CameraPanelChoreography cameraMove;
+        cameraMove.subjectWidth = panel.panelSize.x;
+        cameraMove.fov = spec.fov;
+        cameraMove.frameFill = spec.frameFill;
+        cameraMove.safeMargin = spec.safeMargin;
+        cameraMove.totalFrames = spec.totalFrames;
+        cameraMove.zoomInFrame = spec.zoomInFrame;
+        cameraMove.zoomDuration = spec.zoomDuration;
+        cameraMove.zoomDolly = spec.zoomDolly;
+        cameraMove.panInFrame = spec.panInFrame;
+        cameraMove.panDuration = spec.panDuration;
+        cameraMove.panOffset = spec.panOffset;
+        chrononmotion::motion::camera::applyPanelChoreography(
+            scene.cameraRig(), cameraMove, fps, scene.canvas());
 
         if (spec.motionBlur)
             scene.setTemporalMotionBlur(spec.shutterAngle, spec.motionBlurSamples);
@@ -263,34 +218,16 @@ namespace chronontemplate {
         const Vector2 viewport = scene.canvas();
         auto& rig = scene.cameraRig();
 
-        // 1. Camera continuity: no teleports between adjacent frames.
-        constexpr float kMaxStep = 240.f;
-        Vector3 previous = rig.sample(0.f).position;
-        for (int frame = 1; frame <= spec.totalFrames; ++frame) {
-            const Vector3 current = rig.sample(static_cast<float>(frame) / fps).position;
-            if (!std::isfinite(current.x) || !std::isfinite(current.y) || !std::isfinite(current.z)) {
-                fail("camera position is non-finite at frame " + std::to_string(frame));
-                break;
-            }
-            report.maxJump = std::max(report.maxJump, lengthOf(current - previous));
-            previous = current;
-        }
-        if (report.maxJump > kMaxStep)
-            fail("camera teleports: max per-frame step exceeds the continuity budget");
-
-        // 2. The camera travels, then settles.
-        for (int frame = 0; frame <= spec.totalFrames; ++frame) {
-            const float speed = lengthOf(rig.sampleDerivative(static_cast<float>(frame) / fps).linearVelocity);
-            const int third = spec.totalFrames / 3;
-            if (frame >= third && frame <= 2 * third)
-                report.midRate = std::max(report.midRate, speed);
-            if (frame >= spec.totalFrames - 12)
-                report.endRate = std::max(report.endRate, speed);
-        }
-        if (!(report.midRate > 1.f))
-            fail("camera never travels: mid-window speed is zero");
-        if (!(report.endRate < report.midRate))
-            fail("camera never settles: end speed is not below mid-travel speed");
+        // CM3D owns camera-track temporal validation. Template keeps the
+        // composition-specific parenting and safe-area checks below.
+        const auto cameraTrack = chrononmotion::motion::validateCameraTrack(
+            rig, {.totalFrames = spec.totalFrames, .settleWindowFrames = 12,
+                  .framesPerSecond = fps, .maxPositionStep = 240.f,
+                  .minimumMidTrackSpeed = 1.f});
+        report.maxJump = cameraTrack.maxPositionStep;
+        report.midRate = cameraTrack.maxMidTrackSpeed;
+        report.endRate = cameraTrack.maxSettleSpeed;
+        for (const auto& problem : cameraTrack.failures) fail(problem);
 
         // 3. Animated parenting end-to-end: children follow the Null root.
         // Remove the child's authored local stagger delta before comparing
@@ -325,18 +262,15 @@ namespace chronontemplate {
             fail("parenting unproven: the Null root never moves across the stamps");
 
         // 4. Safe-area framing of the measured panel across the whole window.
-        chrononmotion::motion::ScreenCameraIntrinsics intrinsics;
-        intrinsics.viewport = viewport;
         for (int frame = 0; frame <= spec.totalFrames; ++frame) {
             const float seconds = static_cast<float>(frame) / fps;
             scene.motion().evaluate(frame);
             const Vector3 titleWorld = translationOf(scene.motion().worldMatrix(panel.title));
             const auto pose = rig.sample(seconds);
-            intrinsics.fovDegrees = pose.fov;
-            const Vector2 screen =
-                chrononmotion::motion::projectToScreen(titleWorld, pose, intrinsics);
-            if (!(screen.x >= 0.05f * viewport.x && screen.x <= 0.95f * viewport.x &&
-                  screen.y >= 0.08f * viewport.y && screen.y <= 0.92f * viewport.y)) {
+            chrononmotion::motion::CameraValidator framing;
+            framing.addBounds({"title", titleWorld, {0.f, 0.f, 0.f}})
+                .requireInsideSafeArea("title", 0.05f, 0.08f);
+            if (!framing.validate(pose, viewport).passed) {
                 fail("title leaves the safe area at frame " + std::to_string(frame));
                 break;
             }

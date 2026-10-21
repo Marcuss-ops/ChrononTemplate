@@ -15,9 +15,9 @@
 // a sequence of any length is continuous by construction — no teleport at a
 // boundary, no drift into a hold.
 //
-// Boundary: the pack owns no camera math. Every move is lowered onto the
-// ChrononMotion3D CameraRig channels; the named `scene_camera_*` ids are
-// editorial vocabulary and deliberately live here, not in the motion core.
+// Boundary: the pack owns no camera math. The transition enum and stable
+// `scene_camera_*` IDs come from ChrononMotion3D; Template supplies beats and
+// selects a handoff for each sequence.
 
 #ifndef CHRONONTEMPLATE_SCENE_CAMERA_PACK_HPP
 #define CHRONONTEMPLATE_SCENE_CAMERA_PACK_HPP
@@ -26,8 +26,7 @@
 
 #include "chrononmotion/math/Vector2.hpp"
 #include "chrononmotion/math/Vector3.hpp"
-#include "chrononmotion/motion/CameraRig.hpp"
-
+#include "chrononmotion/motion/CameraSequence.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -65,16 +64,7 @@ namespace chronontemplate {
 
     /// The travel from one stacco to the next. Stable ids: they reach the
     /// catalog and the contract test verbatim, so they are append-only.
-    enum class SceneCameraTransition : std::uint8_t {
-        PushThrough,      ///< scene_camera_push_through — dive through the seam between the two holds
-        LateralSwipe,     ///< scene_camera_lateral_swipe — the body crosses sideways past the seam, aimed ahead
-        ArcCarry,         ///< scene_camera_arc_carry — a curved perpendicular bow carries the frame across
-        OrbitHandoff,     ///< scene_camera_orbit_handoff — the camera orbits the seam pivot from hold A to hold B
-        RiseAndLand,      ///< scene_camera_rise_and_land — lift over the seam and settle down onto the next hold
-        FocusRack,        ///< scene_camera_focus_rack — a near-still frame where the lens hands focus over
-        PullBackReveal,   ///< scene_camera_pull_back_reveal — start tight on A with a roll, pull back, land wide on B
-        WhipReframe,      ///< scene_camera_whip_reframe — one loud acquisition swing, then a long settle onto B
-    };
+    using SceneCameraTransition = chrononmotion::motion::camera::Handoff;
 
     /// One node of the sequence: what the audience watches, and for how long.
     /// The framing hold is the stacco; the travel to the next beat is appended
