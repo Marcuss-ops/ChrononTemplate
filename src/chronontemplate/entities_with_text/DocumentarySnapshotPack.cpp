@@ -2,12 +2,14 @@
 
 #include "chrononmotion/math/MathUtils.hpp"
 #include "chrononmotion/motion/CameraMotion.hpp"
+#include "chrononmotion/motion/CameraRecipe.hpp"
 #include "chrononmotion/motion/CameraRig.hpp"
 #include "chrononmotion/motion/Easing.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <vector>
 
 namespace chronontemplate {
     namespace {
@@ -502,13 +504,11 @@ namespace chronontemplate {
         const Vector3 titleCam = cameraAt(shot.title, shot.cameraDistance);
         const Vector3 photoCam = cameraAt(finalAnchor, finalDistance);
         const float closeDistance = shot.cameraDistance * 0.58f;
-        auto& position = rig.positionTrack();
-        auto& target = rig.targetTrack();
         auto& focus = rig.focusDistanceTrack();
+        std::vector<chrononmotion::motion::camera::CameraTrackWaypoint> cameraWaypoints;
         const auto point = [&](int frame, const Vector3& p, const Vector3& aim,
                                const Easing& easing = Easing::easeInOut()) {
-            position.add(at(frame, fps), p, easing);
-            target.add(at(frame, fps), aim, easing);
+            cameraWaypoints.push_back({frame, p, aim, easing});
         };
 
         // Initial static pose agrees with the opening title shot for arbitrary
@@ -688,6 +688,7 @@ namespace chronontemplate {
                 break;
             }
         }
+        chrononmotion::motion::camera::applyCameraTrack(rig, cameraWaypoints, fps);
         if (shot.recipe == DocumentaryRecipe::FocusDrop) {
             // The RenderPlan DOF bridge represents a world-Z focus plane. As
             // this recipe moves the camera, sample the optical-axis distance
