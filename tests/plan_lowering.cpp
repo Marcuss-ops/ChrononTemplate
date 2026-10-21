@@ -46,8 +46,8 @@ int main() {
     LayerPlan dofText = text;
     dofText.text = "Archive";
     auto& rig = dofScene.cameraRig();
-    // Use the Motion camera's -Z forward axis so the converted focus planes
-    // stay inside RenderPlan's positive world-Z focus range.
+    // focus_distance is camera-space along the optical axis (canonical contract):
+    // the lowering passes it through unchanged, world-Z derivation happens downstream.
     rig.setPosition({0.f, 0.f, -8.f}).clearTarget().setFocusDistance(420.f);
     rig.focusDistanceTrack().add(0.f, 420.f).add(1.f, 620.f);
     rig.apertureTrack().add(0.f, 0.f).add(1.f, 0.06f);
@@ -66,8 +66,8 @@ int main() {
     const auto* maxBlur = findTrack(CameraPropertyPlan::MaxBlur);
     check(focus && aperture && maxBlur,
           "animated focus, aperture, and max blur lower as native camera properties");
-    check(focus && focus->keyframes.front().value.front() == 428.f &&
-          focus->keyframes.back().value.front() == 628.f &&
+    check(focus && focus->keyframes.front().value.front() == 420.f &&
+          focus->keyframes.back().value.front() == 620.f &&
           aperture && aperture->keyframes.front().value.front() == 0.f &&
           aperture->keyframes.back().value.front() == 0.06f &&
           maxBlur && maxBlur->keyframes.front().value.front() == 10.f &&
