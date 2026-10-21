@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+namespace chrononmotion::motion { class CameraRig; }
+
 namespace chronontemplate::native {
 
     using Json = nlohmann::json;
@@ -66,7 +68,11 @@ namespace chronontemplate::native {
                                              const std::array<float, 3>& rotationDeg = {0.f, 0.f, 0.f},
                                              float fovDeg = 43.f, float nearPlane = 1.f,
                                              float farPlane = 10000.f, float zoom = 1.f);
-        [[nodiscard]] static Json animation(const Json& tracks);
+        /// Serializes CM3D-resolved camera snapshots for offline RenderPlan V3.
+        /// Camera evaluation is performed exclusively by CM3D's canonical baker.
+        [[nodiscard]] static Json samples(const chrononmotion::motion::CameraRig& rig,
+                                          float fps, int frameCount,
+                                          float nearPlane = 1.f, float farPlane = 10000.f);
     };
 
     class Particles {
@@ -98,7 +104,7 @@ namespace chronontemplate::native {
         [[nodiscard]] static Json renderPlan(const std::string& jobId, int width, int height,
                                             int fps, int durationFrames, const Json& layers,
                                             const Json& camera = nullptr,
-                                            const Json& cameraAnimation = nullptr,
+                                            const Json& cameraSamples = nullptr,
                                             const Json& output = nullptr);
     };
 

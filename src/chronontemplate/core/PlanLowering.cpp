@@ -487,7 +487,7 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlanImpl(
         const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
         std::string jobId,
         std::string outputPath,
-        bool bakeCameraAnimation) {
+        bool bakeCameraSamples) {
     chrononmotion::motion::RenderPlanLoweringOptions options;
     const auto canvas = scene.canvas();
     options.width = static_cast<int>(canvas.x);
@@ -496,7 +496,7 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlanImpl(
     options.outputPath = std::move(outputPath);
     options.schema = chronon3d::render_plan::kRenderPlanSchemaV3;
     options.cameraRig = &scene.cameraRig();
-    options.bakeCameraAnimation = bakeCameraAnimation;
+    options.bakeResolvedCameraSamples = bakeCameraSamples;
 
     std::unordered_map<MotionLayerId, bool> expected;
     for (const auto& binding : scene.bindings().bindings()) {
