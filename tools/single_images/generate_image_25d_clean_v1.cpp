@@ -1,4 +1,5 @@
 #include <nlohmann/json.hpp>
+#include "chronontemplate/camera_roll/ResolvedCameraSamples.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -109,6 +110,9 @@ int main(int argc, char** argv) try {
     for (const auto& animation : animations) {
         const std::string filename = animation.id + ".plan.json";
         const std::string video = "out/image_25d_clean_v1/videos/" + animation.id + ".mp4";
+        const Json camera{{"type", "perspective"}, {"position", {960.0, 540.0, -1400.0}},
+                          {"rotation_deg", {0.0, 0.0, 0.0}}, {"fov_deg", 55.0},
+                          {"near", 1.0}, {"far", 5000.0}, {"zoom", 1.0}};
         Json root = {
             {"schema", "chronon.render-plan.v2"}, {"version", 2},
             {"job_id", "chronontemplate_" + animation.id},
@@ -121,11 +125,22 @@ int main(int argc, char** argv) try {
                      {"enable_3d", true}, {"start_frame", 0}, {"duration_frames", 150},
                      {"animation", {{"tracks", tracks(animation.image)}}}}
             })},
-            {"camera", {{"type", "perspective"}, {"position", {960.0, 540.0, -1400.0}},
-                        {"rotation_deg", {0.0, 0.0, 0.0}}, {"fov_deg", 55.0}, {"near", 1.0}, {"far", 5000.0}, {"zoom", 1.0}}},
+            {"camera", camera},
             {"output", {{"path", video}, {"format", "mp4"}, {"codec", "h264"}}}
         };
-        if (!animation.camera.empty()) root["camera_animation"] = {{"tracks", tracks(animation.camera)}};
+        Json channels = Json::array();
+        for (const auto& track : animation.camera) {
+            std::string channel = track.property;
+            if (channel.starts_with("camera_")) channel.erase(0, 7);
+            if (channel == "fov_deg") channel = "fov";
+            Json keyframes = Json::array();
+            for (const auto& key : track.keys)
+                keyframes.push_back({{"frame", key.frame}, {"value", key.value.front()}});
+            channels.push_back({{"channel", channel}, {"easing", track.easing},
+                                {"keyframes", std::move(keyframes)}});
+        }
+        chronontemplate::camera_roll::attachResolvedCameraSamples(
+            root, camera, channels, 30.f, 150);
         std::ofstream output(outDir / filename);
         if (!output) throw std::runtime_error("cannot write " + (outDir / filename).string());
         output << root.dump(2) << '\n';

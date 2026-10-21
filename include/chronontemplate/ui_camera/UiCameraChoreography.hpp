@@ -9,8 +9,8 @@
 //     the text engine, the SVG importer;
 //   - layer motion: AnimationTrackPlan position/scale/opacity keys, per-segment
 //     CubicBezier easing, StaggerPlan;
-//   - camera: the ChrononMotion3D CameraRig (2.5D dolly/pan/orbit/roll/FOV,
-//     look-at target) baked to RenderPlan camera_animation tracks;
+//   - camera: selected panel-move parameters passed to the ChrononMotion3D
+//     panel choreography resolver, then lowered from its CameraRig tracks;
 //   - motion blur: TemporalMotionBlurSettings -> MotionBlurPlan.
 //
 // The pack adds no renderer, sampler, easing model or parenting system. It is
@@ -116,9 +116,8 @@ namespace chronontemplate {
                                    const UiCameraChoreographySpec& spec,
                                    const UiPanelComposition& panel);
 
-    /// Pure optical law shared by the applier and the tests: the eye distance
-    /// at which subjectWidth spans frameFill of the frame width at fovDegrees
-    /// over viewport. Throws std::invalid_argument on bad inputs.
+    /// Compatibility wrapper around the CM3D panel framing law. Throws
+    /// std::invalid_argument on bad inputs.
     [[nodiscard]] float uiFramingDistance(float subjectWidth, float fovDegrees,
                                           const chrononmotion::Vector2& viewport,
                                           float frameFill = 0.78f);

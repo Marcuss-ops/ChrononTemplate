@@ -4,7 +4,7 @@
 // Pure geometry, SpanBoundsResolver, deterministic styling and motion authoring.
 
 #include "chronontemplate/important_phrases/didone/DidoneTitlesPack.hpp"
-#include "chrononmotion/motion/Easing.hpp"
+#include "chrononmotion/motion/TitleCameraRecipe.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -57,29 +57,15 @@ namespace {
     }
 
     void author_camera_plan(TemplateScene& scene, const DidoneCameraPlan& plan) {
-        auto& camera = scene.cameraRig();
-        const float fps = scene.fps();
-        const float t0 = static_cast<float>(plan.in_frame) / fps;
-        const float t_settle = static_cast<float>(plan.in_frame + plan.duration - plan.settle_frames) / fps;
-        const float t1 = static_cast<float>(plan.in_frame + plan.duration) / fps;
-
-        const float mid_z = plan.start_z + (plan.end_z - plan.start_z) * 0.85f;
-        camera.positionTrack().add(t0, chrononmotion::Vector3(0.f, 0.f, plan.start_z),
-                                   chrononmotion::motion::Easing::easeInOut());
-        camera.positionTrack().add(t_settle, chrononmotion::Vector3(0.f, 0.f, mid_z),
-                                   chrononmotion::motion::Easing::easeOut());
-        camera.positionTrack().add(t1, chrononmotion::Vector3(0.f, 0.f, plan.end_z),
-                                   chrononmotion::motion::Easing::linear());
-
-        if (std::fabs(plan.start_yaw_deg - plan.end_yaw_deg) > 0.0001f) {
-            const float rad_start = plan.start_yaw_deg * 3.14159265f / 180.f;
-            const float rad_end = plan.end_yaw_deg * 3.14159265f / 180.f;
-            chrononmotion::Quaternion q0, q1;
-            q0.setFromAxisAngle(chrononmotion::Vector3(0.f, 1.f, 0.f), rad_start);
-            q1.setFromAxisAngle(chrononmotion::Vector3(0.f, 1.f, 0.f), rad_end);
-            camera.orientationTrack().add(t0, q0, chrononmotion::motion::Easing::easeOut());
-            camera.orientationTrack().add(t1, q1, chrononmotion::motion::Easing::linear());
-        }
+        chrononmotion::motion::camera::PushSettlePlan resolved;
+        resolved.startDistance = plan.start_z;
+        resolved.endDistance = plan.end_z;
+        resolved.startYawDegrees = plan.start_yaw_deg;
+        resolved.endYawDegrees = plan.end_yaw_deg;
+        resolved.inFrame = plan.in_frame;
+        resolved.duration = plan.duration;
+        resolved.settleFrames = plan.settle_frames;
+        chrononmotion::motion::camera::applyPushSettlePlan(scene.cameraRig(), resolved, scene.fps());
     }
 
 } // namespace
@@ -281,36 +267,22 @@ namespace {
     }
 
     DidoneCameraPlan didoneCameraPlanFor(int preset_index, int duration_frames) {
-        const int duration = clamp_positive(duration_frames, 90);
-        DidoneCameraPlan plan;
-        plan.duration = duration;
+        using P = chrononmotion::motion::camera::PushSettlePreset;
+        P preset = P::Documentary;
         switch (preset_index) {
-            case 0: // RedBarReveal: tiny push
-                plan.start_z = 1100.f;
-                plan.end_z = 1030.f;
-                plan.start_yaw_deg = 0.f;
-                plan.end_yaw_deg = 0.f;
-                break;
-            case 1: // ChecklistStagger: near-static lens
-                plan.start_z = 1150.f;
-                plan.end_z = 1130.f;
-                plan.start_yaw_deg = 0.f;
-                plan.end_yaw_deg = 0.f;
-                break;
-            case 2: // InlineEmphasis: gentle settle from a slight angle
-                plan.start_z = 1200.f;
-                plan.end_z = 1120.f;
-                plan.start_yaw_deg = -0.8f;
-                plan.end_yaw_deg = 0.f;
-                break;
-            case 3: // HeroStatement: 1250 -> 1100 with documentary yaw
-            default:
-                plan.start_z = 1250.f;
-                plan.end_z = 1100.f;
-                plan.start_yaw_deg = -1.5f;
-                plan.end_yaw_deg = 0.f;
-                break;
+            case 0: preset = P::Tight; break;
+            case 1: preset = P::Quiet; break;
+            case 2: preset = P::GentleAngle; break;
+            default: break;
         }
+        const auto resolved = chrononmotion::motion::camera::resolvePushSettlePlan(preset, duration_frames);
+        DidoneCameraPlan plan;
+        plan.start_z = resolved.startDistance;
+        plan.end_z = resolved.endDistance;
+        plan.start_yaw_deg = resolved.startYawDegrees;
+        plan.end_yaw_deg = resolved.endYawDegrees;
+        plan.duration = resolved.duration;
+        plan.settle_frames = resolved.settleFrames;
         return plan;
     }
 

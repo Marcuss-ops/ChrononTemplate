@@ -1,6 +1,7 @@
 #include "chronontemplate/camera_roll/WordLensPack.hpp"
 
 #include "chrononmotion/math/Color.hpp"
+#include "chrononmotion/motion/CameraFocusSequence.hpp"
 #include "chrononmotion/motion/Lighting.hpp"
 #include "chrononmotion/motion/Easing.hpp"
 
@@ -14,7 +15,6 @@ namespace chronontemplate {
 
         using chrononmotion::Vector2;
         using chrononmotion::Vector3;
-        using chrononmotion::motion::CameraRig;
         using chrononmotion::motion::Easing;
         using chrononmotion::motion::PointLight;
 
@@ -32,22 +32,12 @@ namespace chronontemplate {
             return static_cast<float>(frame) / fps;
         }
 
-        Vector3 cameraAnchor(const WordLensBeat& beat, float z) {
-            return Vector3(beat.center.x + kCameraAimOffsetX,
-                           beat.center.y + kCameraAimOffsetY, z);
-        }
-
-        float focusDistance(const WordLensBeat& beat, float cameraDistance) {
-            const float z = cameraDistance + beat.focusBehindZ;
-            return std::sqrt(z * z + kCameraAimOffsetX * kCameraAimOffsetX +
-                             kCameraAimOffsetY * kCameraAimOffsetY);
-        }
-
         void validate(const WordLensSpec& spec) {
             if (spec.backgroundImage.empty() || spec.foregroundImage.empty() || spec.words.empty() ||
                 !(spec.baseFovDegrees > 0.f && spec.baseFovDegrees < 180.f) ||
                 !(spec.focusFovDegrees > 0.f && spec.focusFovDegrees <= spec.baseFovDegrees) ||
-                !(spec.cameraDistance > 0.f) || !(spec.aperture > 0.f && spec.aperture <= 1.f) ||
+                !(spec.cameraDistance > 0.f) ||
+                !(spec.legacyDefocusStrength > 0.f && spec.legacyDefocusStrength <= 1.f) ||
                 !(spec.fStop > 0.f) || !(spec.maxBlurPixels >= 0.f) ||
                 !(spec.highlightGain >= 0.f) || spec.focusTravelFrames < 2 || spec.fadeFrames < 1) {
                 throw std::invalid_argument("addWordLensBoard: invalid camera, lens, background, or timing spec");
@@ -65,57 +55,24 @@ namespace chronontemplate {
         }
 
         void authorCamera(TemplateScene& scene, const WordLensSpec& spec) {
-            CameraRig& camera = scene.cameraRig();
-            const auto& first = spec.words.front();
-            const Vector3 firstTarget = cameraAnchor(first, -first.focusBehindZ);
-            const Vector3 firstPosition = cameraAnchor(first, spec.cameraDistance);
-            camera.setPosition(firstPosition)
-                  .setTarget(firstTarget)
-                  .setFov(spec.baseFovDegrees)
-                  .setAperture(spec.aperture)
-                  .setFocusDistance(focusDistance(first, spec.cameraDistance))
-                  .setFStop(spec.fStop)
-                  .setIrisBlades(8)
-                  .setMaxBlur(spec.maxBlurPixels)
-                  .setHighlightGain(spec.highlightGain);
-
-            auto& positions = camera.positionTrack();
-            auto& targets = camera.targetTrack();
-            auto& fov = camera.fovTrack();
-            auto& focus = camera.focusDistanceTrack();
-            auto& aperture = camera.apertureTrack();
-            const float fps = scene.fps();
-            const Easing ease = Easing::easeInOut();
-
-            const Vector3 initialPosition = cameraAnchor(first, spec.cameraDistance);
-            const Vector3 initialTarget = cameraAnchor(first, -first.focusBehindZ);
-            positions.add(secondsAt(first.focusFrame, fps), initialPosition, ease);
-            targets.add(secondsAt(first.focusFrame, fps), initialTarget, ease);
-            fov.add(secondsAt(first.focusFrame, fps), spec.focusFovDegrees, ease);
-            focus.add(secondsAt(first.focusFrame, fps), focusDistance(first, spec.cameraDistance), ease);
-            aperture.add(secondsAt(first.focusFrame, fps), spec.aperture, ease);
-
-            for (std::size_t index = 1; index < spec.words.size(); ++index) {
-                const auto& previous = spec.words[index - 1];
-                const auto& current = spec.words[index];
-                const int halfTravel = std::max(1, spec.focusTravelFrames / 2);
-                const int travelStart = std::max(previous.focusFrame, current.focusFrame - halfTravel);
-                const int travelEnd = current.focusFrame + halfTravel;
-                const float t0 = secondsAt(travelStart, fps);
-                const float t1 = secondsAt(travelEnd, fps);
-                const Vector3 position0 = cameraAnchor(previous, spec.cameraDistance);
-                const Vector3 position1 = cameraAnchor(current, spec.cameraDistance);
-                const Vector3 target0 = cameraAnchor(previous, -previous.focusBehindZ);
-                const Vector3 target1 = cameraAnchor(current, -current.focusBehindZ);
-
-                positions.add(t0, position0, ease).add(t1, position1, ease);
-                targets.add(t0, target0, ease).add(t1, target1, ease);
-                fov.add(t0, spec.baseFovDegrees, ease).add(t1, spec.focusFovDegrees, ease);
-                focus.add(t0, focusDistance(previous, spec.cameraDistance), ease)
-                      .add(t1, focusDistance(current, spec.cameraDistance), ease);
-                aperture.add(t0, spec.aperture * 0.78f, ease)
-                         .add(t1, spec.aperture, ease);
+            chrononmotion::motion::camera::FocusSequence focusSequence;
+            focusSequence.cameraAimOffset = {kCameraAimOffsetX, kCameraAimOffsetY};
+            focusSequence.cameraDistance = spec.cameraDistance;
+            focusSequence.baseFov = spec.baseFovDegrees;
+            focusSequence.focusFov = spec.focusFovDegrees;
+            focusSequence.legacyDefocusStrength = spec.legacyDefocusStrength;
+            focusSequence.fStop = spec.fStop;
+            focusSequence.maxBlur = spec.maxBlurPixels;
+            focusSequence.highlightGain = spec.highlightGain;
+            focusSequence.focusTravelFrames = spec.focusTravelFrames;
+            focusSequence.irisBlades = 8;
+            focusSequence.subjects.reserve(spec.words.size());
+            for (const auto& word : spec.words) {
+                focusSequence.subjects.push_back({
+                        Vector3(word.center.x, word.center.y, 0.f), word.focusBehindZ, word.focusFrame});
             }
+            chrononmotion::motion::camera::applyFocusSequence(
+                    scene.cameraRig(), focusSequence, scene.fps());
         }
 
         void authorPointLight(TemplateScene& scene, const WordLensBeat& beat,

@@ -3,6 +3,7 @@
 #define CHRONONTEMPLATE_DOCUMENTARY_SNAPSHOT_PACK_HPP
 
 #include "chronontemplate/core/TemplateScene.hpp"
+#include "chrononmotion/motion/DocumentaryCameraPath.hpp"
 
 #include <cstdint>
 #include <string>
@@ -10,7 +11,7 @@
 
 namespace chronontemplate {
 
-    /// Scene-space target. The recipe owns the camera path; content layers stay put.
+    /// Scene-space target supplied to CM3D's documentary camera move resolver.
     struct ShotAnchor {
         chrononmotion::Vector3 center{0.f, 0.f, 0.f};
         float halfWidth{300.f};
@@ -18,20 +19,7 @@ namespace chronontemplate {
         chrononmotion::Quaternion orientation{};
     };
 
-    enum class DocumentaryRecipe : std::uint8_t {
-        SnapDown,
-        PullbackReveal,
-        PushThroughSnapshot,
-        WhipToPhoto,
-        FocusDrop,
-        Reveal90,
-        CornerTurn,
-        ForegroundPhotoPass,
-        PhotoStack,
-        FilmstripHandoff,
-        SplitDepth,
-        ArchiveCraneReveal
-    };
+    using DocumentaryRecipe = chrononmotion::motion::camera::DocumentaryMove;
 
     enum class SnapshotStyle : std::uint8_t {
         Clean,

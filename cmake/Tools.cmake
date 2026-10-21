@@ -1,6 +1,15 @@
 # ChrononTemplate tools (extracted from CMakeLists.txt; no new targets).
 # Demo/showcase emitters, the canonical catalog emitter and the canaries.
 # Included after the `chronontemplate` + `chronontemplate_live_adapter` targets.
+add_executable(chronontemplate_emit_text_depth_focus
+        tools/important_phrases/emit_text_depth_focus.cpp)
+target_link_libraries(chronontemplate_emit_text_depth_focus PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_text_depth_focus PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_text_depth_focus PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_text_depth_focus PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_dump_title_camera_poses tools/camera_roll/dump_title_camera_poses.cpp)
 target_link_libraries(chronontemplate_dump_title_camera_poses PRIVATE chronontemplate)
 
@@ -59,6 +68,26 @@ target_link_libraries(chronontemplate_emit_camera_1950_story PRIVATE chronontemp
 target_include_directories(chronontemplate_emit_camera_1950_story PRIVATE
     "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}"
     "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-video-fast-dev/x64-linux/include")
+
+add_executable(chronontemplate_emit_synthetic_cannabis_native
+        tools/web_presets/emit_synthetic_cannabis_native.cpp)
+target_link_libraries(chronontemplate_emit_synthetic_cannabis_native PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_synthetic_cannabis_native PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_dark_nba_article_native
+        tools/web_presets/emit_dark_nba_article_native.cpp)
+target_link_libraries(chronontemplate_emit_dark_nba_article_native PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_dark_nba_article_native PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_generate_image_25d_clean_v1
+        tools/single_images/generate_image_25d_clean_v1.cpp)
+target_link_libraries(chronontemplate_generate_image_25d_clean_v1 PRIVATE chronontemplate)
+target_compile_options(chronontemplate_generate_image_25d_clean_v1 PRIVATE -Wall -Wextra)
+
+add_executable(chronontemplate_emit_cinematic_documentary_narrative
+        tools/entities_with_text/emit_cinematic_documentary_narrative.cpp)
+target_link_libraries(chronontemplate_emit_cinematic_documentary_narrative PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_cinematic_documentary_narrative PRIVATE -Wall -Wextra)
 
 # Native C++ examples for the vector-map, date-marker, and fading-image samples.
 add_executable(chronontemplate_emit_oil_crisis_reference_plans

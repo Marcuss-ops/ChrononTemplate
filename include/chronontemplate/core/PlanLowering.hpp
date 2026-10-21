@@ -12,6 +12,14 @@
 
 namespace chronontemplate {
 
+    /// Runtime handoff for applications that compile a plan in-process.
+    /// Template supplies layer/content data; the CameraSampleProvider keeps
+    /// camera evaluation in ChrononMotion3D through C3D's shutter samples.
+    struct RuntimeRenderPlan {
+        chronon3d::render_plan::RenderPlan plan;
+        chronon3d::render_plan::RuntimeCameraSampleProvider camera;
+    };
+
     /// Map a measured host image request to the native image layer payload.
     /// The Motion lowerer supplies transform, identity and camera animation.
     [[nodiscard]] chronon3d::render_plan::LayerPlan makeImageLayerPlan(
@@ -29,6 +37,17 @@ namespace chronontemplate {
     [[nodiscard]] chronon3d::render_plan::RenderPlan lowerToRenderPlan(
             TemplateScene& scene,
             const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
+            std::string jobId = "chronontemplate",
+            std::string outputPath = "output.png");
+
+    /// Lower content/layer state for runtime rendering and attach a camera
+    /// provider backed by an immutable snapshot of the TemplateScene rig.
+    /// `cameraFingerprint` must stably identify all camera authoring inputs.
+    /// Unlike the offline lowering API, this omits dense camera keyframes.
+    [[nodiscard]] RuntimeRenderPlan lowerToRuntimeRenderPlan(
+            TemplateScene& scene,
+            const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
+            std::string cameraFingerprint,
             std::string jobId = "chronontemplate",
             std::string outputPath = "output.png");
 

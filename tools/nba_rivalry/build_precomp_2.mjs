@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { resolveCameraSamples } from '../camera_roll/camera_samples.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const out = path.join(root, 'out/nba_rivalry/nba_rivalry_precomp_2.plan.json');
+fs.mkdirSync(path.dirname(out), {recursive: true});
 const duration = 240;
 
 const track = (property, keyframes, easing = 'in_out_cubic') => ({
@@ -63,13 +65,6 @@ const plan = {
     type: 'perspective', position: [0, 0, -1080], rotation_deg: [0, 0, 0],
     fov_deg: 53.14, near: 0.1, far: 10000, zoom: 1,
   },
-  camera_animation: {
-    tracks: [
-      track('camera_rotation_y', [[0, 0], [150, 0], [205, 42], [239, 52]]),
-      track('camera_position_x', [[0, 0], [150, 0], [205, -723], [239, -851]]),
-      track('camera_position_z', [[0, -1080], [150, -1080], [205, -802], [239, -665]]),
-    ],
-  },
   layers: [
     {
       id: 'corkboard', type: 'image', asset: 'assets/nba_rivalry/web/corkboard_bg.png',
@@ -80,6 +75,17 @@ const plan = {
     ...photoGroup({ id: 'lebron', asset: 'assets/nba_rivalry/web/lebron_heat_2011.jpg', side: 1, z: 0, isTop: true }),
   ],
 };
+
+const cameraChannels = [
+  ['rotation_y', [[0, 0], [150, 0], [205, 42], [239, 52]]],
+  ['position_x', [[0, 0], [150, 0], [205, -723], [239, -851]]],
+  ['position_z', [[0, -1080], [150, -1080], [205, -802], [239, -665]]],
+].map(([channel, keyframes]) => ({
+  channel, easing: 'in_out_cubic',
+  keyframes: keyframes.map(([frame, value]) => ({frame, value})),
+}));
+plan.camera_samples = resolveCameraSamples(plan.camera, cameraChannels, 30, duration);
+plan.camera = plan.camera_samples[0].camera;
 
 fs.writeFileSync(out, `${JSON.stringify(plan, null, 2)}\n`);
 console.log(`Wrote ${out}`);

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -480,11 +481,13 @@ chronon3d::render_plan::LayerPlan makeShapeLayerPlan(
     return layer;
 }
 
-chronon3d::render_plan::RenderPlan lowerToRenderPlan(
+namespace {
+chronon3d::render_plan::RenderPlan lowerToRenderPlanImpl(
         TemplateScene& scene,
         const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
         std::string jobId,
-        std::string outputPath) {
+        std::string outputPath,
+        bool bakeCameraSamples) {
     chrononmotion::motion::RenderPlanLoweringOptions options;
     const auto canvas = scene.canvas();
     options.width = static_cast<int>(canvas.x);
@@ -493,6 +496,7 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlan(
     options.outputPath = std::move(outputPath);
     options.schema = chronon3d::render_plan::kRenderPlanSchemaV3;
     options.cameraRig = &scene.cameraRig();
+    options.bakeResolvedCameraSamples = bakeCameraSamples;
 
     std::unordered_map<MotionLayerId, bool> expected;
     for (const auto& binding : scene.bindings().bindings()) {
@@ -514,6 +518,33 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlan(
         plan.temporal_motion_blur = chronon3d::render_plan::MotionBlurPlan{
             blur->shutterAngle, blur->samples};
     return plan;
+}
+} // namespace
+
+chronon3d::render_plan::RenderPlan lowerToRenderPlan(
+        TemplateScene& scene,
+        const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
+        std::string jobId,
+        std::string outputPath) {
+    return lowerToRenderPlanImpl(scene, contentLayers, std::move(jobId),
+                                 std::move(outputPath), true);
+}
+
+RuntimeRenderPlan lowerToRuntimeRenderPlan(
+        TemplateScene& scene,
+        const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
+        std::string cameraFingerprint,
+        std::string jobId,
+        std::string outputPath) {
+    auto plan = lowerToRenderPlanImpl(scene, contentLayers, std::move(jobId),
+                                      std::move(outputPath), false);
+    if (!plan.camera)
+        throw std::logic_error("TemplateScene runtime lowering did not produce a camera snapshot");
+    auto rig = std::make_shared<const chrononmotion::motion::CameraRig>(scene.cameraRig());
+    auto provider = chrononmotion::motion::makeCameraSampleProvider(
+        std::move(rig), scene.fps(), std::move(cameraFingerprint),
+        plan.camera->near, plan.camera->far);
+    return RuntimeRenderPlan{std::move(plan), std::move(provider)};
 }
 
 } // namespace chronontemplate

@@ -1,6 +1,7 @@
 // Native C++ scene-camera example: measured presenter bounds drive a reusable
 // SceneCameraPack reframe. Usage: <asset-dir> <plan.json> [preview|video].
 #include "chronontemplate/camera_roll/SceneCameraPack.hpp"
+#include <chrononmotion/motion/RenderPlanLowering.hpp>
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -148,43 +149,10 @@ int main(int argc, char** argv) {
         if (const auto problems = scene.validate(); !problems.empty())
             throw std::runtime_error("scene validation failed: " + problems.front());
         const int duration = preview ? 1 : wideHold + travel + closeHold;
-        // Motion cameras look down -Z; RenderPlan camera-backed projection
-        // looks down +Z. Match Motion's canonical lowering: mirror camera Z
-        // and invert its orientation at this boundary.
-        auto eulerDegrees = [](Quaternion q) {
-            constexpr float radToDeg = 57.29577951308232f;
-            q.invert();
-            const float x = std::atan2(2.f * (q.w * q.x - q.y * q.z),
-                                       1.f - 2.f * (q.x * q.x + q.y * q.y));
-            const float s = std::clamp(2.f * (q.w * q.y + q.z * q.x), -1.f, 1.f);
-            const float y = std::asin(s);
-            const float z = std::atan2(2.f * (q.w * q.z - q.x * q.y),
-                                       1.f - 2.f * (q.y * q.y + q.z * q.z));
-            return Vector3(x * radToDeg, y * radToDeg, z * radToDeg);
-        };
-        const auto firstPose = scene.cameraRig().sample(0.f);
-        Json cameraTracks = Json::array();
-        const char* properties[] = {"camera_position_x", "camera_position_y", "camera_position_z",
-                                    "camera_rotation_x", "camera_rotation_y", "camera_rotation_z",
-                                    "camera_fov_deg"};
-        Json keys[7] = {Json::array(), Json::array(), Json::array(), Json::array(),
-                        Json::array(), Json::array(), Json::array()};
-        for (int frame = 0; frame < duration; ++frame) {
-            const auto pose = scene.cameraRig().sample(static_cast<float>(frame) / fps);
-            const Vector3 rotation = eulerDegrees(pose.orientation);
-            // TemplateScene expresses camera X/Y in canvas coordinates with
-            // the origin at the upper-left. RenderPlan's camera origin is at
-            // the canvas center, as in the other camera-pack emitters.
-            const double values[] = {pose.position.x - width * .5,
-                                     pose.position.y - height * .5,
-                                     -pose.position.z,
-                                     rotation.x, rotation.y, rotation.z, pose.fov};
-            for (int channel = 0; channel < 7; ++channel)
-                keys[channel].push_back({{"frame", frame}, {"value", values[channel]}});
-        }
-        for (int channel = 0; channel < 7; ++channel)
-            cameraTracks.push_back({{"property", properties[channel]}, {"easing", "linear"},
-                                    {"keyframes", std::move(keys[channel])}});
+        const auto cameraSamples = chrononmotion::motion::cameraSamplesToJson(
+            chrononmotion::motion::bakeResolvedCameraSamples(
+                scene.cameraRig(), fps, static_cast<std::size_t>(duration), 1.f, 10000.f,
+                {-width * .5f, -height * .5f, 0.f}));
         Json outputSpec = {{"path", textPreview
             ? (destination.parent_path() / "beast_land_text_preview.mp4").string()
             : preview ? (destination.parent_path() / "beast_land_subject_preview.png").string()
@@ -250,15 +218,8 @@ int main(int argc, char** argv) {
             {"job_id", "beast_land_subject_reframe_v1"},
             {"canvas", {{"width", static_cast<int>(width)}, {"height", static_cast<int>(height)},
                         {"fps_num", 30}, {"fps_den", 1}, {"duration_frames", duration}}},
-            {"camera", {{"type", "perspective"},
-                         {"position", {firstPose.position.x - width * .5,
-                                        firstPose.position.y - height * .5,
-                                        -firstPose.position.z}},
-                         {"rotation_deg", {eulerDegrees(firstPose.orientation).x,
-                                           eulerDegrees(firstPose.orientation).y,
-                                           eulerDegrees(firstPose.orientation).z}},
-                         {"fov_deg", firstPose.fov}, {"near", 1.0}, {"far", 10000.0}, {"zoom", 1.0}}},
-            {"camera_animation", {{"tracks", std::move(cameraTracks)}}},
+            {"camera", cameraSamples.front().at("camera")},
+            {"camera_samples", cameraSamples},
             {"layers", std::move(layers)},
             {"output", std::move(outputSpec)}
         };

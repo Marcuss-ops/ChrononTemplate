@@ -2,6 +2,7 @@
 #include <nlohmann/json.hpp>
 
 #include <chrononmotion/motion/CameraRig.hpp>
+#include <chrononmotion/motion/RenderPlanLowering.hpp>
 #include <chrononmotion/motion/Easing.hpp>
 
 #include <algorithm>
@@ -74,25 +75,9 @@ int main(int argc, char** argv) try {
         .add(6.1f, {kCenterX, kCenterY, 0.f}, move)
         .add(kDuration, {kCenterX, kCenterY, 0.f}, Easing::easeInOut());
 
-    std::vector<std::vector<double>> channels(7, std::vector<double>(kFrames));
-    for (int frame = 0; frame < kFrames; ++frame) {
-        const auto pose = rig.sample(static_cast<float>(frame) / kFps);
-        const auto rotation = cameraEuler(pose.orientation);
-        channels[0][frame] = pose.position.x;
-        channels[1][frame] = pose.position.y;
-        channels[2][frame] = -pose.position.z;
-        channels[3][frame] = rotation.x;
-        channels[4][frame] = rotation.y;
-        channels[5][frame] = rotation.z;
-        channels[6][frame] = pose.fov;
-    }
-
-    Json cameraTracks = Json::array();
-    constexpr const char* properties[] = {"camera_position_x", "camera_position_y", "camera_position_z",
-                                          "camera_rotation_x", "camera_rotation_y", "camera_rotation_z",
-                                          "camera_fov_deg"};
-    for (std::size_t i = 0; i < channels.size(); ++i)
-        cameraTracks.push_back(track(properties[i], channels[i]));
+    const Json cameraSamples = chrononmotion::motion::cameraSamplesToJson(
+        chrononmotion::motion::bakeResolvedCameraSamples(rig, float(kFps), kFrames, 1.f, 5000.f,
+            Vector3(-static_cast<float>(kWidth) * 0.5f, -static_cast<float>(kHeight) * 0.5f, 0.f)));
 
     const fs::path parent = output.parent_path();
     const std::string sourceName = source.filename().generic_string();
@@ -101,10 +86,8 @@ int main(int argc, char** argv) try {
         {"job_id", "screen_recording_camera_recreation_v1"},
         {"canvas", {{"width", kWidth}, {"height", kHeight}, {"fps_num", kFps},
                     {"fps_den", 1}, {"duration_frames", kFrames}}},
-        {"camera", {{"type", "perspective"}, {"position", {channels[0][0], channels[1][0], channels[2][0]}},
-                    {"rotation_deg", {channels[3][0], channels[4][0], channels[5][0]}},
-                    {"fov_deg", channels[6][0]}, {"near", 1}, {"far", 5000}, {"zoom", 1}}},
-        {"camera_animation", {{"tracks", std::move(cameraTracks)}}},
+        {"camera", cameraSamples.front().at("camera")},
+        {"camera_samples", cameraSamples},
         {"layers", Json::array({Json{{"id", "source_footage"}, {"type", "video"}, {"source", sourceName},
                     {"size", {kWidth, kHeight}}, {"position", {kWidth / 2, kHeight / 2, 0}},
                     {"fit", "cover"}, {"enable_3d", true}, {"start_frame", 0}, {"duration_frames", kFrames}}})},

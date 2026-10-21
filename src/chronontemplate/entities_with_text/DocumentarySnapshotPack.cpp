@@ -1,12 +1,14 @@
 #include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
 
 #include "chrononmotion/math/MathUtils.hpp"
-#include "chrononmotion/motion/CameraRig.hpp"
+#include "chrononmotion/motion/CameraMotion.hpp"
+#include "chrononmotion/motion/DocumentaryCameraPath.hpp"
 #include "chrononmotion/motion/Easing.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <vector>
 
 namespace chronontemplate {
     namespace {
@@ -98,36 +100,17 @@ namespace chronontemplate {
             return anchor;
         }
 
-        Vector3 cameraAt(const ShotAnchor& anchor, float distance) {
-            Vector3 normal(0.f, 0.f, 1.f);
-            normal.applyQuaternion(anchor.orientation);
-            normal.normalize();
-            return Vector3(anchor.center.x + normal.x * distance,
-                           anchor.center.y + normal.y * distance,
-                           anchor.center.z + normal.z * distance);
-        }
-
         void addKey(Layer& layer, float time, const Vector3& value, const Easing& easing) {
             layer.tracks.position.add(time, value, easing);
+        }
+
+        chrononmotion::motion::camera::DocumentaryCameraAnchor cameraAnchorFor(const ShotAnchor& anchor) {
+            return {anchor.center, anchor.orientation, anchor.halfWidth, anchor.halfHeight};
         }
     }
 
     const char* documentaryRecipeId(DocumentaryRecipe recipe) noexcept {
-        switch (recipe) {
-            case DocumentaryRecipe::SnapDown: return "doc_title_snap_down";
-            case DocumentaryRecipe::PullbackReveal: return "doc_title_pullback_photo_reveal";
-            case DocumentaryRecipe::PushThroughSnapshot: return "doc_title_push_through_snapshot";
-            case DocumentaryRecipe::WhipToPhoto: return "doc_title_whip_to_photo";
-            case DocumentaryRecipe::FocusDrop: return "doc_title_focus_drop";
-            case DocumentaryRecipe::Reveal90: return "doc_title_90_reveal";
-            case DocumentaryRecipe::CornerTurn: return "doc_title_corner_turn";
-            case DocumentaryRecipe::ForegroundPhotoPass: return "doc_title_foreground_photo_pass";
-            case DocumentaryRecipe::PhotoStack: return "doc_title_photo_stack";
-            case DocumentaryRecipe::FilmstripHandoff: return "doc_title_filmstrip_handoff";
-            case DocumentaryRecipe::SplitDepth: return "doc_title_split_depth";
-            case DocumentaryRecipe::ArchiveCraneReveal: return "doc_archive_crane_reveal";
-        }
-        return "doc_title_unknown";
+        return chrononmotion::motion::camera::documentaryMoveId(recipe).data();
     }
 
     const char* snapshotStyleId(SnapshotStyle style) noexcept {
@@ -145,14 +128,8 @@ namespace chronontemplate {
 
     std::vector<std::string> documentaryRecipeIds() {
         std::vector<std::string> ids;
-        for (const auto recipe : {DocumentaryRecipe::SnapDown, DocumentaryRecipe::PullbackReveal,
-                                  DocumentaryRecipe::PushThroughSnapshot, DocumentaryRecipe::WhipToPhoto,
-                                  DocumentaryRecipe::FocusDrop, DocumentaryRecipe::Reveal90,
-                                  DocumentaryRecipe::CornerTurn, DocumentaryRecipe::ForegroundPhotoPass,
-                                  DocumentaryRecipe::PhotoStack, DocumentaryRecipe::FilmstripHandoff,
-                                  DocumentaryRecipe::SplitDepth, DocumentaryRecipe::ArchiveCraneReveal}) {
+        for (const auto recipe : chrononmotion::motion::camera::documentaryMoves())
             ids.emplace_back(documentaryRecipeId(recipe));
-        }
         return ids;
     }
 
@@ -365,9 +342,7 @@ namespace chronontemplate {
         const int handoff = start + shot.titleHoldFrames;
         const int end = start + shot.duration;
         const int transitionLength = end - handoff;
-        const int mid = handoff + transitionLength / 2;
         const int fastTransitionEnd = handoff + shot.transitionFrames;
-        const int revealTurnMid = handoff + shot.transitionFrames / 2;
         if (shot.recipe == DocumentaryRecipe::Reveal90) {
             titleLayer.layer().tracks.opacity.add(at(start, fps), 1.f, Easing::linear());
             titleLayer.layer().tracks.opacity.add(at(handoff, fps), 1.f, Easing::linear());
@@ -435,7 +410,6 @@ namespace chronontemplate {
         const ShotAnchor first = resolvedSnapshotAnchor(shot, 0);
         const ShotAnchor last = resolvedSnapshotAnchor(shot, shot.snapshots.size() - 1);
         ShotAnchor finalAnchor = shot.recipe == DocumentaryRecipe::ForegroundPhotoPass ? first : last;
-        float finalDistance = shot.cameraDistance;
         if (shot.recipe == DocumentaryRecipe::ArchiveCraneReveal) {
             float left = shot.title.center.x - shot.title.halfWidth;
             float right = shot.title.center.x + shot.title.halfWidth;
@@ -463,13 +437,6 @@ namespace chronontemplate {
                                          (top + bottom) * 0.5f, 0.f);
             finalAnchor.halfWidth = (right - left) * 0.5f;
             finalAnchor.halfHeight = (bottom - top) * 0.5f;
-            const float tanHalfFov = std::tan(rig.fov() * 0.5f * kPi / 180.f);
-            const Vector2 canvas = scene.canvas();
-            const float verticalDistance = finalAnchor.halfHeight / tanHalfFov;
-            const float horizontalDistance = finalAnchor.halfWidth /
-                (tanHalfFov * canvas.x / canvas.y);
-            finalDistance = std::max(shot.cameraDistance,
-                                     std::max(verticalDistance, horizontalDistance) * 1.10f);
         } else if (shot.recipe == DocumentaryRecipe::PhotoStack &&
                    !shot.snapshots.back().caption.empty()) {
             const auto& snapshot = shot.snapshots.back();
@@ -490,239 +457,51 @@ namespace chronontemplate {
                                          (top + bottom) * 0.5f, snapshot.anchor.center.z);
             finalAnchor.halfWidth = (right - left) * 0.5f;
             finalAnchor.halfHeight = (bottom - top) * 0.5f;
-            const float tanHalfFov = std::tan(rig.fov() * 0.5f * kPi / 180.f);
-            const Vector2 canvas = scene.canvas();
-            const float verticalDistance = finalAnchor.halfHeight / tanHalfFov;
-            const float horizontalDistance = finalAnchor.halfWidth /
-                (tanHalfFov * canvas.x / canvas.y);
-            finalDistance = std::max(shot.cameraDistance * 1.25f,
-                                     std::max(verticalDistance, horizontalDistance) * 1.10f);
         }
-        const Vector3 titleCam = cameraAt(shot.title, shot.cameraDistance);
-        const Vector3 photoCam = cameraAt(finalAnchor, finalDistance);
-        const float closeDistance = shot.cameraDistance * 0.58f;
-        auto& position = rig.positionTrack();
-        auto& target = rig.targetTrack();
-        auto& focus = rig.focusDistanceTrack();
-        const auto point = [&](int frame, const Vector3& p, const Vector3& aim,
-                               const Easing& easing = Easing::easeInOut()) {
-            position.add(at(frame, fps), p, easing);
-            target.add(at(frame, fps), aim, easing);
-        };
-
-        // Initial static pose agrees with the opening title shot for arbitrary
-        // nonzero inFrame. The authored final keys similarly land on the final card.
-        rig.setPosition(titleCam).setTarget(shot.title.center);
-        Vector3 openingTarget = shot.title.center;
-        float openingCameraDistance = shot.cameraDistance;
-        if (shot.recipe == DocumentaryRecipe::FocusDrop) {
-            const ShotAnchor openingPhoto = resolvedSnapshotAnchor(shot, 0);
-            openingTarget = Vector3((shot.title.center.x + openingPhoto.center.x) * 0.5f,
-                                    (shot.title.center.y + openingPhoto.center.y) * 0.5f,
-                                    (shot.title.center.z + openingPhoto.center.z) * 0.5f);
-            const float verticalExtent = std::fabs(shot.title.center.y - openingPhoto.center.y) * 0.5f +
-                                         std::max(shot.title.halfHeight, openingPhoto.halfHeight);
-            const float tanHalfFov = std::tan(rig.fov() * 0.5f * kPi / 180.f);
-            openingCameraDistance = std::max(shot.cameraDistance,
-                                             verticalExtent / tanHalfFov * 1.06f);
+        if (shot.recipe == DocumentaryRecipe::PushThroughSnapshot) {
+            redPortal->tracks.opacity.add(at(start, fps), 0.f, Easing::linear());
+            redPortal->tracks.opacity.add(at(handoff, fps), 0.f, Easing::linear());
+            redPortal->tracks.opacity.add(at(fastTransitionEnd, fps), 1.f, Easing::easeIn());
+            redPortal->tracks.opacity.add(at(end, fps), 0.f, Easing::easeOut());
         }
-        const Vector3 openingCamera = shot.recipe == DocumentaryRecipe::PullbackReveal
-                                              ? cameraAt(shot.title, closeDistance)
-                                              : shot.recipe == DocumentaryRecipe::FocusDrop
-                                                    ? cameraAt(ShotAnchor{.center = openingTarget},
-                                                               openingCameraDistance)
-                                                    : titleCam;
-        point(start, openingCamera, openingTarget, Easing::linear());
-        switch (shot.recipe) {
-            case DocumentaryRecipe::SnapDown: {
-                const Vector3 preload = cameraAt(shot.title, shot.cameraDistance * 0.94f);
-                point(handoff, preload, shot.title.center);
-                point(fastTransitionEnd, photoCam, last.center, Easing::expoOut());
-                point(end, photoCam, last.center, Easing::linear());
-                break;
-            }
-            case DocumentaryRecipe::PullbackReveal: {
-                const Vector3 close = openingCamera;
-                const Vector3 wide = cameraAt(shot.title, shot.cameraDistance * 1.8f);
-                point(handoff, close, shot.title.center);
-                point(mid, wide, shot.title.center, Easing::easeOut());
-                point(end, photoCam, last.center, Easing::easeInOut());
-                break;
-            }
-            case DocumentaryRecipe::PushThroughSnapshot: {
-                const float tanHalfFov = std::tan(rig.fov() * 0.5f * kPi / 180.f);
-                const float coverDistance = std::max(1.f, 0.96f * std::min(
-                        last.halfWidth / (tanHalfFov * rig.aspect()),
-                        last.halfHeight / tanHalfFov));
-                const Vector3 through = cameraAt(last, coverDistance);
-                point(handoff, titleCam, shot.title.center);
-                point(fastTransitionEnd, through, last.center, Easing::easeIn());
-                point(end, photoCam, last.center, Easing::easeOut());
-                // The native rectangle takes over the whole viewport at the
-                // closest push frame, then clears to reveal the snapshot below.
-                redPortal->tracks.opacity.add(at(start, fps), 0.f, Easing::linear());
-                redPortal->tracks.opacity.add(at(handoff, fps), 0.f, Easing::linear());
-                redPortal->tracks.opacity.add(at(fastTransitionEnd, fps), 1.f, Easing::easeIn());
-                redPortal->tracks.opacity.add(at(end, fps), 0.f, Easing::easeOut());
-                break;
-            }
-            case DocumentaryRecipe::WhipToPhoto: {
-                const Vector3 acquisition(shot.title.center.x - shot.cameraDistance * 0.16f,
-                                          shot.title.center.y, shot.title.center.z + shot.cameraDistance);
-                point(handoff, titleCam, shot.title.center);
-                point(handoff + 1, acquisition, shot.title.center, Easing::expoOut());
-                point(fastTransitionEnd, photoCam, last.center, Easing::easeOut());
-                point(end, photoCam, last.center, Easing::linear());
-                break;
-            }
-            case DocumentaryRecipe::FocusDrop: {
-                point(handoff, openingCamera, openingTarget);
-                point(end, photoCam, last.center);
-                // RenderPlan's native DOF aperture channel is normalized to
-                // [0, 1]. Keep it open throughout the handoff so the two depth
-                // planes exchange sharpness instead of briefly snapping sharp.
-                rig.apertureTrack().add(at(start, fps), 0.18f, Easing::linear());
-                rig.apertureTrack().add(at(end, fps), 0.18f, Easing::linear());
-                break;
-            }
-            case DocumentaryRecipe::Reveal90: {
-                const Vector3 side(shot.title.center.x + shot.cameraDistance,
-                                   shot.title.center.y,
-                                   shot.title.center.z + shot.cameraDistance * 0.12f);
-                point(handoff, titleCam, shot.title.center);
-                point(revealTurnMid, side, shot.title.center, Easing::easeInOut());
-                point(fastTransitionEnd, photoCam, last.center, Easing::easeOut());
-                point(end, photoCam, last.center);
-                break;
-            }
-            case DocumentaryRecipe::CornerTurn: {
-                const Vector3 corner(shot.title.center.x + shot.cameraDistance * 0.70f,
-                                     shot.title.center.y, shot.title.center.z + shot.cameraDistance * 0.72f);
-                const Vector3 around( last.center.x + shot.cameraDistance * 0.72f,
-                                      last.center.y, last.center.z + shot.cameraDistance * 0.70f);
-                point(handoff, titleCam, shot.title.center);
-                const int turn = handoff + transitionLength / 3;
-                const int exit = handoff + (transitionLength * 2) / 3;
-                point(turn, corner, shot.title.center, Easing::easeInOut());
-                point(exit, around, last.center, Easing::easeInOut());
-                point(end, photoCam, last.center);
-                break;
-            }
-            case DocumentaryRecipe::ForegroundPhotoPass: {
-                const auto& a = shot.snapshots.front().anchor;
-                const int passCenter = handoff + transitionLength / 3;
-                const int passExit = handoff + (transitionLength * 2) / 3;
-                const Vector3 offscreen(a.center.x - a.halfWidth * 3.f,
-                                        shot.title.center.y, a.center.z + 180.f);
-                const auto offsetFromAnchor = [&](const Vector3& point) {
-                    return Vector3(point.x - a.center.x, point.y - a.center.y,
-                                   point.z - a.center.z);
-                };
-                const Vector3 offscreenOffset = offsetFromAnchor(offscreen);
-                const Vector3 passCenterOffset = offsetFromAnchor(
-                    Vector3(shot.title.center.x, shot.title.center.y, a.center.z + 180.f));
-                const Vector3 passExitOffset = offsetFromAnchor(
-                    Vector3(shot.title.center.x + a.halfWidth * 3.f,
-                            shot.title.center.y, a.center.z + 180.f));
-                for (Layer* foregroundLayer : foregroundCardLayers) {
-                    const Vector3 base = foregroundLayer->transform.position;
-                    addKey(*foregroundLayer, at(start, fps), base.clone().add(offscreenOffset), Easing::easeIn());
-                    addKey(*foregroundLayer, at(handoff, fps), base.clone().add(offscreenOffset), Easing::easeIn());
-                    addKey(*foregroundLayer, at(passCenter, fps), base.clone().add(passCenterOffset), Easing::easeInOut());
-                    addKey(*foregroundLayer, at(passExit, fps), base.clone().add(passExitOffset), Easing::easeInOut());
-                    addKey(*foregroundLayer, at(end, fps), base, Easing::easeOut());
-                }
-                point(handoff, titleCam, shot.title.center, Easing::linear());
-                point(passCenter, titleCam, shot.title.center, Easing::linear());
-                point(passExit, cameraAt(a, shot.cameraDistance), a.center, Easing::easeInOut());
-                point(end, cameraAt(a, shot.cameraDistance), a.center);
-                break;
-            }
-            case DocumentaryRecipe::PhotoStack: {
-                point(handoff, titleCam, shot.title.center);
-                const int travelStart = handoff + 1;
-                point(travelStart, cameraAt(first, shot.cameraDistance), first.center);
-                for (std::size_t i = 1; i < shot.snapshots.size(); ++i) {
-                    const int frame = travelStart + static_cast<int>((static_cast<std::size_t>(transitionLength - 1) * i) /
-                                                                      shot.snapshots.size());
-                    point(frame, cameraAt(shot.snapshots[i].anchor, shot.cameraDistance),
-                          shot.snapshots[i].anchor.center, Easing::easeInOut());
-                }
-                point(end, photoCam, finalAnchor.center);
-                break;
-            }
-            case DocumentaryRecipe::FilmstripHandoff: {
-                point(handoff, titleCam, shot.title.center);
-                const int travelStart = handoff + 1;
-                point(travelStart, cameraAt(first, shot.cameraDistance), first.center);
-                for (std::size_t i = 1; i < shot.snapshots.size(); ++i) {
-                    const int frame = travelStart + static_cast<int>((static_cast<std::size_t>(transitionLength - 1) * i) /
-                                                                      shot.snapshots.size());
-                    point(frame, cameraAt(shot.snapshots[i].anchor, shot.cameraDistance),
-                          shot.snapshots[i].anchor.center, Easing::linear());
-                }
-                point(end, photoCam, last.center, Easing::easeOut());
-                break;
-            }
-            case DocumentaryRecipe::SplitDepth: {
-                const Vector3 arc((shot.title.center.x + last.center.x) * 0.5f - shot.cameraDistance * 0.15f,
-                                  (shot.title.center.y + last.center.y) * 0.5f,
-                                  shot.title.center.z + shot.cameraDistance * 1.1f);
-                point(handoff, arc, shot.title.center, Easing::easeIn());
-                point(mid, arc, last.center, Easing::easeOut());
-                point(end, photoCam, last.center);
-                rig.apertureTrack().add(at(handoff, fps), 0.f, Easing::linear());
-                rig.apertureTrack().add(at(end, fps), 0.06f, Easing::easeInOut());
-                break;
-            }
-            case DocumentaryRecipe::ArchiveCraneReveal: {
-                const Vector3 crane(shot.title.center.x, shot.title.center.y - shot.cameraDistance * 0.25f,
-                                    shot.title.center.z + shot.cameraDistance * 1.65f);
-                point(handoff, crane, shot.title.center, Easing::easeInOut());
-                point(mid, Vector3((shot.title.center.x + last.center.x) * 0.5f,
-                                   (shot.title.center.y + last.center.y) * 0.5f - shot.cameraDistance * 0.10f,
-                                   shot.title.center.z + shot.cameraDistance * 1.30f),
-                      last.center, Easing::easeOut());
-                point(end, photoCam, finalAnchor.center);
-                break;
+        if (shot.recipe == DocumentaryRecipe::ForegroundPhotoPass) {
+            const auto& a = shot.snapshots.front().anchor;
+            const int passCenter = handoff + transitionLength / 3;
+            const int passExit = handoff + (transitionLength * 2) / 3;
+            const Vector3 offscreen(a.center.x - a.halfWidth * 3.f,
+                                    shot.title.center.y, a.center.z + 180.f);
+            const auto offsetFromAnchor = [&](const Vector3& point) {
+                return Vector3(point.x - a.center.x, point.y - a.center.y, point.z - a.center.z);
+            };
+            const Vector3 offscreenOffset = offsetFromAnchor(offscreen);
+            const Vector3 passCenterOffset = offsetFromAnchor(
+                Vector3(shot.title.center.x, shot.title.center.y, a.center.z + 180.f));
+            const Vector3 passExitOffset = offsetFromAnchor(
+                Vector3(shot.title.center.x + a.halfWidth * 3.f,
+                        shot.title.center.y, a.center.z + 180.f));
+            for (Layer* foregroundLayer : foregroundCardLayers) {
+                const Vector3 base = foregroundLayer->transform.position;
+                addKey(*foregroundLayer, at(start, fps), base.clone().add(offscreenOffset), Easing::easeIn());
+                addKey(*foregroundLayer, at(handoff, fps), base.clone().add(offscreenOffset), Easing::easeIn());
+                addKey(*foregroundLayer, at(passCenter, fps), base.clone().add(passCenterOffset), Easing::easeInOut());
+                addKey(*foregroundLayer, at(passExit, fps), base.clone().add(passExitOffset), Easing::easeInOut());
+                addKey(*foregroundLayer, at(end, fps), base, Easing::easeOut());
             }
         }
-        if (shot.recipe == DocumentaryRecipe::FocusDrop) {
-            // The RenderPlan DOF bridge represents a world-Z focus plane. As
-            // this recipe moves the camera, sample the optical-axis distance
-            // that intersects an eased title-Z → snapshot-Z rack-focus plane.
-            for (int frame = start; frame <= end; ++frame) {
-                const float progress = frame <= handoff ? 0.f :
-                    static_cast<float>(frame - handoff) / static_cast<float>(end - handoff);
-                const float eased = progress * progress * (3.f - 2.f * progress);
-                const float focusPlaneZ = shot.title.center.z +
-                    (last.center.z - shot.title.center.z) * eased;
-                const CameraPose pose = rig.sample(at(frame, fps));
-                Vector3 forward(0.f, 0.f, -1.f);
-                forward.applyQuaternion(pose.orientation);
-                forward.normalize();
-                if (std::fabs(forward.z) <= 1e-4f)
-                    throw std::invalid_argument(
-                        "addDocumentarySnapshot: focus-drop optical axis cannot reach its focus plane");
-                const float distance = (focusPlaneZ - pose.position.z) / forward.z;
-                if (!std::isfinite(distance) || distance <= 0.f)
-                    throw std::invalid_argument(
-                        "addDocumentarySnapshot: focus-drop focus plane must stay in front of the camera");
-                focus.add(at(frame, fps), distance, Easing::linear());
-            }
-        } else {
-            // Keep focus locked to the authored camera target at every frame.
-            // Interpolating only endpoint distances can place the legacy
-            // RenderPlan Z focus plane behind its camera during pans and turns.
-            for (int frame = start; frame <= end; ++frame) {
-                const CameraPose pose = rig.sample(at(frame, fps));
-                const float distance = pose.position.distanceTo(pose.target);
-                if (!std::isfinite(distance) || distance <= 0.f)
-                    throw std::invalid_argument(
-                        "addDocumentarySnapshot: camera target must stay in front of the focal plane");
-                focus.add(at(frame, fps), distance, Easing::linear());
-            }
-        }
-        rig.setPosition(photoCam).setTarget(finalAnchor.center);
+        chrononmotion::motion::camera::DocumentaryCameraPath cameraPath;
+        cameraPath.move = shot.recipe;
+        cameraPath.title = cameraAnchorFor(shot.title);
+        cameraPath.finalTarget = cameraAnchorFor(finalAnchor);
+        cameraPath.cameraDistance = shot.cameraDistance;
+        cameraPath.fov = rig.fov();
+        cameraPath.viewport = scene.canvas();
+        cameraPath.startFrame = start;
+        cameraPath.handoffFrame = handoff;
+        cameraPath.endFrame = end;
+        cameraPath.transitionFrames = shot.transitionFrames;
+        cameraPath.snapshots.reserve(shot.snapshots.size());
+        for (std::size_t i = 0; i < shot.snapshots.size(); ++i)
+            cameraPath.snapshots.push_back(cameraAnchorFor(resolvedSnapshotAnchor(shot, i)));
+        chrononmotion::motion::camera::applyDocumentaryCameraPath(rig, cameraPath, fps);
     }
 } // namespace chronontemplate

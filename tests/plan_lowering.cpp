@@ -46,33 +46,41 @@ int main() {
     LayerPlan dofText = text;
     dofText.text = "Archive";
     auto& rig = dofScene.cameraRig();
-    // Use the Motion camera's -Z forward axis so the converted focus planes
-    // stay inside RenderPlan's positive world-Z focus range.
+    // focus_distance is camera-space along the optical axis (canonical contract):
+    // the lowering passes it through unchanged, world-Z derivation happens downstream.
     rig.setPosition({0.f, 0.f, -8.f}).clearTarget().setFocusDistance(420.f);
     rig.focusDistanceTrack().add(0.f, 420.f).add(1.f, 620.f);
-    rig.apertureTrack().add(0.f, 0.f).add(1.f, 0.06f);
+    rig.legacyDefocusStrengthTrack().add(0.f, 0.f).add(1.f, 0.06f);
     rig.maxBlurTrack().add(0.f, 10.f).add(1.f, 18.f);
     const auto dofPlan = lowerToRenderPlan(dofScene, {{dofTitle.id(), dofText}});
     check(dofPlan.camera && dofPlan.camera->dof_enabled,
           "animated DOF is enabled in the base plan even when the aperture opens after frame zero");
-    const auto findTrack = [&](CameraPropertyPlan property) -> const CameraTrackPlan* {
-        if (!dofPlan.camera_animation) return nullptr;
-        for (const auto& track : *dofPlan.camera_animation)
-            if (track.property == property) return &track;
-        return nullptr;
-    };
-    const auto* focus = findTrack(CameraPropertyPlan::FocusDistance);
-    const auto* aperture = findTrack(CameraPropertyPlan::Aperture);
-    const auto* maxBlur = findTrack(CameraPropertyPlan::MaxBlur);
-    check(focus && aperture && maxBlur,
-          "animated focus, aperture, and max blur lower as native camera properties");
-    check(focus && focus->keyframes.front().value.front() == 428.f &&
-          focus->keyframes.back().value.front() == 628.f &&
-          aperture && aperture->keyframes.front().value.front() == 0.f &&
-          aperture->keyframes.back().value.front() == 0.06f &&
-          maxBlur && maxBlur->keyframes.front().value.front() == 10.f &&
-          maxBlur->keyframes.back().value.front() == 18.f,
-          "native DOF camera tracks preserve their authored endpoint values");
+    check(dofPlan.camera_samples && dofPlan.camera_samples->size() == dofPlan.canvas.duration.integral(),
+          "animated focus, aperture, and max blur lower as resolved frame samples");
+    if (dofPlan.camera_samples && !dofPlan.camera_samples->empty()) {
+        const auto& first = dofPlan.camera_samples->front().camera;
+        const auto& last = dofPlan.camera_samples->back().camera;
+        check(first.dof_focus_distance == 420.f && last.dof_focus_distance == 620.f &&
+              first.dof_aperture == 0.f && first.dof_max_blur == 10.f &&
+              last.dof_focus_distance >= 420.f && last.dof_focus_distance <= 620.f &&
+              last.dof_aperture >= 0.f && last.dof_aperture <= 0.06f &&
+              last.dof_max_blur >= 10.f && last.dof_max_blur <= 18.f,
+              "resolved camera samples preserve authored DoF endpoints");
+    }
+
+    const auto runtimeLowered = lowerToRuntimeRenderPlan(
+        dofScene, {{dofTitle.id(), dofText}}, "animated-dof-camera-v1",
+        "runtime-camera-test", "runtime-camera-test.mp4");
+    check(runtimeLowered.plan.camera.has_value() &&
+          !runtimeLowered.plan.camera_samples.has_value(),
+          "runtime lowering keeps a static camera default and omits duplicate dense camera tracks");
+    check(runtimeLowered.camera.fingerprint == "animated-dof-camera-v1",
+          "runtime lowering carries the stable camera identity into the provider");
+    const auto runtimeCamera = runtimeLowered.camera.sample(12.0);
+    chrononmotion_test::checkNear(runtimeCamera.position[2], 8.f, 1e-5f,
+              "runtime provider samples the CM3D rig at frame/fps time");
+    chrononmotion_test::checkNear(runtimeCamera.dof_focus_distance, 520.f, 1e-4f,
+              "runtime provider carries the fractional-time focus distance");
 
     ImageRequest imageRequest;
     imageRequest.path = "archive.jpg";

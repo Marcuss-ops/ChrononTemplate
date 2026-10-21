@@ -516,7 +516,7 @@ namespace {
                   "dolly_zoom keeps the projected title width within 8% (vertigo compensation)");
         }
 
-        // The lens: focus_push keys the focus and aperture channels only.
+        // The lens: focus_push keys the focus and physical f-stop channels only.
         {
             FakeContentHost host;
             TemplateScene scene("title_camera_focus", 30.f, host, kViewportW, kViewportH);
@@ -529,7 +529,7 @@ namespace {
                                                  .duration = 135});
             auto& rig = scene.camera().rig();
             check(!rig.focusDistanceTrack().empty(), "focus_push keys the focus-distance channel");
-            check(!rig.apertureTrack().empty(), "focus_push keys the aperture channel");
+            check(!rig.fStopTrack().empty(), "focus_push keys the physical f-stop channel");
             check(rig.focusDistanceTrack().size() >= 3 &&
                           rig.focusDistanceTrack().keys().back().time >= 135.f / 30.f,
                   "the focus move covers the whole window including its settle");

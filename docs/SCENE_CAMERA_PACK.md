@@ -76,6 +76,13 @@ Per una regione interna al layer, come il volto dentro un ritratto, si parte dai
 bounds misurati e si definisce il rettangolo della regione desiderata; il pack
 continua a derivare distanza e lente dalla viewport.
 
+Per una pipeline in-process usa `lowerToRuntimeRenderPlan(scene, content,
+cameraFingerprint)`: il piano conserva layer e contenuti, mentre il provider
+campiona il rig CM3D anche ai tempi sub-frame dello shutter. La fingerprint
+stabile deve includere gli input che definiscono lo shot. `lowerToRenderPlan`
+resta il percorso offline per i piani serializzati, con camera bake denso a
+frame interi.
+
 ## Mappe pre-configurate da JSON (senza ricompilare)
 
 Una mappa è un documento `chronontemplate.scene-camera-sequence.v1`: camera

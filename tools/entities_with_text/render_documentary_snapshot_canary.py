@@ -87,22 +87,18 @@ def _assert_light_leak_follows_camera_speed(plan_path: Path) -> None:
         return float(value[0] if isinstance(value, list) else value)
 
     plan = json.loads(plan_path.read_text(encoding="utf-8"))
-    camera_tracks = {track["property"]: track["keyframes"]
-                     for track in plan.get("camera_animation", {}).get("tracks", [])}
-    props = ("camera_position_x", "camera_position_y", "camera_position_z",
-             "camera_rotation_x", "camera_rotation_y", "camera_rotation_z")
-    if any(prop not in camera_tracks for prop in props):
-        raise SystemExit("connected plan is missing camera pose tracks for leak synchronization")
+    camera_samples = plan.get("camera_samples", [])
+    if not camera_samples:
+        raise SystemExit("connected plan is missing resolved camera samples for leak synchronization")
     frame_count = int(plan["canvas"]["duration_frames"])
+    by_frame = {int(sample["frame"]): sample for sample in camera_samples}
     samples = []
     for frame in range(frame_count):
-        pose = []
-        for prop in props:
-            keys = camera_tracks[prop]
-            exact = next((scalar(key["value"]) for key in keys if int(key["frame"]) == frame), None)
-            if exact is None:
-                raise SystemExit(f"camera track {prop} has no exact sample at frame {frame}")
-            pose.append(float(exact))
+        sample = by_frame.get(frame)
+        if sample is None:
+            raise SystemExit(f"resolved camera samples have no sample at frame {frame}")
+        camera = sample["camera"]
+        pose = [*map(float, camera["position"]), *map(float, camera["rotation_deg"])]
         samples.append(pose)
     speed = [0.0]
     for before, after in zip(samples, samples[1:]):
@@ -272,13 +268,10 @@ def build_plan(pose_rows: list[list[float]], recipe: str = "doc_title_snap_down"
             "animation": {"tracks": [{"property": "opacity", "easing": "linear",
                 "keyframes": [{"frame": 0, "value": 0.0}, {"frame": 45, "value": 0.0},
                               {"frame": 53, "value": 1.0}, {"frame": 120, "value": 0.0}]}]}})
-    properties = ["camera_position_x", "camera_position_y", "camera_position_z",
-                  "camera_rotation_x", "camera_rotation_y", "camera_rotation_z", "camera_fov_deg"]
     camera = {"type": "perspective", "position": [x[0], y[0], z[0]],
               "rotation_deg": [rx[0], ry[0], rz[0]], "fov_deg": fov[0],
-              "near": 1.0, "far": 10000.0, "zoom": 1.0}
-    camera_tracks = [_track(prop, values) for prop, values in
-                     zip(properties, [x, y, z, rx, ry, rz, fov])]
+              "near": 1.0, "far": 10000.0, "zoom": 1.0,
+              "sensor_width_mm": 36.0, "lens_shift": [0.0, 0.0]}
     if focus_recipe:
         # The existing RenderPlan DOF compositor consumes its legacy focus
         # plane in render-space world Z. Derive that plane from the native
@@ -286,14 +279,22 @@ def build_plan(pose_rows: list[list[float]], recipe: str = "doc_title_snap_down"
         # in the dumper output for contract/debug inspection.
         camera["dof"] = {"enabled": True, "focus_distance": focus_planes[0],
                          "aperture": aperture_values[0], "max_blur": 24.0}
-        camera_tracks.append(_track("camera_focus_distance", focus_planes))
-        camera_tracks.append(_track("camera_aperture", aperture_values))
+    camera_samples = []
+    for frame in range(FRAMES):
+        resolved = {"type": "perspective", "position": [x[frame], y[frame], z[frame]],
+                    "rotation_deg": [rx[frame], ry[frame], rz[frame]],
+                    "fov_deg": fov[frame], "near": 1.0, "far": 10000.0,
+                    "zoom": 1.0, "sensor_width_mm": 36.0, "lens_shift": [0.0, 0.0]}
+        if focus_recipe:
+            resolved["dof"] = {"enabled": True, "focus_distance": focus_planes[frame],
+                               "aperture": aperture_values[frame], "max_blur": 24.0}
+        camera_samples.append({"frame": frame, "camera": resolved})
     plan = {"schema": "chronon.render-plan.v3", "version": 3,
             "job_id": recipe + "_canary_v1",
             "canvas": {"width": WIDTH, "height": HEIGHT, "fps_num": FPS,
                        "fps_den": 1, "duration_frames": FRAMES},
             "camera": camera,
-            "camera_animation": {"tracks": camera_tracks},
+            "camera_samples": camera_samples,
             "layers": layers,
             "output": {"path": recipe + "_canary_v1.mp4",
                        "format": "mp4", "codec": "h264"}}

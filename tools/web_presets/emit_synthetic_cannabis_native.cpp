@@ -1,4 +1,5 @@
 #include <nlohmann/json.hpp>
+#include "chronontemplate/camera_roll/ResolvedCameraSamples.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -115,24 +116,27 @@ Json makePlan() {
         layers.push_back(text("context_below_" + std::to_string(i), bottom[i],
                               bottomY[i], 36.0f, "#686868", false, true));
 
-    return {{"schema", "chronon.render-plan.v3"}, {"version", 3},
+    const Json baseCamera = { {"type", "perspective"}, {"position", {0, 0, -1320}},
+                              {"rotation_deg", {0, 5.4, 0}}, {"fov_deg", 50},
+                              {"near", 1}, {"far", 5000}, {"zoom", 1} };
+    Json plan = {{"schema", "chronon.render-plan.v3"}, {"version", 3},
             {"job_id", "synthetic_cannabis_native_evidence_focus_v2"},
             {"canvas", {{"width", kWidth}, {"height", kHeight}, {"fps_num", 30},
                         {"fps_den", 1}, {"duration_frames", kFrames}}},
             {"layers", std::move(layers)},
-            {"camera", {{"type", "perspective"}, {"position", {0, 0, -1320}},
-                         {"rotation_deg", {0, 5.4, 0}}, {"fov_deg", 50},
-                         {"near", 1}, {"far", 5000}}},
-            {"camera_animation", {{"tracks", Json::array({
-                {{"property", "camera_position_z"}, {"easing", "in_out_cubic"},
-                 {"keyframes", Json::array({{{"frame", 0}, {"value", -1320.0}},
-                                             {{"frame", 239}, {"value", -1290.0}}})}},
-                {{"property", "camera_rotation_y"}, {"easing", "in_out_cubic"},
-                 {"keyframes", Json::array({{{"frame", 0}, {"value", 4.8}},
-                                             {{"frame", 239}, {"value", 6.5}}})}}
-            })}}},
+            {"camera", baseCamera},
             {"output", {{"path", "Synthetic_Cannabis_Evidence_Focus.mp4"},
                         {"format", "mp4"}, {"codec", "h264"}}}};
+    const Json channels = Json::array({
+        {{"channel", "position_z"}, {"easing", "in_out_cubic"},
+         {"keyframes", Json::array({{{"frame", 0}, {"value", -1320.0}},
+                                     {{"frame", 239}, {"value", -1290.0}}})}},
+        {{"channel", "rotation_y"}, {"easing", "in_out_cubic"},
+         {"keyframes", Json::array({{{"frame", 0}, {"value", 4.8}},
+                                     {{"frame", 239}, {"value", 6.5}}})}}
+    });
+    chronontemplate::camera_roll::attachResolvedCameraSamples(plan, baseCamera, channels, 30.f, kFrames);
+    return plan;
 }
 }
 
@@ -147,7 +151,8 @@ int main(int argc, char** argv) try {
     if (preview) {
         plan["job_id"] = "synthetic_cannabis_native_evidence_focus_preview";
         plan["canvas"]["duration_frames"] = 1;
-        plan.erase("camera_animation");
+        plan["camera_samples"] = Json::array({plan["camera_samples"][0]});
+        plan["camera"] = plan["camera_samples"][0]["camera"];
         for (auto& layer : plan["layers"]) {
             layer["duration_frames"] = 1;
             if (!layer.contains("text_animators")) continue;
