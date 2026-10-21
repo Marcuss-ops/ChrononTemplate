@@ -14,7 +14,6 @@
 
 #include "chronontemplate/camera_roll/TitleCameraPack.hpp"
 
-#include "chrononmotion/math/MathUtils.hpp"
 #include "chrononmotion/motion/CameraScreenSpace.hpp"
 
 #include <algorithm>
@@ -30,11 +29,8 @@ namespace chronontemplate {
     using chrononmotion::motion::CameraRig;
     using chrononmotion::motion::Easing;
     using chrononmotion::motion::ScreenCameraIntrinsics;
-    using chrononmotion::math::degToRad;
 
     namespace {
-
-        constexpr float kPi = 3.14159265358979323846f;
 
         [[nodiscard]] float at(int frame, float fps) { return static_cast<float>(frame) / fps; }
 
@@ -44,163 +40,10 @@ namespace chronontemplate {
                    std::isfinite(anchor.halfHeight);
         }
 
-        // ------------------------------------------------- the 20 plans ----
-        // One row per preset: the whole recipe as numbers. The rows state the
-        // *end* pose relative to the frontal rest framing (`distance`, `fov`)
-        // plus, where the move needs one, its start offset.
-
         [[nodiscard]] TitleCameraPlan planFor(TitleCameraMove move, const TitleCameraShot& shot) {
-            // The loudness ladder: the same move, three strengths.
-            float loudness = 1.f;
-            switch (shot.intensity) {
-                case TitleCameraIntensity::Subtle:    loudness = 0.55f; break;
-                case TitleCameraIntensity::Editorial: loudness = 1.f;    break;
-                case TitleCameraIntensity::Cinematic: loudness = 1.9f;   break;
-            }
-
-            TitleCameraPlan plan;
-            plan.distance = titleCameraDistance(shot.framing, plan.fov);
-
-            switch (move) {
-                case TitleCameraMove::SlowPush:
-                    // Medium → close: the title slowly fills more frame.
-                    plan.dolly = plan.distance * 0.34f * loudness;
-                    break;
-                case TitleCameraMove::SlowPullOut:
-                    // Title enormous first, then the context appears.
-                    plan.dolly = -plan.distance * 0.30f * loudness;
-                    break;
-                case TitleCameraMove::LeftDrift:
-                    // The body crosses past the title, aimed at it throughout.
-                    plan.panX = 320.f * loudness;
-                    break;
-                case TitleCameraMove::RightDrift:
-                    plan.panX = -320.f * loudness;
-                    break;
-                case TitleCameraMove::VerticalRise:
-                    // From below the title up to the frontal rest pose.
-                    plan.heightOffset = -110.f * loudness;
-                    break;
-                case TitleCameraMove::VerticalDescend:
-                    plan.heightOffset = 110.f * loudness;
-                    break;
-                case TitleCameraMove::MicroOrbitLeft:
-                    // +8° → −4° about the anchor; the title never moves.
-                    plan.yawStart = degToRad(8.f) * loudness;
-                    plan.yawEnd = degToRad(-4.f) * loudness;
-                    break;
-                case TitleCameraMove::MicroOrbitRight:
-                    plan.yawStart = degToRad(-8.f) * loudness;
-                    plan.yawEnd = degToRad(4.f) * loudness;
-                    break;
-                case TitleCameraMove::ArcPush:
-                    // Dolly forward + lateral arc: not a plain zoom.
-                    plan.restLateral = -140.f * loudness;
-                    plan.arcBow = 150.f * loudness;
-                    plan.dolly = plan.distance * 0.26f * loudness;
-                    break;
-                case TitleCameraMove::ArcPull:
-                    plan.restLateral = 140.f * loudness;
-                    plan.arcBow = -150.f * loudness;
-                    plan.dolly = -plan.distance * 0.24f * loudness;
-                    break;
-                case TitleCameraMove::LowAnglePush:
-                    // Slightly below, looking up; the title reads monumental.
-                    // The offset is retained: the move is a push, not a rise.
-                    plan.heightOffset = -70.f * loudness;
-                    plan.heightEnd = plan.heightOffset;
-                    plan.dolly = plan.distance * 0.24f * loudness;
-                    break;
-                case TitleCameraMove::HighAngleSettle:
-                    plan.heightOffset = 100.f * loudness;
-                    plan.heightEnd = plan.heightOffset * 0.25f;
-                    break;
-                case TitleCameraMove::RollSettle:
-                    // The camera rolls back to level, not the text.
-                    plan.rollStart = degToRad(-3.f) * loudness;
-                    plan.rollEnd = 0.f;
-                    plan.dolly = plan.distance * 0.08f * loudness;
-                    break;
-                case TitleCameraMove::RollPass:
-                    // −2.5° → +2.5° → 0 during a small push.
-                    plan.rollStart = degToRad(-2.5f) * loudness;
-                    plan.rollPeak = degToRad(2.5f) * loudness;
-                    plan.rollEnd = 0.f;
-                    plan.dolly = plan.distance * 0.10f * loudness;
-                    break;
-                case TitleCameraMove::DollyZoomSubtle: {
-                    // Mini vertigo: the title keeps its size, the background
-                    // perspective changes. Projected width scales with
-                    // 1 / (d · tan(fov/2)), so widening the FOV is compensated
-                    // by dollying *in* by the exact tan ratio.
-                    const float widen = 9.f * loudness;
-                    plan.fovEnd = plan.fov + widen;
-                    const float ratio = std::tan(plan.fov * 0.5f * kPi / 180.f) /
-                                        std::tan(plan.fovEnd * 0.5f * kPi / 180.f);
-                    plan.dolly = plan.distance * (1.f - ratio);
-                    break;
-                }
-                case TitleCameraMove::FocusPush:
-                    // Push while the background falls out of focus: the lens
-                    // makes the title matter, not a glow on the text.
-                    plan.dolly = plan.distance * 0.20f * loudness;
-                    plan.focusPull = plan.distance * 0.20f * loudness;
-                    plan.fStop = 12.f;
-                    break;
-                case TitleCameraMove::ParallaxSide:
-                    // Layers behind move faster than the static title.
-                    plan.panX = 260.f * loudness;
-                    break;
-                case TitleCameraMove::ParallaxPush:
-                    plan.dolly = plan.distance * 0.30f * loudness;
-                    break;
-                case TitleCameraMove::WhipSettle: {
-                    // Fast off-axis acquisition, then a long settle onto the
-                    // frontal rest pose. Continuous by construction; the
-                    // acquisition angle is what makes beat one loud.
-                    plan.whipAcquisition = 0.25f;
-                    plan.yawStart = degToRad(-24.f);
-                    plan.dolly = plan.distance * 0.12f * loudness;
-                    break;
-                }
-                case TitleCameraMove::CornerReveal:
-                    // Arrive from the side where a foreground element hid the
-                    // title; the diagonal pass reveals it fully.
-                    plan.restLateral = -240.f * loudness;
-                    plan.arcBow = -170.f * loudness;
-                    plan.panX = 300.f * loudness;
-                    plan.dolly = plan.distance * 0.16f * loudness;
-                    break;
-                case TitleCameraMove::CrashPush:
-                    // v2: fast editorial push, twice the dolly rate of slow_push.
-                    plan.dolly = plan.distance * 0.44f * loudness;
-                    break;
-                case TitleCameraMove::TopDownSettle:
-                    // v2: from above the title down to the frontal rest pose.
-                    plan.heightOffset = 230.f * loudness;
-                    plan.heightEnd = 0.f;
-                    plan.dolly = plan.distance * 0.06f * loudness;
-                    break;
-                case TitleCameraMove::HandheldMicro:
-                    // v2: handheld micro drift + tiny roll settle.
-                    plan.panX = 64.f * loudness;
-                    plan.rollStart = degToRad(0.9f) * loudness;
-                    plan.rollEnd = 0.f;
-                    plan.dolly = plan.distance * 0.04f * loudness;
-                    break;
-                case TitleCameraMove::OrbitWide:
-                    // v2: wide orbit, double the micro-orbit swing.
-                    plan.yawStart = degToRad(15.f) * loudness;
-                    plan.yawEnd = degToRad(-7.f) * loudness;
-                    break;
-                case TitleCameraMove::FloorRise:
-                    // v2: low rise with a gentle push, monumental settle.
-                    plan.heightOffset = -165.f * loudness;
-                    plan.heightEnd = 0.f;
-                    plan.dolly = plan.distance * 0.18f * loudness;
-                    break;
-            }
-            return plan;
+            using namespace chrononmotion::motion::camera;
+            return chrononmotion::motion::camera::resolveTitleCameraPlan(
+                    move, chrononmotion::motion::camera::TitleRecipeShot{shot.framing, shot.intensity, 55.f});
         }
 
         /// The frontal rest pose: straight-on along +Z at the framing distance,
@@ -271,24 +114,7 @@ namespace chronontemplate {
     }
 
     float titleCameraDistance(TitleFraming framing, float fovDegrees) {
-        // The rest pose is authored so a 900-unit-wide subject fills the
-        // `coverage` fraction of the frame width at the delivery aspect. One
-        // scale so every preset and every title share the same optical law.
-        constexpr float kReferenceWidth = 900.f;
-        float coverage = 0.9f;
-        switch (framing) {
-            case TitleFraming::Hero:         coverage = 0.72f; break;
-            case TitleFraming::Medium:       coverage = 0.55f; break;
-            case TitleFraming::Wide:         coverage = 0.40f; break;
-            case TitleFraming::ExtremeClose: coverage = 0.88f; break;
-        }
-        const float halfFovRad = fovDegrees * 0.5f * kPi / 180.f;
-        const float tanHalf = std::tan(std::max(halfFovRad, 1e-4f));
-        const float aspect = 1920.f / 1080.f;
-        // A subject of width W at depth d fills W / (2·d·tan(fov/2)·aspect)
-        // of the frame width, so the coverage fraction is the *denominator*
-        // correction: tighter framing (more coverage) sits closer.
-        return kReferenceWidth / (2.f * tanHalf * aspect * coverage);
+        return chrononmotion::motion::camera::titleFramingDistance(framing, fovDegrees);
     }
 
     TitleCameraPlan titleCameraPlanFor(TitleCameraMove move, const TitleCameraShot& shot) {
