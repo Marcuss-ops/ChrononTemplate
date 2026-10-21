@@ -23,47 +23,17 @@ namespace chronontemplate {
     using chrononmotion::Vector3;
 
     namespace {
-        chrononmotion::motion::camera::Handoff toHandoff(SceneCameraTransition transition) {
-            using H = chrononmotion::motion::camera::Handoff;
-            switch (transition) {
-                case SceneCameraTransition::PushThrough: return H::PushThrough;
-                case SceneCameraTransition::LateralSwipe: return H::LateralSwipe;
-                case SceneCameraTransition::ArcCarry: return H::ArcCarry;
-                case SceneCameraTransition::OrbitHandoff: return H::OrbitHandoff;
-                case SceneCameraTransition::RiseAndLand: return H::RiseAndLand;
-                case SceneCameraTransition::FocusRack: return H::FocusRack;
-                case SceneCameraTransition::PullBackReveal: return H::PullBackReveal;
-                case SceneCameraTransition::WhipReframe: return H::WhipReframe;
-            }
-            throw std::invalid_argument("applySceneCameraSequence: unknown transition");
-        }
     }
 
     const char* sceneCameraTransitionId(SceneCameraTransition transition) noexcept {
-        switch (transition) {
-            case SceneCameraTransition::PushThrough:    return "scene_camera_push_through";
-            case SceneCameraTransition::LateralSwipe:   return "scene_camera_lateral_swipe";
-            case SceneCameraTransition::ArcCarry:       return "scene_camera_arc_carry";
-            case SceneCameraTransition::OrbitHandoff:   return "scene_camera_orbit_handoff";
-            case SceneCameraTransition::RiseAndLand:    return "scene_camera_rise_and_land";
-            case SceneCameraTransition::FocusRack:      return "scene_camera_focus_rack";
-            case SceneCameraTransition::PullBackReveal: return "scene_camera_pull_back_reveal";
-            case SceneCameraTransition::WhipReframe:    return "scene_camera_whip_reframe";
-        }
-        return "scene_camera_unknown";
+        return chrononmotion::motion::camera::cameraHandoffId(transition).data();
     }
 
     std::vector<std::string> sceneCameraTransitionIds() {
-        return {
-                sceneCameraTransitionId(SceneCameraTransition::PushThrough),
-                sceneCameraTransitionId(SceneCameraTransition::LateralSwipe),
-                sceneCameraTransitionId(SceneCameraTransition::ArcCarry),
-                sceneCameraTransitionId(SceneCameraTransition::OrbitHandoff),
-                sceneCameraTransitionId(SceneCameraTransition::RiseAndLand),
-                sceneCameraTransitionId(SceneCameraTransition::FocusRack),
-                sceneCameraTransitionId(SceneCameraTransition::PullBackReveal),
-                sceneCameraTransitionId(SceneCameraTransition::WhipReframe),
-        };
+        std::vector<std::string> ids;
+        for (const auto handoff : chrononmotion::motion::camera::cameraHandoffs())
+            ids.emplace_back(sceneCameraTransitionId(handoff));
+        return ids;
     }
 
     float sceneSubjectFov(SubjectKind kind) {
@@ -119,7 +89,7 @@ namespace chronontemplate {
 
     void applySceneCameraSequence(TemplateScene& scene, const SceneCameraSequence& sequence) {
         chrononmotion::motion::camera::CameraSequence resolved;
-        resolved.handoff = toHandoff(sequence.transition);
+        resolved.handoff = sequence.transition;
         resolved.intensity = sequence.intensity;
         resolved.travelFrames = sequence.travelFrames;
         resolved.inFrame = sequence.inFrame;
