@@ -104,46 +104,13 @@ namespace chronontemplate {
             layer.tracks.position.add(time, value, easing);
         }
 
-        chrononmotion::motion::camera::DocumentaryMove cameraMoveFor(DocumentaryRecipe recipe) {
-            using M = chrononmotion::motion::camera::DocumentaryMove;
-            switch (recipe) {
-                case DocumentaryRecipe::SnapDown: return M::SnapDown;
-                case DocumentaryRecipe::PullbackReveal: return M::PullbackReveal;
-                case DocumentaryRecipe::PushThroughSnapshot: return M::PushThroughSnapshot;
-                case DocumentaryRecipe::WhipToPhoto: return M::WhipToPhoto;
-                case DocumentaryRecipe::FocusDrop: return M::FocusDrop;
-                case DocumentaryRecipe::Reveal90: return M::Reveal90;
-                case DocumentaryRecipe::CornerTurn: return M::CornerTurn;
-                case DocumentaryRecipe::ForegroundPhotoPass: return M::ForegroundPhotoPass;
-                case DocumentaryRecipe::PhotoStack: return M::PhotoStack;
-                case DocumentaryRecipe::FilmstripHandoff: return M::FilmstripHandoff;
-                case DocumentaryRecipe::SplitDepth: return M::SplitDepth;
-                case DocumentaryRecipe::ArchiveCraneReveal: return M::ArchiveCraneReveal;
-            }
-            throw std::invalid_argument("addDocumentarySnapshot: unknown documentary recipe");
-        }
-
         chrononmotion::motion::camera::DocumentaryCameraAnchor cameraAnchorFor(const ShotAnchor& anchor) {
             return {anchor.center, anchor.orientation, anchor.halfWidth, anchor.halfHeight};
         }
     }
 
     const char* documentaryRecipeId(DocumentaryRecipe recipe) noexcept {
-        switch (recipe) {
-            case DocumentaryRecipe::SnapDown: return "doc_title_snap_down";
-            case DocumentaryRecipe::PullbackReveal: return "doc_title_pullback_photo_reveal";
-            case DocumentaryRecipe::PushThroughSnapshot: return "doc_title_push_through_snapshot";
-            case DocumentaryRecipe::WhipToPhoto: return "doc_title_whip_to_photo";
-            case DocumentaryRecipe::FocusDrop: return "doc_title_focus_drop";
-            case DocumentaryRecipe::Reveal90: return "doc_title_90_reveal";
-            case DocumentaryRecipe::CornerTurn: return "doc_title_corner_turn";
-            case DocumentaryRecipe::ForegroundPhotoPass: return "doc_title_foreground_photo_pass";
-            case DocumentaryRecipe::PhotoStack: return "doc_title_photo_stack";
-            case DocumentaryRecipe::FilmstripHandoff: return "doc_title_filmstrip_handoff";
-            case DocumentaryRecipe::SplitDepth: return "doc_title_split_depth";
-            case DocumentaryRecipe::ArchiveCraneReveal: return "doc_archive_crane_reveal";
-        }
-        return "doc_title_unknown";
+        return chrononmotion::motion::camera::documentaryMoveId(recipe).data();
     }
 
     const char* snapshotStyleId(SnapshotStyle style) noexcept {
@@ -161,14 +128,8 @@ namespace chronontemplate {
 
     std::vector<std::string> documentaryRecipeIds() {
         std::vector<std::string> ids;
-        for (const auto recipe : {DocumentaryRecipe::SnapDown, DocumentaryRecipe::PullbackReveal,
-                                  DocumentaryRecipe::PushThroughSnapshot, DocumentaryRecipe::WhipToPhoto,
-                                  DocumentaryRecipe::FocusDrop, DocumentaryRecipe::Reveal90,
-                                  DocumentaryRecipe::CornerTurn, DocumentaryRecipe::ForegroundPhotoPass,
-                                  DocumentaryRecipe::PhotoStack, DocumentaryRecipe::FilmstripHandoff,
-                                  DocumentaryRecipe::SplitDepth, DocumentaryRecipe::ArchiveCraneReveal}) {
+        for (const auto recipe : chrononmotion::motion::camera::documentaryMoves())
             ids.emplace_back(documentaryRecipeId(recipe));
-        }
         return ids;
     }
 
@@ -528,7 +489,7 @@ namespace chronontemplate {
             }
         }
         chrononmotion::motion::camera::DocumentaryCameraPath cameraPath;
-        cameraPath.move = cameraMoveFor(shot.recipe);
+        cameraPath.move = shot.recipe;
         cameraPath.title = cameraAnchorFor(shot.title);
         cameraPath.finalTarget = cameraAnchorFor(finalAnchor);
         cameraPath.cameraDistance = shot.cameraDistance;
