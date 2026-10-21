@@ -16,15 +16,15 @@
 namespace chronontemplate::docfx {
 
     struct ArchivalTimelineSpec {
-        std::string year{"1971"};
-        std::string headline{"EXPOSED BY THE MEDIA"};
+        std::string year{"2025"};
+        std::string headline{"ALEX PASSED AWAY"};
         std::string paperAsset{
-            "ChrononTemplate/assets/archival_timeline_reveal_v1/paper_card.png"};
-        float paperWidth{790.f};
-        float lineY{710.f};
+            "ChrononTemplate/assets/references/date_spotlight_portrait.png"};
+        float paperWidth{800.f};
+        float lineY{535.f};
         float yearFontSize{76.f};
         float headlineFontSize{72.f};
-        std::string headlineColor{"#AD8A47"};
+        std::string headlineColor{"#E4B936"};
         int sceneFrames{180}; ///< 6 s at 30 fps
         int inFrame{0};
     };

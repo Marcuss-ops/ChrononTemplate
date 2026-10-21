@@ -1,0 +1,1026 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "date_timeline_v1_preview",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 1
+  },
+  "camera": {
+    "type": "perspective",
+    "position": [
+      0,
+      0,
+      -1000
+    ],
+    "rotation_deg": [
+      0,
+      0,
+      0
+    ],
+    "fov_deg": 45,
+    "near": 1,
+    "far": 20000,
+    "zoom": 1
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "color",
+      "color": [
+        0.955,
+        0.947,
+        0.925,
+        1
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "heading",
+      "type": "text",
+      "text": "A CHRONOLOGY",
+      "size": [
+        1300,
+        67.19999999999999
+      ],
+      "position": [
+        960,
+        930,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 48,
+        "min_font_size": 48,
+        "max_font_size": 48,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "date_range",
+      "type": "text",
+      "text": "1948 — 2026     ·     10 MILESTONES     ·     20 DATES",
+      "size": [
+        1100,
+        29.4
+      ],
+      "position": [
+        960,
+        870,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 21,
+        "min_font_size": 21,
+        "max_font_size": 21,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_rail",
+      "type": "color",
+      "color": [
+        0.69,
+        0.68,
+        0.65,
+        1
+      ],
+      "size": [
+        1600,
+        2
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_0",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        120
+      ],
+      "position": [
+        -660,
+        60
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_0",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        -660,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_0",
+      "type": "text",
+      "text": "1948 · 1951",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        300,
+        690,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_0",
+      "type": "text",
+      "text": "BIRTH",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        300,
+        735,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_1",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        160
+      ],
+      "position": [
+        -513,
+        -80
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_1",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        -513,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_1",
+      "type": "text",
+      "text": "1962 · 1965",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        447,
+        285,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_1",
+      "type": "text",
+      "text": "FIRST STEP",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        447,
+        330,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_2",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        120
+      ],
+      "position": [
+        -367,
+        60
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_2",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        -367,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_2",
+      "type": "text",
+      "text": "1969 · 1973",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        593,
+        690,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_2",
+      "type": "text",
+      "text": "CHANGE",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        593,
+        735,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_3",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        160
+      ],
+      "position": [
+        -220,
+        -80
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_3",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        -220,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_3",
+      "type": "text",
+      "text": "1980 · 1984",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        740,
+        285,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_3",
+      "type": "text",
+      "text": "SIGNAL",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        740,
+        330,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_4",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        120
+      ],
+      "position": [
+        -73,
+        60
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_4",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        -73,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_4",
+      "type": "text",
+      "text": "1989 · 1991",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        887,
+        690,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_4",
+      "type": "text",
+      "text": "NETWORK",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        887,
+        735,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_5",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        160
+      ],
+      "position": [
+        73,
+        -80
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_5",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        73,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_5",
+      "type": "text",
+      "text": "1998 · 2001",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        1033,
+        285,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_5",
+      "type": "text",
+      "text": "LAUNCH",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        1033,
+        330,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_6",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        120
+      ],
+      "position": [
+        220,
+        60
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_6",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        220,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_6",
+      "type": "text",
+      "text": "2007 · 2010",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        1180,
+        690,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_6",
+      "type": "text",
+      "text": "MOBILE",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        1180,
+        735,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_7",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        160
+      ],
+      "position": [
+        367,
+        -80
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_7",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        367,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_7",
+      "type": "text",
+      "text": "2012 · 2015",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        1327,
+        285,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_7",
+      "type": "text",
+      "text": "CLOUD",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        1327,
+        330,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_8",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        120
+      ],
+      "position": [
+        513,
+        60
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_8",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        513,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_8",
+      "type": "text",
+      "text": "2017 · 2022",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        1473,
+        690,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_8",
+      "type": "text",
+      "text": "AI",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        1473,
+        735,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_stem_9",
+      "type": "color",
+      "color": [
+        0.8,
+        0.78,
+        0.74,
+        1
+      ],
+      "size": [
+        1,
+        160
+      ],
+      "position": [
+        660,
+        -80
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_tick_9",
+      "type": "color",
+      "color": [
+        0.15,
+        0.15,
+        0.14,
+        1
+      ],
+      "size": [
+        10,
+        10
+      ],
+      "position": [
+        660,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_dates_9",
+      "type": "text",
+      "text": "2025 · 2026",
+      "size": [
+        178,
+        28
+      ],
+      "position": [
+        1620,
+        285,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#262521"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    },
+    {
+      "id": "timeline_label_9",
+      "type": "text",
+      "text": "NOW",
+      "size": [
+        176,
+        25.2
+      ],
+      "position": [
+        1620,
+        330,
+        0
+      ],
+      "enable_3d": true,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 18,
+        "min_font_size": 18,
+        "max_font_size": 18,
+        "fit_mode": "shrink_only",
+        "fill": "#77746E"
+      },
+      "start_frame": 0,
+      "duration_frames": 1
+    }
+  ],
+  "output": {
+    "path": "date_timeline_v1_preview.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

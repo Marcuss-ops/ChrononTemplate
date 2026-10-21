@@ -14,8 +14,11 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/../.." && pwd)"
 CLI="${1:-$REPO/../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli}"
-ASSETS="${2:-$REPO/../Chronon3d}"
+ASSETS="${2:-$REPO}"
 OUT="${3:-$REPO/out/web_page_highlight_v1}"
+# The per-glyph folds fall back to the CPU text lane on both backends;
+# CHRONON_BACKEND=software is the deterministic choice on CPU-only hosts.
+BACKEND="${CHRONON_BACKEND:-vulkan}"
 # Verified clips are delivered to the user's MP4 folder when it is mounted
 # (WSL: /mnt/c/...). Override with argument 4 or WEB_MP4_DELIVERY_DIR.
 DELIVERY="${4:-${WEB_MP4_DELIVERY_DIR:-/mnt/c/Users/pater/OneDrive/Documenti/Chronomotion/MP4}}"
@@ -47,7 +50,7 @@ for plan in "$PLAN_DIR"/web_page_*.plan.json; do
     output="$RENDER_DIR/$name.mp4"
     echo "== $name"
     "$CLI" render --plan "$plan" --assets-root "$ASSETS" \
-        --backend vulkan --profile preview --fps 30 \
+        --backend "$BACKEND" --profile preview --fps 30 \
         --video-sink raw --pipe-pixfmt nv12 --chunks 1 \
         --fb-pool-budget-mb 512 --fb-pool-clear-policy trim-after-job \
         --start-frame 0 --end-frame 239 -o "$raw" || { failures=$((failures+1)); continue; }

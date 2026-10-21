@@ -167,7 +167,7 @@ namespace chronontemplate::docfx {
                 .fontSize = spec.yearFontSize,
                 .color = "#FFFFFF",
                 .name = "archival_year"});
-            year.position(960.f, 800.f);
+            year.position(960.f, spec.lineY + 85.f);
             year.alive(spec.inFrame + kYearIn, endFrame);
             year.animatePosition(spec.inFrame + kYearIn, kYearFrames,
                                  chrononmotion::Vector3(0.f, 18.f, 0.f),
@@ -187,7 +187,7 @@ namespace chronontemplate::docfx {
                 .fontSize = spec.headlineFontSize,
                 .color = "#4A1F16",
                 .name = "archival_headline_shadow"});
-            shadow.position(963.f, 894.f);
+            shadow.position(963.f, spec.lineY + 170.f);
             shadow.alive(spec.inFrame + kHeadlineIn, endFrame);
             shadow.animatePosition(spec.inFrame + kHeadlineIn, kHeadlineFrames,
                                    chrononmotion::Vector3(0.f, 30.f, 0.f),
@@ -202,7 +202,7 @@ namespace chronontemplate::docfx {
                 .fontSize = spec.headlineFontSize,
                 .color = spec.headlineColor,
                 .name = "archival_headline"});
-            headline.position(960.f, 890.f);
+            headline.position(960.f, spec.lineY + 166.f);
             headline.alive(spec.inFrame + kHeadlineIn, endFrame);
             headline.animatePosition(spec.inFrame + kHeadlineIn, kHeadlineFrames,
                                      chrononmotion::Vector3(0.f, 30.f, 0.f),

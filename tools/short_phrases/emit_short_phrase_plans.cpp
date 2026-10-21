@@ -451,7 +451,7 @@ namespace {
         const bool sentence = definition.id == "short_phrase_product_depth_parallax";
         const std::string fontPath = definition.id == "short_phrase_editorial_claude_terminal_focus"
                                    ? "assets/fonts/UbuntuMono-R.ttf"
-                                   : modern ? "assets/fonts/Bricolage-Grotesque.ttf"
+                                   : modern ? "assets/fonts/Inter-Bold.ttf"
                                    : sentence ? "assets/fonts/DMSans-Bold.ttf"
                                               : "assets/fonts/Inter-Bold.ttf";
         json textStyle{{"font", fontPath},
