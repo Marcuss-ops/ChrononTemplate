@@ -327,6 +327,12 @@ endif()
 add_executable(chronontemplate_emit_procedural_documentary_v2 tools/showcases/emit_procedural_documentary_v2.cpp)
 target_link_libraries(chronontemplate_emit_procedural_documentary_v2 PRIVATE chronontemplate)
 
+# Independent native C++ starter plans: Fast Intro and classic date timeline.
+add_executable(chronontemplate_emit_fast_intro_and_date_timeline
+        tools/fast_intro/emit_fast_intro_and_date_timeline.cpp)
+target_link_libraries(chronontemplate_emit_fast_intro_and_date_timeline PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_fast_intro_and_date_timeline PRIVATE -Wall -Wextra)
+
 # Optional native-plan canary for deterministic BackgroundPack V3 emission.
 add_executable(chronontemplate_background_canary_v1 tools/backgrounds/background_canary_v1.cpp)
 target_link_libraries(chronontemplate_background_canary_v1 PRIVATE chronontemplate)

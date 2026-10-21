@@ -101,16 +101,41 @@ namespace chronontemplate::web {
             for (int i = 0; i < n; ++i) {
                 const int begin = offset + i * kFoldStagger;
                 const double lo = 100.0 * i / n, hi = 100.0 * (i + 1) / n;
+                // A pending fold must select nothing. `fullWindowSelector`
+                // starts at 0..100, so every not-yet-started glyph animator
+                // selected the whole run and their rotations stacked, which
+                // overflowed the software glyph surface. Keep the window
+                // closed at 100..100 until this glyph's begin frame, open it
+                // for exactly kFoldFrames, then close it.
+                // The start angle stays moderate: a near-90-degree X fold
+                // still produces a very wide sheared glyph surface on a long
+                // headline, so 35 degrees gives the same read without the
+                // allocation spike.
                 Json selector = fullWindowSelector("glyph_fold_" + std::to_string(i));
                 if (begin > 0) {
-                    selector["start"]["keyframes"].push_back({{"frame", begin}, {"value", lo}});
-                    selector["end"]["keyframes"].push_back({{"frame", begin}, {"value", hi}});
+                    selector["start"]["keyframes"] = Json::array({
+                        {{"frame", 0}, {"value", 100.0}},
+                        {{"frame", begin - 1}, {"value", 100.0}},
+                        {{"frame", begin}, {"value", lo}},
+                        {{"frame", begin + kFoldFrames}, {"value", 100.0}}});
+                    selector["end"]["keyframes"] = Json::array({
+                        {{"frame", 0}, {"value", 100.0}},
+                        {{"frame", begin - 1}, {"value", 100.0}},
+                        {{"frame", begin}, {"value", hi}},
+                        {{"frame", begin + kFoldFrames}, {"value", 100.0}}});
+                } else {
+                    selector["start"]["keyframes"] = Json::array({
+                        {{"frame", 0}, {"value", lo}},
+                        {{"frame", kFoldFrames}, {"value", 100.0}}});
+                    selector["end"]["keyframes"] = Json::array({
+                        {{"frame", 0}, {"value", hi}},
+                        {{"frame", kFoldFrames}, {"value", 100.0}}});
                 }
                 Json rot = Json::array(), pos = Json::array(), opacity = Json::array();
                 auto sample = [&](int frame) {
                     const double p = static_cast<double>(std::clamp(frame - begin, 0, kFoldFrames)) / kFoldFrames;
                     const double eased = 1.0 - std::pow(1.0 - p, 3.0);
-                    rot.push_back({{"frame", frame}, {"value", Json::array({82.0 * (1.0 - eased), 0.0, 0.0})}});
+                    rot.push_back({{"frame", frame}, {"value", Json::array({35.0 * (1.0 - eased), 0.0, 0.0})}});
                     pos.push_back({{"frame", frame}, {"value", 36.0 * (1.0 - eased)}});
                     opacity.push_back({{"frame", frame}, {"value", eased}});
                 };

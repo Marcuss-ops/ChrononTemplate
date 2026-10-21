@@ -20,7 +20,7 @@
 
 namespace chronontemplate::elements {
 
-    /// Stable registry of the 31 graphics objects, in spec order.
+    /// Stable registry of the 33 graphics objects, in spec order.
     enum class ElementKind {
         DataTimeline = 0,
         MilestoneCard,
@@ -52,12 +52,14 @@ namespace chronontemplate::elements {
         RelationConnector,
         BeforeAfterSplit,
         FlowDiagramNode,
-        BoundedBox
+        BoundedBox,
+        XPostV1,
+        YouTubeCommunityPostV1
     };
 
     /// Stable dotted ID for an object, e.g. "annotation.glow_brush_trace".
     [[nodiscard]] const char* elementId(ElementKind kind);
-    /// All 30 IDs in registry order.
+    /// All registered IDs in registry order.
     [[nodiscard]] std::vector<std::string> allElementIds();
 
     /// Shared visual language. The palette resolves ink/paper/accent so the

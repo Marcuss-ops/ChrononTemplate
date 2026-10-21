@@ -24,10 +24,10 @@ namespace {
         check(scene.validate().empty(), "each timeline scene validates");
     }
 
-    void theRegistryHoldsThirtyOneUniqueIds() {
-        section("registry holds thirty-one unique ids");
+    void theRegistryHoldsThirtyThreeUniqueIds() {
+        section("registry holds thirty-three unique ids");
         const std::vector<std::string> ids = allElementIds();
-        check(ids.size() == 31, "the registry lists exactly thirty-one objects");
+        check(ids.size() == 33, "the registry lists exactly thirty-three objects");
         for (std::size_t i = 0; i < ids.size(); ++i) {
             check(!ids[i].empty(), "every registry id is non-empty");
             for (std::size_t j = i + 1; j < ids.size(); ++j) {
@@ -40,6 +40,10 @@ namespace {
               "the diagram id stays stable");
         check(std::string(elementId(ElementKind::BoundedBox)) == "web.bounded_box",
               "the bounded box receives its stable web id");
+        check(std::string(elementId(ElementKind::XPostV1)) == "web.x.post.v1" &&
+                      std::string(elementId(ElementKind::YouTubeCommunityPostV1)) ==
+                              "web.youtube.community_post.v1",
+              "platform social presets have stable IDs");
     }
 
     void dataTimelineComposes() {
@@ -165,7 +169,7 @@ namespace {
 }// namespace
 
 int main() {
-    theRegistryHoldsThirtyOneUniqueIds();
+    theRegistryHoldsThirtyThreeUniqueIds();
     dataTimelineComposes();
     milestoneCardComposes();
     dateRangeBracketComposes();

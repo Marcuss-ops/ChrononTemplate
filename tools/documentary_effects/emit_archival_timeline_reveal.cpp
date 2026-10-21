@@ -51,10 +51,10 @@ private:
 }
 
 int main(int argc, char** argv) {
-    const std::string year = argc > 1 ? argv[1] : "1971";
-    const std::string headline = argc > 2 ? argv[2] : "EXPOSED BY THE MEDIA";
+    const std::string year = argc > 1 ? argv[1] : "2025";
+    const std::string headline = argc > 2 ? argv[2] : "ALEX PASSED AWAY";
     const std::string path = argc > 3 ? argv[3]
-        : "ChrononTemplate/out/archival_timeline_reveal_v1/archival_timeline_reveal_v1.plan.json";
+        : "ChrononTemplate/golden_plans/date_spotlight_2025/date_spotlight_2025.plan.json";
     try {
         AssetBackend backend;
         RenderPlanContentHost host({

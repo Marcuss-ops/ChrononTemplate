@@ -44,13 +44,15 @@ namespace chronontemplate::elements {
             case ElementKind::BeforeAfterSplit: return "diagram.before_after_split";
             case ElementKind::FlowDiagramNode: return "diagram.flow_diagram_node";
             case ElementKind::BoundedBox: return "web.bounded_box";
+            case ElementKind::XPostV1: return "web.x.post.v1";
+            case ElementKind::YouTubeCommunityPostV1: return "web.youtube.community_post.v1";
             default: return "unknown.unknown";
         }
     }
 
     std::vector<std::string> allElementIds() {
         std::vector<std::string> ids;
-        for (int i = 0; i <= static_cast<int>(ElementKind::BoundedBox); ++i) {
+        for (int i = 0; i <= static_cast<int>(ElementKind::YouTubeCommunityPostV1); ++i) {
             ids.emplace_back(elementId(static_cast<ElementKind>(i)));
         }
         return ids;

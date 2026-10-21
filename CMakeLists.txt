@@ -207,6 +207,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/ui_camera/UiCameraChoreography.cpp
         src/chronontemplate/entities_with_text/DocumentarySnapshotPack.cpp
         src/chronontemplate/date_groups/DateGroupsPack.cpp
+        src/chronontemplate/date_timeline/DateTimelinePack.cpp
+        src/chronontemplate/fast_intro/FastIntroPack.cpp
         src/chronontemplate/entities_with_text/EntityFilmstripPack.cpp
         src/chronontemplate/important_phrases/ImportantPhrasePack.cpp
         src/chronontemplate/important_phrases/apple/ApplePhrasePack.cpp
@@ -313,6 +315,21 @@ add_executable(chronontemplate_emit_web_page_highlight
         tools/web_presets/emit_web_page_highlight.cpp)
 target_link_libraries(chronontemplate_emit_web_page_highlight PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_page_highlight PRIVATE -Wall -Wextra)
+
+# Reference web phrase rebuilds are direct native render-plan V3 data. The
+# provided screenshots supply copy and composition references only.
+add_executable(chronontemplate_emit_reference_web_phrases
+        tools/web_presets/emit_reference_web_phrases.cpp)
+target_include_directories(chronontemplate_emit_reference_web_phrases PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_reference_web_phrases PRIVATE -Wall -Wextra)
+
+# Ten-photo NBA corkboard Fast Intro with native editable camera and note layers.
+add_executable(chronontemplate_emit_fast_intro_board_10
+        tools/nba_rivalry/emit_fast_intro_board_10.cpp)
+target_include_directories(chronontemplate_emit_fast_intro_board_10 PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_fast_intro_board_10 PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_web_classic_home
         tools/web_presets/emit_web_classic_home.cpp)

@@ -61,7 +61,15 @@ camera_roll/                TitleCameraPack + SceneCameraPack — camera-only mo
 transitions/                TransitionPack — eight rapid light looks
 captions_dataviz/           CaptionsDataVizPack — PCM beat grid, beat-timed captions, bar + step-line charts
 composers/                  LayoutComposer — flex row/column/grid boards plus FLIP moves
+fast_intro/                 FastIntroPack — independent short opening composition
+date_timeline/              DateTimelinePack — classic date rail and chronology
 ```
+
+Fast Intro and Date Timeline are separate native C++ packs and separate scenes.
+The former has a title, subtitle, kicker, three topic chips, an animated rail
+and marker; the latter places all twenty sample years in ten paired milestones
+on a classic chronology. See `docs/FAST_INTRO_V1_CONTRACT.md` and
+`docs/DATE_TIMELINE_V1_CONTRACT.md`.
 
 ## Tools layout
 
@@ -804,7 +812,7 @@ cmake --build build/dev-fast --target chronontemplate_emit_web_page_highlight
 ./build/dev-fast/chronontemplate_emit_web_page_highlight out/web_page_highlight_v1
 ../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli \
     validate --plan "$PWD/out/web_page_highlight_v1/web_page_highlight3d_light_v1.plan.json" \
-    --assets-root "$PWD/../Chronon3d"
+    --assets-root "$PWD"
 ```
 
 Render the clips on a GPU/NVENC host with the bounded raw-NV12 flow
