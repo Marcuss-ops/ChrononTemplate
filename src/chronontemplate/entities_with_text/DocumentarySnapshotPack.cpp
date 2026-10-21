@@ -2,6 +2,7 @@
 
 #include "chrononmotion/math/MathUtils.hpp"
 #include "chrononmotion/motion/CameraMotion.hpp"
+#include "chrononmotion/motion/CameraFocusSequence.hpp"
 #include "chrononmotion/motion/CameraRecipe.hpp"
 #include "chrononmotion/motion/CameraRig.hpp"
 #include "chrononmotion/motion/Easing.hpp"
@@ -504,7 +505,6 @@ namespace chronontemplate {
         const Vector3 titleCam = cameraAt(shot.title, shot.cameraDistance);
         const Vector3 photoCam = cameraAt(finalAnchor, finalDistance);
         const float closeDistance = shot.cameraDistance * 0.58f;
-        auto& focus = rig.focusDistanceTrack();
         std::vector<chrononmotion::motion::camera::CameraTrackWaypoint> cameraWaypoints;
         const auto point = [&](int frame, const Vector3& p, const Vector3& aim,
                                const Easing& easing = Easing::easeInOut()) {
@@ -690,41 +690,10 @@ namespace chronontemplate {
         }
         chrononmotion::motion::camera::applyCameraTrack(rig, cameraWaypoints, fps);
         if (shot.recipe == DocumentaryRecipe::FocusDrop) {
-            // The RenderPlan DOF bridge represents a world-Z focus plane. As
-            // this recipe moves the camera, sample the optical-axis distance
-            // that intersects an eased title-Z → snapshot-Z rack-focus plane.
-            for (int frame = start; frame <= end; ++frame) {
-                const float progress = frame <= handoff ? 0.f :
-                    static_cast<float>(frame - handoff) / static_cast<float>(end - handoff);
-                const float eased = progress * progress * (3.f - 2.f * progress);
-                const float focusPlaneZ = shot.title.center.z +
-                    (last.center.z - shot.title.center.z) * eased;
-                const CameraPose pose = rig.sample(at(frame, fps));
-                Vector3 forward(0.f, 0.f, -1.f);
-                forward.applyQuaternion(pose.orientation);
-                forward.normalize();
-                if (std::fabs(forward.z) <= 1e-4f)
-                    throw std::invalid_argument(
-                        "addDocumentarySnapshot: focus-drop optical axis cannot reach its focus plane");
-                const float distance = (focusPlaneZ - pose.position.z) / forward.z;
-                if (!std::isfinite(distance) || distance <= 0.f)
-                    throw std::invalid_argument(
-                        "addDocumentarySnapshot: focus-drop focus plane must stay in front of the camera");
-                focus.add(at(frame, fps), distance, Easing::linear());
-            }
+            chrononmotion::motion::camera::applyZPlaneFocusTrack(
+                rig, start, end, handoff, shot.title.center.z, last.center.z, fps);
         } else {
-            // Keep focus locked to the authored camera target at every frame.
-            // Interpolating only endpoint distances can place the legacy
-            // RenderPlan Z focus plane behind its camera during pans and turns.
-            for (int frame = start; frame <= end; ++frame) {
-                const CameraPose pose = rig.sample(at(frame, fps));
-                const float distance = chrononmotion::motion::CameraFocusResolver::resolveFocus(
-                    chrononmotion::motion::CameraFocusMode::TargetDistance, pose, pose.target);
-                if (!std::isfinite(distance) || distance <= 0.f)
-                    throw std::invalid_argument(
-                        "addDocumentarySnapshot: camera target must stay in front of the focal plane");
-                focus.add(at(frame, fps), distance, Easing::linear());
-            }
+            chrononmotion::motion::camera::applyTargetFocusTrack(rig, start, end, fps);
         }
         rig.setPosition(photoCam).setTarget(finalAnchor.center);
     }
