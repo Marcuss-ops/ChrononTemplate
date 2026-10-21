@@ -262,18 +262,15 @@ namespace chronontemplate {
             fail("parenting unproven: the Null root never moves across the stamps");
 
         // 4. Safe-area framing of the measured panel across the whole window.
-        chrononmotion::motion::ScreenCameraIntrinsics intrinsics;
-        intrinsics.viewport = viewport;
         for (int frame = 0; frame <= spec.totalFrames; ++frame) {
             const float seconds = static_cast<float>(frame) / fps;
             scene.motion().evaluate(frame);
             const Vector3 titleWorld = translationOf(scene.motion().worldMatrix(panel.title));
             const auto pose = rig.sample(seconds);
-            intrinsics.fovDegrees = pose.fov;
-            const Vector2 screen =
-                chrononmotion::motion::projectToScreen(titleWorld, pose, intrinsics);
-            if (!(screen.x >= 0.05f * viewport.x && screen.x <= 0.95f * viewport.x &&
-                  screen.y >= 0.08f * viewport.y && screen.y <= 0.92f * viewport.y)) {
+            chrononmotion::motion::CameraValidator framing;
+            framing.addBounds({"title", titleWorld, {0.f, 0.f, 0.f}})
+                .requireInsideSafeArea("title", 0.05f, 0.08f);
+            if (!framing.validate(pose, viewport).passed) {
                 fail("title leaves the safe area at frame " + std::to_string(frame));
                 break;
             }
