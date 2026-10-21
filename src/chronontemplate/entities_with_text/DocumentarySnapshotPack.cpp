@@ -3,6 +3,7 @@
 #include "chrononmotion/math/MathUtils.hpp"
 #include "chrononmotion/motion/CameraMotion.hpp"
 #include "chrononmotion/motion/CameraFocusSequence.hpp"
+#include "chrononmotion/motion/CameraFraming.hpp"
 #include "chrononmotion/motion/CameraRecipe.hpp"
 #include "chrononmotion/motion/CameraRig.hpp"
 #include "chrononmotion/motion/Easing.hpp"
@@ -23,6 +24,13 @@ namespace chronontemplate {
 
         constexpr float kPi = 3.14159265358979323846f;
         float at(int frame, float fps) { return static_cast<float>(frame) / fps; }
+
+        float frameDistance(float halfWidth, float halfHeight, float fov,
+                            const Vector2& canvas, float margin) {
+            return chrononmotion::motion::CameraFramingSolver::distanceForBounds(
+                halfWidth, halfHeight, 0.f, fov, canvas,
+                chrononmotion::motion::CameraSafeArea::full()) * margin;
+        }
 
         bool valid(const ShotAnchor& a) {
             return std::isfinite(a.center.x) && std::isfinite(a.center.y) &&
@@ -467,13 +475,10 @@ namespace chronontemplate {
                                          (top + bottom) * 0.5f, 0.f);
             finalAnchor.halfWidth = (right - left) * 0.5f;
             finalAnchor.halfHeight = (bottom - top) * 0.5f;
-            const float tanHalfFov = std::tan(rig.fov() * 0.5f * kPi / 180.f);
             const Vector2 canvas = scene.canvas();
-            const float verticalDistance = finalAnchor.halfHeight / tanHalfFov;
-            const float horizontalDistance = finalAnchor.halfWidth /
-                (tanHalfFov * canvas.x / canvas.y);
             finalDistance = std::max(shot.cameraDistance,
-                                     std::max(verticalDistance, horizontalDistance) * 1.10f);
+                frameDistance(finalAnchor.halfWidth, finalAnchor.halfHeight,
+                              rig.fov(), canvas, 1.10f));
         } else if (shot.recipe == DocumentaryRecipe::PhotoStack &&
                    !shot.snapshots.back().caption.empty()) {
             const auto& snapshot = shot.snapshots.back();
@@ -494,13 +499,10 @@ namespace chronontemplate {
                                          (top + bottom) * 0.5f, snapshot.anchor.center.z);
             finalAnchor.halfWidth = (right - left) * 0.5f;
             finalAnchor.halfHeight = (bottom - top) * 0.5f;
-            const float tanHalfFov = std::tan(rig.fov() * 0.5f * kPi / 180.f);
             const Vector2 canvas = scene.canvas();
-            const float verticalDistance = finalAnchor.halfHeight / tanHalfFov;
-            const float horizontalDistance = finalAnchor.halfWidth /
-                (tanHalfFov * canvas.x / canvas.y);
             finalDistance = std::max(shot.cameraDistance * 1.25f,
-                                     std::max(verticalDistance, horizontalDistance) * 1.10f);
+                frameDistance(finalAnchor.halfWidth, finalAnchor.halfHeight,
+                              rig.fov(), canvas, 1.10f));
         }
         const Vector3 titleCam = cameraAt(shot.title, shot.cameraDistance);
         const Vector3 photoCam = cameraAt(finalAnchor, finalDistance);
@@ -523,9 +525,9 @@ namespace chronontemplate {
                                     (shot.title.center.z + openingPhoto.center.z) * 0.5f);
             const float verticalExtent = std::fabs(shot.title.center.y - openingPhoto.center.y) * 0.5f +
                                          std::max(shot.title.halfHeight, openingPhoto.halfHeight);
-            const float tanHalfFov = std::tan(rig.fov() * 0.5f * kPi / 180.f);
+            const Vector2 canvas = scene.canvas();
             openingCameraDistance = std::max(shot.cameraDistance,
-                                             verticalExtent / tanHalfFov * 1.06f);
+                frameDistance(0.f, verticalExtent * 0.5f, rig.fov(), canvas, 1.06f));
         }
         const Vector3 openingCamera = shot.recipe == DocumentaryRecipe::PullbackReveal
                                               ? cameraAt(shot.title, closeDistance)
@@ -551,10 +553,9 @@ namespace chronontemplate {
                 break;
             }
             case DocumentaryRecipe::PushThroughSnapshot: {
-                const float tanHalfFov = std::tan(rig.fov() * 0.5f * kPi / 180.f);
-                const float coverDistance = std::max(1.f, 0.96f * std::min(
-                        last.halfWidth / (tanHalfFov * rig.aspect()),
-                        last.halfHeight / tanHalfFov));
+                const float coverDistance = std::max(1.f, 0.96f *
+                    chrononmotion::motion::CameraFramingSolver::coverDistanceForBounds(
+                        last.halfWidth, last.halfHeight, rig.fov(), scene.canvas()));
                 const Vector3 through = cameraAt(last, coverDistance);
                 point(handoff, titleCam, shot.title.center);
                 point(fastTransitionEnd, through, last.center, Easing::easeIn());
