@@ -1,5 +1,5 @@
 // Emitter: BulletListPack demo -> chronon render-plan JSON.
-// Usage: emit_bullet_list_demo [SEED] [OUT_PLAN_JSON]
+// Usage: emit_bullet_list_demo [SEED] [OUT_PLAN_JSON] [REVEAL_INDEX]
 #include "chronontemplate/bullet_list/BulletListPack.hpp"
 #include "chronontemplate/core/PlanLowering.hpp"
 #include "chronontemplate/core/RenderPlanContentHost.hpp"
@@ -53,7 +53,8 @@ int main(int argc, char** argv) {
     const std::uint32_t seed = argc > 1 ? static_cast<std::uint32_t>(std::stoul(argv[1])) : 11u;
     const std::string path = argc > 2 ? argv[2]
         : "ChrononTemplate/out/bullet_list_v1/bullet_list_v1.plan.json";
-    constexpr int kFrames = 240;
+    const int revealIndex = argc > 3 ? std::stoi(argv[3]) : -1;
+    constexpr int kFrames = 150;
     try {
         AssetBackend backend;
         RenderPlanContentHost host({
@@ -66,15 +67,32 @@ int main(int argc, char** argv) {
         TemplateScene scene(sceneId, 30.f, host, 1920.f, 1080.f);
 
         BulletListSpec spec;
-        spec.items = {"Primo punto della lista",
-                      "Secondo punto, con un dettaglio",
-                      "Terzo punto della sequenza",
-                      "Quarto punto che chiude il ragionamento"};
+        if (revealIndex >= 0) {
+            const auto& choices = bulletRevealChoices();
+            if (static_cast<std::size_t>(revealIndex) >= choices.size())
+                throw std::invalid_argument("REVEAL_INDEX must be between 0 and 7");
+            spec.items = {
+                "Il mercato cresce quando le persone scelgono qualità e innovazione",
+                "Investire nel digitale riduce tempi e costi operativi",
+                "Una rete locale raggiunge nuovi clienti ogni giorno"};
+            spec.font = "ChrononTemplate/assets/fonts/Inter-SemiBold.ttf";
+            spec.reveal = choices[static_cast<std::size_t>(revealIndex)];
+            spec.revealDuration = 22;
+            spec.staggerFrames = 40;
+            spec.cameraDuration = 140;
+            spec.maxLineLength = 30;
+            spec.camera = TitleCameraMove::VerticalRise;
+        } else {
+            spec.items = {"Primo punto della lista",
+                          "Secondo punto, con un dettaglio",
+                          "Terzo punto della sequenza",
+                          "Quarto punto che chiude il ragionamento"};
+        }
         spec.seed = seed;
         spec.centerX = 960.f;
         spec.centerY = 540.f;
-        spec.lineSpacing = 120.f;
-        spec.fontSize = 56.f;
+        spec.lineSpacing = revealIndex >= 0 ? 250.f : 120.f;
+        spec.fontSize = revealIndex >= 0 ? 46.f : 56.f;
         const BulletListComposition board = addBulletList(scene, spec);
         if (const auto problems = scene.validate(); !problems.empty())
             throw std::runtime_error("bullet list invalid: " + problems.front());

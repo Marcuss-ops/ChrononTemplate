@@ -10,7 +10,7 @@ Comprehensive Optical Finishing & Kinematics Architecture:
    - ref2.png -> Scene 3: didone_inline_emphasis ("Non accettare / la propria / condizione." with "accettare" in #FF1018)
    - ref4.png -> Scene 4: didone_hero_statement ("è il valore più grande / di ogni business" with "ogni business" in #FF1018)
 2. Pinned Didone Face:
-   - Bodoni72-BookItalic.ttf — use the shipped Book Italic face without synthetic weight or glyph dilation.
+   - BodoniModa-Italic.ttf — use the bundled Didone italic face without synthetic weight or glyph dilation.
 3. Auto-fit / Responsive Bounds:
    - Typography fills 76%–87% of viewport width edge-to-edge, matching editorial documentary hero statements.
    - Tight negative tracking (-2.5px to -3.5px) for magazine-grade letter proximity.
@@ -33,11 +33,12 @@ import subprocess
 from PIL import Image, ImageDraw, ImageFont
 
 CLI_PATH = os.path.abspath("Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli")
+CAMERA_BAKER = os.path.abspath("ChrononTemplate/build/dev-fast/chronontemplate_camera_plan_bake")
 if not os.path.exists(CLI_PATH):
     CLI_PATH = os.path.abspath("Chronon3d/build/chronon/linux-release-validation/apps/chronon3d_cli/chronon3d_cli")
 
 ASSETS_ROOT = os.path.abspath("Chronon3d")
-FONT_BLACK_REL = "assets/fonts/Bodoni72-BookItalic.ttf"
+FONT_BLACK_REL = "assets/fonts/BodoniModa-Italic.ttf"
 FONT_BLACK_ABS = os.path.join(ASSETS_ROOT, FONT_BLACK_REL)
 
 OUT_DIR = os.path.abspath("ChrononTemplate/out/editorial_didone_reference_match_v1")
@@ -760,6 +761,10 @@ def render_scene(plan, scene_idx, scene_name):
 
     with open(plan_path, "w") as f:
         json.dump(plan, f, indent=2)
+    if plan.get("camera_animation"):
+        if not os.path.isfile(CAMERA_BAKER):
+            raise RuntimeError(f"CM3D camera baker not built: {CAMERA_BAKER}")
+        subprocess.run([CAMERA_BAKER, plan_path], check=True)
 
     cmd = [
         CLI_PATH,
@@ -833,7 +838,7 @@ def create_side_by_side(ref_path, rendered_path, out_composite_path, title):
 
     # Labels
     draw.text((20, 18), f"REFERENCE TARGET ({title})", fill=(200, 200, 200, 255))
-    draw.text((ref_w + 35, 18), f"CHRONON Vulkan (Bodoni 72 Book Italic; restrained optical finish)", fill=(255, 60, 65, 255))
+    draw.text((ref_w + 35, 18), f"CHRONON Vulkan (Bodoni Moda Italic; restrained optical finish)", fill=(255, 60, 65, 255))
 
     # Paste images
     composite.paste(ref_resized, (15, header_h))
@@ -908,7 +913,7 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
 
     print("=== Editorial Didone Titles Canary v7 (GPU-native, verified source plan) ===")
-    print("Typography: Bodoni 72 Book Italic | Vulkan native render graph + pipe encoder | conservative bloom; unsupported post-effects omitted")
+    print("Typography: Bodoni Moda Italic | Vulkan native render graph + pipe encoder | conservative bloom; unsupported post-effects omitted")
     print("Sequence: four reference scenes + eased camera handoff, five x 5 seconds")
     print("-------------------------------------------------------------------------------")
     scenes = [
@@ -924,6 +929,10 @@ def main():
             plan_path = os.path.join(OUT_DIR, f"scene{index}_{name}.plan.json")
             with open(plan_path, "w", encoding="utf-8") as plan_file:
                 json.dump(plan, plan_file, indent=2)
+            if plan.get("camera_animation"):
+                if not os.path.isfile(CAMERA_BAKER):
+                    raise RuntimeError(f"CM3D camera baker not built: {CAMERA_BAKER}")
+                subprocess.run([CAMERA_BAKER, plan_path], check=True)
             print(f"[+] Wrote current plan: {plan_path}")
         return
 

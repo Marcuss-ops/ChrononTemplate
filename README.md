@@ -4,6 +4,21 @@ Separate C++ composition presets for ChrononMotion. This module does not belong
 inside the ChrononMotion core: it consumes the core's `MotionScene`, `Layer`,
 `ContentRef`, camera, lighting, material and preset APIs.
 
+## Fast path: render the archival card examples
+
+From the repository root, one command builds the emitter, writes the plans,
+composes the frames with Vulkan, and encodes all three MP4s with NVENC:
+
+```sh
+python3 ChrononTemplate/tools/single_images/render_archival_cards_chronon.py
+```
+
+The synchronized NV12 handoff avoids intermittent black frames from direct
+native-surface encoding. The command fails if NVENC is unavailable instead of
+silently switching to CPU encoding.
+See [the archival cards quickstart](docs/ARCHIVAL_CARDS_QUICKSTART.md) for
+single-scene and custom-path options.
+
 ## Contents
 
 ```text

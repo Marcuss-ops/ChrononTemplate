@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = ROOT.parent
 CHRONON = WORKSPACE / "Chronon3d"
 DEFAULT_OUT = ROOT / "out/text_depth_focus_v1"
+CAMERA_BAKER = ROOT / "build/dev-fast/chronontemplate_camera_plan_bake"
 CLI = CHRONON / "build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
 WIDTH, HEIGHT, FPS, FRAMES = 1920, 1080, 30, 150
 FONT = "Chronon3d/assets/fonts/Inter-Bold.ttf"
@@ -377,6 +378,10 @@ def write_plans(out_dir: Path) -> list[Path]:
     for plan in all_plans():
         path = out_dir / f"{plan['job_id']}.plan.json"
         path.write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
+        if plan.get("camera_animation"):
+            if not CAMERA_BAKER.is_file():
+                raise RuntimeError(f"CM3D camera baker not built: {CAMERA_BAKER}")
+            subprocess.run([str(CAMERA_BAKER), str(path)], check=True)
         paths.append(path)
     manifest = {"schema": "chronontemplate.text-depth-focus.v1", "family": "text_depth_focus_v1",
         "renderer_contract": "RenderPlan V3; semantic word TextAnimator blur/scale/opacity, 3D layer position_z, camera DOF",

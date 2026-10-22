@@ -180,6 +180,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_archival_lens_look_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_archival_lens_look_test COMMAND chronontemplate_archival_lens_look_test)
 
+    add_executable(chronontemplate_archival_card_pack_test tests/archival_card_pack.cpp)
+    target_link_libraries(chronontemplate_archival_card_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_archival_card_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_archival_card_pack_test COMMAND chronontemplate_archival_card_pack_test)
+
     add_executable(chronontemplate_doc_effects_camera_test tests/doc_effects_camera.cpp)
     target_link_libraries(chronontemplate_doc_effects_camera_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_doc_effects_camera_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
