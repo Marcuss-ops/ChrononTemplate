@@ -1,7 +1,7 @@
 // ChrononTemplate — the bullet-list documentary pack.
 //
 // A vertical list of points where every bullet enters with its own reveal
-// (slide, rise, drop, scale pop, tilt, depth, yaw flip) and the whole board is
+// (slide, rise, drop, scale pop, depth, fade, soft rise) and the whole board is
 // framed by one camera move drawn from the title-camera vocabulary. Both
 // choices are deterministic: the same seed always yields the same reveals and
 // the same camera, so a render is reproducible and a preview is trustworthy.
@@ -33,7 +33,9 @@ namespace chronontemplate {
         ScalePop,    ///< bullet_scale_pop: grows from 60% with overshoot
         TiltIn,      ///< bullet_tilt_in: swings up from a pitched plane
         DepthIn,     ///< bullet_depth_in: comes toward the lens from depth
-        YawFlipIn    ///< bullet_yaw_flip: turns in on the vertical axis
+        YawFlipIn,   ///< bullet_yaw_flip: turns in on the vertical axis (legacy)
+        FadeIn,      ///< bullet_fade_in: appears through opacity only
+        SoftRise     ///< bullet_soft_rise: a short, restrained rise and fade
     };
 
     /// Stable snake-case id of a reveal.
@@ -62,9 +64,11 @@ namespace chronontemplate {
         float centerX{960.f};
         float centerY{540.f};
         float lineSpacing{110.f};
+        std::size_t maxLineLength{30};      ///< wraps bullet text at word boundaries
         int startFrame{0};
         int staggerFrames{12};              ///< frames between consecutive bullets
         int revealDuration{24};             ///< frames each bullet takes to enter
+        int cameraDuration{0};              ///< explicit camera move length; 0 = auto
         int outFrame{-1};                   ///< when the list fades out; -1 = stays
         int fadeOutDuration{12};
         std::uint32_t seed{0};

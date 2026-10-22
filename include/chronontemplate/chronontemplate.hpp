@@ -36,6 +36,7 @@
 #include "chronontemplate/elements/DocumentaryElements.hpp"
 #include "chronontemplate/elements/DiagramElements.hpp"
 #include "chronontemplate/single_images/ArchivalLensLook.hpp"
+#include "chronontemplate/single_images/ArchivalCardPack.hpp"
 #include "chronontemplate/multiple_images/MultiImagePack.hpp"
 #include "chronontemplate/backgrounds/BackgroundPack.hpp"
 #include "chronontemplate/map/ModernMapPack.hpp"

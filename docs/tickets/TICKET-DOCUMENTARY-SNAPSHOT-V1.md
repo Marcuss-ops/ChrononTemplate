@@ -104,9 +104,11 @@ narrative handoff while ChrononMotion3D evaluates the camera path.
   from the no-blur render over the moving title/photo projection; settled frame
   120 differs by at most 1 RGB level and remains visually sharp. Plan emission
   and decode validate through the connected CLI.
-- [ ] **P1 — recipe handoff visual review:** inspect transition-specific frames
+- [x] **P1 — recipe handoff visual review:** inspect transition-specific frames
   for all 12 recipes through `RenderPlanContentHost`, then record any
-  composition fixes. Frame-53 renders exist for all 12 recipes. Fresh final
+  composition fixes. The eleven recipes other than Snap-down have three-frame
+  software samples and a reviewed contact sheet; Snap-down has five reviewed
+  samples. Frame-53 renders exist for all 12 recipes. Fresh final
   holds were rendered with explicit `Fit` for all 12 and reviewed as a contact
   sheet under `out/documentary_snapshot_v1/recipe_final_v3/`. Single-card pixel
   checks pass at aspect 1.3036 (source 1.3043) with even 7 px margins; PhotoStack,
@@ -120,10 +122,35 @@ narrative handoff while ChrononMotion3D evaluates the camera path.
   envelope; the no-shutter connected frame-120 diagnostic now shows the final
   `ROME, 1986` caption fully legible above the last card, with the card and text
   inside the viewport (`out/documentary_snapshot_v1/photo_stack_caption_fit_v5.png`).
-  The full temporal-shutter Vulkan render is still pending: Chronon3D currently
-  rejects a native SourceOver composite during this recipe, and the error path
-  is being instrumented to expose the backend's specific failure. Continue
-  sampling all other recipe transitions.
+  The PhotoStack 90°/8-sample Vulkan shutter render was attempted at 1920×1080
+  for frames 45–53 through both raw and strict GPU/NVENC paths. Raw Vulkan exits
+  successfully but produces a nearly white frame 46 and overbright frame 47
+  versus software (RGB means 241.6/241.5/241.6 vs 34.5/31.6/30.1 at frame 46).
+  Strict `require_gpu_native` fails with `UnsupportedCapability`: Vulkan has
+  no legacy-node fallback for the native shape (`shape_type=1`) and NVENC
+  accepts zero frames. The washed-out FocusDrop/SplitDepth frames were caused
+  by `SourceNode`'s native rect fast path drawing `RenderNode::color` while
+  ignoring non-solid fill payloads. That path now accepts only enabled solid
+  fills; radial rects reach the Vulkan native gradient shader. Both
+  DoF-disabled, single-sample plans now complete all 121 frames via
+  `require_gpu_native` + NVENC with zero conversion and staging-copy bytes, and
+  the decoded frame-90 images pass the visual check. This does not certify the
+  authored shutter path: strict GPU temporal accumulation still needs a native
+  weighted-add accumulator. Evidence is in
+  `Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/gpu-fullshutter-review/`.
+  The PhotoStack strict failure log, nine-frame backend comparison, and raw
+  artifacts are recorded in
+  `Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/photo-stack-vulkan/`.
+  This is an open Vulkan temporal-compositing defect; return code zero from the
+  raw path does not pass the visual gate. The earlier request to sample all
+  other recipe transitions is now complete, with the
+  three-frame review evidence listed below. A refreshed five-frame Snap-down
+  review now covers frames 0/45/53/80/120; title readability, the title-to-photo
+  handoff, and the settled Fit card pass through the rebuilt Chronon3D CLI.
+  Evidence is under
+  `Chronon3d/docs/evidence/documentary-snapshot-snap-down/`. The other eleven
+  recipes now have a three-frame software sample review; full-shutter Vulkan
+  review remains open.
   Earlier frame-53 sheet is under
   `out/documentary_snapshot_v1/recipe_handoff_v1/`. Split-depth focus endpoints
   and the Motion→RenderPlan DOF mapping have been corrected. Focus-drop opening
@@ -227,8 +254,9 @@ narrative handoff while ChrononMotion3D evaluates the camera path.
     checks pass); connected frame 80 shows one active label. Its frame-120
     caption is still absent in the earlier v3 diagnostic; the updated v5
     no-shutter connected frame now confirms it is legible and within frame.
-    Full-shutter Vulkan visual review remains open while the native composite
-    failure is diagnosed.
+    Full-shutter Vulkan visual review remains open; the strict capability error
+    and raw visual mismatch are now reproduced and documented in the evidence
+    directory referenced under action 15.
     Artifacts: `out/documentary_snapshot_v1/photo_stack_caption_handoff_v1/`,
     `out/documentary_snapshot_v1/photo_stack_caption_fit_v2/`, and the
     no-shutter diagnostics `out/documentary_snapshot_v1/photo_stack_caption_fit_v3.png`
@@ -248,10 +276,13 @@ narrative handoff while ChrononMotion3D evaluates the camera path.
 18. [ ] Make the connected documentary render produce visible pixels through
     the strict Vulkan path, then inspect and publish a GPU-rendered frame/video.
     The current 1920x1080 PhotoStack plan can lose the Vulkan device when its
-    radial light-leak shape or image EffectStack falls back through CPU readback.
+    image EffectStack falls back through CPU readback. Native radial Rect fill
+    support was added for pad-spread gradients with two/three stops, but its
+    full-timeline frame-90 visual output remains washed out and has not passed
+    strict-native NVENC certification.
     With those optional effects removed, a raw Vulkan job exits successfully but
     its output is fully transparent (all RGBA bytes are zero); do not treat that
-    output as visual evidence. The debug trace identifies the unsupported radial
+    output as visual evidence. The earlier debug trace identifies the radial
     Rect as `ShapeType::Rect` (type 1), while `synchronize_native_output` sees
     no retained surface handle on the frame output. Investigate native output
     residency/readback and unsupported-effect policy before the Drive upload.
@@ -308,6 +339,124 @@ narrative handoff while ChrononMotion3D evaluates the camera path.
 - [x] Render all seven style looks visually in Chronon3D; the pack sends frame,
   grade, grain, and vignette settings through the normal image request.
 
+## Connected render refresh (2026-10-21)
+
+The connected canary pointed at a removed `build/documentary-adapter` path;
+`render_documentary_snapshot_canary.py` now uses the current `build/dev-fast`
+target. Re-running the canary with the release CLI exposed mirrored 3D text in
+the title hold. The RenderPlan compiler had forced negative X scale on every
+3D text layer, including animated scale values. Removing that reflection
+restored readable 3D text. `chronon3d_cli` rebuilt with `-j16`, and the
+Snap-down plan was rendered at 1920×1080 for frames 0, 45, 53, 80, and 120.
+The refreshed contact sheet and five decoded PNGs are retained under
+`Chronon3d/docs/evidence/documentary-snapshot-snap-down/`; the visual review
+confirms a legible title hold, a clear snapshot handoff, and a correctly fitted
+settled card. The current Fit pixel check reports 7 px margins on all sides
+and 1.3036:1 rendered aspect against a 1.3043:1 source.
+
+The eleven remaining recipe transitions were rendered through the connected
+adapter at frames 0, 53, and 120 on the software backend and visually reviewed
+on 2026-10-21. All 33 sample frames rendered; the intermediate portal, focus,
+reveal, and multi-photo states appear, and all recipes settle to their final
+card composition. Pullback-reveal deliberately overscans the title during its
+mid-transition and returns to the fitted card by frame 120. Plans, raw frames,
+PNG projections, logs, and the reviewed contact sheet are in
+`Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/`. This closes
+the sampled recipe review; full temporal-shutter Vulkan review and the full
+601-frame torture render remain open.
+
+### Connected recipe Vulkan visual follow-up (2026-10-21)
+
+All eleven connected plans were sampled on Vulkan at transition frames 45,
+46, 53, and 54, at frame 90, and at frame 120 using a diagnostic 1°/2-sample
+shutter. Their original 90°/8-sample plans were also rendered on Vulkan at
+frame 53. This readback lane is not strict native-GPU/NVENC certification.
+The baseline full-shutter results include two exact zero-RGBA outputs
+(`focus-drop`, `split-depth`) and a blank photo for `reveal-90`; the Vulkan
+visual gate therefore failed. Reveal90's sampled photo visibility and
+orientation are now corrected as recorded below, while the two DoF failures
+still fail the recipe review. Other cross-backend findings and pixel
+metrics are in
+`Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/gpu-fullshutter-review/`.
+For `focus-drop` and `split-depth`, disabling only `camera.dof.enabled` makes
+frame 53 visible on Vulkan with the original 90°/8-sample shutter. The source
+routes CPU depth to `VulkanBackend::apply_per_pixel_dof`, which requires a
+native depth surface; the current default Vulkan raw job returns success with
+zero RGBA instead of surfacing the unsupported operation. The ablation and
+renderer path evidence are recorded beside the full-shutter contact sheets.
+Strict native Vulkan/NVENC frame-53 follow-ups were attempted with authored
+DoF and with DoF disabled. The first `focus-drop` runs SIGSEGVed in a oneTBB
+temporal-accumulation task; GDB evidence is preserved in the GPU evidence
+folder. The two CPU accumulation loops now check for host pixels before their
+`pixels_row()` accesses. After rebuilding `chronon3d_cli`, strict full-shutter
+`focus-drop` and DoF-disabled `split-depth` stop with an explicit requirement
+for a native weighted-add accumulator, and NVENC accepts zero frames. This
+prevents the process crash without enabling readback or software fallback.
+The available Vulkan weighted-surface operator is source-over, so the GPU
+temporal average is still unimplemented. `split-depth` with authored DoF also
+fails strict depth locality and has no native encode source surface. Neither
+recipe has a successful strict-native full-shutter visual frame. A no-shutter
+strict-native control proves `focus-drop` can encode a visually correct
+1920×1080 H.264 frame with zero conversion/staging bytes; the DoF-on control is
+pixel-identical to DoF-off, so this does not certify visible DoF. The equivalent
+`split-depth` control encodes successfully but decodes to a uniform gray frame.
+These controls isolate the focus-drop crash to the temporal route and expose a
+separate split-depth content failure. Logs, source plans and decoded images are
+recorded in
+`Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/gpu-fullshutter-review/`.
+Actions 16 and 18 remain open on this strict GPU blocker, alongside the full
+transition review and 601-frame torture render.
+The previously missing frame-90 Vulkan GPU sample is now rendered for all
+eleven recipes and added to
+`Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/gpu-transition-review/gpu-transition-contact-all-v3.png`.
+At diagnostic 1°/2-sample frame 90, focus-drop and split-depth are black,
+foreground-photo-pass is white in the baseline recipe render; the other seven
+show visible content. Separate authored 90°/8-sample DoF-off Vulkan probes at
+frame 90 restore faint structure to focus-drop and split-depth but remain
+severely washed out (mean RGB 242.26 and 228.91 on the 8-bit scale).
+The source-fixed Reveal90 plan was separately rendered at full shutter on
+Vulkan frame 90 and shows the oriented photograph and caption. Contact-sheet
+v3 substitutes this corrected sample while preserving the baseline capture.
+Together with frames 45/46/53/54/120, this completes the sampled transition
+contact-sheet review but does not make the other failing recipes pass. Actions
+16 and 18 remain open for those visual defects, strict-native full-shutter
+rendering, and the 601-frame torture render.
+
+The initial Reveal90 crop-flip ablation changes only `crop.flip_x` and restores
+the photo on Vulkan, but its frame-120 image is mirrored relative to the
+connected software reference. The native image promotion path rejects flipped
+crops; this was diagnostic evidence, not the final fix. The corrected source
+recipe and raw frames are in
+`Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/gpu-fullshutter-review/reveal-90-ablation/`.
+
+Follow-up fix: Motion→RenderPlan now preserves reflected transforms for image
+layers, and `DocumentarySnapshotPack` expresses Reveal90's readable wall-facing
+photo with negative X scale instead of `crop.flip_x`. The regenerated
+five-layer plan validates, and Vulkan raw frames 53 (full shutter) and 120
+(settled) both show the correctly oriented photo. The sampled Reveal90 photo
+visibility/orientation review is closed. Strict native Vulkan/NVENC remains
+open because frame 120 still fails on the decorative rectangular frame
+(`ShapeType::Rect`, type 1); the probe and visuals are in the evidence directory
+above.
+
+The corrected full-shutter frame 53 and settled frame 120 have since been
+visually reviewed side by side in
+`Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/gpu-fullshutter-review/reveal-90-ablation/reveal90_source-fixed_review-contact.png`.
+This replaces the old Reveal90 thumbnail in the baseline contact sheet for
+review purposes; the original baseline capture remains preserved to document
+the bug.
+
+The 601-frame, 68-layer adapter torture plan was regenerated and attempted on
+Vulkan. The full sequence did not finish its first output frame after ~2m23s;
+the observed process used ~6.3 GiB RSS, CPU near one core, and GPU utilization
+varied from 0–77%. The partial MP4 was empty. A separate strict-native Vulkan
+one-frame probe fails closed at frame 0 because `VulkanBackend::draw_node`
+reports `UnsupportedCapability` for `node='image' shape_type=7`; NVENC accepted
+zero frames. Logs and the validated plan are under
+`Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/gpu-torture-canary/`.
+Action 17 therefore remains open, and the blocker is now scoped to the connected
+image/effect path plus the measured multi-layer frame cost.
+
 ## Review artifacts
 
 - Native Fit/Fill/Crop gallery: `out/documentary_snapshot_v1/documentary_snapshot_fit_gallery_v1.png`
@@ -350,3 +499,31 @@ push-through canary reaches full viewport coverage.
 - The camera target settles exactly on the snapshot anchor at shot end.
 - All transition key times are derived from the declared frame window.
 - Unsupported recipe/style values fail explicitly.
+
+### Authored full-shutter raw Vulkan correction (2026-10-21)
+
+The earlier strict-native failure remains accurate for the NVENC/zero-copy
+gate, but the full-shutter visual gate now has a valid raw Vulkan result for
+FocusDrop. After correcting `SourceNode`'s solid-rect fast path to pass radial
+fills to the Vulkan shader, the DoF-disabled authored 90°/8-sample plan
+completed all 121 frames at 1920×1080 on Vulkan. The raw output has the exact
+expected size; its timing sidecar records GPU device work on every frame
+(1.741 s total) and 359.4 s render time (0.324 fps), so CPU-side temporal
+accumulation/readback remains the performance bottleneck. Frame 90 was
+visually reviewed: portrait and caption are readable, the radial leak is
+translucent, and the title is partly above frame during the transition. This
+closes FocusDrop's sampled raw full-shutter visual gate, not its strict-native
+NVENC/zero-copy gate. Evidence and exact frame are in
+`Chronon3d/docs/evidence/documentary-snapshot-recipes-20261021/gpu-fullshutter-review/`.
+The matching SplitDepth full-timeline raw Vulkan render is underway; its visual
+status remains open until frame 90 is reviewed. The 601-frame torture render
+also remains open.
+
+The matching SplitDepth raw Vulkan run has now also completed the entire
+121-frame, 1920×1080 authored 90°/8-sample plan. Frame 90 has a readable
+caption and portrait, retains the tilted card, and is not washed out. Together
+with FocusDrop, this closes the sampled raw full-shutter visual gate for both
+recipes after the radial-fill correction. Both strict-native NVENC full-shutter
+and the 601-frame torture render remain open; raw temporal accumulation spends
+most wall time on CPU/readback. SplitDepth's full sequence, timing sidecar, log,
+and reviewed frame are in the same GPU evidence directory.

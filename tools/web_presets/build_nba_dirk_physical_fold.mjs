@@ -101,4 +101,5 @@ const cameraChannels=[
 plan.camera_samples=resolveCameraSamples(pageCamera,cameraChannels,30,FRAMES);
 plan.camera=plan.camera_samples[0].camera;
 fs.writeFileSync(path.join(out,'nba_dirk_physical_fold.plan.json'),JSON.stringify(plan,null,2)+'\n');
+execFileSync(path.join(root,'build/dev-fast/chronontemplate_camera_plan_bake'),[path.join(out,'nba_dirk_physical_fold.plan.json')],{stdio:'inherit'});
 console.log(`Wrote ${path.join(out,'nba_dirk_physical_fold.plan.json')}`);

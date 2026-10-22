@@ -2,6 +2,7 @@
 #include "chronontemplate/camera_roll/ResolvedCameraSamples.hpp"
 #include <filesystem>
 #include <fstream>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -531,6 +532,10 @@ int main(int argc, char** argv) {
     std::ofstream ofs(outPlanPath);
     ofs << plan.dump(2);
     ofs.close();
+    const auto baker = fs::absolute(argv[0]).parent_path() / "chronontemplate_camera_plan_bake";
+    if (!fs::exists(baker)) throw std::runtime_error("CM3D camera baker missing: " + baker.string());
+    const std::string bakeCommand = "\"" + baker.string() + "\" \"" + fs::absolute(outPlanPath).string() + "\"";
+    if (std::system(bakeCommand.c_str()) != 0) throw std::runtime_error("CM3D camera sample bake failed");
 
     std::cout << "[C++ Cinema] Plan written to: " << outPlanPath
               << " (" << layers.size() << " layers, " << durationFrames << " frames)\n";

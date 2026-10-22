@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -17,6 +18,7 @@ namespace chronontemplate {
 
         constexpr float kSlideDistance = 160.f;   ///< world units
         constexpr float kRiseDistance = 70.f;
+        constexpr float kSoftRiseDistance = 24.f;
         constexpr float kDropDistance = 90.f;
         constexpr float kDepthStart = -500.f;     ///< z units, toward the lens
         constexpr float kTiltStart = 1.1f;        ///< radians
@@ -38,6 +40,45 @@ namespace chronontemplate {
         std::uint32_t drawIndex(std::uint32_t seed, std::uint32_t salt, std::size_t count) {
             const std::uint32_t h = mix(seed ^ mix(salt * 0x9E3779B9U + 1U));
             return h % static_cast<std::uint32_t>(count);
+        }
+
+        std::size_t utf8Length(const std::string& value) {
+            std::size_t count = 0;
+            for (unsigned char c : value) if ((c & 0xC0U) != 0x80U) ++count;
+            return count;
+        }
+
+        std::string wrapBulletText(const std::string& text, std::size_t maxLineLength) {
+            if (maxLineLength == 0) return text;
+            std::istringstream words(text);
+            std::string word;
+            std::string wrapped;
+            std::size_t lineLength = 0;
+            while (words >> word) {
+                const std::size_t wordLength = utf8Length(word);
+                if (lineLength != 0 && lineLength + 1 + wordLength > maxLineLength) {
+                    wrapped.push_back('\n');
+                    lineLength = 0;
+                } else if (lineLength != 0) {
+                    wrapped.push_back(' ');
+                    ++lineLength;
+                }
+                wrapped += word;
+                lineLength += wordLength;
+            }
+            return wrapped;
+        }
+
+        std::size_t longestLineLength(const std::string& text) {
+            std::istringstream lines(text);
+            std::string line;
+            std::size_t longest = 0;
+            while (std::getline(lines, line)) longest = std::max(longest, utf8Length(line));
+            return longest;
+        }
+
+        std::size_t lineCount(const std::string& text) {
+            return 1 + static_cast<std::size_t>(std::count(text.begin(), text.end(), '\n'));
         }
 
         // Each key holds the hidden value until `t0`, then eases to `to` by `t1`.
@@ -78,6 +119,12 @@ namespace chronontemplate {
                 case BulletReveal::RiseFade:
                     ramp(tracks.position, t0, t1, rest + Vector3(0.f, kRiseDistance, 0.f), rest,
                          Easing::easeOut());
+                    break;
+                case BulletReveal::SoftRise:
+                    ramp(tracks.position, t0, t1, rest + Vector3(0.f, kSoftRiseDistance, 0.f), rest,
+                         Easing::easeOut());
+                    break;
+                case BulletReveal::FadeIn:
                     break;
                 case BulletReveal::DropFade:
                     ramp(tracks.position, t0, t1, rest + Vector3(0.f, -kDropDistance, 0.f), rest,
@@ -131,6 +178,8 @@ namespace chronontemplate {
             case BulletReveal::TiltIn: return "bullet_tilt_in";
             case BulletReveal::DepthIn: return "bullet_depth_in";
             case BulletReveal::YawFlipIn: return "bullet_yaw_flip";
+            case BulletReveal::FadeIn: return "bullet_fade_in";
+            case BulletReveal::SoftRise: return "bullet_soft_rise";
         }
         return "bullet_unknown";
     }
@@ -138,8 +187,8 @@ namespace chronontemplate {
     const std::vector<BulletReveal>& bulletRevealChoices() {
         static const std::vector<BulletReveal> choices{
                 BulletReveal::SlideLeft, BulletReveal::SlideRight, BulletReveal::RiseFade,
-                BulletReveal::DropFade, BulletReveal::ScalePop, BulletReveal::TiltIn,
-                BulletReveal::DepthIn, BulletReveal::YawFlipIn};
+                BulletReveal::DropFade, BulletReveal::ScalePop, BulletReveal::DepthIn,
+                BulletReveal::FadeIn, BulletReveal::SoftRise};
         return choices;
     }
 
@@ -191,12 +240,15 @@ namespace chronontemplate {
         out.bullets.reserve(count);
 
         float longest = 0.f;
+        std::size_t tallestLineCount = 1;
         int lastRevealEnd = spec.startFrame;
 
         for (std::size_t i = 0; i < count; ++i) {
             const float y = spec.centerY + (static_cast<float>(i) - centreOffset) * spec.lineSpacing;
-            const std::string text = spec.marker + "  " + spec.items[i];
-            longest = std::max(longest, static_cast<float>(text.size()));
+            const std::string text = spec.marker + "  " +
+                                     wrapBulletText(spec.items[i], spec.maxLineLength);
+            longest = std::max(longest, static_cast<float>(longestLineLength(text)));
+            tallestLineCount = std::max(tallestLineCount, lineCount(text));
 
             LayerHandle& bullet = scene.text(TextSpec{
                     .text = text,
@@ -227,11 +279,14 @@ namespace chronontemplate {
         TitleCameraShot shot{};
         shot.anchor.center = Vector3(spec.centerX, spec.centerY, 0.f);
         shot.anchor.halfWidth = longest * spec.fontSize * 0.3f;
-        shot.anchor.halfHeight = centreOffset * spec.lineSpacing + spec.fontSize * 0.5f;
+        shot.anchor.halfHeight = centreOffset * spec.lineSpacing +
+                                 spec.fontSize * static_cast<float>(tallestLineCount) * 0.5f;
         shot.framing = spec.framing;
         shot.intensity = spec.intensity;
         shot.inFrame = spec.startFrame;
-        shot.duration = spec.outFrame > spec.startFrame
+        shot.duration = spec.cameraDuration > 0
+                                ? spec.cameraDuration
+                                : spec.outFrame > spec.startFrame
                                 ? spec.outFrame - spec.startFrame
                                 : (lastRevealEnd - spec.startFrame) + static_cast<int>(kHoldAfterCamera);
         applyTitleCameraShot(scene, out.camera, shot);

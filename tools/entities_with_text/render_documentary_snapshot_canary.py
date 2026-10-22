@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = ROOT.parent
 DUMPER = ROOT / "build/chronontemplate_dump_documentary_snapshot_pose"
-ADAPTER_DUMPER = ROOT / "build/documentary-adapter/chronontemplate_dump_documentary_snapshot_plan"
+ADAPTER_DUMPER = ROOT / "build/dev-fast/chronontemplate_dump_documentary_snapshot_plan"
 CLI = Path(os.environ.get("CHRONON_CLI", WORKSPACE /
           "Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"))
 FPS, WIDTH, HEIGHT, FRAMES = 30, 1920, 1080, 121
