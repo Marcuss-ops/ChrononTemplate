@@ -1,0 +1,105 @@
+{
+  "template": "investigation_board",
+  "board": {
+    "width": 3200,
+    "height": 1800,
+    "asset": "ChrononTemplate/assets/nba_rivalry/web/corkboard_bg.png"
+  },
+  "items": [
+    {
+      "id": "pierce",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/paul_pierce.png",
+      "position": [520, 530],
+      "rotation": -3.5
+    },
+    {
+      "id": "garnett",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/kevin_garnett.png",
+      "position": [950, 350],
+      "rotation": 2.4
+    },
+    {
+      "id": "allen",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/ray_allen.png",
+      "position": [1330, 610],
+      "rotation": -1.8
+    },
+    {
+      "id": "rondo",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/rajon_rondo.png",
+      "position": [700, 990],
+      "rotation": 4.1
+    },
+    {
+      "id": "james",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/lebron_james.png",
+      "position": [1900, 420],
+      "rotation": -2.7
+    },
+    {
+      "id": "wade",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/dwyane_wade.png",
+      "position": [2300, 700],
+      "rotation": 3.2
+    },
+    {
+      "id": "bosh",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/chris_bosh.png",
+      "position": [2680, 390],
+      "rotation": -4.0
+    },
+    {
+      "id": "haslem",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/udonis_haslem.png",
+      "position": [2480, 1050],
+      "rotation": 1.6
+    },
+    {
+      "id": "perkins",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/kendrick_perkins.png",
+      "position": [1480, 1090],
+      "rotation": -2.2
+    },
+    {
+      "id": "battier",
+      "type": "photo",
+      "asset": "ChrononTemplate/assets/nba_rivalry/cards/shane_battier.png",
+      "position": [2050, 1130],
+      "rotation": 3.7
+    },
+    {
+      "id": "press_photo",
+      "type": "document",
+      "asset": "ChrononTemplate/assets/nba_rivalry/rivalry_shot_02.png",
+      "position": [650, 1430],
+      "size": [420, 300],
+      "rotation": -1.2
+    }
+  ],
+  "connections": [
+    {"from": "pierce", "to": "garnett"},
+    {"from": "garnett", "to": "allen"},
+    {"from": "rondo", "to": "pierce"},
+    {"from": "james", "to": "wade"},
+    {"from": "wade", "to": "bosh"},
+    {"from": "haslem", "to": "wade"},
+    {"from": "battier", "to": "james"},
+    {"from": "allen", "to": "james"},
+    {"from": "perkins", "to": "rondo"}
+  ],
+  "camera": {
+    "preset": "slow_investigation_pan",
+    "duration_seconds": 16,
+    "fps": 30,
+    "focus_order": ["pierce", "rondo", "garnett", "allen", "james", "wade", "bosh"]
+  }
+}

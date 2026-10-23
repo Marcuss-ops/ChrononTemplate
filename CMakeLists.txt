@@ -339,6 +339,14 @@ target_include_directories(chronontemplate_emit_fast_intro_board_10 PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_fast_intro_board_10 PRIVATE -Wall -Wextra)
 
+# Parametric investigation board: JSON input -> native corkboard, cards, pins,
+# red strings and a baked camera pan.
+add_executable(chronontemplate_emit_investigation_board
+        tools/investigation_board/emit_investigation_board.cpp)
+target_include_directories(chronontemplate_emit_investigation_board PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_investigation_board PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_web_classic_home
         tools/web_presets/emit_web_classic_home.cpp)
 target_link_libraries(chronontemplate_emit_web_classic_home PRIVATE chronontemplate)
