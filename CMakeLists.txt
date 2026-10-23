@@ -344,6 +344,19 @@ add_executable(chronontemplate_emit_web_classic_home
 target_link_libraries(chronontemplate_emit_web_classic_home PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_classic_home PRIVATE -Wall -Wextra)
 
+add_executable(chronontemplate_emit_classic_web_pages
+        tools/web_presets/emit_classic_web_pages.cpp)
+target_include_directories(chronontemplate_emit_classic_web_pages PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_classic_web_pages PRIVATE -Wall -Wextra)
+
+# Guardian article uses the established reference layout, which matches the supplied classic-page image.
+add_executable(chronontemplate_emit_reference_article_shots
+        tools/web_presets/emit_reference_article_shots.cpp)
+target_include_directories(chronontemplate_emit_reference_article_shots PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_reference_article_shots PRIVATE -Wall -Wextra)
+
 # Second generation: radians-safe fold, distinct recipes, reworked hierarchy.
 add_executable(chronontemplate_emit_web_page_v2
         tools/web_presets/emit_web_page_v2.cpp)
