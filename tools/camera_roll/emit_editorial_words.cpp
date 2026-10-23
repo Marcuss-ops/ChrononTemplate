@@ -70,7 +70,7 @@ int main(int argc,char**argv) try {
     // Four 3D title planes sit at individually keyed depths; camera lives at Z=1080.
     CameraRig rig(1,55.f,static_cast<float>(W)/H,1.f,10000.f);
     rig.setPosition({600.f,540.f,1080.f}).setTarget({600.f,300.f,0.f})
-       .setFov(55.f).setLegacyDefocusStrength(0.045f).setFocusDistance(975.f).setMaxBlur(12.f);
+       .setFov(55.f).setFStop(chrononmotion::motion::fStopFromBlurGain(0.045f)).setFocusDistance(975.f).setMaxBlur(12.f);
     const Easing glide=Easing::cubicBezier(.22f,.72f,.20f,1.f);
     rig.positionTrack().add(0.f,{600.f,300.f,1080.f},glide)
       .add(2.05f,{590.f,460.f,1080.f},glide).add(4.10f,{610.f,620.f,1080.f},glide)
@@ -83,7 +83,10 @@ int main(int argc,char**argv) try {
     rig.focusDistanceTrack().add(0.f,975.f,glide).add(2.05f,955.f,glide)
       .add(4.10f,935.f,glide).add(6.15f,915.f,glide).add(8.15f,1000.f,Easing::circOut())
       .add(static_cast<float>(DURATION),1000.f,Easing::easeInOut());
-    rig.legacyDefocusStrengthTrack().add(0.f,.045f).add(8.15f,.035f).add(static_cast<float>(DURATION),.035f);
+    // Authored aperture truth is f/N; legacy gains .045/.035 map to f/14.93 and f/19.2.
+    rig.fStopTrack().add(0.f, chrononmotion::motion::fStopFromBlurGain(.045f))
+      .add(8.15f, chrononmotion::motion::fStopFromBlurGain(.035f))
+      .add(static_cast<float>(DURATION), chrononmotion::motion::fStopFromBlurGain(.035f));
     rig.maxBlurTrack().add(0.f,12.f).add(8.15f,10.f).add(static_cast<float>(DURATION),10.f);
 
     // Add the restrained handheld drift as authored CM3D rig keys; all camera
