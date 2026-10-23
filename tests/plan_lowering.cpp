@@ -50,7 +50,8 @@ int main() {
     // the lowering passes it through unchanged, world-Z derivation happens downstream.
     rig.setPosition({0.f, 0.f, -8.f}).clearTarget().setFocusDistance(420.f);
     rig.focusDistanceTrack().add(0.f, 420.f).add(1.f, 620.f);
-    rig.legacyDefocusStrengthTrack().add(0.f, 0.f).add(1.f, 0.06f);
+    // Authored aperture truth is f/N: legacy gain 0.06 maps to f/11.2.
+    rig.fStopTrack().add(0.f, 0.f).add(1.f, 11.2f);
     rig.maxBlurTrack().add(0.f, 10.f).add(1.f, 18.f);
     const auto dofPlan = lowerToRenderPlan(dofScene, {{dofTitle.id(), dofText}});
     check(dofPlan.camera && dofPlan.camera->dof_enabled,
@@ -63,7 +64,7 @@ int main() {
         check(first.dof_focus_distance == 420.f && last.dof_focus_distance == 620.f &&
               first.dof_aperture == 0.f && first.dof_max_blur == 10.f &&
               last.dof_focus_distance >= 420.f && last.dof_focus_distance <= 620.f &&
-              last.dof_aperture >= 0.f && last.dof_aperture <= 0.06f &&
+              last.dof_f_stop > 0.f && last.dof_f_stop <= 11.2f &&
               last.dof_max_blur >= 10.f && last.dof_max_blur <= 18.f,
               "resolved camera samples preserve authored DoF endpoints");
     }

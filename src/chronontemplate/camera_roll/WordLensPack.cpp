@@ -37,7 +37,6 @@ namespace chronontemplate {
                 !(spec.baseFovDegrees > 0.f && spec.baseFovDegrees < 180.f) ||
                 !(spec.focusFovDegrees > 0.f && spec.focusFovDegrees <= spec.baseFovDegrees) ||
                 !(spec.cameraDistance > 0.f) ||
-                !(spec.legacyDefocusStrength > 0.f && spec.legacyDefocusStrength <= 1.f) ||
                 !(spec.fStop > 0.f) || !(spec.maxBlurPixels >= 0.f) ||
                 !(spec.highlightGain >= 0.f) || spec.focusTravelFrames < 2 || spec.fadeFrames < 1) {
                 throw std::invalid_argument("addWordLensBoard: invalid camera, lens, background, or timing spec");
@@ -60,7 +59,6 @@ namespace chronontemplate {
             focusSequence.cameraDistance = spec.cameraDistance;
             focusSequence.baseFov = spec.baseFovDegrees;
             focusSequence.focusFov = spec.focusFovDegrees;
-            focusSequence.legacyDefocusStrength = spec.legacyDefocusStrength;
             focusSequence.fStop = spec.fStop;
             focusSequence.maxBlur = spec.maxBlurPixels;
             focusSequence.highlightGain = spec.highlightGain;

@@ -77,12 +77,16 @@ inline nlohmann::json bakeResolvedCameraSamples(
     if (const auto focalLength = baseCamera.find("focal_length_mm"); focalLength != baseCamera.end())
         basePose.focalLength = focalLength->template get<float>();
     if (const auto dof = baseCamera.find("dof"); dof != baseCamera.end() && dof->is_object()) {
-        if (dof->value("enabled", false))
-            basePose.legacyDefocusStrength = dof->value("aperture", 0.f);
+
         if (dof->contains("focus_distance"))
             basePose.focusDistance = dof->at("focus_distance").template get<float>();
         if (dof->contains("max_blur")) basePose.maxBlur = dof->at("max_blur").template get<float>();
+        // Single authored aperture truth is f/N. Legacy gain-domain `aperture`
+        // content is bridged through fStopFromBlurGain; authored `f_stop` wins
+        // (exact round-trip for lowered plans).
         if (dof->contains("f_stop")) basePose.fStop = dof->at("f_stop").template get<float>();
+        else if (dof->value("enabled", false))
+            basePose.fStop = fStopFromBlurGain(dof->value("aperture", 0.f));
         if (dof->contains("iris_blades")) basePose.irisBlades = dof->at("iris_blades").template get<int>();
         if (dof->contains("highlight_gain"))
             basePose.highlightGain = dof->at("highlight_gain").template get<float>();

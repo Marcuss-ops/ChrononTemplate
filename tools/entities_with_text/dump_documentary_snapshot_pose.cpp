@@ -83,6 +83,6 @@ int main(int argc, char** argv) {
         std::cout << frame << ' ' << pose.position.x << ' ' << pose.position.y << ' ' << pose.position.z
                   << ' ' << angles.x << ' ' << angles.y << ' ' << angles.z << ' ' << pose.fov
                   << ' ' << pose.focusDistance << ' ' << std::max(0.001f, -pose.target.z)
-                  << ' ' << pose.legacyDefocusStrength << '\n';
+                  << ' ' << pose.fStop << '\n';
     }
 }
