@@ -70,6 +70,7 @@ def _blend_layer_at(frame: np.ndarray, rgba: np.ndarray, ox: int = 0, oy: int = 
 
 
 CYAN = (0, 240, 255)
+_ROUTE_GLOW_SCRATCH = local()
 
 LUG = (45.38271, 12.12881)     # Lughetto - frazione, 422 anime
 CLP = (45.35430, 12.09640)     # Campagna Lupia - comune
@@ -263,7 +264,12 @@ def draw_route_glow(frame: np.ndarray, frm: tuple[float, float], to: tuple[float
     if overlay is None or overlay.shape != frame.shape or overlay.dtype != frame.dtype:
         overlay = np.empty_like(frame)
         _ROUTE_GLOW_SCRATCH.buffer = overlay
-    overlay.fill(0)
+        _ROUTE_GLOW_SCRATCH.bounds = None
+    previous = getattr(_ROUTE_GLOW_SCRATCH, "bounds", None)
+    if previous is not None:
+        px0, py0, px1, py1 = previous
+        overlay[py0:py1, px0:px1].fill(0)
+    x0, y0, x1, y1 = WIDTH, HEIGHT, 0, 0
     for i in range(sprites):
         if i > front:
             break
@@ -273,12 +279,23 @@ def draw_route_glow(frame: np.ndarray, frm: tuple[float, float], to: tuple[float
         sx, sy = geo_to_screen(lat, lon, anchor, zoom)
         if not (0 <= sx < WIDTH and 0 <= sy < HEIGHT):
             continue
+        x0 = min(x0, max(0, sx - 18))
+        y0 = min(y0, max(0, sy - 18))
+        x1 = max(x1, min(WIDTH, sx + 19))
+        y1 = max(y1, min(HEIGHT, sy + 19))
         head = max(0.0, 1.0 - abs(front - i) * 0.35)
         strength = 0.55 + 0.45 * head
         for r, a in ((18, 0.20 * strength), (10, 0.45 * strength), (4, 0.95 * strength)):
             cv2.circle(overlay, (sx, sy), r,
                        (int(60 * a), int(240 * a), int(255 * a)), -1, cv2.LINE_AA)
-    cv2.addWeighted(overlay, 1.0, frame, 1.0, 0, dst=frame)
+    if x1 > x0 and y1 > y0:
+        bounds = (x0, y0, x1, y1)
+        cv2.addWeighted(overlay[y0:y1, x0:x1], 1.0,
+                        frame[y0:y1, x0:x1], 1.0, 0,
+                        dst=frame[y0:y1, x0:x1])
+        _ROUTE_GLOW_SCRATCH.bounds = bounds
+    else:
+        _ROUTE_GLOW_SCRATCH.bounds = None
 
 
 # ----------------------------------------------------------------------------

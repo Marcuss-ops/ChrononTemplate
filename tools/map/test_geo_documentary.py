@@ -19,9 +19,27 @@ import geo_documentary as doc
 import geo_runtime as geo
 import dynamic_tile_pyramid as dyn
 import render_geo_camera_small_places as small
+import map_editorial_gpu as editorial_gpu
+from PIL import Image, ImageDraw, ImageFilter
 
 
 class DocumentaryLayersTests(unittest.TestCase):
+    def test_capsule_shadow_roi_is_pixel_identical_to_full_frame_blur(self):
+        width, height = 1280, 720
+        for box in ((54, 54, 510, 144), (344, 260, 936, 340), (690, 540, 1226, 666)):
+            for lift, reveal in ((0, .1), (3, .6), (8, 1.0)):
+                x0, y0, x1, y1 = box
+                full = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+                draw = ImageDraw.Draw(full)
+                draw.rounded_rectangle((x0, y0 + lift + 4, x1, y1 + lift + 4),
+                                       radius=5, fill=(0, 0, 0, int(130 * reveal)))
+                expected = full.filter(ImageFilter.GaussianBlur(8))
+                patch, origin = editorial_gpu._capsule_shadow_patch(box, lift, reveal)
+                actual = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+                actual.alpha_composite(patch, origin)
+                self.assertTrue(np.array_equal(np.asarray(expected), np.asarray(actual)),
+                                f"shadow ROI differs for box={box}, lift={lift}, reveal={reveal}")
+
     def test_earthrise_schedule_pose_and_beat_sync_are_deterministic(self):
         self.assertEqual(doc.earthrise_zoom(5.0, 18.0, 0.0), (18.0, 0.0))
         self.assertEqual(doc.earthrise_zoom(5.0, 18.0, 1.0), (5.0, 1.0))

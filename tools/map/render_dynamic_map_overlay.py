@@ -29,11 +29,11 @@ sys.path.insert(0, str(HERE))
 
 
 def frame_workers() -> int:
-    """Forked frame workers. Default stays at the certified 2; override with DYNAMIC_MAP_WORKERS."""
+    """Forked CPU frame workers; OpenCL editorial scenes remain process-local."""
     raw = os.environ.get("DYNAMIC_MAP_WORKERS")
     if raw:
         return max(1, int(raw))
-    return min(2, max(1, (os.cpu_count() or 2) // 2))
+    return min(12, max(1, (os.cpu_count() or 2) // 2))
 
 
 # One map group may show at most this many unique stops: it is the camera's
@@ -646,13 +646,15 @@ def main() -> int:
     if pyramid.telemetry["tile_fallbacks"] != 0:
         raise RuntimeError(f"tile prefetch produced {pyramid.telemetry['tile_fallbacks']} fallback tiles")
     gate_started = time.perf_counter()
-    # Determinism/velocity gate stays CPU-only for classic scenes. Editorial
-    # requires UMat from the first probe and asserts OpenCL composite counters.
+    # Validate the prepared CPU sampler before uploading the immutable plates.
+    # The final render uses the GPU sampler for every composition; classic
+    # compositions still do their legacy drawing on the host after sampling.
     if map_animation in MAP_EDITORIAL_SCENES:
         cv2.ocl.setUseOpenCL(True)
         if not cv2.ocl.useOpenCL():
             raise RuntimeError("OpenCL GPU map renderer failed to initialize")
-        gpu_plate_bytes = sampler.prepare_opencl()
+        if sampler.opencl_plates is None:
+            gpu_plate_bytes = sampler.prepare_opencl()
         sampler.gpu_map_enabled = True
         sampler.editorial_gpu_enabled = True
         sampler.editorial_scene = map_animation
@@ -667,35 +669,45 @@ def main() -> int:
     gate_ms = (time.perf_counter() - gate_started) * 1000.0
     if sampler.fallback_count != 0:
         raise RuntimeError(f"map acceptance gate observed {sampler.fallback_count} engine fallback frames")
-    # Actual video frames use OpenCL on NVIDIA and encode to NVENC when the
-    # requested scene requires GPU; CPU render is a classic-scene path only.
-    cv2.ocl.setUseOpenCL(True)
-    if not cv2.ocl.useOpenCL():
-        raise RuntimeError("OpenCL GPU map renderer failed to initialize")
-    # The distro OpenCV 4.5 API exposes Device_getDefault directly, while
-    # newer builds expose Device.getDefault.
-    if hasattr(cv2.ocl, "Device"):
-        device = cv2.ocl.Device.getDefault()
-    else:
-        device = cv2.ocl.Device_getDefault()
-    if "NVIDIA" not in device.vendorName().upper():
-        raise RuntimeError(f"GPU map renderer selected unexpected device: {device.name()}")
-    print(f"[dynamic-map] GPU frame renderer: OpenCL / {device.name()}", flush=True)
-    if not sampler.gpu_map_enabled:
-        gpu_plate_bytes = sampler.prepare_opencl()
+    # Use the OpenCL plate sampler for every map composition. The classic
+    # marker/label compositor remains CPU based (and reads the sampled frame
+    # back), but the costly per-frame geographic crop/resize/blend stays on
+    # the GPU. DYNAMIC_MAP_GPU_SAMPLER=0 is the operational rollback switch.
+    # Editorial compositions additionally keep their existing all-GPU layer
+    # compositor and its stricter acceptance counters.
+    gpu_frame_renderer = os.environ.get("DYNAMIC_MAP_GPU_SAMPLER", "1") != "0"
+    opencl_device_name = ""
+    if gpu_frame_renderer:
+        cv2.ocl.setUseOpenCL(True)
+        if not cv2.ocl.useOpenCL():
+            raise RuntimeError("OpenCL GPU map renderer failed to initialize")
+        # The distro OpenCV 4.5 API exposes Device_getDefault directly, while
+        # newer builds expose Device.getDefault.
+        if hasattr(cv2.ocl, "Device"):
+            device = cv2.ocl.Device.getDefault()
+        else:
+            device = cv2.ocl.Device_getDefault()
+        if "NVIDIA" not in device.vendorName().upper():
+            raise RuntimeError(f"GPU map renderer selected unexpected device: {device.name()}")
+        opencl_device_name = device.name()
+        print(f"[dynamic-map] GPU map sampler: OpenCL / {opencl_device_name}; "
+              f"overlay compositor={'OpenCL' if map_animation in MAP_EDITORIAL_SCENES else 'CPU'}", flush=True)
         sampler.gpu_map_enabled = True
-    print(f"[dynamic-map] uploaded {gpu_plate_bytes} map plate bytes to GPU", flush=True)
+        if sampler.opencl_plates is None:
+            gpu_plate_bytes = sampler.prepare_opencl()
+        print(f"[dynamic-map] uploaded {gpu_plate_bytes} map plate bytes to GPU", flush=True)
+    else:
+        cv2.ocl.setUseOpenCL(False)
+        sampler.gpu_map_enabled = False
+        gpu_plate_bytes = 0
+        print(f"[dynamic-map] classic frame renderer: CPU process pool, workers={frame_workers()}; NVENC output", flush=True)
     sampler.editorial_gpu_enabled = bool(map_animation in MAP_EDITORIAL_SCENES)
     sampler.editorial_scene = map_animation
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    if map_animation in MAP_EDITORIAL_SCENES:
-        # Artistically complex editorial overlays must remain GPU-rendered;
-        # rejecting unavailable devices/fallbacks is part of this mode.
-        sampler.editorial_gpu_enabled = True
-        sampler.editorial_scene = map_animation
     reset_gpu_counters()
+    workers = frame_workers()
     stats = harness.encode_with_pool(builder, sampler, args.output,
-                                     workers=frame_workers(),
+                                     workers=workers,
                                      block=2, preset="slow", crf=15,
                                      gpu_required=True)
     overlay_counts = gpu_counters()
@@ -749,10 +761,13 @@ def main() -> int:
         "output_bytes": stats["bytes"],
         "video_encoder": stats["encoder"],
         "gpu_encoder": stats["gpu_encoder"],
-        "gpu_frame_renderer": "opencv_opencl",
+        "frame_renderer": "opencv_opencl" if gpu_frame_renderer else "cpu_process_pool",
+        "gpu_frame_renderer": "opencv_opencl" if gpu_frame_renderer else "none",
+        "frame_workers": 1 if gpu_frame_renderer else workers,
+        "gpu_map_sampler": "opencv_opencl" if gpu_frame_renderer else "cpu",
         "gpu_overlay_compositor": "opencv_umat_opencl" if map_animation in MAP_EDITORIAL_SCENES else "cpu",
         "gpu_overlay_counts": overlay_counts,
-        "opencl_device": device.name(),
+        "opencl_device": opencl_device_name,
         "gpu_plate_bytes": gpu_plate_bytes,
         "renderer_wall_s": time.perf_counter() - render_started,
     }
