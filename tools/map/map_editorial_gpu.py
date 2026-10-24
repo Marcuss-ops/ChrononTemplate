@@ -39,6 +39,12 @@ STYLE = {
     "saturation": 0.72,
 }
 
+# Pillow's GaussianBlur has a finite support of roughly four radii. Keep the
+# exact capsule shadow kernel, but evaluate it only around the label instead of
+# allocating and blurring a full 1080p transparent frame for every label/frame.
+_CAPSULE_SHADOW_BLUR = 8
+_CAPSULE_SHADOW_PAD = _CAPSULE_SHADOW_BLUR * 4
+
 WHITE = (242, 244, 238)
 DARK = (10, 16, 22)
 RED = (38, 48, 242)       # BGR, saturated red
@@ -208,9 +214,9 @@ def _place_labels(entries, W, H, draw):
     return layout
 
 
-def _text_plate(W, H, entries, progress, *, return_layout=False):
+def _text_plate(W, H, entries, progress, *, return_layout=False, return_origin=False):
     """Measured capsules: title/subtitle rows have distinct baselines and boxes."""
-    from PIL import Image, ImageDraw, ImageFilter
+    from PIL import Image, ImageDraw
     plate = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw = ImageDraw.Draw(plate)
     # Lay out the complete scene at every frame, including not-yet-revealed
@@ -230,9 +236,9 @@ def _text_plate(W, H, entries, progress, *, return_layout=False):
         font=item["title_font"]; subfont=item["sub_font"]
         pad_x,pad_y=STYLE["capsule_pad_x"],STYLE["capsule_pad_y"]
         color=entry.get("accent"); alpha=int(242*reveal)
-        shadow=Image.new("RGBA",(W,H),(0,0,0,0));sd=ImageDraw.Draw(shadow)
-        sd.rounded_rectangle((x0,y0_eff+4,x1,y1_eff+4),radius=5,fill=(0,0,0,int(130*reveal)))
-        plate.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(8)))
+        blurred_shadow, shadow_origin = _capsule_shadow_patch(
+            (x0, y0, x1, y1), y_lift, reveal)
+        plate.alpha_composite(blurred_shadow, shadow_origin)
         draw=ImageDraw.Draw(plate)
         draw.rounded_rectangle((x0,y0_eff,x1,y1_eff),radius=4,fill=(*DARK,alpha),
                                outline=(221,230,232,int(100*reveal)),width=1)
@@ -270,17 +276,39 @@ def _text_plate(W, H, entries, progress, *, return_layout=False):
             raise ValueError(f"label capsule bounding boxes overlap: {a['entry']['text']} / {b['entry']['text']}")
     plate_arr=np.asarray(plate)
     boxes=[item["box"] for item in layout]
+    if return_origin:
+        ys, xs = np.nonzero(plate_arr[:, :, 3])
+        if len(xs) == 0:
+            return np.zeros((1, 1, 4), dtype=np.uint8), (0, 0)
+        x0, x1 = int(xs.min()), int(xs.max()) + 1
+        y0, y1 = int(ys.min()), int(ys.max()) + 1
+        return np.ascontiguousarray(plate_arr[y0:y1, x0:x1]), (x0, y0)
     return (plate_arr,boxes) if return_layout else plate_arr
 
 
-def _simple_legend_plate(W, H, progress):
+def _capsule_shadow_patch(box, y_lift, reveal):
+    """Return the exact full-frame capsule shadow as a small compositing patch."""
+    from PIL import Image, ImageDraw, ImageFilter
+    x0, y0, x1, y1 = box
+    pad = _CAPSULE_SHADOW_PAD
+    width, height = (x1 - x0) + 2 * pad, (y1 - y0) + 4 + 2 * pad
+    shadow = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(shadow)
+    draw.rounded_rectangle((pad, pad + 4, pad + x1 - x0, pad + y1 - y0 + 4),
+                           radius=5, fill=(0, 0, 0, int(130 * reveal)))
+    return (shadow.filter(ImageFilter.GaussianBlur(_CAPSULE_SHADOW_BLUR)),
+            (x0 - pad, y0 + y_lift - pad))
+
+
+def _simple_legend_plate(W, H, progress, *, return_origin=False):
     """Compact Mocha legend that labels illustrative areas without asserting control."""
     from PIL import Image, ImageDraw
     plate = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw = ImageDraw.Draw(plate)
     reveal = _stage(progress, 0.58, 0.12)
     if reveal <= 0.01:
-        return np.asarray(plate)
+        empty = np.zeros((1, 1, 4), dtype=np.uint8)
+        return (empty, (0, 0)) if return_origin else np.asarray(plate)
     font = _font(15, False)
     title_font = _font(16, True)
     x, y = 54, H - 116
@@ -298,7 +326,13 @@ def _simple_legend_plate(W, H, progress):
         draw.text((x + 36, yy), label, font=title_font, fill=(*WHITE, int(255 * reveal)))
     draw.text((x + 14, y + 68), "SCHEMATIC — NOT VERIFIED CONTROL DATA",
               font=font, fill=(185, 200, 206, int(240 * reveal)))
-    return np.asarray(plate)
+    plate_arr = np.asarray(plate)
+    if return_origin:
+        ys, xs = np.nonzero(plate_arr[:, :, 3])
+        x0, x1 = int(xs.min()), int(xs.max()) + 1
+        y0, y1 = int(ys.min()), int(ys.max()) + 1
+        return np.ascontiguousarray(plate_arr[y0:y1, x0:x1]), (x0, y0)
+    return plate_arr
 
 
 def _font(size: int, condensed: bool = True):
@@ -419,7 +453,7 @@ def composite_mask(frame, mask, color_bgr, alpha=1.0):
     return frame
 
 
-def composite_rgba(frame, rgba):
+def composite_rgba(frame, rgba, origin=(0, 0)):
     """Composite a CPU-rasterized RGBA text/panel plate using OpenCL."""
     _assert_gpu(frame)
     if rgba.dtype != np.uint8 or rgba.ndim != 3 or rgba.shape[2] != 4:
@@ -428,16 +462,24 @@ def composite_rgba(frame, rgba):
     if not np.any(alpha):
         return frame
     H,W=rgba.shape[:2]
-    if (W,H) != _CURRENT_SIZE:
-        raise ValueError(f"overlay plate {(H,W)} does not match GPU frame {_CURRENT_SIZE[::-1]}")
+    canvas_w,canvas_h=_CURRENT_SIZE
+    left,top=map(int,origin)
+    right,bottom=canvas_w-left-W,canvas_h-top-H
+    if left < 0 or top < 0 or right < 0 or bottom < 0:
+        raise ValueError(f"overlay ROI {(left,top,W,H)} is outside GPU frame {_CURRENT_SIZE[::-1]}")
     # Convert RGB host glyph plate into the BGR premultiplied source. Only
     # glyph rasterization is CPU; blend and frame mutation stay on OpenCL.
     bgr = np.ascontiguousarray(rgba[:, :, 2::-1])
     bgr_u = cv2.UMat(bgr)
     a_u = _upload_mask(alpha)
+    if (W,H) != (canvas_w,canvas_h) or left or top:
+        bgr_u = cv2.copyMakeBorder(bgr_u, top, bottom, left, right,
+                                   cv2.BORDER_CONSTANT, value=(0,0,0))
+        a_u = cv2.copyMakeBorder(a_u, top, bottom, left, right,
+                                 cv2.BORDER_CONSTANT, value=0)
     a3 = cv2.merge([a_u, a_u, a_u])
     fg = cv2.multiply(bgr_u, a3, scale=1.0 / 255.0)
-    inv = cv2.subtract(cv2.UMat(np.full(alpha.shape, 255, np.uint8)), a_u)
+    inv = cv2.subtract(cv2.UMat(np.full((canvas_h, canvas_w), 255, np.uint8)), a_u)
     inv3 = cv2.merge([inv, inv, inv])
     bg = cv2.multiply(frame, inv3, scale=1.0 / 255.0)
     frame = cv2.add(fg, bg)
@@ -690,7 +732,8 @@ def _marker(frame, point, progress, W, H, color=RED, radius=7):
 
 
 def _label(frame, W,H, entries):
-    return composite_rgba(frame,_text_plate(W,H,entries,0.0))
+    plate, origin = _text_plate(W,H,entries,0.0,return_origin=True)
+    return composite_rgba(frame,plate,origin)
 
 
 def _pin_entries(ctx, project, progress, scene):
@@ -881,9 +924,11 @@ def draw_editorial_scene_gpu(frame, scene, ctx, progress):
     else:
         raise ValueError(f"unsupported GPU editorial scene: {scene}")
     if labels:
-        frame=composite_rgba(frame,_text_plate(W,H,labels,progress))
+        plate, origin = _text_plate(W,H,labels,progress,return_origin=True)
+        frame=composite_rgba(frame,plate,origin)
     if scene=="ed_mocha_tactical":
-        frame=composite_rgba(frame,_simple_legend_plate(W,H,progress))
+        plate, origin = _simple_legend_plate(W,H,progress,return_origin=True)
+        frame=composite_rgba(frame,plate,origin)
     frame=_draw_vignette(frame,W,H)
     _GPU_OPS["opencl"] += 1
     return frame

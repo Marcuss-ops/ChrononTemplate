@@ -1,0 +1,25 @@
+{
+  "schema": "chronontemplate.classic-phrase-style.v1",
+  "font": "assets/fonts/PlayfairDisplay.ttf",
+  "font_size": 96.0,
+  "box": [1560.0, 780.0],
+  "position": [960.0, 540.0],
+  "background": [1.0, 1.0, 1.0, 1.0],
+  "fill": "#0B0B0B",
+  "stroke": {
+    "color": "#0B0B0B",
+    "width": 0.0
+  },
+  "glow": {
+    "radius": 0.0,
+    "intensity": 0.0,
+    "color": "#FFFFFF"
+  },
+  "card": {
+    "color": "#FFFFFF",
+    "radius": 22.0,
+    "padding": [64.0, 44.0],
+    "size": [1320.0, 500.0],
+    "opacity": 1.0
+  }
+}

@@ -94,6 +94,72 @@ def extended_keyframes(track: dict[str, Any], duration: int, enter: int) -> list
     return result
 
 
+def easing_value(name: str, t: float) -> float:
+    """GLM-compatible easing polynomials, used to bake text-animator tracks."""
+
+    import math
+
+    if t <= 0.0:
+        return 0.0
+    if t >= 1.0:
+        return 1.0
+    if name == "linear":
+        return t
+    if name == "smoothstep":
+        return t * t * (3.0 - 2.0 * t)
+    if name == "in_quad":
+        return t * t
+    if name == "out_quad":
+        return -(t * (t - 2.0))
+    if name == "in_cubic":
+        return t * t * t
+    if name == "out_cubic":
+        f = t - 1.0
+        return f * f * f + 1.0
+    if name == "in_out_cubic":
+        if t < 0.5:
+            return 4.0 * t * t * t
+        f = 2.0 * t - 2.0
+        return 0.5 * f * f * f + 1.0
+    if name == "in_sine":
+        return math.sin((t - 1.0) * math.pi / 2.0) + 1.0
+    if name == "out_sine":
+        return math.sin(t * math.pi / 2.0)
+    if name == "in_out_sine":
+        return 0.5 * (1.0 - math.cos(t * math.pi))
+    if name == "out_back":
+        o = 1.70158
+        n = t - 1.0
+        return n * n * ((o + 1.0) * n + o) + 1.0
+    raise SystemExit(f"unsupported text-animator easing: {name}")
+
+
+def baked_keyframes(track: dict[str, Any], duration: int, enter: int) -> list[dict[str, Any]]:
+    """Sample a track per frame: Chronon3D text animators are linear-only."""
+
+    keys = extended_keyframes(track, duration, enter)
+    points = [(int(k["frame"]), float(k["value"])) for k in keys]
+    baked = []
+    segment = 0
+    for frame in range(duration):
+        while segment + 1 < len(points) and frame > points[segment + 1][0]:
+            segment += 1
+        value = points[-1][1]
+        if segment + 1 < len(points):
+            start, start_value = points[segment]
+            end, end_value = points[segment + 1]
+            if frame <= start:
+                value = start_value
+            elif end <= start:
+                value = end_value
+            else:
+                t = (frame - start) / (end - start)
+                eased = easing_value(track.get("easing", "linear"), t)
+                value = start_value + (end_value - start_value) * eased
+        baked.append({"frame": frame, "value": value})
+    return baked
+
+
 def lowered_selector(animator: dict[str, Any], enter: int) -> dict[str, Any]:
     selector = animator.get("selector", {})
     kind = selector.get("kind", "glyph")
@@ -111,33 +177,31 @@ def lowered_selector(animator: dict[str, Any], enter: int) -> dict[str, Any]:
         "exclude_spaces": True,
     }
     if staggered:
+        # A reveal window keeps the tail pinned open and sweeps its leading
+        # edge forward: units ahead of the edge still carry the animator's
+        # hidden value, units behind it fall back to the layer's rest style.
+        # The inverted ramp (start 0 -> 100) is what makes the effect a
+        # reveal instead of a wipe that leaves the last unit hidden.
         lowered["start"] = {
-            "property": "start",
-            "keyframes": [{"frame": 0, "value": 0}],
-            "easing": "linear",
-        }
-        # Chronon3D selectors are a window: start is the leading edge and
-        # end is the reveal edge. Animating start to 100 would collapse the
-        # window at the end and leave only partial glyphs visible.
-        lowered["end"] = {
-            "property": "end",
             "keyframes": [
                 {"frame": 0, "value": 0},
                 {"frame": enter, "value": 100},
             ],
-            "easing": "out_cubic",
+            "easing": "linear",
+        }
+        lowered["end"] = {
+            "keyframes": [{"frame": 0, "value": 100}],
+            "easing": "linear",
         }
     else:
         # Make a non-staggered animator affect every glyph. This avoids the
         # zero-width default selector used by older render-plan producers.
         lowered["shape"] = "square"
         lowered["start"] = {
-            "property": "start",
             "keyframes": [{"frame": 0, "value": 0}],
             "easing": "linear",
         }
         lowered["end"] = {
-            "property": "end",
             "keyframes": [{"frame": 0, "value": 100}],
             "easing": "linear",
         }
@@ -175,7 +239,9 @@ def lower_motion(motion: dict[str, Any], duration: int) -> dict[str, Any]:
         )
 
     animators = []
-    for animator in motion.get("text_animators", []):
+    for index, animator in enumerate(motion.get("text_animators", [])):
+        if "id" not in animator:
+            animator = {**animator, "id": f"{motion['id']}_animator_{index}"}
         animators.append(
             {
                 "id": animator["id"],
@@ -183,8 +249,8 @@ def lower_motion(motion: dict[str, Any], duration: int) -> dict[str, Any]:
                 "properties": [
                     {
                         "property": prop["property"],
-                        "keyframes": extended_keyframes(prop, duration, enter),
-                        "easing": prop.get("easing", "linear"),
+                        "keyframes": baked_keyframes(prop, duration, enter),
+                        "easing": "linear",
                     }
                     for prop in animator.get("properties", [])
                 ],
@@ -194,10 +260,54 @@ def lower_motion(motion: dict[str, Any], duration: int) -> dict[str, Any]:
     return {"tracks": tracks, "text_animators": animators}
 
 
-def make_plan(motion: dict[str, Any], duration: int, style: dict[str, Any]) -> dict[str, Any]:
+# The Classic Apple long-phrase set: five short-phrase recipes re-authored
+# for wrapped phrases (line selectors, so each line joins the reveal in turn).
+CLASSIC_MOTIONS = [
+    "classic_playfair_baseline_rise",
+    "classic_playfair_tracking_close",
+    "classic_playfair_focus_resolve",
+    "classic_playfair_quiet_zoom",
+    "classic_playfair_glyph_curtain",
+]
+
+# One long, wrapped Italian phrase for every recipe: comparing the five
+# animations on the same three-line copy is what makes the review meaningful.
+CLASSIC_PHRASE = "Le parole giuste\narrivano al momento\ngiusto"
+
+
+def text_style(style: dict[str, Any]) -> dict[str, Any]:
+    """Lower the appearance, adding the paper card when the style owns one."""
+
+    lowered = {
+        "font": style["font"],
+        "font_size": style["font_size"],
+        "fill": style["fill"],
+        "stroke": style["stroke"],
+        "glow": plan_glow(style),
+    }
+    card = style.get("card")
+    if card:
+        padding = card.get("padding", [0, 0])
+        background = {
+            "color": card["color"],
+            "radius": float(card.get("radius", 0)),
+            "padding": [float(padding[0]), float(padding[1])],
+        }
+        if "opacity" in card:
+            background["opacity"] = float(card["opacity"])
+        lowered["background"] = background
+    return lowered
+
+
+def make_plan(
+    motion: dict[str, Any],
+    duration: int,
+    style: dict[str, Any],
+    phrases: dict[str, str],
+    fps: int = 24,
+) -> dict[str, Any]:
     motion_id = motion["id"]
     lowered = lower_motion(motion, duration)
-    glow = plan_glow(style)
     return {
         "schema": "chronon.render-plan.v2",
         "version": 2,
@@ -205,7 +315,7 @@ def make_plan(motion: dict[str, Any], duration: int, style: dict[str, Any]) -> d
         "canvas": {
             "width": 1920,
             "height": 1080,
-            "fps_num": 24,
+            "fps_num": fps,
             "fps_den": 1,
             "duration_frames": duration,
         },
@@ -221,16 +331,10 @@ def make_plan(motion: dict[str, Any], duration: int, style: dict[str, Any]) -> d
             {
                 "id": "phrase",
                 "type": "text",
-                "text": PHRASES[motion_id],
+                "text": phrases[motion_id],
                 "size": style["box"],
                 "position": style["position"],
-                "style": {
-                    "font": style["font"],
-                    "font_size": style["font_size"],
-                    "fill": style["fill"],
-                    "stroke": style["stroke"],
-                    "glow": glow,
-                },
+                "style": text_style(style),
                 "start_frame": 0,
                 "duration_frames": duration,
                 "animation": lowered["tracks"] and {"tracks": lowered["tracks"]},
@@ -263,42 +367,67 @@ def main() -> None:
         default=Path("ChrononTemplate/catalog/chronontemplate_catalog.v1.json"),
         help="C++-emitted catalog containing native_phrase_style",
     )
-    parser.add_argument("--duration", type=int, default=120)
+    parser.add_argument("--duration", type=int, default=None)
+    parser.add_argument(
+        "--classic-style",
+        type=Path,
+        default=Path("ChrononTemplate/catalog/classic_phrase_style.v1.json"),
+        help="Classic Apple long-phrase appearance (Playfair, black ink, paper card)",
+    )
+    parser.add_argument(
+        "--pack",
+        choices=("native", "classic-long"),
+        default="native",
+        help="native: 15 Unicode phrases; classic-long: the Classic Apple long set",
+    )
     args = parser.parse_args()
 
     catalog = json.loads(args.catalog.read_text())
-    emitted = json.loads(args.style_catalog.read_text())
-    style = emitted.get("native_phrase_style")
     required_style = {"font", "font_size", "box", "position", "background", "fill", "stroke", "glow"}
+    if args.pack == "classic-long":
+        motion_ids = CLASSIC_MOTIONS
+        phrases = {motion_id: CLASSIC_PHRASE for motion_id in motion_ids}
+        style = json.loads(args.classic_style.read_text())
+        style_source = str(args.classic_style)
+        duration = args.duration or 150
+        fps = 30
+    else:
+        motion_ids = MOTIONS
+        phrases = PHRASES
+        emitted = json.loads(args.style_catalog.read_text())
+        style = emitted.get("native_phrase_style")
+        style_source = str(args.style_catalog)
+        duration = args.duration or 120
+        fps = 24
     missing = sorted(required_style - style.keys()) if isinstance(style, dict) else []
     if not isinstance(style, dict) or missing:
         raise SystemExit(
-            f"invalid native_phrase_style in {args.style_catalog}: "
+            f"invalid phrase style in {style_source}: "
             f"missing {', '.join(missing) if missing else 'object'}"
         )
     by_id = {motion["id"]: motion for motion in catalog["motions"]}
-    missing = [motion_id for motion_id in MOTIONS if motion_id not in by_id]
+    missing = [motion_id for motion_id in motion_ids if motion_id not in by_id]
     if missing:
         raise SystemExit(f"missing ChrononTemplate motions: {', '.join(missing)}")
-    if args.duration < 30:
+    if duration < 30:
         raise SystemExit("duration must leave room for entrance and exit")
 
     args.out.mkdir(parents=True, exist_ok=True)
     manifest = {
         "source": str(args.catalog),
-        "style_source": str(args.style_catalog),
+        "style_source": style_source,
         "pipeline": "ChrononTemplate -> Chronon3D native render-plan",
-        "canvas": {"width": 1920, "height": 1080, "fps": 24, "duration_frames": args.duration},
+        "canvas": {"width": 1920, "height": 1080, "fps": fps, "duration_frames": duration},
         "style": style,
         "motions": [],
     }
-    for motion_id in MOTIONS:
-        plan = make_plan(by_id[motion_id], args.duration, style)
+    for motion_id in motion_ids:
+        plan = make_plan(by_id[motion_id], duration, style, phrases, fps)
         destination = args.out / f"{motion_id}.plan.json"
         destination.write_text(json.dumps(plan, indent=2) + "\n")
-        manifest["motions"].append({"id": motion_id, "plan": destination.name, "phrase": PHRASES[motion_id]})
+        manifest["motions"].append({"id": motion_id, "plan": destination.name, "phrase": phrases[motion_id]})
     (args.out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    print(f"emitted {len(MOTIONS)} native ChrononTemplate plans in {args.out}")
+    print(f"emitted {len(motion_ids)} native ChrononTemplate plans in {args.out}")
 
 
 if __name__ == "__main__":

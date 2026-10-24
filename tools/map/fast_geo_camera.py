@@ -66,17 +66,59 @@ def _worker_init() -> None:
             raise RuntimeError(f"OpenCL worker selected unexpected device: {device.name()}")
 
 
-def _render_block(args) -> bytes:
+def _render_block(args) -> tuple[bytes, int]:
     f0, f1 = args
     builder = _S["builder"]
     sampler = _S["sampler"]
     parts = []
-    for f in range(f0, min(f1, builder.TOTAL_FRAMES)):
-        frame = builder.render_frame_fast(sampler, f)
+    fallbacks_before = sampler.fallback_count
+    if getattr(sampler, "gpu_map_enabled", False):
+        # OpenCL operations are queued asynchronously. Keep several complete
+        # UMat frames alive before downloading the oldest one so CPU-side
+        # camera/effect setup for later frames can overlap GPU execution.
+        # This does not change pixels or ordering; the only host readback is
+        # still the single ordered handoff required by FFmpeg's stdin pipe.
+        pending = []
+        for f in range(f0, min(f1, builder.TOTAL_FRAMES)):
+            pending.append(builder.render_frame_fast(sampler, f))
+        for frame in pending:
+            if hasattr(frame, "get"):
+                frame = frame.get()
+            parts.append(frame.tobytes())
+    else:
+        # CPU samplers reuse scratch arrays, so serialize their copy into the
+        # pipe payload before asking for the next frame.
+        for f in range(f0, min(f1, builder.TOTAL_FRAMES)):
+            frame = builder.render_frame_fast(sampler, f)
+            if hasattr(frame, "get"):
+                frame = frame.get()
+            parts.append(frame.tobytes())
+    return b"".join(parts), sampler.fallback_count - fallbacks_before
+
+
+def _iter_gpu_block_frames(args):
+    """Render an ordered GPU block and yield each host frame exactly once.
+
+    Keep the UMat queueing used to overlap camera/effect setup with OpenCL,
+    but do not join the readbacks into a second block-sized bytes object. At
+    4K, joining eight BGR frames temporarily duplicates roughly 200 MB before
+    FFmpeg has consumed any of them.
+    """
+    f0, f1 = args
+    builder = _S["builder"]
+    sampler = _S["sampler"]
+    pending = []
+    for frame_idx in range(f0, min(f1, builder.TOTAL_FRAMES)):
+        pending.append(builder.render_frame_fast(sampler, frame_idx))
+    for frame in pending:
         if hasattr(frame, "get"):
             frame = frame.get()
-        parts.append(frame.tobytes())
-    return b"".join(parts)
+        # NumPy exposes its contiguous pixel storage through the buffer
+        # protocol. Passing a memoryview to the pipe avoids allocating and
+        # copying a second full-frame `bytes` object after UMat readback.
+        if not frame.flags.c_contiguous:
+            frame = np.ascontiguousarray(frame)
+        yield memoryview(frame)
 
 
 # ---- reusable pipeline (used by main() and by programmatic callers) -------
@@ -136,18 +178,53 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
 
     stderr_thread = threading.Thread(target=drain_stderr, daemon=True)
     stderr_thread.start()
+    fallback_frames = 0
     try:
         if getattr(sampler, "gpu_map_enabled", False):
-            # OpenCL contexts are process-local and GPU resources should not be
-            # copied through fork. Render UMat frames in the initialized
-            # parent process; pixel kernels still run on the GPU and frames
-            # stream directly to NVENC.
-            for block_args in blocks:
-                data = _render_block(block_args)
-                proc.stdin.write(data)
+            # Editorial GPU compositions share one process-local OpenCL
+            # context. Do not fork that context: enqueue a small ordered batch
+            # of frames per call and overlap its asynchronous GPU work with
+            # host-side camera/effect preparation instead.
+            # Queue enough frames to keep OpenCL busy across the ordered
+            # readback/pipe handoff, without materializing a full clip on GPU.
+            # Final UMat frames are small relative to the prepared map plates.
+            # Keep the live GPU output pool bounded even when CPU callers
+            # configure larger process-pool blocks.
+            gpu_block = 16
+            gpu_blocks = [(f0, min(f0 + gpu_block, total))
+                          for f0 in range(0, total, gpu_block)]
+            for block_args in gpu_blocks:
+                begin_batch = getattr(sampler, "begin_opencl_frame_batch", None)
+                if begin_batch is not None:
+                    frame_count = block_args[1] - block_args[0]
+                    begin_batch(frame_count, sampler.W, sampler.H)
+                # Dual-epoch scenes sample a second prepared map for every
+                # output frame. Give that sampler its own frame destinations
+                # so the queued UMat results remain live until ordered readback.
+                epoch_sampler = getattr(builder, "epoch_before_sampler", None)
+                begin_epoch_batch = getattr(epoch_sampler, "begin_opencl_frame_batch", None)
+                if begin_epoch_batch is not None:
+                    begin_epoch_batch(block_args[1] - block_args[0],
+                                      epoch_sampler.W, epoch_sampler.H)
+                fallbacks_before = sampler.fallback_count
+                for frame_bytes in _iter_gpu_block_frames(block_args):
+                    proc.stdin.write(frame_bytes)
+                end_batch = getattr(sampler, "end_opencl_frame_batch", None)
+                if end_batch is not None:
+                    end_batch()
+                end_epoch_batch = getattr(epoch_sampler, "end_opencl_frame_batch", None)
+                if end_epoch_batch is not None:
+                    end_epoch_batch()
+                block_fallbacks = sampler.fallback_count - fallbacks_before
+                fallback_frames += block_fallbacks
+                if block_fallbacks:
+                    raise RuntimeError(f"map sampling used slow fallback in {block_fallbacks} frame(s)")
         else:
             with ctx.Pool(processes=workers, initializer=_worker_init) as pool:
-                for data in pool.imap(_render_block, blocks):  # submission order
+                for data, block_fallbacks in pool.imap(_render_block, blocks):  # submission order
+                    fallback_frames += block_fallbacks
+                    if block_fallbacks:
+                        raise RuntimeError(f"map sampling used slow fallback in {block_fallbacks} frame(s)")
                     proc.stdin.write(data)
         produced = time.perf_counter() - t0
         try:
@@ -207,9 +284,12 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
     encoder = "h264_nvenc" if gpu_required else f"libx264 {preset}"
     stats["encoder"] = encoder
     stats["gpu_encoder"] = gpu_required
+    stats["engine_fallback_frames"] = fallback_frames
     print(f"frame production: {produced:.2f}s ({stats['production_fps']:.1f} FPS) | "
           f"total incl. encode: {elapsed:.2f}s ({stats['total_fps']:.1f} FPS, "
-          f"{stats['bytes']:,} bytes) | {workers} workers, {encoder}", flush=True)
+          f"{stats['bytes']:,} bytes) | "
+          f"{'1 OpenCL process' if getattr(sampler, 'gpu_map_enabled', False) else f'{workers} CPU workers'}, "
+          f"{encoder}", flush=True)
     return stats
 
 
