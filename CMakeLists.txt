@@ -371,6 +371,27 @@ add_executable(chronontemplate_emit_web_page_v2
 target_link_libraries(chronontemplate_emit_web_page_v2 PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_page_v2 PRIVATE -Wall -Wextra)
 
+# Single-frame archive triptych, authored as a native RenderPlan V3 in C++.
+add_executable(chronontemplate_emit_web_archive_triptych
+        tools/web_presets/emit_web_archive_triptych.cpp)
+target_include_directories(chronontemplate_emit_web_archive_triptych PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_web_archive_triptych PRIVATE -Wall -Wextra)
+
+# Three individual stills matching the remaining supplied web references.
+add_executable(chronontemplate_emit_web_reference_stills
+        tools/web_presets/emit_web_reference_stills.cpp)
+target_include_directories(chronontemplate_emit_web_reference_stills PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_web_reference_stills PRIVATE -Wall -Wextra)
+
+# Static full-resolution stills for the existing image-effect treatments.
+add_executable(chronontemplate_emit_image_effect_samples
+        tools/web_presets/emit_image_effect_samples.cpp)
+target_include_directories(chronontemplate_emit_image_effect_samples PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_image_effect_samples PRIVATE -Wall -Wextra)
+
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.
