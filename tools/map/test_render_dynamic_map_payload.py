@@ -7,7 +7,10 @@ fallbacks — without touching cv2, tiles or NVENC.
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
+import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import render_dynamic_map_overlay as dm
 
 
@@ -80,6 +83,65 @@ class TourTimingTests(unittest.TestCase):
         schedule = [(0.0, 1.0), (3.0, 1.0), (6.0, 1.0)]
         _, travel, _ = dm.tour_timing_from_pin_timing(schedule, 24.0)
         self.assertAlmostEqual(travel, 2.0)
+
+
+class EncoderContractTests(unittest.TestCase):
+    def test_declared_encoder_profiles_are_explicit_and_closed(self) -> None:
+        self.assertEqual(dm.resolve_encoder_profile({
+            "codec": "h264_nvenc", "gpu": True, "preset": "p6", "quality": 15,
+        }), {"codec": "h264_nvenc", "gpu": True, "preset": "p6", "quality": 15})
+        self.assertEqual(dm.resolve_encoder_profile({
+            "codec": "libx264", "gpu": False, "preset": "veryfast", "quality": 23,
+        }), {"codec": "libx264", "gpu": False, "preset": "veryfast", "quality": 23})
+        for profile in (
+            {"codec": "h264_nvenc", "gpu": True, "preset": "p4", "quality": 15},
+            {"codec": "h264_nvenc", "gpu": True, "preset": "p6", "quality": 18},
+            {"codec": "libx264", "gpu": False, "preset": "medium", "quality": 23},
+            {"codec": "libx264", "gpu": True, "preset": "veryfast", "quality": 23},
+            {"codec": "h264_nvenc", "gpu": False, "preset": "p6", "quality": 15},
+            {"codec": "hevc_nvenc", "gpu": True, "preset": "p6", "quality": 15},
+        ):
+            with self.subTest(profile=profile), self.assertRaises(ValueError):
+                dm.resolve_encoder_profile(profile)
+
+    def test_sampler_declaration_is_not_overridden_by_process_environment(self) -> None:
+        self.assertEqual(dm.resolve_map_sampler("cpu"), "cpu")
+        self.assertEqual(dm.resolve_map_sampler("opencv_opencl"), "opencv_opencl")
+        with self.assertRaises(ValueError):
+            dm.resolve_map_sampler("auto")
+
+    def test_sampler_default_tracks_the_declared_cpu_encoder(self) -> None:
+        self.assertEqual(dm.default_map_sampler({"codec": "libx264", "gpu": False, "preset": "veryfast", "quality": 23}), "cpu")
+        self.assertEqual(dm.default_map_sampler({"codec": "h264_nvenc", "gpu": True, "preset": "p6", "quality": 15}), "opencv_opencl")
+        with self.assertRaises(ValueError):
+            dm.default_map_sampler({"codec": "libx264", "gpu": True})
+
+    def test_sampler_validation_rejects_cpu_with_gpu_encoder(self) -> None:
+        cpu_profile = {"codec": "libx264", "gpu": False, "preset": "veryfast", "quality": 23}
+        nvenc_profile = {"codec": "h264_nvenc", "gpu": True, "preset": "p6", "quality": 15}
+        with self.assertRaises(ValueError):
+            dm.validate_encoder_sampler(nvenc_profile, "cpu")
+        with self.assertRaisesRegex(ValueError, "editorial"):
+            dm.validate_encoder_sampler(cpu_profile, "cpu", editorial=True)
+        self.assertEqual(dm.validate_encoder_sampler(cpu_profile, "opencv_opencl"), "opencv_opencl")
+        self.assertEqual(dm.validate_encoder_sampler(cpu_profile, "cpu"), "cpu")
+
+    def test_explicit_cpu_sampler_can_run_without_opencl(self) -> None:
+        self.assertFalse(dm.sampler_requires_opencl("cpu", "libx264", False))
+        self.assertTrue(dm.sampler_requires_opencl("opencv_opencl", "libx264", False))
+        self.assertTrue(dm.sampler_requires_opencl("cpu", "libx264", True))
+        self.assertTrue(dm.sampler_requires_opencl("opencv_opencl", "h264_nvenc", False))
+
+    def test_ffmpeg_command_obeys_declared_nvenc_and_cpu_profiles(self) -> None:
+        nvenc = dm.encoder_arguments({
+            "codec": "h264_nvenc", "gpu": True, "preset": "p6", "quality": 15,
+        })
+        self.assertEqual(nvenc, ["-c:v", "h264_nvenc", "-gpu", "0", "-preset", "p6",
+                                 "-tune", "hq", "-rc", "vbr", "-cq", "15", "-b:v", "0"])
+        cpu = dm.encoder_arguments({
+            "codec": "libx264", "gpu": False, "preset": "veryfast", "quality": 23,
+        })
+        self.assertEqual(cpu, ["-c:v", "libx264", "-preset", "veryfast", "-crf", "23"])
 
 
 class DeclaredFallbackTests(unittest.TestCase):
