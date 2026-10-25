@@ -107,6 +107,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_bullet_list_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_bullet_list_pack_test COMMAND chronontemplate_bullet_list_pack_test)
 
+    add_executable(chronontemplate_investigation_board_pack_test tests/investigation_board_pack.cpp)
+    target_link_libraries(chronontemplate_investigation_board_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_investigation_board_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_investigation_board_pack_test COMMAND chronontemplate_investigation_board_pack_test)
+
     add_executable(chronontemplate_image_animation_pack_test tests/image_animation_pack.cpp)
     target_link_libraries(chronontemplate_image_animation_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_image_animation_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -143,6 +148,13 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_web_page_highlight_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_web_page_highlight_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_web_page_highlight_pack_test COMMAND chronontemplate_web_page_highlight_pack_test)
+
+    # The headline highlighter looks: statement page, marker sweep and stepped
+    # highlight, one pure plan per recipe with a mid-clip sweep.
+    add_executable(chronontemplate_web_headline_highlight_pack_test tests/web_headline_highlight_pack.cpp)
+    target_link_libraries(chronontemplate_web_headline_highlight_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_web_headline_highlight_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_web_headline_highlight_pack_test COMMAND chronontemplate_web_headline_highlight_pack_test)
 
     add_executable(chronontemplate_web_text_layout_test tests/web_text_layout.cpp)
     target_link_libraries(chronontemplate_web_text_layout_test PRIVATE chronontemplate)

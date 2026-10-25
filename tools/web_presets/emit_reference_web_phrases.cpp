@@ -1,5 +1,7 @@
 // Recreate the supplied highlighted-web passages as editable Chronon render
 // plans. The screenshots are references only; no screenshot is used as a plate.
+#include "chronontemplate/camera_roll/ResolvedCameraSamples.hpp"
+
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -192,15 +194,23 @@ Json makePlan(const Page& p) {
                 {{"frame", 108}, {"value", first}}, {{"frame", 128}, {"value", first}},
                 {{"frame", 168}, {"value", second}}, {{"frame", 209}, {"value", second}}});
         };
-        Json cameraTracks = Json::array();
-        cameraTracks.push_back(track("camera_position_x", trackKeys(centerX(p.lines[0]), centerX(p.lines[2]))));
-        cameraTracks.push_back(track("camera_position_y", trackKeys(centerY(p.lines[0]), centerY(p.lines[2]))));
-        cameraTracks.push_back(
-            track("camera_position_z", Json::array({{{"frame", 0}, {"value", -1320.0}},
+        const auto channel = [](const char* name, const Json& keys) {
+            return Json{{"channel", name}, {"easing", "out_cubic"}, {"keyframes", keys}};
+        };
+        Json cameraChannels = Json::array();
+        cameraChannels.push_back(channel("position_x", trackKeys(centerX(p.lines[0]), centerX(p.lines[2]))));
+        cameraChannels.push_back(channel("position_y", trackKeys(centerY(p.lines[0]), centerY(p.lines[2]))));
+        cameraChannels.push_back(
+            channel("position_z", Json::array({{{"frame", 0}, {"value", -1320.0}},
                 {{"frame", 65}, {"value", -1320.0}}, {{"frame", 108}, {"value", -760.0}},
                 {{"frame", 128}, {"value", -760.0}}, {{"frame", 168}, {"value", -760.0}},
                 {{"frame", 209}, {"value", -760.0}}})));
-        plan["camera_animation"] = {{"tracks", std::move(cameraTracks)}};
+        // camera_animation is retired by the render-plan contract: lower the
+        // authored move to resolved per-frame camera_samples through the
+        // shared CM3D baker instead of shipping track intent.
+        chronontemplate::camera_roll::attachResolvedCameraSamples(
+            plan, plan.at("camera"), cameraChannels, 30.f,
+            static_cast<std::size_t>(kFrames));
     }
     return plan;
 }

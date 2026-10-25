@@ -1,0 +1,152 @@
+{
+  "canvas": "1920x1080",
+  "renderer": "C++ / Blend2D (Visual Studio x64)",
+  "asset_sources": [
+    "OpenAI image_gen (new assets): generated_archival_meeting_v1.png, generated_creator_portrait_v1.png, generated_witness_interview_v1.png, generated_neon_figure_v1.png, generated_cyan_evidence_figure_v1.png, generated_amber_archive_chair_v1.png, generated_red_archive_figure_v1.png, generated_stargate_globe_v1.png",
+    "Vector scenes and typography authored with C++/Blend2D"
+  ],
+  "reference_png_reuse": false,
+  "total_pngs": 258,
+  "animations": [
+    {
+      "animation": "01_subject_floating_push",
+      "png_count": 24,
+      "dimensions": "1920x1080",
+      "first": "frame_0007",
+      "last": "frame_0030"
+    },
+    {
+      "animation": "02_portrait_parallax_drift",
+      "png_count": 14,
+      "dimensions": "1920x1080",
+      "first": "frame_0034",
+      "last": "frame_0047"
+    },
+    {
+      "animation": "03_historical_archive_framing",
+      "png_count": 7,
+      "dimensions": "1920x1080",
+      "first": "frame_0053",
+      "last": "frame_0059"
+    },
+    {
+      "animation": "04_cinematic_title_beat",
+      "png_count": 13,
+      "dimensions": "1920x1080",
+      "first": "frame_0068",
+      "last": "frame_0080"
+    },
+    {
+      "animation": "05_archival_evidence_box",
+      "png_count": 46,
+      "dimensions": "1920x1080",
+      "first": "frame_0091",
+      "last": "frame_0137"
+    },
+    {
+      "animation": "06_documentary_still_evidence",
+      "png_count": 1,
+      "dimensions": "1920x1080",
+      "first": "frame_0149",
+      "last": "frame_0149"
+    },
+    {
+      "animation": "07_archive_scene_pan",
+      "png_count": 24,
+      "dimensions": "1920x1080",
+      "first": "frame_0185",
+      "last": "frame_0208"
+    },
+    {
+      "animation": "08_tactical_radar_graphic",
+      "png_count": 8,
+      "dimensions": "1920x1080",
+      "first": "frame_0239",
+      "last": "frame_0246"
+    },
+    {
+      "animation": "09_newspaper_dossier_zoom",
+      "png_count": 4,
+      "dimensions": "1920x1080",
+      "first": "frame_0259",
+      "last": "frame_0262"
+    },
+    {
+      "animation": "10_highlighter_evidence_sweep",
+      "png_count": 5,
+      "dimensions": "1920x1080",
+      "first": "frame_0313",
+      "last": "frame_0317"
+    },
+    {
+      "animation": "11_subject_tilt_reframe",
+      "png_count": 8,
+      "dimensions": "1920x1080",
+      "first": "frame_0329",
+      "last": "frame_0336"
+    },
+    {
+      "animation": "12_dramatic_cutout_pushin",
+      "png_count": 15,
+      "dimensions": "1920x1080",
+      "first": "frame_0401",
+      "last": "frame_0415"
+    },
+    {
+      "animation": "13_newspaper_headline_wipe",
+      "png_count": 18,
+      "dimensions": "1920x1080",
+      "first": "frame_0440",
+      "last": "frame_0457"
+    },
+    {
+      "animation": "14_archive_document_framing",
+      "png_count": 4,
+      "dimensions": "1920x1080",
+      "first": "frame_0474",
+      "last": "frame_0477"
+    },
+    {
+      "animation": "15_declassified_memo_highlight",
+      "png_count": 13,
+      "dimensions": "1920x1080",
+      "first": "frame_0490",
+      "last": "frame_0502"
+    },
+    {
+      "animation": "16_evidence_callout_card",
+      "png_count": 8,
+      "dimensions": "1920x1080",
+      "first": "frame_0508",
+      "last": "frame_0515"
+    },
+    {
+      "animation": "17_classified_nightvision_reticle",
+      "png_count": 8,
+      "dimensions": "1920x1080",
+      "first": "frame_0527",
+      "last": "frame_0534"
+    },
+    {
+      "animation": "18_witness_portrait_focus",
+      "png_count": 11,
+      "dimensions": "1920x1080",
+      "first": "frame_0543",
+      "last": "frame_0553"
+    },
+    {
+      "animation": "19_chapter_title_card",
+      "png_count": 3,
+      "dimensions": "1920x1080",
+      "first": "frame_0558",
+      "last": "frame_0560"
+    },
+    {
+      "animation": "20_climax_multilayer_parallax",
+      "png_count": 24,
+      "dimensions": "1920x1080",
+      "first": "frame_0575",
+      "last": "frame_0598"
+    }
+  ]
+}

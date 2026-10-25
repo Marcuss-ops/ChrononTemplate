@@ -100,6 +100,8 @@ const cameraChannels=[
 ].map(([channel,keyframes])=>({channel,easing:'in_out_cubic',keyframes:keyframes.map(([frame,value])=>({frame,value}))}));
 plan.camera_samples=resolveCameraSamples(pageCamera,cameraChannels,30,FRAMES);
 plan.camera=plan.camera_samples[0].camera;
+// The plan already carries resolved `camera_samples` (the V3 contract); the
+// legacy camera_animation post-bake step is retired and its binary no longer
+// exists, so the plan is written as-is.
 fs.writeFileSync(path.join(out,'nba_dirk_physical_fold.plan.json'),JSON.stringify(plan,null,2)+'\n');
-execFileSync(path.join(root,'build/dev-fast/chronontemplate_camera_plan_bake'),[path.join(out,'nba_dirk_physical_fold.plan.json')],{stdio:'inherit'});
 console.log(`Wrote ${path.join(out,'nba_dirk_physical_fold.plan.json')}`);

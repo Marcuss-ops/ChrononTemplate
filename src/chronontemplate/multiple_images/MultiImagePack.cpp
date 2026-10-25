@@ -1,9 +1,11 @@
 #include "chronontemplate/multiple_images/MultiImagePack.hpp"
 
+#include "chrononmotion/math/MathUtils.hpp"
 #include "chrononmotion/motion/Presets.hpp"
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdint>
 #include <stdexcept>
 
@@ -41,6 +43,80 @@ namespace chronontemplate {
 
         [[nodiscard]] int exitFramesFor(const MultiImageSpec& spec) {
             return std::max(1, std::min(18, spec.holdFrames + 1));
+        }
+
+        /// Polaroid framing: white border on three sides, deeper bottom strip.
+        constexpr float kPolaroidBorder = 18.f;
+        constexpr float kPolaroidBottom = 58.f;
+
+        /// The look each style gives the board: the plate, the tile frame and
+        /// the caption typography. Colors follow the editorial reference
+        /// boards (light archive plate, aged sepia paper, dark polaroid wall).
+        struct StyleLook {
+            std::string plate{};              ///< full-canvas backing color; empty draws none
+            float plateNoise{0.f};
+            float plateNoiseSize{1.f};
+            float cornerRadius{24.f};
+            float tornEdge{0.f};
+            float captionSize{36.f};
+            std::string captionFont{"Chronon3d/assets/fonts/Inter-Bold.ttf"};
+            std::string captionColor{"#FFFFFF"};
+            float captionOffset{26.f};
+            float tiltStepDegrees{0.f};    ///< per-tile fan tilt; zero keeps tiles upright
+            float shadowOffset{0.f};        ///< drop shadow distance; zero draws no shadow
+            float shadowOpacity{0.f};
+            std::string headerInk{};        ///< archival header ink; empty draws no header
+        };
+
+        [[nodiscard]] StyleLook lookFor(MultiImageStyle style, const MultiImageSpec& spec) {
+            StyleLook look;
+            look.captionFont = spec.captionFont;
+            look.captionSize = spec.captionFontSize;
+            look.captionColor = spec.captionColor;
+            look.captionOffset = spec.captionOffset;
+            switch (style) {
+                case MultiImageStyle::Classic:
+                    return look;
+                case MultiImageStyle::ArchiveBoard:
+                    look.plate = "#D9D9D6";
+                    look.plateNoise = 0.22f;
+                    look.plateNoiseSize = 1.6f;
+                    look.cornerRadius = 28.f;
+                    look.captionFont = "Chronon3d/assets/fonts/Inter-Bold.ttf";
+                    look.captionColor = "#FFFFFF";
+                    look.captionSize = 40.f;
+                    look.shadowOffset = 16.f;
+                    look.shadowOpacity = 0.32f;
+                    look.headerInk = "#2A2A28";
+                    return look;
+                case MultiImageStyle::SepiaTorn:
+                    look.plate = "#E4D2B4";
+                    look.plateNoise = 0.38f;
+                    look.plateNoiseSize = 1.2f;
+                    look.cornerRadius = 0.f;
+                    look.tornEdge = 7.f;
+                    look.captionFont = "Chronon3d/assets/fonts/Georgia_Bold.ttf";
+                    look.captionColor = "#2E2114";
+                    look.captionSize = 42.f;
+                    look.captionOffset = 30.f;
+                    look.shadowOffset = 10.f;
+                    look.shadowOpacity = 0.22f;
+                    look.headerInk = "#3B2B1A";
+                    return look;
+                case MultiImageStyle::PolaroidFan:
+                    look.plate = "#201F1D";
+                    look.plateNoise = 0.45f;
+                    look.plateNoiseSize = 2.2f;
+                    look.cornerRadius = 2.f;
+                    look.captionFont = "Chronon3d/assets/fonts/Inter-Regular.ttf";
+                    look.captionColor = "#3A352C";
+                    look.captionSize = 22.f;
+                    look.tiltStepDegrees = 7.f;
+                    look.shadowOffset = 12.f;
+                    look.shadowOpacity = 0.38f;
+                    return look;
+            }
+            return look;
         }
 
         /// How one tile enters: a slide along a direction, a pop, or a plain rise.
@@ -168,6 +244,16 @@ namespace chronontemplate {
         throw std::invalid_argument("multiImageTileCount: unknown layout");
     }
 
+    const char* multiImageStyleId(MultiImageStyle style) noexcept {
+        switch (style) {
+            case MultiImageStyle::Classic: return "multi_image_classic";
+            case MultiImageStyle::ArchiveBoard: return "multi_image_archive_board";
+            case MultiImageStyle::SepiaTorn: return "multi_image_sepia_torn";
+            case MultiImageStyle::PolaroidFan: return "multi_image_polaroid_fan";
+        }
+        return "unknown";
+    }
+
     std::vector<Vector2> multiImageCells(MultiImageLayout layout) {
         switch (layout) {
             case MultiImageLayout::Duo:
@@ -242,6 +328,10 @@ namespace chronontemplate {
             throw std::invalid_argument(
                     "addMultiImageBoard: positive tile size and duration are required");
         }
+        if (spec.headerLabel.size() > 64 || spec.headerSubtitle.size() > 96) {
+            throw std::invalid_argument(
+                    "addMultiImageBoard: header label (<= 64) or subtitle (<= 96) is too long");
+        }
         std::string selectedMotion = spec.motionId;
         if (selectedMotion == "random") {
             std::string seed = spec.motionSeed;
@@ -280,17 +370,82 @@ namespace chronontemplate {
                 ? beatsFor(spec.layout, selectedMotion, count, spec.duration)
                 : std::vector<Beat>{};
 
+        using chrononmotion::Vector3;
+        using chrononmotion::motion::Easing;
+
+        const StyleLook look = lookFor(spec.style, spec);
+        const bool styled = spec.style != MultiImageStyle::Classic;
+
         MultiImageBoard board;
         board.motionId = selectedMotion;
         board.inFrame = spec.inFrame;
         board.tiles.reserve(cells.size());
         board.captions.reserve(cells.size());
 
+        if (styled && !look.plate.empty()) {
+            LayerHandle& plate = scene.shape(ShapeSpec{.size = canvas,
+                                                      .fillColor = look.plate,
+                                                      .name = "board_plate",
+                                                      .noiseAmount = look.plateNoise,
+                                                      .noiseSeed = 7,
+                                                      .noiseSize = look.plateNoiseSize});
+            plate.position(canvas.x * 0.5f, canvas.y * 0.5f);
+            plate.alive(spec.inFrame, endFrame);
+            plate.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+        }
+
+        if (styled && !look.headerInk.empty() &&
+            (!spec.headerLabel.empty() || !spec.headerSubtitle.empty())) {
+            const float hx = canvas.x * 0.055f;
+            float hy = canvas.y * 0.105f;
+            if (!spec.headerLabel.empty()) {
+                LayerHandle& label = scene.text(TextSpec{.text = spec.headerLabel,
+                                                        .font = "Chronon3d/assets/fonts/Inter-Bold.ttf",
+                                                        .fontSize = 22.f,
+                                                        .color = look.headerInk,
+                                                        .name = "board_header_label"});
+                label.position(hx + 60.f, hy);
+                label.alive(spec.inFrame, endFrame);
+                label.animate(FadeIn{.inFrame = spec.inFrame, .duration = 12});
+                label.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+                hy += 22.f;
+            }
+            {
+                LayerHandle& rule = scene.shape(ShapeSpec{.size = {150.f, 2.f},
+                                                          .fillColor = look.headerInk,
+                                                          .name = "board_header_rule"});
+                rule.position(hx + 60.f, hy);
+                rule.alive(spec.inFrame, endFrame);
+                rule.animate(FadeIn{.inFrame = spec.inFrame, .duration = 12});
+                rule.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+                hy += 24.f;
+            }
+            if (!spec.headerSubtitle.empty()) {
+                LayerHandle& subtitle = scene.text(TextSpec{.text = spec.headerSubtitle,
+                                                           .font = "Chronon3d/assets/fonts/Inter-Bold.ttf",
+                                                           .fontSize = 18.f,
+                                                           .color = look.headerInk,
+                                                           .name = "board_header_subtitle"});
+                subtitle.position(hx + 120.f, hy);
+                subtitle.alive(spec.inFrame, endFrame);
+                subtitle.animate(FadeIn{.inFrame = spec.inFrame, .duration = 12});
+                subtitle.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+            }
+        }
+
         for (std::size_t i = 0; i < cells.size(); ++i) {
             const MultiImageTile& tile = spec.tiles[i];
             const Vector2 cell = cells[i];
             const float x = canvas.x * cell.x;
             const float y = canvas.y * cell.y;
+
+            // The fan look leans the outer tiles outward around an upright
+            // center tile; every other style keeps the grid square.
+            const float tiltDegrees = look.tiltStepDegrees == 0.f
+                    ? 0.f
+                    : (static_cast<float>(i) -
+                       static_cast<float>(cells.size() - 1) * 0.5f) * look.tiltStepDegrees;
+            const float tiltRadians = chrononmotion::math::degToRad(tiltDegrees);
 
             int start = spec.inFrame + static_cast<int>(i) * stagger;
             int enterDuration = std::max(1, stagger);
@@ -306,13 +461,55 @@ namespace chronontemplate {
                 dir = beat.dir;
             }
 
+            ImageFrameStyle frame = tile.frame;
+            if (styled) {
+                frame.cornerRadius = look.cornerRadius;
+                frame.tornEdgeAmount = look.tornEdge;
+                if (look.tornEdge > 0.f) {
+                    frame.tornEdgeSeed = 1000u + static_cast<std::uint32_t>(i);
+                }
+            }
+
+            if (styled && look.shadowOpacity > 0.f) {
+                LayerHandle& shadow = scene.shape(ShapeSpec{
+                        .size = {spec.tileWidth, spec.tileHeight},
+                        .fillColor = "#000000",
+                        .name = "tile_shadow_" + std::to_string(i),
+                        .cornerRadius = look.cornerRadius});
+                shadow.position(x + look.shadowOffset, y + look.shadowOffset);
+                shadow.opacity(look.shadowOpacity);
+                shadow.alive(spec.inFrame, endFrame);
+                shadow.layer().tracks.rotation.add(
+                        0.f, Vector3(0.f, 0.f, tiltRadians), Easing::easeOut());
+                shadow.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+            }
+            if (styled && spec.style == MultiImageStyle::PolaroidFan) {
+                // The polaroid card: white frame around the print with the
+                // classic deeper bottom strip the caption sits on.
+                LayerHandle& card = scene.shape(ShapeSpec{
+                        .size = {spec.tileWidth + 2.f * kPolaroidBorder,
+                                 spec.tileHeight + kPolaroidBorder + kPolaroidBottom},
+                        .fillColor = "#F6F2E9",
+                        .name = "polaroid_frame_" + std::to_string(i),
+                        .cornerRadius = look.cornerRadius});
+                card.position(x, y + (kPolaroidBottom - kPolaroidBorder) * 0.5f);
+                card.alive(spec.inFrame, endFrame);
+                card.layer().tracks.rotation.add(
+                        0.f, Vector3(0.f, 0.f, tiltRadians), Easing::easeOut());
+                card.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+            }
+
             LayerHandle& image = scene.image(ImageSpec{
                     .path = tile.path,
                     .name = "tile_" + std::to_string(i),
-                    .frame = tile.frame,
+                    .frame = frame,
                     .targetSize = Vector2(spec.tileWidth, spec.tileHeight)});
             image.position(x, y);
             image.alive(spec.inFrame, endFrame);
+            if (tiltDegrees != 0.f) {
+                image.layer().tracks.rotation.add(
+                        0.f, Vector3(0.f, 0.f, tiltRadians), Easing::easeOut());
+            }
 
             if (certified) {
                 switch (kind) {
@@ -363,11 +560,22 @@ namespace chronontemplate {
                     tile.caption.empty() ? multiImageTileLabel(tile.path) : tile.caption;
             if (!caption.empty()) {
                 LayerHandle& text = scene.text(TextSpec{.text = caption,
-                                                        .font = spec.captionFont,
-                                                        .fontSize = spec.captionFontSize,
-                                                        .color = spec.captionColor,
+                                                        .font = look.captionFont,
+                                                        .fontSize = look.captionSize,
+                                                        .color = look.captionColor,
                                                         .name = "caption_" + std::to_string(i)});
-                text.position(x, y + spec.tileHeight * 0.5f + spec.captionOffset);
+                const bool onStrip = spec.style == MultiImageStyle::PolaroidFan;
+                const float captionDrop = onStrip
+                        ? spec.tileHeight * 0.5f + kPolaroidBottom * 0.5f
+                        : spec.tileHeight * 0.5f + look.captionOffset;
+                // The caption rides its card's tilt: the drop vector rotates
+                // with the tile so the label stays on the bottom edge/strip.
+                text.position(x - captionDrop * std::sin(tiltRadians),
+                              y + captionDrop * std::cos(tiltRadians));
+                if (tiltDegrees != 0.f) {
+                    text.layer().tracks.rotation.add(
+                            0.f, Vector3(0.f, 0.f, tiltRadians), Easing::easeOut());
+                }
                 text.alive(spec.inFrame, endFrame);
                 text.animate(FadeIn{.inFrame = start + std::max(1, enterDuration / 2),
                                     .duration = std::max(1, enterDuration)});

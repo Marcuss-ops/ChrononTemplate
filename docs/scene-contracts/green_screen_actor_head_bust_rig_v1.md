@@ -1,14 +1,16 @@
-# Green screen actor head and bust rig V1
+# Green-screen actor head and bust rig V1
 
 ## Scene contract
 
-- **Subject and source:** AI-generated photorealistic chest-up portrait of Keanu Reeves, 1672×941 landscape, front-facing, RGB, no alpha, uniform green background. Key the green to alpha before it enters the ChrononMotion scene. Source image: `assets/social_rig_keanu_v1/keanu_chroma_source.png`.
-- **Composition:** 1920×1080, centered head and shoulders, full green-screen output. Camera is fixed, front-facing, 45° FOV, 30 fps. Keep the entire head and shoulders in frame.
-- **Motion and timing:** 4-second seamless loop (121 frames including both endpoints). Head moves slightly right and then left, returning to neutral; bust follows with a smaller lateral sway and gentle tilt. No unrelated gestures, camera movement, or breathing exaggeration.
-- **Layers:** Green background plane and transparent actor image plane. A ChrononMotion PinWarp rig provides separate left/right head controls and a low-amplitude torso control; anchors hold the lower bust stable.
-- **Must not appear:** Original green plate texture, key fringes, cropping, face replacement, text, extra props, cinematic background, or sharp jitter.
-- **Review evidence:** Inspect the keyed cutout and rendered frames at the beginning, middle, and end. Verify the MP4 is 1920×1080, 30 fps, 121 frames, and confirm motion differs between those frames while the first and final frames match.
+- **Subject and source:** AI-generated photorealistic Keanu Reeves portrait, 1672×941 landscape, front-facing, originally RGB on a uniform green background. Keyed texture: `assets/social_rig_keanu_v1/processed/keanu_keyed.png`.
+- **Composition:** 1920×1080, centered head and shoulders, full green-screen output. Fixed front camera; keep all hair and shoulders in frame.
+- **Motion and timing:** Four seconds, 121 frames at 30 fps. The complete head makes a small yaw and tilt around the upper-neck pivot. Torso and shoulders remain still; no global translation or vertical bob.
+- **Rig/layers:** C++ dense textured plane deformed by ChrononMotion's `RigProgramEvaluator` and applied through `MotionSceneBridge`. Skull vertices include hair, face, ears and jaw; weights blend through the neck into the torso root. Original UV and RGBA texture are retained; alpha controls visibility.
+- **Must not appear:** Green gaps at the neck, detached head, key fringes, cropping, face replacement, text or extra props.
+- **Review:** Inspect frames 0/30/60/90/120. Confirm whole-skull motion, continuous neck, stable shoulder/chest pixels, and neutral start/end poses. The delivered contact sheet is `keanu_head_bust_joint_rig_v3_contact.png`.
 
-## Asset inspection
+## Render path and verification
 
-The generated source is 1672×941 (RGB, landscape, no alpha). Its green plate is uniformly lit and there are no external media assets or third-party attribution requirements. The working cutout is derived with an FFmpeg chroma key; the source remains preserved unchanged.
+The scene now uses the C3D RenderPlan V3 inline-mesh animation path. ChrononMotion bakes the canonical rig deformation into textured mesh samples; Chronon3D interpolates the vertex positions at the requested frame and renders the original UV/RGBA texture through its software mesh backend. Mesh texture assets are supported alongside inline geometry. The background and portrait are independent mesh layers.
+
+The delivered C3D proof is `keanu_head_neck_joint_rig_c3d.mp4`; its contact sheet is `keanu_head_neck_joint_rig_c3d_contact.png`. Verified output: H.264, 1920×1080, 30 fps, 121 frames (4.03 s), green-screen background. Frames 0/30/60/90/120 were inspected. The whole head visibly changes between frames 0 and 30/90, while sampled shoulder/chest regions remain visually stable apart from small raster/compression differences. Frame 120 returns close to the neutral pose. Encoding used FFmpeg because this C3D build does not include its native FFmpeg video sink; C3D rendered the raw frame stream.

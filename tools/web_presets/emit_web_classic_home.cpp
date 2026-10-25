@@ -42,7 +42,7 @@ Json text(const char* id, const char* value, float x, float y, float w, float h,
     Json layer={{"id",id},{"type","text"},{"text",value},{"size",{w,h}},
             {"position",{x+w/2.f,y+h/2.f,0.f}},{"enable_3d",true},{"screen_space",true},
             {"start_frame",0},{"duration_frames",FRAMES},
-            {"style",{{"font",font},{"font_size",size},{"fill",Material::rgba(color)}}}};
+            {"style",{{"font",font},{"font_size",size},{"fill",color}}}};
     std::string name=id;
     int start=4;
     if(name.starts_with("edition")) start=18;
@@ -80,7 +80,7 @@ Json build(const Theme& t) {
     layers.push_back(rect("read_button",92,466,202,54,t.accent));
     layers.push_back(text("read_cta","EXPLORE THE ISSUE  →",105,479,178,28,14,bold,t.paper));
     Json hero={{"id","lead_photo"},{"type","image"},{"asset","assets/images/investigative_journalist_hero.jpg"},
-                      {"size",{690,386}},{"position",{1362,340,0}},{"fit","cover"},{"screen_space",true},
+                      {"size",{690,386}},{"position",{1362,340}},{"fit","cover"},{"screen_space",true},
                       {"start_frame",0},{"duration_frames",FRAMES}};
     entrance(hero,39,30.f);
     layers.push_back(std::move(hero));
