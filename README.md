@@ -837,7 +837,7 @@ encode with ffmpeg, as the other editorial packs do.
 ## Documentary and archival web stills
 
 `include/chronontemplate/web/DocumentaryReferenceStills.hpp` exposes four distinct
-static 1920×1080 native C++ compositions through
+static 1920×1080 native C++ recreations of the supplied video screenshots through
 `chronontemplate::web::buildDocumentaryReferenceStillPlans()`: a highlighted tax-status
 excerpt, an 80s CRT headline, a 1972 newspaper-style rainmaking headline, and a warm
 Pinto documentary text frame. The plans are render-plan V3 data and are emitted by:

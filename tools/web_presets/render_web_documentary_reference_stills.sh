@@ -14,13 +14,15 @@ command -v ffmpeg >/dev/null || { echo "ffmpeg is required to wrap the renderer'
 
 mkdir -p "$OUT/plans" "$OUT/png" "$OUT/raw"
 "$EMITTER" "$OUT/plans"
+cd "$ROOT"
 
 while IFS= read -r plan; do
   stem="$(basename "$plan" .plan.json)"
+  plan_arg="$(realpath --relative-to="$ROOT" "$OUT/plans/${stem}.plan.json")"
   png="$OUT/png/${stem}.png"
   raw="$OUT/raw/${stem}.rgba"
   echo "== $stem"
-  "$CLI" render --plan "$plan" --assets-root "$ROOT" --backend "$BACKEND" \
+  "$CLI" render --plan "$plan_arg" --assets-root "$ROOT" --backend "$BACKEND" \
     --profile maximum --frame 0 --video-sink raw --pipe-pixfmt rgba -v error -o "$raw"
   ffmpeg -v error -y -f rawvideo -pixel_format rgba -video_size 1920x1080 \
     -i "$raw" -frames:v 1 -pix_fmt rgba "$png"
