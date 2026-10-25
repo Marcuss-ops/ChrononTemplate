@@ -243,6 +243,7 @@ add_library(chronontemplate STATIC
         # the native web-page family: complete page + highlight 3D + blurred phrases
         src/chronontemplate/web/WebPageHighlightPack.cpp
         src/chronontemplate/web/WebHeadlineHighlightPack.cpp
+        src/chronontemplate/web/DocumentaryReferenceStills.cpp
         src/chronontemplate/web/WebTextLayout.cpp
         src/chronontemplate/web/ArticleEvidenceReveal.cpp
         # second generation: radians-safe fold, distinct recipes, reworked hierarchy
@@ -412,6 +413,15 @@ add_executable(chronontemplate_emit_web_reference_stills
 target_include_directories(chronontemplate_emit_web_reference_stills PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_web_reference_stills PRIVATE -Wall -Wextra)
+
+# Four one-frame documentary/newsroom web recreations, emitted as native V3 plans.
+add_executable(chronontemplate_emit_web_documentary_reference_stills
+        tools/web_presets/emit_web_documentary_reference_stills.cpp
+        src/chronontemplate/web/DocumentaryReferenceStills.cpp)
+target_include_directories(chronontemplate_emit_web_documentary_reference_stills PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_web_documentary_reference_stills PRIVATE -Wall -Wextra)
 
 # Static full-resolution stills for the existing image-effect treatments.
 add_executable(chronontemplate_emit_image_effect_samples

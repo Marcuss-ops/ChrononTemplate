@@ -834,6 +834,22 @@ Render the clips on a GPU/NVENC host with the bounded raw-NV12 flow
 (`--video-sink raw --pipe-pixfmt nv12 --chunks 1 --fb-pool-budget-mb 512`) and
 encode with ffmpeg, as the other editorial packs do.
 
+## Documentary and archival web stills
+
+`include/chronontemplate/web/DocumentaryReferenceStills.hpp` exposes four distinct
+static 1920×1080 native C++ compositions through
+`chronontemplate::web::buildDocumentaryReferenceStillPlans()`: a highlighted tax-status
+excerpt, an 80s CRT headline, a 1972 newspaper-style rainmaking headline, and a warm
+Pinto documentary text frame. The plans are render-plan V3 data and are emitted by:
+
+```shell
+cmake --build build/release-fast --target chronontemplate_emit_web_documentary_reference_stills
+./build/release-fast/chronontemplate_emit_web_documentary_reference_stills out/web_documentary_reference_stills_v1/plans
+tools/web_presets/render_web_documentary_reference_stills.sh
+```
+
+The render script writes one PNG per composition; it creates no video.
+
 ## Boundary
 
 This module owns recipes. The motion core owns space/time evaluation, and
