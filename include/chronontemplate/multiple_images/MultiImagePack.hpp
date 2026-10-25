@@ -38,6 +38,20 @@ namespace chronontemplate {
         ScalePop    ///< each card pops from below then settles
     };
 
+    /// How the board is dressed. Classic is the original bare grid; the other
+    /// looks add the plate, the archival header and the styled frames seen in
+    /// the editorial reference boards. The look owns the frame and caption
+    /// typography; `MultiImageTile::frame` keeps authoring the Classic tiles.
+    enum class MultiImageStyle : std::uint8_t {
+        Classic,       ///< plain tiles and captions on the scene's own ground
+        ArchiveBoard,  ///< light board, archival header + rule, rounded shadowed cards
+        SepiaTorn,     ///< aged paper plate, torn-edge prints, serif captions
+        PolaroidFan    ///< dark board, white polaroid borders, fanned tilts
+    };
+
+    /// Stable snake-case id of a style (the catalog/consumer-facing name).
+    [[nodiscard]] const char* multiImageStyleId(MultiImageStyle style) noexcept;
+
     /// Stable ids of the group choreographies a layout certifies. Each id is a
     /// real choreography of the layout's tiles, not just a catalog name.
     [[nodiscard]] std::vector<std::string> multiImageMotionIds(MultiImageLayout layout);
@@ -62,6 +76,11 @@ namespace chronontemplate {
         std::vector<MultiImageTile> tiles{};
         MultiImageLayout layout{MultiImageLayout::Duo};
         MultiImageEntrance entrance{MultiImageEntrance::Rise};
+        MultiImageStyle style{MultiImageStyle::Classic};
+        /// Archival header drawn top-left by ArchiveBoard and SepiaTorn.
+        std::string headerLabel{"Archive image"};
+        /// The subjects line under the header rule, e.g. the captioned names.
+        std::string headerSubtitle{};
         /// Certified group choreography, or `random` to select one from the
         /// layout's catalog. Random selection is stable for motionSeed; when
         /// motionSeed is empty the scene and tile paths provide the seed.

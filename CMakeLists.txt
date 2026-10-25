@@ -176,6 +176,7 @@ add_library(chronontemplate STATIC
         # Optional offline RenderPlan bridge lives outside the Motion core.
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
         src/chronontemplate/single_images/ImageAnimationPack.cpp
+        src/chronontemplate/investigation_board/InvestigationBoardPack.cpp
         src/chronontemplate/single_images/PixelGridPack.cpp
         src/chronontemplate/single_images/EdgeStrokePack.cpp
         src/chronontemplate/single_images/GlowPack.cpp
@@ -241,6 +242,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/entities_with_text/YouTubeSubscribe.cpp
         # the native web-page family: complete page + highlight 3D + blurred phrases
         src/chronontemplate/web/WebPageHighlightPack.cpp
+        src/chronontemplate/web/WebHeadlineHighlightPack.cpp
         src/chronontemplate/web/WebTextLayout.cpp
         src/chronontemplate/web/ArticleEvidenceReveal.cpp
         # second generation: radians-safe fold, distinct recipes, reworked hierarchy
@@ -300,7 +302,23 @@ target_compile_options(chronontemplate_emit_bounded_box PRIVATE -Wall -Wextra)
 add_executable(chronontemplate_emit_camera_bullet_focus
         tools/web_presets/emit_camera_bullet_focus.cpp)
 target_link_libraries(chronontemplate_emit_camera_bullet_focus PRIVATE ChrononMotion::chrononmotion)
+# CameraRig's resolved-sample lowering (bakeResolvedCameraSamples,
+# cameraSamplesToJson) lives in CM3D's optional Chronon3d adapter. Use it when
+# this build provides the target, otherwise compile the single lowering TU in.
+# CM3D's RenderPlanLowering (pulled in by CameraRig) uses the Chronon3d
+# render-plan contract types, so this target needs the sibling include tree.
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_camera_bullet_focus
+            PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    target_sources(chronontemplate_emit_camera_bullet_focus PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp")
+    target_include_directories(chronontemplate_emit_camera_bullet_focus PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include")
+endif()
 target_include_directories(chronontemplate_emit_camera_bullet_focus PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include"
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_camera_bullet_focus PRIVATE -Wall -Wextra)
 
@@ -324,10 +342,18 @@ add_executable(chronontemplate_emit_web_page_highlight
 target_link_libraries(chronontemplate_emit_web_page_highlight PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_page_highlight PRIVATE -Wall -Wextra)
 
+# The headline highlighter looks (statement page, marker sweep, stepped
+# highlight) recreated from the supplied reference frames as native V3 plans.
+add_executable(chronontemplate_emit_web_headline_highlight
+        tools/web_presets/emit_web_headline_highlight.cpp)
+target_link_libraries(chronontemplate_emit_web_headline_highlight PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_headline_highlight PRIVATE -Wall -Wextra)
+
 # Reference web phrase rebuilds are direct native render-plan V3 data. The
 # provided screenshots supply copy and composition references only.
 add_executable(chronontemplate_emit_reference_web_phrases
         tools/web_presets/emit_reference_web_phrases.cpp)
+target_link_libraries(chronontemplate_emit_reference_web_phrases PRIVATE chronontemplate)
 target_include_directories(chronontemplate_emit_reference_web_phrases PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_reference_web_phrases PRIVATE -Wall -Wextra)

@@ -63,12 +63,20 @@ namespace chronontemplate::web {
                         {{"frame", start + span}, {"value", to}}})}};
         }
 
-        /// Camera-transformed shapes place their center in top-left-down px.
+        /// Camera-transformed shapes are authored with their center in
+        /// top-left-down px, but the enable_3d wire space is bottom-left-up
+        /// world units (the reference phrase emitter lowers with the same
+        /// `kHeight - y` conversion). Emission flips Y here — the single
+        /// conversion point for every authored Y quantity.
+        float wireY(float topDownCenterY) {
+            return static_cast<float>(kH) - topDownCenterY;
+        }
+
         Json rect(const std::string& id, float left, float top, float w, float h,
                   const std::string& hex, float alpha, const Json& tracks = Json::array()) {
             Json layer = {{"id", id}, {"type", "shape"}, {"enable_3d", true},
                           {"size", Json::array({w, h})},
-                          {"position", Json::array({left + w * 0.5f, top + h * 0.5f, 0.f})},
+                          {"position", Json::array({left + w * 0.5f, wireY(top + h * 0.5f), 0.f})},
                           {"start_frame", 0}, {"duration_frames", 1},
                           {"shape", {{"type", "rect"}, {"fill", Material::rgba(hex, alpha)}}}};
             if (!tracks.empty()) layer["animation"] = {{"tracks", tracks}};
@@ -138,7 +146,7 @@ namespace chronontemplate::web {
                     const double p = static_cast<double>(std::clamp(frame - begin, 0, kFoldFrames)) / kFoldFrames;
                     const double eased = 1.0 - std::pow(1.0 - p, 3.0);
                     rot.push_back({{"frame", frame}, {"value", Json::array({35.0 * (1.0 - eased), 0.0, 0.0})}});
-                    pos.push_back({{"frame", frame}, {"value", 36.0 * (1.0 - eased)}});
+                    pos.push_back({{"frame", frame}, {"value", -36.0 * (1.0 - eased)}});
                     opacity.push_back({{"frame", frame}, {"value", eased}});
                 };
                 if (begin > 0) sample(0);
@@ -168,7 +176,7 @@ namespace chronontemplate::web {
             const float h = size * 1.65f;
             Json layer = {{"id", id}, {"type", "text"}, {"text", text},
                           {"size", Json::array({w, h})},
-                          {"position", Json::array({left + w * 0.5f + 8.f, top + h * 0.5f, 0.f})},
+                          {"position", Json::array({left + w * 0.5f + 8.f, wireY(top + h * 0.5f), 0.f})},
                           {"enable_3d", true},
                           {"style", {{"font", font}, {"font_size", size}, {"fill", fill}}},
                           {"start_frame", 0}, {"duration_frames", durationFrames}};
@@ -183,7 +191,7 @@ namespace chronontemplate::web {
                 const int start = 3 + entranceSlot * 4;
                 layer["animation"] = {{"tracks", Json::array({
                         easedTrack("opacity", 0.f, 1.f, start, 26, "out_cubic"),
-                        easedTrack("position_y", 26.f, 0.f, start, 26, "out_cubic")})}};
+                        easedTrack("position_y", -26.f, 0.f, start, 26, "out_cubic")})}};
             }
             return layer;
         }
@@ -451,7 +459,7 @@ namespace chronontemplate::web {
                 throw std::invalid_argument("exact web page line has invalid shaped dimensions");
             layer["size"] = Json::array({line.width + 2.f, line.lineHeight});
             layer["position"] = Json::array({line.x + (line.width + 2.f) * .5f,
-                                               line.top + line.lineHeight * .5f, 0.f});
+                                               wireY(line.top + line.lineHeight * .5f), 0.f});
             layer["style"]["font"] = bodyLayout.fontPath;
             layer["style"]["font_size"] = bodyLayout.fontSize;
         }

@@ -381,6 +381,46 @@ else()
 endif()
 target_compile_options(chronontemplate_background_canary_v1 PRIVATE -Wall -Wextra)
 
+# Native render-plan preview for the investigation board pack.
+add_executable(chronontemplate_investigation_board_preview tools/investigation_board/investigation_board_preview.cpp)
+target_link_libraries(chronontemplate_investigation_board_preview PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_investigation_board_preview PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_investigation_board_preview PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_investigation_board_preview PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_investigation_board_preview PRIVATE -Wall -Wextra)
+
+# Styled multi-image boards (archive, sepia torn, polaroid fan) lowered to
+# native render-plan V3 through the same path as the investigation preview.
+add_executable(chronontemplate_emit_multi_image_styles tools/multiple_images/emit_multi_image_styles.cpp)
+target_link_libraries(chronontemplate_emit_multi_image_styles PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_multi_image_styles PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_multi_image_styles PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidationBounds.cpp")
+    target_include_directories(chronontemplate_emit_multi_image_styles PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_multi_image_styles PRIVATE -Wall -Wextra)
+
 # Optional native-plan canary for rapid transition frame-range validation.
 add_executable(chronontemplate_transition_canary_v1 tools/transitions/transition_canary_v1.cpp)
 target_link_libraries(chronontemplate_transition_canary_v1 PRIVATE chronontemplate)
