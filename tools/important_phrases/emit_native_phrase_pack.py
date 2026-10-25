@@ -127,6 +127,19 @@ def easing_value(name: str, t: float) -> float:
         return math.sin(t * math.pi / 2.0)
     if name == "in_out_sine":
         return 0.5 * (1.0 - math.cos(t * math.pi))
+    if name == "in_out_quad":
+        if t < 0.5:
+            return 2.0 * t * t
+        f = t - 1.0
+        return -2.0 * f * f + 1.0
+    if name == "in_expo":
+        return 0.0 if t <= 0.0 else math.pow(2.0, 10.0 * (t - 1.0))
+    if name == "out_expo":
+        return 1.0 if t >= 1.0 else 1.0 - math.pow(2.0, -10.0 * t)
+    if name == "in_out_expo":
+        if t < 0.5:
+            return 0.5 * math.pow(2.0, 20.0 * t - 10.0)
+        return 1.0 - 0.5 * math.pow(2.0, -20.0 * t + 10.0)
     if name == "out_back":
         o = 1.70158
         n = t - 1.0
@@ -160,7 +173,7 @@ def baked_keyframes(track: dict[str, Any], duration: int, enter: int) -> list[di
     return baked
 
 
-def lowered_selector(animator: dict[str, Any], enter: int) -> dict[str, Any]:
+def lowered_selector(animator: dict[str, Any], enter: int, duration: int) -> dict[str, Any]:
     selector = animator.get("selector", {})
     kind = selector.get("kind", "glyph")
     staggered = bool(selector.get("stagger"))
@@ -182,13 +195,23 @@ def lowered_selector(animator: dict[str, Any], enter: int) -> dict[str, Any]:
         # hidden value, units behind it fall back to the layer's rest style.
         # The inverted ramp (start 0 -> 100) is what makes the effect a
         # reveal instead of a wipe that leaves the last unit hidden.
-        lowered["start"] = {
-            "keyframes": [
-                {"frame": 0, "value": 0},
-                {"frame": enter, "value": 100},
-            ],
-            "easing": "linear",
-        }
+        #
+        # `pace` and `delay` shape that sweep, which is what separates the
+        # Classic recipes from one another: the edge is baked per frame so
+        # the authored easing survives the renderer's linear-only tracks.
+        delay = int(selector.get("delay", 0))
+        sweep_end = min(int(selector.get("enter", enter)), enter)
+        pace = selector.get("pace", "linear")
+        frames = [{"frame": 0, "value": 0}]
+        if delay > 0:
+            frames.append({"frame": min(delay, duration - 1), "value": 0})
+        for frame in range(max(delay + 1, 1), sweep_end):
+            t = (frame - delay) / max(sweep_end - delay, 1)
+            frames.append(
+                {"frame": frame, "value": 100.0 * easing_value(pace, t)}
+            )
+        frames.append({"frame": sweep_end, "value": 100.0})
+        lowered["start"] = {"keyframes": frames, "easing": "linear"}
         lowered["end"] = {
             "keyframes": [{"frame": 0, "value": 100}],
             "easing": "linear",
@@ -245,7 +268,7 @@ def lower_motion(motion: dict[str, Any], duration: int) -> dict[str, Any]:
         animators.append(
             {
                 "id": animator["id"],
-                "selectors": [lowered_selector(animator, enter)],
+                "selectors": [lowered_selector(animator, enter, duration)],
                 "properties": [
                     {
                         "property": prop["property"],
@@ -260,18 +283,15 @@ def lower_motion(motion: dict[str, Any], duration: int) -> dict[str, Any]:
     return {"tracks": tracks, "text_animators": animators}
 
 
-# The Classic Apple long-phrase set: five short-phrase recipes re-authored
-# for wrapped phrases (line selectors, so each line joins the reveal in turn).
-CLASSIC_MOTIONS = [
-    "classic_playfair_baseline_rise",
-    "classic_playfair_tracking_close",
-    "classic_playfair_focus_resolve",
-    "classic_playfair_quiet_zoom",
-    "classic_playfair_glyph_curtain",
-]
+# The Classic Apple long-phrase set: short-phrase gestures re-authored for
+# wrapped phrases (word/line/glyph selectors, so each unit joins the reveal in
+# turn). The family is owned by tools/important_phrases/
+# author_classic_phrase_motions.py; the pack renders whatever that writer put
+# in the catalog, so a new recipe needs no emitter edit.
+CLASSIC_MOTION_PREFIX = "classic_playfair_"
 
-# One long, wrapped Italian phrase for every recipe: comparing the five
-# animations on the same three-line copy is what makes the review meaningful.
+# One long, wrapped Italian phrase for every recipe: comparing the animations
+# on the same three-line copy is what makes the review meaningful.
 CLASSIC_PHRASE = "Le parole giuste\narrivano al momento\ngiusto"
 
 
@@ -385,7 +405,16 @@ def main() -> None:
     catalog = json.loads(args.catalog.read_text())
     required_style = {"font", "font_size", "box", "position", "background", "fill", "stroke", "glow"}
     if args.pack == "classic-long":
-        motion_ids = CLASSIC_MOTIONS
+        motion_ids = [
+            motion["id"]
+            for motion in catalog["motions"]
+            if motion["id"].startswith(CLASSIC_MOTION_PREFIX)
+        ]
+        if not motion_ids:
+            raise SystemExit(
+                f"no {CLASSIC_MOTION_PREFIX}* motions in {args.catalog}; "
+                "run tools/important_phrases/author_classic_phrase_motions.py"
+            )
         phrases = {motion_id: CLASSIC_PHRASE for motion_id in motion_ids}
         style = json.loads(args.classic_style.read_text())
         style_source = str(args.classic_style)

@@ -919,6 +919,32 @@ selects the whole run at once. Every definition stays inside Chronon3D's
 canonical GPU text contract (glyph windows and single-word run emphasis), which
 is what keeps the whole pack on the GPU instead of the software text fallback.
 
+### Classic Apple long phrases — `classic_playfair_*`
+
+The short-phrase family animates one short line. Fifteen of its gestures are
+re-authored here for wrapped body copy (up to three lines) in the Classic
+Apple look: Playfair Display static, near-black ink on a white canvas, no
+stroke and no glow (`catalog/classic_phrase_style.v1.json`). The recipes
+differ in what the eye reads, not in decoration: `baseline_rise` lifts the
+block while words snap in front-loaded, `word_lift` rises per word,
+`tracking_close` gathers the lines as tracking closes, `tracking_open` spreads
+each word on entry, `focus_resolve` bursts at glyph level out of a slight
+over-scale, `glyph_glide` slides each glyph into place, `letter_tick` types on
+a hard square cut, `quiet_zoom` and `soft_push_in` are slow push-ins,
+`hero_settle` and `breath_in` bloom up from under-scale, `depth_push` pulls back
+from an over-scale, `line_float` floats the block down, `quiet_dissolve` fades
+in late and low, and `glyph_curtain` drops the lines in on a hard cut. Each is
+one text animator whose selector sweep is baked from an authored `pace` and
+`delay` (`tools/important_phrases/author_classic_phrase_motions.py`).
+
+```sh
+python3 ChrononTemplate/tools/important_phrases/author_classic_phrase_motions.py --check
+ChrononTemplate/tools/important_phrases/render_classic_long_phrases.sh \
+  ChrononTemplate/out/classic_long_phrase_v1
+ChrononTemplate/tools/important_phrases/upload_classic_long_phrases_drive.sh \
+  ChrononTemplate/out/classic_long_phrase_v1
+```
+
 ### Title-camera documentary family — `camera_title_documentary_v1`
 
 Twenty editorial title moves as recipes over six camera primitives (dolly, pan,

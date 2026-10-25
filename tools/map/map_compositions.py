@@ -203,6 +203,72 @@ def _editorial_pin(draw, frame, cx: int, cy: int, name: str,
           fill=(22, 22, 22), shadow=False, tracking=3)
 
 
+def _editorial_pin_roi(frame, cx: int, cy: int, name: str, progress: float,
+                       W: int, H: int, side: int = 0) -> None:
+    """Draw the legacy editorial pin in a small RGBA patch.
+
+    The full-frame implementation allocates and blurs transparent 1080p
+    images for a tiny leader/card/text. Restricting those identical PIL
+    operations to their support region removes that per-frame full-canvas
+    work while retaining the same fonts, geometry, colors, and alpha math.
+    """
+    from PIL import Image, ImageDraw
+    import numpy as np
+    dot_e = _ease(_stage(progress, 0.15, 0.15))
+    label_e = _ease(_stage(progress, 0.45, 0.20))
+    f_title = _font("cond", 34) if label_e > 0.01 and name else None
+    if f_title is not None:
+        measure = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+        tw = measure.textbbox((0, 0), name.upper(), font=f_title)[2]
+        pad_x, pad_y = 26, 14
+        bw, bh = tw + pad_x * 2, 34 + pad_y * 2
+        if side % 2 == 0:
+            bx = int(min(max(cx + 28, 24), W - bw - 24))
+            by = int(min(max(cy - bh - 40, 24), H - bh - 24))
+        else:
+            bx = int(min(max(cx + 28, 24), W - bw - 24))
+            by = int(min(max(cy + 32, 24), H - bh - 24))
+        # 40 px covers the card shadow (blur 8, offset 5) and text support.
+        x0 = max(0, min(cx - 14, bx - 40))
+        y0 = max(0, min(cy - 14, by - 40))
+        x1 = min(W, max(cx + 15, bx + bw + 40))
+        y1 = min(H, max(cy + 15, by + bh + 40))
+    elif dot_e > 0.01:
+        x0, y0 = max(0, cx - 14), max(0, cy - 14)
+        x1, y1 = min(W, cx + 15), min(H, cy + 15)
+    else:
+        return
+
+    patch = Image.fromarray(frame[y0:y1, x0:x1, ::-1].copy()).convert("RGBA")
+    draw = ImageDraw.Draw(patch)
+    draw._image = patch
+    if dot_e > 0.01:
+        r = max(1, int(7 * dot_e))
+        e = int(255 * min(1.0, dot_e * 2.0))
+        px, py = cx - x0, cy - y0
+        draw.ellipse([px-r-3, py-r-3, px+r+3, py+r+3],
+                     fill=(247, 247, 245, e))
+        draw.ellipse([px-r, py-r, px+r, py+r], fill=(22, 22, 22, e))
+    if f_title is not None:
+        local_box = (bx-x0, by-y0, bx+bw-x0, by+bh-y0)
+        line_layer = Image.new("RGBA", patch.size, (0, 0, 0, 0))
+        line_draw = ImageDraw.Draw(line_layer)
+        line_draw.line([(bx+12-x0, by+bh-y0), (cx-x0, cy-y0)],
+                       fill=(22, 22, 22, int(255*label_e)), width=2)
+        patch.alpha_composite(line_layer)
+        _paper_card(draw, local_box, 4, label_e)
+        _text(draw, (bx+pad_x-x0, by+pad_y-y0-2), name.upper(), f_title,
+              fill=(22, 22, 22), shadow=False, tracking=3)
+    rgb = patch.convert("RGB")
+    frame[y0:y1, x0:x1] = np.asarray(rgb)[:, :, ::-1]
+
+
+def _draw_editorial_pins_roi(frame, pins, progress: float, W: int, H: int) -> None:
+    for i, pin in enumerate(pins):
+        _editorial_pin_roi(frame, int(pin["x"]), int(pin["y"]),
+                           _pin_name(pin), progress, W, H, side=i)
+
+
 def _panel(draw, box: tuple[int, int, int, int], radius: int,
            alpha: float, outline=None, outline_w: int = 0) -> None:
     """Dark label background #080D12 with a soft drop shadow and a hairline
@@ -287,13 +353,7 @@ def _comp_region_zoom(frame, pins, progress, W, H, basemap: str = "") -> None:
     from PIL import Image, ImageDraw
     if basemap == "chronon_editorial":
         # Editorial grammar: one minimal pin per place, no region circle.
-        rgba = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).convert("RGBA")
-        draw = ImageDraw.Draw(rgba)
-        draw._image = rgba
-        for i, pin in enumerate(pins):
-            _editorial_pin(draw, frame, int(pin["x"]), int(pin["y"]),
-                           _pin_name(pin), progress, W, H, side=i)
-        frame[:] = cv2.cvtColor(np.array(rgba.convert("RGB")), cv2.COLOR_RGB2BGR)
+        _draw_editorial_pins_roi(frame, pins, progress, W, H)
         return
     cx, cy = _region_centroid(pins)
     R = 300
@@ -373,13 +433,7 @@ def _comp_pulse_marker(frame, pins, progress, W, H, basemap: str = "") -> None:
     import numpy as np
     from PIL import Image, ImageDraw
     if basemap == "chronon_editorial":
-        rgba = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).convert("RGBA")
-        draw = ImageDraw.Draw(rgba)
-        draw._image = rgba
-        for i, pin in enumerate(pins):
-            _editorial_pin(draw, frame, int(pin["x"]), int(pin["y"]),
-                           _pin_name(pin), progress, W, H, side=i)
-        frame[:] = cv2.cvtColor(np.array(rgba.convert("RGB")), cv2.COLOR_RGB2BGR)
+        _draw_editorial_pins_roi(frame, pins, progress, W, H)
         return
     pin = pins[0]
     cx, cy = pin["x"], pin["y"]
@@ -442,13 +496,7 @@ def _comp_spotlight(frame, pins, progress, W, H, basemap: str = "") -> None:
     import numpy as np
     from PIL import Image, ImageDraw
     if basemap == "chronon_editorial":
-        rgba = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).convert("RGBA")
-        draw = ImageDraw.Draw(rgba)
-        draw._image = rgba
-        for i, pin in enumerate(pins):
-            _editorial_pin(draw, frame, int(pin["x"]), int(pin["y"]),
-                           _pin_name(pin), progress, W, H, side=i)
-        frame[:] = cv2.cvtColor(np.array(rgba.convert("RGB")), cv2.COLOR_RGB2BGR)
+        _draw_editorial_pins_roi(frame, pins, progress, W, H)
         return
     pin = pins[0]
     cx, cy = pin["x"], pin["y"]

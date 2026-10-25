@@ -72,6 +72,7 @@ def _render_block(args) -> tuple[bytes, int]:
     sampler = _S["sampler"]
     parts = []
     fallbacks_before = sampler.fallback_count
+    lo_only_before = sampler.lo_only_blend_count
     if getattr(sampler, "gpu_map_enabled", False):
         # OpenCL operations are queued asynchronously. Keep several complete
         # UMat frames alive before downloading the oldest one so CPU-side
@@ -93,7 +94,8 @@ def _render_block(args) -> tuple[bytes, int]:
             if hasattr(frame, "get"):
                 frame = frame.get()
             parts.append(frame.tobytes())
-    return b"".join(parts), sampler.fallback_count - fallbacks_before
+    return (b"".join(parts), sampler.fallback_count - fallbacks_before,
+            sampler.lo_only_blend_count - lo_only_before)
 
 
 def _iter_gpu_block_frames(args):
@@ -155,7 +157,7 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
     if gpu_required:
         # Production map overlays must use the NVIDIA encoder. There is no
         # software fallback: an unavailable/lost GPU fails the runtime job.
-        cmd += ["-c:v", "h264_nvenc", "-gpu", "0", "-preset", "p6",
+        cmd += ["-c:v", "h264_nvenc", "-gpu", "0", "-preset", preset,
                 "-tune", "hq", "-rc", "vbr", "-cq", str(crf), "-b:v", "0"]
     else:
         cmd += ["-c:v", "libx264", "-preset", preset, "-crf", str(crf)]
@@ -179,6 +181,7 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
     stderr_thread = threading.Thread(target=drain_stderr, daemon=True)
     stderr_thread.start()
     fallback_frames = 0
+    lo_only_frames = 0
     try:
         if getattr(sampler, "gpu_map_enabled", False):
             # Editorial GPU compositions share one process-local OpenCL
@@ -207,6 +210,7 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
                     begin_epoch_batch(block_args[1] - block_args[0],
                                       epoch_sampler.W, epoch_sampler.H)
                 fallbacks_before = sampler.fallback_count
+                lo_only_before = sampler.lo_only_blend_count
                 for frame_bytes in _iter_gpu_block_frames(block_args):
                     proc.stdin.write(frame_bytes)
                 end_batch = getattr(sampler, "end_opencl_frame_batch", None)
@@ -217,12 +221,14 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
                     end_epoch_batch()
                 block_fallbacks = sampler.fallback_count - fallbacks_before
                 fallback_frames += block_fallbacks
+                lo_only_frames += sampler.lo_only_blend_count - lo_only_before
                 if block_fallbacks:
                     raise RuntimeError(f"map sampling used slow fallback in {block_fallbacks} frame(s)")
         else:
             with ctx.Pool(processes=workers, initializer=_worker_init) as pool:
-                for data, block_fallbacks in pool.imap(_render_block, blocks):  # submission order
+                for data, block_fallbacks, block_lo_only in pool.imap(_render_block, blocks):  # submission order
                     fallback_frames += block_fallbacks
+                    lo_only_frames += block_lo_only
                     if block_fallbacks:
                         raise RuntimeError(f"map sampling used slow fallback in {block_fallbacks} frame(s)")
                     proc.stdin.write(data)
@@ -275,16 +281,18 @@ def encode_with_pool(builder, sampler, out_path: Path, workers: int, block: int,
     stats = {"frames": total, "production_s": produced, "total_s": elapsed,
              "production_fps": total / produced, "total_fps": total / elapsed,
              "bytes": out.stat().st_size, "out": str(out),
+             "preset": preset, "quality": crf,
              # Rendering and encoding overlap while raw frames are streamed;
              # this is only the post-production tail, not exclusive encoder CPU.
              "post_frame_tail_s": max(0.0, elapsed - produced),
              # Retained for dynamic-map telemetry v1 compatibility. Sampling
              # is fail-closed, so any missing plate aborts before encoding.
              "engine_fallback_frames": 0}
-    encoder = "h264_nvenc" if gpu_required else f"libx264 {preset}"
+    encoder = "h264_nvenc" if gpu_required else "libx264"
     stats["encoder"] = encoder
     stats["gpu_encoder"] = gpu_required
     stats["engine_fallback_frames"] = fallback_frames
+    stats["lo_only_blend_frames"] = lo_only_frames
     print(f"frame production: {produced:.2f}s ({stats['production_fps']:.1f} FPS) | "
           f"total incl. encode: {elapsed:.2f}s ({stats['total_fps']:.1f} FPS, "
           f"{stats['bytes']:,} bytes) | "

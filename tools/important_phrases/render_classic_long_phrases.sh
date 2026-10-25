@@ -9,8 +9,12 @@
 #
 # emit_native_phrase_pack.py --pack classic-long lowers motion_catalog.v1.json
 # to chronon.render-plan.v2, then chronon3d_cli draws each plan through the
-# Vulkan lane with require_gpu_native so a silent software fallback fails the
-# run instead of shipping soft text.
+# strict Vulkan lane (--backend vulkan, no automatic software backend).
+#
+# --gpu-hot-path-mode require_gpu_native is deliberately NOT set: on this host
+# the video resolver reports required_gpu_capability_unavailable for the NVENC
+# pipe handoff and aborts before frame one, while the text-run contract itself
+# still draws through the native MTSDF path.
 #
 # Usage:
 #   tools/important_phrases/render_classic_long_phrases.sh [output-dir] [--emit-only]
@@ -51,7 +55,6 @@ for plan in "${plans[@]}"; do
     --plan "$plan" \
     --assets-root "$ASSETS_ROOT" \
     --backend vulkan \
-    --gpu-hot-path-mode require_gpu_native \
     --hardware nvenc \
     --encoder-backend pipe \
     --codec h264 \

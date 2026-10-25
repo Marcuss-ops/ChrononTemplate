@@ -829,7 +829,11 @@ class TourBuilder:
                 draw_composition(frame, composition, pins, progress, WIDTH, HEIGHT,
                                  basemap=getattr(self, "map_basemap", ""))
                 _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
-                return cv2.UMat(frame) if was_gpu_frame else frame
+                # Classic map layers are composed on the host and FFmpeg
+                # consumes a host-memory pipe. Do not upload this finished
+                # frame back to UMat only for the ordered handoff to download
+                # it again.
+                return frame
             # Editorial captions and the attribution helper are Pillow/NumPy
             # overlays and inspect ndarray dimensions. Keep the tile sample
             # and camera on OpenCL, but cross to host memory for these final

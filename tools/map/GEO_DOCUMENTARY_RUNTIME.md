@@ -23,7 +23,15 @@ python3 tools/map/geo_runtime.py --place "Roma, Italia" \
 
 ## Production dynamic map overlays
 
-`render_dynamic_map_overlay.py` uses the prepared OpenCL plate sampler for every composition by default (`DYNAMIC_MAP_GPU_SAMPLER=0` is the rollback). Classic compositions (`region_zoom`, `pulse_marker`, `spotlight`) still run their legacy marker/label drawing on the host, so their sampled frame crosses GPU→host→GPU; editorial compositions keep their all-GPU layer compositor. NVENC remains the required production encoder. GPU rendering queues up to 16 frames before ordered host readback. The sampler reuses two GPU resize surfaces and retains a separate GPU output surface for each queued frame; this avoids per-frame GPU allocation without overwriting frames still waiting for readback. Completed pixels still cross to FFmpeg's host pipe; this is not a zero-copy Vulkan/CUDA path. Both paths fail on sampler fallback, and telemetry reports the actual frame renderer separately from the video encoder.
+`render_dynamic_map_overlay.py` uses the prepared OpenCL plate sampler for every composition by default (`DYNAMIC_MAP_GPU_SAMPLER=0` is the rollback). Classic compositions (`region_zoom`, `pulse_marker`, `spotlight`) still run their marker/label drawing on the host, so their sampled frame crosses GPU→host once; editorial compositions keep their all-GPU layer compositor until host readback. NVENC remains the required production encoder. GPU rendering queues up to 16 frames before ordered host readback. The sampler reuses two GPU resize surfaces and retains a separate GPU output surface for each queued frame; this avoids per-frame GPU allocation without overwriting frames still waiting for readback. Completed pixels still cross to FFmpeg's host pipe; this is not a zero-copy Vulkan/CUDA path. Both paths fail on sampler fallback, and telemetry reports the actual frame renderer separately from the video encoder.
+
+For `chronon_editorial`, the retained map compositions use a cropped PIL patch
+for the pin, leader and label. Their old implementation allocated, composited
+and blurred full-canvas RGBA images for each pin on every frame. The ROI path
+was checked against that implementation at center and edge positions and at
+four animation phases: all 12 raw-frame comparisons were byte-identical.
+Host-composed classic frames now stay in host memory for the FFmpeg pipe; they
+are not uploaded to UMat just to be read back immediately.
 
 ## Documentary JSON
 

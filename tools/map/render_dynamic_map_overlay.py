@@ -28,6 +28,63 @@ sys.path.insert(0, str(ROOT / "Chronon3d/tools/cartography"))
 sys.path.insert(0, str(HERE))
 
 
+def resolve_encoder_profile(profile):
+    """Validate the closed map encoder contract and return its canonical fields."""
+    if not isinstance(profile, dict):
+        raise ValueError("encoder_profile must be an object")
+    codec = profile.get("codec")
+    certified = {
+        "h264_nvenc": {"codec": "h264_nvenc", "gpu": True, "preset": "p6", "quality": 15},
+        "libx264": {"codec": "libx264", "gpu": False, "preset": "veryfast", "quality": 23},
+    }
+    if codec not in certified or profile != certified[codec]:
+        raise ValueError(f"unsupported or incomplete dynamic-map encoder profile: {profile!r}")
+    return dict(profile)
+
+
+def resolve_map_sampler(sampler):
+    """Validate the sampler field explicitly passed by PipelineGen."""
+    if sampler not in ("opencv_opencl", "cpu"):
+        raise ValueError(f"unsupported declared map sampler: {sampler!r}")
+    return sampler
+
+
+def default_map_sampler(encoder_profile):
+    """Choose the certified default sampler consistent with the encoder."""
+    if not isinstance(encoder_profile, dict):
+        raise ValueError("encoder_profile must be an object")
+    if encoder_profile.get("codec") == "h264_nvenc" and encoder_profile.get("gpu") is True:
+        return "opencv_opencl"
+    if encoder_profile.get("codec") == "libx264" and encoder_profile.get("gpu") is False:
+        return "cpu"
+    raise ValueError("encoder profile codec/GPU declaration is inconsistent")
+
+
+def sampler_requires_opencl(sampler, codec, editorial_gpu_composition):
+    """Whether this declared render needs OpenCL initialization."""
+    return sampler == "opencv_opencl" or codec == "h264_nvenc" or editorial_gpu_composition
+
+
+def validate_encoder_sampler(encoder_profile, sampler, editorial=False):
+    """Reject execution combinations that contradict the certified profile."""
+    profile = resolve_encoder_profile(encoder_profile)
+    sampler = resolve_map_sampler(sampler)
+    if profile["codec"] == "h264_nvenc" and sampler != "opencv_opencl":
+        raise ValueError("NVENC map encode profile requires the OpenCL map sampler")
+    if editorial and sampler != "opencv_opencl":
+        raise ValueError("editorial map compositions require the OpenCL GPU sampler")
+    return sampler
+
+
+def encoder_arguments(profile):
+    """Build the exact ffmpeg video-encoder arguments for a certified profile."""
+    profile = resolve_encoder_profile(profile)
+    if profile["gpu"]:
+        return ["-c:v", profile["codec"], "-gpu", "0", "-preset", profile["preset"],
+                "-tune", "hq", "-rc", "vbr", "-cq", str(profile["quality"]), "-b:v", "0"]
+    return ["-c:v", profile["codec"], "-preset", profile["preset"], "-crf", str(profile["quality"])]
+
+
 def frame_workers() -> int:
     """Forked CPU frame workers; OpenCL editorial scenes remain process-local."""
     raw = os.environ.get("DYNAMIC_MAP_WORKERS")
@@ -160,6 +217,10 @@ def main() -> int:
     render_started = time.perf_counter()
     payload = json.loads(args.input.read_text(encoding="utf-8"))
     width, height = int(payload["width"]), int(payload["height"])
+    encoder_profile = resolve_encoder_profile(payload.get(
+        "encoder_profile", {"codec": "h264_nvenc", "gpu": True, "preset": "p6", "quality": 15}))
+    expected_sampler = resolve_map_sampler(payload.get(
+        "sampler", default_map_sampler(encoder_profile)))
     # Preserve the media contract exactly; the map renderer must match the
     # source timeline's frame rate for deterministic overlay synchronization.
     fps_num, fps_den = int(payload["fps_num"]), int(payload["fps_den"])
@@ -238,6 +299,15 @@ def main() -> int:
         MAP_COMPOSITIONS, MULTI_PIN_SYSTEMS, MAP_EDITORIAL_SCENES, MULTI_PIN_SCENES)
     if map_animation in MAP_EDITORIAL_SCENES and label_animation != "none":
         raise ValueError("certified editorial map scenes require label_animation='none'")
+    expected_sampler = validate_encoder_sampler(
+        encoder_profile, expected_sampler, editorial=map_animation in MAP_EDITORIAL_SCENES)
+    if sampler_requires_opencl(expected_sampler, encoder_profile["codec"],
+                               map_animation in MAP_EDITORIAL_SCENES):
+        import cv2  # noqa: PLC0415 - bound before first use: the lazy import
+        # block below runs later in this function, and referencing cv2 before
+        # it would raise UnboundLocalError.
+        if not cv2.ocl.haveOpenCL():
+            raise RuntimeError("declared dynamic-map profile requires an active OpenCL device")
     # Photo slots only accept real assets: a specified photo that does not
     # exist fails closed; an absent photo compacts the card (never generated).
     for pin in pins:
@@ -265,13 +335,8 @@ def main() -> int:
     import fast_geo_camera as harness
     import dynamic_tile_pyramid as dyn
     import fast_plate_sampler as fast
-    # Map motion and pixel composition run through OpenCV's OpenCL kernels on
-    # the NVIDIA device; NVENC remains the encoded-video writer.
-    if not cv2.ocl.haveOpenCL():
-        raise RuntimeError("GPU map rendering requires an active OpenCL device")
-    # Keep OpenCL disabled through the CPU-only acceptance gate. The actual
-    # encoder streams frames from this process, so its OpenCL context is never
-    # inherited by forked workers.
+    # Validate once the editorial catalog is loaded below, before any map
+    # acceptance gate or frame production is attempted.
     cv2.ocl.setUseOpenCL(False)
     # The runtime picks the basemap style per render; an id outside the
     # certified palette is a hard failure, never a silent fallback to satellite.
@@ -600,6 +665,27 @@ def main() -> int:
 
     sampler = fast.FastPlateSampler(pyramid, width, height)
     sampler.gpu_map_enabled = False
+    # Plate budget (operator decision 2026-10-24: "non mi serve 4k, mi basta
+    # 1920*1080"): classic compositions prepare plates smaller than the
+    # historical 3x-canvas (4K-class) margin — but not below the ~2x-canvas
+    # floor the fractional-zoom blend crop requires (see below).
+    # Certified editorial scenes keep their wide-pan margin. A declared value
+    # always wins; it must be finite and positive (fail-closed).
+    plate_margin_factor = payload.get("plate_margin_factor")
+    if plate_margin_factor is None:
+        # The fractional-zoom blend samples level z+1 with a crop up to TWO
+        # canvases wide (resize_level scale 2**(t-1) >= 0.5 -> w = W/scale + 4),
+        # so a plate must be at least ~2x canvas wide to contain ANY blend
+        # crop: margin 1.0 is geometrically impossible (every fractional zoom
+        # raised "no prepared plate at zoom N"). 2.5 is the smallest value with
+        # comfortable rounding/interpolation slack that is still below the
+        # historical 3x-canvas (4K-class) plates.
+        plate_margin_factor = 3.0 if map_animation in MAP_EDITORIAL_SCENES else 2.5
+    else:
+        plate_margin_factor = float(plate_margin_factor)
+        if not math.isfinite(plate_margin_factor) or plate_margin_factor <= 0.0:
+            raise ValueError("plate_margin_factor must be finite and positive")
+    sampler.plate_margin_factor = plate_margin_factor
     sampler.prepare(anchors, prepare_zmin, prepare_zmax)
     for frame_idx in range(total_frames):
         if map_animation in editorial_country_scenes:
@@ -640,7 +726,7 @@ def main() -> int:
                     raise RuntimeError(f"scene bounds leave frame at camera frame {frame_idx}: {geometry_bounds}")
     if sampler.fallback_count != 0:
         raise RuntimeError("fail-closed sampler telemetry expected zero engine fallbacks")
-    print(f"[dynamic-map] prepared zooms {sampler.z_min}..{sampler.z_max}", flush=True)
+    print(f"[dynamic-map] prepared zooms {sampler.z_min}..{sampler.z_max} plate_margin={sampler.plate_margin_factor}", flush=True)
     if pyramid.telemetry["late_tile_fetches"] != 0:
         raise RuntimeError(f"plate composition performed {pyramid.telemetry['late_tile_fetches']} late tile fetches")
     if pyramid.telemetry["tile_fallbacks"] != 0:
@@ -675,7 +761,11 @@ def main() -> int:
     # the GPU. DYNAMIC_MAP_GPU_SAMPLER=0 is the operational rollback switch.
     # Editorial compositions additionally keep their existing all-GPU layer
     # compositor and its stricter acceptance counters.
-    gpu_frame_renderer = os.environ.get("DYNAMIC_MAP_GPU_SAMPLER", "1") != "0"
+    gpu_frame_renderer = expected_sampler == "opencv_opencl"
+    if map_animation in MAP_EDITORIAL_SCENES and not gpu_frame_renderer:
+        raise RuntimeError("editorial map compositions require the OpenCL GPU sampler")
+    if encoder_profile["codec"] == "h264_nvenc" and not gpu_frame_renderer:
+        raise RuntimeError("NVENC map encode profile requires the OpenCL map sampler")
     opencl_device_name = ""
     if gpu_frame_renderer:
         cv2.ocl.setUseOpenCL(True)
@@ -700,16 +790,17 @@ def main() -> int:
         cv2.ocl.setUseOpenCL(False)
         sampler.gpu_map_enabled = False
         gpu_plate_bytes = 0
-        print(f"[dynamic-map] classic frame renderer: CPU process pool, workers={frame_workers()}; NVENC output", flush=True)
+        print(f"[dynamic-map] classic frame renderer: CPU process pool, workers={frame_workers()}; encoder={encoder_profile['codec']}", flush=True)
     sampler.editorial_gpu_enabled = bool(map_animation in MAP_EDITORIAL_SCENES)
     sampler.editorial_scene = map_animation
     args.output.parent.mkdir(parents=True, exist_ok=True)
     reset_gpu_counters()
     workers = frame_workers()
     stats = harness.encode_with_pool(builder, sampler, args.output,
-                                     workers=workers,
-                                     block=2, preset="slow", crf=15,
-                                     gpu_required=True)
+                                     workers=workers, block=2,
+                                     preset=encoder_profile["preset"],
+                                     crf=int(encoder_profile["quality"]),
+                                     gpu_required=bool(encoder_profile["gpu"]))
     overlay_counts = gpu_counters()
     if map_animation in MAP_EDITORIAL_SCENES and (
             overlay_counts.get("opencl", 0) <= 0 or
@@ -758,6 +849,7 @@ def main() -> int:
         "post_frame_tail_s": stats["post_frame_tail_s"],
         # Telemetry v1 compatibility; fail-closed sampling cannot fall back.
         "engine_fallback_frames": 0,
+        "lo_only_blend_frames": int(stats.get("lo_only_blend_frames", 0)),
         "output_bytes": stats["bytes"],
         "video_encoder": stats["encoder"],
         "gpu_encoder": stats["gpu_encoder"],
@@ -765,6 +857,8 @@ def main() -> int:
         "gpu_frame_renderer": "opencv_opencl" if gpu_frame_renderer else "none",
         "frame_workers": 1 if gpu_frame_renderer else workers,
         "gpu_map_sampler": "opencv_opencl" if gpu_frame_renderer else "cpu",
+        "encoder_preset": stats["preset"],
+        "encoder_quality": stats["quality"],
         "gpu_overlay_compositor": "opencv_umat_opencl" if map_animation in MAP_EDITORIAL_SCENES else "cpu",
         "gpu_overlay_counts": overlay_counts,
         "opencl_device": opencl_device_name,
