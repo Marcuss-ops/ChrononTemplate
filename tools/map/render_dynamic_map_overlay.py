@@ -24,7 +24,7 @@ ROOT = HERE.parents[2]
 SYSTEM_DIST_PACKAGES = Path("/usr/lib/python3/dist-packages")
 if SYSTEM_DIST_PACKAGES.is_dir():
     sys.path.insert(0, str(SYSTEM_DIST_PACKAGES))
-sys.path.insert(0, str(ROOT / "Chronon3d/tools/cartography"))
+sys.path.insert(0, str(ROOT / "ChrononPlugin/plugins/maps/tools/cartography"))
 sys.path.insert(0, str(HERE))
 
 
@@ -629,39 +629,50 @@ def main() -> int:
     for index in range(len(camera_stops) - 1):
         a, b = camera_stops[index], camera_stops[index + 1]
         anchors.append(((a.lat + b.lat) / 2, (a.lon + b.lon) / 2))
-    # Only prepare levels the animation can sample. Fractional zoom blends
-    # z and z+1, so include the next integer above the deepest stop.
-    prepare_zmin = min(builder.PREPARE_ZMIN, max(0, math.floor(min(camera_stop_zooms))))
+    # Only prepare the integer levels the camera actually samples. The band is
+    # derived from the real per-frame poses, not from the conservative
+    # PREPARE_ZMIN..ZMAX constants: those prepared z5..18 (14 levels, ~3 200
+    # tiles, ~550 MB of plates on a city map) for a shot whose camera only
+    # ever visits z8.3..z9.7. Fractional zoom blends z_lo and z_lo+1, so the
+    # exact band is floor(min pose zoom)..ceil(max pose zoom): a non-integer
+    # sample needs its own level plus the next one, an integer sample needs no
+    # blend level at all. The per-frame validation loop below still proves
+    # every pose is served by the prepared plates before a frame is encoded.
+    def pose_zoom_samples() -> list[float]:
+        samples = []
+        for frame_idx in range(total_frames):
+            if map_animation in editorial_country_scenes or len(camera_stops) <= 1:
+                samples.append(float(builder.pose(frame_idx)[0]))
+            else:
+                samples.append(float(builder.pose(frame_idx)[2]))
+        return samples
+
+    zoom_samples = pose_zoom_samples()
     # The current frame sampler cannot consume zooms below its historic z=5
     # floor; clamp the authored flight to that certified floor instead of
     # allocating world-sized plates or falling back during a coarse shot.
-    if prepare_zmin < 5:
+    if min(zoom_samples) < 5.0:
         if len(camera_stops) == 1:
             builder.end_zoom = max(5.0, builder.end_zoom)
         else:
             builder.stop_end_zooms = [max(5.0, zoom) for zoom in builder.stop_end_zooms]
             builder.end_zoom = max(builder.stop_end_zooms)
         camera_stop_zooms = [max(5.0, zoom) for zoom in camera_stop_zooms]
-        prepare_zmin = 5
-    # Regional routes use a lower zoom while crossing distance, but each stop
-    # still needs its local high-zoom tiles for the city arrival. Do not cap
-    # the prepared pyramid at the route builder's broad-span limit.
-    prepare_zmax = min(18, max(builder.PREPARE_ZMAX,
-                               6, math.ceil(max(camera_stop_zooms)) + 1))
+        zoom_samples = pose_zoom_samples()
+    sampled_min_zoom = min(zoom_samples)
+    sampled_max_zoom = max(zoom_samples)
+    if sampled_min_zoom < 5.0:
+        # Fail closed at prepare time, naming the sampled band, instead of
+        # crashing mid-render on an un-sampleable zoom: no certified camera
+        # law may fly below the sampler's z=5 floor.
+        raise ValueError(
+            f"dynamic-map: camera samples zoom {sampled_min_zoom:.3f} below the "
+            f"sampler's z=5 floor (sampled band {sampled_min_zoom:.3f}.."
+            f"{sampled_max_zoom:.3f}); repair the camera law before rendering")
+    prepare_zmin = max(0, math.floor(sampled_min_zoom))
+    prepare_zmax = min(18, math.ceil(sampled_max_zoom))
     if prepare_zmax < prepare_zmin:
         prepare_zmax = prepare_zmin
-
-    # The camera may zoom out to show an entire route leg. Validate its actual
-    # frame trajectory at the integer-sampling boundary before encoding; never
-    # rely on the sampler's slow fallback to hide an undersized plate.
-    if map_animation not in editorial_country_scenes:
-      for leg_index in range(len(camera_stops) - 1):
-        a, b = camera_stops[leg_index], camera_stops[leg_index + 1]
-        ax, ay = dyn.latlon_to_global_px(a.lat, a.lon, 5)
-        bx, by = dyn.latlon_to_global_px(b.lat, b.lon, 5)
-        leg_zoom = max(5.2, min(max(camera_stop_zooms), 5.0 + math.log2(
-            (0.72 * width) / max(math.hypot(bx - ax, by - ay), 1.0))))
-        prepare_zmax = max(prepare_zmax, math.ceil(leg_zoom) + 1)
 
     sampler = fast.FastPlateSampler(pyramid, width, height)
     sampler.gpu_map_enabled = False
@@ -842,6 +853,14 @@ def main() -> int:
                    "terminal_hold_frames": terminal_hold_frames,
                    "center": center,
                    "fit_bounds": getattr(builder,"editorial_bounds_telemetry",None)},
+        # Zoom band the camera actually sampled vs the band prepared into
+        # plates: identical by construction since the trajectory-derived band
+        # landed (2026-10-25), so a future camera law that widens the flight
+        # cannot silently starve the sampler — the pair is auditable here.
+        "zoom_band": {"sampled_min": sampled_min_zoom,
+                      "sampled_max": sampled_max_zoom,
+                      "prepared_min": int(sampler.z_min),
+                      "prepared_max": int(sampler.z_max)},
         "plates": dict(sampler.prepare_telemetry),
         "gate_ms": gate_ms,
         "frame_pipeline_s": stats["production_s"],

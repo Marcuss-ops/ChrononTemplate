@@ -36,7 +36,7 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]  # the repo root (VeloxEditing), two levels up
-for p in (str(ROOT / "Chronon3d/tools/cartography"), str(HERE)):
+for p in (str(ROOT / "ChrononPlugin/plugins/maps/tools/cartography"), str(HERE)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
