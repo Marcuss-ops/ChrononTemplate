@@ -32,7 +32,7 @@ import numpy as np
 import cv2
 
 BASE_DIR = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(BASE_DIR / "Chronon3d/tools/cartography"))
+sys.path.insert(0, str(BASE_DIR / "ChrononPlugin/plugins/maps/tools/cartography"))
 sys.path.insert(0, str(BASE_DIR / "ChrononTemplate/tools"))
 
 from dynamic_tile_pyramid import (  # noqa: E402 - sys.path is set above

@@ -39,7 +39,7 @@ from geo_catalog import GeographicCatalog
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]  # the repo root (VeloxEditing), two levels up
-for p in (str(ROOT / "Chronon3d/tools/cartography"), str(HERE)):
+for p in (str(ROOT / "ChrononPlugin/plugins/maps/tools/cartography"), str(HERE)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
@@ -371,7 +371,12 @@ class _ShotBuilder:
                 draw_composition(frame, composition, pins, progress, WIDTH, HEIGHT,
                                  basemap=getattr(self, "map_basemap", ""))
                 _draw_map_attribution(frame, getattr(self, "map_basemap", "esri_sat"))
-                return cv2.UMat(frame) if gpu_map else frame
+                # The CPU compositor just wrote into a HOST frame that was
+                # already downloaded from the sampler. Hand that frame straight
+                # to the encoder pipe: wrapping it back into cv2.UMat only for
+                # _iter_gpu_block_frames to download it again cost two extra
+                # full-frame PCIe round trips per frame for zero pixels changed.
+                return frame
             # The standard caption/marker helpers use NumPy and Pillow. OpenCL
             # sampling returns cv2.UMat, so download only this fallback frame
             # before applying those CPU overlays.
