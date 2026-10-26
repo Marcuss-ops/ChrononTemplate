@@ -13,14 +13,19 @@ Boundary sources (also recorded in render telemetry):
   drawn only over Italy
 - No city labels, no roads: pins come from the grounded payload.
 
-Interface mirrors DynamicTilePyramid exactly where FastPlateSampler and
-render_dynamic_map_overlay touch it: ``tile_cache``, ``telemetry``,
-``record_telemetry``, ``_fetch_single_tile`` and ``prefetch_tiles`` with the
-same return shape, so the fail-closed gates (late fetches, fallbacks) keep
-working unchanged. Tiles are cached on disk as PNG (lossless, deterministic).
+Interface mirrors DynamicTilePyramid exactly where FastPlateSampler and the
+tooling touch it: ``tile_cache``, ``telemetry``, ``record_telemetry``,
+``_fetch_single_tile`` and ``prefetch_tiles`` with the same return shape, so
+the fail-closed gates (late fetches, fallbacks) keep working unchanged.
+
+Disk cache caveat: tiles are cached as JPEG quality 95 (TILE_SUFFIX ``.jpg``),
+so a cache HIT is a lossy round trip and frames depend on cache state. The
+deterministic reference for parity gates is the freshly rendered tile (see
+ChrononPlugin/plugins/maps/tools/map_native/parity_composite_check.py, which
+bypasses this cache on purpose).
 
 All drawing is deterministic (no random): the acceptance gate requires
-byte-identical frames.
+byte-identical frames on fresh tiles.
 """
 
 from __future__ import annotations
