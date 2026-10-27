@@ -93,6 +93,28 @@ the complete reference video. The registered preset is defined in
 from the SVG, timing, marker styling/glow, and framing. The synthetic glow
 pixel gate passes; target-scene glow remains open.
 
-Vulkan/NVENC, Drive publication, Edge-TTS voiceover and footage pixels are
-out of scope for this headless ticket (same boundary as TICKET-LOTTIE-ANIMATED:
-software scene evaluation PASS, GPU capability separate).
+## Rigging 2D + Anims
+
+`rig_2d_anims/` contains a reusable SVG puppet rig split into torso, head,
+upper/lower arms, hands, thighs and shins, with composite arm and leg controls.
+Its four 4-second clips exercise breathing, a shoulder-pivot wave, an
+alternating walk cycle, and a jump with anticipation and landing. The
+`shape.element_animations` tracks address SVG group IDs; rotations pair with
+translation tracks calculated from each shoulder or hip pivot, keeping the
+composite limbs connected during motion.
+
+Generate and render the four MP4s plus a contact sheet through Chronon3D's SVG
+enabled software renderer:
+
+```sh
+CHRONON_CLI=/path/to/svg-enabled/chronon3d_cli \
+  tools/vector_diagram/rig_2d_anims/render_rig_2d_anims.sh
+```
+
+Outputs and editable plans are written to `artifacts/rig_2d_anims_v1/`.
+The source SVG and plan emitter stay in the `rig_2d_anims/` section; the
+renderer executes the SVG and keyframes as native Chronon RenderPlan data.
+
+The showcase renders headlessly with Chronon3D's software renderer; no GPU is
+required. Edge-TTS voiceover and footage pixels are outside this SVG-rigging
+example.

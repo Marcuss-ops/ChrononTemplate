@@ -101,6 +101,7 @@ tools/
   backgrounds/         cinematic light-leak, bloom, rgb, aura, tech-background suites
   entities_with_text/  entity cards, captions and documentary snapshots
   map/                 map plates, geo-camera flights, location and route suites
+  vector_diagram/      imported SVG motion, path rigs, and 2D joint animations
   camera_roll/         title-camera, scene-camera and camera-motion suites
   kit/, emit_*         shared scaffolding and the catalog emitters (root)
 ```

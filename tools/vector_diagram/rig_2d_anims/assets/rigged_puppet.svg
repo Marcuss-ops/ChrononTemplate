@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="854" height="480" viewBox="0 0 854 480">
+  <defs>
+    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f2b36c"/><stop offset="1" stop-color="#d96f59"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#ffe4bb"/><stop offset="1" stop-color="#e6a980"/>
+    </linearGradient>
+  </defs>
+
+  <!-- The art lives in centered, Y-up composition coordinates. -->
+  <g id="puppet_art" transform="scale(0.75 -0.75)" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="0" cy="-210" rx="120" ry="13" fill="#02070c" opacity="0.55"/>
+
+    <!-- Legs: the SVG group IDs are the rig controls used by the plans. -->
+    <g id="leg_l">
+    <g id="leg_l_thigh">
+      <path d="M -30 -82 L -56 -160" fill="none" stroke="#26394d" stroke-width="31"/>
+      <path d="M -30 -82 L -56 -160" fill="none" stroke="#66829a" stroke-width="3" opacity="0.68"/>
+      <circle cx="-30" cy="-82" r="10" fill="#f0b873" stroke="#fff0d7" stroke-width="2"/>
+    </g>
+    <g id="leg_l_shin">
+      <path d="M -56 -160 L -68 -226 Q -68 -232 -60 -232 L -20 -232" fill="none" stroke="#26394d" stroke-width="25"/>
+      <path d="M -56 -160 L -68 -226" fill="none" stroke="#7891a4" stroke-width="3" opacity="0.65"/>
+      <circle cx="-56" cy="-160" r="9" fill="#61d6c5" stroke="#e0fff9" stroke-width="2"/>
+    </g>
+    </g>
+    <g id="leg_r">
+    <g id="leg_r_thigh">
+      <path d="M 30 -82 L 55 -158" fill="none" stroke="#314b62" stroke-width="31"/>
+      <path d="M 30 -82 L 55 -158" fill="none" stroke="#91aabd" stroke-width="3" opacity="0.64"/>
+      <circle cx="30" cy="-82" r="10" fill="#f0b873" stroke="#fff0d7" stroke-width="2"/>
+    </g>
+    <g id="leg_r_shin">
+      <path d="M 55 -158 L 68 -226 Q 68 -232 60 -232 L 101 -232" fill="none" stroke="#314b62" stroke-width="25"/>
+      <path d="M 55 -158 L 68 -226" fill="none" stroke="#91aabd" stroke-width="3" opacity="0.64"/>
+      <circle cx="55" cy="-158" r="9" fill="#61d6c5" stroke="#e0fff9" stroke-width="2"/>
+    </g>
+    </g>
+
+    <!-- Torso, neck and head. -->
+    <g id="torso">
+    <path d="M -29 89 L 29 89 L 41 61 L 69 47 L 55 -86 Q 0 -105 -55 -86 L -69 47 L -41 61 Z"
+          fill="url(#shirt)" stroke="#ffe0b2" stroke-width="3"/>
+    <path d="M -12 80 L 0 57 L 12 80" fill="none" stroke="#fff1dc" stroke-width="4" opacity="0.72"/>
+    <path d="M 0 12 L 0 -46" fill="none" stroke="#8b4650" stroke-width="3" opacity="0.5"/>
+    <path d="M -39 37 L -53 -10 M 39 37 L 53 -10" fill="none" stroke="#ffd19d" stroke-width="2" opacity="0.7"/>
+    <rect x="-17" y="87" width="34" height="20" rx="9" fill="url(#skin)"/>
+    </g>
+    <g id="head">
+    <path d="M -47 115 Q -50 177 0 184 Q 53 179 47 115 Q 36 89 0 91 Q -35 92 -47 115 Z"
+          fill="url(#skin)" stroke="#fff0dc" stroke-width="3"/>
+    <path d="M -47 143 Q -40 194 4 187 Q 34 186 48 158 L 39 174 Q 14 167 -4 173 Q -24 179 -47 160 Z"
+          fill="#26394d" stroke="#26394d" stroke-width="2"/>
+    <path d="M -22 137 Q -16 142 -10 137 M 12 137 Q 18 142 24 137" fill="none" stroke="#403844" stroke-width="3"/>
+    <path d="M -10 113 Q 0 107 11 113" fill="none" stroke="#a45758" stroke-width="3"/>
+    <circle cx="-16" cy="137" r="2.5" fill="#12202a"/><circle cx="18" cy="137" r="2.5" fill="#12202a"/>
+    </g>
+
+    <!-- Arms, split into upper arm and forearm at a true elbow pivot. -->
+    <g id="arm_l">
+    <g id="arm_l_upper">
+      <path d="M -57 52 L -111 5" fill="none" stroke="#f0b873" stroke-width="23"/>
+      <path d="M -57 52 L -111 5" fill="none" stroke="#fff0d7" stroke-width="2.5" opacity="0.7"/>
+      <circle cx="-57" cy="52" r="9" fill="#61d6c5" stroke="#e0fff9" stroke-width="2"/>
+    </g>
+    <g id="arm_l_forearm">
+      <path d="M -111 5 L -133 -48" fill="none" stroke="#f0b873" stroke-width="19"/>
+      <path d="M -111 5 L -133 -48" fill="none" stroke="#fff0d7" stroke-width="2" opacity="0.7"/>
+      <circle cx="-111" cy="5" r="8" fill="#61d6c5" stroke="#e0fff9" stroke-width="2"/>
+      <circle cx="-133" cy="-48" r="8" fill="#ffe4bb" stroke="#fff0d7" stroke-width="2"/>
+    </g>
+    </g>
+    <g id="arm_r">
+    <g id="arm_r_upper">
+      <path d="M 57 52 L 111 5" fill="none" stroke="#f0b873" stroke-width="23"/>
+      <path d="M 57 52 L 111 5" fill="none" stroke="#fff0d7" stroke-width="2.5" opacity="0.7"/>
+      <circle cx="57" cy="52" r="9" fill="#61d6c5" stroke="#e0fff9" stroke-width="2"/>
+    </g>
+    <g id="arm_r_forearm">
+      <path d="M 111 5 L 133 -48" fill="none" stroke="#f0b873" stroke-width="19"/>
+      <path d="M 111 5 L 133 -48" fill="none" stroke="#fff0d7" stroke-width="2" opacity="0.7"/>
+      <circle cx="111" cy="5" r="8" fill="#61d6c5" stroke="#e0fff9" stroke-width="2"/>
+    </g>
+    <g id="hand_r">
+      <path d="M 133 -48 C 124 -58 125 -70 132 -75 C 137 -78 141 -74 140 -68
+               C 142 -79 150 -77 150 -68 L 150 -60 C 158 -70 165 -62 160 -53
+               L 151 -39 Q 142 -33 133 -48 Z" fill="url(#skin)"
+            stroke="#fff0d7" stroke-width="2"/>
+      <circle cx="133" cy="-48" r="7" fill="#61d6c5" stroke="#e0fff9" stroke-width="2"/>
+    </g>
+    </g>
+  </g>
+</svg>
