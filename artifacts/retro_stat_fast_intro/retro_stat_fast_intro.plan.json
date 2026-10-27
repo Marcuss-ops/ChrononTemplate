@@ -1,0 +1,458 @@
+{
+  "canvas": {
+    "duration_frames": 173,
+    "fps_den": 1,
+    "fps_num": 30,
+    "height": 1080,
+    "width": 1920
+  },
+  "job_id": "retro_stat_fast_intro",
+  "layers": [
+    {
+      "color": [
+        0.05,
+        0.01,
+        0.01,
+        1.0
+      ],
+      "duration_frames": 173,
+      "id": "retro_stat_fast_intro_ground",
+      "position": [
+        960.0,
+        540.0
+      ],
+      "size": [
+        1920.0,
+        1080.0
+      ],
+      "start_frame": 0,
+      "type": "color"
+    },
+    {
+      "duration_frames": 173,
+      "id": "retro_stat_fast_intro_radial_glow",
+      "position": [
+        960.0,
+        520.0
+      ],
+      "shape": {
+        "fill": {
+          "enabled": true,
+          "gradient": {
+            "center": [
+              0.5,
+              0.5
+            ],
+            "color_stops": [
+              {
+                "color": [
+                  1.0,
+                  0.8235294117647058,
+                  0.2901960784313726,
+                  1.0
+                ],
+                "position": 0.0
+              },
+              {
+                "color": [
+                  1.0,
+                  0.7568627450980392,
+                  0.1803921568627451,
+                  1.0
+                ],
+                "position": 0.1
+              },
+              {
+                "color": [
+                  0.9686274509803922,
+                  0.6039215686274509,
+                  0.08627450980392157,
+                  1.0
+                ],
+                "position": 0.18
+              },
+              {
+                "color": [
+                  0.9333333333333333,
+                  0.47843137254901963,
+                  0.06274509803921569,
+                  1.0
+                ],
+                "position": 0.26
+              },
+              {
+                "color": [
+                  0.9411764705882353,
+                  0.5411764705882353,
+                  0.0784313725490196,
+                  1.0
+                ],
+                "position": 0.34
+              },
+              {
+                "color": [
+                  0.8509803921568627,
+                  0.3686274509803922,
+                  0.043137254901960784,
+                  1.0
+                ],
+                "position": 0.42
+              },
+              {
+                "color": [
+                  0.7607843137254902,
+                  0.2901960784313726,
+                  0.03137254901960784,
+                  1.0
+                ],
+                "position": 0.52
+              },
+              {
+                "color": [
+                  0.6980392156862745,
+                  0.22745098039215686,
+                  0.03137254901960784,
+                  1.0
+                ],
+                "position": 0.62
+              },
+              {
+                "color": [
+                  0.5568627450980392,
+                  0.13333333333333333,
+                  0.023529411764705882,
+                  1.0
+                ],
+                "position": 0.72
+              },
+              {
+                "color": [
+                  0.3686274509803922,
+                  0.050980392156862744,
+                  0.01568627450980392,
+                  1.0
+                ],
+                "position": 0.85
+              },
+              {
+                "color": [
+                  0.054901960784313725,
+                  0.00784313725490196,
+                  0.00784313725490196,
+                  1.0
+                ],
+                "position": 1.0
+              }
+            ],
+            "radius": 0.5,
+            "type": "radial"
+          }
+        },
+        "type": "ellipse"
+      },
+      "size": [
+        2688.0,
+        2688.0
+      ],
+      "start_frame": 0,
+      "type": "shape"
+    },
+    {
+      "animation": {
+        "tracks": [
+          {
+            "easing": "ease_in",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "frame": 38,
+                "value": [
+                  1.14,
+                  1.14,
+                  1.0
+                ]
+              },
+              {
+                "frame": 46,
+                "value": [
+                  1.45,
+                  1.45,
+                  1.0
+                ]
+              }
+            ],
+            "property": "scale"
+          },
+          {
+            "easing": "ease_out",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 38,
+                "value": 1.0
+              },
+              {
+                "frame": 46,
+                "value": 0.0
+              }
+            ],
+            "property": "opacity"
+          }
+        ]
+      },
+      "color": "#F5F1EA",
+      "duration_frames": 47,
+      "font": "ChrononTemplate/assets/fonts/Impact.ttf",
+      "font_size": 360.0,
+      "id": "retro_stat_fast_intro_era",
+      "position": [
+        960.0,
+        540.0
+      ],
+      "shadow": {
+        "blur": 12.0,
+        "color": "#1C0404",
+        "offset": [
+          8.0,
+          14.0
+        ],
+        "opacity": 0.88
+      },
+      "start_frame": 0,
+      "text": "1990s",
+      "type": "text"
+    },
+    {
+      "animation": {
+        "tracks": [
+          {
+            "easing": "ease_out",
+            "keyframes": [
+              {
+                "frame": 38,
+                "value": [
+                  8.199999809265137,
+                  8.199999809265137,
+                  1.0
+                ]
+              },
+              {
+                "frame": 48,
+                "value": [
+                  4.6,
+                  4.6,
+                  1.0
+                ]
+              },
+              {
+                "frame": 60,
+                "value": [
+                  2.7,
+                  2.7,
+                  1.0
+                ]
+              },
+              {
+                "frame": 72,
+                "value": [
+                  1.6,
+                  1.6,
+                  1.0
+                ]
+              },
+              {
+                "frame": 82,
+                "value": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "frame": 121,
+                "value": [
+                  0.92,
+                  0.92,
+                  1.0
+                ]
+              }
+            ],
+            "property": "scale"
+          },
+          {
+            "easing": "ease_out",
+            "keyframes": [
+              {
+                "frame": 38,
+                "value": [
+                  1280.0,
+                  680.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 82,
+                "value": [
+                  960.0,
+                  540.0,
+                  0.0
+                ]
+              }
+            ],
+            "property": "position"
+          },
+          {
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 38,
+                "value": 0.0
+              },
+              {
+                "frame": 39,
+                "value": 1.0
+              },
+              {
+                "frame": 82,
+                "value": 1.0
+              },
+              {
+                "frame": 90,
+                "value": 0.75
+              },
+              {
+                "frame": 108,
+                "value": 0.5
+              },
+              {
+                "frame": 121,
+                "value": 0.0
+              }
+            ],
+            "property": "opacity"
+          }
+        ]
+      },
+      "color": "#F5F1EA",
+      "duration_frames": 83,
+      "font": "ChrononTemplate/assets/fonts/Impact.ttf",
+      "font_size": 360.0,
+      "id": "retro_stat_fast_intro_stat",
+      "position": [
+        960.0,
+        540.0
+      ],
+      "shadow": {
+        "blur": 14.0,
+        "color": "#1C0404",
+        "offset": [
+          12.0,
+          16.0
+        ],
+        "opacity": 0.9
+      },
+      "start_frame": 38,
+      "text": "37.7 M",
+      "type": "text"
+    },
+    {
+      "animation": {
+        "tracks": [
+          {
+            "easing": "ease_out",
+            "keyframes": [
+              {
+                "frame": 88,
+                "value": [
+                  6.5,
+                  6.5,
+                  1.0
+                ]
+              },
+              {
+                "frame": 99,
+                "value": [
+                  2.4,
+                  2.4,
+                  1.0
+                ]
+              },
+              {
+                "frame": 120,
+                "value": [
+                  1.42,
+                  1.42,
+                  1.0
+                ]
+              },
+              {
+                "frame": 150,
+                "value": [
+                  1.04,
+                  1.04,
+                  1.0
+                ]
+              },
+              {
+                "frame": 162,
+                "value": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "frame": 172,
+                "value": [
+                  1.0,
+                  1.0,
+                  1.0
+                ]
+              }
+            ],
+            "property": "scale"
+          },
+          {
+            "easing": "ease_out",
+            "keyframes": [
+              {
+                "frame": 88,
+                "value": 0.0
+              },
+              {
+                "frame": 90,
+                "value": 1.0
+              }
+            ],
+            "property": "opacity"
+          }
+        ]
+      },
+      "asset": "ChrononTemplate/assets/images/retro_collage.png",
+      "duration_frames": 85,
+      "id": "retro_stat_fast_intro_collage",
+      "position": [
+        960.0,
+        525.0
+      ],
+      "size": [
+        1689.5999755859375,
+        1036.7999267578125
+      ],
+      "start_frame": 88,
+      "type": "image"
+    }
+  ],
+  "schema": "chronon.render-plan.v3",
+  "version": 3
+}
