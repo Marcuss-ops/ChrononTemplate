@@ -267,6 +267,25 @@ else()
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 endif()
 
+add_executable(chronontemplate_emit_graph_recreations
+        tools/charts/emit_graph_recreations.cpp)
+target_link_libraries(chronontemplate_emit_graph_recreations PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_graph_recreations
+            PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_GRAPHS_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_graph_recreations PRIVATE
+        "${CHRONONTEMPLATE_GRAPHS_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_GRAPHS_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_GRAPHS_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_graph_recreations PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+
 add_executable(chronontemplate_emit_effects_overlays tools/effects_overlays/emit_effects_overlays.cpp)
 target_link_libraries(chronontemplate_emit_effects_overlays PRIVATE chronontemplate)
 if(TARGET chrononmotion_chronon3d_adapter)
