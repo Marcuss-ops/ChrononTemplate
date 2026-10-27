@@ -24,6 +24,7 @@
 #include "chronontemplate/transitions/TransitionPack.hpp"
 #include "chronontemplate/core/StyleTokens.hpp"
 #include "chronontemplate/core/TemplateScene.hpp"
+#include "chronontemplate/charts/ChartsPack.hpp"
 #include "chronontemplate/single_images/ImageAnimationPack.hpp"
 #include "chronontemplate/single_images/PixelGridPack.hpp"
 #include "chronontemplate/single_images/EdgeStrokePack.hpp"

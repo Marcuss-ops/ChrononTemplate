@@ -253,6 +253,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/transitions/TransitionPack.cpp
         # captions + data-viz (BACKLOG item 5): PCM beat grid, captions, bar chart
         src/chronontemplate/captions_dataviz/CaptionsDataVizPack.cpp
+        # modern, semantically qualified chart recipes
+        src/chronontemplate/charts/ChartsPack.cpp
         # the template catalog that used to live inside the motion core
         src/chrononmotion/templates/Templates.cpp)
 

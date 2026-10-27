@@ -363,6 +363,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_captions_dataviz_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_captions_dataviz_pack_test COMMAND chronontemplate_captions_dataviz_pack_test)
 
+    add_executable(chronontemplate_charts_pack_test tests/charts_pack.cpp)
+    target_link_libraries(chronontemplate_charts_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_charts_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_charts_pack_test COMMAND chronontemplate_charts_pack_test)
+
     add_executable(chronontemplate_modern_map_pack_test tests/modern_map_pack.cpp)
     target_link_libraries(chronontemplate_modern_map_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_modern_map_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
