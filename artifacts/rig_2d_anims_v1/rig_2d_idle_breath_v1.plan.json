@@ -1,0 +1,166 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "rig_2d_idle_breath_v1",
+  "canvas": {
+    "width": 854,
+    "height": 480,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 120
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "color",
+      "color": [
+        0.018,
+        0.03,
+        0.045,
+        1.0
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        854,
+        480
+      ],
+      "start_frame": 0,
+      "duration_frames": 120
+    },
+    {
+      "id": "svg_rig",
+      "type": "shape",
+      "position": [
+        427.0,
+        240.0
+      ],
+      "size": [
+        640,
+        360
+      ],
+      "start_frame": 0,
+      "duration_frames": 120,
+      "shape": {
+        "type": "path",
+        "asset": "tools/vector_diagram/rig_2d_anims/assets/rigged_puppet.svg",
+        "element_animations": [
+          {
+            "target": "puppet_art",
+            "property": "transform.translate",
+            "animation": {
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": [
+                    0.0,
+                    0.0
+                  ],
+                  "easing": "linear"
+                },
+                {
+                  "frame": 28,
+                  "value": [
+                    0.0,
+                    4.0
+                  ],
+                  "easing": "linear"
+                },
+                {
+                  "frame": 58,
+                  "value": [
+                    0.0,
+                    0.0
+                  ],
+                  "easing": "linear"
+                },
+                {
+                  "frame": 87,
+                  "value": [
+                    0.0,
+                    4.0
+                  ],
+                  "easing": "linear"
+                },
+                {
+                  "frame": 119,
+                  "value": [
+                    0.0,
+                    0.0
+                  ],
+                  "easing": "linear"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "rig_title",
+      "type": "text",
+      "position": [
+        427.0,
+        34
+      ],
+      "size": [
+        730,
+        38
+      ],
+      "start_frame": 0,
+      "duration_frames": 120,
+      "text": "RIGGING 2D  /  ANIMS",
+      "style": {
+        "font": "assets/fonts/Inter-ExtraBold.ttf",
+        "font_size": 27,
+        "fill": "#f4efe6"
+      }
+    },
+    {
+      "id": "motion_title",
+      "type": "text",
+      "position": [
+        427.0,
+        62
+      ],
+      "size": [
+        760,
+        26
+      ],
+      "start_frame": 0,
+      "duration_frames": 120,
+      "text": "SVG JOINT STUDY   /   IDLE / BREATHING",
+      "style": {
+        "font": "assets/fonts/Inter-Medium.ttf",
+        "font_size": 14,
+        "fill": "#72d9cb"
+      }
+    },
+    {
+      "id": "rig_footer",
+      "type": "text",
+      "position": [
+        427.0,
+        458
+      ],
+      "size": [
+        760,
+        22
+      ],
+      "start_frame": 0,
+      "duration_frames": 120,
+      "text": "PIVOT LOCK  /  SHOULDER \u00b7 ELBOW \u00b7 HIP \u00b7 KNEE",
+      "style": {
+        "font": "assets/fonts/Inter-Medium.ttf",
+        "font_size": 12,
+        "fill": "#99a9b4"
+      }
+    }
+  ],
+  "output": {
+    "path": "rig_2d_idle_breath_v1.mp4",
+    "format": "mp4"
+  }
+}
