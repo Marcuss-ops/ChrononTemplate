@@ -21,10 +21,55 @@ namespace chronontemplate::fast_intro {
         float height{1080.f};
     };
 
+    /// Retro statistic collage Fast Intro:
+    /// 1. Era contextual title ("1990s") with slow forward camera push.
+    /// 2. Gigantic statistic number ("37.7 M") crossing the frame: still
+    ///    overflowing the borders at 2.0s, fully legible at 2.75s, then
+    ///    slipping away behind the collage during the transition.
+    /// 3. Hero collage entering at ~3.0s from an extreme close-up pull-back
+    ///    and composing at 88% of the frame width.
+    /// 4. Optional lower third closing title sliding in from bottom (off by
+    ///    default: the reference replica carries no closing title).
+    struct RetroStatCollageSpec {
+        std::string name{"retro_stat_collage_v1"};
+        std::string eraTitle{"1990s"};
+        std::string statistic{"37.7 M"};
+        std::string closingTitle{""};
+        std::string collagePath{"ChrononTemplate/assets/images/retro_collage.png"};
+        std::string font{"ChrononTemplate/assets/fonts/Impact.ttf"};
+        std::string bgCenterColor{"#FFD24A"};
+        std::string bgOuterColor{"#0E0202"};
+        float eraFontSize{360.f};
+        float statisticFontSize{360.f};
+        float closingFontSize{80.f};
+        float collageScaleIn{6.5f};
+        float statisticScaleIn{8.2f};
+        float collageTargetWidthRatio{0.88f};
+        int durationFrames{173};
+        float width{1920.f};
+        float height{1080.f};
+    };
+
     /// Author the opening plate, title/subtitle, topic chips, draw rail and
     /// moving marker. All copy and accent color are supplied by the caller.
     [[nodiscard]] LayerHandle& addFastIntro(TemplateScene& scene,
                                             const FastIntroSpec& spec);
+
+    /// Author the retro stat fast intro: warm radial gradient background with
+    /// soft concentric bands, era title, crash zoom statistic and the hero
+    /// collage pull-back reveal.
+    [[nodiscard]] LayerHandle& addRetroStatCollage(TemplateScene& scene,
+                                                  const RetroStatCollageSpec& spec);
+
+    /// Convenience shorthand matching the fast intro recipe signature.
+    inline LayerHandle& addRetroStatIntro(TemplateScene& scene,
+                                         const std::string& collagePath,
+                                         const std::string& fontPath) {
+        RetroStatCollageSpec spec;
+        spec.collagePath = collagePath;
+        spec.font = fontPath;
+        return addRetroStatCollage(scene, spec);
+    }
 
 } // namespace chronontemplate::fast_intro
 

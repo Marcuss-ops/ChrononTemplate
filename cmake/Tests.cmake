@@ -380,6 +380,12 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_short_phrase_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_short_phrase_pack_test COMMAND chronontemplate_short_phrase_pack_test)
 
+    # Fast Intro family: standard editorial board and retro statistic collage.
+    add_executable(chronontemplate_fast_intro_pack_test tests/fast_intro_pack.cpp)
+    target_link_libraries(chronontemplate_fast_intro_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_fast_intro_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_fast_intro_pack_test COMMAND chronontemplate_fast_intro_pack_test)
+
     if(CHRONONTEMPLATE_BUILD_LIVE_ADAPTER_TEST)
         if(NOT EXISTS "${CHRONONTEMPLATE_CHRONON3D_LIBRARY}")
             message(FATAL_ERROR
