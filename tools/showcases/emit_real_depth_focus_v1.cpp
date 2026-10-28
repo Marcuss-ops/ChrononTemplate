@@ -85,22 +85,36 @@ int main(int argc, char** argv) {
         TemplateScene scene("real_depth_focus_v1", static_cast<float>(kFps), host, 1920.f, 1080.f);
         scene.camera().setFov(48.f);
         auto& camera = scene.cameraRig();
-        camera.setFocusDistance(1260.f).setFStop(2.8f).setMaxBlur(22.f)
+        camera.setFocusDistance(1260.f).setFStop(2.8f).setMaxBlur(38.f)
               .setLensShift(Vector2(.012f, 0.f));
+        // Dolly in along the optical axis. Static layer coordinates now acquire
+        // real perspective scale/parallax from the camera projection.
+        camera.positionTrack()
+            .add(0.f, Vector3(960.f, 540.f, 1080.f))
+            .add(3.f, Vector3(960.f, 540.f, 980.f))
+            .add(6.f, Vector3(960.f, 540.f, 900.f));
         camera.focusDistanceTrack()
             .add(0.f, 1260.f)
-            .add(1.5f, 1260.f)
-            .add(2.5f, 1080.f)
-            .add(3.5f, 1080.f)
-            .add(4.5f, 900.f)
-            .add(6.f, 900.f);
+            .add(1.5f, 1220.f)
+            .add(2.5f, 986.67f)
+            .add(3.5f, 986.67f)
+            .add(4.5f, 760.f)
+            .add(6.f, 720.f);
         camera.fStopTrack().add(0.f, 2.8f).add(6.f, 2.8f);
-        camera.maxBlurTrack().add(0.f, 22.f).add(6.f, 22.f);
-        scene.camera().orbit(.035f, .012f).between(0, kFrames - 1);
+        camera.maxBlurTrack().add(0.f, 38.f).add(6.f, 38.f);
 
-        auto& background = scene.shape(ShapeSpec{
-            .size = Vector2(1920.f, 1080.f), .fillColor = "#080B16", .name = "InkBlueBackground"});
-        background.position(0.f, 0.f).alive(0, kFrames - 1);
+        // Give the native per-pixel DOF pass continuous depth coverage around
+        // each glyph. They match the transparent canvas clear color, so they
+        // add depth coverage without introducing a visible plate.
+        auto& farBacking = scene.shape(ShapeSpec{
+            .size = Vector2(700.f, 200.f), .fillColor = "#000000", .name = "FarPlaneDofBacking"});
+        farBacking.position(960.f, 300.f, -180.f).alive(0, kFrames - 1);
+        auto& middleBacking = scene.shape(ShapeSpec{
+            .size = Vector2(700.f, 200.f), .fillColor = "#000000", .name = "MiddlePlaneDofBacking"});
+        middleBacking.position(960.f, 540.f, 0.f).alive(0, kFrames - 1);
+        auto& nearBacking = scene.shape(ShapeSpec{
+            .size = Vector2(700.f, 200.f), .fillColor = "#000000", .name = "NearPlaneDofBacking"});
+        nearBacking.position(960.f, 780.f, 180.f).alive(0, kFrames - 1);
 
         const std::string font = "Chronon3d/assets/fonts/InterDisplay-Bold.ttf";
         auto& far = scene.text(TextSpec{.text = "CAMERA", .font = font, .fontSize = 112.f,
@@ -109,14 +123,12 @@ int main(int argc, char** argv) {
            .animateOpacity(0, 20, 0.f, .82f);
 
         auto& middle = scene.text(TextSpec{.text = "FOCUS", .font = font, .fontSize = 118.f,
-            .color = "#F1F7FF", .name = "MiddlePlaneFocus",
-            .glow = TextGlowStyle{.color = "#36DDF2", .radius = 7.f, .intensity = .08f}});
+            .color = "#F1F7FF", .name = "MiddlePlaneFocus"});
         middle.position(960.f, 540.f, 0.f).alive(0, kFrames - 1)
               .animateOpacity(10, 24, 0.f, 1.f);
 
         auto& near = scene.text(TextSpec{.text = "DEPTH", .font = font, .fontSize = 100.f,
-            .color = "#E9FBFF", .name = "NearPlaneDepth",
-            .glow = TextGlowStyle{.color = "#24CBE8", .radius = 8.f, .intensity = .09f}});
+            .color = "#E9FBFF", .name = "NearPlaneDepth"});
         near.position(960.f, 780.f, 180.f).alive(0, kFrames - 1)
             .animateOpacity(22, 28, 0.f, 1.f);
 
@@ -125,7 +137,9 @@ int main(int argc, char** argv) {
         for (auto& layer : plan.layers)
             if (layer.duration_frames) layer.duration_frames = chronon3d::Frame(kFrames);
         plan.output.format = chronon3d::render_plan::OutputFormat::Mp4;
-        markLayer(plan, background.id(), true, true);
+        markLayer(plan, farBacking.id(), true);
+        markLayer(plan, middleBacking.id(), true);
+        markLayer(plan, nearBacking.id(), true);
         markLayer(plan, far.id(), true);
         markLayer(plan, middle.id(), true);
         markLayer(plan, near.id(), true);
