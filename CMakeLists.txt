@@ -273,6 +273,14 @@ target_include_directories(chronontemplate_emit_beast_land_subject_reframe PRIVA
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_beast_land_subject_reframe PRIVATE -Wall -Wextra)
 
+add_executable(chronontemplate_emit_real_depth_focus_v1
+        tools/showcases/emit_real_depth_focus_v1.cpp)
+target_link_libraries(chronontemplate_emit_real_depth_focus_v1 PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_real_depth_focus_v1 PRIVATE chrononmotion_chronon3d_adapter)
+endif()
+target_compile_options(chronontemplate_emit_real_depth_focus_v1 PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_resolve_camera_samples
         tools/camera_roll/resolve_camera_samples.cpp)
 target_link_libraries(chronontemplate_resolve_camera_samples PRIVATE chronontemplate)
