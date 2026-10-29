@@ -175,6 +175,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/core/RenderPlanContentHost.cpp
         # Optional offline RenderPlan bridge lives outside the Motion core.
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp"
         src/chronontemplate/single_images/ImageAnimationPack.cpp
         src/chronontemplate/investigation_board/InvestigationBoardPack.cpp
         src/chronontemplate/single_images/PixelGridPack.cpp

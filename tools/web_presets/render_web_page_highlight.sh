@@ -4,7 +4,7 @@
 #
 #   1. bounded raw-NV12 export  (CLI: --video-sink raw --pipe-pixfmt nv12
 #      --chunks 1 --fb-pool-budget-mb 512)
-#   2. single ffmpeg encode     (h264_nvenc when present, else libx264)
+#   2. single ffmpeg encode     (h264_nvenc; fail instead of falling back)
 #   3. ffprobe verification     (H.264, 1920x1080, 30 fps, exact frame count)
 #
 # Plans are written by chronontemplate_emit_web_page_highlight; run this from
@@ -16,9 +16,10 @@ REPO="$(cd "$(dirname "$0")/../.." && pwd)"
 CLI="${1:-$REPO/../Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli}"
 ASSETS="${2:-$REPO}"
 OUT="${3:-$REPO/out/web_page_highlight_v1}"
-# The per-glyph folds fall back to the CPU text lane on both backends;
-# CHRONON_BACKEND=software is the deterministic choice on CPU-only hosts.
-BACKEND="${CHRONON_BACKEND:-vulkan}"
+# Vulkan renders every scene node; NVENC encodes H.264. The raw sink crosses
+# host memory at the final handoff, so verify that no scene/text rasterization
+# fell back to CPU rather than requiring a native encoder-owned surface.
+BACKEND=vulkan
 # Verified clips are delivered to the user's MP4 folder when it is mounted
 # (WSL: /mnt/c/...). Override with argument 4 or WEB_MP4_DELIVERY_DIR.
 DELIVERY="${4:-${WEB_MP4_DELIVERY_DIR:-/mnt/c/Users/pater/OneDrive/Documenti/Chronomotion/MP4}}"
@@ -31,14 +32,11 @@ if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; 
     echo "ffmpeg/ffprobe are required for encode and verification" >&2
     exit 1
 fi
-if ffmpeg -hide_banner -encoders 2>/dev/null | grep -q h264_nvenc \
-    && "$CLI" doctor 2>/dev/null | grep -q "encoder.nvenc.*PASS"; then
-    ENCODE=("-c:v" "h264_nvenc" "-preset" "p4" "-cq" "18" "-b:v" "0")
-    echo "encoding with NVENC"
-else
-    ENCODE=("-c:v" "libx264" "-preset" "veryfast" "-crf" "17")
-    echo "encoding with libx264 (no NVENC)"
+if ! ffmpeg -hide_banner -encoders 2>/dev/null | grep -q h264_nvenc || ! "$CLI" doctor 2>/dev/null | grep -q "encoder.nvenc.*PASS"; then
+    echo "GPU-only render requires a working Vulkan device and NVENC encoder" >&2
+    exit 1
 fi
+ENCODE=("-c:v" "h264_nvenc" "-preset" "p1" "-tune" "ll" "-cq" "20" "-b:v" "0")
 
 : > "$OUT/verification.json.new"
 echo "[" >> "$OUT/verification.json.new"
@@ -51,6 +49,7 @@ for plan in "$PLAN_DIR"/web_page_*.plan.json; do
     echo "== $name"
     "$CLI" render --plan "$plan" --assets-root "$ASSETS" \
         --backend "$BACKEND" --profile preview --fps 30 \
+        --hardware none \
         --video-sink raw --pipe-pixfmt nv12 --chunks 1 \
         --fb-pool-budget-mb 512 --fb-pool-clear-policy trim-after-job \
         --start-frame 0 --end-frame 239 -o "$raw" || { failures=$((failures+1)); continue; }
@@ -59,6 +58,24 @@ for plan in "$PLAN_DIR"/web_page_*.plan.json; do
     if [ "$actual" -ne "$expected" ]; then
         echo "$name: raw frame size mismatch ($actual, expected $expected)" >&2
         rm -f "$raw"; failures=$((failures+1)); continue
+    fi
+    if ! python3 - "$raw.timing.json" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    report = json.load(f)
+gpu = report["job"]["gpu"]
+text = report["job"]["text"]
+if gpu["effective_backend"] != "vulkan":
+    raise SystemExit(f"expected Vulkan, got {gpu['effective_backend']}")
+if gpu["gpu_nodes"] <= 0 or gpu["software_fallback_nodes"] != 0:
+    raise SystemExit("GPU render had no Vulkan nodes or used software fallback")
+if text["raster_ms"] != 0:
+    raise SystemExit(f"CPU text rasterization detected: {text['raster_ms']} ms")
+print(f"GPU verified: Vulkan nodes={gpu['gpu_nodes']}, CPU text raster=0 ms")
+PY
+    then
+        echo "$name: GPU render gate failed" >&2
+        failures=$((failures+1)); continue
     fi
     ffmpeg -v error -y -f rawvideo -pixel_format nv12 -video_size 1920x1080 \
         -framerate 30 -i "$raw" -frames:v 240 -an "${ENCODE[@]}" \

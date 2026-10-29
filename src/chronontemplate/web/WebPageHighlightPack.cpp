@@ -34,7 +34,11 @@ namespace chronontemplate::web {
         constexpr const char* kBold = "assets/fonts/Inter-Bold.ttf";
         constexpr const char* kRegular = "assets/fonts/Inter-Regular.ttf";
         constexpr const char* kSerif = "assets/fonts/PlayfairDisplay.ttf";
-        constexpr int kFoldStagger = 2, kFoldFrames = 8;
+        // Keep one selected character active at a time. The Vulkan MTSDF
+        // lane evaluates one animator per text run and applies its selector
+        // per glyph; overlapping independent per-glyph animator stacks force
+        // the entire run through the software rasterizer.
+        constexpr int kFoldFrames = 5;
 
         [[noreturn]] void fail(const std::string& message) {
             throw std::invalid_argument("WebPageHighlightSpec: " + message);
@@ -103,66 +107,57 @@ namespace chronontemplate::web {
                             {{"frame", durationFrames - 1}, {"value", blur}}})}}})}};
         }
 
-        /// Per-glyph 3D fold: each character rotates in around X from above —
-        /// the exact animator geometry the web-article-fold canary validated.
+        /// GPU-native per-glyph fold. One character selector walks the shaped
+        /// run while a single animator supplies the shared fold envelope.
         Json foldAnimators(const std::string& id, const std::string& text, int offset, int durationFrames) {
             const int n = static_cast<int>(text.size());
-            Json animators = Json::array();
+            const int foldFrames = std::max(1, std::min(kFoldFrames,
+                (durationFrames - offset) / std::max(n, 1)));
+            const int stagger = foldFrames;
+            Json selector = fullWindowSelector("glyph_fold");
+            Json selectorStart = Json::array();
+            Json selectorEnd = Json::array();
+            Json rot = Json::array(), pos = Json::array(), opacity = Json::array();
             for (int i = 0; i < n; ++i) {
-                const int begin = offset + i * kFoldStagger;
+                const int begin = offset + i * stagger;
                 const double lo = 100.0 * i / n, hi = 100.0 * (i + 1) / n;
-                // A pending fold must select nothing. `fullWindowSelector`
-                // starts at 0..100, so every not-yet-started glyph animator
-                // selected the whole run and their rotations stacked, which
-                // overflowed the software glyph surface. Keep the window
-                // closed at 100..100 until this glyph's begin frame, open it
-                // for exactly kFoldFrames, then close it.
-                // The start angle stays moderate: a near-90-degree X fold
-                // still produces a very wide sheared glyph surface on a long
-                // headline, so 35 degrees gives the same read without the
-                // allocation spike.
-                Json selector = fullWindowSelector("glyph_fold_" + std::to_string(i));
-                if (begin > 0) {
-                    selector["start"]["keyframes"] = Json::array({
-                        {{"frame", 0}, {"value", 100.0}},
-                        {{"frame", begin - 1}, {"value", 100.0}},
-                        {{"frame", begin}, {"value", lo}},
-                        {{"frame", begin + kFoldFrames}, {"value", 100.0}}});
-                    selector["end"]["keyframes"] = Json::array({
-                        {{"frame", 0}, {"value", 100.0}},
-                        {{"frame", begin - 1}, {"value", 100.0}},
-                        {{"frame", begin}, {"value", hi}},
-                        {{"frame", begin + kFoldFrames}, {"value", 100.0}}});
-                } else {
-                    selector["start"]["keyframes"] = Json::array({
-                        {{"frame", 0}, {"value", lo}},
-                        {{"frame", kFoldFrames}, {"value", 100.0}}});
-                    selector["end"]["keyframes"] = Json::array({
-                        {{"frame", 0}, {"value", hi}},
-                        {{"frame", kFoldFrames}, {"value", 100.0}}});
+                for (int f = 0; f < foldFrames; ++f) {
+                    selectorStart.push_back({{"frame", begin + f}, {"value", lo}});
+                    selectorEnd.push_back({{"frame", begin + f}, {"value", hi}});
                 }
-                Json rot = Json::array(), pos = Json::array(), opacity = Json::array();
                 auto sample = [&](int frame) {
-                    const double p = static_cast<double>(std::clamp(frame - begin, 0, kFoldFrames)) / kFoldFrames;
+                    const double p = static_cast<double>(frame - begin) / foldFrames;
                     const double eased = 1.0 - std::pow(1.0 - p, 3.0);
                     rot.push_back({{"frame", frame}, {"value", Json::array({35.0 * (1.0 - eased), 0.0, 0.0})}});
                     pos.push_back({{"frame", frame}, {"value", -36.0 * (1.0 - eased)}});
                     opacity.push_back({{"frame", frame}, {"value", eased}});
                 };
-                if (begin > 0) sample(0);
-                for (int f = 0; f <= kFoldFrames; ++f) sample(begin + f);
-                for (Json* track : {&rot, &pos, &opacity}) {
-                    if (begin + kFoldFrames < durationFrames - 1) {
-                        track->push_back({{"frame", durationFrames - 1}, {"value", track->back()["value"]}});
-                    }
-                }
-                animators.push_back({{"id", id + "_fold_" + std::to_string(i)},
-                                     {"selectors", Json::array({std::move(selector)})},
-                                     {"properties", Json::array({
-                                         {{"property", "rotation"}, {"easing", "linear"}, {"keyframes", std::move(rot)}},
-                                         {{"property", "position_y"}, {"easing", "linear"}, {"keyframes", std::move(pos)}},
-                                         {{"property", "opacity"}, {"easing", "linear"}, {"keyframes", std::move(opacity)}}})}});
+                for (int f = 0; f < foldFrames; ++f) sample(begin + f);
+                if (i + 1 == n) sample(begin + foldFrames);
             }
+            selectorStart.push_back({{"frame", offset + n * stagger}, {"value", 100.0}});
+            selectorEnd.push_back({{"frame", offset + n * stagger}, {"value", 100.0}});
+            selector["start"] = {{"easing", "linear"}, {"keyframes", std::move(selectorStart)}};
+            selector["end"] = {{"easing", "linear"}, {"keyframes", std::move(selectorEnd)}};
+            for (Json* track : {&rot, &pos, &opacity}) {
+                std::sort(track->begin(), track->end(), [](const Json& a, const Json& b) {
+                    return a["frame"].get<int>() < b["frame"].get<int>();
+                });
+                Json unique = Json::array();
+                for (const auto& key : *track) {
+                    if (!unique.empty() && unique.back()["frame"] == key["frame"])
+                        unique.back() = key;
+                    else
+                        unique.push_back(key);
+                }
+                *track = std::move(unique);
+            }
+            Json animators = Json::array({{{"id", id + "_fold"},
+                {"selectors", Json::array({std::move(selector)})},
+                {"properties", Json::array({
+                    {{"property", "rotation"}, {"easing", "linear"}, {"keyframes", std::move(rot)}},
+                    {{"property", "position_y"}, {"easing", "linear"}, {"keyframes", std::move(pos)}},
+                    {{"property", "opacity"}, {"easing", "linear"}, {"keyframes", std::move(opacity)}}})}}});
             return animators;
         }
 
@@ -355,9 +350,9 @@ namespace chronontemplate::web {
                                           pal.highlight, 0.5f, markerSweepTracks(566.f)));
                 }
             }
-            layers.push_back(textLayer("masthead_byline", spec.byline, kMargin, 380.f, 20.f,
+            layers.push_back(textLayer("masthead_byline", spec.byline, kMargin, 418.f, 20.f,
                                        kBold, pal.ink, duration, 2.4f, 6));
-            layers.push_back(rect("masthead_rule", kMargin, 428.f, kContentRight - kMargin, 2.f,
+            layers.push_back(rect("masthead_rule", kMargin, 466.f, kContentRight - kMargin, 2.f,
                                   pal.rule, 1.f,
                                   Json::array({easedTrack("opacity", 0.f, 1.f, 40, 30, "out_cubic")})));
 
@@ -365,7 +360,7 @@ namespace chronontemplate::web {
             int bodySlot = 7;
             const int split = static_cast<int>(spec.bodyLines.size() / 2 + 1);
             for (std::size_t i = 0; i < spec.bodyLines.size(); ++i) {
-                const float y = 462.f + static_cast<float>(static_cast<int>(i) % 7) * 40.f;
+                const float y = 500.f + static_cast<float>(static_cast<int>(i) % 7) * 40.f;
                 const float x = static_cast<int>(i) < split ? kMargin : kMargin + 690.f;
                 layers.push_back(textLayer("body_line_" + std::to_string(i), spec.bodyLines[i],
                                            x, y, 23.f, kSerif, pal.body, duration, 3.2f, bodySlot++));
