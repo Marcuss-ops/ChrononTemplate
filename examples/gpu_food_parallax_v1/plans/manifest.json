@@ -1,0 +1,16 @@
+{
+  "schema": "chronontemplate.gpu-food-parallax.v2",
+  "renderer": "Chronon3D Vulkan",
+  "camera_authority": "Chronon3D perspective camera with authored dolly samples",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "frames": 180
+  },
+  "plans": [
+    "food_story_01_humble_beginnings.plan.json",
+    "food_story_02_the_sandwich.plan.json",
+    "food_story_03_long_game.plan.json"
+  ]
+}

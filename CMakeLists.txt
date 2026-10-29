@@ -274,6 +274,22 @@ target_include_directories(chronontemplate_emit_beast_land_subject_reframe PRIVA
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_beast_land_subject_reframe PRIVATE -Wall -Wextra)
 
+# Three 2.5D food-history seed plans, with camera samples baked by ChrononMotion3D.
+add_executable(chronontemplate_emit_gpu_food_parallax_examples
+        tools/gpu_parallax/emit_food_story_examples.cpp
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringGeometry.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringSamples.cpp")
+target_link_libraries(chronontemplate_emit_gpu_food_parallax_examples PRIVATE
+        ChrononMotion::chrononmotion)
+target_include_directories(chronontemplate_emit_gpu_food_parallax_examples PRIVATE
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_GLM_DIR}"
+        "${CHRONONTEMPLATE_MAGIC_ENUM_INCLUDE_DIR}"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_gpu_food_parallax_examples PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_real_depth_focus_v1
         tools/showcases/emit_real_depth_focus_v1.cpp)
 target_link_libraries(chronontemplate_emit_real_depth_focus_v1 PRIVATE chronontemplate)
