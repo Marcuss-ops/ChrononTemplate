@@ -818,6 +818,12 @@ the important center phrase stays sharp:
 - `LongPhraseBlurred` — a quiet plate: long context phrases blurred at the top and
   bottom, the important center phrase sharp with an accent underline wipe.
 
+Headline folds advance one glyph at a time through a single text animator per
+run. This keeps the glyph transforms on the Vulkan MTSDF path instead of
+rasterizing a separate animator stack on the CPU. The render script checks each
+NV12 timing sidecar for Vulkan execution, zero software fallback nodes, and zero
+CPU text-raster time before it allows the NVENC encode.
+
 `WebPageTheme::Light|Dark` inverts ink and page paper (dark text on the light page,
 paper-light text on the dark page), re-checked by
 `chronontemplate_web_page_highlight_pack_test` together with the blur grammar, the
@@ -833,7 +839,8 @@ cmake --build build/dev-fast --target chronontemplate_emit_web_page_highlight
 
 Render the clips on a GPU/NVENC host with the bounded raw-NV12 flow
 (`--video-sink raw --pipe-pixfmt nv12 --chunks 1 --fb-pool-budget-mb 512`) and
-encode with ffmpeg, as the other editorial packs do.
+encode with ffmpeg. The scene and text rasterization stay on Vulkan; raw NV12 is
+read back at the output handoff and encoded with NVENC (`p1`) for speed.
 
 ## Documentary and archival web stills
 

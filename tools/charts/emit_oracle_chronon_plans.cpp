@@ -23,11 +23,13 @@ json track(std::string property,json frames,std::string easing="out_cubic"){
 }
 json animation(std::initializer_list<json> tracks){return json{{"tracks",json(tracks)}};}
 json base(std::string id,std::string type,double x,double y,double w,double h,int start=0,double opacity=1.0){
-    // These planar charts use the 2.5D camera so rotated axis rules work.
-    // 3D-enabled layer positions use canvas-centred coordinates with +Y up.
-    return json{{"id",std::move(id)},{"type",std::move(type)},{"position",json::array({x-W*.5,H*.5-y,0})},
+    // RenderPlan V3 positions are canvas coordinates. The compiler converts
+    // them to a centred transform once, so keep the chart's pixel-centred
+    // placement in the layer position and let screen-space bypass the camera.
+    // 3D remains enabled for the Z-rotation used by axis rules.
+    return json{{"id",std::move(id)},{"type",std::move(type)},{"position",json::array({x+W*.5,y+H*.5,0})},
         {"size",json::array({w,h})},{"scale",json::array({1,1,1})},{"rotation",json::array({0,0,0})},
-        {"enable_3d",true},{"screen_space",false},{"start_frame",0},{"duration_frames",FRAMES},{"opacity",opacity}};
+        {"enable_3d",true},{"screen_space",true},{"start_frame",0},{"duration_frames",FRAMES},{"opacity",opacity}};
 }
 json rect(std::string id,double x,double y,double w,double h,std::string color,int at=0,
           bool drawBorder=false,bool dotted=false){
@@ -86,9 +88,9 @@ std::vector<Point> jCurvePoints(){const Point k[]={{0,0},{.5,-100},{1,-70},{2,-4
     return out;}
 json pathCommand(std::string type,double x=0,double y=0){json j{{"type",std::move(type)}};if(j["type"]!="close")j["point"]=json::array({x,y});return j;}
 json areaPath(std::string id,const std::vector<Point>& pts,bool aboveBase,std::string fill,int at){
-    std::vector<Point> use;const double baseline=540-453;
+    std::vector<Point> use;const double baseline=453-540;
     use.push_back({pts.front().x-960,baseline});
-    for(const auto& q:pts){const double sx=510+q.x*160,sy=453-q.y*3.36; if((aboveBase&&sy<=453)||(!aboveBase&&sy>=453))use.push_back({sx-960,540-sy});}
+    for(const auto& q:pts){const double sx=510+q.x*160,sy=453-q.y*3.36; if((aboveBase&&sy<=453)||(!aboveBase&&sy>=453))use.push_back({sx-960,sy-540});}
     use.push_back({use.back().x,baseline});use.push_back({pts.front().x-960,baseline});
     auto l=base(std::move(id),"shape",960,540,W,H);json cmds=json::array();cmds.push_back(pathCommand("move_to",use[0].x,use[0].y));for(size_t i=1;i<use.size();++i)cmds.push_back(pathCommand("line_to",use[i].x,use[i].y));cmds.push_back(pathCommand("close"));
     l["shape"]={{"type","path"},{"path",std::move(cmds)},{"fill",rgba(fill,.18)}};
@@ -101,10 +103,10 @@ json jcurve(){json p=planBase("oracle_j_curve_effect");auto& l=p["layers"];
     l.push_back(lineRect("y-axis",x0,yt,x0,yb,2.4,"#111111"));l.push_back(lineRect("x-axis",x0,y0,x1,y0,2.4,"#111111"));
     for(int v=-120;v<=80;v+=20){double y=y0-v*3.36;l.push_back(lineRect("ytick-"+std::to_string(v),x0-8,y,x0,y,2.4,"#111111"));l.push_back(textLayer("ylabel-"+std::to_string(v),std::to_string(v),x0-34,y,65,38,29,"#111111","right"));}
     for(int y=0;y<=6;++y){double x=510+y*160;l.push_back(lineRect("xtick-"+std::to_string(y),x,y0,x,y0+9,2.4,"#111111"));l.push_back(textLayer("xlabel-"+std::to_string(y),"Year "+std::to_string(y),x,yb+34,145,42,28,"#111111","center"));}
-    l.push_back(textLayer("axis-title","Cumulative Net Cash Flow ($)",260,513,440,45,29,"#111111","center"));
+    l.push_back(textLayer("axis-title","Cumulative Net Cash Flow ($)",250,505,350,38,21,"#111111","center"));
     auto pts=jCurvePoints();l.push_back(areaPath("loss-area",pts,false,"#EA493A",66));l.push_back(areaPath("gain-area",pts,true,"#38C879",70));
     auto drawCurve=[&](std::string id,size_t begin,size_t end,std::string color,int start,int finish){
-        json points=json::array();for(size_t i=begin;i<=end;++i){const auto q=pts[i];const double sx=510+q.x*160,sy=453-q.y*3.36;points.push_back(json::array({sx-960,540-sy}));}
+        json points=json::array();for(size_t i=begin;i<=end;++i){const auto q=pts[i];const double sx=510+q.x*160,sy=453-q.y*3.36;points.push_back(json::array({sx-960,sy-540}));}
         auto path=base(id,"shape",960,540,W,H);path["shape"]={{"type","monotone_line"},{"data_points",std::move(points)},{"stroke",{{"color",color},{"width",7.0},{"cap","round"},{"join","round"},{"dash_array",json::array({2200.0,2200.0})},{"dash_offset",2200.0}}}};
         path["animation"]=animation({track("stroke_dash_offset",json::array({key(0,2200.0),key(start,2200.0),key(finish,0.0),key(FRAMES-1,0.0)}))});l.push_back(std::move(path));};
     size_t cross=0;while(cross+1<pts.size()&&pts[cross+1].y<=0)++cross;
@@ -121,10 +123,10 @@ json profits(){json p=planBase("oracle_profits_comparison");auto& l=p["layers"];
     l.push_back(textLayer("oracle","ORACLE",198,510,138,40,26,"#CB3427","center",5));
     auto bar=rect("oracle-profit-bar",left+greenW*.5,greenY,greenW,h,"#3DC77A",0,true);bar["animation"]=animation({track("scale_x",json::array({key(0,.001),key(10,.001),key(48,1.0),key(FRAMES-1,1.0)})),track("position_x",json::array({key(0,-greenW*.5),key(10,-greenW*.5),key(48,0.0),key(FRAMES-1,0.0)}))});l.push_back(bar);
     auto dots=rect("profit-halftone",left+greenW*.5,greenY,greenW,h,"#111111",0,false,true);dots["animation"]=bar["animation"];l.push_back(dots);
-    auto value=textLayer("profit-value","$27 B",left+greenW-86,510,210,61,58,"#050505","right",45,true);l.push_back(value);
+    auto value=textLayer("profit-value","$27 B",left+greenW-120,510,220,61,52,"#050505","center",45,true);l.push_back(value);
     const double redW=310,redY=622;auto red=rect("openai-profit-bar",left+redW*.5,redY,redW,h,"#EF786A",0,true);red["animation"]=animation({track("scale_x",json::array({key(0,.001),key(29,.001),key(60,1.0),key(FRAMES-1,1.0)})),track("position_x",json::array({key(0,-redW*.5),key(29,-redW*.5),key(60,0.0),key(FRAMES-1,0.0)}))});l.push_back(red);
     auto rd=rect("openai-profit-halftone",left+redW*.5,redY,redW,h,"#111111",0,false,true);rd["animation"]=red["animation"];l.push_back(rd);
-    l.push_back(textLayer("small-profit-value","~$5.4 B",left+redW-120,redY,250,60,56,"#090909","right",57,true));
+    l.push_back(textLayer("small-profit-value","~$5.4 B",left+redW*.5,redY,redW-12,60,42,"#090909","center",57,true));
     auto note=base("source-note","shape",1600,1031,420,45);note["shape"]={{"type","rounded_rect"},{"radius",9},{"fill",rgba("#777777")}};l.push_back(note);
     l.push_back(textLayer("source-note-text","*Figures simplified and rounded for explanation.",1600,1030,400,39,17,"#FFFFFF","center"));return p;}
 void write(json plan,const fs::path& dir){std::string id=plan["job_id"].get<std::string>();fs::create_directories(dir);std::ofstream f(dir/(id+".plan.json"),std::ios::binary|std::ios::trunc);if(!f||!(f<<plan.dump(2)<<'\n'))throw std::runtime_error("failed writing plan "+id);std::cout<<"Wrote native Chronon3D RenderPlan: "<<(dir/(id+".plan.json"))<<'\n';}
