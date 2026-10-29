@@ -16,11 +16,11 @@
   },
   "marker": {
     "id": "yellow_marker",
-    "size": 22,
-    "fill": [1.0, 0.87, 0.12, 1.0],
+    "size": 35,
+    "fill": [1.0, 0.82, 0.16, 1.0],
     "start_frame": 8,
     "end_frame": 64,
-    "progress_end": 0.94,
+    "progress_end": 0.35,
     "glow": {
       "enabled": false,
       "radius": 22,

@@ -1,26 +1,31 @@
-// ChrononTemplate: Native C++ SVG Parity Emitter and Renderer
-// Recreates the Documentary SVG Peak Graph & Neon 2.5D Essay animations.
+// ChrononTemplate: Native C++ SVG Parity Emitter
 //
-// Complies with schema "chronon.render-plan.v3".
-// Covers:
-//   1. SVG Path Import / Authoring with Trim Paths (draw-on animation)
-//   2. Follow Path marker geometry (yellow glowing sun following path)
-//   3. Glow markers (rising checkpoint dot & summit peak marker)
-//   4. Multi-pass exponential bloom & inner glow SDF style
-//   5. 2.5D Scene composition & analog film post-processing
+// Emits the RenderPlan V3 documents for the Documentary SVG Peak scene and
+// the 2.5D Neon Essay scene. Every scene value of the peak plan — geometry,
+// framing, timing, easing, colors, checkpoints and camera — comes from the
+// shared `svg_peak_scene.hpp` module, which parses the SVG asset and the
+// scene preset at runtime. No scene coordinate or keyframe is duplicated in
+// this file (certification tests SVG-02/SVG-03/INT-02).
+//
+// Plan conventions mirror `documentary_svg_peak_registry.py` (the Python
+// generator whose plans are accepted by `chronon3d_cli validate`): the peak
+// path lives in the SVG asset referenced by name, the marker's `follow_path`
+// carries the same canvas-space geometry emitted from the same parse.
+//
+// Usage:
+//   svg_peak_parity_emitter [outDir] [--svg path] [--preset path]
+//
+// Errors (SVG-08): every malformed input produces an explicit "[ERROR]"
+// line and exit code 1 — never a crash.
+
+#include "svg_peak_scene.hpp"
 
 #include <nlohmann/json.hpp>
 
-#include <algorithm>
 #include <array>
-#include <cmath>
 #include <filesystem>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
-#include <memory>
-#include <optional>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -29,380 +34,243 @@ using json = nlohmann::json;
 
 namespace chronon::svg_parity {
 
-constexpr int kDefaultWidth = 1920;
-constexpr int kDefaultHeight = 1080;
-constexpr int kDefaultFps = 30;
-constexpr int kDefaultFrames = 180; // 6.0 seconds
-
-using Point = std::array<double, 2>;
-
-inline json rgba(double r, double g, double b, double a = 1.0) {
-    return json::array({r, g, b, a});
+inline json rgba(const std::array<double, 4>& c) {
+    return json::array({c[0], c[1], c[2], c[3]});
 }
 
-inline json hexRgba(const std::string& hex, double alpha = 1.0) {
-    const auto part = [&](std::size_t at) {
-        return std::stoi(hex.substr(at, 2), nullptr, 16) / 255.0;
-    };
-    return json::array({part(1), part(3), part(5), alpha});
-}
-
-inline json moveTo(Point p) {
-    return {{"type", "move_to"}, {"point", {p[0], p[1]}}};
-}
-
-inline json lineTo(Point p) {
-    return {{"type", "line_to"}, {"point", {p[0], p[1]}}};
-}
-
-inline json closePath() {
-    return {{"type", "close"}};
-}
-
-// Build SVG Trim Path operator
-inline json buildTrimOperator(int startFrame, int endFrame, const std::string& easing = "in_out_cubic") {
-    json keyframes = json::array();
-    keyframes.push_back({{"frame", startFrame}, {"value", 0.0}});
-    keyframes.push_back({{"frame", endFrame}, {"value", 1.0}});
-
-    json anim = {
-        {"easing", easing},
-        {"keyframes", std::move(keyframes)}
-    };
-
-    return {
-        {"kind", "trim"},
-        {"params", {
-            {"start", 0.0},
-            {"end", 1.0},
-            {"offset", 0.0},
-            {"animation", std::move(anim)}
-        }}
-    };
-}
-
-// Build FollowPath controller for a marker traversing path geometry
-inline json buildFollowPath(const std::vector<Point>& points, int startFrame, int endFrame, double endProgress = 1.0) {
-    json pathCommands = json::array();
+inline json pathCommands(const std::vector<Vec2>& points) {
+    json commands = json::array();
     for (std::size_t i = 0; i < points.size(); ++i) {
-        pathCommands.push_back(i == 0 ? moveTo(points[i]) : lineTo(points[i]));
+        commands.push_back({{"type", i == 0 ? "move_to" : "line_to"},
+                            {"point", {points[i].x, points[i].y}}});
     }
-
-    json keyframes = json::array();
-    keyframes.push_back({{"frame", startFrame}, {"value", 0.0}});
-    keyframes.push_back({{"frame", endFrame}, {"value", endProgress}});
-
-    return {
-        {"path_commands", std::move(pathCommands)},
-        {"progress", {
-            {"easing", "in_out_cubic"},
-            {"keyframes", std::move(keyframes)}
-        }},
-        {"auto_orient", false},
-        {"clamp_end", true}
-    };
+    return commands;
 }
 
-// Generate the complete Documentary SVG Peak Plan
-inline json generateSvgPeakPlan(int width = kDefaultWidth, int height = kDefaultHeight) {
-    // Exact documentary peak profile points from documentary_svg_peak_v1.svg
-    // Normalized and scaled to target canvas
-    const double sx = static_cast<double>(width) / 854.0;
-    const double sy = static_cast<double>(height) / 480.0;
+inline json keyframe(int frame, double value) {
+    return {{"frame", frame}, {"value", value}};
+}
 
-    const std::vector<Point> rawPoints = {
-        {106.0, 366.0},
-        {219.0, 278.0},
-        {262.0, 245.0},
-        {304.0, 245.0},
-        {383.0, 190.0},
-        {458.0, 118.0},
-        {594.0, 302.0},
-        {706.0, 226.0}
-    };
-
-    std::vector<Point> canvasPoints;
-    canvasPoints.reserve(rawPoints.size());
-    for (const auto& pt : rawPoints) {
-        canvasPoints.push_back({pt[0] * sx, pt[1] * sy});
-    }
+// RenderPlan V3 for the Documentary SVG Peak scene, driven entirely by the
+// shared SceneSpec. The trim operator animates `#peak_line` inside the SVG
+// asset; the marker follows the same geometry through `follow_path`.
+inline json generateSvgPeakPlan(const SceneSpec& spec) {
+    const int frames = spec.frames;
 
     json layers = json::array();
 
-    // 1. Near-black background plate with cinematic optical vignette
-    layers.push_back({
-        {"id", "bg_base"},
-        {"type", "color"},
-        {"color", rgba(0.012, 0.014, 0.022, 1.0)},
-        {"position", {0, 0}},
-        {"size", {width, height}},
-        {"start_frame", 0},
-        {"duration_frames", kDefaultFrames},
-        {"screen_space", true},
-        {"effects", json::array({
-            {
-                {"type", "vignette"},
-                {"radius", 0.88},
-                {"softness", 0.55},
-                {"amount", 0.45}
-            }
-        })}
-    });
+    layers.push_back({{"id", "background"},
+                      {"type", "color"},
+                      {"color", rgba(spec.background)},
+                      {"size", {spec.width, spec.height}},
+                      {"position", {0, 0}},
+                      {"start_frame", 0},
+                      {"duration_frames", frames}});
 
-    // 2. Mountain elevation path with animated Trim Path
-    json mountainCommands = json::array();
-    for (std::size_t i = 0; i < canvasPoints.size(); ++i) {
-        mountainCommands.push_back(i == 0 ? moveTo(canvasPoints[i]) : lineTo(canvasPoints[i]));
-    }
-
-    json mountainShape = {
+    json svgLayer = {{"id", "peak_svg"},
+                     {"type", "shape"},
+                     {"position", {spec.framingOffset[0], -spec.framingOffset[1]}},
+                     {"size", {spec.width * spec.framingScale, spec.height * spec.framingScale}},
+                     {"start_frame", 0},
+                     {"duration_frames", frames}};
+    svgLayer["shape"] = {
         {"type", "path"},
-        {"path", std::move(mountainCommands)},
-        {"stroke", {
-            {"color", "#E8EBF0"},
-            {"width", 5.5 * sx},
-            {"cap", "round"},
-            {"join", "round"}
-        }},
-        {"operators", json::array({
-            buildTrimOperator(12, 85, "in_out_cubic")
-        })}
-    };
+        {"asset", spec.assetName},
+        {"operators", json::array({{{"kind", "trim"},
+                                    {"target", "peak_line"},
+                                    {"params",
+                                     {{"start", 0.0},
+                                      {"end", 0.0},
+                                      {"animation",
+                                       {{"easing", spec.trim.easing},
+                                        {"keyframes",
+                                         json::array({keyframe(spec.trim.keyframes[0].first, 0.0),
+                                                      keyframe(spec.trim.keyframes[1].first, 1.0)})}}}}}}})}};
+    layers.push_back(std::move(svgLayer));
 
-    layers.push_back({
-        {"id", "mountain_peak_line"},
-        {"type", "shape"},
-        {"position", {width / 2.0, height / 2.0}},
-        {"size", {width, height}},
-        {"start_frame", 0},
-        {"duration_frames", kDefaultFrames},
-        {"screen_space", true},
-        {"shape", std::move(mountainShape)},
-        {"effects", json::array({
-            {
-                {"type", "glow"},
-                {"radius", 22.0},
-                {"intensity", 0.75},
-                {"color", hexRgba("#E8EBF0", 0.9)}
-            },
-            {
-                {"type", "bloom"},
-                {"threshold", 0.65},
-                {"radius", 18.0},
-                {"intensity", 0.5}
+    json markerLayer = {{"id", spec.markerId},
+                        {"type", "shape"},
+                        {"position", {0, 0}},
+                        {"size", {spec.markerSize, spec.markerSize}},
+                        {"start_frame", spec.marker.keyframes.front().first},
+                        {"duration_frames", frames - spec.marker.keyframes.front().first},
+                        {"shape", {{"type", "ellipse"}, {"fill", rgba(spec.markerFill)}}},
+                        {"follow_path",
+                         {{"path_commands", pathCommands(spec.pathPoints)},
+                          {"progress",
+                           {{"easing", spec.marker.easing},
+                            {"keyframes",
+                             json::array({keyframe(spec.marker.keyframes[0].first, 0.0),
+                                          keyframe(spec.marker.keyframes[1].first,
+                                                   spec.marker.keyframes[1].second)})}}},
+                          {"auto_orient", false},
+                          {"clamp_end", true}}}};
+    if (spec.markerGlow.enabled) {
+        markerLayer["effects"] = json::array({{{"type", "glow"},
+                                               {"radius", spec.markerGlow.radius},
+                                               {"intensity", spec.markerGlow.intensity},
+                                               {"color", rgba(spec.markerGlow.color)}}});
+    }
+    layers.push_back(std::move(markerLayer));
+
+    for (const CheckpointSpec& checkpoint : spec.checkpoints) {
+        layers.push_back({{"id", checkpoint.id},
+                          {"type", "shape"},
+                          {"position", {checkpoint.center.x, -checkpoint.center.y}},
+                          {"size", {checkpoint.radius * 2.0, checkpoint.radius * 2.0}},
+                          {"start_frame", checkpoint.startFrame},
+                          {"duration_frames", frames - checkpoint.startFrame},
+                          {"shape", {{"type", "ellipse"}, {"fill", rgba(checkpoint.fill)}}}});
+    }
+
+    json plan = {{"schema", "chronon.render-plan.v3"},
+                 {"version", 3},
+                 {"job_id", spec.jobId},
+                 {"canvas",
+                  {{"width", spec.width},
+                   {"height", spec.height},
+                   {"fps_num", spec.fps},
+                   {"fps_den", 1},
+                   {"duration_frames", frames}}},
+                 {"layers", std::move(layers)},
+                 {"output", {{"path", spec.jobId + ".mp4"}, {"format", "mp4"}}}};
+
+    if (spec.camera.enabled) {
+        json tracks = json::array();
+        auto pushTrack = [&](const char* property, const Track& track) {
+            if (track.keyframes.empty()) return;
+            json keyframes = json::array();
+            for (const auto& [frame, value] : track.keyframes) {
+                keyframes.push_back(keyframe(frame, value));
             }
-        })}
-    });
+            tracks.push_back({{"property", property},
+                              {"easing", track.easing},
+                              {"keyframes", std::move(keyframes)}});
+        };
+        pushTrack("camera.position.x", spec.camera.panX);
+        pushTrack("camera.position.y", spec.camera.panY);
+        pushTrack("camera.position.z", spec.camera.dollyZ);
+        plan["camera"] = {{"position", {0.0, 0.0, 0.0}},
+                          {"target", {0.0, 0.0, -500.0}},
+                          {"fov_degrees", 55.0},
+                          {"animation", {{"tracks", std::move(tracks)}}}};
+    }
 
-    // 3. Radiant Sun / Yellow Marker traversing the mountain line
-    layers.push_back({
-        {"id", "yellow_sun_marker"},
-        {"type", "shape"},
-        {"position", {0.0, 0.0}},
-        {"size", {44.0 * sx, 44.0 * sx}},
-        {"start_frame", 10},
-        {"duration_frames", kDefaultFrames - 10},
-        {"screen_space", true},
-        {"shape", {
-            {"type", "ellipse"},
-            {"fill", hexRgba("#FFDC1E")},
-            {"stroke", {
-                {"color", "#FFF2A0"},
-                {"width", 3.0}
-            }}
-        }},
-        {"follow_path", buildFollowPath(canvasPoints, 12, 95, 0.72)},
-        {"effects", json::array({
-            {
-                {"type", "glow"},
-                {"radius", 36.0},
-                {"intensity", 0.95},
-                {"color", hexRgba("#FFDC1E", 1.0)}
-            },
-            {
-                {"type", "bloom"},
-                {"threshold", 0.3},
-                {"radius", 32.0},
-                {"intensity", 0.85}
-            }
-        })}
-    });
-
-    // 4. Rising slope checkpoint marker (Red)
-    layers.push_back({
-        {"id", "red_rising_marker"},
-        {"type", "shape"},
-        {"position", {canvasPoints[2][0], canvasPoints[2][1]}},
-        {"size", {26.0 * sx, 26.0 * sx}},
-        {"start_frame", 35},
-        {"duration_frames", kDefaultFrames - 35},
-        {"screen_space", true},
-        {"shape", {
-            {"type", "ellipse"},
-            {"fill", hexRgba("#F02B3C")}
-        }},
-        {"effects", json::array({
-            {
-                {"type", "glow"},
-                {"radius", 24.0},
-                {"intensity", 0.85},
-                {"color", hexRgba("#F02B3C", 1.0)}
-            }
-        })}
-    });
-
-    // 5. Summit peak checkpoint marker (Red)
-    layers.push_back({
-        {"id", "red_summit_marker"},
-        {"type", "shape"},
-        {"position", {canvasPoints[5][0], canvasPoints[5][1]}},
-        {"size", {30.0 * sx, 30.0 * sx}},
-        {"start_frame", 68},
-        {"duration_frames", kDefaultFrames - 68},
-        {"screen_space", true},
-        {"shape", {
-            {"type", "ellipse"},
-            {"fill", hexRgba("#F02B3C")}
-        }},
-        {"effects", json::array({
-            {
-                {"type", "glow"},
-                {"radius", 30.0},
-                {"intensity", 0.9},
-                {"color", hexRgba("#F02B3C", 1.0)}
-            }
-        })}
-    });
-
-    return {
-        {"schema", "chronon.render-plan.v3"},
-        {"version", 3},
-        {"job_id", "documentary_svg_peak_parity"},
-        {"canvas", {
-            {"width", width},
-            {"height", height},
-            {"fps_num", kDefaultFps},
-            {"fps_den", 1},
-            {"duration_frames", kDefaultFrames}
-        }},
-        {"layers", std::move(layers)},
-        {"output", {
-            {"path", "output/documentary_svg_peak_parity.mp4"},
-            {"format", "mp4"},
-            {"codec", "h264"}
-        }}
-    };
+    return plan;
 }
 
-// Generate the 2.5D Neon Essay Scene Plan
-inline json generateNeonEssay25DPlan(int width = kDefaultWidth, int height = kDefaultHeight) {
+// The 2.5D Neon Essay scene plan (camera + DoF demo). Self-contained: it
+// carries no peak-scene geometry and shares no data with the SVG asset.
+inline json generateNeonEssay25DPlan(int width, int height) {
     json layers = json::array();
 
-    // Deep dark field
-    layers.push_back({
-        {"id", "bg"},
-        {"type", "color"},
-        {"color", rgba(0.015, 0.015, 0.025, 1.0)},
-        {"position", {0, 0}},
-        {"size", {width, height}},
-        {"start_frame", 0},
-        {"duration_frames", 210},
-        {"screen_space", true},
-        {"effects", json::array({
-            {
-                {"type", "vignette"},
-                {"radius", 0.90},
-                {"softness", 0.5},
-                {"amount", 0.4}
-            }
-        })}
-    });
+    layers.push_back({{"id", "bg"},
+                      {"type", "color"},
+                      {"color", json::array({0.015, 0.015, 0.025, 1.0})},
+                      {"position", {0, 0}},
+                      {"size", {width, height}},
+                      {"start_frame", 0},
+                      {"duration_frames", 210},
+                      {"screen_space", true},
+                      {"effects", json::array({{{"type", "vignette"},
+                                                {"radius", 0.90},
+                                                {"softness", 0.5},
+                                                {"amount", 0.4}}})}});
 
-    // Camera with pan and dolly tracks
     json camTracks = json::array();
-    // Pan X
-    camTracks.push_back({
-        {"property", "camera.position.x"},
-        {"easing", "in_out_cubic"},
-        {"keyframes", json::array({
-            {{"frame", 0}, {"value", 0.0}},
-            {{"frame", 60}, {"value", 0.0}},
-            {{"frame", 120}, {"value", 500.0}},
-            {{"frame", 210}, {"value", 350.0}}
-        })}
-    });
-    // Dolly Z
-    camTracks.push_back({
-        {"property", "camera.position.z"},
-        {"easing", "in_out_cubic"},
-        {"keyframes", json::array({
-            {{"frame", 0}, {"value", 0.0}},
-            {{"frame", 120}, {"value", 0.0}},
-            {{"frame", 210}, {"value", 450.0}}
-        })}
-    });
+    camTracks.push_back({{"property", "camera.position.x"},
+                         {"easing", "in_out_cubic"},
+                         {"keyframes", json::array({keyframe(0, 0.0), keyframe(60, 0.0),
+                                                    keyframe(120, 500.0), keyframe(210, 350.0)})}});
+    camTracks.push_back({{"property", "camera.position.z"},
+                         {"easing", "in_out_cubic"},
+                         {"keyframes", json::array({keyframe(0, 0.0), keyframe(120, 0.0),
+                                                    keyframe(210, 450.0)})}});
 
-    return {
-        {"schema", "chronon.render-plan.v3"},
-        {"version", 3},
-        {"job_id", "neon_essay_25d_dof_parity"},
-        {"canvas", {
-            {"width", width},
-            {"height", height},
-            {"fps_num", 30},
-            {"fps_den", 1},
-            {"duration_frames", 210}
-        }},
-        {"camera", {
-            {"position", {0.0, 0.0, 0.0}},
-            {"target", {0.0, 0.0, -500.0}},
-            {"fov_degrees", 55.0},
-            {"dof", {
-                {"enabled", true},
-                {"focus_distance", 500.0},
-                {"aperture", 2.8}
-            }},
-            {"animation", {{"tracks", std::move(camTracks)}}}
-        }},
-        {"layers", std::move(layers)},
-        {"output", {
-            {"path", "output/neon_essay_25d_dof_parity.mp4"},
-            {"format", "mp4"},
-            {"codec", "h264"}
-        }}
-    };
+    return {{"schema", "chronon.render-plan.v3"},
+            {"version", 3},
+            {"job_id", "neon_essay_25d_dof_parity"},
+            {"canvas",
+             {{"width", width},
+              {"height", height},
+              {"fps_num", 30},
+              {"fps_den", 1},
+              {"duration_frames", 210}}},
+            {"camera",
+             {{"position", {0.0, 0.0, 0.0}},
+              {"target", {0.0, 0.0, -500.0}},
+              {"fov_degrees", 55.0},
+              {"dof", {{"enabled", true}, {"focus_distance", 500.0}, {"aperture", 2.8}}},
+              {"animation", {{"tracks", std::move(camTracks)}}}}},
+            {"layers", std::move(layers)},
+            {"output",
+             {{"path", "neon_essay_25d_dof_parity.mp4"}, {"format", "mp4"}, {"codec", "h264"}}}};
 }
 
 } // namespace chronon::svg_parity
 
+namespace {
+
+struct Options {
+    std::filesystem::path outDir = "out/svg_parity";
+    std::string svg = "tools/vector_diagram/assets/documentary_svg_peak_v1.svg";
+    std::string preset = "catalog/documentary_svg_peak_v1.json";
+};
+
+void printUsage() {
+    std::cout << "Usage: svg_peak_parity_emitter [outDir] [--svg path] [--preset path]\n";
+}
+
+} // namespace
+
 int main(int argc, char** argv) {
+    using namespace chronon::svg_parity;
+
+    Options options;
     try {
+        for (int i = 1; i < argc; ++i) {
+            const std::string arg = argv[i];
+            if (arg == "--help" || arg == "-h") {
+                printUsage();
+                return 0;
+            }
+            if (arg == "--svg" && i + 1 < argc) {
+                options.svg = argv[++i];
+            } else if (arg == "--preset" && i + 1 < argc) {
+                options.preset = argv[++i];
+            } else if (!arg.empty() && arg[0] != '-') {
+                options.outDir = arg;
+            } else {
+                throw SceneError("unknown argument: " + arg);
+            }
+        }
+
         std::cout << "========================================================\n"
                   << "ChrononTemplate: SVG Parity Native C++ Emitter\n"
-                  << "Recreating Documentary SVG Peak & 2.5D Neon Essay\n"
+                  << "Scene source of truth: " << options.svg << " + " << options.preset << "\n"
                   << "========================================================\n";
 
-        fs::path outDir = "out/svg_parity";
-        if (argc >= 2) {
-            outDir = fs::path(argv[1]);
-        }
-        fs::create_directories(outDir);
+        fs::create_directories(options.outDir);
 
-        // 1. Emit Documentary SVG Peak Plan
-        json peakPlan = chronon::svg_parity::generateSvgPeakPlan();
-        fs::path peakPlanPath = outDir / "documentary_svg_peak_parity.plan.json";
+        // Documentary SVG Peak plan: every value comes from the shared module.
+        const SceneSpec spec = loadSceneSpec(options.svg, options.preset);
+        const json peakPlan = generateSvgPeakPlan(spec);
+        const fs::path peakPlanPath = options.outDir / (spec.jobId + ".plan.json");
         std::ofstream(peakPlanPath) << peakPlan.dump(2) << '\n';
         std::cout << "[SUCCESS] Emitted SVG Peak Parity Plan: " << peakPlanPath.string() << '\n';
 
-        // 2. Emit 2.5D Neon Essay Scene Plan
-        json essayPlan = chronon::svg_parity::generateNeonEssay25DPlan();
-        fs::path essayPlanPath = outDir / "neon_essay_25d_dof_parity.plan.json";
+        // 2.5D Neon Essay scene plan.
+        const json essayPlan = generateNeonEssay25DPlan(spec.width, spec.height);
+        const fs::path essayPlanPath = options.outDir / "neon_essay_25d_dof_parity.plan.json";
         std::ofstream(essayPlanPath) << essayPlan.dump(2) << '\n';
         std::cout << "[SUCCESS] Emitted 2.5D Neon Essay Parity Plan: " << essayPlanPath.string() << '\n';
 
         return 0;
-    } catch (const std::exception& e) {
+    } catch (const SceneError& e) {
         std::cerr << "[ERROR] " << e.what() << '\n';
+        return 1;
+    } catch (const std::exception& e) {
+        std::cerr << "[ERROR] unexpected failure: " << e.what() << '\n';
         return 1;
     }
 }
