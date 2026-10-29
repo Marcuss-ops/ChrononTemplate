@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="854" height="480" viewBox="0 0 854 480">
-  <path id="peak_line" d="M 106 366 L 219 278 L 262 245 L 304 245 L 383 190 L 458 118 L 594 302 L 706 226"
-        fill="none" stroke="#E8EBF0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle id="red_rising_marker" cx="262" cy="245" r="8" fill="#F02B3C"/>
-  <circle id="red_peak_marker" cx="458" cy="118" r="9" fill="#F02B3C"/>
-</svg>

@@ -105,6 +105,14 @@ target_include_directories(chronontemplate_emit_example_svg_recreation_plans PRI
 target_compile_features(chronontemplate_emit_example_svg_recreation_plans PRIVATE cxx_std_20)
 target_compile_options(chronontemplate_emit_example_svg_recreation_plans PRIVATE -Wall -Wextra)
 
+# Blend2D-backed tools need the imported blend2d::blend2d target. It comes
+# from a vcpkg/system Blend2D install (find_package below); when Blend2D is
+# absent the tools are skipped instead of breaking the whole configure step.
+find_package(blend2d CONFIG QUIET)
+if(NOT TARGET blend2d::blend2d)
+    message(STATUS "ChrononTemplate: blend2d not found; skipping the Blend2D vector tools")
+endif()
+
 # Native C++ SVG Parity Emitter (Documentary SVG Peak & Neon Essay)
 add_executable(chronontemplate_svg_peak_parity_emitter
         tools/vector_diagram/svg_peak_parity_emitter.cpp)
@@ -114,10 +122,24 @@ target_compile_features(chronontemplate_svg_peak_parity_emitter PRIVATE cxx_std_
 target_compile_options(chronontemplate_svg_peak_parity_emitter PRIVATE -Wall -Wextra)
 
 # Native C++ Blend2D Renderer for SVG Parity
-add_executable(chronontemplate_render_svg_parity_blend2d
-        tools/vector_diagram/render_svg_parity_blend2d.cpp)
-target_link_libraries(chronontemplate_render_svg_parity_blend2d PRIVATE blend2d::blend2d)
-target_compile_features(chronontemplate_render_svg_parity_blend2d PRIVATE cxx_std_20)
+if(TARGET blend2d::blend2d)
+    add_executable(chronontemplate_render_svg_parity_blend2d
+            tools/vector_diagram/render_svg_parity_blend2d.cpp)
+    target_include_directories(chronontemplate_render_svg_parity_blend2d PRIVATE
+            "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+    target_link_libraries(chronontemplate_render_svg_parity_blend2d PRIVATE blend2d::blend2d)
+    target_compile_features(chronontemplate_render_svg_parity_blend2d PRIVATE cxx_std_20)
+endif()
+
+# Morph reel (Van -> Thermometer -> Sun/Mountain) on the shared documentary style
+if(TARGET blend2d::blend2d)
+    add_executable(chronontemplate_render_anim1_van_mountain_blend2d
+            tools/vector_diagram/render_anim1_van_mountain_blend2d.cpp)
+    target_include_directories(chronontemplate_render_anim1_van_mountain_blend2d PRIVATE
+            "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+    target_link_libraries(chronontemplate_render_anim1_van_mountain_blend2d PRIVATE blend2d::blend2d)
+    target_compile_features(chronontemplate_render_anim1_van_mountain_blend2d PRIVATE cxx_std_20)
+endif()
 
 # Native C++ Emitter for Primitives Scaling & Parity Showcase
 add_executable(chronontemplate_emit_primitives_scaling_showcase_plan
@@ -128,20 +150,24 @@ target_compile_features(chronontemplate_emit_primitives_scaling_showcase_plan PR
 target_compile_options(chronontemplate_emit_primitives_scaling_showcase_plan PRIVATE -Wall -Wextra)
 
 # Native C++ Blend2D Renderer for Primitives Scaling & Parity Showcase
-add_executable(chronontemplate_render_primitives_scaling_showcase_blend2d
-        tools/vector_diagram/render_primitives_scaling_showcase_blend2d.cpp)
-target_link_libraries(chronontemplate_render_primitives_scaling_showcase_blend2d PRIVATE blend2d::blend2d)
-target_compile_features(chronontemplate_render_primitives_scaling_showcase_blend2d PRIVATE cxx_std_20)
+if(TARGET blend2d::blend2d)
+    add_executable(chronontemplate_render_primitives_scaling_showcase_blend2d
+            tools/vector_diagram/render_primitives_scaling_showcase_blend2d.cpp)
+    target_link_libraries(chronontemplate_render_primitives_scaling_showcase_blend2d PRIVATE blend2d::blend2d)
+    target_compile_features(chronontemplate_render_primitives_scaling_showcase_blend2d PRIVATE cxx_std_20)
+endif()
 
 # Native C++ 2.5D Tech & Space Icon Constellation Animation (Parity & Vector Icons)
 add_executable(chronontemplate_emit_icon_constellation_plan
         tools/vector_diagram/emit_icon_constellation_plan.cpp)
 target_compile_features(chronontemplate_emit_icon_constellation_plan PRIVATE cxx_std_20)
 
-add_executable(chronontemplate_render_icon_constellation_blend2d
-        tools/vector_diagram/render_icon_constellation_blend2d.cpp)
-target_link_libraries(chronontemplate_render_icon_constellation_blend2d PRIVATE blend2d::blend2d)
-target_compile_features(chronontemplate_render_icon_constellation_blend2d PRIVATE cxx_std_20)
+if(TARGET blend2d::blend2d)
+    add_executable(chronontemplate_render_icon_constellation_blend2d
+            tools/vector_diagram/render_icon_constellation_blend2d.cpp)
+    target_link_libraries(chronontemplate_render_icon_constellation_blend2d PRIVATE blend2d::blend2d)
+    target_compile_features(chronontemplate_render_icon_constellation_blend2d PRIVATE cxx_std_20)
+endif()
 
 # Native C++ Topological Path Morpher (Arc-Length Resampling & Optimal Pairing)
 add_executable(chronontemplate_test_topological_morpher
@@ -153,24 +179,28 @@ add_executable(chronontemplate_emit_topological_morph_showcase_plan
         tools/vector_diagram/emit_topological_morph_showcase_plan.cpp)
 target_compile_features(chronontemplate_emit_topological_morph_showcase_plan PRIVATE cxx_std_20)
 
-add_executable(chronontemplate_render_topological_morph_blend2d
-        tools/vector_diagram/render_topological_morph_blend2d.cpp)
-target_include_directories(chronontemplate_render_topological_morph_blend2d PRIVATE include)
-target_link_libraries(chronontemplate_render_topological_morph_blend2d PRIVATE blend2d::blend2d)
-target_compile_features(chronontemplate_render_topological_morph_blend2d PRIVATE cxx_std_20)
+if(TARGET blend2d::blend2d)
+    add_executable(chronontemplate_render_topological_morph_blend2d
+            tools/vector_diagram/render_topological_morph_blend2d.cpp)
+    target_include_directories(chronontemplate_render_topological_morph_blend2d PRIVATE include)
+    target_link_libraries(chronontemplate_render_topological_morph_blend2d PRIVATE blend2d::blend2d)
+    target_compile_features(chronontemplate_render_topological_morph_blend2d PRIVATE cxx_std_20)
+endif()
 
 # Native C++ Direct SVG Parser & Loader
-add_executable(chronontemplate_test_native_svg_parser
-        tools/vector_diagram/test_native_svg_parser.cpp)
-target_include_directories(chronontemplate_test_native_svg_parser PRIVATE include)
-target_link_libraries(chronontemplate_test_native_svg_parser PRIVATE blend2d::blend2d)
-target_compile_features(chronontemplate_test_native_svg_parser PRIVATE cxx_std_20)
+if(TARGET blend2d::blend2d)
+    add_executable(chronontemplate_test_native_svg_parser
+            tools/vector_diagram/test_native_svg_parser.cpp)
+    target_include_directories(chronontemplate_test_native_svg_parser PRIVATE include)
+    target_link_libraries(chronontemplate_test_native_svg_parser PRIVATE blend2d::blend2d)
+    target_compile_features(chronontemplate_test_native_svg_parser PRIVATE cxx_std_20)
 
-add_executable(chronontemplate_render_svg_direct_morph_blend2d
-        tools/vector_diagram/render_svg_direct_morph_blend2d.cpp)
-target_include_directories(chronontemplate_render_svg_direct_morph_blend2d PRIVATE include)
-target_link_libraries(chronontemplate_render_svg_direct_morph_blend2d PRIVATE blend2d::blend2d)
-target_compile_features(chronontemplate_render_svg_direct_morph_blend2d PRIVATE cxx_std_20)
+    add_executable(chronontemplate_render_svg_direct_morph_blend2d
+            tools/vector_diagram/render_svg_direct_morph_blend2d.cpp)
+    target_include_directories(chronontemplate_render_svg_direct_morph_blend2d PRIVATE include)
+    target_link_libraries(chronontemplate_render_svg_direct_morph_blend2d PRIVATE blend2d::blend2d)
+    target_compile_features(chronontemplate_render_svg_direct_morph_blend2d PRIVATE cxx_std_20)
+endif()
 
 add_executable(chronontemplate_emit_svg_grain_perlin_showcase
         tools/showcases/emit_svg_grain_perlin_showcase.cpp)
