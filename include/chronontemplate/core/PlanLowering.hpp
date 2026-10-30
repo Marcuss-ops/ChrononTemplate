@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace chronontemplate {
 
@@ -40,9 +41,22 @@ namespace chronontemplate {
             std::string jobId = "chronontemplate",
             std::string outputPath = "output.png");
 
+    /// Offline bake at the exact absolute frame times supplied by the render
+    /// job's shutter scheduler. The list must be non-empty and strictly
+    /// increasing. Only the camera is sampled at these times; layer tracks
+    /// still use the integer-frame bake and are approximate between frames.
+    [[nodiscard]] chronon3d::render_plan::RenderPlan lowerToRenderPlan(
+            TemplateScene& scene,
+            const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
+            std::string jobId,
+            std::string outputPath,
+            std::vector<double> cameraSampleFrames);
+
     /// Lower content/layer state for runtime rendering and attach a camera
     /// provider backed by an immutable snapshot of the TemplateScene rig.
-    /// `cameraFingerprint` must stably identify all camera authoring inputs.
+    /// For a parented rig, a dedicated MotionScene project-file snapshot owns
+    /// the hierarchy; unsupported project-file data fails closed. The caller's
+    /// `cameraFingerprint` must identify the rig, hierarchy and timing.
     /// Unlike the offline lowering API, this omits dense camera keyframes.
     [[nodiscard]] RuntimeRenderPlan lowerToRuntimeRenderPlan(
             TemplateScene& scene,
