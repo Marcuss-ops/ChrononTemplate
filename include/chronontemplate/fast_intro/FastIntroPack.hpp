@@ -71,6 +71,65 @@ namespace chronontemplate::fast_intro {
         return addRetroStatCollage(scene, spec);
     }
 
+    // ── Fast Intro v2: one unified parametric family ─────────────────────
+    //
+    // Replaces the four diverging one-offs (ivory v1, retro dual-source,
+    // 24s match-cut script, hard-coded disaster chapter) with a single
+    // spec + recipe enum. Every recipe:
+    //  - hooks in frames 0-12 (no dead openings),
+    //  - carries a slow camera push (no static plates),
+    //  - caps scales to [0.02, 3.5] (no singular transforms, no 8x GPU spikes),
+    //  - uses Inter-Black by default (legible at 854x480),
+    //  - lays out relative to cx/cy so 1920x1080 and 1080x1920 both work.
+
+    enum class FastIntroRecipe {
+        OpeningPlate,  // dark cinematic successor of fast_intro_v1
+        PunchStat,     // single-source successor of retro_stat_collage
+        WhipMatch,     // parametric successor of build_match_cut_plan.py
+        ChapterCard    // parametric successor of emit_disaster_chapter_intro
+    };
+
+    struct FastIntroV2Spec {
+        FastIntroRecipe recipe{FastIntroRecipe::OpeningPlate};
+        std::string name{"fast_intro_v2_opening"};
+        std::string font{"ChrononTemplate/assets/fonts/Inter-Black.ttf"};
+        int durationFrames{150};
+        float width{1920.f};
+        float height{1080.f};
+        // OpeningPlate / ChapterCard copy
+        std::string kicker{"CHRONON TEMPLATE"};
+        std::string title{"THE STORY SO FAR"};
+        std::string subtitle{"A short line that sets up the story."};
+        std::string chapterLabel{""};  // non-empty => chapter band rendered
+        std::vector<std::string> topics{};  // 0-4 pill chips (flexible, was exactly 3)
+        std::string accent{"#FF4D2E"};
+        std::string ground{"#0B0B0E"};
+        // PunchStat copy
+        std::string eraTitle{"1990s"};
+        std::string statistic{"37.7 M"};
+        std::string closingTitle{""};
+        std::string collagePath{"ChrononTemplate/assets/images/retro_collage.png"};
+        std::string bgCenterColor{"#FFD24A"};
+        std::string bgOuterColor{"#0E0202"};
+        // WhipMatch copy
+        std::vector<std::string> plates{};  // image assets, 4-16
+        int whipQuickFrames{8};
+        int whipHoldFrames{15};
+        float cameraPush{160.f};
+    };
+
+    struct FastIntroV2Choice {
+        FastIntroRecipe recipe{};
+        std::string id{};
+        std::string label{};
+        int defaultDuration{150};
+    };
+
+    [[nodiscard]] std::vector<FastIntroV2Choice> fastIntroV2Choices();
+    [[nodiscard]] int fastIntroV2DurationFrames(const FastIntroV2Spec& spec);
+    [[nodiscard]] LayerHandle& addFastIntroV2(TemplateScene& scene,
+                                              const FastIntroV2Spec& spec);
+
 } // namespace chronontemplate::fast_intro
 
 #endif // CHRONONTEMPLATE_FAST_INTRO_PACK_HPP

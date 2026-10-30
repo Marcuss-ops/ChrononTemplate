@@ -11,6 +11,253 @@ inline void line(BLContext& c, double x1, double y1, double x2, double y2,
                  BLRgba32 color, double width = 5.0) {
     c.setStrokeStyle(color); c.setStrokeWidth(width); c.strokeLine(BLPoint(x1,y1), BLPoint(x2,y2));
 }
+
+// ── Visual Venture Inked Brushed Line with authentic Line-Boil (15fps) ────────
+inline void brushedLine(BLContext& c, double x1, double y1, double x2, double y2,
+                        BLRgba32 color, double width = 6.0, int frameIdx = 0, double wobbleAmp = 3.5) {
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    double dist = std::hypot(dx, dy);
+    if (dist < 1.0) return;
+
+    double perpX = -dy / dist;
+    double perpY = dx / dist;
+
+    // Step-printed line boil every 2 frames (~15fps hand-drawn cadence)
+    uint32_t boilSeed = static_cast<uint32_t>((frameIdx / 2) * 997 + static_cast<int>(x1 * 13.0 + y1 * 7.0));
+    int numSegs = std::max(4, static_cast<int>(dist / 24.0));
+
+    BLPath path;
+    path.moveTo(x1, y1);
+
+    for (int i = 1; i < numSegs; ++i) {
+        double frac = static_cast<double>(i) / numSegs;
+        double bx = x1 + dx * frac;
+        double by = y1 + dy * frac;
+
+        // Sine envelope to anchor endpoints
+        double edgeDamp = std::sin(frac * 3.1415926535);
+
+        boilSeed = boilSeed * 1664525u + 1013904223u;
+        double rnd = (static_cast<double>(boilSeed & 0xFFFF) / 32768.0) - 1.0;
+        double wobble = (std::sin(frac * 8.0 + boilSeed * 0.05) * 0.7 + rnd * 0.6) * wobbleAmp * edgeDamp;
+
+        path.lineTo(bx + perpX * wobble, by + perpY * wobble);
+    }
+    path.lineTo(x2, y2);
+
+    // Layer 1: Soft ink feathering / bleed
+    c.setStrokeStyle(BLRgba32(color.r(), color.g(), color.b(), static_cast<uint32_t>(color.a() * 0.45)));
+    c.setStrokeWidth(width * 1.5);
+    c.strokePath(path);
+
+    // Layer 2: Core ink stroke
+    c.setStrokeStyle(color);
+    c.setStrokeWidth(width);
+    c.strokePath(path);
+}
+
+// ── Visual Venture Inked Brushed Box with Line-Boil ───────────────────────────
+inline void brushedBox(BLContext& c, double x, double y, double w, double h,
+                       BLRgba32 color, double width = 6.0, int frameIdx = 0, double wobbleAmp = 3.5) {
+    brushedLine(c, x, y, x + w, y, color, width, frameIdx, wobbleAmp);
+    brushedLine(c, x + w, y, x + w, y + h, color, width, frameIdx + 1, wobbleAmp);
+    brushedLine(c, x + w, y + h, x, y + h, color, width, frameIdx + 2, wobbleAmp);
+    brushedLine(c, x, y + h, x, y, color, width, frameIdx + 3, wobbleAmp);
+}
+
+// ── Visual Venture Corner Brackets [ ] with Rotation ──────────────────────────
+inline void brushedReticle(BLContext& c, double cx, double cy, double halfSize,
+                           double armLen, double angleDeg, BLRgba32 color,
+                           double width = 6.0, int frameIdx = 0, double wobbleAmp = 3.0) {
+    double rad = angleDeg * 3.1415926535 / 180.0;
+    double cosA = std::cos(rad);
+    double sinA = std::sin(rad);
+
+    auto rotPt = [&](double px, double py) -> BLPoint {
+        return BLPoint(px * cosA - py * sinA + cx, px * sinA + py * cosA + cy);
+    };
+
+    // TL
+    BLPoint p0 = rotPt(-halfSize, -halfSize);
+    BLPoint p0_r = rotPt(-halfSize + armLen, -halfSize);
+    BLPoint p0_d = rotPt(-halfSize, -halfSize + armLen);
+    brushedLine(c, p0.x, p0.y, p0_r.x, p0_r.y, color, width, frameIdx, wobbleAmp);
+    brushedLine(c, p0.x, p0.y, p0_d.x, p0_d.y, color, width, frameIdx + 1, wobbleAmp);
+
+    // TR
+    BLPoint p1 = rotPt(halfSize, -halfSize);
+    BLPoint p1_l = rotPt(halfSize - armLen, -halfSize);
+    BLPoint p1_d = rotPt(halfSize, -halfSize + armLen);
+    brushedLine(c, p1.x, p1.y, p1_l.x, p1_l.y, color, width, frameIdx + 2, wobbleAmp);
+    brushedLine(c, p1.x, p1.y, p1_d.x, p1_d.y, color, width, frameIdx + 3, wobbleAmp);
+
+    // BR
+    BLPoint p2 = rotPt(halfSize, halfSize);
+    BLPoint p2_l = rotPt(halfSize - armLen, halfSize);
+    BLPoint p2_u = rotPt(halfSize, halfSize - armLen);
+    brushedLine(c, p2.x, p2.y, p2_l.x, p2_l.y, color, width, frameIdx + 4, wobbleAmp);
+    brushedLine(c, p2.x, p2.y, p2_u.x, p2_u.y, color, width, frameIdx + 5, wobbleAmp);
+
+    // BL
+    BLPoint p3 = rotPt(-halfSize, halfSize);
+    BLPoint p3_r = rotPt(-halfSize + armLen, halfSize);
+    BLPoint p3_u = rotPt(-halfSize, halfSize - armLen);
+    brushedLine(c, p3.x, p3.y, p3_r.x, p3_r.y, color, width, frameIdx + 6, wobbleAmp);
+    brushedLine(c, p3.x, p3.y, p3_u.x, p3_u.y, color, width, frameIdx + 7, wobbleAmp);
+}
+
+// ── 3D Radial Shaded Celestial Sphere with Specular Highlight ─────────────────
+inline void shadedSphere(BLContext& c, double cx, double cy, double r,
+                         BLRgba32 baseColor, double lightXOffset = -0.35, double lightYOffset = -0.45) {
+    if (r <= 2.0) {
+        c.setFillStyle(baseColor);
+        c.fillCircle(BLCircle(cx, cy, r));
+        return;
+    }
+
+    double lx = cx + lightXOffset * r;
+    double ly = cy + lightYOffset * r;
+
+    // Outer rim glow
+    c.setStrokeStyle(BLRgba32(baseColor.r(), baseColor.g(), baseColor.b(), 60));
+    c.setStrokeWidth(4.0);
+    c.strokeCircle(BLCircle(cx, cy, r + 3.0));
+
+    // Multi-pass gradient stepping for 3D sphere volume
+    int steps = static_cast<int>(r);
+    for (int s = steps; s >= 1; s -= 2) {
+        double frac = static_cast<double>(s) / r;
+        double stepCx = lx + (cx - lx) * frac;
+        double stepCy = ly + (cy - ly) * frac;
+        double factor = std::pow(1.0 - frac, 1.3);
+
+        uint32_t cr = std::min(255, static_cast<int>(baseColor.r() * (0.35 + 0.65 * (1.0 - frac * 0.8)) + 255.0 * factor * 0.95));
+        uint32_t cg = std::min(255, static_cast<int>(baseColor.g() * (0.35 + 0.65 * (1.0 - frac * 0.8)) + 255.0 * factor * 0.95));
+        uint32_t cb = std::min(255, static_cast<int>(baseColor.b() * (0.35 + 0.65 * (1.0 - frac * 0.8)) + 255.0 * factor * 0.95));
+
+        c.setFillStyle(BLRgba32(cr, cg, cb, 255));
+        c.fillCircle(BLCircle(stepCx, stepCy, s));
+    }
+
+    // Specular pinpoint glint
+    c.setFillStyle(BLRgba32(255, 255, 255, 240));
+    c.fillCircle(BLCircle(lx - r * 0.12, ly - r * 0.12, std::max(2.0, r * 0.22)));
+}
+
+// ── Volumetric Conical Light Beam with Radial Falloff ─────────────────────────
+inline void volumetricLightCone(BLContext& c, double apexX, double apexY,
+                                double bottomWidth, double height,
+                                BLRgba32 beamColor, double pulse = 1.0) {
+    BLPath cone;
+    cone.moveTo(apexX, apexY);
+    cone.lineTo(apexX + bottomWidth * 0.5 * pulse, apexY + height);
+    cone.lineTo(apexX - bottomWidth * 0.5 * pulse, apexY + height);
+    cone.close();
+
+    // Outer soft beam
+    c.setFillStyle(BLRgba32(beamColor.r(), beamColor.g(), beamColor.b(), static_cast<uint32_t>(beamColor.a() * 0.35)));
+    c.fillPath(cone);
+
+    // Inner bright core beam
+    BLPath innerCone;
+    innerCone.moveTo(apexX, apexY);
+    innerCone.lineTo(apexX + bottomWidth * 0.22 * pulse, apexY + height);
+    innerCone.lineTo(apexX - bottomWidth * 0.22 * pulse, apexY + height);
+    innerCone.close();
+
+    c.setFillStyle(BLRgba32(beamColor.r(), beamColor.g(), beamColor.b(), static_cast<uint32_t>(beamColor.a() * 0.65)));
+    c.fillPath(innerCone);
+
+    // Apex emitter
+    c.setFillStyle(BLRgba32(255, 255, 255, 240));
+    c.fillCircle(BLCircle(apexX, apexY, 24.0));
+    c.setStrokeStyle(BLRgba32(255, 255, 255, 90));
+    c.setStrokeWidth(6.0);
+    c.strokeCircle(BLCircle(apexX, apexY, 48.0));
+}
+
+// ── Target Lock-on Reticle with Pulsing Rings & Crosshairs ────────────────────
+inline void targetLockon(BLContext& c, double cx, double cy, double radius,
+                         BLRgba32 color, int frameIdx = 0) {
+    double pulse = 1.0 + 0.12 * std::sin(frameIdx * 0.4);
+    double r = radius * pulse;
+
+    // Rings
+    c.setStrokeStyle(color);
+    c.setStrokeWidth(5.0);
+    c.strokeCircle(BLCircle(cx, cy, r));
+
+    c.setStrokeStyle(BLRgba32(color.r(), color.g(), color.b(), 140));
+    c.setStrokeWidth(2.5);
+    c.strokeCircle(BLCircle(cx, cy, std::max(2.0, r - 8.0)));
+
+    // Crosshairs
+    double tick = 16.0;
+    line(c, cx - r - tick, cy, cx - r, cy, color, 5.0);
+    line(c, cx + r, cy, cx + r + tick, cy, color, 5.0);
+    line(c, cx, cy - r - tick, cx, cy - r, color, 5.0);
+    line(c, cx, cy + r, cx, cy + r + tick, color, 5.0);
+}
+
+// ── Dynamic Continuous Film Grain & Archival Dust/Scratches ───────────────────
+inline void applyContinuousFilmGrain(BLImage& img, int frameIdx, float intensity = 12.0f, int dustCount = 30) {
+    BLImageData data;
+    if (img.getData(&data) != BL_SUCCESS) return;
+
+    int w = data.size.w;
+    int h = data.size.h;
+    uint8_t* pixels = static_cast<uint8_t*>(data.pixelData);
+    intptr_t stride = data.stride;
+
+    uint32_t seed = static_cast<uint32_t>(frameIdx * 104729u + 777u);
+
+    // Fast deterministic pseudo-Gaussian grain modulation
+    for (int y = 0; y < h; ++y) {
+        uint32_t* row = reinterpret_cast<uint32_t*>(pixels + y * stride);
+        for (int x = 0; x < w; ++x) {
+            seed = seed * 1664525u + 1013904223u;
+            int r1 = static_cast<int>(seed & 0xFF);
+            seed = seed * 1664525u + 1013904223u;
+            int r2 = static_cast<int>(seed & 0xFF);
+            seed = seed * 1664525u + 1013904223u;
+            int r3 = static_cast<int>(seed & 0xFF);
+
+            int noise = static_cast<int>(((r1 + r2 + r3) / 3 - 128) * (intensity / 128.0f));
+
+            uint32_t pix = row[x];
+            int b = std::clamp(static_cast<int>(pix & 0xFF) + noise, 0, 255);
+            int g = std::clamp(static_cast<int>((pix >> 8) & 0xFF) + noise, 0, 255);
+            int r = std::clamp(static_cast<int>((pix >> 16) & 0xFF) + noise, 0, 255);
+            uint32_t a = (pix >> 24) & 0xFF;
+
+            row[x] = static_cast<uint32_t>(b | (g << 8) | (r << 16) | (a << 24));
+        }
+    }
+
+    // Dynamic archival dust hairs and flecks
+    BLContext ctx(img);
+    for (int i = 0; i < dustCount; ++i) {
+        seed = seed * 1664525u + 1013904223u;
+        double sx = static_cast<double>(seed % w);
+        seed = seed * 1664525u + 1013904223u;
+        double sy = static_cast<double>(seed % h);
+        seed = seed * 1664525u + 1013904223u;
+        uint32_t bright = 140u + (seed % 95u);
+
+        if ((seed % 10) > 5) {
+            seed = seed * 1664525u + 1013904223u;
+            double hx2 = sx + static_cast<double>(static_cast<int>(seed % 17) - 8);
+            seed = seed * 1664525u + 1013904223u;
+            double hy2 = sy + static_cast<double>(static_cast<int>(seed % 17) - 8);
+            line(ctx, sx, sy, hx2, hy2, BLRgba32(bright, bright, bright, 220), 2.0);
+        } else {
+            ctx.setFillStyle(BLRgba32(bright, bright, bright, 230));
+            ctx.fillCircle(BLCircle(sx, sy, 2.0));
+        }
+    }
+}
+
 inline void glowLine(BLContext& c, double x1, double y1, double x2, double y2,
                      BLRgba32 color, double width = 10.0) {
     line(c,x1,y1,x2,y2,BLRgba32(color.r(),color.g(),color.b(),28),width*5.0);

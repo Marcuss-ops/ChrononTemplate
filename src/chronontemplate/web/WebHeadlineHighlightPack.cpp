@@ -1,6 +1,7 @@
 // ChrononTemplate web.WebHeadlineHighlightPack — native C++ highlighter looks.
 //
-// All three plans (statement page, marker sweep, stepped highlight) are pure
+// All six plans (statement page, marker sweep, stepped highlight, breaking
+// ticker, live-blog feed, quote card) are pure
 // functions of the spec: every layer is authored as render-plan V3 data with
 // the conventions proven by the web-page packs (camera-transformed layer
 // positions are centers in top-left-down px, camera z is negative behind the
@@ -179,6 +180,9 @@ namespace chronontemplate::web {
             case HeadlineHighlightRecipe::StatementPage: return "statement";
             case HeadlineHighlightRecipe::MarkerSweep: return "marker_sweep";
             case HeadlineHighlightRecipe::SteppedHighlight: return "stepped_highlight";
+            case HeadlineHighlightRecipe::BreakingTicker: return "breaking_ticker";
+            case HeadlineHighlightRecipe::LiveBlogFeed: return "live_blog";
+            case HeadlineHighlightRecipe::QuoteCard: return "quote_card";
         }
         return "unknown";
     }
@@ -199,12 +203,73 @@ namespace chronontemplate::web {
         if (durationFrames < 60 || durationFrames > 600)
             fail("durationFrames must be in [60, 600]");
         for (const std::string* text : { &kicker, &highlightText, &dateline, &phrase,
+                                         &tickerText, &attribution, &source,
                                          &siteName, &paperColor, &inkColor, &highlightColor }) {
             if (text->find('\n') != std::string::npos) fail("fields must not contain newlines");
         }
         if (recipe == HeadlineHighlightRecipe::MarkerSweep) {
             if (phrase.empty()) fail("phrase is required for the marker sweep");
             if (phrase.size() > 48) fail("phrase is too long (<= 48 chars)");
+            return;
+        }
+        if (recipe == HeadlineHighlightRecipe::BreakingTicker) {
+            if (kicker.empty() || kicker.size() > 16) fail("breaking kicker must be 1..16 chars");
+            if (headlineLines.empty() || headlineLines.size() > 2)
+                fail("breaking ticker needs one or two headline lines");
+            for (const std::string& line : headlineLines) {
+                if (line.empty() || line.size() > 30) fail("breaking headline lines must be 1..30 chars");
+                if (line.find('\n') != std::string::npos) fail("fields must not contain newlines");
+            }
+            if (highlightText.empty() || highlightText.size() > 64)
+                fail("highlightText is required (<= 64 chars)");
+            bool found = false;
+            for (const std::string& line : headlineLines)
+                found = found || line.find(highlightText) != std::string::npos;
+            if (!found) fail("breaking highlight must appear in the headline");
+            if (tickerText.empty() || tickerText.size() > 90) fail("tickerText must be 1..90 chars");
+            if (dateline.empty() || dateline.size() > 32) fail("breaking timestamp must be 1..32 chars");
+            return;
+        }
+        if (recipe == HeadlineHighlightRecipe::LiveBlogFeed) {
+            if (kicker.empty() || kicker.size() > 24) fail("live-blog title must be 1..24 chars");
+            if (bodyLines.size() < 2 || bodyLines.size() > 4)
+                fail("live-blog needs two to four entries");
+            if (entryTimes.size() != bodyLines.size())
+                fail("live-blog needs one timestamp per entry");
+            for (const std::string& line : bodyLines) {
+                if (line.empty() || line.size() > 80) fail("live-blog entries must be 1..80 chars");
+                if (line.find('\n') != std::string::npos) fail("fields must not contain newlines");
+            }
+            for (const std::string& time : entryTimes) {
+                if (time.empty() || time.size() > 16) fail("live-blog timestamps must be 1..16 chars");
+                if (time.find('\n') != std::string::npos) fail("fields must not contain newlines");
+            }
+            if (highlightText.empty() || highlightText.size() > 64)
+                fail("highlightText is required (<= 64 chars)");
+            bool found = false;
+            for (const std::string& line : bodyLines)
+                found = found || line.find(highlightText) != std::string::npos;
+            if (!found) fail("live-blog highlight must appear in an entry");
+            if (dateline.empty() || dateline.size() > 40)
+                fail("live-blog updated line must be 1..40 chars");
+            return;
+        }
+        if (recipe == HeadlineHighlightRecipe::QuoteCard) {
+            if (quoteLines.empty() || quoteLines.size() > 3)
+                fail("quote needs one to three lines");
+            for (const std::string& line : quoteLines) {
+                if (line.empty() || line.size() > 44) fail("quote lines must be 1..44 chars");
+                if (line.find('\n') != std::string::npos) fail("fields must not contain newlines");
+            }
+            if (highlightText.empty() || highlightText.size() > 64)
+                fail("highlightText is required (<= 64 chars)");
+            bool found = false;
+            for (const std::string& line : quoteLines)
+                found = found || line.find(highlightText) != std::string::npos;
+            if (!found) fail("quote highlight must appear in the quote");
+            if (attribution.empty() || attribution.size() > 60)
+                fail("quote attribution must be 1..60 chars");
+            if (source.size() > 60) fail("quote source is too long (<= 60 chars)");
             return;
         }
         if (headlineLines.empty() || headlineLines.size() > 4)
@@ -277,8 +342,190 @@ namespace chronontemplate::web {
                 layers.push_back(textLayer("sweep_dateline", spec.dateline, 150.f, 940.f, 22.f,
                                            kRegular, ink, duration, 2.8f, 2));
             }
+        } else if (spec.recipe == HeadlineHighlightRecipe::BreakingTicker) {
+            // ── dark breaking-news page: red kicker bar, stepped headline, ticker tape
+            const std::string paper = spec.paperColor.empty() ? "#0B1220" : spec.paperColor;
+            const std::string ink = spec.inkColor.empty() ? "#F2F5FA" : spec.inkColor;
+            const std::string marker = spec.highlightColor.empty() ? "#FFD23F" : spec.highlightColor;
+            const std::string alert = "#E5484D";
+
+            layers.push_back({ { "id", "bb_ground" }, { "type", "color" },
+                               { "color", Material::rgba(paper) },
+                               { "size", Json::array({ kW, kH }) }, { "screen_space", true },
+                               { "start_frame", 0 }, { "duration_frames", duration } });
+
+            layers.push_back(rect("bb_kicker_bar", 0.f, 0.f, static_cast<float>(kW), 96.f, alert, 1.f));
+            layers.push_back(textLayer("bb_kicker", spec.kicker, 96.f, 26.f, 34.f,
+                                       kBold, "#FFFFFF", duration, 0.f, 0));
+            const float bbDateW = estimateWidth(spec.dateline, 24.f);
+            layers.push_back(textLayer("bb_timestamp", spec.dateline,
+                                       static_cast<float>(kW) - 96.f - bbDateW, 32.f,
+                                       24.f, kRegular, ink, duration, 2.4f, 1));
+
+            const float bbSize = 96.f;
+            const float bbStep = bbSize * 1.30f;
+            const float bbTop = 300.f;
+            float bbLeft = 0.f, bbRight = 0.f;
+            int bbLine = -1;
+            for (std::size_t i = 0; i < spec.headlineLines.size(); ++i) {
+                layers.push_back(textLayer("bb_headline_" + std::to_string(i), spec.headlineLines[i],
+                                           150.f, bbTop + static_cast<float>(i) * bbStep,
+                                           bbSize, kBold, ink, duration, 0.f, -1));
+                const std::size_t found = spec.headlineLines[i].find(spec.highlightText);
+                if (found != std::string::npos) {
+                    bbLine = static_cast<int>(i);
+                    bbLeft = 150.f + estimateWidth(spec.headlineLines[i].substr(0, found), bbSize);
+                    bbRight = 150.f + estimateWidth(
+                            spec.headlineLines[i].substr(0, found + spec.highlightText.size()), bbSize);
+                }
+            }
+            if (bbLine >= 0) {
+                const int begin = std::max(12, duration / 5);
+                const int span = std::max(12, duration / 4);
+                const float blockTop = bbTop + static_cast<float>(bbLine) * bbStep + bbSize * 0.18f;
+                const float blockH = bbSize * 1.02f;
+                const float blockW = bbRight - bbLeft + 28.f;
+                layers.push_back(rect("bb_highlight_top", bbLeft - 14.f, blockTop,
+                                      blockW, blockH * 0.55f, marker, 0.95f,
+                                      highlightSweepTracks(blockW, begin, span)));
+                layers.push_back(rect("bb_highlight_step", bbLeft - 14.f,
+                                      blockTop + blockH * 0.52f, blockW * 0.86f,
+                                      blockH * 0.55f, marker, 0.95f,
+                                      highlightSweepTracks(blockW, begin + 5, span)));
+            }
+
+            // the ticker tape: a hairline rule plus one muted line sliding in
+            layers.push_back(rect("bb_ticker_rule", 0.f, 918.f, static_cast<float>(kW), 2.f, ink, 0.28f));
+            Json tape = textLayer("bb_ticker_tape", spec.tickerText, 96.f, 948.f,
+                                  30.f, kRegular, ink, duration, 2.4f, -1);
+            tape["animation"] = { { "tracks", Json::array({
+                easedTrack("opacity", 0.f, 1.f, 3, 26, "out_cubic"),
+                easedTrack("position_x", 900.f, 0.f, 3, 44, "out_cubic") }) } };
+            layers.push_back(std::move(tape));
+        } else if (spec.recipe == HeadlineHighlightRecipe::LiveBlogFeed) {
+            // ── live-blog feed: LIVE header, timestamped entries, marked entry
+            const std::string paper = spec.paperColor.empty() ? "#F7F4EC" : spec.paperColor;
+            const std::string ink = spec.inkColor.empty() ? "#1F1B16" : spec.inkColor;
+            const std::string marker = spec.highlightColor.empty() ? "#FFD23F" : spec.highlightColor;
+            const std::string live = "#D93025";
+
+            layers.push_back({ { "id", "live_ground" }, { "type", "color" },
+                               { "color", Material::rgba(paper) },
+                               { "size", Json::array({ kW, kH }) }, { "screen_space", true },
+                               { "start_frame", 0 }, { "duration_frames", duration } });
+
+            // blinking LIVE dot: deterministic on/off keys across the clip
+            Json dotKeys = Json::array();
+            {
+                bool on = true;
+                for (int f = 0; f < duration;) {
+                    const int next = std::min(duration - 1, f + (f == 0 ? 18 : 17));
+                    dotKeys.push_back({ { "frame", f }, { "value", on ? 1.0 : 0.0 } });
+                    dotKeys.push_back({ { "frame", next }, { "value", on ? 1.0 : 0.0 } });
+                    f = next + 1;
+                    on = !on;
+                }
+            }
+            layers.push_back(rect("live_dot", 150.f, 118.f, 22.f, 22.f, live, 1.f,
+                                  Json::array({{ { "property", "opacity" }, { "easing", "linear" },
+                                                { "keyframes", std::move(dotKeys) } }})));
+            layers.push_back(textLayer("live_label", "LIVE", 188.f, 112.f, 32.f,
+                                       kBold, live, duration, 0.f, 0));
+            layers.push_back(textLayer("live_title", spec.kicker, 300.f, 112.f, 32.f,
+                                       kBold, ink, duration, 2.f, 1));
+            const float updW = estimateWidth(spec.dateline, 22.f);
+            layers.push_back(textLayer("live_updated", spec.dateline,
+                                       static_cast<float>(kW) - 150.f - updW, 118.f,
+                                       22.f, kRegular, ink, duration, 2.4f, 2));
+            layers.push_back(rect("live_header_rule", 150.f, 190.f, 1620.f, 2.f, ink, 0.18f));
+
+            const float entrySize = 34.f;
+            const int begin = std::max(12, duration / 5);
+            const int span = std::max(12, duration / 4);
+            float y = 250.f;
+            for (std::size_t i = 0; i < spec.bodyLines.size(); ++i) {
+                const int slot = 2 + static_cast<int>(i) * 2;
+                layers.push_back(textLayer("live_time_" + std::to_string(i), spec.entryTimes[i],
+                                           150.f, y, 22.f, kBold, ink, duration, 2.4f, slot));
+                layers.push_back(textLayer("live_entry_" + std::to_string(i), spec.bodyLines[i],
+                                           150.f, y + 34.f, entrySize, kRegular, ink,
+                                           duration, 0.f, slot));
+                const std::size_t found = spec.bodyLines[i].find(spec.highlightText);
+                if (found != std::string::npos) {
+                    const float hl = 150.f + estimateWidth(spec.bodyLines[i].substr(0, found), entrySize);
+                    const float hr = 150.f + estimateWidth(
+                            spec.bodyLines[i].substr(0, found + spec.highlightText.size()), entrySize);
+                    const float bw = hr - hl + 24.f;
+                    layers.push_back(rect("live_marker_" + std::to_string(i), hl - 12.f,
+                                          y + 34.f + entrySize * 0.18f, bw, entrySize * 1.02f,
+                                          marker, 0.92f, highlightSweepTracks(bw, begin, span)));
+                }
+                if (i + 1 < spec.bodyLines.size())
+                    layers.push_back(rect("live_rule_" + std::to_string(i), 150.f, y + 100.f,
+                                          1620.f, 1.5f, ink, 0.10f));
+                y += 132.f;
+            }
+            layers.push_back(rect("live_footer_rule", 150.f, y - 32.f, 1620.f, 2.f, ink, 0.18f));
+            layers.push_back(textLayer("live_footer", "Auto-refresh on", 150.f, y - 8.f,
+                                       22.f, kRegular, ink, duration, 2.4f, 6));
+        } else if (spec.recipe == HeadlineHighlightRecipe::QuoteCard) {
+            // ── centered quote card: serif italic quote, coral key phrase, credit
+            const std::string paper = spec.paperColor.empty() ? "#F4F2EE" : spec.paperColor;
+            const std::string ink = spec.inkColor.empty() ? "#20242B" : spec.inkColor;
+            const std::string marker = spec.highlightColor.empty() ? "#E8734A" : spec.highlightColor;
+
+            layers.push_back({ { "id", "quote_ground" }, { "type", "color" },
+                               { "color", Material::rgba(paper) },
+                               { "size", Json::array({ kW, kH }) }, { "screen_space", true },
+                               { "start_frame", 0 }, { "duration_frames", duration } });
+
+            layers.push_back(rect("quote_card", 240.f, 150.f, 1440.f, 780.f, "#FFFFFF", 1.f));
+            layers.push_back(rect("quote_bar", 240.f, 150.f, 1440.f, 12.f, marker, 1.f));
+            layers.push_back(textLayer("quote_mark", "\\u201C", 300.f, 190.f, 190.f,
+                                       kSerifItalic, marker, duration, 0.f, 0));
+
+            const float qSize = 54.f;
+            const float qStep = 76.f;
+            const std::size_t n = spec.quoteLines.size();
+            const float qTop = 470.f - static_cast<float>(n - 1) * qStep * 0.5f;
+            int qLine = -1;
+            float qLeft = 0.f, qRight = 0.f;
+            for (std::size_t i = 0; i < n; ++i) {
+                const float w = estimateWidth(spec.quoteLines[i], qSize);
+                const float left = 960.f - w * 0.5f;
+                layers.push_back(textLayer("quote_line_" + std::to_string(i), spec.quoteLines[i],
+                                           left, qTop + static_cast<float>(i) * qStep,
+                                           qSize, kSerifItalic, ink, duration, 0.f,
+                                           1 + static_cast<int>(i)));
+                const std::size_t found = spec.quoteLines[i].find(spec.highlightText);
+                if (found != std::string::npos) {
+                    qLine = static_cast<int>(i);
+                    qLeft = left + estimateWidth(spec.quoteLines[i].substr(0, found), qSize);
+                    qRight = left + estimateWidth(
+                            spec.quoteLines[i].substr(0, found + spec.highlightText.size()), qSize);
+                }
+            }
+            if (qLine >= 0) {
+                const int begin = std::max(12, duration / 5);
+                const int span = std::max(12, duration / 4);
+                const float blockTop = qTop + static_cast<float>(qLine) * qStep + qSize * 0.10f;
+                const float blockW = qRight - qLeft + 24.f;
+                layers.push_back(rect("quote_highlight", qLeft - 12.f, blockTop,
+                                      blockW, qSize * 1.05f, marker, 0.88f,
+                                      highlightSweepTracks(blockW, begin, span)));
+            }
+            const std::string by = "\\u2014 " + spec.attribution;
+            const float byW = estimateWidth(spec.attribution, 28.f) + 60.f;
+            const float byTop = qTop + static_cast<float>(n) * qStep + 56.f;
+            layers.push_back(textLayer("quote_by", by, 960.f - byW * 0.5f, byTop,
+                                       28.f, kBold, ink, duration, 2.f, 5));
+            if (!spec.source.empty())
+                layers.push_back(textLayer("quote_source", spec.source,
+                                           960.f - estimateWidth(spec.source, 22.f) * 0.5f,
+                                           byTop + 48.f, 22.f, kRegular, ink,
+                                           duration, 2.6f, 6));
         } else {
-            // ── shared page ground for the two headline recipes ──────────────
+            // ── shared page ground for the statement and stepped recipes ──────
             const bool statement = spec.recipe == HeadlineHighlightRecipe::StatementPage;
             const std::string paper = spec.paperColor.empty()
                     ? (statement ? "#F4F2EE" : "#F2F1EC") : spec.paperColor;

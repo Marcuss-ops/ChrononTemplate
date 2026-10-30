@@ -518,6 +518,28 @@ target_include_directories(chronontemplate_emit_retro_stat_fast_intro PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_retro_stat_fast_intro PRIVATE -Wall -Wextra)
 
+# Fast Intro v2: single unified emitter for all four recipes (Linux CI).
+# The Python mirror (tools/fast_intro/build_fast_intro_v2.py) produces the
+# same plans without a build; goldens live in golden_plans/fast_intro_v2/.
+add_executable(chronontemplate_emit_fast_intro_v2
+        tools/fast_intro/emit_fast_intro_v2.cpp)
+target_link_libraries(chronontemplate_emit_fast_intro_v2 PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_fast_intro_v2 PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_FASTINTRO_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_fast_intro_v2 PRIVATE
+        "${CHRONONTEMPLATE_FASTINTRO_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_FASTINTRO_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_FASTINTRO_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_fast_intro_v2 PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_fast_intro_v2 PRIVATE -Wall -Wextra)
+
 # Optional native-plan canary for deterministic BackgroundPack V3 emission.
 add_executable(chronontemplate_background_canary_v1 tools/backgrounds/background_canary_v1.cpp)
 target_link_libraries(chronontemplate_background_canary_v1 PRIVATE chronontemplate)

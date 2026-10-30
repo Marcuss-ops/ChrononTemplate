@@ -91,9 +91,83 @@ namespace {
 
 } // namespace
 
+    void v2OpeningPlate() {
+        section("v2 opening plate");
+        FakeContentHost host;
+        TemplateScene scene("v2_opening", kFps, host);
+        FastIntroV2Spec spec;
+        spec.recipe = FastIntroRecipe::OpeningPlate;
+        spec.topics = {"CONTEXT", "EVIDENCE", "WHAT CHANGED"};
+        LayerHandle& root = addFastIntroV2(scene, spec);
+        (void)root;
+        check(scene.validate().empty(), "v2 opening validates without errors");
+        check(scene.motion().layerCount() >= 8, "opening has ground, aura, texts, rail, marker and pills");
+        check(fastIntroV2Choices().size() == 4, "four v2 recipes registered");
+    }
+
+    void v2PunchStatCapped() {
+        section("v2 punch stat capped scales");
+        FakeContentHost host;
+        TemplateScene scene("v2_punch", kFps, host);
+        FastIntroV2Spec spec;
+        spec.recipe = FastIntroRecipe::PunchStat;
+        LayerHandle& root = addFastIntroV2(scene, spec);
+        (void)root;
+        check(scene.validate().empty(), "v2 punch validates without errors");
+        check(scene.motion().layerCount() >= 9, "punch has ground, glow, 5 rings, era, stat and collage");
+    }
+
+    void v2WhipAndChapter() {
+        section("v2 whip + chapter parametric");
+        FakeContentHost host;
+        {
+            TemplateScene scene("v2_whip", kFps, host);
+            FastIntroV2Spec spec;
+            spec.recipe = FastIntroRecipe::WhipMatch;
+            spec.durationFrames = 180;
+            spec.plates = {"a.png", "b.png", "c.png", "d.png", "e.png", "f.png"};
+            LayerHandle& root = addFastIntroV2(scene, spec);
+            (void)root;
+            check(scene.validate().empty(), "v2 whip validates without errors");
+        }
+        {
+            TemplateScene scene("v2_chapter", kFps, host);
+            FastIntroV2Spec spec;
+            spec.recipe = FastIntroRecipe::ChapterCard;
+            spec.chapterLabel = "CHAPTER 1";
+            spec.title = "THE HITMAN HIDDEN IN A FAMILY PHOTO";
+            LayerHandle& root = addFastIntroV2(scene, spec);
+            (void)root;
+            check(scene.validate().empty(), "v2 chapter validates without errors");
+        }
+        {
+            TemplateScene scene("bad_whip", kFps, host);
+            FastIntroV2Spec spec;
+            spec.recipe = FastIntroRecipe::WhipMatch;
+            spec.plates = {"only.png"};
+            bool threw = false;
+            try { (void)addFastIntroV2(scene, spec); } catch (const std::invalid_argument&) { threw = true; }
+            check(threw, "whip with <4 plates throws invalid_argument");
+        }
+        {
+            TemplateScene scene("bad_topics", kFps, host);
+            FastIntroV2Spec spec;
+            spec.recipe = FastIntroRecipe::OpeningPlate;
+            spec.topics = {"a", "b", "c", "d", "e"};
+            bool threw = false;
+            try { (void)addFastIntroV2(scene, spec); } catch (const std::invalid_argument&) { threw = true; }
+            check(threw, "opening with >4 topics throws invalid_argument");
+        }
+    }
+
+} // namespace
+
 int main() {
     standardFastIntroComposition();
     retroStatCollageComposition();
     validationRejections();
+    v2OpeningPlate();
+    v2PunchStatCapped();
+    v2WhipAndChapter();
     return 0;
 }
