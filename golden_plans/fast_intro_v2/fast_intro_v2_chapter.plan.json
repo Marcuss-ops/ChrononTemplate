@@ -1,0 +1,4069 @@
+{
+ "schema": "chronon.render-plan.v3",
+ "version": 3,
+ "job_id": "fast_intro_v2_chapter",
+ "canvas": {
+  "width": 1920,
+  "height": 1080,
+  "fps_num": 30,
+  "fps_den": 1,
+  "duration_frames": 150
+ },
+ "camera": {
+  "type": "perspective",
+  "position": [
+   0,
+   0,
+   -1350
+  ],
+  "rotation_deg": [
+   0,
+   0,
+   0
+  ],
+  "fov_deg": 48.0,
+  "near": 1,
+  "far": 10000,
+  "zoom": 1.0
+ },
+ "camera_samples": [
+  {
+   "frame": 0,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1350.0
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 1,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1348.6577181208054
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 2,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1347.3154362416108
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 3,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1345.9731543624162
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 4,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1344.6308724832215
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 5,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1343.288590604027
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 6,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1341.9463087248323
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 7,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1340.6040268456377
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 8,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1339.2617449664428
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 9,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1337.9194630872482
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 10,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1336.5771812080536
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 11,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1335.234899328859
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 12,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1333.8926174496644
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 13,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1332.5503355704698
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 14,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1331.2080536912752
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 15,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1329.8657718120805
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 16,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1328.523489932886
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 17,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1327.1812080536913
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 18,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1325.8389261744967
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 19,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1324.496644295302
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 20,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1323.1543624161075
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 21,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1321.8120805369128
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 22,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1320.4697986577182
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 23,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1319.1275167785234
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 24,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1317.7852348993288
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 25,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1316.4429530201342
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 26,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1315.1006711409395
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 27,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1313.758389261745
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 28,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1312.4161073825503
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 29,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1311.0738255033557
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 30,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1309.731543624161
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 31,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1308.3892617449665
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 32,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1307.0469798657718
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 33,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1305.7046979865772
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 34,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1304.3624161073826
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 35,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1303.020134228188
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 36,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1301.6778523489934
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 37,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1300.3355704697988
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 38,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1298.993288590604
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 39,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1297.6510067114093
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 40,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1296.3087248322147
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 41,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1294.96644295302
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 42,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1293.6241610738255
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 43,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1292.2818791946308
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 44,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1290.9395973154362
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 45,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1289.5973154362416
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 46,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1288.255033557047
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 47,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1286.9127516778524
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 48,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1285.5704697986578
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 49,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1284.2281879194632
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 50,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1282.8859060402685
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 51,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1281.543624161074
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 52,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1280.201342281879
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 53,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1278.8590604026845
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 54,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1277.5167785234898
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 55,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1276.1744966442952
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 56,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1274.8322147651006
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 57,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1273.489932885906
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 58,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1272.1476510067114
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 59,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1270.8053691275168
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 60,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1269.4630872483222
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 61,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1268.1208053691275
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 62,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1266.778523489933
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 63,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1265.4362416107383
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 64,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1264.0939597315437
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 65,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1262.751677852349
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 66,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1261.4093959731545
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 67,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1260.0671140939598
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 68,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1258.724832214765
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 69,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1257.3825503355704
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 70,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1256.0402684563758
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 71,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1254.6979865771812
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 72,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1253.3557046979865
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 73,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1252.013422818792
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 74,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1250.6711409395973
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 75,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1249.3288590604027
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 76,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1247.986577181208
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 77,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1246.6442953020135
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 78,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1245.3020134228188
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 79,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1243.9597315436242
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 80,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1242.6174496644296
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 81,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1241.275167785235
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 82,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1239.9328859060402
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 83,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1238.5906040268455
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 84,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1237.248322147651
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 85,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1235.9060402684563
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 86,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1234.5637583892617
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 87,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1233.221476510067
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 88,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1231.8791946308725
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 89,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1230.5369127516778
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 90,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1229.1946308724832
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 91,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1227.8523489932886
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 92,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1226.510067114094
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 93,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1225.1677852348994
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 94,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1223.8255033557048
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 95,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1222.4832214765102
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 96,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1221.1409395973155
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 97,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1219.798657718121
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 98,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1218.456375838926
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 99,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1217.1140939597315
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 100,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1215.7718120805368
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 101,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1214.4295302013422
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 102,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1213.0872483221476
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 103,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1211.744966442953
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 104,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1210.4026845637584
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 105,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1209.0604026845638
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 106,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1207.7181208053692
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 107,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1206.3758389261745
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 108,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1205.03355704698
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 109,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1203.6912751677853
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 110,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1202.3489932885907
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 111,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1201.0067114093958
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 112,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1199.6644295302012
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 113,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1198.3221476510066
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 114,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1196.979865771812
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 115,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1195.6375838926174
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 116,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1194.2953020134228
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 117,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1192.9530201342282
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 118,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1191.6107382550335
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 119,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1190.268456375839
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 120,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1188.9261744966443
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 121,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1187.5838926174497
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 122,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1186.241610738255
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 123,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1184.8993288590605
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 124,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1183.5570469798658
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 125,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1182.2147651006712
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 126,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1180.8724832214766
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 127,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1179.530201342282
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 128,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1178.1879194630872
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 129,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1176.8456375838925
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 130,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1175.503355704698
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 131,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1174.1610738255033
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 132,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1172.8187919463087
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 133,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1171.476510067114
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 134,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1170.1342281879195
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 135,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1168.7919463087248
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 136,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1167.4496644295302
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 137,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1166.1073825503356
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 138,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1164.765100671141
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 139,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1163.4228187919464
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 140,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1162.0805369127518
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 141,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1160.738255033557
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 142,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1159.3959731543623
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 143,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1158.0536912751677
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 144,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1156.711409395973
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 145,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1155.3691275167785
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 146,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1154.0268456375838
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 147,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1152.6845637583892
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 148,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1151.3422818791946
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  },
+  {
+   "frame": 149,
+   "camera": {
+    "type": "perspective",
+    "position": [
+     0,
+     0,
+     -1150.0
+    ],
+    "rotation_deg": [
+     0,
+     0,
+     0
+    ],
+    "fov_deg": 48.0,
+    "near": 1,
+    "far": 10000,
+    "zoom": 1.0
+   }
+  }
+ ],
+ "layers": [
+  {
+   "id": "chapter_ground",
+   "type": "color",
+   "color": [
+    0.023529411764705882,
+    0.023529411764705882,
+    0.03137254901960784,
+    1.0
+   ],
+   "position": [
+    0,
+    0
+   ],
+   "size": [
+    1920,
+    1080
+   ],
+   "start_frame": 0,
+   "duration_frames": 150
+  },
+  {
+   "id": "chapter_band",
+   "type": "shape",
+   "shape": {
+    "type": "rect",
+    "fill": [
+     0.7686274509803922,
+     0.0392156862745098,
+     0.12156862745098039,
+     1.0
+    ]
+   },
+   "position": [
+    960.0,
+    520.0
+   ],
+   "size": [
+    1920,
+    110
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "scale_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.02
+       },
+       {
+        "frame": 18,
+        "value": 1.0
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_label",
+   "type": "text",
+   "text": "CHAPTER 1",
+   "size": [
+    600,
+    70
+   ],
+   "position": [
+    960.0,
+    320.0
+   ],
+   "start_frame": 4,
+   "duration_frames": 146,
+   "style": {
+    "font": "ChrononTemplate/assets/fonts/Inter-Black.ttf",
+    "font_size": 44,
+    "fill": "#FF8A94",
+    "fit_mode": "shrink_only",
+    "min_font_size": 44,
+    "max_font_size": 44
+   },
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "out_cubic",
+      "keyframes": [
+       {
+        "frame": 4,
+        "value": 0.0
+       },
+       {
+        "frame": 14,
+        "value": 1.0
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_title",
+   "type": "text",
+   "text": "THE HITMAN HIDDEN IN A FAMILY PHOTO",
+   "size": [
+    1700,
+    120
+   ],
+   "position": [
+    960.0,
+    520.0
+   ],
+   "start_frame": 8,
+   "duration_frames": 142,
+   "style": {
+    "font": "ChrononTemplate/assets/fonts/Inter-Black.ttf",
+    "font_size": 64,
+    "fill": "#FFF8F5",
+    "fit_mode": "shrink_only",
+    "min_font_size": 64,
+    "max_font_size": 64,
+    "glow": {
+     "color": "#FF2638",
+     "radius": 18.0,
+     "intensity": 0.5
+    }
+   },
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "out_cubic",
+      "keyframes": [
+       {
+        "frame": 8,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 1.0
+       }
+      ]
+     },
+     {
+      "property": "scale",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 8,
+        "value": 0.94
+       },
+       {
+        "frame": 26,
+        "value": 1.0
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_subtitle",
+   "type": "text",
+   "text": "A parametric chapter card, no hard-coded copy.",
+   "size": [
+    1400,
+    60
+   ],
+   "position": [
+    960.0,
+    720.0
+   ],
+   "start_frame": 16,
+   "duration_frames": 134,
+   "style": {
+    "font": "ChrononTemplate/assets/fonts/Inter-Black.ttf",
+    "font_size": 30,
+    "fill": "#C9C2B4",
+    "fit_mode": "shrink_only",
+    "min_font_size": 30,
+    "max_font_size": 30
+   },
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "out_cubic",
+      "keyframes": [
+       {
+        "frame": 16,
+        "value": 0.0
+       },
+       {
+        "frame": 28,
+        "value": 1.0
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_0",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    96.0,
+    390.0
+   ],
+   "size": [
+    4,
+    4
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_1",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    1357.44,
+    681.0
+   ],
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_2",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    890.8800000000001,
+    672.0
+   ],
+   "size": [
+    10,
+    10
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_3",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    424.32,
+    663.0
+   ],
+   "size": [
+    4,
+    4
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_4",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    1685.7600000000002,
+    654.0
+   ],
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_5",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    1219.2,
+    645.0
+   ],
+   "size": [
+    10,
+    10
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_6",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    752.64,
+    636.0
+   ],
+   "size": [
+    4,
+    4
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_7",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    286.08,
+    627.0
+   ],
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_8",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    1547.52,
+    618.0
+   ],
+   "size": [
+    10,
+    10
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_9",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    1080.96,
+    609.0
+   ],
+   "size": [
+    4,
+    4
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_10",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    614.4,
+    600.0
+   ],
+   "size": [
+    7,
+    7
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "chapter_dust_11",
+   "type": "shape",
+   "shape": {
+    "type": "ellipse",
+    "fill": [
+     0.91,
+     0.725,
+     0.541,
+     0.5
+    ]
+   },
+   "position": [
+    147.84,
+    591.0
+   ],
+   "size": [
+    10,
+    10
+   ],
+   "start_frame": 0,
+   "duration_frames": 150,
+   "animation": {
+    "tracks": [
+     {
+      "property": "opacity",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0.0
+       },
+       {
+        "frame": 20,
+        "value": 0.5
+       }
+      ]
+     },
+     {
+      "property": "position_x",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": 30
+       }
+      ]
+     },
+     {
+      "property": "position_y",
+      "easing": "linear",
+      "keyframes": [
+       {
+        "frame": 0,
+        "value": 0
+       },
+       {
+        "frame": 149,
+        "value": -60
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "output": {
+  "path": "fast_intro_v2_chapter.mp4",
+  "format": "mp4",
+  "codec": "h264"
+ }
+}
