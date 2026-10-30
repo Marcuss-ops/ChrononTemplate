@@ -25,3 +25,27 @@ historical samples and are no longer offered by the current reveal picker.
 Both tools currently use `BulletListPack` for the shared text-layer reveal
 mechanics. List layout and camera travel are selected only by the text-list
 emitter; the standalone bullet-point emitter authors exactly one item.
+
+## Bullet point → camera → image
+
+For a narrated sequence where each statement is typed first and then the camera
+travels down to its related image, use
+`tools/bullet_points/emit_bullet_camera_images.cpp`. It reuses the modern
+typewriter's GPU glyph-window reveal, a perspective camera, and a cyan leader
+with native glow. The `fast_intro` preset has two short beats; `normal_chapter`
+has three longer reading beats. Supply one image per point with repeated
+image paths as arguments (relative to the workspace root):
+
+```sh
+cmake --build ChrononTemplate/build/release-fast --target chronontemplate_emit_bullet_camera_images
+ChrononTemplate/build/release-fast/chronontemplate_emit_bullet_camera_images fast_intro \
+  ChrononTemplate/out/bullet_camera_images_v1/bullet_camera_fast_intro.plan.json \
+  ChrononTemplate/assets/first.png ChrononTemplate/assets/second.png
+ChrononTemplate/build/release-fast/chronontemplate_emit_bullet_camera_images normal_chapter \
+  ChrononTemplate/out/bullet_camera_images_v1/bullet_camera_normal_chapter.plan.json \
+  ChrononTemplate/assets/first.png ChrononTemplate/assets/second.png ChrononTemplate/assets/third.png
+```
+
+The command writes an editable RenderPlan under
+`ChrononTemplate/out/bullet_camera_images_v1/`. The no-argument fast-intro
+example uses the three `web_archive_v1` sample images already in the repository.

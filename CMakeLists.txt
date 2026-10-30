@@ -244,6 +244,9 @@ add_library(chronontemplate STATIC
         src/chronontemplate/web/DocumentaryReferenceStills.cpp
         src/chronontemplate/web/WebTextLayout.cpp
         src/chronontemplate/web/ArticleEvidenceReveal.cpp
+        # web shots rebuild v1: port C++ dei 28 shot Python + 6 nuove recipe next
+        src/chronontemplate/web/WebShotsRebuildPack.cpp
+        src/chronontemplate/web/WebShotsNextPack.cpp
         # second generation: radians-safe fold, distinct recipes, reworked hierarchy
         src/chronontemplate/web/WebPageV2Pack.cpp
         # native layout composers: flex rows, columns and grids plus FLIP moves
@@ -356,6 +359,14 @@ target_include_directories(chronontemplate_emit_bullet_camera_10 PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/../Chronon3d/include")
 target_compile_options(chronontemplate_emit_bullet_camera_10 PRIVATE -Wall -Wextra)
 
+# Native C++ authoring for the typewriter -> camera -> image bullet sequence.
+add_executable(chronontemplate_emit_bullet_camera_images
+        tools/bullet_points/emit_bullet_camera_images.cpp)
+target_include_directories(chronontemplate_emit_bullet_camera_images PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_bullet_camera_images PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_bullet_camera_images PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_web_article_fold
         tools/web_presets/emit_web_article_fold.cpp)
 target_include_directories(chronontemplate_emit_web_article_fold PRIVATE
@@ -375,6 +386,14 @@ add_executable(chronontemplate_emit_web_headline_highlight
         tools/web_presets/emit_web_headline_highlight.cpp)
 target_link_libraries(chronontemplate_emit_web_headline_highlight PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_headline_highlight PRIVATE -Wall -Wextra)
+
+# Web shots rebuild v1: 28 shot Python portati in C++ + 6 nuove recipe next.
+# Base riusabile per tutti i prossimi render/animazioni (stessa grammatica
+# marker sweep + camera lenta, nessun Pillow/browser/screenshot).
+add_executable(chronontemplate_emit_web_shots_rebuild
+        tools/web_shots/emit_web_shots_rebuild.cpp)
+target_link_libraries(chronontemplate_emit_web_shots_rebuild PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_shots_rebuild PRIVATE -Wall -Wextra)
 
 # Reference web phrase rebuilds are direct native render-plan V3 data. The
 # provided screenshots supply copy and composition references only.

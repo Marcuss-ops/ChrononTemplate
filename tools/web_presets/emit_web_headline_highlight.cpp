@@ -47,6 +47,30 @@ namespace {
                                       "talent war"};
                 spec.highlightText = "Meta's $100 million signing";
                 break;
+            case HeadlineHighlightRecipe::BreakingTicker:
+                spec.kicker = "BREAKING";
+                spec.headlineLines = {"Senate passes the",
+                                      "chip export bill"};
+                spec.highlightText = "chip export bill";
+                spec.dateline = "10:42 ET";
+                spec.tickerText = "Markets rally as export rules take hold";
+                break;
+            case HeadlineHighlightRecipe::LiveBlogFeed:
+                spec.kicker = "Election night";
+                spec.dateline = "Updated 21:35";
+                spec.bodyLines = {"Polls close in three states",
+                                  "Counting under way in the capital"};
+                spec.entryTimes = {"21:00", "21:34"};
+                spec.highlightText = "Counting under way";
+                break;
+            case HeadlineHighlightRecipe::QuoteCard:
+                spec.quoteLines = {"We shape our tools,",
+                                   "thereafter our tools shape us"};
+                spec.highlightText = "tools shape us";
+                spec.attribution = "Marshall McLuhan";
+                spec.source = "The Interview, Jun 2026";
+                spec.kicker = "Quote";
+                break;
         }
         return spec;
     }
@@ -62,7 +86,10 @@ int main(int argc, char** argv) try {
     int written = 0;
     for (const HeadlineHighlightRecipe recipe : {HeadlineHighlightRecipe::StatementPage,
                                                  HeadlineHighlightRecipe::MarkerSweep,
-                                                 HeadlineHighlightRecipe::SteppedHighlight}) {
+                                                 HeadlineHighlightRecipe::SteppedHighlight,
+                                                 HeadlineHighlightRecipe::BreakingTicker,
+                                                 HeadlineHighlightRecipe::LiveBlogFeed,
+                                                 HeadlineHighlightRecipe::QuoteCard}) {
         const auto spec = specFor(recipe);
         const auto plan = buildWebHeadlineHighlightPlan(spec);
         const fs::path out = outDir / (spec.planName() + ".plan.json");
@@ -72,7 +99,7 @@ int main(int argc, char** argv) try {
         std::cout << "Wrote " << out << '\n';
         ++written;
     }
-    std::cout << written << " native plans (3 highlighter looks, no Pillow)\n";
+    std::cout << written << " native plans (6 highlighter looks, no Pillow)\n";
     return 0;
 } catch (const std::exception& error) {
     std::cerr << error.what() << '\n';

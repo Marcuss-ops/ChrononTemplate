@@ -282,9 +282,11 @@ class Canvas:
             jb = (rnd.uniform(-0.9, 0.9) * (h * 0.045)) if rough else 0.0
             pts_top.append((tx, y + jt))
             pts_bot.append((tx, y + h + jb))
-        self.poly(pts_top + pts_bot[::-1], fill, alpha)
+        # Keep marker pigment translucent so headline glyphs remain crisp.
+        marker_alpha = alpha * 0.62
+        self.poly(pts_top + pts_bot[::-1], fill, marker_alpha)
         # slightly denser core band, like a marker pressed harder
-        self.rect(x, y + h * 0.22, ww, h * 0.56, fill, min(1.0, alpha * 1.05) if alpha < 1 else 1.0)
+        self.rect(x, y + h * 0.22, ww, h * 0.56, fill, min(0.68, alpha * 0.68))
 
     # -- misc ---------------------------------------------------------------- #
     def noise(self, amount: float = 0.02, seed: int = 0):
@@ -445,7 +447,13 @@ class Shot:
     def camera(self, t: float):
         z0, x0, y0 = self.cam_from
         z1, x1, y1 = self.cam_to
-        return (z0 + (z1 - z0) * t, x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)
+        # Start on the full composition and allow only a restrained optical
+        # drift. Older authored crops began zoomed in and some paths wandered
+        # off center, making short editorial clips feel erratic.
+        dx = max(-0.003, min(0.003, (x1 - x0) * 0.10))
+        dy = max(-0.003, min(0.003, (y1 - y0) * 0.10))
+        zoom_delta = max(0.0, min(0.012, abs(z1 - z0) * 0.20))
+        return (1.0 + zoom_delta * t, 0.5 + dx * t, 0.5 + dy * t)
 
     def render_frame(self, static: Optional[Image.Image], t: float,
                      front: Optional[Image.Image] = None) -> Image.Image:

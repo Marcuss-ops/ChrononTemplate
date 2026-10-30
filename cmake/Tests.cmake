@@ -387,6 +387,15 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_fast_intro_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_fast_intro_pack_test COMMAND chronontemplate_fast_intro_pack_test)
 
+    # Fast Intro v2 contract: hook/camera/scales/fonts/pillarbox gates on the
+    # committed golden plans (runs without a build, same gates as CI).
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME chronontemplate_fast_intro_v2_contract
+            COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tools/fast_intro/test_fast_intro_v2.py"
+                    --dir "${CMAKE_CURRENT_SOURCE_DIR}/golden_plans/fast_intro_v2")
+    endif()
+
     if(CHRONONTEMPLATE_BUILD_LIVE_ADAPTER_TEST)
         if(NOT EXISTS "${CHRONONTEMPLATE_CHRONON3D_LIBRARY}")
             message(FATAL_ERROR
