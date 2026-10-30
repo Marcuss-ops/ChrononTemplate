@@ -1,6 +1,7 @@
 #include "chronontemplate/core/PlanLowering.hpp"
 
 #include <chronon3d/render_plan/color_utils.hpp>
+#include <chrononmotion/motion/SceneImport.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -487,7 +488,8 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlanImpl(
         const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
         std::string jobId,
         std::string outputPath,
-        bool bakeCameraSamples) {
+        bool bakeCameraSamples,
+        std::vector<double> cameraSampleFrames = {}) {
     chrononmotion::motion::RenderPlanLoweringOptions options;
     const auto canvas = scene.canvas();
     options.width = static_cast<int>(canvas.x);
@@ -497,6 +499,7 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlanImpl(
     options.schema = chronon3d::render_plan::kRenderPlanSchemaV3;
     options.cameraRig = &scene.cameraRig();
     options.bakeResolvedCameraSamples = bakeCameraSamples;
+    options.cameraSampleFrames = std::move(cameraSampleFrames);
 
     std::unordered_map<MotionLayerId, bool> expected;
     for (const auto& binding : scene.bindings().bindings()) {
@@ -530,6 +533,18 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlan(
                                  std::move(outputPath), true);
 }
 
+chronon3d::render_plan::RenderPlan lowerToRenderPlan(
+        TemplateScene& scene,
+        const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
+        std::string jobId,
+        std::string outputPath,
+        std::vector<double> cameraSampleFrames) {
+    if (cameraSampleFrames.empty())
+        throw std::invalid_argument("TemplateScene -> RenderPlan: explicit camera sample frames must not be empty");
+    return lowerToRenderPlanImpl(scene, contentLayers, std::move(jobId),
+                                 std::move(outputPath), true, std::move(cameraSampleFrames));
+}
+
 RuntimeRenderPlan lowerToRuntimeRenderPlan(
         TemplateScene& scene,
         const std::unordered_map<MotionLayerId, chronon3d::render_plan::LayerPlan>& contentLayers,
@@ -541,9 +556,21 @@ RuntimeRenderPlan lowerToRuntimeRenderPlan(
     if (!plan.camera)
         throw std::logic_error("TemplateScene runtime lowering did not produce a camera snapshot");
     auto rig = std::make_shared<const chrononmotion::motion::CameraRig>(scene.cameraRig());
-    auto provider = chrononmotion::motion::makeCameraSampleProvider(
-        std::move(rig), scene.fps(), std::move(cameraFingerprint),
-        plan.camera->near, plan.camera->far);
+    chronon3d::render_plan::RuntimeCameraSampleProvider provider;
+    if (rig->layer().parentId == chrononmotion::motion::Layer::kRoot) {
+        provider = chrononmotion::motion::makeCameraSampleProvider(
+            std::move(rig), scene.fps(), std::move(cameraFingerprint),
+            plan.camera->near, plan.camera->far);
+    } else {
+        // The project-file round trip creates a separate evaluation context,
+        // so the provider survives the template and never races its authoring
+        // scene. Unsupported project-file data is rejected, not approximated.
+        auto snapshot = std::make_shared<chrononmotion::motion::MotionScene>(
+            chrononmotion::motion::sceneFromJson(scene.motion().toJson()));
+        provider = chrononmotion::motion::makeCameraSampleProvider(
+            std::move(rig), std::move(snapshot), std::move(cameraFingerprint),
+            plan.camera->near, plan.camera->far);
+    }
     return RuntimeRenderPlan{std::move(plan), std::move(provider)};
 }
 

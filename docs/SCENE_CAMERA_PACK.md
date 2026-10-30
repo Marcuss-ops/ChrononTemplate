@@ -78,10 +78,17 @@ continua a derivare distanza e lente dalla viewport.
 
 Per una pipeline in-process usa `lowerToRuntimeRenderPlan(scene, content,
 cameraFingerprint)`: il piano conserva layer e contenuti, mentre il provider
-campiona il rig CM3D anche ai tempi sub-frame dello shutter. La fingerprint
-stabile deve includere gli input che definiscono lo shot. `lowerToRenderPlan`
-resta il percorso offline per i piani serializzati, con camera bake denso a
-frame interi.
+campiona il rig CM3D anche ai tempi sub-frame dello shutter. Con camera parented
+il provider usa una copia dedicata della gerarchia tramite il formato progetto
+Motion; gli elementi non rappresentabili da quel formato sono rifiutati. La
+fingerprint stabile deve includere rig, gerarchia e tempi dello shot.
+`lowerToRenderPlan` resta il percorso offline per i piani serializzati. Per
+un job che conosce il proprio calendario shutter, l'overload con
+`cameraSampleFrames` accetta gli istanti assoluti già generati dallo scheduler
+C3D e li inoltra al bake Motion; il chiamante deve includere tutti i tempi che
+il job userà, ordinati e senza duplicati. L'overload precedente conserva il
+bake a frame interi. Questa opzione riguarda solo la camera: i layer restano
+approssimati tra frame interi e il calendario non viene generato automaticamente.
 
 ## Mappe pre-configurate da JSON (senza ricompilare)
 

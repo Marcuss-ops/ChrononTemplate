@@ -173,9 +173,6 @@ add_library(chronontemplate STATIC
         src/chronontemplate/core/TemplateScene.cpp
         src/chronontemplate/core/PlanLowering.cpp
         src/chronontemplate/core/RenderPlanContentHost.cpp
-        # Optional offline RenderPlan bridge lives outside the Motion core.
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp"
         src/chronontemplate/single_images/ImageAnimationPack.cpp
         src/chronontemplate/investigation_board/InvestigationBoardPack.cpp
         src/chronontemplate/single_images/PixelGridPack.cpp
@@ -262,7 +259,9 @@ add_library(chronontemplate STATIC
 
 add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 
-
+# The tools below use Blend2D's imported target; load its package before
+# declaring them rather than relying on another project to define it.
+find_package(blend2d CONFIG REQUIRED)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tools.cmake)
 
 add_executable(chronontemplate_emit_beast_land_subject_reframe
@@ -467,6 +466,15 @@ target_include_directories(chronontemplate PUBLIC
         $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(chronontemplate PUBLIC ChrononMotion::chrononmotion)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate PUBLIC chrononmotion_chronon3d_adapter)
+else()
+    # The optional adapter is not provided by a prebuilt Motion core.
+    target_sources(chronontemplate PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringSamples.cpp")
+endif()
 # ── Live Chronon3D adapter: the pure/adapter boundary ────────────────────────
 #
 # Pure template recipes (the library above) never link the renderer. The two

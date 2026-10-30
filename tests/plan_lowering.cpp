@@ -3,6 +3,8 @@
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"
 
+#include <chronon3d/animation/temporal/temporal_samples.hpp>
+
 #include <algorithm>
 #include <stdexcept>
 
@@ -51,7 +53,9 @@ int main() {
     rig.setPosition({0.f, 0.f, -8.f}).clearTarget().setFocusDistance(420.f);
     rig.focusDistanceTrack().add(0.f, 420.f).add(1.f, 620.f);
     // Authored aperture truth is f/N: legacy gain 0.06 maps to f/11.2.
-    rig.fStopTrack().add(0.f, 0.f).add(1.f, 11.2f);
+    // Zero denotes disabled, not a physical f-stop. Step to the minimum
+    // supported aperture before interpolating, so no sampled pose is in (0, 0.7).
+    rig.fStopTrack().addDiscrete(0.f, 0.f).add(1.f / 24.f, 0.7f).add(1.f, 11.2f);
     rig.maxBlurTrack().add(0.f, 10.f).add(1.f, 18.f);
     const auto dofPlan = lowerToRenderPlan(dofScene, {{dofTitle.id(), dofText}});
     check(dofPlan.camera && dofPlan.camera->dof_enabled,
@@ -82,6 +86,70 @@ int main() {
               "runtime provider samples the CM3D rig at frame/fps time");
     chrononmotion_test::checkNear(runtimeCamera.dof_focus_distance, 520.f, 1e-4f,
               "runtime provider carries the fractional-time focus distance");
+
+    // The parented provider retains a dedicated hierarchy after the authored
+    // template is changed and destroyed, including at fractional shutter times.
+    const auto parented = [&] {
+        TemplateScene source("parented-runtime", 24.f, host, 640.f, 360.f);
+        auto& controller = source.group("Camera Null");
+        controller.layer().tracks.position.add(0.f, {10.f, 0.f, 0.f},
+                                               chrononmotion::motion::Easing::easeInOut());
+        controller.layer().tracks.position.add(1.f, {110.f, 0.f, 0.f});
+        source.cameraRig().setParent(controller.id()).setPosition({5.f, 0.f, 0.f});
+        return lowerToRuntimeRenderPlan(source, {}, "rig-parent-v1");
+    }();
+    const auto parentedFirst = parented.camera.sample(0.0);
+    const auto parentedMiddle = parented.camera.sample(12.5);
+    const auto parentedAgain = parented.camera.sample(0.0);
+    chrononmotion_test::checkNear(parentedFirst.position[0], 15.f, 1e-4f,
+                                 "parented runtime includes Null translation");
+    check(parentedMiddle.position[0] > parentedFirst.position[0],
+          "parented runtime samples the animated Null at fractional time");
+    chrononmotion_test::checkNear(parentedAgain.position[0], parentedFirst.position[0], 1e-4f,
+                                 "parented runtime remains deterministic after a seek");
+
+    // The offline job supplies its exact C3D shutter schedule. Verify every
+    // timestamp against the same parented runtime provider, including preroll.
+    TemplateScene scheduled("scheduled-camera", 24.f, host, 640.f, 360.f);
+    auto& scheduledParent = scheduled.group("Camera Null");
+    scheduledParent.layer().tracks.position.add(0.f, {10.f, 0.f, 0.f},
+                                                chrononmotion::motion::Easing::easeInOut());
+    scheduledParent.layer().tracks.position.add(1.f, {110.f, 0.f, 0.f});
+    scheduled.cameraRig().setParent(scheduledParent.id()).setPosition({5.f, 0.f, 0.f});
+    const auto scheduledRuntime = lowerToRuntimeRenderPlan(scheduled, {}, "scheduled-camera-v1");
+    std::vector<double> cameraTimes;
+    for (int frame : {0, 12, 24}) {
+        const auto shutter = chronon3d::temporal::make_temporal_sample_plan(
+            chronon3d::temporal::TemporalSampleParams{}, 8, chronon3d::Frame{frame},
+            chronon3d::FrameRate{24, 1}, 640, 360);
+        check(shutter.valid(), "C3D job shutter schedule is valid");
+        for (const auto& sample : shutter.contexts) cameraTimes.push_back(sample.time.frame);
+    }
+    std::sort(cameraTimes.begin(), cameraTimes.end());
+    const auto scheduledPlan = lowerToRenderPlan(scheduled, {}, "scheduled", "scheduled.png", cameraTimes);
+    check(scheduledPlan.camera_samples && scheduledPlan.camera_samples->size() == cameraTimes.size(),
+          "Template forwards all C3D job shutter times to the Motion camera bake");
+    if (scheduledPlan.camera_samples && scheduledPlan.camera_samples->size() == cameraTimes.size()) {
+        for (std::size_t i = 0; i < cameraTimes.size(); ++i) {
+            const auto& sample = scheduledPlan.camera_samples->at(i);
+            check(sample.frame == cameraTimes[i], "Template preserves exact shutter timestamp");
+            const auto direct = scheduledRuntime.camera.sample(sample.frame);
+            for (int axis = 0; axis < 3; ++axis) {
+                chrononmotion_test::checkNear(sample.camera.position[axis], direct.position[axis], 1e-4f,
+                                              "Template offline and runtime world positions agree");
+                chrononmotion_test::checkNear(sample.camera.rotation_deg[axis], direct.rotation_deg[axis], 1e-3f,
+                                              "Template offline and runtime orientations agree");
+            }
+        }
+    }
+    bool emptyScheduleRejected = false;
+    try { (void)lowerToRenderPlan(scheduled, {}, "scheduled", "scheduled.png", {}); }
+    catch (const std::invalid_argument&) { emptyScheduleRejected = true; }
+    check(emptyScheduleRejected, "explicit empty camera schedule fails closed");
+    bool duplicateScheduleRejected = false;
+    try { (void)lowerToRenderPlan(scheduled, {}, "scheduled", "scheduled.png", {1., 1.}); }
+    catch (const std::invalid_argument&) { duplicateScheduleRejected = true; }
+    check(duplicateScheduleRejected, "duplicate camera schedule entries fail closed");
 
     ImageRequest imageRequest;
     imageRequest.path = "archive.jpg";
