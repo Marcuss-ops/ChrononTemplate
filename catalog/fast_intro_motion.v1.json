@@ -1,0 +1,52 @@
+{
+ "schema": "fast-intro-motion.v1",
+ "version": 1,
+ "fps": 30,
+ "font_default": "ChrononTemplate/assets/fonts/Inter-Black.ttf",
+ "recipes": [
+  {
+   "id": "fast_intro_v2_chapter",
+   "recipe": "chapter",
+   "duration_frames": 150,
+   "width": 1920,
+   "height": 1080,
+   "font": "ChrononTemplate/assets/fonts/Inter-Black.ttf",
+   "camera_push": true,
+   "hook_by_frame": 12,
+   "max_scale": 3.4
+  },
+  {
+   "id": "fast_intro_v2_opening",
+   "recipe": "opening",
+   "duration_frames": 120,
+   "width": 1920,
+   "height": 1080,
+   "font": "ChrononTemplate/assets/fonts/Inter-Black.ttf",
+   "camera_push": true,
+   "hook_by_frame": 12,
+   "max_scale": 3.4
+  },
+  {
+   "id": "fast_intro_v2_punch",
+   "recipe": "punch",
+   "duration_frames": 150,
+   "width": 1920,
+   "height": 1080,
+   "font": "ChrononTemplate/assets/fonts/Inter-Black.ttf",
+   "camera_push": true,
+   "hook_by_frame": 12,
+   "max_scale": 3.4
+  },
+  {
+   "id": "fast_intro_v2_whip",
+   "recipe": "whip",
+   "duration_frames": 180,
+   "width": 1920,
+   "height": 1080,
+   "font": "ChrononTemplate/assets/fonts/Inter-Black.ttf",
+   "camera_push": true,
+   "hook_by_frame": 12,
+   "max_scale": 3.4
+  }
+ ]
+}
