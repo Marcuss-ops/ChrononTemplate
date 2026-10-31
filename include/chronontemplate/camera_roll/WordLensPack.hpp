@@ -38,7 +38,6 @@ namespace chronontemplate {
         float cameraDistance{1080.f};
         float fStop{5.6f};
         float maxBlurPixels{10.f};
-        float highlightGain{1.25f};
         int focusTravelFrames{24};
         int fadeFrames{10};
     };

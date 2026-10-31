@@ -38,7 +38,7 @@ namespace chronontemplate {
                 !(spec.focusFovDegrees > 0.f && spec.focusFovDegrees <= spec.baseFovDegrees) ||
                 !(spec.cameraDistance > 0.f) ||
                 !(spec.fStop > 0.f) || !(spec.maxBlurPixels >= 0.f) ||
-                !(spec.highlightGain >= 0.f) || spec.focusTravelFrames < 2 || spec.fadeFrames < 1) {
+                spec.focusTravelFrames < 2 || spec.fadeFrames < 1) {
                 throw std::invalid_argument("addWordLensBoard: invalid camera, lens, background, or timing spec");
             }
             int priorFocus = -1;
@@ -61,9 +61,7 @@ namespace chronontemplate {
             focusSequence.focusFov = spec.focusFovDegrees;
             focusSequence.fStop = spec.fStop;
             focusSequence.maxBlur = spec.maxBlurPixels;
-            focusSequence.highlightGain = spec.highlightGain;
             focusSequence.focusTravelFrames = spec.focusTravelFrames;
-            focusSequence.irisBlades = 8;
             focusSequence.subjects.reserve(spec.words.size());
             for (const auto& word : spec.words) {
                 focusSequence.subjects.push_back({
