@@ -165,6 +165,13 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_web_page_v2_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_web_page_v2_pack_test COMMAND chronontemplate_web_page_v2_pack_test)
 
+    # The native web-shot family: 28 rebuilds + six reusable recipes, all in
+    # the current screen-space layer contract, deterministic and fail-closed.
+    add_executable(chronontemplate_web_shots_pack_test tests/web_shots_pack.cpp)
+    target_link_libraries(chronontemplate_web_shots_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_web_shots_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_web_shots_pack_test COMMAND chronontemplate_web_shots_pack_test)
+
     add_executable(chronontemplate_elements_documentary_test tests/elements_documentary.cpp)
     target_link_libraries(chronontemplate_elements_documentary_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_elements_documentary_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)

@@ -16,6 +16,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "chronontemplate/web/WebFontMeasure.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -66,7 +68,9 @@ inline Json rgba(const std::string& hex, float alpha = 1.f) {
 /// pixel-truth raw: wire [-760,-340] centra un box su (200,880) px).
 /// `position` e' il centro del layer. Lo z e' assegnato da renderPlan.
 inline Json wirePos(float topDownCenterX, float topDownCenterY, float z = 0.f) {
-    return Json::array({topDownCenterX - float(kW) * 0.5f, float(kH) * 0.5f - topDownCenterY, z});
+    // Same contract as WebPageHighlightPack/WebPageV2Pack: position is the
+    // layer center in top-left-down px for X and bottom-left-up px for Y.
+    return Json::array({topDownCenterX, float(kH) - topDownCenterY, z});
 }
 
 /// Depth separation between consecutive layers, in wire units. The camera
@@ -97,12 +101,11 @@ inline Json rect(const std::string& id, float left, float top, float w, float h,
     // fuori canvas su questi backend).
     if (left == 0.f && top == 0.f && w == float(kW) && h == float(kH) &&
         alpha >= 0.999f && tracks.empty()) {
-        Json layer = {{"id", id}, {"type", "shape"}, {"enable_3d", true},
-                      {"size", Json::array({kW, kH})},
-                      {"position", wirePos(float(kW) * 0.5f, float(kH) * 0.5f)},
-                      {"start_frame", 0}, {"duration_frames", duration},
-                      {"shape", {{"type", "rect"}, {"fill", rgba(hex, alpha)}}}};
-        return layer;
+        // Full-bleed paper is screen-space, exactly like the working web packs:
+        // it must not move or clip when the camera rides above the composition.
+        return {{"id", id}, {"type", "color"}, {"color", rgba(hex, alpha)},
+                {"size", Json::array({kW, kH})}, {"screen_space", true},
+                {"start_frame", 0}, {"duration_frames", duration}};
     }
     const bool isMarkerColor = (hex == "#F7F7F5" && id == "cap") ||
         hex == "#C9DC28" || hex == "#E6E300" || hex == "#8F7313" ||
@@ -146,21 +149,10 @@ inline Json rect(const std::string& id, float left, float top, float w, float h,
         geometry = {{"type", "path"}, {"path", std::move(commands)},
                     {"fill", rgba(hex, alpha)}};
 
-        const auto& keys = tracks[1]["keyframes"];
-        const int begin = keys.size() >= 3 ? keys[1]["frame"].get<int>() : 0;
-        const int end = keys.size() >= 3 ? keys.back()["frame"].get<int>() : begin + 1;
-        Json opacityKeys = Json::array(), scaleKeys = Json::array(), xKeys = Json::array();
-        for (int frame = 0; frame < duration; ++frame) {
-            const float t = std::clamp(float(frame - begin) / float(std::max(1, end - begin)), 0.f, 1.f);
-            const float s = t * t * (3.f - 2.f * t); // Python _ease / smoothstep
-            opacityKeys.push_back(Json{{"frame", frame}, {"value", frame <= begin ? 0.0 : 1.0}});
-            scaleKeys.push_back(Json{{"frame", frame}, {"value", s}});
-            xKeys.push_back(Json{{"frame", frame}, {"value", -w * 0.5f * (1.f - s)}});
-        }
-        layer["animation"] = {{"tracks", Json::array({
-            Json{{"property", "opacity"}, {"easing", "linear"}, {"keyframes", std::move(opacityKeys)}},
-            Json{{"property", "scale_x"}, {"easing", "linear"}, {"keyframes", std::move(scaleKeys)}},
-            Json{{"property", "position_x"}, {"easing", "linear"}, {"keyframes", std::move(xKeys)}}})}};
+        // Keep the authored 3-keyframe sweep tracks as-is: the renderer
+        // evaluates sparse eased tracks correctly (proven by the glow-line
+        // recipe), while dense per-frame baked keys make the layer vanish.
+        layer["animation"] = {{"tracks", tracks}};
         layer["_native_marker_core_alpha"] = std::min(1.f, alpha < 1.f ? alpha * 1.05f : 1.f);
     } else {
         geometry = {{"type", "rect"}, {"fill", rgba(hex, alpha)}};
@@ -240,10 +232,21 @@ inline void addBlur(Json& layer, float radius) {
     layer["effects"] = std::move(effects);
 }
 
+/// Wire degli image layer (derivato da 6 render di calibrazione): diverso sia
+/// da shape che da text. `position` e' un offset dal centro canvas
+/// (center_px = (960 + pos.x, 540 - pos.y)) e `size` e' la cornice in px, con
+/// `fit: cover` che ritaglia al suo interno. Misure: size 1440x257 a [0,0] ->
+/// bbox x 240..1680 y 411..668; a [232,0] -> x 472..1912 (solo +232 in x);
+/// size 1920x1080 a [0,0] -> cornice piena.
+inline Json wireImagePos(float left, float top, float w, float h, float z = 0.f) {
+    return Json::array({left + w * 0.5f - float(kW) * 0.5f,
+                        float(kH) * 0.5f - (top + h * 0.5f), z});
+}
+
 inline Json image(const std::string& id, const std::string& asset, float left, float top,
                   float w, float h, int duration = 90) {
     return {{"id", id}, {"type", "image"}, {"enable_3d", true}, {"asset", asset},
-            {"position", wirePos(left + w * 0.5f, top + h * 0.5f)},
+            {"position", wireImagePos(left, top, w, h)},
             {"size", Json::array({w, h})}, {"fit", "cover"},
             {"start_frame", 0}, {"duration_frames", duration}};
 }
@@ -388,46 +391,33 @@ inline Json textLayer(const std::string& id, const std::string& text, float left
     const bool hCenter = anchor[0] == 'm';
     const bool hRight  = anchor[0] == 'r';
     const bool vMiddle = anchor[1] == 'm';
-    const bool edgeLeft = !hCenter && !hRight;
-    // The RenderPlan text renderer wraps at `size[0]`. The heuristic advance
-    // is only for aligning the authored left edge; using it as the wrap box
-    // clipped real-font runs (notably long headlines and small source labels).
-    // Builders author each line explicitly, so grant the full remaining canvas
-    // width and preserve that left edge as the box origin. Centered/right
-    // runs get a canvas-wide box so overlong Python single-line runs (e.g.
-    // the CNBC deck) stay on one line and overflow like PIL does.
-    const float advance = estimateWidth(text, size) * 1.07f;
-    const float w = edgeLeft
-        ? std::max(60.f, left >= 0.f ? float(kW) - left
-                                     : float(kW) + std::min(0.f, left))
-        : float(kW) * 2.f;
-    // Large display fonts have taller ascender/line metrics in Chronon3D than
-    // the CSS-like 1.65 estimate; leave room so exact-size headlines do not
-    // get clipped by the text frame.
-    const float h = size * (size >= 70.f ? 2.15f : 1.65f);
-    // Coordinate contract matches the Python kit's anchors:
-    //   - `text_align: left` hangs the run from the box's left edge, so the
-    //     run starts exactly at `left` regardless of advance estimation.
-    //   - The renderer vertically centers the 1.2em line box inside `h`;
-    //     measured mapping: cap_top = position.y - 0.407*size. PIL's "la"
-    //     anchor puts the ascender line at `top`, i.e. cap_top = top +
-    //     (ascent - capHeight) ~= top + 0.242*size, so position.y = top +
-    //     0.65*size reproduces the Python render (verified on shot 03).
-    //   - 'm' horizontal centers the run on `left` (box center == position.x);
-    //     'r' right-aligns it; 'm' vertical centers the line box on `top`.
-    // The native text renderer centers the glyph run inside the box (it does
-    // not honour text_align), so the box center is what lands on screen. Place
-    // it at the run's own center: left edge + half the measured advance.
-    const float px = hCenter ? left : (hRight ? left - advance * 0.5f : left + advance * 0.5f);
-    const float py = vMiddle ? top : top + size * 0.65f;
-    Json position = wirePos(px, py);
-    const char* align = hCenter ? "center" : (hRight ? "right" : "left");
+    // Contratto testo: il renderer centra la run nel box (align center di
+    // default; text_align:left e' ignorato dalla build corrente) e manda a
+    // capo oltre la larghezza del box, quindi il box deve contenere la run.
+    // Misura reale via stb+em-scale (entro ~1% dal renderer su 3 font): box
+    // largo measured*1.06 e centrato su left+measured/2, cosi' la run parte
+    // da `left` a meno di (measured-run)/2. La vecchia inflazione *1.32+48
+    // spostava il testo a destra di ~250px.
+    const float measured = measureTextWidth(font, size, text);
+    const float content = measured > 0.f ? measured : estimateWidth(text, size);
+    // 1.10 di margine: la misura puo' sottostimare dell'1-8% (font serif con
+    // kerning GPOS) e con un box piu' stretto della run il renderer manda a
+    // capo e centra le righe, facendo uscire il testo dai bordi. Il margine
+    // non sposta la run: leftEff = left - pad la tiene ancorata a `left`.
+    const float w = std::max(60.f, content * 1.10f);
+    const float h = size * 1.65f;
+    // left/top = bordo del box per 'l'/'a' (come Canvas Python); per 'm'/'r'
+    // il box e' centrato/ancorato a destra su left come prima.
+    const float pad = (w - content) * 0.5f;
+    const float leftEff = hCenter ? left - w * 0.5f
+                                  : (hRight ? left - w : left - pad);
+    const float topEff = vMiddle ? top - h * 0.5f : top;
+    Json position = wirePos(leftEff + w * 0.5f, topEff + h * 0.5f);
     Json layer = {{"id", id}, {"type", "text"}, {"text", text},
                   {"size", Json::array({w, h})},
                   {"position", std::move(position)},
                   {"enable_3d", true},
-                  {"style", {{"font", font}, {"font_size", size}, {"fill", fill},
-                             {"text_align", align}, {"fit_mode", "none"}}},
+                  {"style", {{"font", font}, {"font_size", size}, {"fill", fill}}},
                   {"start_frame", 0}, {"duration_frames", duration}};
     if (opacity != 1.f) layer["opacity"] = opacity;
     Json animators = Json::array();
@@ -488,6 +478,19 @@ inline void addPlayerChrome(Json& layers, const std::string& timestamp, double p
 /// Distanza camera che mappa 1 unita' = 1 px: il piano a z=0 riempie il canvas.
 /// Con fov verticale 50deg: (1080/2) / tan(25deg) = 1158.06.
 inline constexpr float kCameraBaseDistance = 1158.06f;
+
+/// Static camera: 1 unita' = 1 px. Con fov verticale 50deg la distanza che
+/// mappa 1080 unita' su 1080px e' 540/tan(25deg) = 1158.06 = kCameraBaseDistance
+/// (verificato con render di calibrazione: rettangoli a x 200/900/1600 tornano
+/// al px con -1158.06; la vecchia -1320 con yaw 0.5deg scalava tutto di 0.877
+/// verso il centro e traslava i bordi).
+inline Json staticCamera() {
+    return Json{{"type", "perspective"},
+                {"position", Json::array({0.f, 0.f, -kCameraBaseDistance})},
+                {"rotation_deg", Json::array({0.f, 0.f, 0.f})},
+                {"fov_deg", 50.f}, {"near", 1.f}, {"far", 10000.f}, {"zoom", 1.f},
+                {"sensor_width_mm", 36.f}, {"lens_shift", Json::array({0.f, 0.f})}};
+}
 
 /// Camera samples per-frame: asse centrale e push molto leggero, senza yaw,
 /// roll, tilt o oscillazioni. Il push e' uno zoom ottico minimo, quindi non
@@ -679,8 +682,13 @@ inline void bakeCameraTracks(Json& layer, const std::vector<CamAffine>& cam) {
 /// renderer conserva l'ordine autoriale del builder.
 inline Json renderPlan(const std::string& jobId, int duration, const Json& layers,
                        const Json& cameraSamplesJson) {
+    // The current RenderPlan contract applies the plan camera directly. The
+    // old writer baked a Python crop affine into layer tracks as well, which
+    // double-transformed every shot after the camera pass changed. Keep one
+    // transform authority: the camera stays static and the layers keep only
+    // their authored tracks (marker sweeps, pops, etc.).
+    (void)cameraSamplesJson;
     Json stack = Json::array();
-    const std::vector<CamAffine> camA = cameraAffines(cameraSamplesJson, duration);
     for (const Json& authored : layers) {
         Json layer = authored;
         const bool hasMarkerCore = layer.contains("_native_marker_core_alpha");
@@ -712,19 +720,10 @@ inline Json renderPlan(const std::string& jobId, int duration, const Json& layer
             pushWithDepth(std::move(core));
         }
     }
-    // La camera del renderer resta inerte su questi layer: il push autore e'
-    // bucato nelle track (bakeCameraTracks) cosi' la composizione coincide
-    // con apply_camera() del kit Python. I campioni restano nel piano per
-    // ispezione ma non vengono applicati due volte.
-    for (Json& l : stack) bakeCameraTracks(l, camA); // single transform
-    // I layer sono 3D con origine al centro canvas (Y verso il basso):
-    // lo z di pila qui sopra conserva l'ordine autoriale nel depth test.
     return {{"schema", "chronon.render-plan.v3"}, {"version", 3}, {"job_id", jobId},
             {"canvas", {{"width", kW}, {"height", kH}, {"fps_num", kFps}, {"fps_den", 1},
                         {"duration_frames", duration}}},
-            {"layers", std::move(stack)},
-            {"camera", cameraSamples(1, 1.0, 0.5, 0.5, 1.0, 0.5, 0.5)[0]["camera"]},
-            {"camera_samples", cameraSamples(duration, 1.0, 0.5, 0.5, 1.0, 0.5, 0.5)}};
+            {"layers", std::move(stack)}, {"camera", staticCamera()}};
 }
 
 } // namespace chronontemplate::web::shot

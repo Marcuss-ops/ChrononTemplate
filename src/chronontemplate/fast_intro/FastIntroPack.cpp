@@ -445,7 +445,7 @@ namespace chronontemplate::fast_intro {
                 LayerHandle& ring = scene.shape(ShapeSpec{
                     .size = chrononmotion::Vector2(glowSize * frac, glowSize * frac),
                     .fillColor = "#EE941F", .name = spec.name + "_ring_" + std::to_string(r),
-                    .geometry = ShapeGeometry::Ellipse, .fillEnabled = false,
+                    .fillEnabled = false, .geometry = ShapeGeometry::Ellipse,
                     .strokeColor = "#EE941F", .strokeWidth = 10.f - static_cast<float>(r) * 1.2f});
                 ring.parent(parent).position(cx, cy - 20.f).alive(0, end);
                 ring.animateOpacity(0, 20, 0.f, 0.20f - static_cast<float>(r) * 0.02f);

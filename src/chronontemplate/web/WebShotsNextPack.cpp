@@ -18,6 +18,18 @@ namespace {
 
 [[noreturn]] void fail(const std::string& m) { throw std::invalid_argument("WebNextSpec: " + m); }
 
+// Larghezza del prefisso prima di `highlight` in `head`: il marker deve
+// partire dove inizia la frase evidenziata, non a inizio headline.
+// Misura reale dal font (stesso file del renderer), fallback alla stima.
+float prefixWidth(const char* font, float size, const std::string& head,
+                  const std::string& hi) {
+    const auto at = head.find(hi);
+    const std::string pre = at == std::string::npos ? "" : head.substr(0, at);
+    if (pre.empty()) return 0.f;
+    const float m = measureTextWidth(font, size, pre);
+    return m > 0.f ? m : estimateWidth(pre, size);
+}
+
 } // namespace
 
 const char* webNextName(WebNextRecipe r){
@@ -57,12 +69,15 @@ Json buildWebNextPlan(const WebNextSpec& spec){
     switch(spec.recipe){
     case WebNextRecipe::DualMarkerCross: {
         std::string paper = spec.paperColor.empty() ? "#EDECEA" : spec.paperColor;
+        static constexpr const char* kHelv = "ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf";
         L.push_back(rect("paper",0,0,1920,1080,paper,1.f,Json::array(),D));
-        float wH = estimateWidth(spec.highlight,72);
-        // due sweep incrociati: primo da sinistra, secondo da destra ritardato
-        L.push_back(rect("cross_a",200,400,wH+24,92,hl,0.95f,sweepTracks(wH,b1,s1),D));
-        L.push_back(rect("cross_b",200,520,wH+24,72,"#E4572E",0.55f,sweepTracks(wH,b2,s2),D));
-        L.push_back(textLayer("headline",spec.headline,200,400,72,"ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf","#141416",D,0.f,0));
+        const float mH = measureTextWidth(kHelv, 72, spec.highlight);
+        float wH = (mH > 0.f ? mH : estimateWidth(spec.highlight,72));
+        // due sweep incrociati sulla frase evidenziata (offset dal prefisso)
+        const float px = 200.f + prefixWidth(kHelv, 72, spec.headline, spec.highlight);
+        L.push_back(rect("cross_a",px,400,wH+24,92,hl,0.95f,sweepTracks(wH,b1,s1),D));
+        L.push_back(rect("cross_b",px,520,wH+24,72,"#E4572E",0.55f,sweepTracks(wH,b2,s2),D));
+        L.push_back(textLayer("headline",spec.headline,200,400,72,"ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf","#141416",D,0.f,-1));
         L.push_back(textLayer("sub",spec.subline,200,640,30,"ChrononTemplate/assets/fonts/Inter-Regular.ttf","#67645F",D,0.f,1));
         L.push_back(textLayer("body",spec.body,200,700,30,"ChrononTemplate/assets/fonts/Inter-Regular.ttf","#67645F",D,2.4f,2));
         break; }
@@ -79,15 +94,19 @@ Json buildWebNextPlan(const WebNextSpec& spec){
         break; }
     case WebNextRecipe::TiltSnapReveal: {
         std::string paper = spec.paperColor.empty() ? "#F4F3F0" : spec.paperColor;
+        static constexpr const char* kHelv = "ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf";
         L.push_back(rect("paper",0,0,1920,1080,paper,1.f,Json::array(),D));
-        float wH = estimateWidth(spec.highlight,72);
-        L.push_back(rect("snap_marker",140,330,wH+16,92,hl,0.95f,sweepTracks(wH,b1,s1),D));
-        L.push_back(textLayer("headline",spec.headline,140,330,72,"ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf","#0E0E10",D,0.f,0));
+        const float mH = measureTextWidth(kHelv, 72, spec.highlight);
+        float wH = (mH > 0.f ? mH : estimateWidth(spec.highlight,72));
+        const float mx = 140.f + prefixWidth(kHelv, 72, spec.headline, spec.highlight);
+        L.push_back(rect("snap_marker",mx,330,wH+16,92,hl,0.95f,sweepTracks(wH,b1,s1),D));
+        L.push_back(textLayer("headline",spec.headline,140,330,72,"ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf","#0E0E10",D,0.f,-1));
         L.push_back(textLayer("body",spec.body,140,480,34,"ChrononTemplate/assets/fonts/Inter-Regular.ttf","#4A4844",D,2.4f,1));
-        // Snap centrato senza rotazione: scala 0.94->1 con easing morbido.
+        // Settle senza scala (il renderer non scala i layer testo): fade-in.
         L.back()["animation"] = Json::object({{"tracks", Json::array({
-            easedTrack("scale_x",0.94f,1.f,0,D/3,"out_cubic"),
-            easedTrack("scale_y",0.94f,1.f,0,D/3,"out_cubic")})}});
+            easedTrack("opacity",0.f,1.f,8,24,"out_cubic")})}});
+        // Sottile riga che cade in posizione quando lo sweep atterra.
+        L.push_back(rect("settle_rule",140,600,520,4,"#0E0E10",0.75f,sweepTracks(520.f,b1+12,s1),D));
         L.push_back(rect("chyron",0,984,1920,96,"#080809",1.f,Json::array(),D));
         L.push_back(textLayer("chy",spec.subline,760,1010,34,"ChrononTemplate/assets/fonts/Oswald-Bold.ttf","#E8871E",D,0.f,2));
         break; }
@@ -109,14 +128,15 @@ Json buildWebNextPlan(const WebNextSpec& spec){
         std::string paper = spec.paperColor.empty() ? "#131110" : spec.paperColor;
         L.push_back(rect("bg",0,0,1920,1080,paper,1.f,Json::array(),D));
         L.push_back(ellipse("pizza",240,-180,1520,1240,"#2B241E",1.f,D));
-        // card: pop con overshoot 0.9->1 + marker sweep dietro
-        float wH = estimateWidth(spec.headline,52);
+        // card: pop con overshoot 0.9->1 sul rettangolo (shape: la scala e'
+        // sicura), testo con fade+rise (il renderer non scala i layer testo)
+        const float mH = measureTextWidth(kRegular, 52, spec.headline);
+        float wH = (mH > 0.f ? mH : estimateWidth(spec.headline,52));
         L.push_back(rect("card",960-(wH/2)-60,492,wH+120,148,"#F7F7F5",1.f,sweepTracks(wH,b1,s1),D));
-        Json card = textLayer("cap",spec.headline,960-wH/2,556,52,"ChrononTemplate/assets/fonts/Inter-Regular.ttf","#101010",D,0.f,0);
+        Json card = textLayer("cap",spec.headline,960,566,52,kRegular,"#101010",D,0.f,-1,1.f,"mm");
         card["animation"] = Json::object({{"tracks", Json::array({
-            easedTrack("scale_x",0.9f,1.f,0,22,"out_back"),
-            easedTrack("scale_y",0.9f,1.f,0,22,"out_back"),
-            easedTrack("opacity",0.f,1.f,0,16,"out_cubic")})}});
+            easedTrack("opacity",0.f,1.f,0,16,"out_cubic"),
+            easedTrack("position_y",14.f,0.f,0,16,"out_cubic")})}});
         L.push_back(std::move(card));
         break; }
     case WebNextRecipe::CrtFringeFlash: {
@@ -125,8 +145,11 @@ Json buildWebNextPlan(const WebNextSpec& spec){
         // fringe: due copie offset rosso/ciano sotto il bianco
         L.push_back(textLayer("fr_r",spec.headline,105,205,96,kSerifBold,"#D5D000",D,0.f,-1,0.55f));
         L.push_back(textLayer("fr_b",spec.headline,95,195,96,kSerifBold,"#67B9D4",D,0.f,-1,0.42f));
-        float wH = estimateWidth(spec.highlight,96);
-        L.push_back(rect("flash",100,210,wH+16,116,"#C9DC28",0.0f,Json::array(),D));
+        const float mPre = measureTextWidth(kSerifBold, 96, spec.headline.substr(0, spec.headline.find(spec.highlight)));
+        const float mH = measureTextWidth(kSerifBold, 96, spec.highlight);
+        float wH = (mH > 0.f ? mH : estimateWidth(spec.highlight,96));
+        const float fx = 100.f + (mPre > 0.f ? mPre : estimateWidth(spec.headline.substr(0, spec.headline.find(spec.highlight)),96));
+        L.push_back(rect("flash",fx-4,210,wH+8,116,"#C9DC28",0.0f,Json::array(),D));
         // flash reveal: opacity 0->0.85 sul marker + testo bianco sopra
         L.back()["animation"] = Json::object({{"tracks", Json::array({
             easedTrack("opacity",0.f,0.85f,b1,s1,"in_out_cubic"),
