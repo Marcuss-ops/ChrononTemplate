@@ -83,6 +83,11 @@ int main() {
     check(runtimeLowered.plan.camera.has_value() &&
           !runtimeLowered.plan.camera_samples.has_value(),
           "runtime lowering keeps a static camera default and omits duplicate dense camera tracks");
+    check(!runtimeLowered.plan.layers.front().transform_samples.empty() &&
+          runtimeLowered.plan.layers.front().transform_samples.size() ==
+              runtimeLowered.plan.canvas.duration.integral() &&
+          !runtimeLowered.plan.layers.front().animation,
+          "runtime-camera lowering also replaces legacy integer TRS with resolved layer samples");
     check(runtimeLowered.camera.fingerprint == "animated-dof-camera-v1",
           "runtime lowering carries the stable camera identity into the provider");
     const auto runtimeCamera = runtimeLowered.camera.sample(12.0);
@@ -90,6 +95,28 @@ int main() {
               "runtime provider samples the CM3D rig at frame/fps time");
     chrononmotion_test::checkNear(runtimeCamera.dof_focus_distance, 520.f, 1e-4f,
               "runtime provider carries the fractional-time focus distance");
+
+    TemplateScene shutteredRuntime("runtime-shuttered-layers", 24.f, host, 640.f, 360.f);
+    auto& shutteredTitle = shutteredRuntime.text(
+        TextSpec{.text = "Shutter", .font = "Inter.ttf", .fontSize = 48.f});
+    shutteredTitle.position(320.f, 180.f).animate(FadeIn{.inFrame = 0, .duration = 8});
+    shutteredRuntime.setTemporalMotionBlur(180.f, 4);
+    LayerPlan shutteredText = text;
+    shutteredText.text = "Shutter";
+    const auto shutteredPlan = lowerToRuntimeRenderPlan(
+        shutteredRuntime, {{shutteredTitle.id(), shutteredText}}, "runtime-shuttered-camera-v1");
+    const auto expectedLayerFrames = chronon3d::render_plan::resolved_sample_frames(
+        shutteredPlan.plan.canvas, shutteredPlan.plan.temporal_motion_blur);
+    const auto& shutteredLayer = shutteredPlan.plan.layers.front();
+    check(shutteredPlan.plan.temporal_motion_blur.has_value() &&
+          shutteredLayer.transform_samples.size() == expectedLayerFrames.size() &&
+          !shutteredLayer.animation,
+          "runtime-camera lowering resolves visual transforms on the canonical shutter calendar");
+    if (shutteredLayer.transform_samples.size() == expectedLayerFrames.size()) {
+        for (std::size_t i = 0; i < expectedLayerFrames.size(); ++i)
+            check(shutteredLayer.transform_samples[i].frame == expectedLayerFrames[i],
+                  "runtime layer sample timestamp matches the renderer shutter scheduler");
+    }
 
     // The parented provider retains a dedicated hierarchy after the authored
     // template is changed and destroyed, including at fractional shutter times.

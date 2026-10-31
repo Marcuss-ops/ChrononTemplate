@@ -499,10 +499,13 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlanImpl(
     options.schema = chronon3d::render_plan::kRenderPlanSchemaV3;
     options.cameraRig = &scene.cameraRig();
     options.bakeResolvedCameraSamples = bakeCameraSamples;
-    // Materialized Template plans use resolved per-frame layer transforms as
-    // well as resolved camera samples. Keep the runtime-provider overload
-    // separate: it deliberately evaluates the rig through its provider.
-    options.requireResolvedLayerSamples = bakeCameraSamples;
+    // Both materialized and runtime-camera plans use resolved layer samples.
+    // The runtime overload changes only camera ownership; it must not leave
+    // visual transforms on the legacy integer-TRS path.
+    options.requireResolvedLayerSamples = true;
+    if (const auto& blur = scene.temporalMotionBlur())
+        options.temporalMotionBlur = chronon3d::render_plan::MotionBlurPlan{
+            blur->shutterAngle, blur->samples};
     options.cameraSampleFrames = std::move(cameraSampleFrames);
 
     std::unordered_map<MotionLayerId, bool> expected;
@@ -521,9 +524,6 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlanImpl(
                                         std::to_string(layerId));
     }
     auto plan = chrononmotion::motion::lowerToRenderPlan(scene.motion(), options);
-    if (const auto& blur = scene.temporalMotionBlur())
-        plan.temporal_motion_blur = chronon3d::render_plan::MotionBlurPlan{
-            blur->shutterAngle, blur->samples};
     return plan;
 }
 } // namespace
