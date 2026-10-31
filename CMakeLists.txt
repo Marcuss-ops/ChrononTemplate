@@ -247,6 +247,7 @@ add_library(chronontemplate STATIC
         # web shots rebuild v1: port C++ dei 28 shot Python + 6 nuove recipe next
         src/chronontemplate/web/WebShotsRebuildPack.cpp
         src/chronontemplate/web/WebShotsNextPack.cpp
+        src/chronontemplate/web/WebFontMeasure.cpp
         # second generation: radians-safe fold, distinct recipes, reworked hierarchy
         src/chronontemplate/web/WebPageV2Pack.cpp
         # native layout composers: flex rows, columns and grids plus FLIP moves
@@ -476,6 +477,43 @@ target_compile_options(chronontemplate_emit_image_effect_samples PRIVATE -Wall -
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.
+if(CHRONONTEMPLATE_STB_FLAT_DIR)
+    target_include_directories(chronontemplate PRIVATE ${CHRONONTEMPLATE_STB_FLAT_DIR})
+endif()
+# HarfBuzz per la misura testo con shaping (stesso risultato del renderer,
+# entro ~1%): i vcpkg CONFIG package stanno sotto vcpkg_installed quando il
+# toolchain non e' in uso. Senza, misura stb senza shaping (fallback).
+find_path(CHRONONTEMPLATE_HARFBUZZ_INCLUDE_DIR hb.h
+    PATH_SUFFIXES harfbuzz
+    HINTS "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-fast-dev/x64-linux/include"
+          "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-video-fast-dev/x64-linux/include")
+find_library(CHRONONTEMPLATE_HARFBUZZ_LIBRARY harfbuzz
+    HINTS "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-fast-dev/x64-linux/lib"
+          "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-video-fast-dev/x64-linux/lib")
+if(CHRONONTEMPLATE_HARFBUZZ_INCLUDE_DIR AND CHRONONTEMPLATE_HARFBUZZ_LIBRARY)
+    # libharfbuzz.a include il backend FreeType (hb-ft.cc.o): serve anche FT.
+    find_library(CHRONONTEMPLATE_FREETYPE_LIBRARY freetype
+        HINTS "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-fast-dev/x64-linux/lib"
+              "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-video-fast-dev/x64-linux/lib")
+    target_include_directories(chronontemplate PRIVATE ${CHRONONTEMPLATE_HARFBUZZ_INCLUDE_DIR})
+    target_link_libraries(chronontemplate PUBLIC ${CHRONONTEMPLATE_HARFBUZZ_LIBRARY})
+    if(CHRONONTEMPLATE_FREETYPE_LIBRARY)
+        target_link_libraries(chronontemplate PUBLIC ${CHRONONTEMPLATE_FREETYPE_LIBRARY})
+        # libfreetype.a statica tira dentro png/bz2 per i font sfnt compressi.
+        foreach(_ft_dep png bz2 z brotlidec brotlicommon)
+            find_library(CHRONONTEMPLATE_FT_DEP_${_ft_dep} ${_ft_dep}
+                HINTS "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-fast-dev/x64-linux/lib"
+                      "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/linux-video-fast-dev/x64-linux/lib")
+            if(CHRONONTEMPLATE_FT_DEP_${_ft_dep})
+                target_link_libraries(chronontemplate PUBLIC ${CHRONONTEMPLATE_FT_DEP_${_ft_dep}})
+            endif()
+        endforeach()
+    endif()
+    target_compile_definitions(chronontemplate PUBLIC CHRONONTEMPLATE_HAVE_HARFBUZZ=1)
+    message(STATUS "ChrononTemplate: shaping text measure via HarfBuzz")
+else()
+    message(STATUS "ChrononTemplate: HarfBuzz not found, stb text measure fallback")
+endif()
 target_include_directories(chronontemplate PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CHRONONTEMPLATE_CHRONON3D_DIR}/include>
