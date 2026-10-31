@@ -499,6 +499,10 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlanImpl(
     options.schema = chronon3d::render_plan::kRenderPlanSchemaV3;
     options.cameraRig = &scene.cameraRig();
     options.bakeResolvedCameraSamples = bakeCameraSamples;
+    // Materialized Template plans use resolved per-frame layer transforms as
+    // well as resolved camera samples. Keep the runtime-provider overload
+    // separate: it deliberately evaluates the rig through its provider.
+    options.requireResolvedLayerSamples = bakeCameraSamples;
     options.cameraSampleFrames = std::move(cameraSampleFrames);
 
     std::unordered_map<MotionLayerId, bool> expected;

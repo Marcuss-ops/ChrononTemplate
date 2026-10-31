@@ -31,7 +31,11 @@ int main() {
     check(plan.canvas.width == 640 && plan.canvas.height == 360, "lowering preserves the template canvas");
     check(plan.layers.size() == 1 && plan.layers.front().id == std::to_string(title.id()),
           "lowering carries bound content with stable layer identity");
-    check(plan.layers.front().animation.has_value(), "motion animation is baked into the RenderPlan");
+    check(!plan.layers.front().transform_samples.empty() &&
+          plan.layers.front().transform_samples.size() == plan.canvas.duration.integral(),
+          "materialized Template plans carry resolved layer transforms for every frame");
+    check(!plan.layers.front().animation.has_value(),
+          "resolved Template transform samples replace the legacy TRS animation bake");
 
     bool missingRejected = false;
     try { (void)lowerToRenderPlan(scene, {}); }
@@ -66,9 +70,9 @@ int main() {
         const auto& first = dofPlan.camera_samples->front().camera;
         const auto& last = dofPlan.camera_samples->back().camera;
         check(first.dof_focus_distance == 420.f && last.dof_focus_distance == 620.f &&
-              first.dof_aperture == 0.f && first.dof_max_blur == 10.f &&
+              first.f_stop == 0.f && first.dof_max_blur == 10.f &&
               last.dof_focus_distance >= 420.f && last.dof_focus_distance <= 620.f &&
-              last.dof_f_stop > 0.f && last.dof_f_stop <= 11.2f &&
+              last.f_stop > 0.f && last.f_stop <= 11.2f &&
               last.dof_max_blur >= 10.f && last.dof_max_blur <= 18.f,
               "resolved camera samples preserve authored DoF endpoints");
     }
