@@ -20,9 +20,9 @@ class EntityWithTextV2Tests(unittest.TestCase):
     def setUpClass(cls):
         cls.plans = V2.build_all()
 
-    def test_fifteen_unique_five_second_renderplan_v3_scenes(self):
-        self.assertEqual(len(self.plans), 15)
-        self.assertEqual(len({plan["job_id"] for plan in self.plans}), 15)
+    def test_twenty_eight_unique_five_second_renderplan_v3_scenes(self):
+        self.assertEqual(len(self.plans), 28)
+        self.assertEqual(len({plan["job_id"] for plan in self.plans}), 28)
         for plan in self.plans:
             with self.subTest(scene=plan["job_id"]):
                 self.assertEqual(plan["schema"], "chronon.render-plan.v3")
@@ -36,9 +36,10 @@ class EntityWithTextV2Tests(unittest.TestCase):
                 portrait=next(layer for layer in plan["layers"] if layer["id"]=="steve-jobs-portrait")
                 title=next(layer for layer in plan["layers"] if layer["id"]=="steve-jobs-title")
                 self.assertEqual(portrait["type"],"image")
-                self.assertEqual(portrait["asset"],V2.ASSET)
+                recipe=next(item for item in V2.RECIPES if item["id"]==plan["job_id"])
+                self.assertEqual(portrait["asset"],recipe.get("asset",V2.ASSET))
                 self.assertEqual(title["type"],"text")
-                self.assertEqual(title["text"],"STEVE JOBS")
+                self.assertEqual(title["text"],recipe.get("title_text","STEVE JOBS"))
                 self.assertEqual(title["style"]["font"],V2.FONT)
                 self.assertEqual(portrait["duration_frames"],150)
                 self.assertEqual(title["duration_frames"],150)
@@ -46,16 +47,20 @@ class EntityWithTextV2Tests(unittest.TestCase):
                 self.assertTrue(title["animation"]["tracks"])
                 self.assertFalse(any(layer.get("type")=="image" and "title" in layer.get("id","") for layer in plan["layers"]))
 
-    def test_ten_existing_directions_are_refined_and_five_are_new(self):
+    def test_ten_existing_directions_are_refined_and_eighteen_are_new(self):
         refined=[item for item in V2.RECIPES if not item["source"].startswith("new_")]
         new=[item for item in V2.RECIPES if item["source"].startswith("new_")]
         self.assertEqual(len(refined),10)
-        self.assertEqual(len(new),5)
+        self.assertEqual(len(new),18)
         for item in refined:
             self.assertIn(item["source"],{preset["id"] for preset in V2.BASE.load_families()["entity_card_v1"]["presets"]})
         self.assertEqual({item["id"] for item in new},{
             "entity_v2_monumental_push","entity_v2_archive_filmstrip","entity_v2_dual_depth_lockup",
-            "entity_v2_quote_annotation","entity_v2_silhouette_reveal"})
+            "entity_v2_quote_annotation","entity_v2_silhouette_reveal","entity_v2_kinetic_name_lockup",
+            "entity_v2_quote_first_reveal","entity_v2_editorial_wipe","entity_v2_lunar_rise",
+            "entity_v2_orbit_name","entity_v2_mission_lockup","entity_v2_quote_slow_reveal",
+            "entity_v2_lunar_descent","entity_v2_horizon_drift","entity_v2_snap_settle",
+            "entity_v2_side_slide","entity_v2_moonshot_push","entity_v2_moonwalk_endcard"})
 
     def test_all_animated_keys_are_finite_and_inside_their_layer_lifetime(self):
         for plan in self.plans:
