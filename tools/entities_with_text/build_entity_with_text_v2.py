@@ -26,8 +26,8 @@ BASE = importlib.util.module_from_spec(_builder_spec)
 _builder_spec.loader.exec_module(BASE)
 
 # The first ten names deliberately map V1 ideas into a more legible, coherent
-# hero-card composition. The five appended recipes explore camera/depth,
-# archival framing and split-layout options without rasterizing the name.
+# hero-card composition. Appended recipes explore camera/depth, archival
+# framing, split layouts and editorial text treatments without rasterizing the name.
 RECIPES = [
     {"id":"entity_v2_caption_rise","source":"entity_caption_rise","image":[("opacity",[(0,0),(28,1),(149,1)]),("scale",[(0,.92),(56,1),(149,1)])],"title":[("opacity",[(0,0),(42,1),(149,1)]),("position_y",[(0,42),(50,0),(149,0)])],"layout":"lower"},
     {"id":"entity_v2_depth_settle","source":"entity_depth_caption","image":[("opacity",[(0,0),(32,1),(149,1)]),("position_z",[(0,150),(62,0),(149,0)]),("scale",[(0,.91),(62,1),(149,1)])],"title":[("opacity",[(0,0),(48,1),(149,1)]),("position_z",[(0,82),(54,0),(149,0)])],"layout":"lower"},
@@ -44,6 +44,19 @@ RECIPES = [
     {"id":"entity_v2_dual_depth_lockup","source":"new_dual_depth_lockup","image":[("opacity",[(0,0),(34,1),(149,1)]),("position_z",[(0,-120),(65,0),(149,0)]),("rotation_y",[(0,10),(58,0),(149,0)])],"title":[("opacity",[(0,0),(53,1),(149,1)]),("position_z",[(0,120),(72,0),(149,0)])],"layout":"lower"},
     {"id":"entity_v2_quote_annotation","source":"new_documentary_annotation","image":[("opacity",[(0,0),(36,1),(149,1)]),("scale",[(0,.94),(60,1),(149,1)])],"title":[("opacity",[(0,0),(54,1),(149,1)]),("position_y",[(0,30),(70,0),(149,0)])],"layout":"annotation","annotation":True},
     {"id":"entity_v2_silhouette_reveal","source":"new_silhouette_color_reveal","image":[("opacity",[(0,0),(18,0),(50,1),(149,1)]),("scale",[(0,1.08),(62,1),(149,1)])],"title":[("opacity",[(0,0),(57,1),(149,1)]),("position_x",[(0,42),(70,0),(149,0)])],"layout":"monumental"},
+    {"id":"entity_v2_kinetic_name_lockup","source":"new_kinetic_name_lockup","image":[("opacity",[(0,0),(24,1),(149,1)]),("position_x",[(0,-95),(58,0),(149,0)]),("scale",[(0,.94),(62,1),(149,1)])],"title":[("opacity",[(0,0),(34,1),(149,1)]),("position_x",[(0,180),(54,0),(149,0)]),("scale",[(0,.92),(65,1),(149,1)])],"layout":"split","lockup":True},
+    {"id":"entity_v2_quote_first_reveal","source":"new_quote_first_reveal","image":[("opacity",[(0,0),(62,0),(82,1),(149,1)]),("position_y",[(0,32),(92,0),(149,0)]),("scale",[(0,1.04),(94,1),(149,1)])],"title":[("opacity",[(0,0),(48,1),(149,1)]),("position_y",[(0,28),(58,0),(149,0)])],"layout":"lower","quote_first":True},
+    {"id":"entity_v2_editorial_wipe","source":"new_editorial_wipe","image":[("opacity",[(0,0),(38,1),(149,1)]),("rotation_y",[(0,8),(52,-1),(76,0),(149,0)]),("position_z",[(0,70),(70,0),(149,0)])],"title":[("opacity",[(0,0),(54,1),(149,1)]),("position_x",[(0,-100),(72,0),(149,0)])],"layout":"monumental","editorial":True},
+    {"id":"entity_v2_lunar_rise","source":"new_lunar_rise","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"APOLLO 11  ·  1969","image":[("opacity",[(0,0),(24,1),(149,1)]),("position_y",[(0,75),(62,0),(149,0)]),("scale",[(0,.91),(72,1),(149,1)])],"title":[("opacity",[(0,0),(50,1),(149,1)]),("position_y",[(0,48),(62,0),(149,0)])],"layout":"lower"},
+    {"id":"entity_v2_orbit_name","source":"new_orbit_name","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"APOLLO 11  ·  1969","image":[("opacity",[(0,0),(30,1),(149,1)]),("rotation_y",[(0,-12),(56,3),(84,0),(149,0)]),("position_z",[(0,-100),(68,0),(149,0)])],"title":[("opacity",[(0,0),(56,1),(149,1)]),("position_x",[(0,72),(70,0),(149,0)])],"layout":"lower"},
+    {"id":"entity_v2_mission_lockup","source":"new_mission_lockup","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"COMMANDER  ·  APOLLO 11","image":[("opacity",[(0,0),(26,1),(149,1)]),("position_x",[(0,-160),(60,0),(149,0)]),("scale",[(0,.94),(70,1),(149,1)])],"title":[("opacity",[(0,0),(42,1),(149,1)]),("position_x",[(0,180),(62,0),(149,0)])],"layout":"split","lockup":True},
+    {"id":"entity_v2_quote_slow_reveal","source":"new_quote_slow_reveal","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"APOLLO 11  ·  1969","image":[("opacity",[(0,0),(80,0),(104,1),(149,1)]),("scale",[(0,1.08),(110,1),(149,1)])],"title":[("opacity",[(0,0),(52,1),(149,1)]),("position_y",[(0,32),(64,0),(149,0)])],"layout":"lower","quote_first":True,"quote":"THAT'S ONE SMALL STEP FOR [A] MAN."},
+    {"id":"entity_v2_lunar_descent","source":"new_lunar_descent","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"FIRST FOOTPRINT  ·  MOON","image":[("opacity",[(0,0),(20,1),(149,1)]),("position_y",[(0,-90),(70,0),(149,0)]),("scale",[(0,1.12),(78,1),(149,1)])],"title":[("opacity",[(0,0),(66,1),(149,1)]),("position_x",[(0,-90),(74,0),(149,0)])],"layout":"monumental"},
+    {"id":"entity_v2_horizon_drift","source":"new_horizon_drift","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"MISSION  ·  1969","image":[("opacity",[(0,0),(34,1),(149,1)]),("position_x",[(0,-45),(149,42)]),("scale",[(0,.97),(149,1.04)])],"title":[("opacity",[(0,0),(58,1),(149,1)]),("position_x",[(0,55),(149,-35)])],"layout":"lower"},
+    {"id":"entity_v2_snap_settle","source":"new_snap_settle","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"A GIANT LEAP  ·  1969","image":[("opacity",[(0,0),(16,1),(149,1)]),("scale",[(0,.82),(38,1.04),(58,1),(149,1)])],"title":[("opacity",[(0,0),(28,1),(149,1)]),("scale",[(0,.72),(48,1.06),(68,1),(149,1)])],"layout":"lower"},
+    {"id":"entity_v2_side_slide","source":"new_side_slide","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"NASA ASTRONAUT  ·  1930—2012","image":[("opacity",[(0,0),(28,1),(149,1)]),("position_x",[(0,220),(66,0),(149,0)]),("scale",[(0,.9),(70,1),(149,1)])],"title":[("opacity",[(0,0),(46,1),(149,1)]),("position_x",[(0,-180),(70,0),(149,0)])],"layout":"split"},
+    {"id":"entity_v2_moonshot_push","source":"new_moonshot_push","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"APOLLO 11  ·  COMMANDER","image":[("opacity",[(0,0),(32,1),(149,1)]),("position_z",[(0,230),(78,-30),(108,0),(149,0)]),("scale",[(0,.84),(80,1.05),(108,1),(149,1)])],"title":[("opacity",[(0,0),(68,1),(149,1)]),("position_z",[(0,110),(78,0),(149,0)])],"layout":"monumental"},
+    {"id":"entity_v2_moonwalk_endcard","source":"new_moonwalk_endcard","asset":"ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png","title_text":"NEIL ARMSTRONG","caption":"THE FIRST HUMAN ON THE MOON","image":[("opacity",[(0,0),(36,1),(149,1)]),("position_y",[(0,42),(80,0),(149,-8)]),("scale",[(0,.93),(84,1),(149,1)])],"title":[("opacity",[(0,0),(74,1),(149,1)]),("position_y",[(0,38),(82,0),(149,0)]),("scale",[(0,.95),(85,1),(149,1)])],"layout":"monumental"},
 ]
 
 
@@ -60,6 +73,9 @@ def _rule(layer_id: str, center: tuple[int, int], width: int, color: str, start:
                            [BASE.track("scale_x",[(0,.015),(min(56,final),1),(final,1)],"out_cubic"),
                             BASE.track("opacity",[(0,0),(min(38,final),1),(final,1)],"out_cubic")])
     layer["type"]="shape"
+    # Shape layers use canvas-centered coordinates directly; color/image layers
+    # use renderer-centered coordinates. Convert after changing the layer type.
+    layer["position"]=[float(x),float(y)]
     layer["shape"]={"type":"path","path":[{"type":"move_to","point":[-width/2,0]},{"type":"line_to","point":[width/2,0]}],"stroke":{"color":color,"width":5}}
     layer.pop("color",None)
     return layer
@@ -78,22 +94,29 @@ def build_plan(recipe: dict) -> dict:
                                       tracks=[BASE.track("opacity",[(0,0),(38,1),(149,1)])]))
         layers.append(BASE.layer_text("annotation-quote","A DIFFERENT WAY OF THINKING",[860,65],[960,930],12,FRAMES-12,font=FONT,font_size=34,fill="#E5DED1",
                                       tracks=[BASE.track("opacity",[(0,0),(56,1),(137,1)]),BASE.track("position_y",[(0,20),(60,0),(137,0)])]))
+    if recipe.get("quote_first"):
+        layers.append(BASE.layer_text("entity-quote",recipe.get("quote","THE PEOPLE WHO ARE CRAZY ENOUGH TO THINK THEY CAN CHANGE THE WORLD"),[1420,100],[960,300],0,FRAMES,font=FONT,font_size=35,min_font_size=26,fill="#D8B977",
+                                      tracks=[BASE.track("opacity",[(0,0),(35,1),(149,1)]),BASE.track("position_y",[(0,30),(42,0),(149,0)])]))
+    if recipe.get("lockup"):
+        layers.append(BASE.layer_text("entity-kicker","THE THINKER  /  THE MAKER",[650,38],[1310,405],0,FRAMES,font=FONT,font_size=22,fill="#D8B977",
+                                      tracks=[BASE.track("opacity",[(0,0),(44,1),(149,1)]),BASE.track("position_x",[(0,90),(62,0),(149,0)])]))
     if layout == "split":
         image_xy, image_size, title_xy, title_size = [650,500],[620,660],[1310,500],[740,140]
     elif layout == "monumental":
         image_xy, image_size, title_xy, title_size = [960,435],[690,700],[960,850],[1400,145]
     else:
         image_xy, image_size, title_xy, title_size = [960,450],[680,690],[960,865],[1250,135]
-    image = {"id":"steve-jobs-portrait","type":"image","asset":ASSET,"size":image_size,"fit":"contain",
+    image = {"id":"steve-jobs-portrait","type":"image","asset":recipe.get("asset",ASSET),"size":image_size,"fit":"contain",
              "position":BASE.renderer_center_position(image_xy),"start_frame":0,"duration_frames":FRAMES,
              "enable_3d":any(prop in {"position_z","rotation_x","rotation_y"} for prop,_ in recipe["image"]),
              "animation":{"tracks":_tracks(recipe["image"])},"effects":[]}
     if recipe.get("glow"):
         image["effects"]=[{"type":"glow","radius":20,"intensity":.16,"color":[.84,.68,.42,1]}]
     BASE.add_entity_image_frame(image,image_radius=10,stroke_width=0)
+    image["style"]["background"]["color"]="#111821"
     layers.append(image)
     title_fill = "#E8D6AF" if recipe.get("archive") else "#F4F1E9"
-    title = BASE.layer_text("steve-jobs-title","STEVE JOBS",title_size,title_xy,0,FRAMES,font=FONT,font_size=118 if layout!="split" else 88,
+    title = BASE.layer_text("steve-jobs-title",recipe.get("title_text","STEVE JOBS"),title_size,title_xy,0,FRAMES,font=FONT,font_size=118 if layout!="split" else 88,
                             min_font_size=58,fill=title_fill,tracks=_tracks(recipe["title"]))
     if recipe.get("pill"):
         title["style"]["background"]={"color":"#252B30","radius":22,"padding":[24,12]}
@@ -101,7 +124,7 @@ def build_plan(recipe: dict) -> dict:
     if layout != "split":
         accent_color="#D8B977" if recipe.get("archive") else "#B7975B"
         layers.append(_rule("title-accent-rule",(960,940),430,accent_color))
-        layers.append(BASE.layer_text("portrait-caption","INNOVATOR  ·  1955—2011",[620,36],[960,995],18,FRAMES-18,font=FONT,font_size=22,fill="#9C9A94",
+        layers.append(BASE.layer_text("portrait-caption",recipe.get("caption","INNOVATOR  ·  1955—2011"),[620,36],[960,995],18,FRAMES-18,font=FONT,font_size=22,fill="#9C9A94",
                                       tracks=[BASE.track("opacity",[(0,0),(36,1),(131,1)])]))
     elif recipe.get("archive"):
         layers.append(_rule("archive-rule",(1310,610),440,"#D8B977"))
@@ -112,6 +135,10 @@ def build_plan(recipe: dict) -> dict:
     if recipe.get("archive"):
         for y in (180,875):
             layers.append(_rule(f"archive-hairline-{y}",(960,y),1580,"#776849"))
+    if recipe.get("editorial"):
+        layers.append(_rule("editorial-wipe-rule",(960,762),660,"#D8B977",start=12))
+        layers.append(BASE.layer_text("editorial-caption","A VISION THAT CHANGED EVERYTHING",[850,38],[960,990],22,FRAMES-22,font=FONT,font_size=22,fill="#AAA69D",
+                                      tracks=[BASE.track("opacity",[(0,0),(70,1),(129,1)])]))
     return BASE.scene_plan(recipe["id"],layers,FRAMES)
 
 
