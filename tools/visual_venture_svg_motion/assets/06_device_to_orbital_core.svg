@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+<defs>
+  <radialGradient id="bg"><stop stop-color="#171719"/><stop offset="1" stop-color="#020203"/></radialGradient>
+  <linearGradient id="beam" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".2"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <filter id="glow" x="-200%" y="-200%" width="400%" height="400%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <style><![CDATA[
+    @keyframes gridOut{0%,18%{opacity:1;transform:scale(1)}30%,100%{opacity:0;transform:scale(.72)}}
+    @keyframes deviceIn{0%,20%{opacity:0;transform:scale(.55)}34%,68%{opacity:1;transform:scale(1)}78%,100%{opacity:0;transform:scale(.72)}}
+    @keyframes beamIn{0%,33%{opacity:0}42%,65%{opacity:.8}76%,100%{opacity:0}}
+    @keyframes orbitIn{0%,65%{opacity:0;transform:scale(.3) rotate(-90deg)}82%,100%{opacity:1;transform:scale(1) rotate(0deg)}}
+    @keyframes corePulse{0%,100%{r:17;opacity:.8}50%{r:24;opacity:1}}
+    .grid{transform-box:fill-box;transform-origin:center;animation:gridOut 8s ease-in-out infinite}
+    .device{transform-box:fill-box;transform-origin:center;animation:deviceIn 8s cubic-bezier(.2,.8,.2,1) infinite}
+    .beam{animation:beamIn 8s ease-in-out infinite}
+    .orbit{transform-box:fill-box;transform-origin:center;animation:orbitIn 8s cubic-bezier(.16,1,.3,1) infinite}
+    .core{animation:corePulse 1.8s ease-in-out infinite}
+  ]]></style>
+<filter id="filmGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".82" numOctaves="2" seed="3" stitchTiles="stitch"><animate attributeName="seed" values="3;11;23;3" dur="1.4s" repeatCount="indefinite"/></feTurbulence><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .22"/></feComponentTransfer></filter>
+</defs>
+<rect width="1920" height="1080" fill="url(#bg)"/>
+<g class="grid" fill="none" stroke="#edf0f4" stroke-width="5" filter="url(#glow)">
+  <rect x="840" y="305" width="240" height="68" rx="14"/><rect x="840" y="397" width="240" height="68" rx="14"/><rect x="840" y="489" width="240" height="68" rx="14"/>
+  <path d="M960 373v24M960 465v24" stroke-width="2" opacity=".7"/>
+</g>
+<g class="device" fill="none" stroke="#f1f2f5" stroke-width="5" filter="url(#glow)">
+  <rect x="900" y="345" width="120" height="186" rx="12"/><circle cx="943" cy="478" r="11" fill="#fff"/><circle cx="977" cy="478" r="7" fill="#bfc3cb"/>
+</g>
+<g class="beam"><path d="M960 218L1100 760H820Z" fill="url(#beam)"/><path d="M940 220h40" stroke="#fff" stroke-width="8" stroke-linecap="round" filter="url(#glow)"/></g>
+<g class="orbit" fill="#fff" filter="url(#glow)">
+  <circle class="core" cx="960" cy="540" r="17" fill="#ff343b"/>
+  <circle cx="960" cy="467" r="5"/><circle cx="1002" cy="485" r="5"/><circle cx="1030" cy="527" r="5"/><circle cx="1020" cy="575" r="5"/>
+  <circle cx="960" cy="613" r="5"/><circle cx="918" cy="595" r="5"/><circle cx="890" cy="553" r="5"/><circle cx="900" cy="505" r="5"/>
+</g>
+<rect width="1920" height="1080" filter="url(#filmGrain)" opacity=".16" style="mix-blend-mode:screen;pointer-events:none"/>
+</svg>

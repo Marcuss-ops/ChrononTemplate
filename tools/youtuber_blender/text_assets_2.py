@@ -3,7 +3,7 @@ import os
 import math
 
 ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
-FONT_DIR = '/mnt/c/Users/pater/Pyt/Chronon3d/assets/fonts'
+FONT_DIR = '/mnt/c/Users/pater/Pyt/chronons/Chronon3d/assets/fonts'
 
 
 def _fnt(name, size):

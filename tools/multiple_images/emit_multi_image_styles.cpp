@@ -133,7 +133,101 @@ int main(int argc, char** argv) try {
         emit(outDir, "multi_image_polaroid_fan_trio_v1", spec);
     }
 
-    std::cout << "3 styled boards emitted\n";
+    {
+        MultiImageSpec spec;
+        spec.layout = MultiImageLayout::Duo;
+        spec.style = MultiImageStyle::SoftDream;
+        spec.motionId = "";
+        spec.entrance = MultiImageEntrance::SoftBloom;
+        spec.tileWidth = 600.f;
+        spec.tileHeight = 900.f;
+        spec.gap = 64.f;
+        spec.duration = 150;
+        spec.holdFrames = 36;
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png",
+                .caption = "Neil Armstrong"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/sally_ride.png",
+                .caption = "Sally Ride"});
+        emit(outDir, "multi_image_soft_dream_duo_v1", spec);
+    }
+    {
+        MultiImageSpec spec;
+        spec.layout = MultiImageLayout::Penta;
+        spec.style = MultiImageStyle::SoftDream;
+        spec.motionId = "";
+        spec.entrance = MultiImageEntrance::Drift;
+        spec.tileWidth = 290.f;
+        spec.tileHeight = 420.f;
+        spec.gap = 36.f;
+        spec.duration = 180;
+        spec.holdFrames = 36;
+        spec.captionFontSize = 26.f;
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/john_glenn.png",
+                .caption = "Glenn"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png",
+                .caption = "Armstrong"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/sally_ride.png",
+                .caption = "Ride"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/drive_trio_replica_v1/online/portrait_woman.jpg",
+                .caption = "Woman"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/drive_trio_replica_v1/online/portrait_man1.jpg",
+                .caption = "Man"});
+        emit(outDir, "multi_image_soft_dream_penta_v1", spec);
+    }
+    {
+        MultiImageSpec spec;
+        spec.layout = MultiImageLayout::Duo;
+        spec.style = MultiImageStyle::SoftDream;
+        spec.presentation = MultiImagePresentation::StoryReel;
+        spec.reelMove = MultiImageReelMove::SoftIris;
+        spec.tileWidth = 600.f;
+        spec.tileHeight = 900.f;
+        spec.duration = 150;
+        spec.holdFrames = 36;
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/john_glenn.png",
+                .caption = "John Glenn"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png",
+                .caption = "Neil Armstrong"});
+        emit(outDir, "multi_image_story_reel_duo_v1", spec);
+    }
+    {
+        MultiImageSpec spec;
+        spec.layout = MultiImageLayout::Penta;
+        spec.style = MultiImageStyle::SoftDream;
+        spec.presentation = MultiImagePresentation::StoryReel;
+        spec.reelMove = MultiImageReelMove::DreamPush;
+        spec.tileWidth = 600.f;
+        spec.tileHeight = 900.f;
+        spec.duration = 210;
+        spec.holdFrames = 42;
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/john_glenn.png",
+                .caption = "John Glenn"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/neil_armstrong.png",
+                .caption = "Neil Armstrong"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/famous_people_trio_v1/sally_ride.png",
+                .caption = "Sally Ride"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/drive_trio_replica_v1/online/portrait_woman.jpg",
+                .caption = "Portrait woman"});
+        spec.tiles.push_back(MultiImageTile{
+                .path = "ChrononTemplate/assets/drive_trio_replica_v1/online/portrait_man1.jpg",
+                .caption = "Portrait man"});
+        emit(outDir, "multi_image_story_reel_penta_v1", spec);
+    }
+
+    std::cout << "7 styled boards emitted\n";
     return 0;
 } catch (const std::exception& error) {
     std::cerr << "emit_multi_image_styles: " << error.what() << '\n';

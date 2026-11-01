@@ -3,7 +3,7 @@ import json
 import urllib.request
 import re
 
-OUT_DIR = r"C:\Users\pater\Pyt\ChrononTemplate\assets\icons"
+OUT_DIR = r"C:\Users\pater\Pyt\chronons\ChrononTemplate\assets\icons"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}

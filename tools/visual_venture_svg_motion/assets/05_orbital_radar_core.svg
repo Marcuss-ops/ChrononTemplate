@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%" style="background:#040407;">
+  <defs>
+    <filter id="glow-red-core" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-white" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      @keyframes rotateConstellation {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes orbitSatellite {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(-360deg); }
+      }
+      @keyframes pulseReactor {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+      }
+      .constellation-ring { animation: rotateConstellation 24s linear infinite; transform-origin: 960px 540px; }
+      .satellite-track { animation: orbitSatellite 8s linear infinite; transform-origin: 960px 540px; }
+      .reactor-iris { animation: pulseReactor 2.5s infinite ease-in-out; transform-origin: 960px 540px; }
+    </style>
+  </defs>
+
+  <circle cx="960" cy="540" r="120" fill="none" stroke="#80A0C0" stroke-width="1.5" stroke-opacity="0.25"/>
+  <circle cx="960" cy="540" r="220" fill="none" stroke="#80A0C0" stroke-width="1.5" stroke-opacity="0.25"/>
+  <circle cx="960" cy="540" r="320" fill="none" stroke="#80A0C0" stroke-width="1.5" stroke-opacity="0.25"/>
+
+  <circle class="reactor-iris" cx="960" cy="540" r="70" fill="#FF1515" stroke="#FF4040" stroke-width="3" filter="url(#glow-red-core)"/>
+  <circle cx="960" cy="540" r="25" fill="#ffffff" filter="url(#glow-white)"/>
+
+  <g class="satellite-track">
+    <circle cx="1080" cy="540" r="12" fill="#C0D0E0" stroke="#ffffff" stroke-width="1.5" filter="url(#glow-white)"/>
+  </g>
+
+  <g class="constellation-ring">
+    <circle cx="1180" cy="540" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="1150" cy="650" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="1070" cy="730" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="960" cy="760" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="850" cy="730" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="770" cy="650" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="740" cy="540" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="770" cy="430" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="850" cy="350" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="960" cy="320" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="1070" cy="350" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+    <circle cx="1150" cy="430" r="9" fill="#ffffff" filter="url(#glow-white)"/>
+  </g>
+</svg>

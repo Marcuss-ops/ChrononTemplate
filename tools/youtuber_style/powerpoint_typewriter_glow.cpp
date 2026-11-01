@@ -86,7 +86,7 @@ std::string resolveFontPath() {
     const std::vector<std::string> candidates = {
         kFontsDir + "/Inter-Bold.ttf",
         // Same font tree when the project is opened from WSL/Linux.
-        "/mnt/c/Users/pater/Pyt/Chronon3d/assets/fonts/Inter-Bold.ttf",
+        "/mnt/c/Users/pater/Pyt/chronons/Chronon3d/assets/fonts/Inter-Bold.ttf",
         "assets/fonts/Inter-Bold.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",

@@ -12,10 +12,10 @@ $motionLibraryDir = Join-Path $root 'ChrononMotion3D\build\rapdaily-camera'
 $sampleCsv = Join-Path $outputDir 'camera_samples.csv'
 New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
 New-Item -ItemType Directory -Force -Path $motionLibraryDir | Out-Null
-$linuxMotion = '/mnt/c/Users/pater/Pyt/ChrononMotion3D'
-$linuxTemplate = '/mnt/c/Users/pater/Pyt/ChrononTemplate'
-$linuxSampleCsv = '/mnt/c/Users/pater/Pyt/ChrononTemplate/out/bullet_families/rapdaily_reference_rebuild/camera_samples.csv'
-$linuxMotionLibrary = '/mnt/c/Users/pater/Pyt/ChrononMotion3D/build/rapdaily-camera/chrononmotion-camera-lib.a'
+$linuxMotion = '/mnt/c/Users/pater/Pyt/chronons/ChrononMotion3D'
+$linuxTemplate = '/mnt/c/Users/pater/Pyt/chronons/ChrononTemplate'
+$linuxSampleCsv = '/mnt/c/Users/pater/Pyt/chronons/ChrononTemplate/out/bullet_families/rapdaily_reference_rebuild/camera_samples.csv'
+$linuxMotionLibrary = '/mnt/c/Users/pater/Pyt/chronons/ChrononMotion3D/build/rapdaily-camera/chrononmotion-camera-lib.a'
 $cameraBuild = @"
 set -e
 if [ ! -f '$linuxMotionLibrary' ]; then

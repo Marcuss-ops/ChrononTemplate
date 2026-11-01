@@ -1,0 +1,608 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "vv_hierarchy_flowchart",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 90
+  },
+  "output": {
+    "path": "C:/Users/pater/Pyt/chronons/ChrononTemplate/tools/visual_venture_svg_motion/renders/vv_hierarchy_flowchart.mp4",
+    "format": "mp4"
+  },
+  "layers": [
+    {
+      "id": "bg_space",
+      "type": "color",
+      "color": [
+        0.015,
+        0.015,
+        0.02,
+        1.0
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "effects": [
+        {
+          "type": "vignette",
+          "radius": 0.85,
+          "softness": 0.6,
+          "amount": 0.5
+        }
+      ]
+    },
+    {
+      "id": "container_box",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        600,
+        720
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "opacity": 0.35,
+      "shape": {
+        "type": "rounded_rect",
+        "corner_radius": [
+          24.0,
+          24.0,
+          24.0,
+          24.0
+        ],
+        "stroke": {
+          "color": "#6E8294",
+          "width": 2.0
+        }
+      }
+    },
+    {
+      "id": "connector_trunk",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        8,
+        500
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              0.0,
+              -220.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              0.0,
+              220.0
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 3.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 12.0,
+          "intensity": 0.7,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flow_card_1",
+      "type": "shape",
+      "position": [
+        0,
+        -200
+      ],
+      "size": [
+        460,
+        120
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "rounded_rect",
+        "corner_radius": [
+          18.0,
+          18.0,
+          18.0,
+          18.0
+        ],
+        "fill": [
+          0.03,
+          0.04,
+          0.06,
+          0.85
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 3.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 22.0,
+          "intensity": 0.85,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.95,
+                  0.95
+                ]
+              },
+              {
+                "frame": 1,
+                "value": [
+                  0.95,
+                  0.95
+                ]
+              },
+              {
+                "frame": 12,
+                "value": [
+                  1.04,
+                  1.04
+                ]
+              },
+              {
+                "frame": 24,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "card_dot_1",
+      "type": "shape",
+      "position": [
+        -180,
+        -200
+      ],
+      "size": [
+        22,
+        22
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 16.0,
+          "intensity": 0.85,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flow_card_2",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        460,
+        120
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "rounded_rect",
+        "corner_radius": [
+          18.0,
+          18.0,
+          18.0,
+          18.0
+        ],
+        "fill": [
+          0.03,
+          0.04,
+          0.06,
+          0.85
+        ],
+        "stroke": {
+          "color": "#667788",
+          "width": 2.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 22.0,
+          "intensity": 0.4,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.95,
+                  0.95
+                ]
+              },
+              {
+                "frame": 24,
+                "value": [
+                  0.95,
+                  0.95
+                ]
+              },
+              {
+                "frame": 36,
+                "value": [
+                  1.04,
+                  1.04
+                ]
+              },
+              {
+                "frame": 48,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "card_dot_2",
+      "type": "shape",
+      "position": [
+        -180,
+        0
+      ],
+      "size": [
+        22,
+        22
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          0.8,
+          0.2,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 16.0,
+          "intensity": 0.85,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flow_card_3",
+      "type": "shape",
+      "position": [
+        0,
+        200
+      ],
+      "size": [
+        460,
+        120
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "rounded_rect",
+        "corner_radius": [
+          18.0,
+          18.0,
+          18.0,
+          18.0
+        ],
+        "fill": [
+          0.03,
+          0.04,
+          0.06,
+          0.85
+        ],
+        "stroke": {
+          "color": "#667788",
+          "width": 2.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 22.0,
+          "intensity": 0.4,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "out_cubic",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.95,
+                  0.95
+                ]
+              },
+              {
+                "frame": 48,
+                "value": [
+                  0.95,
+                  0.95
+                ]
+              },
+              {
+                "frame": 60,
+                "value": [
+                  1.04,
+                  1.04
+                ]
+              },
+              {
+                "frame": 72,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "card_dot_3",
+      "type": "shape",
+      "position": [
+        -180,
+        200
+      ],
+      "size": [
+        22,
+        22
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          0.15,
+          0.15,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 16.0,
+          "intensity": 0.85,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "traveling_data_pulse",
+      "type": "shape",
+      "position": [
+        0,
+        -200
+      ],
+      "size": [
+        28,
+        28
+      ],
+      "start_frame": 10,
+      "duration_frames": 80,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#00E5FF",
+          "width": 2.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 24.0,
+          "intensity": 0.95,
+          "color": [
+            0.2,
+            0.9,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "in_out_cubic",
+            "keyframes": [
+              {
+                "frame": 10,
+                "value": [
+                  0.0,
+                  -200.0
+                ]
+              },
+              {
+                "frame": 35,
+                "value": [
+                  0.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 60,
+                "value": [
+                  0.0,
+                  200.0
+                ]
+              },
+              {
+                "frame": 85,
+                "value": [
+                  0.0,
+                  200.0
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 10,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "frame": 35,
+                "value": [
+                  1.4,
+                  1.4
+                ]
+              },
+              {
+                "frame": 60,
+                "value": [
+                  1.2,
+                  1.2
+                ]
+              },
+              {
+                "frame": 85,
+                "value": [
+                  1.5,
+                  1.5
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

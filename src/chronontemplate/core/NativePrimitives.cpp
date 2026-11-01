@@ -145,7 +145,7 @@ Json Paths::strokeLayer(const std::string& id, const Json& commands, int startFr
         {"fill",{0.f,0.f,0.f,0.f}},
         {"stroke",{{"color",color},{"width",width},{"cap","round"},{"join","round"}}},
         {"operators",Json::array({trim(startFrame,endFrame)})}}},
-        {"size",{canvasWidth,canvasHeight}},{"position",{0,0}},
+        {"size",{canvasWidth,canvasHeight}},{"position",{canvasWidth*0.5f,canvasHeight*0.5f}},
         {"color",{1.f,1.f,1.f,1.f}},{"screen_space",true},
         {"start_frame",0},{"duration_frames",durationFrames}};
     if (!opacityKeys.empty()) {

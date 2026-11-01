@@ -5,7 +5,7 @@ import resvg_py
 from PIL import Image, ImageFilter, ImageOps
 import numpy as np
 
-BASE_DIR = r"C:\Users\pater\Pyt\ChrononTemplate\assets\icons"
+BASE_DIR = r"C:\Users\pater\Pyt\chronons\ChrononTemplate\assets\icons"
 SVG_DIR = os.path.join(BASE_DIR, "svg")
 PNG_WHITE_DIR = os.path.join(BASE_DIR, "png_white")
 PNG_NEON_DIR = os.path.join(BASE_DIR, "png_neon")

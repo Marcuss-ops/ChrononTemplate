@@ -296,7 +296,7 @@ def vignette_glow(name, x, y, z, radius, color, strength=0.14):
 
 # ---------------------------------------------------------------- text texture
 
-FONT_DIR = '/mnt/c/Users/pater/Pyt/Chronon3d/assets/fonts'
+FONT_DIR = '/mnt/c/Users/pater/Pyt/chronons/Chronon3d/assets/fonts'
 
 
 def text_texture(path, lines, size=90, color=(245, 240, 230), bg=(8, 8, 12),

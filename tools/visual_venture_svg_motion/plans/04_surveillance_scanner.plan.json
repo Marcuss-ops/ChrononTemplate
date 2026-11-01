@@ -1,0 +1,1003 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "vv_surveillance_scanner",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 90
+  },
+  "output": {
+    "path": "C:/Users/pater/Pyt/chronons/ChrononTemplate/tools/visual_venture_svg_motion/renders/vv_surveillance_scanner.mp4",
+    "format": "mp4"
+  },
+  "layers": [
+    {
+      "id": "bg_space",
+      "type": "color",
+      "color": [
+        0.015,
+        0.015,
+        0.02,
+        1.0
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "effects": [
+        {
+          "type": "vignette",
+          "radius": 0.85,
+          "softness": 0.6,
+          "amount": 0.5
+        }
+      ]
+    },
+    {
+      "id": "scanner_viewport_card",
+      "type": "shape",
+      "position": [
+        0,
+        -30
+      ],
+      "size": [
+        420,
+        500
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "rounded_rect",
+        "corner_radius": [
+          28.0,
+          28.0,
+          28.0,
+          28.0
+        ],
+        "fill": [
+          0.02,
+          0.02,
+          0.03,
+          0.8
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 3.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 22.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tracked_agent_white",
+      "type": "shape",
+      "position": [
+        -40,
+        40
+      ],
+      "size": [
+        56,
+        56
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 2.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 20.0,
+          "intensity": 0.85,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tracked_agent_aux",
+      "type": "shape",
+      "position": [
+        50,
+        60
+      ],
+      "size": [
+        36,
+        36
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.55,
+          0.6,
+          0.68,
+          1.0
+        ],
+        "stroke": {
+          "color": "#8899AA",
+          "width": 1.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.6,
+          "color": [
+            0.6,
+            0.7,
+            0.8,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "overhead_sensor_bar",
+      "type": "shape",
+      "position": [
+        0,
+        -180
+      ],
+      "size": [
+        140,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "rounded_rect",
+        "corner_radius": [
+          9.0,
+          9.0,
+          9.0,
+          9.0
+        ],
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 22.0,
+          "intensity": 0.9,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  -60.0,
+                  -180.0
+                ]
+              },
+              {
+                "frame": 45,
+                "value": [
+                  60.0,
+                  -180.0
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  -60.0,
+                  -180.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "sensor_spotlight_cone",
+      "type": "shape",
+      "position": [
+        0,
+        -50
+      ],
+      "size": [
+        380,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "opacity": 0.22,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -70.0,
+              -130.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              70.0,
+              -130.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              140.0,
+              140.0
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              -140.0,
+              140.0
+            ]
+          },
+          {
+            "type": "close"
+          }
+        ],
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          0.35
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  -40.0,
+                  -50.0
+                ]
+              },
+              {
+                "frame": 45,
+                "value": [
+                  40.0,
+                  -50.0
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  -40.0,
+                  -50.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry_dot_0",
+      "type": "shape",
+      "position": [
+        -168.0,
+        310
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 1,
+                "value": [
+                  1.0
+                ]
+              },
+              {
+                "frame": 12,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  0.6
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry_dot_1",
+      "type": "shape",
+      "position": [
+        -126.0,
+        310
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 9,
+                "value": [
+                  1.0
+                ]
+              },
+              {
+                "frame": 21,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  0.6
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry_dot_2",
+      "type": "shape",
+      "position": [
+        -84.0,
+        310
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 18,
+                "value": [
+                  1.0
+                ]
+              },
+              {
+                "frame": 30,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  0.6
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry_dot_3",
+      "type": "shape",
+      "position": [
+        -42.0,
+        310
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 27,
+                "value": [
+                  1.0
+                ]
+              },
+              {
+                "frame": 39,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  0.6
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry_dot_4",
+      "type": "shape",
+      "position": [
+        0.0,
+        310
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 36,
+                "value": [
+                  1.0
+                ]
+              },
+              {
+                "frame": 48,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  0.6
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry_dot_5",
+      "type": "shape",
+      "position": [
+        42.0,
+        310
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 45,
+                "value": [
+                  1.0
+                ]
+              },
+              {
+                "frame": 57,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  0.6
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry_dot_6",
+      "type": "shape",
+      "position": [
+        84.0,
+        310
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 54,
+                "value": [
+                  1.0
+                ]
+              },
+              {
+                "frame": 66,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  0.6
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry_dot_7",
+      "type": "shape",
+      "position": [
+        126.0,
+        310
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 63,
+                "value": [
+                  1.0
+                ]
+              },
+              {
+                "frame": 75,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  0.6
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "telemetry_dot_8",
+      "type": "shape",
+      "position": [
+        168.0,
+        310
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.75,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 72,
+                "value": [
+                  1.0
+                ]
+              },
+              {
+                "frame": 84,
+                "value": [
+                  0.3
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  0.6
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

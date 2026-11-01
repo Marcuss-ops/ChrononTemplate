@@ -29,8 +29,8 @@ int main() {
         ArcLengthPath pathRocket, pathBrain;
         BLPath blRocket, blBrain;
 
-        bool okRocket = SvgPathParser::loadSvgFile("C:/Users/pater/Pyt/ChrononTemplate/assets/icons/svg/rocket.svg", pathRocket, blRocket);
-        bool okBrain = SvgPathParser::loadSvgFile("C:/Users/pater/Pyt/ChrononTemplate/assets/icons/svg/brain.svg", pathBrain, blBrain);
+        bool okRocket = SvgPathParser::loadSvgFile("C:/Users/pater/Pyt/chronons/ChrononTemplate/assets/icons/svg/rocket.svg", pathRocket, blRocket);
+        bool okBrain = SvgPathParser::loadSvgFile("C:/Users/pater/Pyt/chronons/ChrononTemplate/assets/icons/svg/brain.svg", pathBrain, blBrain);
 
         assert(okRocket);
         assert(okBrain);

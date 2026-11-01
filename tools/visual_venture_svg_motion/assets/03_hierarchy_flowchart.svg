@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%" style="background:#040407;">
+  <defs>
+    <filter id="glow-white" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      @keyframes pulseData {
+        0% { transform: translateY(0px); opacity: 0; }
+        15% { opacity: 1; }
+        50% { transform: translateY(200px); }
+        85% { opacity: 1; }
+        100% { transform: translateY(400px); opacity: 0; }
+      }
+      .data-packet { animation: pulseData 3.2s infinite ease-in-out; }
+    </style>
+  </defs>
+
+  <rect x="660" y="180" width="600" height="720" rx="24" fill="none" stroke="#6E8294" stroke-width="2" stroke-dasharray="8 6" opacity="0.45"/>
+  <line x1="960" y1="340" x2="960" y2="740" stroke="#ffffff" stroke-width="3" filter="url(#glow-white)"/>
+
+  <rect x="730" y="280" width="460" height="120" rx="18" fill="#080b10" stroke="#ffffff" stroke-width="3.5" filter="url(#glow-white)"/>
+  <circle cx="780" cy="340" r="11" fill="#ffffff" filter="url(#glow-white)"/>
+
+  <rect x="730" y="480" width="460" height="120" rx="18" fill="#080b10" stroke="#778899" stroke-width="2"/>
+  <circle cx="780" cy="540" r="11" fill="#FFD700" filter="url(#glow-white)"/>
+
+  <rect x="730" y="680" width="460" height="120" rx="18" fill="#080b10" stroke="#778899" stroke-width="2"/>
+  <circle cx="780" cy="740" r="11" fill="#FF2828" filter="url(#glow-white)"/>
+
+  <circle class="data-packet" cx="960" cy="340" r="14" fill="#ffffff" stroke="#00E5FF" stroke-width="2.5" filter="url(#glow-cyan)"/>
+</svg>

@@ -16,7 +16,7 @@
 namespace fs = std::filesystem;
 constexpr int W = 1920, H = 1080, FPS = 30, PER_CHART = 90;
 constexpr double PI = 3.14159265358979323846;
-const fs::path ROOT = L"C:/Users/pater/Pyt/ChrononTemplate";
+const fs::path ROOT = L"C:/Users/pater/Pyt/chronons/ChrononTemplate";
 const fs::path OUTPUT_DIR = ROOT / L"out/charts/oracle_deal_recreation";
 const fs::path FONTS = ROOT / L"assets/fonts";
 

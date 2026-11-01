@@ -7,7 +7,7 @@
 #include <vector>
 
 int main() {
-    std::string out_path = "C:/Users/pater/Pyt/ChrononTemplate/out/svg_parity/icon_constellation_25d.plan.json";
+    std::string out_path = "C:/Users/pater/Pyt/chronons/ChrononTemplate/out/svg_parity/icon_constellation_25d.plan.json";
 
     std::ofstream f(out_path);
     if (!f.is_open()) {

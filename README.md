@@ -68,7 +68,7 @@ important_phrases/          phrasing and titling, one subdir per family
 short_phrases/              ShortPhrasePack — 26 surviving recipes for phrases of 1–5 words
                             (+ short_phrase.decor.star_bumper, semantic emphasis, exit modes)
 single_images/              ImageAnimationPack — one-image 2.5D entrances
-multiple_images/            MultiImagePack — duo/trio/quad/penta boards with captions
+multiple_images/            MultiImagePack — duo/trio/quad/penta boards, story reels with captions
 backgrounds/                BackgroundPack — editorial documentary/grid/scan/dust looks from shape layers
 entities_with_text/         DocumentarySnapshotPack + YouTubeSubscribe
 map/                        ModernMapPack — styled plate, labels and camera beat
@@ -1247,6 +1247,45 @@ The resolved choreography is returned as `MultiImageBoard::motionId`. Pass a
 specific catalog ID to pin a choreography, or set `motionId` to an empty string
 to retain the older shared entrance. A single image stays on the single-image
 animation path and does not need a one-member group recipe.
+
+### Multi-image story reels and the soft-dream look
+
+Set `MultiImageSpec::presentation` to `MultiImagePresentation::StoryReel` to
+stage the same two-to-five tiles **one after another** in one scene. Every tile
+is centered and receives its own slot, an overlapping crossfade and one of three
+moves: `reel_dream_push`, `reel_soft_iris`, or `reel_lateral_veil` (select it
+with `reelMove`). The last tile holds through `holdFrames`, then the board exits
+as one move. A reel ignores `motionId`: `MultiImageBoard::reelMoveId` reports the
+resolved move instead.
+
+`MultiImageStyle::SoftDream` dresses both boards and reels with a deep indigo
+plate, a breathing radial aura, strongly rounded prints, a subtle native soft
+blur and a glowing accent rim behind each card. The rim is a native shape with
+Chronon's glow effect; nothing is pre-rendered. The new `SoftBloom` and `Drift`
+entrances give simultaneous duo/penta boards a gentler entrance without a
+catalog motion. All three looks are composed from the existing image-frame and
+shape effects, so they lower through the ordinary RenderPlan path:
+
+```cpp
+MultiImageSpec spec;
+spec.layout = MultiImageLayout::Penta;
+spec.presentation = MultiImagePresentation::StoryReel;
+spec.reelMove = MultiImageReelMove::DreamPush;
+spec.style = MultiImageStyle::SoftDream;
+spec.tileWidth = 920.f;
+spec.tileHeight = 560.f;
+spec.duration = 210;
+// five MultiImageTile paths here
+const MultiImageBoard board = addMultiImageBoard(scene, spec);
+```
+
+Emit the four new showcase plans (duo/penta soft boards plus duo/penta story
+reels) through the existing multi-image emitter:
+
+```shell
+cmake --build build/dev-fast --target chronontemplate_emit_multi_image_styles
+./build/dev-fast/chronontemplate_emit_multi_image_styles out/multi_image_cinematics_v1
+```
 
 ### Responsive Social Motion V1
 

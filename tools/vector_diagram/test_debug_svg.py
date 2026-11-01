@@ -1,7 +1,7 @@
 import re, resvg_py, io
 from PIL import Image
 
-with open(r'C:\Users\pater\Pyt\ChrononTemplate\assets\icons\svg\cpu.svg') as f:
+with open(r'C:\Users\pater\Pyt\chronons\ChrononTemplate\assets\icons\svg\cpu.svg') as f:
     raw_svg = f.read()
 
 white_svg = raw_svg

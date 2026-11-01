@@ -29,7 +29,7 @@ constexpr int k4KH = kH;
 inline const std::string kFinalBase1 = "C:/Users/pater/OneDrive/Documenti/Chronomotion/MP4/Youtuberstle/Final";
 inline const std::string kFinalBase2 = "C:/Users/pater/OneDrive/Documenti/Chronomotion/ChrononMotion3D/Final";
 inline const std::string kAssetsDir  = "C:/Users/pater/dev/projects/ChrononTemplate/tools/youtuber_style/assets";
-inline const std::string kFontsDir   = "C:/Users/pater/Pyt/Chronon3d/assets/fonts";
+inline const std::string kFontsDir   = "C:/Users/pater/Pyt/chronons/Chronon3d/assets/fonts";
 
 struct FontBundle {
     BLFont fontTitle;

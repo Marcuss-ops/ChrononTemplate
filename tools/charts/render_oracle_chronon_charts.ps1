@@ -1,5 +1,5 @@
 param(
-    [string]$ChrononCli = 'C:\Users\pater\Pyt\Chronon3d\build\chronon\rapdaily-release\apps\chronon3d_cli\Release\chronon3d_cli.exe'
+    [string]$ChrononCli = 'C:\Users\pater\Pyt\chronons\Chronon3d\build\chronon\rapdaily-release\apps\chronon3d_cli\Release\chronon3d_cli.exe'
 )
 $ErrorActionPreference = 'Stop'
 $root = 'C:\Users\pater\Pyt'

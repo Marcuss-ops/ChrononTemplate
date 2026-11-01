@@ -2,8 +2,11 @@
 //
 // The recipes place a fixed number of images in a layout (duo, trio, quad,
 // penta), caption each one, and stage a single entrance across the grid so the
-// board assembles as one move instead of N independent clips. The pack authors
-// ordinary image/text layers; Chronon owns the bytes and the rasterization.
+// board assembles as one move instead of N independent clips. A StoryReel
+// presentation centers the same tiles and reveals them one after another, so
+// five images can be told in sequence without leaving the composition. The pack
+// authors ordinary image/text layers; Chronon owns the bytes and the
+// rasterization.
 //
 // The pack is data, not rendering: `multiImageCells` exposes the grid so a test
 // can pin it without owning a scene.
@@ -35,7 +38,9 @@ namespace chronontemplate {
     enum class MultiImageEntrance : std::uint8_t {
         Fade,       ///< opacity only
         Rise,       ///< each card rises into its cell
-        ScalePop    ///< each card pops from below then settles
+        ScalePop,   ///< each card pops from below then settles
+        SoftBloom,  ///< slow scale-and-rise bloom, the dream-board entrance
+        Drift       ///< cards drift inward from alternating sides
     };
 
     /// How the board is dressed. Classic is the original bare grid; the other
@@ -46,11 +51,30 @@ namespace chronontemplate {
         Classic,       ///< plain tiles and captions on the scene's own ground
         ArchiveBoard,  ///< light board, archival header + rule, rounded shadowed cards
         SepiaTorn,     ///< aged paper plate, torn-edge prints, serif captions
-        PolaroidFan    ///< dark board, white polaroid borders, fanned tilts
+        PolaroidFan,   ///< dark board, white polaroid borders, fanned tilts
+        SoftDream      ///< indigo dream plate, feathered rounded cards with a glow halo
+    };
+
+    /// How the tiles occupy the canvas. A board shows the complete layout; a
+    /// story reel centers every tile and reveals it one after another, so five
+    /// images can be told in sequence inside one scene.
+    enum class MultiImagePresentation : std::uint8_t {
+        Board,     ///< the layout's grid, assembled with one staggered move
+        StoryReel  ///< every tile centered and staged sequentially with crossfades
+    };
+
+    /// The transition vocabulary of a story reel.
+    enum class MultiImageReelMove : std::uint8_t {
+        DreamPush,   ///< slow push-in with a soft bloom
+        SoftIris,    ///< small-to-large bloom with a slight rotational settle
+        LateralVeil  ///< alternating lateral drift with a crossfade
     };
 
     /// Stable snake-case id of a style (the catalog/consumer-facing name).
     [[nodiscard]] const char* multiImageStyleId(MultiImageStyle style) noexcept;
+
+    /// Stable snake-case id of a story-reel move.
+    [[nodiscard]] const char* multiImageReelMoveId(MultiImageReelMove move) noexcept;
 
     /// Stable ids of the group choreographies a layout certifies. Each id is a
     /// real choreography of the layout's tiles, not just a catalog name.
@@ -77,6 +101,10 @@ namespace chronontemplate {
         MultiImageLayout layout{MultiImageLayout::Duo};
         MultiImageEntrance entrance{MultiImageEntrance::Rise};
         MultiImageStyle style{MultiImageStyle::Classic};
+        /// Board (grid) or StoryReel (one centered image after another).
+        MultiImagePresentation presentation{MultiImagePresentation::Board};
+        /// The transition used when `presentation` is StoryReel.
+        MultiImageReelMove reelMove{MultiImageReelMove::DreamPush};
         /// Archival header drawn top-left by ArchiveBoard and SepiaTorn.
         std::string headerLabel{"Archive image"};
         /// The subjects line under the header rule, e.g. the captioned names.
@@ -104,7 +132,8 @@ namespace chronontemplate {
     struct MultiImageBoard {
         std::vector<LayerHandle*> tiles{};
         std::vector<LayerHandle*> captions{};
-        std::string motionId{}; ///< resolved choreography; empty for legacy entrance
+        std::string motionId{};     ///< resolved choreography; empty for legacy entrance or a reel
+        std::string reelMoveId{};   ///< resolved story-reel move; empty for a board
         int inFrame{0};
         int endFrame{0};
     };

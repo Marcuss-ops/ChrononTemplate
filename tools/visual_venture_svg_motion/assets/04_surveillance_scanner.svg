@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%" style="background:#040407;">
+  <defs>
+    <filter id="glow-white" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="scannerBeamGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.03"/>
+    </linearGradient>
+    <style>
+      @keyframes sweepSensor {
+        0%, 100% { transform: translateX(-60px); }
+        50% { transform: translateX(60px); }
+      }
+      @keyframes pulseDot {
+        0%, 100% { opacity: 0.3; transform: scale(0.9); }
+        50% { opacity: 1; transform: scale(1.2); }
+      }
+      .sweeper { animation: sweepSensor 3.6s infinite ease-in-out; }
+      .p-dot { animation: pulseDot 2s infinite ease-in-out; transform-origin: center; }
+    </style>
+  </defs>
+
+  <rect x="750" y="260" width="420" height="500" rx="28" fill="#05060a" stroke="#ffffff" stroke-width="3" filter="url(#glow-white)"/>
+  <circle cx="920" cy="550" r="28" fill="#ffffff" filter="url(#glow-white)"/>
+  <circle cx="1010" cy="570" r="18" fill="#8899AA" filter="url(#glow-white)"/>
+
+  <g class="sweeper">
+    <polygon points="890,340 1030,340 1100,610 820,610" fill="url(#scannerBeamGrad)" stroke="#ffffff" stroke-width="1" stroke-opacity="0.2"/>
+    <rect x="890" y="331" width="140" height="18" rx="9" fill="#ffffff" filter="url(#glow-white)"/>
+  </g>
+
+  <g>
+    <circle class="p-dot" cx="792" cy="850" r="9" fill="#ffffff" filter="url(#glow-white)" style="animation-delay: 0.0s; transform-origin: 792px 850px;"/>
+    <circle class="p-dot" cx="834" cy="850" r="9" fill="#ffffff" filter="url(#glow-white)" style="animation-delay: 0.2s; transform-origin: 834px 850px;"/>
+    <circle class="p-dot" cx="876" cy="850" r="9" fill="#ffffff" filter="url(#glow-white)" style="animation-delay: 0.4s; transform-origin: 876px 850px;"/>
+    <circle class="p-dot" cx="918" cy="850" r="9" fill="#ffffff" filter="url(#glow-white)" style="animation-delay: 0.6s; transform-origin: 918px 850px;"/>
+    <circle class="p-dot" cx="960" cy="850" r="9" fill="#ffffff" filter="url(#glow-white)" style="animation-delay: 0.8s; transform-origin: 960px 850px;"/>
+    <circle class="p-dot" cx="1002" cy="850" r="9" fill="#ffffff" filter="url(#glow-white)" style="animation-delay: 1.0s; transform-origin: 1002px 850px;"/>
+    <circle class="p-dot" cx="1044" cy="850" r="9" fill="#ffffff" filter="url(#glow-white)" style="animation-delay: 1.2s; transform-origin: 1044px 850px;"/>
+    <circle class="p-dot" cx="1086" cy="850" r="9" fill="#ffffff" filter="url(#glow-white)" style="animation-delay: 1.4s; transform-origin: 1086px 850px;"/>
+    <circle class="p-dot" cx="1128" cy="850" r="9" fill="#ffffff" filter="url(#glow-white)" style="animation-delay: 1.6s; transform-origin: 1128px 850px;"/>
+  </g>
+</svg>

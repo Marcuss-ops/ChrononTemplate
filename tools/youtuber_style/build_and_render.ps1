@@ -1,7 +1,7 @@
 $srcDir = "C:\Users\pater\dev\projects\ChrononTemplate\tools\youtuber_style"
-$inc = "C:\Users\pater\Pyt\Chronon3d\vcpkg_installed\x64-windows\include"
-$lib = "C:\Users\pater\Pyt\Chronon3d\vcpkg_installed\x64-windows\lib"
-$env:PATH = "C:\Users\pater\Pyt\Chronon3d\vcpkg_installed\x64-windows\bin;" + $env:PATH
+$inc = "C:\Users\pater\Pyt\chronons\Chronon3d\vcpkg_installed\x64-windows\include"
+$lib = "C:\Users\pater\Pyt\chronons\Chronon3d\vcpkg_installed\x64-windows\lib"
+$env:PATH = "C:\Users\pater\Pyt\chronons\Chronon3d\vcpkg_installed\x64-windows\bin;" + $env:PATH
 
 $files = Get-ChildItem -Path $srcDir -Filter "*.cpp" | Where-Object { $_.Name -match "^\d{2}_" } | Sort-Object Name
 

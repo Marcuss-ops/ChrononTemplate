@@ -66,6 +66,13 @@ namespace chronontemplate {
             float shadowOffset{0.f};        ///< drop shadow distance; zero draws no shadow
             float shadowOpacity{0.f};
             std::string headerInk{};        ///< archival header ink; empty draws no header
+            float softBlur{0.f};            ///< subtle optical softness on the print
+            std::string haloColor{};        ///< soft glow frame behind each card; empty draws none
+            float haloPadding{18.f};
+            float haloGlowRadius{40.f};
+            float haloGlowIntensity{0.8f};
+            float haloOpacity{0.22f};
+            bool dreamGlow{false};          ///< broad radial aura behind the whole board
         };
 
         [[nodiscard]] StyleLook lookFor(MultiImageStyle style, const MultiImageSpec& spec) {
@@ -114,6 +121,25 @@ namespace chronontemplate {
                     look.tiltStepDegrees = 7.f;
                     look.shadowOffset = 12.f;
                     look.shadowOpacity = 0.38f;
+                    return look;
+                case MultiImageStyle::SoftDream:
+                    // Deep indigo plate with a broad radial aura, feathered
+                    // rounded prints and a soft accent rim behind every card.
+                    look.plate = "#070A18";
+                    look.plateNoise = 0.26f;
+                    look.plateNoiseSize = 1.5f;
+                    look.cornerRadius = 64.f;
+                    look.captionFont = "Chronon3d/assets/fonts/Inter-Regular.ttf";
+                    look.captionColor = "#EDE9FF";
+                    look.captionSize = 30.f;
+                    look.captionOffset = 30.f;
+                    look.softBlur = 1.2f;
+                    look.haloColor = "#7B6BFF";
+                    look.haloPadding = 20.f;
+                    look.haloGlowRadius = 44.f;
+                    look.haloGlowIntensity = 0.9f;
+                    look.haloOpacity = 0.24f;
+                    look.dreamGlow = true;
                     return look;
             }
             return look;
@@ -250,6 +276,16 @@ namespace chronontemplate {
             case MultiImageStyle::ArchiveBoard: return "multi_image_archive_board";
             case MultiImageStyle::SepiaTorn: return "multi_image_sepia_torn";
             case MultiImageStyle::PolaroidFan: return "multi_image_polaroid_fan";
+            case MultiImageStyle::SoftDream: return "multi_image_soft_dream";
+        }
+        return "unknown";
+    }
+
+    const char* multiImageReelMoveId(MultiImageReelMove move) noexcept {
+        switch (move) {
+            case MultiImageReelMove::DreamPush: return "reel_dream_push";
+            case MultiImageReelMove::SoftIris: return "reel_soft_iris";
+            case MultiImageReelMove::LateralVeil: return "reel_lateral_veil";
         }
         return "unknown";
     }
@@ -328,27 +364,39 @@ namespace chronontemplate {
             throw std::invalid_argument(
                     "addMultiImageBoard: positive tile size and duration are required");
         }
+        const bool storyReel = spec.presentation == MultiImagePresentation::StoryReel;
+        if (storyReel &&
+            spec.duration < static_cast<int>(expected) * 6) {
+            throw std::invalid_argument(
+                    "addMultiImageBoard: a story reel needs at least six frames per tile");
+        }
         if (spec.headerLabel.size() > 64 || spec.headerSubtitle.size() > 96) {
             throw std::invalid_argument(
                     "addMultiImageBoard: header label (<= 64) or subtitle (<= 96) is too long");
         }
         std::string selectedMotion = spec.motionId;
-        if (selectedMotion == "random") {
-            std::string seed = spec.motionSeed;
-            if (seed.empty()) {
-                seed = scene.name();
-                seed.push_back('\0');
-                seed += multiImageLayoutId(spec.layout);
-                for (const MultiImageTile& tile : spec.tiles) {
+        if (storyReel) {
+            // A reel owns its own sequential timing; a board choreography would
+            // only fight it. The resolved move is reported on the board instead.
+            selectedMotion.clear();
+        } else {
+            if (selectedMotion == "random") {
+                std::string seed = spec.motionSeed;
+                if (seed.empty()) {
+                    seed = scene.name();
                     seed.push_back('\0');
-                    seed += tile.path;
+                    seed += multiImageLayoutId(spec.layout);
+                    for (const MultiImageTile& tile : spec.tiles) {
+                        seed.push_back('\0');
+                        seed += tile.path;
+                    }
                 }
+                selectedMotion = selectMultiImageMotion(spec.layout, seed);
             }
-            selectedMotion = selectMultiImageMotion(spec.layout, seed);
-        }
-        if (!selectedMotion.empty() && !isMultiImageMotion(spec.layout, selectedMotion)) {
-            throw std::invalid_argument(
-                    "addMultiImageBoard: the motion is not certified for this layout");
+            if (!selectedMotion.empty() && !isMultiImageMotion(spec.layout, selectedMotion)) {
+                throw std::invalid_argument(
+                        "addMultiImageBoard: the motion is not certified for this layout");
+            }
         }
         for (const MultiImageTile& tile : spec.tiles) {
             if (tile.path.empty()) {
@@ -356,16 +404,21 @@ namespace chronontemplate {
             }
         }
 
-        const std::vector<Vector2> cells = multiImageCells(spec.layout);
+        std::vector<Vector2> cells = multiImageCells(spec.layout);
+        if (storyReel) {
+            // Every tile shares the center cell; the reel reveals them in turn.
+            cells.assign(cells.size(), Vector2(0.5f, 0.5f));
+        }
         const Vector2 canvas = scene.canvas();
         const int count = static_cast<int>(cells.size());
         const int stagger = std::max(1, spec.duration / (count + 1));
         const int endFrame = spec.inFrame + spec.duration + spec.holdFrames;
         const int exitFrames = exitFramesFor(spec);
         const int exitStart = endFrame - exitFrames;
+        const float fps = scene.fps();
 
         // With no certified motion the shared entrance staggers the grid as before.
-        const bool certified = !selectedMotion.empty();
+        const bool certified = !storyReel && !selectedMotion.empty();
         const std::vector<Beat> beats = certified
                 ? beatsFor(spec.layout, selectedMotion, count, spec.duration)
                 : std::vector<Beat>{};
@@ -378,6 +431,7 @@ namespace chronontemplate {
 
         MultiImageBoard board;
         board.motionId = selectedMotion;
+        board.reelMoveId = storyReel ? multiImageReelMoveId(spec.reelMove) : std::string{};
         board.inFrame = spec.inFrame;
         board.tiles.reserve(cells.size());
         board.captions.reserve(cells.size());
@@ -392,6 +446,32 @@ namespace chronontemplate {
             plate.position(canvas.x * 0.5f, canvas.y * 0.5f);
             plate.alive(spec.inFrame, endFrame);
             plate.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+        }
+
+        if (styled && look.dreamGlow) {
+            // A broad, slowly breathing radial field under the cards. This is a
+            // native shape gradient, not a second renderer or a screenshot.
+            ShapeRadialGradient auraGradient;
+            auraGradient.center = {0.5f, 0.5f};
+            auraGradient.radius = 0.5f;
+            auraGradient.stops = {
+                    ShapeGradientStop{.position = 0.f, .color = "#5A3FA8", .opacity = 0.55f},
+                    ShapeGradientStop{.position = 0.58f, .color = "#231846", .opacity = 0.32f},
+                    ShapeGradientStop{.position = 1.f, .color = "#070A18", .opacity = 0.f}};
+            LayerHandle& aura = scene.shape(ShapeSpec{
+                    .size = {canvas.x * 1.45f, canvas.y * 1.45f},
+                    .fillColor = "#FFFFFF",
+                    .name = "dream_aura",
+                    .geometry = ShapeGeometry::Ellipse,
+                    .radialGradient = auraGradient});
+            aura.position(canvas.x * 0.5f, canvas.y * 0.5f);
+            aura.alive(spec.inFrame, endFrame);
+            aura.animateOpacity(spec.inFrame, 18, 0.f, 0.9f, Easing::easeOut());
+            aura.animateOpacity(exitStart, exitFrames, 0.9f, 0.f, Easing::easeIn());
+            aura.layer().tracks.scale.add(static_cast<float>(spec.inFrame) / fps,
+                                          Vector3(1.f, 1.f, 1.f), Easing::inOutCubic());
+            aura.layer().tracks.scale.add(static_cast<float>(endFrame) / fps,
+                                          Vector3(1.08f, 1.08f, 1.f), Easing::inOutCubic());
         }
 
         if (styled && !look.headerInk.empty() &&
@@ -433,6 +513,147 @@ namespace chronontemplate {
             }
         }
 
+        // One entrance vocabulary for the image and its soft halo: they move as
+        // one card, so the rim cannot peel away from the print.
+        const auto authorEnter = [&](LayerHandle& target, int startFrame, int enterFrames,
+                                     int moveFrames, Enter kind, Direction dir) {
+            if (certified) {
+                switch (kind) {
+                    case Enter::Slide:
+                        target.animate(SlideIn{.direction = dir,
+                                              .inFrame = startFrame,
+                                              .duration = moveFrames,
+                                              .distance = spec.tileWidth * 0.5f})
+                                .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                        break;
+                    case Enter::Pop:
+                        target.animate(ScalePop{.inFrame = startFrame, .duration = moveFrames,
+                                               .from = 0.72f, .to = 1.f})
+                                .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                        break;
+                    case Enter::Rise:
+                        target.animate(SlideIn{.direction = Direction::Up,
+                                              .inFrame = startFrame,
+                                              .duration = moveFrames,
+                                              .distance = spec.tileHeight * 0.5f})
+                                .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                        break;
+                }
+                return;
+            }
+            switch (spec.entrance) {
+                case MultiImageEntrance::Fade:
+                    target.animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                    break;
+                case MultiImageEntrance::Rise:
+                    target.animate(SlideIn{.direction = Direction::Up,
+                                          .inFrame = startFrame,
+                                          .duration = moveFrames,
+                                          .distance = spec.tileHeight * 0.5f})
+                            .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                    break;
+                case MultiImageEntrance::ScalePop:
+                    target.animate(ScalePop{.inFrame = startFrame, .duration = moveFrames,
+                                           .from = 0.72f, .to = 1.f})
+                            .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                    break;
+                case MultiImageEntrance::SoftBloom:
+                    target.animate(SlideIn{.direction = Direction::Up,
+                                          .inFrame = startFrame,
+                                          .duration = moveFrames,
+                                          .distance = spec.tileHeight * 0.14f})
+                            .animate(ScalePop{.inFrame = startFrame, .duration = moveFrames,
+                                             .from = 0.92f, .to = 1.f})
+                            .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                    break;
+                case MultiImageEntrance::Drift:
+                    target.animate(SlideIn{.direction = dir,
+                                          .inFrame = startFrame,
+                                          .duration = moveFrames,
+                                          .distance = spec.tileWidth * 0.18f})
+                            .animate(ScalePop{.inFrame = startFrame, .duration = moveFrames,
+                                             .from = 0.97f, .to = 1.f})
+                            .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                    break;
+            }
+        };
+
+        // The reel keys each centered tile in and out inside its own slot. The
+        // halo receives the identical keys; it only differs in resting opacity.
+        const auto authorReel = [&](LayerHandle& target, std::size_t index,
+                                    int startFrame, int enterFrames,
+                                    int reelExitStart, int reelExitDuration) {
+            const Vector3 rest = target.layer().transform.position;
+            const float peakOpacity = target.layer().transform.opacity;
+            const float baseZ = target.layer().transform.rotation.z;
+            const auto keyPosition = [&](int frame, const Vector3& value, const Easing& easing) {
+                target.layer().tracks.position.add(static_cast<float>(frame) / fps, value, easing);
+            };
+            const auto keyScale = [&](int frame, float value, const Easing& easing) {
+                target.layer().tracks.scale.add(static_cast<float>(frame) / fps,
+                                                Vector3(value, value, 1.f), easing);
+            };
+            const auto keyRotation = [&](int frame, float degrees, const Easing& easing) {
+                target.layer().tracks.rotation.add(
+                        static_cast<float>(frame) / fps,
+                        Vector3(0.f, 0.f,
+                                 baseZ + chrononmotion::math::degToRad(degrees)), easing);
+            };
+
+            target.animateOpacity(startFrame, std::max(2, enterFrames - 2),
+                                  0.f, peakOpacity, Easing::easeOut());
+            target.animateOpacity(reelExitStart, reelExitDuration,
+                                  peakOpacity, 0.f, Easing::easeIn());
+
+            switch (spec.reelMove) {
+                case MultiImageReelMove::DreamPush:
+                    target.animatePosition(startFrame, enterFrames,
+                                           Vector3(0.f, 72.f, 0.f), Easing::easeOut());
+                    keyScale(startFrame, 0.92f, Easing::easeOut());
+                    keyScale(startFrame + enterFrames, 1.f, Easing::easeOut());
+                    keyPosition(reelExitStart, rest, Easing::easeIn());
+                    keyPosition(reelExitStart + reelExitDuration,
+                                rest + Vector3(0.f, -42.f, 0.f), Easing::easeIn());
+                    keyScale(reelExitStart, 1.f, Easing::easeIn());
+                    keyScale(reelExitStart + reelExitDuration, 0.96f, Easing::easeIn());
+                    break;
+                case MultiImageReelMove::SoftIris:
+                    target.animatePosition(startFrame, enterFrames,
+                                           Vector3(0.f, 30.f, 0.f), Easing::easeOut());
+                    keyScale(startFrame, 0.78f, Easing::overshoot());
+                    keyScale(startFrame + enterFrames, 1.f, Easing::overshoot());
+                    keyRotation(startFrame, -2.4f, Easing::easeOut());
+                    keyRotation(startFrame + enterFrames, 0.f, Easing::easeOut());
+                    keyPosition(reelExitStart, rest, Easing::easeIn());
+                    keyPosition(reelExitStart + reelExitDuration,
+                                rest + Vector3(0.f, 24.f, 0.f), Easing::easeIn());
+                    keyScale(reelExitStart, 1.f, Easing::easeIn());
+                    keyScale(reelExitStart + reelExitDuration, 1.05f, Easing::easeIn());
+                    keyRotation(reelExitStart, 0.f, Easing::easeIn());
+                    keyRotation(reelExitStart + reelExitDuration, 2.2f, Easing::easeIn());
+                    break;
+                case MultiImageReelMove::LateralVeil: {
+                    const float side = index % 2 == 0 ? -1.f : 1.f;
+                    target.animatePosition(startFrame, enterFrames,
+                                           Vector3(side * spec.tileWidth * 0.22f, 0.f, 0.f),
+                                           Easing::easeOut());
+                    keyScale(startFrame, 0.96f, Easing::easeOut());
+                    keyScale(startFrame + enterFrames, 1.f, Easing::easeOut());
+                    keyRotation(startFrame, side * 1.6f, Easing::easeOut());
+                    keyRotation(startFrame + enterFrames, 0.f, Easing::easeOut());
+                    keyPosition(reelExitStart, rest, Easing::easeIn());
+                    keyPosition(reelExitStart + reelExitDuration,
+                                rest + Vector3(side * spec.tileWidth * 0.10f, -18.f, 0.f),
+                                Easing::easeIn());
+                    keyScale(reelExitStart, 1.f, Easing::easeIn());
+                    keyScale(reelExitStart + reelExitDuration, 0.97f, Easing::easeIn());
+                    keyRotation(reelExitStart, 0.f, Easing::easeIn());
+                    keyRotation(reelExitStart + reelExitDuration, -side * 1.2f, Easing::easeIn());
+                    break;
+                }
+            }
+        };
+
         for (std::size_t i = 0; i < cells.size(); ++i) {
             const MultiImageTile& tile = spec.tiles[i];
             const Vector2 cell = cells[i];
@@ -447,27 +668,70 @@ namespace chronontemplate {
                        static_cast<float>(cells.size() - 1) * 0.5f) * look.tiltStepDegrees;
             const float tiltRadians = chrononmotion::math::degToRad(tiltDegrees);
 
+            const int segment = storyReel ? std::max(1, spec.duration / count) : 0;
+            const int overlap = storyReel ? std::max(2, std::min(10, segment / 4)) : 0;
+            const bool lastTile = i + 1 == cells.size();
             int start = spec.inFrame + static_cast<int>(i) * stagger;
             int enterDuration = std::max(1, stagger);
             int moveDuration = std::max(2, stagger * 2);
+            int tileExitStart = exitStart;
+            int tileExitDuration = exitFrames;
+            int tileAliveEnd = endFrame;
             Enter kind = Enter::Rise;
             Direction dir = Direction::Up;
-            if (certified) {
+            if (storyReel) {
+                start = spec.inFrame + static_cast<int>(i) * segment;
+                enterDuration = std::max(3, std::min(16, segment / 3));
+                moveDuration = std::max(enterDuration, segment / 2);
+                // The previous print starts leaving before the next one arrives,
+                // so the handoff is a crossfade rather than a hard cut.
+                tileExitStart = lastTile ? exitStart : start + segment - overlap;
+                tileExitDuration = lastTile ? exitFrames : std::max(2, overlap * 2);
+                tileAliveEnd = lastTile
+                        ? endFrame
+                        : std::min(endFrame, tileExitStart + tileExitDuration);
+                dir = (i % 2 == 0) ? Direction::Left : Direction::Right;
+            } else if (certified) {
                 const Beat& beat = beats[i];
                 start = spec.inFrame + beat.start;
                 enterDuration = beat.enter;
                 moveDuration = std::max(2, beat.enter);
                 kind = beat.kind;
                 dir = beat.dir;
+            } else if (spec.entrance == MultiImageEntrance::Drift) {
+                dir = (i % 2 == 0) ? Direction::Left : Direction::Right;
             }
 
             ImageFrameStyle frame = tile.frame;
             if (styled) {
                 frame.cornerRadius = look.cornerRadius;
                 frame.tornEdgeAmount = look.tornEdge;
+                if (look.softBlur > 0.f) frame.softBlur = look.softBlur;
                 if (look.tornEdge > 0.f) {
                     frame.tornEdgeSeed = 1000u + static_cast<std::uint32_t>(i);
                 }
+            }
+
+            LayerHandle* halo = nullptr;
+            if (styled && !look.haloColor.empty()) {
+                LayerHandle& glow = scene.shape(ShapeSpec{
+                        .size = {spec.tileWidth + 2.f * look.haloPadding,
+                                 spec.tileHeight + 2.f * look.haloPadding},
+                        .fillColor = look.haloColor,
+                        .name = "tile_halo_" + std::to_string(i),
+                        .cornerRadius = look.cornerRadius + look.haloPadding,
+                        .glowRadius = look.haloGlowRadius,
+                        .glowIntensity = look.haloGlowIntensity,
+                        .glowColor = look.haloColor});
+                glow.position(x, y);
+                glow.opacity(look.haloOpacity);
+                glow.alive(storyReel ? start : spec.inFrame,
+                           storyReel ? tileAliveEnd : endFrame);
+                if (tiltDegrees != 0.f) {
+                    glow.layer().tracks.rotation.add(
+                            0.f, Vector3(0.f, 0.f, tiltRadians), Easing::easeOut());
+                }
+                halo = &glow;
             }
 
             if (styled && look.shadowOpacity > 0.f) {
@@ -478,10 +742,17 @@ namespace chronontemplate {
                         .cornerRadius = look.cornerRadius});
                 shadow.position(x + look.shadowOffset, y + look.shadowOffset);
                 shadow.opacity(look.shadowOpacity);
-                shadow.alive(spec.inFrame, endFrame);
+                shadow.alive(storyReel ? start : spec.inFrame,
+                             storyReel ? tileAliveEnd : endFrame);
                 shadow.layer().tracks.rotation.add(
                         0.f, Vector3(0.f, 0.f, tiltRadians), Easing::easeOut());
-                shadow.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+                if (storyReel) {
+                    shadow.animate(FadeIn{.inFrame = start, .duration = enterDuration});
+                    shadow.animate(FadeOut{.startFrame = tileExitStart,
+                                           .duration = tileExitDuration});
+                } else {
+                    shadow.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+                }
             }
             if (styled && spec.style == MultiImageStyle::PolaroidFan) {
                 // The polaroid card: white frame around the print with the
@@ -493,10 +764,17 @@ namespace chronontemplate {
                         .name = "polaroid_frame_" + std::to_string(i),
                         .cornerRadius = look.cornerRadius});
                 card.position(x, y + (kPolaroidBottom - kPolaroidBorder) * 0.5f);
-                card.alive(spec.inFrame, endFrame);
+                card.alive(storyReel ? start : spec.inFrame,
+                           storyReel ? tileAliveEnd : endFrame);
                 card.layer().tracks.rotation.add(
                         0.f, Vector3(0.f, 0.f, tiltRadians), Easing::easeOut());
-                card.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+                if (storyReel) {
+                    card.animate(FadeIn{.inFrame = start, .duration = enterDuration});
+                    card.animate(FadeOut{.startFrame = tileExitStart,
+                                         .duration = tileExitDuration});
+                } else {
+                    card.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+                }
             }
 
             LayerHandle& image = scene.image(ImageSpec{
@@ -505,55 +783,26 @@ namespace chronontemplate {
                     .frame = frame,
                     .targetSize = Vector2(spec.tileWidth, spec.tileHeight)});
             image.position(x, y);
-            image.alive(spec.inFrame, endFrame);
+            image.alive(storyReel ? start : spec.inFrame,
+                        storyReel ? tileAliveEnd : endFrame);
             if (tiltDegrees != 0.f) {
                 image.layer().tracks.rotation.add(
                         0.f, Vector3(0.f, 0.f, tiltRadians), Easing::easeOut());
             }
 
-            if (certified) {
-                switch (kind) {
-                    case Enter::Slide:
-                        image.animate(SlideIn{.direction = dir,
-                                              .inFrame = start,
-                                              .duration = moveDuration,
-                                              .distance = spec.tileWidth * 0.5f})
-                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
-                        break;
-                    case Enter::Pop:
-                        image.animate(ScalePop{.inFrame = start, .duration = moveDuration,
-                                               .from = 0.72f, .to = 1.f})
-                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
-                        break;
-                    case Enter::Rise:
-                        image.animate(SlideIn{.direction = Direction::Up,
-                                              .inFrame = start,
-                                              .duration = moveDuration,
-                                              .distance = spec.tileHeight * 0.5f})
-                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
-                        break;
+            if (storyReel) {
+                authorReel(image, i, start, enterDuration, tileExitStart, tileExitDuration);
+                if (halo != nullptr) {
+                    authorReel(*halo, i, start, enterDuration, tileExitStart, tileExitDuration);
                 }
             } else {
-                switch (spec.entrance) {
-                    case MultiImageEntrance::Fade:
-                        image.animate(FadeIn{.inFrame = start, .duration = enterDuration});
-                        break;
-                    case MultiImageEntrance::Rise:
-                        image.animate(SlideIn{
-                                         .direction = Direction::Up,
-                                         .inFrame = start,
-                                         .duration = moveDuration,
-                                         .distance = spec.tileHeight * 0.5f})
-                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
-                        break;
-                    case MultiImageEntrance::ScalePop:
-                        image.animate(ScalePop{.inFrame = start, .duration = moveDuration,
-                                               .from = 0.72f, .to = 1.f})
-                                .animate(FadeIn{.inFrame = start, .duration = enterDuration});
-                        break;
+                authorEnter(image, start, enterDuration, moveDuration, kind, dir);
+                image.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+                if (halo != nullptr) {
+                    authorEnter(*halo, start, enterDuration, moveDuration, kind, dir);
+                    halo->animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
                 }
             }
-            image.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
             board.tiles.push_back(&image);
 
             const std::string caption =
@@ -576,10 +825,12 @@ namespace chronontemplate {
                     text.layer().tracks.rotation.add(
                             0.f, Vector3(0.f, 0.f, tiltRadians), Easing::easeOut());
                 }
-                text.alive(spec.inFrame, endFrame);
+                text.alive(storyReel ? start : spec.inFrame,
+                           storyReel ? tileAliveEnd : endFrame);
                 text.animate(FadeIn{.inFrame = start + std::max(1, enterDuration / 2),
                                     .duration = std::max(1, enterDuration)});
-                text.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+                text.animate(FadeOut{.startFrame = storyReel ? tileExitStart : exitStart,
+                                     .duration = storyReel ? tileExitDuration : exitFrames});
                 board.captions.push_back(&text);
             }
         }
