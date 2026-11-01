@@ -212,6 +212,136 @@ namespace {
         }
     }
 
+    void theSoftDreamStyleAndReelMovesHaveStableIds() {
+        section("soft dream style and story reel moves");
+        check(std::string(multiImageStyleId(MultiImageStyle::SoftDream)) ==
+                      "multi_image_soft_dream",
+              "the soft dream look has a stable id");
+        check(std::string(multiImageReelMoveId(MultiImageReelMove::DreamPush)) ==
+                      "reel_dream_push",
+              "the dream push has a stable id");
+        check(std::string(multiImageReelMoveId(MultiImageReelMove::SoftIris)) ==
+                      "reel_soft_iris",
+              "the soft iris has a stable id");
+        check(std::string(multiImageReelMoveId(MultiImageReelMove::LateralVeil)) ==
+                      "reel_lateral_veil",
+              "the lateral veil has a stable id");
+    }
+
+    void theStoryReelStagesFiveImagesOneAfterAnother() {
+        section("story reel stages five images one after another");
+        FakeContentHost host;
+        TemplateScene scene("soft_reel", 30.f, host, 1920.f, 1080.f);
+        MultiImageSpec spec = specFor(MultiImageLayout::Penta);
+        spec.presentation = MultiImagePresentation::StoryReel;
+        spec.style = MultiImageStyle::SoftDream;
+        spec.reelMove = MultiImageReelMove::DreamPush;
+        spec.tileWidth = 900.f;
+        spec.tileHeight = 560.f;
+        spec.duration = 150;
+        spec.holdFrames = 30;
+        const MultiImageBoard board = addMultiImageBoard(scene, spec);
+
+        check(board.tiles.size() == 5, "the reel authors all five prints");
+        check(board.captions.size() == 5, "every print keeps its caption");
+        check(board.motionId.empty(), "a reel does not claim a board choreography");
+        check(board.reelMoveId == "reel_dream_push", "the board reports its reel move");
+        check(host.lastImageRequest().cornerRadius == 64.f,
+              "the soft dream prints are strongly rounded");
+        check(host.lastImageRequest().softBlur == 1.2f,
+              "the soft dream prints carry a subtle optical softness");
+        const ShapeRequest* halo = host.findShapeRequest("tile_halo_0");
+        check(halo != nullptr && halo->glowRadius == 44.f,
+              "each print has a glowing soft rim");
+        check(host.findShapeRequest("dream_aura") != nullptr,
+              "the board draws its radial dream aura");
+        check(scene.validate().empty(), "the reel scene validates");
+
+        // Five slots of thirty frames: the first print leads, a later print owns
+        // the middle, and the last print holds before the board exits.
+        const FrameSubmission early = scene.submit(10);
+        const FrameSubmission middle = scene.submit(100);
+        const FrameSubmission hold = scene.submit(160);
+        const FrameSubmission end = scene.submit(180);
+        const BoundLayer* firstEarly = findLayer(early, board.tiles[0]->id());
+        const BoundLayer* secondEarly = findLayer(early, board.tiles[1]->id());
+        check(firstEarly && firstEarly->transform.opacity > 0.5f,
+              "the first print is on screen when the reel opens");
+        check(secondEarly == nullptr || secondEarly->transform.opacity <= 0.01f,
+              "the second print has not arrived yet");
+        const BoundLayer* fourthMiddle = findLayer(middle, board.tiles[3]->id());
+        const BoundLayer* firstMiddle = findLayer(middle, board.tiles[0]->id());
+        check(fourthMiddle && fourthMiddle->transform.opacity > 0.5f,
+              "the fourth print owns the middle of the reel");
+        check(firstMiddle == nullptr || firstMiddle->transform.opacity <= 0.01f,
+              "the first print has left by the middle");
+        const BoundLayer* lastHold = findLayer(hold, board.tiles[4]->id());
+        check(lastHold && lastHold->transform.opacity > 0.9f,
+              "the last print holds for the ending");
+        const BoundLayer* lastEnd = findLayer(end, board.tiles[4]->id());
+        check(lastEnd == nullptr || lastEnd->transform.opacity <= 0.05f,
+              "the reel fades out completely");
+    }
+
+    void theDuoStoryReelWorksForTwoImages() {
+        section("story reel works with two images");
+        FakeContentHost host;
+        TemplateScene scene("duo_reel", 30.f, host, 1920.f, 1080.f);
+        MultiImageSpec spec = specFor(MultiImageLayout::Duo);
+        spec.presentation = MultiImagePresentation::StoryReel;
+        spec.style = MultiImageStyle::SoftDream;
+        spec.reelMove = MultiImageReelMove::SoftIris;
+        spec.tileWidth = 960.f;
+        spec.tileHeight = 600.f;
+        spec.duration = 120;
+        spec.holdFrames = 24;
+        const MultiImageBoard board = addMultiImageBoard(scene, spec);
+
+        check(board.tiles.size() == 2, "both prints are authored");
+        check(board.reelMoveId == "reel_soft_iris", "the duo exposes its own move");
+        check(scene.validate().empty(), "the duo reel validates");
+        const FrameSubmission first = scene.submit(20);
+        const FrameSubmission second = scene.submit(90);
+        const BoundLayer* a = findLayer(first, board.tiles[0]->id());
+        const BoundLayer* b = findLayer(second, board.tiles[1]->id());
+        check(a && a->transform.opacity > 0.5f, "the first duo print leads");
+        check(b && b->transform.opacity > 0.5f, "the second duo print follows");
+    }
+
+    void theSoftEntrancesAnimateSimultaneousBoards() {
+        section("soft entrances animate simultaneous boards");
+        {
+            FakeContentHost host;
+            TemplateScene scene("soft_bloom", 30.f, host, 1920.f, 1080.f);
+            MultiImageSpec spec = specFor(MultiImageLayout::Duo);
+            spec.motionId = "";
+            spec.entrance = MultiImageEntrance::SoftBloom;
+            const MultiImageBoard board = addMultiImageBoard(scene, spec);
+            const auto& positionKeys = board.tiles[0]->layer().tracks.position.keys();
+            const auto& scaleKeys = board.tiles[0]->layer().tracks.scale.keys();
+            check(!positionKeys.empty() && positionKeys.front().value.y > 540.f,
+                  "soft bloom starts above the resting print");
+            check(!scaleKeys.empty() && scaleKeys.front().value.x < 0.95f,
+                  "soft bloom starts slightly smaller");
+            check(scene.validate().empty(), "the soft bloom board validates");
+        }
+        {
+            FakeContentHost host;
+            TemplateScene scene("soft_drift", 30.f, host, 1920.f, 1080.f);
+            MultiImageSpec spec = specFor(MultiImageLayout::Duo);
+            spec.motionId = "";
+            spec.entrance = MultiImageEntrance::Drift;
+            const MultiImageBoard board = addMultiImageBoard(scene, spec);
+            const auto& left = board.tiles[0]->layer().tracks.position.keys();
+            const auto& right = board.tiles[1]->layer().tracks.position.keys();
+            check(!left.empty() && left.front().value.x < 1920.f * 0.30f,
+                  "the left card drifts in from the left");
+            check(!right.empty() && right.front().value.x > 1920.f * 0.70f,
+                  "the right card drifts in from the right");
+            check(scene.validate().empty(), "the soft drift board validates");
+        }
+    }
+
     void theTileLabelIsDerivedFromThePath() {
         section("multi-image tile labels");
         check(multiImageTileLabel("assets/card_trio_1.png") == "CARD TRIO 1",
@@ -330,7 +460,11 @@ int main() {
     theBoardsAssembleAndSubmit();
     theBoardRejectsAMismatchedTileCount();
     theTileLabelIsDerivedFromThePath();
+    theSoftDreamStyleAndReelMovesHaveStableIds();
     theStyleLooksDressTheBoard();
+    theStoryReelStagesFiveImagesOneAfterAnother();
+    theDuoStoryReelWorksForTwoImages();
+    theSoftEntrancesAnimateSimultaneousBoards();
     theGroupMotionsAreCertifiedPerLayout();
     randomGroupMotionsAreStableAndApplied();
     theTwoMotionsOfALayoutDiffer();

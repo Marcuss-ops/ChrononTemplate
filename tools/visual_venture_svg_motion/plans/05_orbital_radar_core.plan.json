@@ -1,0 +1,1480 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "vv_orbital_radar_core",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 90
+  },
+  "output": {
+    "path": "C:/Users/pater/Pyt/chronons/ChrononTemplate/tools/visual_venture_svg_motion/renders/vv_orbital_radar_core.mp4",
+    "format": "mp4"
+  },
+  "layers": [
+    {
+      "id": "bg_space",
+      "type": "color",
+      "color": [
+        0.015,
+        0.015,
+        0.02,
+        1.0
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "effects": [
+        {
+          "type": "vignette",
+          "radius": 0.85,
+          "softness": 0.6,
+          "amount": 0.5
+        }
+      ]
+    },
+    {
+      "id": "radar_ring_120",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        240,
+        240
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "opacity": 0.22,
+      "shape": {
+        "type": "ellipse",
+        "stroke": {
+          "color": "#80A0C0",
+          "width": 1.5
+        }
+      }
+    },
+    {
+      "id": "radar_ring_220",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        440,
+        440
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "opacity": 0.22,
+      "shape": {
+        "type": "ellipse",
+        "stroke": {
+          "color": "#80A0C0",
+          "width": 1.5
+        }
+      }
+    },
+    {
+      "id": "radar_ring_320",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        640,
+        640
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "opacity": 0.22,
+      "shape": {
+        "type": "ellipse",
+        "stroke": {
+          "color": "#80A0C0",
+          "width": 1.5
+        }
+      }
+    },
+    {
+      "id": "reactor_core_glow",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        140,
+        140
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          0.08,
+          0.08,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FF4040",
+          "width": 3.0
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 36.0,
+          "intensity": 1.0,
+          "color": [
+            1.0,
+            0.08,
+            0.08,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              },
+              {
+                "frame": 45,
+                "value": [
+                  1.18,
+                  1.18
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "core_nucleus_hot",
+      "type": "shape",
+      "position": [
+        0,
+        0
+      ],
+      "size": [
+        50,
+        50
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          0.95,
+          0.95,
+          1.0
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 18.0,
+          "intensity": 0.9,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "constellation_dot_0",
+      "type": "shape",
+      "position": [
+        220.0,
+        0.0
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  220.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  110.00000000000003,
+                  190.5255888325765
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 1,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 15,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_1",
+      "type": "shape",
+      "position": [
+        190.52558883257652,
+        109.99999999999999
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  190.52558883257652,
+                  109.99999999999999
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.3471114790620885e-14,
+                  220.0
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 7,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 22,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_2",
+      "type": "shape",
+      "position": [
+        110.00000000000003,
+        190.5255888325765
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  110.00000000000003,
+                  190.5255888325765
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  -109.99999999999996,
+                  190.52558883257652
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 14,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 29,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_3",
+      "type": "shape",
+      "position": [
+        1.3471114790620885e-14,
+        220.0
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  1.3471114790620885e-14,
+                  220.0
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  -190.52558883257652,
+                  109.99999999999999
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 21,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 36,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_4",
+      "type": "shape",
+      "position": [
+        -109.99999999999996,
+        190.52558883257652
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  -109.99999999999996,
+                  190.52558883257652
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  -220.0,
+                  2.694222958124177e-14
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 28,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 43,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_5",
+      "type": "shape",
+      "position": [
+        -190.52558883257652,
+        109.99999999999999
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  -190.52558883257652,
+                  109.99999999999999
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  -190.5255888325765,
+                  -110.00000000000003
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 35,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 50,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_6",
+      "type": "shape",
+      "position": [
+        -220.0,
+        2.694222958124177e-14
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  -220.0,
+                  2.694222958124177e-14
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  -110.0000000000001,
+                  -190.52558883257646
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 42,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 57,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_7",
+      "type": "shape",
+      "position": [
+        -190.5255888325765,
+        -110.00000000000003
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  -190.5255888325765,
+                  -110.00000000000003
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  -4.0413344371862656e-14,
+                  -220.0
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 49,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 64,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_8",
+      "type": "shape",
+      "position": [
+        -110.0000000000001,
+        -190.52558883257646
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  -110.0000000000001,
+                  -190.52558883257646
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  110.00000000000003,
+                  -190.5255888325765
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 56,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 71,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_9",
+      "type": "shape",
+      "position": [
+        -4.0413344371862656e-14,
+        -220.0
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  -4.0413344371862656e-14,
+                  -220.0
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  190.52558883257643,
+                  -110.0000000000001
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 63,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 78,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_10",
+      "type": "shape",
+      "position": [
+        110.00000000000003,
+        -190.5255888325765
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  110.00000000000003,
+                  -190.5255888325765
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  220.0,
+                  -5.388445916248354e-14
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 70,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 85,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "constellation_dot_11",
+      "type": "shape",
+      "position": [
+        190.52558883257643,
+        -110.0000000000001
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.2
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14.0,
+          "intensity": 0.8,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  190.52558883257643,
+                  -110.0000000000001
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  190.5255888325765,
+                  110.0
+                ]
+              }
+            ]
+          },
+          {
+            "property": "scale",
+            "easing": "in_out_sine",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 77,
+                "value": [
+                  1.35,
+                  1.35
+                ]
+              },
+              {
+                "frame": 89,
+                "value": [
+                  0.8,
+                  0.8
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  1.0,
+                  1.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "inner_satellite_node",
+      "type": "shape",
+      "position": [
+        120,
+        0
+      ],
+      "size": [
+        24,
+        24
+      ],
+      "start_frame": 0,
+      "duration_frames": 90,
+      "shape": {
+        "type": "ellipse",
+        "fill": [
+          0.75,
+          0.82,
+          0.9,
+          1.0
+        ],
+        "stroke": {
+          "color": "#FFFFFF",
+          "width": 1.5
+        }
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 16.0,
+          "intensity": 0.75,
+          "color": [
+            0.7,
+            0.85,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "animation": {
+        "tracks": [
+          {
+            "property": "position",
+            "easing": "linear",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": [
+                  120.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 22,
+                "value": [
+                  0.0,
+                  120.0
+                ]
+              },
+              {
+                "frame": 45,
+                "value": [
+                  -120.0,
+                  0.0
+                ]
+              },
+              {
+                "frame": 68,
+                "value": [
+                  0.0,
+                  -120.0
+                ]
+              },
+              {
+                "frame": 90,
+                "value": [
+                  120.0,
+                  0.0
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

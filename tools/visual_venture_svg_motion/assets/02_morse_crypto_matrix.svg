@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%" style="background:#040407;">
+  <defs>
+    <filter id="glow-white" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="blur" />
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      @keyframes slideWhiteA {
+        0%, 100% { transform: translateX(0px); }
+        50% { transform: translateX(180px); }
+      }
+      @keyframes slideWhiteB {
+        0%, 100% { transform: translateX(0px); }
+        50% { transform: translateX(-160px); }
+      }
+      @keyframes slideRed {
+        0%, 100% { transform: translateX(0px); }
+        50% { transform: translateX(-190px); }
+      }
+      @keyframes pulseAlert {
+        0%, 100% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.25); opacity: 1; }
+      }
+      .bar-white-1 { animation: slideWhiteA 2.4s infinite ease-in-out; }
+      .bar-white-2 { animation: slideWhiteB 2.8s infinite ease-in-out; }
+      .bar-red { animation: slideRed 2.6s infinite ease-in-out; }
+      .alert-dot { animation: pulseAlert 1.8s infinite ease-in-out; transform-origin: center; }
+    </style>
+  </defs>
+
+  <!-- Row 1 -->
+  <line x1="360" y1="380" x2="1560" y2="380" stroke="#88B0D0" stroke-width="1" stroke-opacity="0.15"/>
+  <circle cx="640" cy="380" r="20" fill="#ffffff" filter="url(#glow-white)"/>
+  <circle class="alert-dot" cx="1280" cy="380" r="18" fill="#ff2424" filter="url(#glow-red)" style="transform-origin: 1280px 380px;"/>
+  <rect class="bar-white-1" x="800" y="362" width="75" height="10" rx="5" fill="#ffffff" filter="url(#glow-white)"/>
+  <rect class="bar-white-2" x="1000" y="362" width="75" height="10" rx="5" fill="#ffffff" filter="url(#glow-white)"/>
+  <rect class="bar-red" x="870" y="388" width="80" height="10" rx="5" fill="#ff2424" filter="url(#glow-red)"/>
+
+  <!-- Row 2 -->
+  <line x1="360" y1="540" x2="1560" y2="540" stroke="#88B0D0" stroke-width="1" stroke-opacity="0.15"/>
+  <circle cx="640" cy="540" r="20" fill="#ffffff" filter="url(#glow-white)"/>
+  <circle class="alert-dot" cx="1280" cy="540" r="18" fill="#ff2424" filter="url(#glow-red)" style="transform-origin: 1280px 540px; animation-delay: 0.3s;"/>
+  <rect class="bar-white-2" x="830" y="522" width="75" height="10" rx="5" fill="#ffffff" filter="url(#glow-white)"/>
+  <rect class="bar-white-1" x="1030" y="522" width="75" height="10" rx="5" fill="#ffffff" filter="url(#glow-white)"/>
+  <rect class="bar-red" x="840" y="548" width="80" height="10" rx="5" fill="#ff2424" filter="url(#glow-red)" style="animation-delay: 0.4s;"/>
+
+  <!-- Row 3 -->
+  <line x1="360" y1="700" x2="1560" y2="700" stroke="#88B0D0" stroke-width="1" stroke-opacity="0.15"/>
+  <circle cx="640" cy="700" r="20" fill="#ffffff" filter="url(#glow-white)"/>
+  <circle class="alert-dot" cx="1280" cy="700" r="18" fill="#ff2424" filter="url(#glow-red)" style="transform-origin: 1280px 700px; animation-delay: 0.6s;"/>
+  <rect class="bar-white-1" x="860" y="682" width="75" height="10" rx="5" fill="#ffffff" filter="url(#glow-white)"/>
+  <rect class="bar-white-2" x="970" y="682" width="75" height="10" rx="5" fill="#ffffff" filter="url(#glow-white)"/>
+  <rect class="bar-red" x="920" y="708" width="80" height="10" rx="5" fill="#ff2424" filter="url(#glow-red)" style="animation-delay: 0.8s;"/>
+</svg>

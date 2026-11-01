@@ -263,6 +263,13 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
             ${CHRONONTEMPLATE_NLOHMANN_JSON_DIR})
     target_compile_options(chronontemplate_emit_camera_motion_certification PRIVATE -Wall -Wextra)
 
+    # Three temporal shutter demonstrations using an original generated plate.
+    add_executable(chronontemplate_shutter_lifetime_v1 tools/shutter_lifetime_v1.cpp)
+    target_include_directories(chronontemplate_shutter_lifetime_v1 PRIVATE
+            ${CHRONONTEMPLATE_NLOHMANN_JSON_DIR})
+    target_compile_features(chronontemplate_shutter_lifetime_v1 PRIVATE cxx_std_20)
+    target_compile_options(chronontemplate_shutter_lifetime_v1 PRIVATE -Wall -Wextra)
+
     # The UI + smooth-camera choreography: one Null controller carries the
     # panel, the camera push/drift/settle rides the rig, framing fits the
     # measured bounds, and the 90-frame canary lowers to RenderPlan V3.

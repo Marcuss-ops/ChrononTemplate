@@ -2,13 +2,13 @@
 $ErrorActionPreference = "Stop"
 
 $MSVC_ENV = "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat"
-$VCPKG_INC = "C:\Users\pater\Pyt\Chronon3d\vcpkg_installed\win-release\x64-windows\include"
-$VCPKG_LIB = "C:\Users\pater\Pyt\Chronon3d\vcpkg_installed\win-release\x64-windows\lib"
-$VCPKG_BIN = "C:\Users\pater\Pyt\Chronon3d\vcpkg_installed\win-release\x64-windows\bin"
+$VCPKG_INC = "C:\Users\pater\Pyt\chronons\Chronon3d\vcpkg_installed\win-release\x64-windows\include"
+$VCPKG_LIB = "C:\Users\pater\Pyt\chronons\Chronon3d\vcpkg_installed\win-release\x64-windows\lib"
+$VCPKG_BIN = "C:\Users\pater\Pyt\chronons\Chronon3d\vcpkg_installed\win-release\x64-windows\bin"
 
-$SRC_DIR = "C:\Users\pater\Pyt\ChrononTemplate\tools\vector_diagram"
-$INC_DIR = "C:\Users\pater\Pyt\ChrononTemplate\include"
-$OUT_DIR = "C:\Users\pater\Pyt\ChrononTemplate\out\svg_parity"
+$SRC_DIR = "C:\Users\pater\Pyt\chronons\ChrononTemplate\tools\vector_diagram"
+$INC_DIR = "C:\Users\pater\Pyt\chronons\ChrononTemplate\include"
+$OUT_DIR = "C:\Users\pater\Pyt\chronons\ChrononTemplate\out\svg_parity"
 
 if (-not (Test-Path $OUT_DIR)) {
     New-Item -ItemType Directory -Force -Path $OUT_DIR | Out-Null

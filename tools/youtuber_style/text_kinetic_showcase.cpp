@@ -39,7 +39,7 @@ constexpr double kPi = 3.14159265358979323846;
 constexpr double kFitWidth = 3080.0;
 constexpr int kFps = 30;
 
-inline const std::string kFontsDir = "C:/Users/pater/Pyt/Chronon3d/assets/fonts";
+inline const std::string kFontsDir = "C:/Users/pater/Pyt/chronons/Chronon3d/assets/fonts";
 
 using Color = BLRgba32;
 

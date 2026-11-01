@@ -108,7 +108,7 @@ void applyBayerDithering(BLImage& img) {
 int main() {
     std::cout << "=== 2.5D Icon Constellation Blend2D Renderer (Visual Parity) ===\n";
 
-    std::string base_dir = "C:/Users/pater/Pyt/ChrononTemplate/";
+    std::string base_dir = "C:/Users/pater/Pyt/chronons/ChrononTemplate/";
     std::string neon_png_dir = base_dir + "assets/icons/png_neon/";
     std::string white_png_dir = base_dir + "assets/icons/png_white/";
     std::string frames_dir = base_dir + "out/svg_parity/icon_constellation_frames/";

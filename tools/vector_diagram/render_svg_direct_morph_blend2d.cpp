@@ -81,7 +81,7 @@ int main() {
               << "Direct Disk SVG Ingestion -> Arc-Length Resampling -> 60FPS\n"
               << "========================================================\n";
 
-    std::string base_dir = "C:/Users/pater/Pyt/ChrononTemplate/";
+    std::string base_dir = "C:/Users/pater/Pyt/chronons/ChrononTemplate/";
     std::string svg_dir = base_dir + "assets/icons/svg/";
     std::string frames_dir = base_dir + "out/svg_parity/direct_svg_morph_frames/";
     std::string out_mp4 = base_dir + "out/svg_parity/direct_svg_morph_showcase.mp4";

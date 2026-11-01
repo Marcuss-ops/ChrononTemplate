@@ -102,7 +102,7 @@ std::vector<Point2D> build_rocket_shape() {
 int main() {
     std::cout << "=== 2.5D Topological Morphing Blend2D Renderer (60 FPS) ===\n";
 
-    std::string base_dir = "C:/Users/pater/Pyt/ChrononTemplate/";
+    std::string base_dir = "C:/Users/pater/Pyt/chronons/ChrononTemplate/";
     std::string frames_dir = base_dir + "out/svg_parity/topological_morph_frames/";
     std::string out_mp4 = base_dir + "out/svg_parity/topological_morph_showcase.mp4";
 

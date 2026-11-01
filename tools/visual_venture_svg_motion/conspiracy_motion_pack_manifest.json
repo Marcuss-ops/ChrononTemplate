@@ -1,0 +1,205 @@
+{
+  "title": "Visual Venture conspiracy motion pack",
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 24,
+  "duration_seconds": 8,
+  "grain": "light monochrome grain across the full frame",
+  "assets": [
+    {
+      "id": "09_project_sunshine_food_chain",
+      "title": "PROJECT SUNSHINE / FALLOUT PATHWAY",
+      "category": "story_scene",
+      "svg": "assets/09_project_sunshine_food_chain.svg",
+      "mp4": "renders/09_project_sunshine_food_chain.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "10_operation_sea_spray_dispersion",
+      "title": "OPERATION SEA SPRAY / DISPERSION MODEL",
+      "category": "story_scene",
+      "svg": "assets/10_operation_sea_spray_dispersion.svg",
+      "mp4": "renders/10_operation_sea_spray_dispersion.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "11_project_shad_ship_scan",
+      "title": "PROJECT SHAD / SHIP AND TEST ZONE",
+      "category": "story_scene",
+      "svg": "assets/11_project_shad_ship_scan.svg",
+      "mp4": "renders/11_project_shad_ship_scan.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "12_greenbrier_bunker_cutaway",
+      "title": "GREENBRIER / UNDERGROUND CUTAWAY",
+      "category": "story_scene",
+      "svg": "assets/12_greenbrier_bunker_cutaway.svg",
+      "mp4": "renders/12_greenbrier_bunker_cutaway.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "13_midnight_climax_surveillance",
+      "title": "MIDNIGHT CLIMAX / ROOM SIGHTLINE",
+      "category": "story_scene",
+      "svg": "assets/13_midnight_climax_surveillance.svg",
+      "mp4": "renders/13_midnight_climax_surveillance.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "14_goldsboro_safety_sequence",
+      "title": "GOLDSBORO / ARMING SEQUENCE",
+      "category": "story_scene",
+      "svg": "assets/14_goldsboro_safety_sequence.svg",
+      "mp4": "renders/14_goldsboro_safety_sequence.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "15_fernald_tracer_path",
+      "title": "FERNALD / TRACER PATHWAY",
+      "category": "story_scene",
+      "svg": "assets/15_fernald_tracer_path.svg",
+      "mp4": "renders/15_fernald_tracer_path.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "16_teapot_dome_money_flow",
+      "title": "TEAPOT DOME / CONTRACT FLOW",
+      "category": "story_scene",
+      "svg": "assets/16_teapot_dome_money_flow.svg",
+      "mp4": "renders/16_teapot_dome_money_flow.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "17_operation_washtub_network",
+      "title": "OPERATION WASHTUB / NETWORK MAP",
+      "category": "story_scene",
+      "svg": "assets/17_operation_washtub_network.svg",
+      "mp4": "renders/17_operation_washtub_network.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "18_soviet_alfa_cooling_loop",
+      "title": "PROJECT 705 / COOLANT LOOP",
+      "category": "story_scene",
+      "svg": "assets/18_soviet_alfa_cooling_loop.svg",
+      "mp4": "renders/18_soviet_alfa_cooling_loop.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "19_particle_flow",
+      "title": "PARTICLE FLOW",
+      "category": "motion_primitive",
+      "svg": "assets/19_particle_flow.svg",
+      "mp4": "renders/19_particle_flow.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "20_path_reveal",
+      "title": "PATH REVEAL",
+      "category": "motion_primitive",
+      "svg": "assets/20_path_reveal.svg",
+      "mp4": "renders/20_path_reveal.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "21_radar_scan",
+      "title": "RADAR SCAN",
+      "category": "motion_primitive",
+      "svg": "assets/21_radar_scan.svg",
+      "mp4": "renders/21_radar_scan.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "22_network_graph",
+      "title": "NETWORK GRAPH",
+      "category": "motion_primitive",
+      "svg": "assets/22_network_graph.svg",
+      "mp4": "renders/22_network_graph.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "23_number_counter",
+      "title": "NUMBER COUNTER",
+      "category": "motion_primitive",
+      "svg": "assets/23_number_counter.svg",
+      "mp4": "renders/23_number_counter.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "24_shape_morph",
+      "title": "SHAPE MORPH",
+      "category": "motion_primitive",
+      "svg": "assets/24_shape_morph.svg",
+      "mp4": "renders/24_shape_morph.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "25_document_reveal",
+      "title": "DOCUMENT REVEAL",
+      "category": "motion_primitive",
+      "svg": "assets/25_document_reveal.svg",
+      "mp4": "renders/25_document_reveal.mp4",
+      "camera_path": "scene-specific"
+    },
+    {
+      "id": "26_signal_pulse",
+      "title": "SIGNAL PULSE",
+      "category": "motion_primitive",
+      "svg": "assets/26_signal_pulse.svg",
+      "mp4": "renders/26_signal_pulse.mp4",
+      "camera_path": "scene-specific"
+    }
+  ],
+  "intro": {
+    "id": "intro_10_real_secrets_30s",
+    "title": "10 REAL SECRETS — narrative SVG intro",
+    "category": "intro",
+    "duration_seconds": 30,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "fps": 24,
+    "svg": "assets/intro_10_real_secrets_30s.svg",
+    "mp4": "renders/intro_10_real_secrets_30s.mp4",
+    "morph": "radioactive tracer → San Francisco Bay contour → falling device → dossier → title underline → opening lead line",
+    "storyboard": [
+      {
+        "start": 0,
+        "end": 5,
+        "scene": "Project Sunshine: fallout enters a food chain and lights the bone"
+      },
+      {
+        "start": 5,
+        "end": 10,
+        "scene": "Operation Sea-Spray: particle cloud crosses a schematic San Francisco Bay map"
+      },
+      {
+        "start": 10,
+        "end": 15,
+        "scene": "Goldsboro: bomber, two falling devices, safety-state indicator"
+      },
+      {
+        "start": 15,
+        "end": 21,
+        "scene": "Three evidence files converge and receive a declassified stamp"
+      },
+      {
+        "start": 21,
+        "end": 26,
+        "scene": "Centered title reveal"
+      },
+      {
+        "start": 26,
+        "end": 30,
+        "scene": "Title resolves into a line leading to the first story"
+      }
+    ],
+    "render_source": "standalone animated SVG; MP4 rendered from the SVG SMIL timeline",
+    "audio": false,
+    "pack_mp4": "intro_10_real_secrets_narrative_final_30s.mp4"
+  }
+}

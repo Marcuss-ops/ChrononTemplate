@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+<defs>
+  <radialGradient id="bg"><stop stop-color="#111214"/><stop offset="1" stop-color="#020203"/></radialGradient>
+  <linearGradient id="beam" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".2"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <filter id="glow" x="-200%" y="-200%" width="400%" height="400%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></filter>
+  <style><![CDATA[
+    @keyframes sweep{0%,100%{transform:translateX(-90px);opacity:.35}50%{transform:translateX(90px);opacity:.8}}
+    @keyframes ping{0%{r:15;opacity:.8}70%,100%{r:55;opacity:0}}
+    @keyframes dots{0%,100%{opacity:.4}50%{opacity:1}}
+    .scanner{animation:sweep 4s ease-in-out infinite}
+    .ping{animation:ping 2s ease-out infinite}
+    .dots{animation:dots 1.5s ease-in-out infinite}
+  ]]></style>
+<filter id="filmGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".82" numOctaves="2" seed="3" stitchTiles="stitch"><animate attributeName="seed" values="3;11;23;3" dur="1.4s" repeatCount="indefinite"/></feTurbulence><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .22"/></feComponentTransfer></filter>
+</defs>
+<rect width="1920" height="1080" fill="url(#bg)"/>
+<path d="M960 240L1250 850H670Z" fill="url(#beam)" opacity=".7"/>
+<g class="scanner"><path d="M785 240h350" stroke="#fff" stroke-opacity=".22" stroke-width="2"/><path d="M925 240h70" stroke="#fff" stroke-width="8" stroke-linecap="round" filter="url(#glow)"/></g>
+<circle cx="960" cy="240" r="12" fill="#fff" filter="url(#glow)"/>
+<circle cx="920" cy="710" r="18" fill="#fff" filter="url(#glow)"/><circle cx="1000" cy="710" r="10" fill="#cdd1d9" filter="url(#glow)"/>
+<circle class="ping" cx="920" cy="710" r="15" fill="none" stroke="#fff" stroke-width="2" filter="url(#glow)"/>
+<g class="dots" fill="#fff" filter="url(#glow)"><circle cx="780" cy="890" r="5"/><circle cx="840" cy="890" r="5"/><circle cx="900" cy="890" r="5"/><circle cx="960" cy="890" r="5"/><circle cx="1020" cy="890" r="5"/><circle cx="1080" cy="890" r="5"/><circle cx="1140" cy="890" r="5"/></g>
+<rect width="1920" height="1080" filter="url(#filmGrain)" opacity=".16" style="mix-blend-mode:screen;pointer-events:none"/>
+</svg>

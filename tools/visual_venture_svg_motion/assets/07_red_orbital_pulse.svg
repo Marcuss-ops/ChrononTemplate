@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+<defs>
+  <radialGradient id="bg"><stop stop-color="#171719"/><stop offset="1" stop-color="#020203"/></radialGradient>
+  <filter id="glow" x="-200%" y="-200%" width="400%" height="400%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <style><![CDATA[
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes pulse{0%,100%{r:31;opacity:.82}50%{r:43;opacity:1}}
+    @keyframes ripple{0%{r:54;opacity:.6}100%{r:180;opacity:0}}
+    .ring{transform-origin:960px 540px;animation:spin 14s linear infinite}
+    .core{animation:pulse 2s ease-in-out infinite}
+    .ripple{animation:ripple 2.4s ease-out infinite}
+  ]]></style>
+<filter id="filmGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".82" numOctaves="2" seed="3" stitchTiles="stitch"><animate attributeName="seed" values="3;11;23;3" dur="1.4s" repeatCount="indefinite"/></feTurbulence><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .22"/></feComponentTransfer></filter>
+</defs>
+<rect width="1920" height="1080" fill="url(#bg)"/>
+<circle cx="960" cy="540" r="120" fill="none" stroke="#dce1e8" stroke-opacity=".18" stroke-width="2"/>
+<circle class="ripple" cx="960" cy="540" r="54" fill="none" stroke="#ff3139" stroke-width="2"/>
+<g class="ring" fill="#fff" filter="url(#glow)"><circle cx="960" cy="414" r="6"/><circle cx="1049" cy="451" r="5"/><circle cx="1086" cy="540" r="6"/><circle cx="1049" cy="629" r="5"/><circle cx="960" cy="666" r="6"/><circle cx="871" cy="629" r="5"/><circle cx="834" cy="540" r="6"/><circle cx="871" cy="451" r="5"/></g>
+<circle class="core" cx="960" cy="540" r="34" fill="#ff3038" filter="url(#glow)"/>
+<rect width="1920" height="1080" filter="url(#filmGrain)" opacity=".16" style="mix-blend-mode:screen;pointer-events:none"/>
+</svg>

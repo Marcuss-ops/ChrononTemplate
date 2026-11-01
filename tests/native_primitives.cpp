@@ -26,6 +26,8 @@ int main() {
     const auto path=Paths::polyline({{0,0},{10,5}});
     const auto stroke=Paths::strokeLayer("stroke",path,2,8,12);
     check(stroke.at("shape").at("operators")[0].at("kind")=="trim","stroke uses native animated trim");
+    check(stroke.at("position")[0]==960.f && stroke.at("position")[1]==540.f,
+          "stroke anchors canvas-space paths to the canvas centre");
     check(Motion::track("opacity",{{0,0},{4,1}}).at("keyframes").size()==2,"motion track preserves keys");
     check(Camera::perspective().at("type")=="perspective","camera builder emits perspective camera");
     const auto dust=Particles::emitterLayer("dust",4,17,12,{1,1},{0,-2},{1,0},{0.1f,0.5f},{1,2},
