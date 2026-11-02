@@ -458,6 +458,20 @@ target_include_directories(chronontemplate_emit_web_reference_stills PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_web_reference_stills PRIVATE -Wall -Wextra)
 
+# Five-platform, 25-recipe social recreation catalog authored as native
+# Chronon RenderPlan V3 layers in C++.
+file(GLOB CHRONONTEMPLATE_SOCIAL_PRESET_CPP CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/social_posts/*.cpp")
+list(FILTER CHRONONTEMPLATE_SOCIAL_PRESET_CPP EXCLUDE REGEX
+        "/(emit_social_recreator_v1|social_recreator_v1_catalog)\\.cpp$")
+add_executable(chronontemplate_emit_social_recreator_v1
+        tools/social_posts/emit_social_recreator_v1.cpp
+        tools/social_posts/social_recreator_v1_catalog.cpp
+        ${CHRONONTEMPLATE_SOCIAL_PRESET_CPP})
+target_include_directories(chronontemplate_emit_social_recreator_v1 PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_social_recreator_v1 PRIVATE -Wall -Wextra)
+
 # Four one-frame documentary/newsroom web recreations, emitted as native V3 plans.
 add_executable(chronontemplate_emit_web_documentary_reference_stills
         tools/web_presets/emit_web_documentary_reference_stills.cpp

@@ -1289,6 +1289,17 @@ cmake --build build/dev-fast --target chronontemplate_emit_multi_image_styles
 
 ### Responsive Social Motion V1
 
+### Social Media Recreator V1
+
+The static preview catalog contains 25 documentary mockup recipes across
+YouTube, Instagram, TikTok, Discord and X, emitted as native Chronon RenderPlan
+V3 layers. Every recipe has its own C++ file under `tools/social_posts/` and
+uses shared Chronon composition primitives. The catalog and preview scope are documented in
+[`docs/SOCIAL_MEDIA_RECREATOR_V1.md`](docs/SOCIAL_MEDIA_RECREATOR_V1.md).
+Chronon3D's headless C++ renderer writes PNGs to `out/social_recreator_v1/png/`.
+The implementation shares primitives and uses platform and composition
+variants; the images are fictional mockups, not platform captures.
+
 `tools/important_phrases/build_social_motion_pack_v1.py` creates eighteen five-second, 30 fps
 Chronon3D plans: five image-count layouts (one through five images) for each
 1920×1080 landscape, 1080×1080 square and 1080×1920 vertical canvas, plus a
