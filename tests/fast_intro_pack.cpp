@@ -89,8 +89,6 @@ namespace {
         }
     }
 
-} // namespace
-
     void v2OpeningPlate() {
         section("v2 opening plate");
         FakeContentHost host;

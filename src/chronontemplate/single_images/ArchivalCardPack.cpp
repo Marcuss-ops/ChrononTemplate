@@ -19,8 +19,6 @@ namespace chronontemplate {
         constexpr float kMatPadX = 48.f;
         constexpr float kMatPadY = 60.f;
         constexpr float kCaptionGap = 46.f;
-        constexpr const char* kTornFrameAsset =
-                "ChrononTemplate/assets/archival_refs_v2/torn_paper_frame.png";
 
         // Deterministic [0,1) from an index (splitmix64), so the torn edges and
         // paper stains are byte-identical across machines and resumed renders.
@@ -94,6 +92,8 @@ namespace chronontemplate {
             // exactly in place throughout the shot.
             constexpr int kEntranceFrames = 18;
             photo.animateOpacity(inFrame, kEntranceFrames, 0.f, 1.f);
+            photo.animateOpacity(std::max(inFrame, endFrame - kEntranceFrames),
+                                 std::min(kEntranceFrames, endFrame - inFrame), 1.f, 0.f);
         }
 
         void fadeEntrance(LayerHandle& layer, int inFrame, float finalOpacity = 1.f) {
@@ -252,8 +252,12 @@ namespace chronontemplate {
             shadow.opacity(0.26f);
             fadeEntrance(shadow, spec.inFrame, 0.26f);
 
-            // A transparent frame asset gives the paper its real torn edge;
-            // Chronon still composites it as an independent layer over photo.
+            LayerHandle& mat = scene.shape(ShapeSpec{
+                    .size = Vector2(matW, matH), .fillColor = "#F2EBD8",
+                    .name = "torn_mat", .noiseAmount = 0.012f, .noiseSeed = 42});
+            positionScreenLayer(mat, cx, photoY);
+            mat.alive(spec.inFrame, endFrame);
+            fadeEntrance(mat, spec.inFrame);
 
             LayerHandle& photo = scene.image(ImageSpec{
                     .path = spec.primaryAsset, .name = spec.name + "_photo",
@@ -264,14 +268,6 @@ namespace chronontemplate {
             photo.position(cx, photoY);
             animatePhoto(photo, spec.inFrame, endFrame, photoScale);
             out.primary = photo.id();
-
-            LayerHandle& mat = scene.image(ImageSpec{
-                    .path = kTornFrameAsset, .name = spec.name + "_torn_paper_frame",
-                    .frame = {}, .fit = ImageFitMode::Stretch,
-                    .targetSize = Vector2(matW, matH)});
-            mat.position(cx, photoY);
-            mat.alive(spec.inFrame, endFrame);
-            fadeEntrance(mat, spec.inFrame);
             out.mat = mat.id();
 
             if (!spec.primaryLabel.empty()) {
@@ -312,7 +308,7 @@ namespace chronontemplate {
             fadeEntrance(outer, spec.inFrame);
             LayerHandle& inner = scene.shape(ShapeSpec{
                     .size = Vector2(spec.primaryWidth + 14.f, spec.primaryHeight + 14.f),
-                    .fillColor = "#F1EFE8", .name = spec.name + "_border_inner",
+                    .fillColor = "#F1EFE8", .name = "print_paper",
                     .noiseAmount = 0.035f, .noiseSeed = 1952});
             positionScreenLayer(inner, cx, photoY);
             inner.alive(spec.inFrame, endFrame);
@@ -353,7 +349,7 @@ namespace chronontemplate {
             const float windowH = spec.primaryHeight;
             LayerHandle& window = scene.shape(ShapeSpec{
                     .size = Vector2(windowW, windowH), .fillColor = "#E9E3D3",
-                    .name = spec.name + "_window", .cornerRadius = 30.f,
+                    .name = "film_window", .cornerRadius = 30.f,
                     .noiseAmount = 0.04f, .noiseSeed = 1963});
             positionScreenLayer(window, cx, cy);
             window.alive(spec.inFrame, endFrame);
@@ -426,11 +422,11 @@ namespace chronontemplate {
             shadowB.opacity(0.24f);
             fadeEntrance(shadowB, spec.inFrame, 0.24f);
 
-            LayerHandle& matA = tornPaper(scene, spec.name + "_mat_a", matW, matH,
+            LayerHandle& matA = tornPaper(scene, "duo_mat_a", matW, matH,
                                           "#F2EBD8", 6.f, 73, 0.f, 0.f, leftX, photoY,
                                           spec.inFrame, endFrame);
             fadeEntrance(matA, spec.inFrame);
-            LayerHandle& matB = tornPaper(scene, spec.name + "_mat_b", matW, matH,
+            LayerHandle& matB = tornPaper(scene, "duo_mat_b", matW, matH,
                                           "#F2EBD8", 6.f, 91, 0.f, 0.f, rightX, photoY,
                                           spec.inFrame, endFrame);
             fadeEntrance(matB, spec.inFrame + 8);
@@ -488,16 +484,15 @@ namespace chronontemplate {
         ImageFrameStyle frame{};
         switch (look) {
             case ArchivalCardLook::TornPaperPortrait:
-                frame.saturation = 0.55f;
+                frame.saturation = 0.72f;
                 frame.contrast = 0.95f;
                 frame.grain = 0.018f;
                 frame.grainSeed = 1942;
                 frame.vignette = 0.10f;
                 frame.channelSplit = 1.2f;
-                // The torn silhouette belongs to the mat, not the straight-edged photo.
-                frame.tornEdgeAmount = 0.f;
-                frame.tornEdgeScale = 8.f;
-                frame.tornEdgeSeed = 0;
+                frame.tornEdgeAmount = 7.f;
+                frame.tornEdgeScale = 9.f;
+                frame.tornEdgeSeed = 42;
                 return frame;
             case ArchivalCardLook::ArchivePrint:
                 frame.cornerRadius = 2.f;
@@ -515,7 +510,7 @@ namespace chronontemplate {
                 frame.grainSeed = 1963;
                 frame.vignette = 0.18f;
                 frame.channelSplit = 0.f;
-                frame.scanlineIntensity = 0.f;
+                frame.scanlineIntensity = 0.12f;
                 frame.scanlineSpacing = 0.035f;
                 return frame;
             case ArchivalCardLook::DoublePortraitArchive:
