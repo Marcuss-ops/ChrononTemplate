@@ -67,21 +67,24 @@ namespace chronontemplate::web {
                         {{"frame", start + span}, {"value", to}}})}};
         }
 
-        /// Camera-transformed shapes are authored with their center in
-        /// top-left-down px, but the enable_3d wire space is bottom-left-up
-        /// world units (the reference phrase emitter lowers with the same
-        /// `kHeight - y` conversion). Emission flips Y here — the single
-        /// conversion point for every authored Y quantity.
+        /// Camera-transformed shapes are authored in top-left-down canvas
+        /// pixels. The camera looks at the world origin, so convert both axes
+        /// to centered world coordinates and flip Y in this one place.
+        float wireX(float topDownCenterX) {
+            return topDownCenterX - static_cast<float>(kW) * 0.5f;
+        }
+
         float wireY(float topDownCenterY) {
-            return static_cast<float>(kH) - topDownCenterY;
+            return static_cast<float>(kH) * 0.5f - topDownCenterY;
         }
 
         Json rect(const std::string& id, float left, float top, float w, float h,
-                  const std::string& hex, float alpha, const Json& tracks = Json::array()) {
+                  const std::string& hex, float alpha, int durationFrames,
+                  const Json& tracks = Json::array()) {
             Json layer = {{"id", id}, {"type", "shape"}, {"enable_3d", true},
                           {"size", Json::array({w, h})},
-                          {"position", Json::array({left + w * 0.5f, wireY(top + h * 0.5f), 0.f})},
-                          {"start_frame", 0}, {"duration_frames", 1},
+                          {"position", Json::array({wireX(left + w * 0.5f), wireY(top + h * 0.5f), 0.f})},
+                          {"start_frame", 0}, {"duration_frames", durationFrames},
                           {"shape", {{"type", "rect"}, {"fill", Material::rgba(hex, alpha)}}}};
             if (!tracks.empty()) layer["animation"] = {{"tracks", tracks}};
             return layer;
@@ -171,7 +174,7 @@ namespace chronontemplate::web {
             const float h = size * 1.65f;
             Json layer = {{"id", id}, {"type", "text"}, {"text", text},
                           {"size", Json::array({w, h})},
-                          {"position", Json::array({left + w * 0.5f + 8.f, wireY(top + h * 0.5f), 0.f})},
+                          {"position", Json::array({wireX(left + w * 0.5f + 8.f), wireY(top + h * 0.5f), 0.f})},
                           {"enable_3d", true},
                           {"style", {{"font", font}, {"font_size", size}, {"fill", fill}}},
                           {"start_frame", 0}, {"duration_frames", durationFrames}};
@@ -302,17 +305,17 @@ namespace chronontemplate::web {
         const int duration = spec.durationFrames;
         const std::string contrast = spec.theme == WebPageTheme::Light ? "#F7F6F2" : "#0F1217";
 
-        // The page paper is the full-bleed canvas; a screen-space color layer
-        // stays exactly where it is while the camera push-in rides above it.
+        // The paper is a centered canvas plane, so it shares the camera's
+        // world-space framing with the editorial layers.
         Json layers = Json::array({{
             {"id", "web_page_paper"}, {"type", "color"}, {"color", Material::rgba(pal.paper)},
-            {"size", Json::array({kW, kH})}, {"screen_space", true},
+            {"size", Json::array({kW * 1.12f, kH * 1.12f})}, {"position", Json::array({0.f, 0.f})},
             {"start_frame", 0}, {"duration_frames", duration}}});
 
         if (spec.recipe != WebPageRecipe::LongPhraseBlurred) {
             // ── nav chrome ────────────────────────────────────────────────────
-            layers.push_back(rect("nav_bar", 0.f, 0.f, static_cast<float>(kW), 72.f, pal.nav, 1.f));
-            layers.push_back(rect("nav_rule", 0.f, 70.f, static_cast<float>(kW), 2.f, pal.rule, 1.f));
+            layers.push_back(rect("nav_bar", 0.f, 0.f, static_cast<float>(kW), 72.f, pal.nav, 1.f, duration));
+            layers.push_back(rect("nav_rule", 0.f, 70.f, static_cast<float>(kW), 2.f, pal.rule, 1.f, duration));
             layers.push_back(textLayer("nav_logo", spec.siteName, 90.f, 18.f, 24.f, kBold, pal.ink, duration,
                                        0.f, 0));
             float linkX = 640.f;
@@ -322,11 +325,11 @@ namespace chronontemplate::web {
                                            linkX, 22.f, 19.f, kRegular, pal.muted, duration, 3.4f, slot));
                 linkX += estimateWidth(spec.navLinks[i], 19.f) + 44.f;
             }
-            layers.push_back(rect("nav_search_pill", 1400.f, 18.f, 190.f, 38.f, pal.panel, 1.f,
+            layers.push_back(rect("nav_search_pill", 1400.f, 18.f, 190.f, 38.f, pal.panel, 1.f, duration,
                                   Json::array({easedTrack("opacity", 0.f, 1.f, 20, 26, "out_cubic")})));
             layers.push_back(textLayer("nav_search_text", spec.searchHint, 1420.f, 24.f, 16.f,
                                        kRegular, pal.muted, duration, 3.4f));
-            layers.push_back(rect("nav_action_pill", 1620.f, 16.f, 210.f, 40.f, pal.accent, 1.f,
+            layers.push_back(rect("nav_action_pill", 1620.f, 16.f, 210.f, 40.f, pal.accent, 1.f, duration,
                                   Json::array({easedTrack("opacity", 0.f, 1.f, 24, 26, "out_cubic")})));
             layers.push_back(textLayer("nav_action_text", spec.actionLabel, 1650.f, 24.f, 18.f,
                                        kBold, contrast, duration));
@@ -347,13 +350,13 @@ namespace chronontemplate::web {
                 headline("headline_line_2", spec.headlineLineTwo, 300.f, 44);
                 if (spec.recipe == WebPageRecipe::Highlight3D) {
                     layers.push_back(rect("headline_marker", kMargin - 14.f, 296.f, 566.f, 108.f,
-                                          pal.highlight, 0.5f, markerSweepTracks(566.f)));
+                                          pal.highlight, 0.5f, duration, markerSweepTracks(566.f)));
                 }
             }
             layers.push_back(textLayer("masthead_byline", spec.byline, kMargin, 418.f, 20.f,
                                        kBold, pal.ink, duration, 2.4f, 6));
             layers.push_back(rect("masthead_rule", kMargin, 466.f, kContentRight - kMargin, 2.f,
-                                  pal.rule, 1.f,
+                                  pal.rule, 1.f, duration,
                                   Json::array({easedTrack("opacity", 0.f, 1.f, 40, 30, "out_cubic")})));
 
             // ── two-column body: defocused context copy ───────────────────────
@@ -367,26 +370,26 @@ namespace chronontemplate::web {
             }
 
             // ── sidebar: defocused recommendation card ────────────────────────
-            layers.push_back(rect("sidebar_panel", 1490.f, 212.f, 280.f, 520.f, pal.panel, 1.f));
-            layers.push_back(rect("sidebar_panel_light", 1490.f, 212.f, 280.f, 2.f, pal.panelLine, 1.f));
+            layers.push_back(rect("sidebar_panel", 1490.f, 212.f, 280.f, 520.f, pal.panel, 1.f, duration));
+            layers.push_back(rect("sidebar_panel_light", 1490.f, 212.f, 280.f, 2.f, pal.panelLine, 1.f, duration));
             layers.push_back(textLayer("sidebar_title", "EDITOR'S PICKS", 1516.f, 240.f, 18.f,
                                        kBold, pal.muted, duration, 3.f, 9));
             float pickY = 300.f;
             for (std::size_t i = 0; i < spec.pickTitles.size() && i < 3; ++i) {
                 const std::string base = "sidebar_pick_" + std::to_string(i);
-                layers.push_back(rect(base + "_thumb", 1516.f, pickY, 78.f, 56.f, pal.accent, 0.32f));
+                layers.push_back(rect(base + "_thumb", 1516.f, pickY, 78.f, 56.f, pal.accent, 0.32f, duration));
                 layers.push_back(textLayer(base + "_line", spec.pickTitles[i], 1612.f, pickY + 4.f, 15.f,
                                            kRegular, pal.body, duration, 3.6f, 10 + static_cast<int>(i)));
                 pickY += 96.f;
                 if (i + 1 < spec.pickTitles.size()) {
                     layers.push_back(rect(base + "_rule", 1516.f, pickY - 22.f, 234.f, 1.f,
-                                          pal.panelLine, 0.9f));
+                                          pal.panelLine, 0.9f, duration));
                 }
             }
 
             // ── footer ────────────────────────────────────────────────────────
             layers.push_back(rect("footer_rule", kMargin, 1006.f, kContentRight - kMargin, 1.f,
-                                  pal.rule, 1.f));
+                                  pal.rule, 1.f, duration));
             layers.push_back(textLayer("footer_left", spec.siteName + "  ·  all rights reserved",
                                        kMargin, 1024.f, 15.f, kRegular, pal.muted, duration, 3.f));
         } else {
@@ -405,7 +408,7 @@ namespace chronontemplate::web {
                                        72.f, kBold, pal.ink, duration, 0.f, -1, true, 0));
             const float phraseW = estimateWidth(spec.importantPhrase, 72.f);
             layers.push_back(rect("important_underline", 960.f - phraseW * 0.5f, 622.f,
-                                  phraseW + 32.f, 6.f, pal.accent, 0.85f,
+                                  phraseW + 32.f, 6.f, pal.accent, 0.85f, duration,
                                   markerSweepTracks(phraseW + 32.f)));
 
             for (std::size_t i = 2; i < spec.contextPhrases.size() && i < 6; ++i) {
@@ -453,7 +456,7 @@ namespace chronontemplate::web {
             if (line.width <= 0.f || line.lineHeight <= 0.f)
                 throw std::invalid_argument("exact web page line has invalid shaped dimensions");
             layer["size"] = Json::array({line.width + 2.f, line.lineHeight});
-            layer["position"] = Json::array({line.x + (line.width + 2.f) * .5f,
+            layer["position"] = Json::array({wireX(line.x + (line.width + 2.f) * .5f),
                                                wireY(line.top + line.lineHeight * .5f), 0.f});
             layer["style"]["font"] = bodyLayout.fontPath;
             layer["style"]["font_size"] = bodyLayout.fontSize;

@@ -20,39 +20,32 @@ namespace {
         WebPageHighlightSpec spec;
         spec.theme = theme;
         spec.recipe = recipe;
-        spec.siteName = "CHRONON NEWS";
-        spec.navLinks = {"NBA", "Football", "Business", "Culture"};
-        spec.kicker = "NBA";
-        spec.headlineLineOne = "Sources: Jonathan Kuminga";
-        spec.headlineLineTwo = "demanding trade away from Warriors";
-        spec.byline = "ANTHONY SLATER AND SHAMS CHARANIA";
-        spec.dateline = "Jan 15, 2026  ·  San Francisco";
-        spec.meta = "JAN 15, 2026  ·  08:58 PM";
+        spec.siteName = "ARTICLE";
+        spec.navLinks = {};
+        spec.kicker = "ARTICLE";
+        spec.headlineLineOne = "Massacre at the 1972 Olympic";
+        spec.headlineLineTwo = "Games";
+        spec.byline = "MUNICH, GERMANY · SEPTEMBER 1972";
+        spec.dateline = "Historical archive";
+        spec.meta = "1972 OLYMPIC GAMES";
         spec.bodyLines = {
-            "SAN FRANCISCO — Eligible to be moved for the first",
-            "time this summer, the fifth-year forward demanded a",
-            "trade away from the Warriors, league sources said.",
-            "The contract he signed restricts any deal until the",
-            "trade window opens in the first week of February.",
-            "His roller-coaster tenure reached its lowest point",
-            "after a difficult stretch in the rotation, sources",
-            "added, and the rotation spot never really returned.",
-            "League executives expect the conversations to resume",
-            "quickly once front offices are allowed to talk again.",
-            "Golden State has weighed staged return plans before,",
-            "including minutes charts and staged practice reps.",
+            "The David Berger National Memorial honors David Berger,",
+            "an American-Israeli citizen and one of the eleven",
+            "Israeli athletes murdered at the 1972 Olympic Games",
+            "in Munich, Germany. The memorial stands on the grounds",
+            "of the Mandel Jewish Community Center in Cleveland.",
+            "This article details the tragedy and remembers the",
+            "athletes whose lives were taken during the attack.",
         };
-        spec.pickTitles = {"Trade buzz: the moves that could",
-                           "land before the February window",
-                           "How the deadline reshapes the West"};
-        spec.importantPhrase = "THE FEBRUARY DEADLINE";
+        spec.pickTitles = {"David Berger National Memorial",
+                           "The Munich Olympic attack",
+                           "Remembering the eleven athletes"};
+        spec.importantPhrase = "11 Israeli athletes";
         spec.contextPhrases = {
-            "Executives around the league expect the",
-            "conversation to resume before the window opens,",
-            "sources added, and the rotation spot has not",
-            "really returned since the difficult stretch.",
-            "Golden State has weighed staged return plans,",
-            "with minutes charts drafted for each option.",
+            "David Berger was among the eleven Israeli athletes",
+            "murdered during the 1972 Olympic Games in Munich.",
+            "The memorial in Cleveland honors his memory and",
+            "the lives of all those lost in the tragedy.",
         };
         return spec;
     }

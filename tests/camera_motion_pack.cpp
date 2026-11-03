@@ -196,7 +196,7 @@ namespace {
             check(spec.durationFrames >= 8, "every preset lasts at least 8 frames");
             check(std::string(spec.easing).size() > 0, "every preset names an easing");
             // The easing name must resolve — unknown names fail loudly.
-            cameraMotionEasingFor(spec.easing);
+            (void)cameraMotionEasingFor(spec.easing);
         }
         for (int f = 0; f < 5; ++f) {
             check(perFamily[f] == 3, "every family holds exactly three presets");

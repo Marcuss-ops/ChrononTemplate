@@ -2,8 +2,8 @@
 //
 // The tutorial grammar as gates:
 //
-//   P0  the panel rides one Null controller — root isNull, children parented,
-//       no second parenting system;
+//   P0  the panel is authored under one Null controller; resolved RenderPlan
+//       samples bake that hierarchy without adding a controller layer;
 //   1.  animated parenting end-to-end — children follow the root across the
 //       entrance, zoom and pan windows;
 //   2.  the camera travels without teleports and settles into the hold;
@@ -152,19 +152,26 @@ namespace {
               "the canary lowers at 1920x1080");
         check(plan.canvas.duration.integral() == spec.totalFrames + 1,
               "the canary covers all 90 frames plus the settle hold");
-        bool hasController = false;
-        bool childrenBaked = true;
+        bool hasControllerLayer = false;
+        std::size_t resolvedChildren = 0;
         for (const auto& layer : plan.layers) {
             if (layer.id == std::to_string(panel.root))
-                hasController = true;
+                hasControllerLayer = true;
             if (layer.id == std::to_string(panel.card) || layer.id == std::to_string(panel.title) ||
-                layer.id == std::to_string(panel.icon))
-                childrenBaked = childrenBaked && layer.animation.has_value();
+                layer.id == std::to_string(panel.icon)) {
+                if (!layer.animation && plan.camera_samples &&
+                    layer.transform_samples.size() == plan.camera_samples->size())
+                    ++resolvedChildren;
+            }
         }
-        check(hasController, "the Null controller lowers as a transparent color layer");
-        check(childrenBaked, "card, title and icon carry baked animation tracks");
-        check(plan.camera_samples && plan.camera_samples->size() == spec.totalFrames + 1,
-              "position, rotation and fov lower as CM3D-resolved camera samples");
+        check(!hasControllerLayer, "the Null controller is omitted after hierarchy resolution");
+        check(resolvedChildren == 3,
+              "card, title and icon carry exact per-sample transforms without integer animation tracks");
+        const std::size_t cameraSampleCount =
+            static_cast<std::size_t>(spec.totalFrames + 1) *
+            (spec.motionBlur ? static_cast<std::size_t>(spec.motionBlurSamples + 1) : 1U);
+        check(plan.camera_samples && plan.camera_samples->size() == cameraSampleCount,
+              "position, rotation and fov lower at every shutter sample and settle frame");
         if (plan.camera_samples && plan.camera_samples->size() > 2) {
             const auto& first = plan.camera_samples->front().camera;
             const auto& middle = plan.camera_samples->at(plan.camera_samples->size() / 2).camera;

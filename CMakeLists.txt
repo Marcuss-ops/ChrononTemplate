@@ -15,10 +15,6 @@ project(ChrononTemplate
         DESCRIPTION "Composition presets and templates built on ChrononMotion"
         LANGUAGES CXX)
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    message(FATAL_ERROR "ChrononTemplate is Linux-only")
-endif()
-
 option(CHRONONTEMPLATE_BUILD_TESTS "Build the ChrononTemplate test binaries" ${PROJECT_IS_TOP_LEVEL})
 option(CHRONONTEMPLATE_WERROR "Turn compiler warnings into errors" OFF)
 option(CHRONONTEMPLATE_BUILD_LIVE_ADAPTER_TEST "Link the live adapter test against Chronon3D" OFF)
@@ -126,6 +122,27 @@ set(CHRONONTEMPLATE_CHRONONMOTION_PREBUILT_LIBRARY "" CACHE FILEPATH
 set(CHRONONTEMPLATE_CHRONONMOTION_INCLUDE_DIR "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include" CACHE PATH
     "Include directory of the prebuilt ChrononMotion core")
 
+# ChrononMotion's optional offline adapter is built when the sibling renderer
+# headers are known. Expose the sibling vcpkg packages before adding Motion so
+# its fmt dependency resolves in standalone Template builds too.
+set(_chronontemplate_chronon3d_vcpkg_prefixes)
+foreach(_preset IN ITEMS linux-fast-dev linux-video-fast-dev linux-release-validation)
+    set(_prefix "${CHRONONTEMPLATE_CHRONON3D_DIR}/vcpkg_installed/${_preset}/x64-linux")
+    if(EXISTS "${_prefix}/share/blend2d/blend2d-config.cmake")
+        list(APPEND _chronontemplate_chronon3d_vcpkg_prefixes "${_prefix}")
+    endif()
+endforeach()
+if(_chronontemplate_chronon3d_vcpkg_prefixes)
+    list(PREPEND CMAKE_PREFIX_PATH ${_chronontemplate_chronon3d_vcpkg_prefixes})
+endif()
+if(NOT CHRONON3D_INCLUDE_DIR)
+    set(CHRONON3D_INCLUDE_DIR "${CHRONONTEMPLATE_CHRONON3D_DIR}/include")
+endif()
+if(NOT CHRONON3D_DEPENDENCY_INCLUDE_DIR AND _chronontemplate_chronon3d_vcpkg_prefixes)
+    list(GET _chronontemplate_chronon3d_vcpkg_prefixes 0 _chronontemplate_vcpkg_prefix)
+    set(CHRONON3D_DEPENDENCY_INCLUDE_DIR "${_chronontemplate_vcpkg_prefix}/include")
+endif()
+
 if(PROJECT_IS_TOP_LEVEL AND NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
@@ -174,6 +191,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/core/PlanLowering.cpp
         src/chronontemplate/core/RenderPlanContentHost.cpp
         src/chronontemplate/single_images/ImageAnimationPack.cpp
+        src/chronontemplate/single_images/ArchivalCardPack.cpp
         src/chronontemplate/investigation_board/InvestigationBoardPack.cpp
         src/chronontemplate/single_images/PixelGridPack.cpp
         src/chronontemplate/single_images/EdgeStrokePack.cpp
@@ -265,6 +283,9 @@ add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 
 # The tools below use Blend2D's imported target; load its package before
 # declaring them rather than relying on another project to define it.
+# Chronon3D installs vcpkg dependencies per preset. The template consumes the
+# sibling checkout rather than its vcpkg toolchain, so add available package
+# roots explicitly for the documented standalone build.
 find_package(blend2d CONFIG REQUIRED)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tools.cmake)
 
@@ -279,13 +300,19 @@ target_compile_options(chronontemplate_emit_beast_land_subject_reframe PRIVATE -
 
 # Three 2.5D food-history seed plans, with camera samples baked by ChrononMotion3D.
 add_executable(chronontemplate_emit_gpu_food_parallax_examples
-        tools/gpu_parallax/emit_food_story_examples.cpp
+        tools/gpu_parallax/emit_food_story_examples.cpp)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_gpu_food_parallax_examples PRIVATE
+            chrononmotion_chronon3d_adapter)
+else()
+    target_sources(chronontemplate_emit_gpu_food_parallax_examples PRIVATE
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp"
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringGeometry.cpp"
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringSamples.cpp")
-target_link_libraries(chronontemplate_emit_gpu_food_parallax_examples PRIVATE
-        ChrononMotion::chrononmotion)
+    target_link_libraries(chronontemplate_emit_gpu_food_parallax_examples PRIVATE
+            ChrononMotion::chrononmotion)
+endif()
 target_include_directories(chronontemplate_emit_gpu_food_parallax_examples PRIVATE
         "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
         "${CHRONONTEMPLATE_GLM_DIR}"
@@ -310,16 +337,22 @@ target_include_directories(chronontemplate_resolve_camera_samples PRIVATE
 target_compile_options(chronontemplate_resolve_camera_samples PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_screen_recording_camera_recreation
-        tools/camera_roll/emit_screen_recording_camera_recreation.cpp)
+        tools/camera_roll/emit_screen_recording_camera_recreation.cpp
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp")
 target_link_libraries(chronontemplate_emit_screen_recording_camera_recreation PRIVATE ChrononMotion::chrononmotion)
 target_include_directories(chronontemplate_emit_screen_recording_camera_recreation PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_screen_recording_camera_recreation PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_ai_tabletop_camera
-        tools/camera_roll/emit_ai_tabletop_camera.cpp)
+        tools/camera_roll/emit_ai_tabletop_camera.cpp
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp")
 target_link_libraries(chronontemplate_emit_ai_tabletop_camera PRIVATE ChrononMotion::chrononmotion)
 target_include_directories(chronontemplate_emit_ai_tabletop_camera PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_ai_tabletop_camera PRIVATE -Wall -Wextra)
 

@@ -219,6 +219,8 @@ namespace chronontemplate {
             imageStyle.borderColor.clear();
             imageStyle.borderWidth = 0.f;
             ImageCrop imageCrop = snapshot.crop;
+            if (shot.recipe == DocumentaryRecipe::Reveal90)
+                imageCrop.flipX = true;
             auto& card = scene.image(ImageSpec{.path = snapshot.path,
                                                .name = "DocumentarySnapshot",
                                                .frame = imageStyle,
@@ -250,13 +252,6 @@ namespace chronontemplate {
                 const float sourceAspect = contentWidth / contentHeight;
                 const float viewportAspect = canvas.x / canvas.y;
                 card.layer().transform.scale.y *= viewportAspect / sourceAspect;
-            }
-            if (shot.recipe == DocumentaryRecipe::Reveal90) {
-                // Use a mirrored quad for the wall-facing shot instead of
-                // ImageCrop.flipX. The native Vulkan image path rejects
-                // flipped crops; the local-axis reflection encodes the same
-                // intended orientation in the layer transform.
-                card.layer().transform.scale.x = -std::abs(card.layer().transform.scale.x);
             }
             card.alive(shot.inFrame, shot.inFrame + shot.duration);
             cardLayers.push_back(&card.layer());

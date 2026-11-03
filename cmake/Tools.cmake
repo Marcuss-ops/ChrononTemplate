@@ -318,8 +318,11 @@ add_executable(chronontemplate_dump_documentary_snapshot_pose
         tools/entities_with_text/dump_documentary_snapshot_pose.cpp)
 target_link_libraries(chronontemplate_dump_documentary_snapshot_pose PRIVATE chronontemplate)
 
-# The full native CLI canary needs ChrononMotion's optional typed JSON writer.
-if(TARGET chrononmotion_chronon3d_adapter)
+# The full native CLI canary uses Chronon3D's removed effect_presets API.
+# Keep it available for matching older checkouts without breaking current
+# standalone builds against the newer sibling checkout.
+if(TARGET chrononmotion_chronon3d_adapter AND
+   EXISTS "${CHRONONTEMPLATE_CHRONON3D_DIR}/include/chronon3d/render_plan/effect_presets.hpp")
     add_executable(chronontemplate_dump_documentary_snapshot_plan
             tools/entities_with_text/dump_documentary_snapshot_plan.cpp)
     target_link_libraries(chronontemplate_dump_documentary_snapshot_plan

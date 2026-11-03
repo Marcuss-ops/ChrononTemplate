@@ -6,10 +6,10 @@
 
 #include "chronontemplate/ui_camera/UiCameraChoreography.hpp"
 
-#include "chrononmotion/motion/CameraPanelChoreography.hpp"
 #include "chrononmotion/motion/CameraValidation.hpp"
-#include "chrononmotion/motion/CameraScreenSpace.hpp"
+#include "chrononmotion/motion/CameraFraming.hpp"
 #include "chrononmotion/motion/Easing.hpp"
+#include "chrononmotion/motion/Presets.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -55,8 +55,16 @@ namespace chronontemplate {
 
     float uiFramingDistance(float subjectWidth, float fovDegrees,
                             const Vector2& viewport, float frameFill) {
-        return chrononmotion::motion::camera::panelFramingDistance(
-            subjectWidth, fovDegrees, viewport, frameFill);
+        checkedPositive(subjectWidth, "framing subject width");
+        checkedPositive(fovDegrees, "framing field of view");
+        checkedPositive(viewport.x, "framing viewport width");
+        checkedPositive(viewport.y, "framing viewport height");
+        if (!std::isfinite(frameFill) || frameFill <= 0.f || frameFill > 1.f)
+            throw std::invalid_argument("UiCameraChoreography: frame fill must be in (0, 1]");
+        chrononmotion::motion::CameraSafeArea safeArea;
+        safeArea.left = safeArea.right = (1.f - frameFill) * 0.5f;
+        return chrononmotion::motion::CameraFramingSolver::distanceForBounds(
+            subjectWidth * 0.5f, 0.f, 0.f, fovDegrees, viewport, safeArea);
     }
 
     UiPanelComposition buildUiPanel(TemplateScene& scene, const UiPanelSpec& spec) {
@@ -186,7 +194,7 @@ namespace chronontemplate {
         iconHandle.animate(FadeIn{.inFrame = spec.panelInFrame + 4, .duration = 12});
 
         // Camera framing and all CameraRig track evaluation belong to CM3D.
-        chrononmotion::motion::camera::CameraPanelChoreography cameraMove;
+        chrononmotion::motion::presets::CameraPanelChoreography cameraMove;
         cameraMove.subjectWidth = panel.panelSize.x;
         cameraMove.fov = spec.fov;
         cameraMove.frameFill = spec.frameFill;
@@ -198,7 +206,7 @@ namespace chronontemplate {
         cameraMove.panInFrame = spec.panInFrame;
         cameraMove.panDuration = spec.panDuration;
         cameraMove.panOffset = spec.panOffset;
-        chrononmotion::motion::camera::applyPanelChoreography(
+        chrononmotion::motion::presets::applyPanelChoreography(
             scene.cameraRig(), cameraMove, fps, scene.canvas());
 
         if (spec.motionBlur)
