@@ -18,9 +18,9 @@
 // canonical MotionScene::addNull) carries the whole UI panel so the entrance
 // is authored once, and the camera is the only other animated thing. A Null
 // controller needs no new RenderPlan LayerType: the canonical Motion ->
-// RenderPlan lowerer bakes its world motion into the children and emits the
-// controller itself as a transparent 1x1 color layer, so the hierarchy rides
-// the existing contract instead of widening it.
+// RenderPlan lowerer bakes its world motion into the children and folds the
+// controller out of the render layers, so the hierarchy rides the existing
+// contract instead of widening it.
 //
 // Framing is derived from the measured ContentHost metrics (the real bounds
 // of the card/title/icon), never from hand-placed coordinates, so a zoom

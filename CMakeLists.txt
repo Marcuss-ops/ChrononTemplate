@@ -197,6 +197,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/single_images/EdgeStrokePack.cpp
         src/chronontemplate/single_images/GlowPack.cpp
         src/chronontemplate/single_images/RGBSplitPack.cpp
+        src/chronontemplate/single_images/ArchivalCardPack.cpp
         src/chronontemplate/elements/ElementsCommon.cpp
         src/chronontemplate/elements/TimelineElements.cpp
         src/chronontemplate/elements/AnnotationElements.cpp
@@ -309,7 +310,8 @@ else()
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLowering.cpp"
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp"
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringGeometry.cpp"
-        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringSamples.cpp")
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringSamples.cpp"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/src/animations/temporal/temporal_samples.cpp")
     target_link_libraries(chronontemplate_emit_gpu_food_parallax_examples PRIVATE
             ChrononMotion::chrononmotion)
 endif()
@@ -340,9 +342,15 @@ add_executable(chronontemplate_emit_screen_recording_camera_recreation
         tools/camera_roll/emit_screen_recording_camera_recreation.cpp
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp")
 target_link_libraries(chronontemplate_emit_screen_recording_camera_recreation PRIVATE ChrononMotion::chrononmotion)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_screen_recording_camera_recreation PRIVATE
+            chrononmotion_chronon3d_adapter)
+endif()
 target_include_directories(chronontemplate_emit_screen_recording_camera_recreation PRIVATE
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
         "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_GLM_DIR}"
+        "${CHRONONTEMPLATE_MAGIC_ENUM_INCLUDE_DIR}"
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_screen_recording_camera_recreation PRIVATE -Wall -Wextra)
 
@@ -350,9 +358,15 @@ add_executable(chronontemplate_emit_ai_tabletop_camera
         tools/camera_roll/emit_ai_tabletop_camera.cpp
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanLoweringCamera.cpp")
 target_link_libraries(chronontemplate_emit_ai_tabletop_camera PRIVATE ChrononMotion::chrononmotion)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_ai_tabletop_camera PRIVATE
+            chrononmotion_chronon3d_adapter)
+endif()
 target_include_directories(chronontemplate_emit_ai_tabletop_camera PRIVATE
         "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
         "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_GLM_DIR}"
+        "${CHRONONTEMPLATE_MAGIC_ENUM_INCLUDE_DIR}"
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_ai_tabletop_camera PRIVATE -Wall -Wextra)
 

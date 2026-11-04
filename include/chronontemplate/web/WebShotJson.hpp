@@ -79,19 +79,10 @@ inline Json wirePos(float topDownCenterX, float topDownCenterY, float z = 0.f) {
 /// resolves every layer deterministically (coplanar layers z-fight).
 inline constexpr float kLayerDepthStep = 0.05f;
 
-/// Tabella di larghezza deterministica: la geometria dei blocchi segue il
-/// copy autore, non i glifi misurati (stessa scelta dei pack web).
-inline float estimateWidth(const std::string& text, float size) {
-    double units = 0.0;
-    for (unsigned char c : text) {
-        if (c == ' ') units += 0.28;
-        else if (c == 'i' || c == 'l' || c == 'I' || c == '!' || c == '.' || c == ',' || c == ':') units += 0.29;
-        else if (c == 'm' || c == 'w' || c == 'M' || c == 'W') units += 0.78;
-        else if (c >= 'A' && c <= 'Z') units += 0.64;
-        else units += 0.52;
-    }
-    return float(units * size);
-}
+/// Misura canonica dei pack web: advance shaped dal font del renderer con la
+/// tabella deterministica come fallback. L'unica definizione vive in
+/// WebFontMeasure.cpp (measuredTextWidth); i pack non ne tengono copie.
+
 
 inline Json rect(const std::string& id, float left, float top, float w, float h,
                  const std::string& hex, float alpha, const Json& tracks = Json::array(),
@@ -398,8 +389,7 @@ inline Json textLayer(const std::string& id, const std::string& text, float left
     // largo measured*1.06 e centrato su left+measured/2, cosi' la run parte
     // da `left` a meno di (measured-run)/2. La vecchia inflazione *1.32+48
     // spostava il testo a destra di ~250px.
-    const float measured = measureTextWidth(font, size, text);
-    const float content = measured > 0.f ? measured : estimateWidth(text, size);
+    const float content = measuredTextWidth(text, size, font);
     // 1.10 di margine: la misura puo' sottostimare dell'1-8% (font serif con
     // kerning GPOS) e con un box piu' stretto della run il renderer manda a
     // capo e centra le righe, facendo uscire il testo dai bordi. Il margine

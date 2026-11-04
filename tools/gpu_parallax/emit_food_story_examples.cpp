@@ -1,5 +1,5 @@
 #include <chrononmotion/motion/CameraRig.hpp>
-#include <chrononmotion/motion/CameraShake.hpp>
+#include <chrononmotion/motion/CameraMotion.hpp>
 #include <chrononmotion/motion/RenderPlanLowering.hpp>
 #include <nlohmann/json.hpp>
 

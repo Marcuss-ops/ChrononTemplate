@@ -198,9 +198,9 @@ void buildLayers(WebShotId id, Json& L, int D) {
             "appeals followed and lawsuits flooded the IRS.",
             "From 1973-1977, something was"};
         std::array<float,6> lineX{};
-        for(int i=0;i<6;++i) lineX[i]=960.f-estimateWidth(lines[i],size)*0.5f;
+        for(int i=0;i<6;++i) lineX[i]=960.f-measuredTextWidth(lines[i],size,kPlayfair)*0.5f;
         const int highlightLine=2;
-        const float w=estimateWidth(lines[highlightLine],size)+16.f;
+        const float w=measuredTextWidth(lines[highlightLine],size,kPlayfair)+16.f;
         L.push_back(staticHighlightRect("m",lineX[highlightLine]-8.f,
             centeredRectTop(y0+highlightLine*leading+5.f,46.f),w,46.f,
             "#E6E32E",0.42f,D));
@@ -359,9 +359,9 @@ void buildLayers(WebShotId id, Json& L, int D) {
             "Washington Post reporter David Finkel",
             "in his book"};
         std::array<float,4> lineX{};
-        for(int i=0;i<4;++i) lineX[i]=960.f-estimateWidth(lines[i],size)*0.5f;
+        for(int i=0;i<4;++i) lineX[i]=960.f-measuredTextWidth(lines[i],size,kPlayfair)*0.5f;
         const int highlightLine=1;
-        const float w=estimateWidth(lines[highlightLine],size)+16.f;
+        const float w=measuredTextWidth(lines[highlightLine],size,kPlayfair)+16.f;
         L.push_back(staticHighlightRect("m",lineX[highlightLine]-8.f,
             centeredRectTop(y0+highlightLine*leading+5.f,46.f),w,46.f,
             "#E6E32E",0.42f,D));
@@ -385,9 +385,9 @@ void buildLayers(WebShotId id, Json& L, int D) {
             "The cars emitted far more nitrogen oxides,",
             "up to 40 times the permitted levels."};
         std::array<float,6> lineX{};
-        for(int i=0;i<6;++i) lineX[i]=960.f-estimateWidth(lines[i],size)*0.5f;
+        for(int i=0;i<6;++i) lineX[i]=960.f-measuredTextWidth(lines[i],size,kPlayfair)*0.5f;
         const int highlightLine=5;
-        const float w=estimateWidth(lines[highlightLine],size)+16.f;
+        const float w=measuredTextWidth(lines[highlightLine],size,kPlayfair)+16.f;
         L.push_back(staticHighlightRect("m",lineX[highlightLine]-8.f,
             centeredRectTop(y0+highlightLine*leading+5.f,46.f),w,46.f,
             "#E6E32E",0.42f,D));

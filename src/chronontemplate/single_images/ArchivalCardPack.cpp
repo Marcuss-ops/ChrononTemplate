@@ -92,8 +92,12 @@ namespace chronontemplate {
             // exactly in place throughout the shot.
             constexpr int kEntranceFrames = 18;
             photo.animateOpacity(inFrame, kEntranceFrames, 0.f, 1.f);
-            photo.animateOpacity(std::max(inFrame, endFrame - kEntranceFrames),
-                                 std::min(kEntranceFrames, endFrame - inFrame), 1.f, 0.f);
+            // The card closes on a short dissolve, so the photograph is gone
+            // before the next editorial beat rather than cutting out.
+            constexpr int kExitFrames = 20;
+            const int exitDuration = std::min(kExitFrames, std::max(1, endFrame - inFrame));
+            const int exitStart = std::max(inFrame, endFrame - exitDuration + 1);
+            photo.animateOpacity(exitStart, endFrame - exitStart + 1, 1.f, 0.f);
         }
 
         void fadeEntrance(LayerHandle& layer, int inFrame, float finalOpacity = 1.f) {
@@ -308,7 +312,7 @@ namespace chronontemplate {
             fadeEntrance(outer, spec.inFrame);
             LayerHandle& inner = scene.shape(ShapeSpec{
                     .size = Vector2(spec.primaryWidth + 14.f, spec.primaryHeight + 14.f),
-                    .fillColor = "#F1EFE8", .name = "print_paper",
+                    .fillColor = "#F1EFE8", .name = spec.name + "_paper",
                     .noiseAmount = 0.035f, .noiseSeed = 1952});
             positionScreenLayer(inner, cx, photoY);
             inner.alive(spec.inFrame, endFrame);
@@ -510,7 +514,7 @@ namespace chronontemplate {
                 frame.grainSeed = 1963;
                 frame.vignette = 0.18f;
                 frame.channelSplit = 0.f;
-                frame.scanlineIntensity = 0.12f;
+                frame.scanlineIntensity = 0.16f;
                 frame.scanlineSpacing = 0.035f;
                 return frame;
             case ArchivalCardLook::DoublePortraitArchive:

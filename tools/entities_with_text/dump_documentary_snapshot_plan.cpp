@@ -1,7 +1,7 @@
 #include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
 #include "chronontemplate/core/RenderPlanContentHost.hpp"
 #include "chrononmotion/motion/RenderPlanEmission.hpp"
-#include <chronon3d/render_plan/effect_presets.hpp>
+#include <chrononplugin/effects/presets/light_leak_profiles.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -15,7 +15,7 @@ using namespace chronontemplate;
 using namespace chrononmotion;
 using namespace chrononmotion::motion;
 using namespace chronon3d::render_plan;
-using namespace chronon3d::render_plan::effect_presets::light_leak;
+using namespace chrononplugin::effects::presets::light_leak;
 
 namespace {
 

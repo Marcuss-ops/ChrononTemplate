@@ -2,11 +2,14 @@
 // each with its own highlighter furniture, a sweep that lands mid-clip, and
 // fail-closed spec defects.
 #include "chronontemplate/web/WebHeadlineHighlightPack.hpp"
+#include "chronontemplate/web/WebFontMeasure.hpp"
 
 #include "motion_check.hpp"
 
 #include <nlohmann/json.hpp>
 
+#include <cmath>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -124,6 +127,22 @@ namespace {
         check(findLayer(plan, "paper_rule_0") != nullptr, "the paper is lined");
         sweepsIn(plan, "marker_band");
         sweepsIn(plan, "marker_band_lip");
+    }
+
+    void theMarkerTracksMeasuredWidth() {
+        section("marker tracks the HarfBuzz advance width");
+        const json plan = buildWebHeadlineHighlightPlan(specFor(HeadlineHighlightRecipe::MarkerSweep));
+        const json* band = findLayer(plan, "marker_band");
+        check(band != nullptr, "the marker band exists");
+        const auto root = std::filesystem::path(CHRONONTEMPLATE_SOURCE_DIR);
+        const std::string font = (root / "assets/fonts/PlayfairDisplay-Italic.ttf").string();
+        const float measured = shot::measureTextWidth(font, 148.f, "one company");
+        check(measured > 0.f, "the renderer font is measurable");
+        if (band && measured > 0.f) {
+            const float width = band->at("size").at(0).get<float>();
+            check(std::fabs(width - measured * 1.12f) < 0.01f,
+                  "the marker width follows the measured phrase, not the estimate table");
+        }
     }
 
     void theSteppedHighlightSteps() {
@@ -256,6 +275,7 @@ int main() {
     }
     theStatementPageCarriesItsChrome();
     theMarkerSweepCarriesItsPaper();
+    theMarkerTracksMeasuredWidth();
     theSteppedHighlightSteps();
     theBreakingTickerTicks();
     theLiveBlogMarksItsLatest();
