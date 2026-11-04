@@ -50,7 +50,7 @@ class SocialMotionPackTests(unittest.TestCase):
                     card_w, card_h = layer["size"]
                     self.assertLessEqual(abs(x) + card_w * 1.05 / 2, width / 2)
                     self.assertLessEqual(abs(y) + card_h * 1.05 / 2, height / 2)
-                    self.assertTrue((PACK.CHRONON / layer["asset"]).is_file())
+                    self.assertTrue((PACK.ASSET_ROOT / layer["asset"]).is_file())
 
     def test_contract_rejects_3d_depth_grading_on_flat_cards(self):
         plan = PACK.image_plan("landscape", 2)

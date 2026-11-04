@@ -8,6 +8,7 @@
 // animator; the important center phrase never does. No Python, no Pillow, no
 // browser: Chronon3D dev authoring vocabulary, the renderer rasterizes.
 #include "chronontemplate/web/WebPageHighlightPack.hpp"
+#include "chronontemplate/web/WebFontMeasure.hpp"
 #include "chronontemplate/web/WebTextLayout.hpp"
 
 #include "chronontemplate/core/NativePrimitives.hpp"
@@ -44,17 +45,10 @@ namespace chronontemplate::web {
             throw std::invalid_argument("WebPageHighlightSpec: " + message);
         }
 
-        float estimateWidth(const std::string& text, float size) {
-            double units = 0.0;
-            for (unsigned char c : text) {
-                if (c == ' ') units += 0.28;
-                else if (c == 'i' || c == 'l' || c == 'I' || c == '!' || c == '.' || c == ',' || c == ':') units += 0.29;
-                else if (c == 'm' || c == 'w' || c == 'M' || c == 'W') units += 0.78;
-                else if (c >= 'A' && c <= 'Z') units += 0.64;
-                else units += 0.52;
-            }
-            return static_cast<float>(units * size);
-        }
+        /// Canonical advance width from the same HarfBuzz shaper the renderer
+        /// uses, with the deterministic table as an explicit fallback. The
+        /// measure lives in WebFontMeasure.cpp: no pack keeps a private copy.
+        using shot::measuredTextWidth;
 
         /// Sparse layer-track with a named easing — the proven layer-track shape
         /// the bullet-focus canary validated against the renderer.
@@ -170,11 +164,12 @@ namespace chronontemplate::web {
         Json textLayer(const std::string& id, const std::string& text, float left, float top,
                        float size, const char* font, const std::string& fill, int durationFrames,
                        float blur = 0.f, int entranceSlot = -1, bool fold = false, int foldOffset = 0) {
-            const float w = std::max(60.f, estimateWidth(text, size) * 1.32f + 48.f);
+            const float content = measuredTextWidth(text, size, font);
+            const float w = std::max(60.f, content * 1.10f);
             const float h = size * 1.65f;
             Json layer = {{"id", id}, {"type", "text"}, {"text", text},
                           {"size", Json::array({w, h})},
-                          {"position", Json::array({wireX(left + w * 0.5f + 8.f), wireY(top + h * 0.5f), 0.f})},
+                          {"position", Json::array({wireX(left + content * 0.5f + 8.f), wireY(top + h * 0.5f), 0.f})},
                           {"enable_3d", true},
                           {"style", {{"font", font}, {"font_size", size}, {"fill", fill}}},
                           {"start_frame", 0}, {"duration_frames", durationFrames}};
@@ -323,7 +318,7 @@ namespace chronontemplate::web {
             for (std::size_t i = 0; i < spec.navLinks.size(); ++i, ++slot) {
                 layers.push_back(textLayer("nav_link_" + std::to_string(i), spec.navLinks[i],
                                            linkX, 22.f, 19.f, kRegular, pal.muted, duration, 3.4f, slot));
-                linkX += estimateWidth(spec.navLinks[i], 19.f) + 44.f;
+                linkX += measuredTextWidth(spec.navLinks[i], 19.f, kRegular) + 44.f;
             }
             layers.push_back(rect("nav_search_pill", 1400.f, 18.f, 190.f, 38.f, pal.panel, 1.f, duration,
                                   Json::array({easedTrack("opacity", 0.f, 1.f, 20, 26, "out_cubic")})));
@@ -338,7 +333,7 @@ namespace chronontemplate::web {
             layers.push_back(textLayer("masthead_kicker", spec.kicker, kMargin, 138.f, 22.f,
                                        kBold, pal.accent, duration, 0.f, 2));
             layers.push_back(textLayer("masthead_meta", spec.meta,
-                                       kContentRight - estimateWidth(spec.meta, 16.f) - 16.f, 142.f,
+                                       kContentRight - measuredTextWidth(spec.meta, 16.f, kRegular) - 16.f, 142.f,
                                        16.f, kRegular, pal.muted, duration, 3.f, 3));
 
             auto headline = [&](const std::string& id, const std::string& text, float y, int offset) {
@@ -349,8 +344,9 @@ namespace chronontemplate::web {
             if (!spec.headlineLineTwo.empty()) {
                 headline("headline_line_2", spec.headlineLineTwo, 300.f, 44);
                 if (spec.recipe == WebPageRecipe::Highlight3D) {
-                    layers.push_back(rect("headline_marker", kMargin - 14.f, 296.f, 566.f, 108.f,
-                                          pal.highlight, 0.5f, duration, markerSweepTracks(566.f)));
+                    const float markerW = measuredTextWidth(spec.headlineLineTwo, 64.f, kBold) + 28.f;
+                    layers.push_back(rect("headline_marker", kMargin - 14.f, 296.f, markerW, 108.f,
+                                          pal.highlight, 0.5f, markerSweepTracks(markerW)));
                 }
             }
             layers.push_back(textLayer("masthead_byline", spec.byline, kMargin, 418.f, 20.f,
@@ -395,7 +391,7 @@ namespace chronontemplate::web {
         } else {
             // ── quiet plate: blurred long phrases, sharp center phrase ───────
             auto contextLine = [&](const std::string& id, const std::string& text, float y) {
-                const float w = estimateWidth(text, 30.f);
+                const float w = measuredTextWidth(text, 30.f, kRegular);
                 layers.push_back(textLayer(id, text, 960.f - w * 0.5f, y, 30.f, kRegular,
                                            pal.muted, duration, 6.5f));
             };
@@ -404,9 +400,9 @@ namespace chronontemplate::web {
                 contextLine("long_context_top_1", spec.contextPhrases[1], 296.f);
 
             layers.push_back(textLayer("important_center_phrase", spec.importantPhrase,
-                                       960.f - estimateWidth(spec.importantPhrase, 72.f) * 0.5f, 480.f,
+                                       960.f - measuredTextWidth(spec.importantPhrase, 72.f, kBold) * 0.5f, 480.f,
                                        72.f, kBold, pal.ink, duration, 0.f, -1, true, 0));
-            const float phraseW = estimateWidth(spec.importantPhrase, 72.f);
+            const float phraseW = measuredTextWidth(spec.importantPhrase, 72.f, kBold);
             layers.push_back(rect("important_underline", 960.f - phraseW * 0.5f, 622.f,
                                   phraseW + 32.f, 6.f, pal.accent, 0.85f, duration,
                                   markerSweepTracks(phraseW + 32.f)));

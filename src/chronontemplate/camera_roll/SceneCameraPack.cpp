@@ -11,7 +11,7 @@
 
 #include "chronontemplate/camera_roll/SceneCameraPack.hpp"
 
-#include "chrononmotion/motion/CameraSequence.hpp"
+#include "chrononmotion/motion/CameraMotion.hpp"
 
 #include <algorithm>
 #include <cmath>

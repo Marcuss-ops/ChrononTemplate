@@ -25,12 +25,19 @@ texture counts as static material); live components added per frame.
 """
 from __future__ import annotations
 
+import argparse
+import hashlib
+import json
 import math
+import subprocess
+import sys
+import zlib
+from datetime import datetime, timezone
+from pathlib import Path
+
 import numpy as np
 from PIL import Image
 
-import sys
-from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from documentary_background_v2 import (
     build_v2, base_dark_graphite, _tint, _with,
@@ -62,6 +69,11 @@ GRAIN_SIGMA = {
     "11_newspaper_paper": 2.2, "12_faint_horizontal_lines": 2.2,
     "13_floating_dust": 2.2, "14_muted_olive": 2.1, "15_soft_light_sweep": 2.0,
 }
+
+
+def _stable_seed(preset_id: str) -> int:
+    """Stable per-preset seed. Python's hash() is randomized per process."""
+    return zlib.crc32(preset_id.encode("utf-8")) & 0xFFFFFFFF
 
 
 # ------------------------------------------------------------ static bases
@@ -208,7 +220,7 @@ def _live_grain(rng: np.random.Generator, sigma: float) -> np.ndarray:
 def render_frame(pid: str, idx: int, static: np.ndarray, assets: dict) -> np.ndarray:
     """Return uint8 HxWx3 frame. Deterministic in idx."""
     t = idx / FPS
-    rng = np.random.default_rng(1000 + idx * 7919 + hash(pid) % 100000)
+    rng = np.random.default_rng((1000 + idx * 7919 + _stable_seed(pid)) & 0xFFFFFFFF)
     base = static.copy()
     sigma = GRAIN_SIGMA[pid]
 
@@ -272,3 +284,153 @@ def render_frame(pid: str, idx: int, static: np.ndarray, assets: dict) -> np.nda
         raise ValueError(pid)
 
     return np.clip(base, 0, 255).astype(np.uint8)
+
+
+# ------------------------------------------------------------ prototype CLI
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _render_prototype(preset_id: str, out_dir: Path, frames: int, fps: int) -> dict:
+    """Render one prototype as a bounded rawvideo -> ffmpeg stream.
+
+    Only one 1920x1080 RGB frame is materialized at a time; six thumbnails are
+    retained for the contact sheet. This is the OOM-safe path for the host.
+    """
+    global FPS, DUR
+    FPS = fps
+    DUR = frames / float(fps)
+    static = get_static(preset_id)
+    assets = get_assets(preset_id)
+    video = out_dir / f"{preset_id}_v2.mp4"
+    contact = out_dir / f"{preset_id}_v2_contact.jpg"
+    sample_at = {round(i * (frames - 1) / 5) for i in range(6)} if frames > 1 else {0}
+    thumbnails: list[Image.Image] = []
+    command = [
+        "ffmpeg", "-y", "-nostats", "-loglevel", "error",
+        "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
+        "-r", str(fps), "-i", "-", "-an", "-c:v", "libx264",
+        "-preset", "veryfast", "-crf", "18", "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart", str(video),
+    ]
+    process = subprocess.Popen(
+        command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+    )
+    written = 0
+    try:
+        for idx in range(frames):
+            frame = render_frame(preset_id, idx, static, assets)
+            if idx in sample_at:
+                thumbnails.append(
+                    Image.fromarray(frame).resize((480, 270), Image.LANCZOS)
+                )
+            try:
+                process.stdin.write(frame.tobytes())
+            except BrokenPipeError:
+                break
+            written += 1
+        try:
+            process.stdin.close()
+        except BrokenPipeError:
+            pass
+        stderr = process.stderr.read().decode("utf-8", "replace")
+        rc = process.wait()
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait()
+    if rc != 0:
+        raise RuntimeError(f"ffmpeg failed for {preset_id} (rc={rc}): {stderr.strip()}")
+    if written != frames:
+        raise RuntimeError(f"{preset_id}: wrote {written}/{frames} frames; ffmpeg: {stderr.strip()}")
+
+    columns, rows = 2, 3
+    sheet = Image.new("RGB", (columns * 480, rows * 270), (0, 0, 0))
+    for i, thumb in enumerate(thumbnails[: columns * rows]):
+        sheet.paste(thumb, ((i % columns) * 480, (i // columns) * 270))
+    sheet.save(contact, quality=90)
+
+    return {
+        "preset": preset_id,
+        "version": "2.0",
+        "video": str(video),
+        "contact_sheet": str(contact),
+        "width": W,
+        "height": H,
+        "fps": fps,
+        "frames": frames,
+        "duration_seconds": frames / float(fps),
+        "seed": _stable_seed(preset_id),
+        "size_bytes": video.stat().st_size,
+        "sha256": _sha256_file(video),
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Generate the documentary background 2.0 prototypes (bounded memory)."
+    )
+    parser.add_argument(
+        "--out-dir", type=Path,
+        default=Path(__file__).resolve().parents[2] / "out" / "docbg_v2",
+    )
+    parser.add_argument("--preset", action="append", choices=IDS)
+    parser.add_argument("--all", action="store_true", help="render all 15 presets")
+    parser.add_argument("--frames", type=int, default=FRAMES)
+    parser.add_argument("--fps", type=int, default=FPS)
+    parser.add_argument("--report", type=Path)
+    parser.add_argument("--seed", type=int, default=12045,
+                        help="recorded project seed; per-preset seeds stay stable")
+    args = parser.parse_args()
+    if args.frames <= 0 or args.fps <= 0:
+        parser.error("--frames and --fps must be positive")
+
+    requested = set(IDS) if args.all else set(
+        args.preset or ["01_dark_film_grain", "06_editorial_ivory", "03_archival_film"]
+    )
+    selected = [preset for preset in IDS if preset in requested]
+    if not selected:
+        parser.error("no known preset selected")
+
+    out_dir = args.out_dir.resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    entries = []
+    for preset_id in selected:
+        print(f"[docbg] {preset_id}: {args.frames} frame @ {args.fps} fps -> {out_dir}", flush=True)
+        entry = _render_prototype(preset_id, out_dir, args.frames, args.fps)
+        entries.append(entry)
+        print(
+            f"[docbg] {preset_id}: {entry['size_bytes']} byte, "
+            f"sha256={entry['sha256'][:16]}", flush=True,
+        )
+
+    report = {
+        "schema": "chronontemplate.docbg_v2.prototypes.v1",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generator": str(Path(__file__).resolve()),
+        "width": W,
+        "height": H,
+        "fps": args.fps,
+        "frames": args.frames,
+        "duration_seconds": args.frames / float(args.fps),
+        "seed": args.seed,
+        "notes": (
+            "Prototipi 2.0 per la review visiva; non sostituiscono il contratto "
+            "procedural_documentary_v2 (7 background + 10 highlight)."
+        ),
+        "entries": entries,
+    }
+    report_path = (args.report or (out_dir / "report.json")).resolve()
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(f"[docbg] report: {report_path}", flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

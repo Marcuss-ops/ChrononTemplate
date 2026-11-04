@@ -26,8 +26,7 @@ float prefixWidth(const char* font, float size, const std::string& head,
     const auto at = head.find(hi);
     const std::string pre = at == std::string::npos ? "" : head.substr(0, at);
     if (pre.empty()) return 0.f;
-    const float m = measureTextWidth(font, size, pre);
-    return m > 0.f ? m : estimateWidth(pre, size);
+    return measuredTextWidth(pre, size, font);
 }
 
 } // namespace
@@ -71,8 +70,7 @@ Json buildWebNextPlan(const WebNextSpec& spec){
         std::string paper = spec.paperColor.empty() ? "#EDECEA" : spec.paperColor;
         static constexpr const char* kHelv = "ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf";
         L.push_back(rect("paper",0,0,1920,1080,paper,1.f,Json::array(),D));
-        const float mH = measureTextWidth(kHelv, 72, spec.highlight);
-        float wH = (mH > 0.f ? mH : estimateWidth(spec.highlight,72));
+        const float wH = measuredTextWidth(spec.highlight, 72, kHelv);
         // due sweep incrociati sulla frase evidenziata (offset dal prefisso)
         const float px = 200.f + prefixWidth(kHelv, 72, spec.headline, spec.highlight);
         L.push_back(rect("cross_a",px,400,wH+24,92,hl,0.95f,sweepTracks(wH,b1,s1),D));
@@ -84,7 +82,8 @@ Json buildWebNextPlan(const WebNextSpec& spec){
     case WebNextRecipe::GlowLinePulse: {
         std::string paper = spec.paperColor.empty() ? "#0A0A0A" : spec.paperColor;
         L.push_back(rect("bg",0,0,1920,1080,paper,1.f,Json::array(),D));
-        float wH = estimateWidth(spec.highlight,110);
+        static constexpr const char* kPlayfairItalic = "ChrononTemplate/assets/fonts/PlayfairDisplay-Italic.ttf";
+        const float wH = measuredTextWidth(spec.highlight, 110, kPlayfairItalic);
         // glow: banda larga opaca + core stretto + pulse opacity 0.75->1
         L.push_back(rect("glow_halo",200,430,wH+40,120,"#F5D24A",0.35f,sweepTracks(wH,b1,s1),D));
         L.push_back(rect("glow_core",200,452,wH+16,76,"#F5D24A",0.95f,sweepTracks(wH,b1+6,s1),D));
@@ -96,8 +95,7 @@ Json buildWebNextPlan(const WebNextSpec& spec){
         std::string paper = spec.paperColor.empty() ? "#F4F3F0" : spec.paperColor;
         static constexpr const char* kHelv = "ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf";
         L.push_back(rect("paper",0,0,1920,1080,paper,1.f,Json::array(),D));
-        const float mH = measureTextWidth(kHelv, 72, spec.highlight);
-        float wH = (mH > 0.f ? mH : estimateWidth(spec.highlight,72));
+        const float wH = measuredTextWidth(spec.highlight, 72, kHelv);
         const float mx = 140.f + prefixWidth(kHelv, 72, spec.headline, spec.highlight);
         L.push_back(rect("snap_marker",mx,330,wH+16,92,hl,0.95f,sweepTracks(wH,b1,s1),D));
         L.push_back(textLayer("headline",spec.headline,140,330,72,"ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf","#0E0E10",D,0.f,-1));
@@ -130,8 +128,7 @@ Json buildWebNextPlan(const WebNextSpec& spec){
         L.push_back(ellipse("pizza",240,-180,1520,1240,"#2B241E",1.f,D));
         // card: pop con overshoot 0.9->1 sul rettangolo (shape: la scala e'
         // sicura), testo con fade+rise (il renderer non scala i layer testo)
-        const float mH = measureTextWidth(kRegular, 52, spec.headline);
-        float wH = (mH > 0.f ? mH : estimateWidth(spec.headline,52));
+        const float wH = measuredTextWidth(spec.headline, 52, kRegular);
         L.push_back(rect("card",960-(wH/2)-60,492,wH+120,148,"#F7F7F5",1.f,sweepTracks(wH,b1,s1),D));
         Json card = textLayer("cap",spec.headline,960,566,52,kRegular,"#101010",D,0.f,-1,1.f,"mm");
         card["animation"] = Json::object({{"tracks", Json::array({
@@ -145,10 +142,9 @@ Json buildWebNextPlan(const WebNextSpec& spec){
         // fringe: due copie offset rosso/ciano sotto il bianco
         L.push_back(textLayer("fr_r",spec.headline,105,205,96,kSerifBold,"#D5D000",D,0.f,-1,0.55f));
         L.push_back(textLayer("fr_b",spec.headline,95,195,96,kSerifBold,"#67B9D4",D,0.f,-1,0.42f));
-        const float mPre = measureTextWidth(kSerifBold, 96, spec.headline.substr(0, spec.headline.find(spec.highlight)));
-        const float mH = measureTextWidth(kSerifBold, 96, spec.highlight);
-        float wH = (mH > 0.f ? mH : estimateWidth(spec.highlight,96));
-        const float fx = 100.f + (mPre > 0.f ? mPre : estimateWidth(spec.headline.substr(0, spec.headline.find(spec.highlight)),96));
+        const float wH = measuredTextWidth(spec.highlight, 96, kSerifBold);
+        const float fx = 100.f + measuredTextWidth(
+            spec.headline.substr(0, spec.headline.find(spec.highlight)), 96, kSerifBold);
         L.push_back(rect("flash",fx-4,210,wH+8,116,"#C9DC28",0.0f,Json::array(),D));
         // flash reveal: opacity 0->0.85 sul marker + testo bianco sopra
         L.back()["animation"] = Json::object({{"tracks", Json::array({

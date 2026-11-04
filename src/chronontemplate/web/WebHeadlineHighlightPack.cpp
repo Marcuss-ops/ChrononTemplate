@@ -5,12 +5,13 @@
 // functions of the spec: every layer is authored as render-plan V3 data with
 // the conventions proven by the web-page packs (camera-transformed layer
 // positions are centers in top-left-down px, camera z is negative behind the
-// layers). The highlighter blocks are estimated from the authored copy with
-// the pack's deterministic width table; they are composition intent, not
-// glyph-exact coverage. No Python, no Pillow, no browser: Chronon3D dev
+// layers). Text boxes and highlighter blocks use HarfBuzz advances from the
+// same font files as the renderer; the deterministic table is only a fallback
+// when a font cannot be loaded. No Python, no Pillow, no browser: Chronon3D dev
 // authoring vocabulary, the renderer rasterizes.
 #include "chronontemplate/web/WebHeadlineHighlightPack.hpp"
 #include "chronontemplate/core/NativePrimitives.hpp"
+#include "chronontemplate/web/WebFontMeasure.hpp"
 
 #include <chrononmotion/motion/Presets.hpp>
 
@@ -37,19 +38,10 @@ namespace chronontemplate::web {
             throw std::invalid_argument("WebHeadlineHighlightSpec: " + message);
         }
 
-        /// The same deterministic width table the web-page packs use: block
-        /// geometry follows authored copy, not measured glyphs.
-        float estimateWidth(const std::string& text, float size) {
-            double units = 0.0;
-            for (unsigned char c : text) {
-                if (c == ' ') units += 0.28;
-                else if (c == 'i' || c == 'l' || c == 'I' || c == '!' || c == '.' || c == ',' || c == ':') units += 0.29;
-                else if (c == 'm' || c == 'w' || c == 'M' || c == 'W') units += 0.78;
-                else if (c >= 'A' && c <= 'Z') units += 0.64;
-                else units += 0.52;
-            }
-            return static_cast<float>(units * size);
-        }
+        /// Canonical advance width from the same HarfBuzz shaper the renderer
+        /// uses, with the deterministic table as an explicit fallback. The
+        /// measure lives in WebFontMeasure.cpp: no pack keeps a private copy.
+        using shot::measuredTextWidth;
 
         /// Camera-transformed shapes are authored with their center in
         /// top-left-down px, but the enable_3d wire space is bottom-left-up
@@ -104,11 +96,12 @@ namespace chronontemplate::web {
         Json textLayer(const std::string& id, const std::string& text, float left, float top,
                        float size, const char* font, const std::string& fill, int durationFrames,
                        float blur = 0.f, int entranceSlot = -1) {
-            const float w = std::max(60.f, estimateWidth(text, size) * 1.32f + 48.f);
+            const float content = measuredTextWidth(text, size, font);
+            const float w = std::max(60.f, content * 1.10f);
             const float h = size * 1.65f;
             Json layer = { { "id", id }, { "type", "text" }, { "text", text },
                            { "size", Json::array({ w, h }) },
-                           { "position", Json::array({ left + w * 0.5f + 8.f, wireY(top + h * 0.5f), 0.f }) },
+                           { "position", Json::array({ left + content * 0.5f, wireY(top + h * 0.5f), 0.f }) },
                            { "enable_3d", true },
                            { "style", { { "font", font }, { "font_size", size }, { "fill", fill } } },
                            { "start_frame", 0 }, { "duration_frames", durationFrames } };
@@ -317,7 +310,7 @@ namespace chronontemplate::web {
             }
 
             const float phraseSize = 148.f;
-            const float phraseW = estimateWidth(spec.phrase, phraseSize);
+            const float phraseW = measuredTextWidth(spec.phrase, phraseSize, kSerifItalic);
             const float phraseLeft = 960.f - phraseW * 0.5f;
 
             // The marker band: a wide bar plus a lower lip approximating the
@@ -357,7 +350,7 @@ namespace chronontemplate::web {
             layers.push_back(rect("bb_kicker_bar", 0.f, 0.f, static_cast<float>(kW), 96.f, alert, 1.f));
             layers.push_back(textLayer("bb_kicker", spec.kicker, 96.f, 26.f, 34.f,
                                        kBold, "#FFFFFF", duration, 0.f, 0));
-            const float bbDateW = estimateWidth(spec.dateline, 24.f);
+            const float bbDateW = measuredTextWidth(spec.dateline, 24.f, kRegular);
             layers.push_back(textLayer("bb_timestamp", spec.dateline,
                                        static_cast<float>(kW) - 96.f - bbDateW, 32.f,
                                        24.f, kRegular, ink, duration, 2.4f, 1));
@@ -374,9 +367,9 @@ namespace chronontemplate::web {
                 const std::size_t found = spec.headlineLines[i].find(spec.highlightText);
                 if (found != std::string::npos) {
                     bbLine = static_cast<int>(i);
-                    bbLeft = 150.f + estimateWidth(spec.headlineLines[i].substr(0, found), bbSize);
-                    bbRight = 150.f + estimateWidth(
-                            spec.headlineLines[i].substr(0, found + spec.highlightText.size()), bbSize);
+                    bbLeft = 150.f + measuredTextWidth(spec.headlineLines[i].substr(0, found), bbSize, kBold);
+                    bbRight = 150.f + measuredTextWidth(
+                            spec.headlineLines[i].substr(0, found + spec.highlightText.size()), bbSize, kBold);
                 }
             }
             if (bbLine >= 0) {
@@ -433,7 +426,7 @@ namespace chronontemplate::web {
                                        kBold, live, duration, 0.f, 0));
             layers.push_back(textLayer("live_title", spec.kicker, 300.f, 112.f, 32.f,
                                        kBold, ink, duration, 2.f, 1));
-            const float updW = estimateWidth(spec.dateline, 22.f);
+            const float updW = measuredTextWidth(spec.dateline, 22.f, kRegular);
             layers.push_back(textLayer("live_updated", spec.dateline,
                                        static_cast<float>(kW) - 150.f - updW, 118.f,
                                        22.f, kRegular, ink, duration, 2.4f, 2));
@@ -452,9 +445,9 @@ namespace chronontemplate::web {
                                            duration, 0.f, slot));
                 const std::size_t found = spec.bodyLines[i].find(spec.highlightText);
                 if (found != std::string::npos) {
-                    const float hl = 150.f + estimateWidth(spec.bodyLines[i].substr(0, found), entrySize);
-                    const float hr = 150.f + estimateWidth(
-                            spec.bodyLines[i].substr(0, found + spec.highlightText.size()), entrySize);
+                    const float hl = 150.f + measuredTextWidth(spec.bodyLines[i].substr(0, found), entrySize, kRegular);
+                    const float hr = 150.f + measuredTextWidth(
+                            spec.bodyLines[i].substr(0, found + spec.highlightText.size()), entrySize, kRegular);
                     const float bw = hr - hl + 24.f;
                     layers.push_back(rect("live_marker_" + std::to_string(i), hl - 12.f,
                                           y + 34.f + entrySize * 0.18f, bw, entrySize * 1.02f,
@@ -491,7 +484,7 @@ namespace chronontemplate::web {
             int qLine = -1;
             float qLeft = 0.f, qRight = 0.f;
             for (std::size_t i = 0; i < n; ++i) {
-                const float w = estimateWidth(spec.quoteLines[i], qSize);
+                const float w = measuredTextWidth(spec.quoteLines[i], qSize, kSerifItalic);
                 const float left = 960.f - w * 0.5f;
                 layers.push_back(textLayer("quote_line_" + std::to_string(i), spec.quoteLines[i],
                                            left, qTop + static_cast<float>(i) * qStep,
@@ -500,9 +493,9 @@ namespace chronontemplate::web {
                 const std::size_t found = spec.quoteLines[i].find(spec.highlightText);
                 if (found != std::string::npos) {
                     qLine = static_cast<int>(i);
-                    qLeft = left + estimateWidth(spec.quoteLines[i].substr(0, found), qSize);
-                    qRight = left + estimateWidth(
-                            spec.quoteLines[i].substr(0, found + spec.highlightText.size()), qSize);
+                    qLeft = left + measuredTextWidth(spec.quoteLines[i].substr(0, found), qSize, kSerifItalic);
+                    qRight = left + measuredTextWidth(
+                            spec.quoteLines[i].substr(0, found + spec.highlightText.size()), qSize, kSerifItalic);
                 }
             }
             if (qLine >= 0) {
@@ -515,13 +508,13 @@ namespace chronontemplate::web {
                                       highlightSweepTracks(blockW, begin, span)));
             }
             const std::string by = "\\u2014 " + spec.attribution;
-            const float byW = estimateWidth(spec.attribution, 28.f) + 60.f;
+            const float byW = measuredTextWidth(spec.attribution, 28.f, kBold) + 60.f;
             const float byTop = qTop + static_cast<float>(n) * qStep + 56.f;
             layers.push_back(textLayer("quote_by", by, 960.f - byW * 0.5f, byTop,
                                        28.f, kBold, ink, duration, 2.f, 5));
             if (!spec.source.empty())
                 layers.push_back(textLayer("quote_source", spec.source,
-                                           960.f - estimateWidth(spec.source, 22.f) * 0.5f,
+                                           960.f - measuredTextWidth(spec.source, 22.f, kRegular) * 0.5f,
                                            byTop + 48.f, 22.f, kRegular, ink,
                                            duration, 2.6f, 6));
         } else {
@@ -550,9 +543,9 @@ namespace chronontemplate::web {
                     layers.push_back(textLayer("nav_link_" + std::to_string(i), spec.navLinks[i],
                                                linkX, 26.f, 19.f, kRegular, ink, duration,
                                                3.2f, 1 + static_cast<int>(i)));
-                    linkX += estimateWidth(spec.navLinks[i], 19.f) + 52.f;
+                    linkX += measuredTextWidth(spec.navLinks[i], 19.f, kRegular) + 52.f;
                 }
-                const float kickerW = estimateWidth(spec.kicker, 24.f);
+                const float kickerW = measuredTextWidth(spec.kicker, 24.f, kBold);
                 layers.push_back(textLayer("page_kicker", spec.kicker, 960.f - kickerW * 0.5f,
                                            148.f, 24.f, kBold, ink, duration, 2.f, 5));
                 top = 236.f;
@@ -562,6 +555,7 @@ namespace chronontemplate::web {
             // line by line, estimated from the authored copy.
             const float headlineSize = statement ? 88.f : 84.f;
             const float lineStep = headlineSize * 1.32f;
+            const char* headlineFont = statement ? kBold : kSerif;
             float highlightLeft = 0.f, highlightRight = 0.f;
             int highlightLine = -1;
             for (std::size_t i = 0; i < spec.headlineLines.size(); ++i) {
@@ -569,14 +563,14 @@ namespace chronontemplate::web {
                 const float lineLeft = 150.f;
                 layers.push_back(textLayer("headline_line_" + std::to_string(i), line,
                                            lineLeft, top + static_cast<float>(i) * lineStep,
-                                           headlineSize, statement ? kBold : kSerif, ink,
+                                           headlineSize, headlineFont, ink,
                                            duration, 0.f, -1));
                 const std::size_t found = line.find(spec.highlightText);
                 if (found != std::string::npos) {
                     highlightLine = static_cast<int>(i);
-                    highlightLeft = lineLeft + estimateWidth(line.substr(0, found), headlineSize);
-                    highlightRight = lineLeft + estimateWidth(
-                            line.substr(0, found + spec.highlightText.size()), headlineSize);
+                    highlightLeft = lineLeft + measuredTextWidth(line.substr(0, found), headlineSize, headlineFont);
+                    highlightRight = lineLeft + measuredTextWidth(
+                            line.substr(0, found + spec.highlightText.size()), headlineSize, headlineFont);
                 }
             }
 
@@ -608,7 +602,7 @@ namespace chronontemplate::web {
             if (statement) {
                 float bodyTop = top + static_cast<float>(spec.headlineLines.size()) * lineStep + 48.f;
                 if (!spec.dateline.empty()) {
-                    const float dateW = estimateWidth(spec.dateline, 26.f);
+                    const float dateW = measuredTextWidth(spec.dateline, 26.f, kRegular);
                     layers.push_back(textLayer("page_dateline", spec.dateline,
                                                960.f - dateW * 0.5f, bodyTop, 26.f,
                                                kRegular, ink, duration, 2.6f, 6));

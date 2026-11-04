@@ -26,7 +26,7 @@
 
 #include "chrononmotion/math/Vector2.hpp"
 #include "chrononmotion/math/Vector3.hpp"
-#include "chrononmotion/motion/CameraSequence.hpp"
+#include "chrononmotion/motion/CameraMotion.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>

@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = ROOT.parent
 CHRONON = WORKSPACE / "Chronon3d"
+ASSET_ROOT = ROOT
 DEFAULT_OUT = ROOT / "out/social_motion_pack_v1"
 DRIVE_FOLDER = "1ATL0bnJXijNqFlKkgWye3PEAdAuQa1HI"
 UPLOADER = WORKSPACE / "RenderingGen/bin/drive-upload"
@@ -203,7 +204,7 @@ def validate_contract(plan: dict) -> None:
 def cli_arguments(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cli", type=Path, default=CHRONON / "build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli")
-    parser.add_argument("--assets-root", type=Path, default=CHRONON)
+    parser.add_argument("--assets-root", type=Path, default=ASSET_ROOT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--validate-only", action="store_true", help="write and validate plans without rendering")
     parser.add_argument("--render", action="store_true", help="render the complete 18-video pack locally")

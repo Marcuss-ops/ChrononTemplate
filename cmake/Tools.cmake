@@ -327,6 +327,9 @@ if(TARGET chrononmotion_chronon3d_adapter AND
             tools/entities_with_text/dump_documentary_snapshot_plan.cpp)
     target_link_libraries(chronontemplate_dump_documentary_snapshot_plan
             PRIVATE chronontemplate chrononmotion_chronon3d_adapter)
+    # LightLeak moved out of Chronon3D into the header-only effects plugin.
+    target_include_directories(chronontemplate_dump_documentary_snapshot_plan PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/../ChrononPlugin/plugins/effects/include)
 endif()
 
 add_executable(chronontemplate_emit_dataviz_sample

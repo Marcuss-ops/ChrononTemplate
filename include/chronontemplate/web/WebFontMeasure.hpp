@@ -16,9 +16,18 @@ namespace chronontemplate::web::shot {
 // `fontRef` e' il riferimento usato nei plan (es.
 // "ChrononTemplate/assets/fonts/HelveticaNeue-Bold.otf", relativo alla root
 // del workspace). Ritorna un valore <= 0 se la misura fallisce (il chiamante
-// usa estimateWidth come fallback).
+// usa measuredTextWidth come fallback).
 [[nodiscard]] float measureTextWidth(const std::string& fontRef, float sizePx,
                                      const std::string& text);
+
+// Tabella deterministica usata SOLO quando il font non si carica. E' l'unica
+// copia nel template: i pack web non devono reimplementarla.
+[[nodiscard]] float estimateTextWidth(const std::string& text, float sizePx);
+
+// Autorita' unica di misura per i preset editoriali: advance shaped dal font
+// del renderer, con la tabella deterministica come fallback dichiarato.
+[[nodiscard]] float measuredTextWidth(const std::string& text, float sizePx,
+                                      const std::string& fontRef);
 
 } // namespace chronontemplate::web::shot
 

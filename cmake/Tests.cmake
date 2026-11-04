@@ -152,7 +152,15 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     add_executable(chronontemplate_web_headline_highlight_pack_test tests/web_headline_highlight_pack.cpp)
     target_link_libraries(chronontemplate_web_headline_highlight_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_web_headline_highlight_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    target_compile_definitions(chronontemplate_web_headline_highlight_pack_test PRIVATE
+        CHRONONTEMPLATE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     add_test(NAME chronontemplate_web_headline_highlight_pack_test COMMAND chronontemplate_web_headline_highlight_pack_test)
+    # Plan font refs are workspace-relative (for example
+    # ChrononTemplate/assets/fonts/...), so this test must run at the workspace
+    # root; otherwise the pack falls back to estimateWidth while the assertion
+    # measures the real font.
+    set_tests_properties(chronontemplate_web_headline_highlight_pack_test PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
     add_executable(chronontemplate_web_text_layout_test tests/web_text_layout.cpp)
     target_link_libraries(chronontemplate_web_text_layout_test PRIVATE chronontemplate)

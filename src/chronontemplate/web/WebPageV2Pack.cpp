@@ -7,6 +7,7 @@
 #include "chronontemplate/web/WebPageV2Pack.hpp"
 
 #include "chronontemplate/core/NativePrimitives.hpp"
+#include "chronontemplate/web/WebFontMeasure.hpp"
 
 #include <chrononmotion/motion/Presets.hpp>
 
@@ -40,17 +41,7 @@ namespace chronontemplate::web {
             throw std::invalid_argument("WebPageV2Spec: " + message);
         }
 
-        float estimateWidth(const std::string& text, float size) {
-            double units = 0.0;
-            for (unsigned char c : text) {
-                if (c == ' ') units += 0.28;
-                else if (c == 'i' || c == 'l' || c == 'I' || c == '!' || c == '.' || c == ',' || c == ':') units += 0.29;
-                else if (c == 'm' || c == 'w' || c == 'M' || c == 'W') units += 0.78;
-                else if (c >= 'A' && c <= 'Z') units += 0.64;
-                else units += 0.52;
-            }
-            return static_cast<float>(units * size);
-        }
+        using shot::measuredTextWidth;
 
         Json easedTrack(const std::string& property, float from, float to, int start, int span,
                         const std::string& easing) {
@@ -138,7 +129,7 @@ namespace chronontemplate::web {
         Json textLayer(const std::string& id, const std::string& text, float left, float top,
                        float size, const char* font, const std::string& fill, int durationFrames,
                        float blur = 0.f, int entranceSlot = -1, bool fold = false, int foldOffset = 0) {
-            const float w = std::max(60.f, estimateWidth(text, size) * 1.32f + 48.f);
+            const float w = std::max(60.f, measuredTextWidth(text, size, font) * 1.10f);
             const float h = size * 1.65f;
             Json layer = {{"id", id}, {"type", "text"}, {"text", text},
                           {"size", Json::array({w, h})},
@@ -287,7 +278,7 @@ namespace chronontemplate::web {
             for (std::size_t i = 0; i < spec.navLinks.size(); ++i, ++slot) {
                 layers.push_back(textLayer("nav_link_" + std::to_string(i), spec.navLinks[i],
                                            linkX, 26.f, 19.f, kRegular, pal.muted, duration, 2.6f, slot));
-                linkX += estimateWidth(spec.navLinks[i], 19.f) + 46.f;
+                linkX += measuredTextWidth(spec.navLinks[i], 19.f, kRegular) + 46.f;
             }
             layers.push_back(rect("nav_search_pill", 1396.f, 20.f, 194.f, 38.f, pal.panel, 1.f,
                                   Json::array({easedTrack("opacity", 0.f, 1.f, 22, 28, "out_cubic")})));
@@ -304,7 +295,7 @@ namespace chronontemplate::web {
             layers.push_back(textLayer("masthead_kicker", spec.kicker, kMargin + 58.f, 128.f, 21.f,
                                        kBold, pal.accent, duration, 0.f, 2));
             layers.push_back(textLayer("masthead_meta", spec.meta,
-                                       kContentRight - estimateWidth(spec.meta, 16.f) - 16.f, 132.f,
+                                       kContentRight - measuredTextWidth(spec.meta, 16.f, kRegular) - 16.f, 132.f,
                                        16.f, kRegular, pal.muted, duration, 2.4f, 3));
 
             if (folded) {
@@ -329,13 +320,13 @@ namespace chronontemplate::web {
             // byline + dateline + share pills on one row
             layers.push_back(textLayer("masthead_byline", spec.byline, kMargin, 428.f, 20.f,
                                        kBold, pal.ink, duration, 0.f, 7));
-            const float bylineW = estimateWidth(spec.byline, 20.f);
+            const float bylineW = measuredTextWidth(spec.byline, 20.f, kBold);
             layers.push_back(textLayer("masthead_dateline", spec.dateline, kMargin + bylineW + 28.f, 430.f,
                                        19.f, kRegular, pal.muted, duration, 2.2f, 8));
             const std::vector<std::string> shares{"Share", "Save"};
             float shareX = kMargin;
             for (std::size_t i = 0; i < shares.size(); ++i) {
-                const float pillW = estimateWidth(shares[i], 16.f) + 44.f;
+                const float pillW = measuredTextWidth(shares[i], 16.f, kRegular) + 44.f;
                 layers.push_back(rect("share_pill_" + std::to_string(i), shareX, 474.f, pillW, 34.f,
                                       pal.panel, 1.f,
                                       Json::array({easedTrack("opacity", 0.f, 1.f, 44 + static_cast<int>(i) * 4, 26, "out_cubic")})));
@@ -388,11 +379,11 @@ namespace chronontemplate::web {
             layers.push_back(textLayer("footer_left", spec.siteName + "  ·  all rights reserved",
                                        kMargin, 1024.f, 15.f, kRegular, pal.muted, duration, 2.6f));
             layers.push_back(textLayer("footer_right", "Top stories  ·  Newsletters",
-                                       kContentRight - estimateWidth("Top stories  ·  Newsletters", 15.f) - 16.f,
+                                       kContentRight - measuredTextWidth("Top stories  ·  Newsletters", 15.f, kRegular) - 16.f,
                                        1024.f, 15.f, kRegular, pal.muted, duration, 2.6f));
         } else {
             auto contextLine = [&](const std::string& id, const std::string& text, float y) {
-                const float w = estimateWidth(text, 30.f);
+                const float w = measuredTextWidth(text, 30.f, kRegular);
                 layers.push_back(textLayer(id, text, 960.f - w * 0.5f, y, 30.f, kRegular,
                                            pal.muted, duration, 6.0f));
             };
@@ -401,9 +392,9 @@ namespace chronontemplate::web {
                 contextLine("long_context_top_1", spec.contextPhrases[1], 292.f);
 
             layers.push_back(textLayer("important_center_phrase", spec.importantPhrase,
-                                       960.f - estimateWidth(spec.importantPhrase, 76.f) * 0.5f, 476.f,
+                                       960.f - measuredTextWidth(spec.importantPhrase, 76.f, kBold) * 0.5f, 476.f,
                                        76.f, kBold, pal.ink, duration, 0.f, -1, true, 0));
-            const float phraseW = estimateWidth(spec.importantPhrase, 76.f);
+            const float phraseW = measuredTextWidth(spec.importantPhrase, 76.f, kBold);
             layers.push_back(rect("important_underline", 960.f - phraseW * 0.5f, 626.f,
                                   phraseW + 32.f, 6.f, pal.accent, 0.85f,
                                   markerSweepTracks(phraseW + 32.f)));

@@ -219,8 +219,12 @@ namespace chronontemplate {
             imageStyle.borderColor.clear();
             imageStyle.borderWidth = 0.f;
             ImageCrop imageCrop = snapshot.crop;
-            if (shot.recipe == DocumentaryRecipe::Reveal90)
+            if (shot.recipe == DocumentaryRecipe::Reveal90) {
+                // The wall-facing shot flips the image content, not the layer
+                // transform. The native affine image path handles crop.flip_x
+                // and keeps the world transform right-handed.
                 imageCrop.flipX = true;
+            }
             auto& card = scene.image(ImageSpec{.path = snapshot.path,
                                                .name = "DocumentarySnapshot",
                                                .frame = imageStyle,

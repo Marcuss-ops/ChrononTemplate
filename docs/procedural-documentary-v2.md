@@ -47,6 +47,16 @@ Every highlight: 1920x1080, 30/1 FPS, 150 decoded frames, 5 seconds.
 Vulkan must be selected explicitly; GPU-native admission is checked separately
 from Vulkan rendering with any internal CPU preparation.
 
+**Local render status 2026-11-03.** Four clips were rendered and decoded
+(`01_marker_quality`, `04_newspaper_investigation`, `09_mask_spotlight`,
+`10_documentary_master`): 150/150 frames each, 1920×1080/30. They are not
+accepted: the highlighted stroke layers are not visible in the contact sheet,
+and `10_documentary_master` reports 456 Vulkan `InvalidImageLayout` errors plus
+misregistered layers. The same frame in software is visually identical, so this
+is an authoring/lowering/compositing defect, not a Vulkan-only lane. Evidence:
+`ChrononTemplate/out/procedural_documentary_v2/review/P1-RESULT.md`.
+Human review and a corrected render remain required; P1 stays PARTIAL.
+
 Plans and PNG golden frames live alongside the videos; measured timings and
 quality checks live in `metrics.json`. A valid schema/build alone is not video
 certification. Check decoded frame count, dimensions, rate and duration with

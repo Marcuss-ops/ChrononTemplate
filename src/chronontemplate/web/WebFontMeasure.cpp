@@ -131,4 +131,22 @@ float measureTextWidth(const std::string& fontRef, float sizePx, const std::stri
     return measureSTB(data, sizePx, text);
 }
 
+float estimateTextWidth(const std::string& text, float sizePx) {
+    double units = 0.0;
+    for (unsigned char c : text) {
+        if (c == ' ') units += 0.28;
+        else if (c == 'i' || c == 'l' || c == 'I' || c == '!' || c == '.' || c == ',' || c == ':') units += 0.29;
+        else if (c == 'm' || c == 'w' || c == 'M' || c == 'W') units += 0.78;
+        else if (c >= 'A' && c <= 'Z') units += 0.64;
+        else units += 0.52;
+    }
+    return static_cast<float>(units * sizePx);
+}
+
+float measuredTextWidth(const std::string& text, float sizePx,
+                        const std::string& fontRef) {
+    const float measured = measureTextWidth(fontRef, sizePx, text);
+    return measured > 0.f ? measured : estimateTextWidth(text, sizePx);
+}
+
 } // namespace chronontemplate::web::shot
