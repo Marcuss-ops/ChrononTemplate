@@ -1,5 +1,7 @@
 #include "chronontemplate/charts/ChartsPack.hpp"
 
+#include "chronontemplate/web/WebFontMeasure.hpp"
+
 #include "chrononmotion/motion/OfflineBaking.hpp"
 
 #include <algorithm>
@@ -67,9 +69,13 @@ namespace chronontemplate {
             return result;
         }
 
-        [[nodiscard]] float fitFont(const std::string& content, float preferred, float maxWidth) {
-            const float estimatedWidth = std::max(1.f, static_cast<float>(content.size()) * preferred * 0.56f);
-            return std::min(preferred, preferred * maxWidth / estimatedWidth);
+        [[nodiscard]] float fitFont(const std::string& content, float preferred, float maxWidth,
+                                    const std::string& fontRef) {
+            // One measurement authority for every template pack: the same shaped
+            // advance the renderer uses. A character-count estimate overflows
+            // wide labels and under-sizes narrow ones.
+            const float measured = web::shot::measuredTextWidth(content, preferred, fontRef);
+            return std::min(preferred, preferred * maxWidth / std::max(1.f, measured));
         }
 
         [[nodiscard]] int revealFrame(const ChartSpec& spec, std::size_t index, std::size_t count) {
@@ -282,11 +288,11 @@ namespace chronontemplate {
                              i == 0 ? spec.primary : spec.secondary,
                              "comparison_card_" + std::to_string(i), reveal(i), true);
                         text(scene, out, spec, d.label, cx, cy - cardH * 0.29f,
-                             fitFont(d.label, font * 1.08f, cardW * 0.84f), spec.canvas,
+                             fitFont(d.label, font * 1.08f, cardW * 0.84f, spec.font), spec.canvas,
                              "comparison_label_" + std::to_string(i), reveal(i));
                         const std::string display = valueText(d, unit(d));
                         LayerHandle& value = text(scene, out, spec, display, cx, cy + font * 0.28f,
-                                                   fitFont(display, big * 1.15f, cardW * 0.86f), spec.canvas,
+                                                   fitFont(display, big * 1.15f, cardW * 0.86f, spec.font), spec.canvas,
                                                    "comparison_value_" + std::to_string(i), reveal(i));
                         out.values.push_back(&value);
                     }
@@ -314,9 +320,10 @@ namespace chronontemplate {
                     float valueX = marker + font * 0.75f;
                     float valueY = y + barH * 0.92f;
                     std::string valueColor = spec.ink;
-                    const float estimatedHalfWidth = static_cast<float>(display.size()) * font * 1.2f * 0.28f;
-                    if (valueX + estimatedHalfWidth > canvas.x * 0.95f) {
-                        valueX = marker - estimatedHalfWidth - font * 0.20f;
+                    const float measuredHalfWidth =
+                        web::shot::measuredTextWidth(display, font * 1.2f, spec.font) * 0.5f;
+                    if (valueX + measuredHalfWidth > canvas.x * 0.95f) {
+                        valueX = marker - measuredHalfWidth - font * 0.20f;
                         valueY = y;
                         valueColor = spec.canvas;
                     }
@@ -421,7 +428,7 @@ namespace chronontemplate {
                              spec.secondary, "period_" + std::to_string(i), reveal(i));
                         const std::string display = valueText(d, unit(d));
                         LayerHandle& v = text(scene, out, spec, display, colX[i], centerY + font * 0.1f,
-                                               fitFont(display, big * 1.25f, canvas.x * 0.34f), spec.ink,
+                                               fitFont(display, big * 1.25f, canvas.x * 0.34f, spec.font), spec.ink,
                                                "value_" + std::to_string(i), reveal(i));
                         out.values.push_back(&v);
                     }
@@ -451,20 +458,21 @@ namespace chronontemplate {
                     (void)card;
                     if (spec.style == ChartStyle::ScenarioSplit) {
                         text(scene, out, spec, d.label, cx, cy - cardH * 0.36f,
-                             fitFont(d.label, font * 0.9f, cardW * 0.84f), spec.canvas,
+                             fitFont(d.label, font * 0.9f, cardW * 0.84f, spec.font), spec.canvas,
                              "scenario_" + std::to_string(i), reveal(i));
                         if (!d.period.empty())
                             text(scene, out, spec, d.period, cx, cy - cardH * 0.23f,
-                                 fitFont(d.period, font * 0.8f, cardW * 0.84f), spec.canvas,
+                                 fitFont(d.period, font * 0.8f, cardW * 0.84f, spec.font), spec.canvas,
                                  "period_" + std::to_string(i), reveal(i));
                     } else {
                         text(scene, out, spec, d.period.empty() ? d.label : d.period, cx, cy - cardH * 0.24f,
-                             fitFont(d.period.empty() ? d.label : d.period, font, cardW * 0.84f),
+                             fitFont(d.period.empty() ? d.label : d.period, font, cardW * 0.84f,
+                                     spec.font),
                              spec.canvas, "period_" + std::to_string(i), reveal(i));
                     }
                     const std::string display = valueText(d, unit(d));
                     LayerHandle& v = text(scene, out, spec, display, cx, cy + font * 0.55f,
-                                           fitFont(display, big, cardW * 0.86f), spec.canvas,
+                                           fitFont(display, big, cardW * 0.86f, spec.font), spec.canvas,
                                            "value_" + std::to_string(i), reveal(i));
                     out.values.push_back(&v);
                 }
@@ -543,7 +551,7 @@ namespace chronontemplate {
         }
         if (!spec.note.empty())
             text(scene, out, spec, spec.note, canvas.x * 0.5f, canvas.y * 0.9f,
-                 fitFont(spec.note, font * 0.9f, canvas.x * 0.82f),
+                 fitFont(spec.note, font * 0.9f, canvas.x * 0.82f, spec.font),
                  spec.secondary, "method_note", out.peakFrame);
         return out;
     }

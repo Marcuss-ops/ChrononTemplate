@@ -221,6 +221,44 @@ else()
 endif()
 target_compile_options(chronontemplate_emit_svg_grain_perlin_showcase PRIVATE -Wall -Wextra)
 
+# The minimal map FX proof: one plate, four primitive-only acts.
+add_executable(chronontemplate_emit_minimal_map_fx tools/map/emit_minimal_map_fx.cpp)
+target_link_libraries(chronontemplate_emit_minimal_map_fx PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_minimal_map_fx PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_minimal_map_fx PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_minimal_map_fx PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_minimal_map_fx PRIVATE -Wall -Wextra)
+
+# The tactical-fill canary: already-projected rings lowered to native shapes.
+add_executable(chronontemplate_emit_tactical_fill tools/map/emit_tactical_fill.cpp)
+target_link_libraries(chronontemplate_emit_tactical_fill PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_tactical_fill PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_tactical_fill PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_tactical_fill PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_tactical_fill PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_truett_cathy_legacy_v1
         tools/entities_with_text/emit_truett_cathy_legacy_v1.cpp)
 target_link_libraries(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE chronontemplate)
@@ -604,6 +642,27 @@ else()
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 endif()
 target_compile_options(chronontemplate_emit_multi_image_styles PRIVATE -Wall -Wextra)
+
+# Premium multi-image choreographies (duo/trio/quad/penta) lowered to native
+# render-plan V3 through the same canonical path.
+add_executable(chronontemplate_emit_multi_image_premium tools/multiple_images/emit_multi_image_premium.cpp)
+target_link_libraries(chronontemplate_emit_multi_image_premium PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_multi_image_premium PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_multi_image_premium PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidationBounds.cpp")
+    target_include_directories(chronontemplate_emit_multi_image_premium PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_multi_image_premium PRIVATE -Wall -Wextra)
 
 # Optional native-plan canary for rapid transition frame-range validation.
 add_executable(chronontemplate_transition_canary_v1 tools/transitions/transition_canary_v1.cpp)

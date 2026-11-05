@@ -237,24 +237,18 @@ add_library(chronontemplate STATIC
         src/chronontemplate/backgrounds/BackgroundPack.cpp
         src/chronontemplate/backgrounds/ProceduralBackground.cpp
         src/chronontemplate/map/ModernMapPack.cpp
+        src/chronontemplate/map/MapFxPack.cpp
+        src/chronontemplate/map/TacticalFillPack.cpp
         # the short-phrase family: surviving recipes plus the star bumper
         src/chronontemplate/short_phrases/ShortPhrasePack.cpp
         include/chronontemplate/short_phrases/ShortPhraseRecipes.def
-        src/chronontemplate/short_phrases/animations/BlurOutUp.cpp
-        src/chronontemplate/short_phrases/animations/BottomUpLetters.cpp
-        src/chronontemplate/short_phrases/animations/FocusBlurResolve.cpp
         src/chronontemplate/short_phrases/animations/KineticCenterBuild.cpp
         src/chronontemplate/short_phrases/animations/PerWordRise.cpp
         src/chronontemplate/short_phrases/animations/PerspectiveMarquee.cpp
         src/chronontemplate/short_phrases/animations/StrikethroughReplace.cpp
-        src/chronontemplate/short_phrases/animations/TextMatchCut.cpp
-        src/chronontemplate/short_phrases/animations/TextShimmer.cpp
         src/chronontemplate/short_phrases/animations/ChromaticFringeTitle.cpp
-        src/chronontemplate/short_phrases/animations/MaskedHeading.cpp
         src/chronontemplate/short_phrases/animations/SplitFlapText.cpp
         src/chronontemplate/short_phrases/animations/ScrollReveal.cpp
-        src/chronontemplate/short_phrases/animations/ScrambledText.cpp
-        src/chronontemplate/short_phrases/animations/GradualBlur.cpp
         # the packs a template author starts from
         src/chronontemplate/entities_with_text/YouTubeSubscribe.cpp
         # the native web-page family: complete page + highlight 3D + blurred phrases
@@ -266,6 +260,7 @@ add_library(chronontemplate STATIC
         # web shots rebuild v1: port C++ dei 28 shot Python + 6 nuove recipe next
         src/chronontemplate/web/WebShotsRebuildPack.cpp
         src/chronontemplate/web/WebShotsNextPack.cpp
+        src/chronontemplate/web/MotionClassicsPack.cpp
         src/chronontemplate/web/WebFontMeasure.cpp
         # second generation: radians-safe fold, distinct recipes, reworked hierarchy
         src/chronontemplate/web/WebPageV2Pack.cpp
@@ -400,6 +395,12 @@ target_include_directories(chronontemplate_emit_camera_bullet_focus PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_camera_bullet_focus PRIVATE -Wall -Wextra)
 
+add_executable(chronontemplate_emit_giulio_cesare_camera_v5
+        tools/showcases/emit_giulio_cesare_camera_v5.cpp)
+target_include_directories(chronontemplate_emit_giulio_cesare_camera_v5 PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_giulio_cesare_camera_v5 PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_bullet_camera_10
         tools/bulletpoints_3d/emit_bullet_camera_10.cpp)
 target_link_libraries(chronontemplate_emit_bullet_camera_10 PRIVATE chronontemplate)
@@ -417,6 +418,7 @@ target_compile_options(chronontemplate_emit_bullet_camera_images PRIVATE -Wall -
 
 add_executable(chronontemplate_emit_web_article_fold
         tools/web_presets/emit_web_article_fold.cpp)
+target_link_libraries(chronontemplate_emit_web_article_fold PRIVATE chronontemplate)
 target_include_directories(chronontemplate_emit_web_article_fold PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_web_article_fold PRIVATE -Wall -Wextra)
@@ -442,6 +444,19 @@ add_executable(chronontemplate_emit_web_shots_rebuild
         tools/web_shots/emit_web_shots_rebuild.cpp)
 target_link_libraries(chronontemplate_emit_web_shots_rebuild PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_shots_rebuild PRIVATE -Wall -Wextra)
+
+# v4: the same 28 compositions with a runtime word-by-word fade reveal,
+# retimed highlights and a focus-driven camera drift.
+add_executable(chronontemplate_emit_web_shots_rebuild_v4
+        tools/web_shots/emit_web_shots_rebuild_v4.cpp)
+target_link_libraries(chronontemplate_emit_web_shots_rebuild_v4 PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_shots_rebuild_v4 PRIVATE -Wall -Wextra)
+
+# Twelve native web-motion classics: RenderPlan V3 built from Chronon primitives.
+add_executable(chronontemplate_emit_web_motion_classics
+        tools/web_shots/emit_web_motion_classics.cpp)
+target_link_libraries(chronontemplate_emit_web_motion_classics PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_motion_classics PRIVATE -Wall -Wextra)
 
 # Reference web phrase rebuilds are direct native render-plan V3 data. The
 # provided screenshots supply copy and composition references only.

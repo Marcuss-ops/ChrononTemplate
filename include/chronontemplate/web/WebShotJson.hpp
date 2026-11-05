@@ -92,10 +92,12 @@ inline Json rect(const std::string& id, float left, float top, float w, float h,
     // fuori canvas su questi backend).
     if (left == 0.f && top == 0.f && w == float(kW) && h == float(kH) &&
         alpha >= 0.999f && tracks.empty()) {
-        // Full-bleed paper is screen-space, exactly like the working web packs:
-        // it must not move or clip when the camera rides above the composition.
+        // Full-bleed paper is a centered canvas plane with an explicit origin.
+        // A screen-space color layer without a position renders as a black
+        // frame plus a single edge line on this backend; position [0,0] is the
+        // shape the verified date-timeline and headline packs use.
         return {{"id", id}, {"type", "color"}, {"color", rgba(hex, alpha)},
-                {"size", Json::array({kW, kH})}, {"screen_space", true},
+                {"size", Json::array({kW, kH})}, {"position", Json::array({0.f, 0.f})},
                 {"start_frame", 0}, {"duration_frames", duration}};
     }
     const bool isMarkerColor = (hex == "#F7F7F5" && id == "cap") ||
@@ -113,32 +115,12 @@ inline Json rect(const std::string& id, float left, float top, float w, float h,
                   {"position", wirePos(left + w * 0.5f, top + h * 0.5f)},
                   {"start_frame", 0}, {"duration_frames", duration}};
     if (markerSweep) {
-        // The Python Canvas.marker is a seeded rough swipe, not a hard-edged
-        // rectangle. Match its top/bottom contour and its smoothstep reveal.
-        // Il fill nativo Vulkan accetta contorni di 3..8 vertici: n resta
-        // piccolo (7 comandi per n=2), la banda core gemella aggiunge il
-        // corpo piu' denso del pennarello.
-        std::uint32_t seed = 2166136261u;
-        for (unsigned char c : id) seed = (seed ^ c) * 16777619u;
-        std::mt19937 rng(seed);
-        std::uniform_real_distribution<float> jitter(-0.9f, 0.9f);
-        const int n = std::min(2, std::max(1, int(w / 26.f)));
-        Json commands = Json::array();
-        for (int i = 0; i <= n; ++i) {
-            const float x = -w * 0.5f + w * float(i) / float(n);
-            const float y = -h * 0.5f + jitter(rng) * (h * 0.045f);
-            commands.push_back(Json{{"type", i == 0 ? "move_to" : "line_to"},
-                                    {"point", Json::array({x, y})}});
-        }
-        for (int i = n; i >= 0; --i) {
-            const float x = -w * 0.5f + w * float(i) / float(n);
-            const float y = h * 0.5f + jitter(rng) * (h * 0.045f);
-            commands.push_back(Json{{"type", "line_to"},
-                                    {"point", Json::array({x, y})}});
-        }
-        commands.push_back(Json{{"type", "close"}});
-        geometry = {{"type", "path"}, {"path", std::move(commands)},
-                    {"fill", rgba(hex, alpha)}};
+        // Marker bands are plain rectangles: the native Vulkan path fill used
+        // by the old seeded swipe rasterizes to nothing (verified on the
+        // Alexis/Rainmaking plans), while the reference highlights are hard
+        // NYT-style blocks anyway. Keep the authored sweep tracks and the
+        // denser core twin.
+        geometry = {{"type", "rect"}, {"fill", rgba(hex, alpha)}};
 
         // Keep the authored 3-keyframe sweep tracks as-is: the renderer
         // evaluates sparse eased tracks correctly (proven by the glow-line
@@ -300,8 +282,12 @@ struct TextHighlight {
     static Json layer(const std::string& id, float left, float top, float width,
                       float height, const std::string& color, float alpha,
                       int begin, int span, int duration) {
-        return rect(id,left,top,width,height,color,alpha * 0.62f,
-                    tracks(width,begin,span),duration);
+        Json marker = rect(id,left,top,width,height,color,alpha * 0.62f,
+                           tracks(width,begin,span),duration);
+        // Consumed by the v4 word-reveal pass (retime + focus), stripped by
+        // renderPlan before the plan is written.
+        marker["_v4_highlight"] = true;
+        return marker;
     }
 };
 } // namespace modules
@@ -684,6 +670,7 @@ inline Json renderPlan(const std::string& jobId, int duration, const Json& layer
         const bool hasMarkerCore = layer.contains("_native_marker_core_alpha");
         const double coreAlpha = hasMarkerCore ? layer["_native_marker_core_alpha"].get<double>() : 1.0;
         layer.erase("_native_marker_core_alpha");
+        layer.erase("_v4_highlight");
         // Painter order: i layer successivi siedono piu' vicini alla camera
         // (camera a z=-1158: z piu' negativo = piu' vicino). Il core del
         // marker segue subito il bordo grezzo cosi' resta sopra di esso e
@@ -700,6 +687,7 @@ inline Json renderPlan(const std::string& jobId, int duration, const Json& layer
             // stesso centro, stesse track di sweep del bordo, un layer solo.
             Json core = authored;
             core.erase("_native_marker_core_alpha");
+            core.erase("_v4_highlight");
             const std::string id = authored.value("id", std::string{});
             const float w = authored["size"][0].get<float>();
             const float h = authored["size"][1].get<float>();

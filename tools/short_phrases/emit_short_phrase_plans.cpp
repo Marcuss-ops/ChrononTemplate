@@ -390,14 +390,6 @@ namespace {
             fail(definition.id + ": an animation with neither tracks nor text animators renders a static phrase");
         }
 
-        const auto setBezier = [](json& tracks, const std::string& property,
-                                  const std::array<float, 4>& curve) {
-            for (auto& item : tracks) {
-                if (item.value("property", std::string{}) != property) continue;
-                item["easing"] = "bezier";
-                item["bezier_curve"] = curve;
-            }
-        };
         json layerTracks = json::array();
         bool hasLayerOpacity = false;
         for (std::size_t i = 0; i < definition.tracks.size(); ++i) {
@@ -406,8 +398,6 @@ namespace {
             hasLayerOpacity = hasLayerOpacity || definition.tracks[i].property == "opacity";
             layerTracks.push_back(makeTrack(definition.tracks[i], enter));
         }
-        if (definition.id == "short_phrase_product_text_match_cut")
-            setBezier(layerTracks, "scale", {0.85f, 0.f, 0.15f, 1.f});
 
         // Every phrase needs a real layer-level entrance/hold/exit. An animator
         // reveals the units, but without this safety net a unit-less frame
@@ -458,8 +448,7 @@ namespace {
         json textStyle{{"font", fontPath},
                        {"font_size", phraseFontSize},
                        {"fill", definition.fill_color.empty() ? style.fill : definition.fill_color},
-                       {"stroke", json{{"color", "#000000"}, {"width", 0}}},
-                       {"glow", json{{"radius", 0}, {"intensity", 0}, {"color", "#000000"}}}};
+                       {"stroke", json{{"color", "#000000"}, {"width", 0}}}};
         if (definition.light || definition.white_background) textStyle["fill"] = "#080808";
         if (definition.id == "short_phrase_editorial_claude_terminal_focus") {
             textStyle["font"] = "assets/fonts/UbuntuMono-R.ttf";
@@ -476,10 +465,6 @@ namespace {
                 {"animation", json{{"tracks", layerTracks}}},
         };
         if (!animators.empty()) phrase["text_animators"] = animators;
-        if (definition.id == "short_phrase_product_blur_out_up") {
-            phrase["masks"] = json::array({json{{"type", "rect"}, {"mode", "intersect"},
-                {"position", json::array({0, 0})}, {"size", json::array({1760, 260})}}});
-        }
         if (definition.id == "short_phrase_product_depth_parallax") {
             phrase.erase("text_animators");
             phrase["animation"]["tracks"] = json::array({json{{"property", "opacity"}, {"easing", "linear"},
@@ -499,11 +484,12 @@ namespace {
         if (modern) {
             const auto bg = definition.white_background ? json::array({1.0, 1.0, 1.0, 1.0})
                 : definition.light ? json::array({0.96, 0.95, 0.93, 1.0})
-                : definition.id == "short_phrase_product_text_match_cut"
-                    ? json::array({0.0, 0.0, 0.035, 1.0})
-                    : json::array({0.025, 0.032, 0.045, 1.0});
+                : json::array({0.025, 0.032, 0.045, 1.0});
             layers[0] = json{{"id", "background"}, {"type", "color"},
                              {"color", bg},
+                             {"size", definition.id == "short_phrase_product_perspective_marquee"
+                                 ? json::array({4000, 2500}) : json::array({kWidth, kHeight})},
+                             {"position", json::array({0, 0})},
                              {"start_frame", 0}, {"duration_frames", kDurationFrames}};
         }
         for (const auto& accent : definition.accents) {
@@ -560,8 +546,6 @@ namespace {
                 overlayTracks.push_back(makeTrack(t, enter));
             }
             if (!overlayTracks.empty()) copy["animation"]["tracks"] = std::move(overlayTracks);
-            if (definition.id == "short_phrase_product_text_match_cut")
-                setBezier(copy["animation"]["tracks"], "scale", {0.85f, 0.f, 0.15f, 1.f});
             if (!overlay.textAnimators.empty()) {
                 json overlayAnimators = json::array();
                 for (std::size_t i = 0; i < overlay.textAnimators.size(); ++i)
@@ -609,9 +593,6 @@ namespace {
                     {"layers", layers},
                     {"output", json{{"path", definition.id + ".mp4"}, {"format", "mp4"}, {"codec", "h264"}}}};
         if (definition.id == "short_phrase_product_perspective_marquee") {
-            for (auto& layer : result["layers"]) {
-                if (layer.value("type", std::string{}) == "text") layer["enable_3d"] = true;
-            }
             const json camera{{"type", "perspective"}, {"position", json::array({0,0,-1700})},
                                     {"rotation_deg", json::array({0,0,0})}, {"fov_deg", 45},
                                     {"near", 0.1}, {"far", 10000}};
@@ -687,10 +668,8 @@ int main(int argc, char** argv) try {
                          [&](const auto& spec) { return spec.animation == animation && spec.runtime_enabled; }) ==
                     chronontemplate::shortPhraseRecipeSpecs().end()) continue;
         if (argc == 3 && std::string(argv[2]) == "--react-text-only" &&
-            definition.id != "short_phrase_product_masked_heading" &&
             definition.id != "short_phrase_product_split_flap_text" &&
-            definition.id != "short_phrase_product_scroll_reveal" &&
-            definition.id != "short_phrase_product_scrambled_text") continue;
+            definition.id != "short_phrase_product_scroll_reveal") continue;
         if (argc == 3 && std::string(argv[2]) == "--terminal-only" &&
             definition.id != "short_phrase_editorial_claude_terminal_focus") continue;
         const std::string expected = chronontemplate::name(animation);

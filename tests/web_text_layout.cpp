@@ -65,6 +65,29 @@ int main() {
                     "highlight geometry stays inside its text column");
         }
 
+        // Highlight ON/OFF invariant: resolving a span is a read-only projection
+        // over the shaped layout, so the same inputs must reproduce every line
+        // and every glyph position exactly.
+        const auto highlightOff = layoutWebText(text, 120.f, 300.f, 170.f, 19.f,
+                                               "assets/fonts/Inter-Regular.ttf", 21.f, mockShape);
+        require(highlightOff.lines.size() == first.lines.size(),
+                "highlight resolution cannot change the line count");
+        for (std::size_t i = 0; i < first.lines.size(); ++i) {
+            const auto& on = first.lines[i];
+            const auto& off = highlightOff.lines[i];
+            require(on.text == off.text && on.x == off.x && on.top == off.top &&
+                        on.baseline == off.baseline && on.width == off.width,
+                    "highlight ON/OFF preserves line geometry");
+            require(on.shaped.glyphs.size() == off.shaped.glyphs.size(),
+                    "highlight ON/OFF preserves the glyph run");
+            for (std::size_t g = 0; g < on.shaped.glyphs.size(); ++g) {
+                require(on.shaped.glyphs[g].x == off.shaped.glyphs[g].x &&
+                            on.shaped.glyphs[g].advance_x == off.shaped.glyphs[g].advance_x &&
+                            on.shaped.glyphs[g].cluster == off.shaped.glyphs[g].cluster,
+                        "highlight ON/OFF preserves every glyph position");
+            }
+        }
+
         const std::string accented = "caffè";
         const auto accentedStart = text.find(accented);
         const auto accentedSegments = resolveWebTextSpan(first, accentedStart,
@@ -120,7 +143,7 @@ int main() {
         require(bodyLayer != exactPage.at("layers").end() &&
                     bodyLayer->at("text") == sceneLayout.lines[0].text &&
                     bodyLayer->at("position").at(0).get<float>() ==
-                        sceneLayout.lines[0].x + (sceneLayout.lines[0].width + 2.f) * .5f,
+                        sceneLayout.lines[0].x + (sceneLayout.lines[0].width + 2.f) * .5f - 960.f,
                 "existing web page pack consumes shared shaped text geometry");
 
         std::string longArticle;

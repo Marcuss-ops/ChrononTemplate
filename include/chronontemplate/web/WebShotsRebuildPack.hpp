@@ -73,11 +73,17 @@ struct WebShotSpec {
 
     void validate() const;
     [[nodiscard]] std::string planName() const;
+    [[nodiscard]] std::string planNameV4() const;
     [[nodiscard]] std::string outputStem() const;
 };
 
 /// Funzione pura: stesso input -> stessi byte JSON (RenderPlan V3 completo).
 [[nodiscard]] nlohmann::json buildWebShotPlan(const WebShotSpec& spec);
+
+/// v4: ogni parola entra a runtime con un fade leggero, i marker vengono
+/// ri-temporizzati e un drift di camera porta l'area evidenziata verso il
+/// centro (o resta fermo quando l'highlight e' gia' centrato).
+[[nodiscard]] nlohmann::json buildWebShotPlanV4(const WebShotSpec& spec);
 
 } // namespace chronontemplate::web
 

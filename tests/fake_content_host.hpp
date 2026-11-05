@@ -29,6 +29,7 @@ namespace chronontemplate_test {
     public:
         ct::ContentHandle createText(const ct::TextRequest& request) override {
 
+            m_textRequests.push_back(request);
             return measure("text/" + request.text + "@" + std::to_string(static_cast<int>(request.fontSize)),
                            chrononmotion::motion::ContentKind::Text,
                            chrononmotion::Vector2(static_cast<float>(request.text.size()) * request.fontSize * 0.55f,
@@ -58,6 +59,7 @@ namespace chronontemplate_test {
         }
 
         [[nodiscard]] const ct::ShapeRequest& lastShapeRequest() const { return m_lastShapeRequest; }
+        [[nodiscard]] const std::vector<ct::TextRequest>& textRequests() const { return m_textRequests; }
         [[nodiscard]] const ct::ShapeRequest* findShapeRequest(const std::string& name) const {
             const auto found = std::find_if(m_shapeRequests.begin(), m_shapeRequests.end(),
                 [&](const ct::ShapeRequest& request) { return request.name == name; });
@@ -79,6 +81,7 @@ namespace chronontemplate_test {
         ct::ImageRequest m_lastImageRequest{};
         ct::ShapeRequest m_lastShapeRequest{};
         std::vector<ct::ShapeRequest> m_shapeRequests{};
+        std::vector<ct::TextRequest> m_textRequests{};
         ct::ContentHandle measure(const std::string& id, chrononmotion::motion::ContentKind kind,
                                   const chrononmotion::Vector2& size) {
 

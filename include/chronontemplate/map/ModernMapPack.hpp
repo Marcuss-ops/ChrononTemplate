@@ -8,6 +8,7 @@
 #define CHRONONTEMPLATE_MODERN_MAP_PACK_HPP
 
 #include "chronontemplate/core/TemplateScene.hpp"
+#include "chronontemplate/map/MapFxPack.hpp"
 
 #include <cstdint>
 #include <optional>
@@ -93,6 +94,8 @@ struct ModernMapSpec {
     std::vector<MapDataCard> dataCards{};
     std::vector<MapLegendItem> legend{};
     std::vector<MapEditorialCallout> callouts{};
+    /// Optional lightweight map treatment (the four runtime-aligned FX).
+    std::optional<MapFxSpec> fx{};
     float titleOffset{112.f};
     float subtitleOffset{150.f};
 };
@@ -102,6 +105,7 @@ struct ModernMapComposition {
     std::vector<LayerHandle*> markers{};
     std::vector<LayerHandle*> labels{};
     std::vector<LayerHandle*> editorial{};
+    std::vector<LayerHandle*> fx{};
     LayerHandle* title{nullptr};
     LayerHandle* subtitle{nullptr};
     LayerHandle* attribution{nullptr};

@@ -1,0 +1,2588 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "date_focus_4dates_modern",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 320
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "color",
+      "color": [
+        0.018,
+        0.024,
+        0.045,
+        1.0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "grid_v_-720",
+      "type": "color",
+      "color": [
+        0.1,
+        0.16,
+        0.28,
+        0.55
+      ],
+      "size": [
+        1,
+        1080
+      ],
+      "position": [
+        -720,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "grid_v_-240",
+      "type": "color",
+      "color": [
+        0.1,
+        0.16,
+        0.28,
+        0.55
+      ],
+      "size": [
+        1,
+        1080
+      ],
+      "position": [
+        -240,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "grid_v_240",
+      "type": "color",
+      "color": [
+        0.1,
+        0.16,
+        0.28,
+        0.55
+      ],
+      "size": [
+        1,
+        1080
+      ],
+      "position": [
+        240,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "grid_v_720",
+      "type": "color",
+      "color": [
+        0.1,
+        0.16,
+        0.28,
+        0.55
+      ],
+      "size": [
+        1,
+        1080
+      ],
+      "position": [
+        720,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "grid_h_-270",
+      "type": "color",
+      "color": [
+        0.1,
+        0.16,
+        0.28,
+        0.55
+      ],
+      "size": [
+        1920,
+        1
+      ],
+      "position": [
+        0,
+        -270
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "grid_h_0",
+      "type": "color",
+      "color": [
+        0.1,
+        0.16,
+        0.28,
+        0.55
+      ],
+      "size": [
+        1920,
+        1
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "grid_h_270",
+      "type": "color",
+      "color": [
+        0.1,
+        0.16,
+        0.28,
+        0.55
+      ],
+      "size": [
+        1920,
+        1
+      ],
+      "position": [
+        0,
+        270
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "rail_glow",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.07
+      ],
+      "size": [
+        4400,
+        10
+      ],
+      "position": [
+        0,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rail",
+      "type": "color",
+      "color": [
+        0.12,
+        0.18,
+        0.3,
+        1.0
+      ],
+      "size": [
+        4400,
+        2
+      ],
+      "position": [
+        0,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tick_0",
+      "type": "color",
+      "color": [
+        0.18,
+        0.36,
+        0.52,
+        1.0
+      ],
+      "size": [
+        1,
+        26
+      ],
+      "position": [
+        0.0,
+        302
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node_0",
+      "type": "color",
+      "color": [
+        0.25,
+        0.42,
+        0.6,
+        1.0
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "position": [
+        0.0,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "axis_0",
+      "type": "text",
+      "text": "1948",
+      "size": [
+        240,
+        40
+      ],
+      "position": [
+        960.0,
+        900
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-SemiBold.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#7891B5"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tick_1",
+      "type": "color",
+      "color": [
+        0.18,
+        0.36,
+        0.52,
+        1.0
+      ],
+      "size": [
+        1,
+        26
+      ],
+      "position": [
+        380.0,
+        302
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node_1",
+      "type": "color",
+      "color": [
+        0.25,
+        0.42,
+        0.6,
+        1.0
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "position": [
+        380.0,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "axis_1",
+      "type": "text",
+      "text": "1969",
+      "size": [
+        240,
+        40
+      ],
+      "position": [
+        1340.0,
+        900
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-SemiBold.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#7891B5"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tick_2",
+      "type": "color",
+      "color": [
+        0.18,
+        0.36,
+        0.52,
+        1.0
+      ],
+      "size": [
+        1,
+        26
+      ],
+      "position": [
+        760.0,
+        302
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node_2",
+      "type": "color",
+      "color": [
+        0.25,
+        0.42,
+        0.6,
+        1.0
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "position": [
+        760.0,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "axis_2",
+      "type": "text",
+      "text": "1998",
+      "size": [
+        240,
+        40
+      ],
+      "position": [
+        1720.0,
+        900
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-SemiBold.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#7891B5"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tick_3",
+      "type": "color",
+      "color": [
+        0.18,
+        0.36,
+        0.52,
+        1.0
+      ],
+      "size": [
+        1,
+        26
+      ],
+      "position": [
+        1140.0,
+        302
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "node_3",
+      "type": "color",
+      "color": [
+        0.25,
+        0.42,
+        0.6,
+        1.0
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "position": [
+        1140.0,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "axis_3",
+      "type": "text",
+      "text": "2026",
+      "size": [
+        240,
+        40
+      ],
+      "position": [
+        2100.0,
+        900
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-SemiBold.ttf",
+        "font_size": 20,
+        "min_font_size": 20,
+        "max_font_size": 20,
+        "fit_mode": "shrink_only",
+        "fill": "#7891B5"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": -380.0
+              },
+              {
+                "frame": 140,
+                "value": -380.0
+              },
+              {
+                "frame": 168,
+                "value": -760.0
+              },
+              {
+                "frame": 220,
+                "value": -760.0
+              },
+              {
+                "frame": 248,
+                "value": -1140.0
+              },
+              {
+                "frame": 319,
+                "value": -1140.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "active_halo",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.08
+      ],
+      "size": [
+        90,
+        90
+      ],
+      "position": [
+        0,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "active_halo_inner",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.16
+      ],
+      "size": [
+        40,
+        40
+      ],
+      "position": [
+        0,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "active_node",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        1.0
+      ],
+      "size": [
+        18,
+        18
+      ],
+      "position": [
+        0,
+        280
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "pin_stem_glow",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.12
+      ],
+      "size": [
+        9,
+        70
+      ],
+      "position": [
+        0,
+        245
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "pin_stem",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        1.0
+      ],
+      "size": [
+        3,
+        70
+      ],
+      "position": [
+        0,
+        245
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "pin_head_glow",
+      "type": "color",
+      "color": [
+        1.0,
+        0.24,
+        0.73,
+        0.18
+      ],
+      "size": [
+        56,
+        56
+      ],
+      "position": [
+        0,
+        200
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "pin_head",
+      "type": "color",
+      "color": [
+        1.0,
+        0.24,
+        0.73,
+        1.0
+      ],
+      "size": [
+        20,
+        20
+      ],
+      "position": [
+        0,
+        200
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "pin_centre",
+      "type": "color",
+      "color": [
+        0.018,
+        0.024,
+        0.045,
+        1.0
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "position": [
+        0,
+        200
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "reticle_tl_h",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.55
+      ],
+      "size": [
+        80,
+        2
+      ],
+      "position": [
+        -320,
+        -240
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "reticle_tl_v",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.55
+      ],
+      "size": [
+        2,
+        80
+      ],
+      "position": [
+        -360,
+        -200
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "reticle_tr_h",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.55
+      ],
+      "size": [
+        80,
+        2
+      ],
+      "position": [
+        320,
+        -240
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "reticle_tr_v",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.55
+      ],
+      "size": [
+        2,
+        80
+      ],
+      "position": [
+        360,
+        -200
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "reticle_bl_h",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.55
+      ],
+      "size": [
+        80,
+        2
+      ],
+      "position": [
+        -320,
+        100
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "reticle_bl_v",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.55
+      ],
+      "size": [
+        2,
+        80
+      ],
+      "position": [
+        -360,
+        60
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "reticle_br_h",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.55
+      ],
+      "size": [
+        80,
+        2
+      ],
+      "position": [
+        320,
+        100
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "reticle_br_v",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.55
+      ],
+      "size": [
+        2,
+        80
+      ],
+      "position": [
+        360,
+        60
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "big_date_echo_0",
+      "type": "text",
+      "text": "1948",
+      "size": [
+        1200,
+        340
+      ],
+      "position": [
+        966,
+        472
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Anton-Regular.ttf",
+        "font_size": 270,
+        "min_font_size": 220,
+        "max_font_size": 270,
+        "fit_mode": "shrink_only",
+        "fill": "#FF3DBB"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 100,
+                "value": -1300.0
+              },
+              {
+                "frame": 319,
+                "value": -1300.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 60,
+                "value": 1.0
+              },
+              {
+                "frame": 100,
+                "value": 0.95
+              },
+              {
+                "frame": 319,
+                "value": 0.95
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "opacity": 0.22
+    },
+    {
+      "id": "big_date_0",
+      "type": "text",
+      "text": "1948",
+      "size": [
+        1200,
+        340
+      ],
+      "position": [
+        960,
+        470
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Anton-Regular.ttf",
+        "font_size": 270,
+        "min_font_size": 220,
+        "max_font_size": 270,
+        "fit_mode": "shrink_only",
+        "fill": "#F2FFFF",
+        "shadow": {
+          "color": "#3DF4FF",
+          "opacity": 0.85,
+          "blur": 46,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 100,
+                "value": -1300.0
+              },
+              {
+                "frame": 319,
+                "value": -1300.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 60,
+                "value": 1.0
+              },
+              {
+                "frame": 100,
+                "value": 0.95
+              },
+              {
+                "frame": 319,
+                "value": 0.95
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "big_label_0",
+      "type": "text",
+      "text": "BIRTH",
+      "size": [
+        900,
+        60
+      ],
+      "position": [
+        960,
+        680
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-ExtraBold.ttf",
+        "font_size": 30,
+        "min_font_size": 24,
+        "max_font_size": 30,
+        "fit_mode": "shrink_only",
+        "fill": "#D8FF3E",
+        "shadow": {
+          "color": "#D8FF3E",
+          "opacity": 0.75,
+          "blur": 18,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 100,
+                "value": -1300.0
+              },
+              {
+                "frame": 319,
+                "value": -1300.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "big_date_echo_1",
+      "type": "text",
+      "text": "1969",
+      "size": [
+        1200,
+        340
+      ],
+      "position": [
+        966,
+        472
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Anton-Regular.ttf",
+        "font_size": 270,
+        "min_font_size": 220,
+        "max_font_size": 270,
+        "fit_mode": "shrink_only",
+        "fill": "#FF3DBB"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1300.0
+              },
+              {
+                "frame": 50,
+                "value": 1300.0
+              },
+              {
+                "frame": 90,
+                "value": 0.0
+              },
+              {
+                "frame": 140,
+                "value": 0.0
+              },
+              {
+                "frame": 180,
+                "value": -1300.0
+              },
+              {
+                "frame": 319,
+                "value": -1300.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.9
+              },
+              {
+                "frame": 50,
+                "value": 0.9
+              },
+              {
+                "frame": 90,
+                "value": 1.0
+              },
+              {
+                "frame": 140,
+                "value": 1.0
+              },
+              {
+                "frame": 180,
+                "value": 0.95
+              },
+              {
+                "frame": 319,
+                "value": 0.95
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "opacity": 0.22
+    },
+    {
+      "id": "big_date_1",
+      "type": "text",
+      "text": "1969",
+      "size": [
+        1200,
+        340
+      ],
+      "position": [
+        960,
+        470
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Anton-Regular.ttf",
+        "font_size": 270,
+        "min_font_size": 220,
+        "max_font_size": 270,
+        "fit_mode": "shrink_only",
+        "fill": "#F2FFFF",
+        "shadow": {
+          "color": "#3DF4FF",
+          "opacity": 0.85,
+          "blur": 46,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1300.0
+              },
+              {
+                "frame": 50,
+                "value": 1300.0
+              },
+              {
+                "frame": 90,
+                "value": 0.0
+              },
+              {
+                "frame": 140,
+                "value": 0.0
+              },
+              {
+                "frame": 180,
+                "value": -1300.0
+              },
+              {
+                "frame": 319,
+                "value": -1300.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.9
+              },
+              {
+                "frame": 50,
+                "value": 0.9
+              },
+              {
+                "frame": 90,
+                "value": 1.0
+              },
+              {
+                "frame": 140,
+                "value": 1.0
+              },
+              {
+                "frame": 180,
+                "value": 0.95
+              },
+              {
+                "frame": 319,
+                "value": 0.95
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "big_label_1",
+      "type": "text",
+      "text": "CHANGE",
+      "size": [
+        900,
+        60
+      ],
+      "position": [
+        960,
+        680
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-ExtraBold.ttf",
+        "font_size": 30,
+        "min_font_size": 24,
+        "max_font_size": 30,
+        "fit_mode": "shrink_only",
+        "fill": "#D8FF3E",
+        "shadow": {
+          "color": "#D8FF3E",
+          "opacity": 0.75,
+          "blur": 18,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1300.0
+              },
+              {
+                "frame": 50,
+                "value": 1300.0
+              },
+              {
+                "frame": 90,
+                "value": 0.0
+              },
+              {
+                "frame": 140,
+                "value": 0.0
+              },
+              {
+                "frame": 180,
+                "value": -1300.0
+              },
+              {
+                "frame": 319,
+                "value": -1300.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "big_date_echo_2",
+      "type": "text",
+      "text": "1998",
+      "size": [
+        1200,
+        340
+      ],
+      "position": [
+        966,
+        472
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Anton-Regular.ttf",
+        "font_size": 270,
+        "min_font_size": 220,
+        "max_font_size": 270,
+        "fit_mode": "shrink_only",
+        "fill": "#FF3DBB"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1300.0
+              },
+              {
+                "frame": 130,
+                "value": 1300.0
+              },
+              {
+                "frame": 170,
+                "value": 0.0
+              },
+              {
+                "frame": 220,
+                "value": 0.0
+              },
+              {
+                "frame": 260,
+                "value": -1300.0
+              },
+              {
+                "frame": 319,
+                "value": -1300.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.9
+              },
+              {
+                "frame": 130,
+                "value": 0.9
+              },
+              {
+                "frame": 170,
+                "value": 1.0
+              },
+              {
+                "frame": 220,
+                "value": 1.0
+              },
+              {
+                "frame": 260,
+                "value": 0.95
+              },
+              {
+                "frame": 319,
+                "value": 0.95
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "opacity": 0.22
+    },
+    {
+      "id": "big_date_2",
+      "type": "text",
+      "text": "1998",
+      "size": [
+        1200,
+        340
+      ],
+      "position": [
+        960,
+        470
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Anton-Regular.ttf",
+        "font_size": 270,
+        "min_font_size": 220,
+        "max_font_size": 270,
+        "fit_mode": "shrink_only",
+        "fill": "#F2FFFF",
+        "shadow": {
+          "color": "#3DF4FF",
+          "opacity": 0.85,
+          "blur": 46,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1300.0
+              },
+              {
+                "frame": 130,
+                "value": 1300.0
+              },
+              {
+                "frame": 170,
+                "value": 0.0
+              },
+              {
+                "frame": 220,
+                "value": 0.0
+              },
+              {
+                "frame": 260,
+                "value": -1300.0
+              },
+              {
+                "frame": 319,
+                "value": -1300.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.9
+              },
+              {
+                "frame": 130,
+                "value": 0.9
+              },
+              {
+                "frame": 170,
+                "value": 1.0
+              },
+              {
+                "frame": 220,
+                "value": 1.0
+              },
+              {
+                "frame": 260,
+                "value": 0.95
+              },
+              {
+                "frame": 319,
+                "value": 0.95
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "big_label_2",
+      "type": "text",
+      "text": "LAUNCH",
+      "size": [
+        900,
+        60
+      ],
+      "position": [
+        960,
+        680
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-ExtraBold.ttf",
+        "font_size": 30,
+        "min_font_size": 24,
+        "max_font_size": 30,
+        "fit_mode": "shrink_only",
+        "fill": "#D8FF3E",
+        "shadow": {
+          "color": "#D8FF3E",
+          "opacity": 0.75,
+          "blur": 18,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1300.0
+              },
+              {
+                "frame": 130,
+                "value": 1300.0
+              },
+              {
+                "frame": 170,
+                "value": 0.0
+              },
+              {
+                "frame": 220,
+                "value": 0.0
+              },
+              {
+                "frame": 260,
+                "value": -1300.0
+              },
+              {
+                "frame": 319,
+                "value": -1300.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "big_date_echo_3",
+      "type": "text",
+      "text": "2026",
+      "size": [
+        1200,
+        340
+      ],
+      "position": [
+        966,
+        472
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Anton-Regular.ttf",
+        "font_size": 270,
+        "min_font_size": 220,
+        "max_font_size": 270,
+        "fit_mode": "shrink_only",
+        "fill": "#FF3DBB"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1300.0
+              },
+              {
+                "frame": 210,
+                "value": 1300.0
+              },
+              {
+                "frame": 250,
+                "value": 0.0
+              },
+              {
+                "frame": 319,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.9
+              },
+              {
+                "frame": 210,
+                "value": 0.9
+              },
+              {
+                "frame": 250,
+                "value": 1.0
+              },
+              {
+                "frame": 319,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "opacity": 0.22
+    },
+    {
+      "id": "big_date_3",
+      "type": "text",
+      "text": "2026",
+      "size": [
+        1200,
+        340
+      ],
+      "position": [
+        960,
+        470
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Anton-Regular.ttf",
+        "font_size": 270,
+        "min_font_size": 220,
+        "max_font_size": 270,
+        "fit_mode": "shrink_only",
+        "fill": "#F2FFFF",
+        "shadow": {
+          "color": "#3DF4FF",
+          "opacity": 0.85,
+          "blur": 46,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1300.0
+              },
+              {
+                "frame": 210,
+                "value": 1300.0
+              },
+              {
+                "frame": 250,
+                "value": 0.0
+              },
+              {
+                "frame": 319,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.9
+              },
+              {
+                "frame": 210,
+                "value": 0.9
+              },
+              {
+                "frame": 250,
+                "value": 1.0
+              },
+              {
+                "frame": 319,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "big_label_3",
+      "type": "text",
+      "text": "NOW",
+      "size": [
+        900,
+        60
+      ],
+      "position": [
+        960,
+        680
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-ExtraBold.ttf",
+        "font_size": 30,
+        "min_font_size": 24,
+        "max_font_size": 30,
+        "fit_mode": "shrink_only",
+        "fill": "#D8FF3E",
+        "shadow": {
+          "color": "#D8FF3E",
+          "opacity": 0.75,
+          "blur": 18,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1300.0
+              },
+              {
+                "frame": 210,
+                "value": 1300.0
+              },
+              {
+                "frame": 250,
+                "value": 0.0
+              },
+              {
+                "frame": 319,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "eyebrow",
+      "type": "text",
+      "text": "CHRONON / MODERN EDITION",
+      "size": [
+        1200,
+        26
+      ],
+      "position": [
+        960,
+        96
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-SemiBold.ttf",
+        "font_size": 13,
+        "min_font_size": 13,
+        "max_font_size": 13,
+        "fit_mode": "shrink_only",
+        "fill": "#3DF4FF",
+        "shadow": {
+          "color": "#3DF4FF",
+          "opacity": 0.6,
+          "blur": 12,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 18,
+                "value": 1.0
+              },
+              {
+                "frame": 319,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "heading",
+      "type": "text",
+      "text": "FOUR MOMENTS",
+      "size": [
+        1200,
+        76
+      ],
+      "position": [
+        960,
+        150
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-ExtraBold.ttf",
+        "font_size": 46,
+        "min_font_size": 46,
+        "max_font_size": 46,
+        "fit_mode": "shrink_only",
+        "fill": "#F2FFFF",
+        "shadow": {
+          "color": "#3DF4FF",
+          "opacity": 0.45,
+          "blur": 22,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 18,
+                "value": 1.0
+              },
+              {
+                "frame": 319,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 10.0
+              },
+              {
+                "frame": 18,
+                "value": 0.0
+              },
+              {
+                "frame": 319,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "subtitle",
+      "type": "text",
+      "text": "1948 — 2026  /  A NEW TIMELINE",
+      "size": [
+        1200,
+        30
+      ],
+      "position": [
+        960,
+        202
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-Medium.ttf",
+        "font_size": 16,
+        "min_font_size": 16,
+        "max_font_size": 16,
+        "fit_mode": "shrink_only",
+        "fill": "#7891B5"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 22,
+                "value": 1.0
+              },
+              {
+                "frame": 319,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "count",
+      "type": "text",
+      "text": "04 / 04",
+      "size": [
+        260,
+        30
+      ],
+      "position": [
+        1740,
+        130
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 16,
+        "min_font_size": 16,
+        "max_font_size": 16,
+        "fit_mode": "shrink_only",
+        "fill": "#D8FF3E",
+        "shadow": {
+          "color": "#D8FF3E",
+          "opacity": 0.55,
+          "blur": 12,
+          "offset": [
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "id": "count_caption",
+      "type": "text",
+      "text": "MOMENTS",
+      "size": [
+        260,
+        20
+      ],
+      "position": [
+        1740,
+        160
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-Medium.ttf",
+        "font_size": 10,
+        "min_font_size": 10,
+        "max_font_size": 10,
+        "fit_mode": "shrink_only",
+        "fill": "#7891B5"
+      }
+    },
+    {
+      "id": "footer",
+      "type": "text",
+      "text": "CHRONON TEMPLATE  /  MODERN CHRONOLOGY",
+      "size": [
+        520,
+        24
+      ],
+      "position": [
+        300,
+        1015
+      ],
+      "start_frame": 0,
+      "duration_frames": 320,
+      "style": {
+        "font": "assets/fonts/Inter-Medium.ttf",
+        "font_size": 11,
+        "min_font_size": 11,
+        "max_font_size": 11,
+        "fit_mode": "shrink_only",
+        "fill": "#7891B5"
+      }
+    },
+    {
+      "id": "top_line",
+      "type": "color",
+      "color": [
+        0.24,
+        0.96,
+        1.0,
+        0.75
+      ],
+      "size": [
+        1920,
+        2
+      ],
+      "position": [
+        0,
+        -540
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    },
+    {
+      "id": "bottom_line",
+      "type": "color",
+      "color": [
+        1.0,
+        0.24,
+        0.73,
+        0.55
+      ],
+      "size": [
+        1920,
+        2
+      ],
+      "position": [
+        0,
+        538
+      ],
+      "start_frame": 0,
+      "duration_frames": 320
+    }
+  ],
+  "output": {
+    "path": "focus_4dates_modern.mp4",
+    "format": "mp4",
+    "codec": "h264"
+  }
+}

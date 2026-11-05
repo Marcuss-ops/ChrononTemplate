@@ -70,6 +70,9 @@ void emit(const std::filesystem::path& outDir, const std::string& name,
         .currentFingerprint = [&](const auto& id) { return backend.currentFingerprint(id); }});
 
     chronontemplate::TemplateScene scene(name, 30.f, host, 1920.f, 1080.f);
+    scene.cameraRig()
+            .setPosition(chrononmotion::Vector3{0.f, 0.f, 1080.f})
+            .setTarget(chrononmotion::Vector3{0.f, 0.f, 0.f});
     const chronontemplate::MultiImageBoard board = chronontemplate::addMultiImageBoard(scene, spec);
     if (!scene.validate().empty())
         throw std::runtime_error(name + ": scene does not validate");

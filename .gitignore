@@ -19,3 +19,10 @@ out/**/*.log
 # Local CTest output belongs to working directories, not the source tree.
 /Testing/
 assets/screenrecording_word_lens/frame_*.png
+
+# Local fixture runs (2026-11-05) write timings and previews under renders/,
+# and an emitter invoked with a stray flag dropped a plan dump into a
+# directory literally named "--help". Neither is source: certified goldens
+# live in golden_plans/ and the catalog samples next to the catalogs.
+/renders/
+/--help/

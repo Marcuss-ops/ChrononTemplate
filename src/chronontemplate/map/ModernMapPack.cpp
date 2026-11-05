@@ -8,6 +8,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 namespace chronontemplate {
 namespace {
@@ -260,6 +261,14 @@ ModernMapComposition composeModernMap(TemplateScene& scene, const ModernMapSpec&
         if (auto* label = addEditorialText(callout.label, mapTypographyPreset(MapTextRole::PrimaryLocation),
                 "modern_map_callout_label_" + std::to_string(i), callout.textPosition,
                 spec.inFrame + enterFrames * 4, enterFrames)) result.editorial.push_back(label);
+    }
+
+    if (spec.fx) {
+        std::vector<Vector2> anchors;
+        anchors.reserve(spec.markers.size());
+        for (const auto& marker : spec.markers) anchors.push_back(marker.position);
+        MapFxComposition fx = addMapFx(scene, *spec.fx, anchors, spec.inFrame, spec.duration);
+        result.fx = std::move(fx.layers);
     }
 
     switch (spec.cameraMove) {

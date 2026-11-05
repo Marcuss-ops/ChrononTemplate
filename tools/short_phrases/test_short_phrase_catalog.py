@@ -112,46 +112,44 @@ def main() -> int:
         "short_phrase_word_mask_sequence",
         "short_phrase_character_write_on",
         "short_phrase_editorial_paper_title_card",
-    }
-    check("none of the retired motions is published", not retired_ids.intersection({r["id"] for r in recipes}))
-    check("27 surviving recipes", len(recipes) == 27, str(len(recipes)))
-    editorial = [r for r in recipes if r["id"].startswith("short_phrase_editorial_")]
-    product = [r for r in recipes if r["id"].startswith("short_phrase_product_")]
-    check("surviving editorial recipes", len(editorial) == 8, str(len(editorial)))
-    check("surviving product recipes", len(product) == 15, str(len(product)))
-    check("exact surviving id set", {recipe.get("id") for recipe in recipes} == {
-        "short_phrase_shape_phrase_wipe",
         "short_phrase_character_tracking_reveal",
         "short_phrase_character_cascade_shapes",
-        "short_phrase_editorial_baseline_rise",
-        "short_phrase_editorial_side_glide",
         "short_phrase_editorial_tracking_close",
-        "short_phrase_editorial_focus_resolve",
         "short_phrase_editorial_glyph_curtain",
-        "short_phrase_editorial_contrast_sweep",
         "short_phrase_editorial_quiet_zoom",
         "short_phrase_product_blur_out_up",
         "short_phrase_product_bottom_up_letters",
         "short_phrase_product_focus_blur_resolve",
+        "short_phrase_product_text_match_cut",
+        "short_phrase_product_text_shimmer",
+        "short_phrase_product_masked_heading",
+        "short_phrase_product_scrambled_text",
+        "short_phrase_product_gradual_blur",
+    }
+    check("none of the retired motions is published", not retired_ids.intersection({r["id"] for r in recipes}))
+    check("14 surviving recipes", len(recipes) == 14, str(len(recipes)))
+    editorial = [r for r in recipes if r["id"].startswith("short_phrase_editorial_")]
+    product = [r for r in recipes if r["id"].startswith("short_phrase_product_")]
+    check("surviving editorial recipes", len(editorial) == 5, str(len(editorial)))
+    check("surviving product recipes", len(product) == 7, str(len(product)))
+    check("exact surviving id set", {recipe.get("id") for recipe in recipes} == {
+        "short_phrase_shape_phrase_wipe",
+        "short_phrase_editorial_baseline_rise",
+        "short_phrase_editorial_side_glide",
+        "short_phrase_editorial_focus_resolve",
+        "short_phrase_editorial_contrast_sweep",
         "short_phrase_product_kinetic_center_build",
         "short_phrase_product_per_word_rise",
         "short_phrase_product_perspective_marquee",
         "short_phrase_product_strikethrough_replace",
-        "short_phrase_product_text_match_cut",
-        "short_phrase_product_text_shimmer",
         "short_phrase_product_chromatic_fringe_title",
-        "short_phrase_product_masked_heading",
         "short_phrase_product_split_flap_text",
         "short_phrase_product_scroll_reveal",
-        "short_phrase_product_scrambled_text",
-        "short_phrase_product_gradual_blur",
         "short_phrase_editorial_claude_terminal_focus",
         "short_phrase_burst",
     })
     adapted_product_ids = {
-        "short_phrase_product_masked_heading", "short_phrase_product_split_flap_text",
-        "short_phrase_product_scroll_reveal", "short_phrase_product_scrambled_text",
-        "short_phrase_product_gradual_blur",
+        "short_phrase_product_split_flap_text", "short_phrase_product_scroll_reveal",
     }
     check("adapted products are registered", adapted_product_ids.issubset({r["id"] for r in product}))
     for recipe in product:
@@ -161,7 +159,6 @@ def main() -> int:
                 "short_phrase_product_per_word_rise",
                 "short_phrase_product_perspective_marquee",
                 "short_phrase_product_strikethrough_replace",
-                "short_phrase_product_text_shimmer",
             }:
                 check(f"{recipe['id']} uses a three-second entrance", recipe.get("enter") == 90,
                       str(recipe.get("enter")))

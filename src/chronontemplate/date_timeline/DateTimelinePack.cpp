@@ -38,7 +38,7 @@ namespace chronontemplate::date_timeline {
                           const std::string& color, float x, float y, int start, int end) {
             LayerHandle& layer = scene.text(TextSpec{.text = value, .font = spec.font,
                 .fontSize = size, .color = color, .name = name});
-            layer.parent(parent).position(x, y).alive(start, end);
+            layer.parent(parent).position(x - spec.width * .5f, y - spec.height * .5f).alive(start, end);
             layer.animateOpacity(start, kRevealFrames, 0.f, 1.f);
             return layer;
         }
@@ -81,13 +81,17 @@ namespace chronontemplate::date_timeline {
         const float cx = spec.width * .5f;
         const float cy = spec.height * .5f;
         LayerHandle& root = scene.group(spec.name);
+        // Children are authored in absolute canvas coordinates. The group is a
+        // null controller at the canvas centre, so leaving its position at the
+        // default would add (width/2, height/2) to every child a second time.
+        root.position(0.f, 0.f);
         root.alive(0, duration);
         const auto parent = root.id();
 
         LayerHandle& background = scene.shape(ShapeSpec{
             .size = chrononmotion::Vector2(spec.width, spec.height),
             .fillColor = "#F5F3EE", .name = spec.name + "_ground"});
-        background.parent(parent).position(cx, cy).alive(0, duration);
+        background.parent(parent).position(0.f, 0.f).alive(0, duration);
         (void)text(scene, parent, spec, spec.name + "_heading", spec.heading,
                    34.f, kInk, cx, 150.f, 0, duration);
 
@@ -97,7 +101,7 @@ namespace chronontemplate::date_timeline {
         LayerHandle& rail = scene.shape(ShapeSpec{
             .size = chrononmotion::Vector2(span, 2.f), .fillColor = "#B8B4AC",
             .name = spec.name + "_rail"});
-        rail.parent(parent).position(cx, cy).alive(0, duration);
+        rail.parent(parent).position(0.f, 0.f).alive(0, duration);
         auto& scaleTrack = rail.layer().tracks.scale;
         scaleTrack.add(0.f, chrononmotion::Vector3(.001f, 1.f, 1.f),
                        chrononmotion::motion::Easing::linear());
@@ -124,7 +128,7 @@ namespace chronontemplate::date_timeline {
             LayerHandle& stem = scene.shape(ShapeSpec{
                 .size = chrononmotion::Vector2(1.f, stemHeight), .fillColor = "#D1CEC7",
                 .name = spec.name + "_stem_" + std::to_string(i)});
-            stem.parent(parent).position(x, (kRailY + stemEnd) * .5f).alive(start, end);
+            stem.parent(parent).position(x - cx, (kRailY + stemEnd) * .5f - cy).alive(start, end);
             stem.animateOpacity(start, kRevealFrames, 0.f, 1.f);
             if (spec.motion == TimelineMotion::SegmentDraw)
                 stem.animatePosition(start, kRevealFrames, chrononmotion::Vector3(0.f, upper ? 10.f : -10.f, 0.f));
@@ -133,7 +137,7 @@ namespace chronontemplate::date_timeline {
                 .size = chrononmotion::Vector2(10.f, 10.f), .fillColor = kAccent,
                 .name = spec.name + "_tick_" + std::to_string(i), .cornerRadius = 5.f,
                 .geometry = ShapeGeometry::Ellipse});
-            tick.parent(parent).position(x, kRailY).alive(start, end);
+            tick.parent(parent).position(x - cx, kRailY - cy).alive(start, end);
             tick.animateOpacity(start, kRevealFrames, 0.f, 1.f);
             if (spec.motion == TimelineMotion::MarkerPop)
                 tick.animate(ScalePop{.inFrame = start, .duration = kRevealFrames, .from = .3f});
@@ -166,10 +170,10 @@ namespace chronontemplate::date_timeline {
             LayerHandle& cursor = scene.shape(ShapeSpec{.size = chrononmotion::Vector2(8.f, 8.f),
                 .fillColor = kInk, .name = spec.name + "_cursor", .cornerRadius = 4.f,
                 .geometry = ShapeGeometry::Ellipse});
-            cursor.parent(parent).position(left, kRailY).alive(0, duration);
-            cursor.layer().tracks.position.add(0.f, chrononmotion::Vector3(left, kRailY, 0.f));
+            cursor.parent(parent).position(left - cx, kRailY - cy).alive(0, duration);
+            cursor.layer().tracks.position.add(0.f, chrononmotion::Vector3(left - cx, kRailY - cy, 0.f));
             cursor.layer().tracks.position.add(static_cast<float>(duration) / scene.fps(),
-                chrononmotion::Vector3(right, kRailY, 0.f), chrononmotion::motion::Easing::easeInOut());
+                chrononmotion::Vector3(right - cx, kRailY - cy, 0.f), chrononmotion::motion::Easing::easeInOut());
         }
         return root;
     }

@@ -153,6 +153,17 @@ namespace chronontemplate {
             int enter{1};        ///< frames the entrance takes
             Enter kind{Enter::Rise};
             Direction dir{Direction::Up};
+            // Premium motions add one emphasis pass after the tile has entered:
+            // the card eases forward in depth, takes a slight scale/tilt or
+            // parallax emphasis, then settles back into its cell. Zero focusAt
+            // keeps the classic entrance-only behaviour.
+            int focusAt{0};             ///< frame offset from the board's inFrame
+            int focusHold{0};           ///< frames the emphasis is held
+            float focusScale{1.f};      ///< peak scale during the emphasis
+            float focusDepth{0.f};      ///< peak z offset during the emphasis
+            float focusDriftX{0.f};     ///< peak x offset during the emphasis
+            float focusDriftY{0.f};     ///< peak y offset during the emphasis
+            float focusTiltDegrees{0.f};///< peak rotation during the emphasis
         };
 
         /// The certified choreography of each layout as a per-tile beat schedule.
@@ -163,6 +174,17 @@ namespace chronontemplate {
             const int half = std::max(1, s / 2);
             std::vector<Beat> beats(static_cast<std::size_t>(count));
             auto at = [&](std::size_t i) -> Beat& { return beats[i]; };
+            auto focus = [&](std::size_t i, int atFrame, int hold, float scale, float depth,
+                             float driftX, float driftY, float tilt) {
+                Beat& beat = beats[i];
+                beat.focusAt = atFrame;
+                beat.focusHold = hold;
+                beat.focusScale = scale;
+                beat.focusDepth = depth;
+                beat.focusDriftX = driftX;
+                beat.focusDriftY = driftY;
+                beat.focusTiltDegrees = tilt;
+            };
 
             switch (layout) {
                 case MultiImageLayout::Duo:
@@ -194,6 +216,27 @@ namespace chronontemplate {
                         // in first over a long entrance, the right card follows.
                         at(0) = {0, 2 * s, Enter::Pop, Direction::Up};
                         at(1) = {s, s, Enter::Pop, Direction::Up};
+                    } else if (motionId == "duo_cinematic_parallax") {
+                        // Cinematic two-shot: the cards settle in from opposite
+                        // sides, then the focus travels left -> right with a
+                        // gentle depth and parallax lift.
+                        at(0) = {0, std::max(1, duration * 5 / 12), Enter::Rise, Direction::Up};
+                        at(1) = {std::max(1, duration / 10),
+                                 std::max(1, duration * 5 / 12), Enter::Slide, Direction::Left};
+                        focus(0, duration / 2, std::max(1, duration / 5),
+                              1.045f, 34.f, -8.f, 0.f, -1.8f);
+                        focus(1, duration * 3 / 4, std::max(1, duration / 6),
+                              1.045f, 34.f, 8.f, 0.f, 1.8f);
+                    } else if (motionId == "duo_depth_handoff") {
+                        // Depth handoff: both cards pop in, then each one takes
+                        // the foreground in turn before the pair settles level.
+                        at(0) = {0, std::max(1, duration / 3), Enter::Pop, Direction::Up};
+                        at(1) = {std::max(1, duration / 8),
+                                 std::max(1, duration / 3), Enter::Pop, Direction::Up};
+                        focus(0, duration * 5 / 12, std::max(1, duration / 6),
+                              1.04f, 46.f, 0.f, -4.f, -2.2f);
+                        focus(1, duration * 7 / 10, std::max(1, duration / 7),
+                              1.04f, 46.f, 0.f, -4.f, 2.2f);
                     } else {  // duo_cross_focus: the first pops, then the second cross-focuses in
                         at(0) = {0, s, Enter::Pop, Direction::Up};
                         at(1) = {s, s, Enter::Pop, Direction::Up};
@@ -205,6 +248,34 @@ namespace chronontemplate {
                         for (std::size_t i = 0; i < 3; ++i) {
                             at(i) = {static_cast<int>(i) * s, s, Enter::Slide, Direction::Up};
                         }
+                    } else if (motionId == "trio_orbit_focus") {
+                        // Center-led orbit: the hero lands first, the side cards
+                        // arc in, then the focus sweeps left -> center -> right.
+                        at(1) = {0, std::max(1, duration / 4), Enter::Pop, Direction::Up};
+                        at(0) = {std::max(1, duration / 12), std::max(1, duration / 4),
+                                 Enter::Slide, Direction::Right};
+                        at(2) = {std::max(1, duration / 6), std::max(1, duration / 4),
+                                 Enter::Slide, Direction::Left};
+                        focus(0, duration * 2 / 5, std::max(1, duration / 7),
+                              1.055f, 36.f, -4.f, 0.f, -2.4f);
+                        focus(1, duration * 11 / 20, std::max(1, duration / 6),
+                              1.065f, 42.f, 0.f, 0.f, 0.f);
+                        focus(2, duration * 7 / 10, std::max(1, duration / 7),
+                              1.055f, 36.f, 4.f, 0.f, 2.4f);
+                    } else if (motionId == "trio_prism_cascade") {
+                        // Prism cascade: a diagonal ingress with alternating
+                        // depth emphasis, so the row reads as a travelling light.
+                        at(0) = {0, std::max(1, duration / 3), Enter::Slide, Direction::Right};
+                        at(1) = {std::max(1, duration / 15), std::max(1, duration / 3),
+                                 Enter::Rise, Direction::Up};
+                        at(2) = {std::max(1, duration * 2 / 15), std::max(1, duration / 3),
+                                 Enter::Slide, Direction::Left};
+                        focus(0, duration * 7 / 20, std::max(1, duration / 8),
+                              1.05f, 28.f, 0.f, -2.f, -3.f);
+                        focus(1, duration / 2, std::max(1, duration / 7),
+                              1.06f, 36.f, 0.f, 0.f, 0.f);
+                        focus(2, duration * 13 / 20, std::max(1, duration / 8),
+                              1.05f, 28.f, 0.f, -2.f, 3.f);
                     } else {  // trio_center_priority: the hero pops first, the sides follow
                         at(1) = {0, s, Enter::Pop, Direction::Up};
                         at(0) = {s, s, Enter::Slide, Direction::Right};
@@ -217,6 +288,39 @@ namespace chronontemplate {
                         for (std::size_t i = 0; i < 4; ++i) {
                             at(i) = {static_cast<int>(i) * s, s, Enter::Rise, Direction::Up};
                         }
+                    } else if (motionId == "quad_mosaic_wave") {
+                        // Mosaic wave: a reading-order rise with a clockwise
+                        // focus that gives each quadrant its own beat.
+                        for (std::size_t i = 0; i < 4; ++i) {
+                            at(i) = {static_cast<int>(i) * half,
+                                     std::max(1, duration / 5), Enter::Rise, Direction::Up};
+                        }
+                        focus(0, duration * 2 / 5, std::max(1, duration / 10),
+                              1.04f, 24.f, 0.f, -2.f, -1.5f);
+                        focus(1, duration / 2, std::max(1, duration / 10),
+                              1.04f, 24.f, 0.f, -2.f, 1.5f);
+                        focus(2, duration * 3 / 5, std::max(1, duration / 10),
+                              1.04f, 24.f, 0.f, -2.f, -1.5f);
+                        focus(3, duration * 7 / 10, std::max(1, duration / 10),
+                              1.04f, 24.f, 0.f, -2.f, 1.5f);
+                    } else if (motionId == "quad_parallax_grid") {
+                        // Parallax grid: columns arrive from opposite edges,
+                        // then the top and bottom rows trade focus in depth.
+                        at(0) = {0, std::max(1, duration / 4), Enter::Slide, Direction::Right};
+                        at(2) = {std::max(1, duration / 15), std::max(1, duration / 4),
+                                 Enter::Slide, Direction::Right};
+                        at(1) = {std::max(1, duration / 8), std::max(1, duration / 4),
+                                 Enter::Slide, Direction::Left};
+                        at(3) = {std::max(1, duration * 3 / 20), std::max(1, duration / 4),
+                                 Enter::Slide, Direction::Left};
+                        focus(0, duration / 3, std::max(1, duration / 10),
+                              1.045f, 32.f, 0.f, -2.f, -2.f);
+                        focus(1, duration * 9 / 20, std::max(1, duration / 10),
+                              1.045f, 32.f, 0.f, -2.f, 2.f);
+                        focus(2, duration * 3 / 5, std::max(1, duration / 10),
+                              1.04f, 28.f, 0.f, 2.f, 2.f);
+                        focus(3, duration * 3 / 4, std::max(1, duration / 10),
+                              1.04f, 28.f, 0.f, 2.f, -2.f);
                     } else {  // quad_corner_converge: the left column slides in, the right follows
                         at(0) = {0, s, Enter::Slide, Direction::Right};
                         at(2) = {0, s, Enter::Slide, Direction::Right};
@@ -231,6 +335,45 @@ namespace chronontemplate {
                         for (std::size_t i = 1; i < 5; ++i) {
                             at(i) = {2 * s + static_cast<int>(i - 1) * half, s, Enter::Rise, Direction::Up};
                         }
+                    } else if (motionId == "penta_carousel_orbit") {
+                        // Carousel orbit: the five cards rise in a soft wave,
+                        // then the focus travels across the strip one card at a
+                        // time with a small alternating tilt.
+                        for (std::size_t i = 0; i < 5; ++i) {
+                            at(i) = {static_cast<int>(i) * half,
+                                     std::max(1, duration / 5), Enter::Rise, Direction::Up};
+                        }
+                        const int focusStart = duration * 5 / 12;
+                        const int focusStep = std::max(1, duration / 12);
+                        for (std::size_t i = 0; i < 5; ++i) {
+                            focus(i, focusStart + static_cast<int>(i) * focusStep,
+                                  focusStep, 1.045f, 28.f,
+                                  i % 2 == 0 ? -4.f : 4.f, 0.f,
+                                  i % 2 == 0 ? -2.f : 2.f);
+                        }
+                    } else if (motionId == "penta_hero_cascade") {
+                        // Hero cascade: the centre card lands first, the four
+                        // satellites cascade in around it, then the hero takes
+                        // a deeper foreground beat while the strip settles.
+                        at(3) = {0, std::max(1, duration * 3 / 10), Enter::Pop, Direction::Up};
+                        at(0) = {std::max(1, duration / 15), std::max(1, duration / 5),
+                                 Enter::Rise, Direction::Up};
+                        at(1) = {std::max(1, duration * 2 / 15), std::max(1, duration / 5),
+                                 Enter::Rise, Direction::Up};
+                        at(2) = {std::max(1, duration / 5), std::max(1, duration / 5),
+                                 Enter::Rise, Direction::Up};
+                        at(4) = {std::max(1, duration * 4 / 15), std::max(1, duration / 5),
+                                 Enter::Rise, Direction::Up};
+                        focus(3, duration * 7 / 15, std::max(1, duration / 5),
+                              1.07f, 48.f, 0.f, 0.f, 0.f);
+                        focus(0, duration * 8 / 15, std::max(1, duration / 15),
+                              1.035f, 24.f, -3.f, 0.f, -2.f);
+                        focus(1, duration * 3 / 5, std::max(1, duration / 15),
+                              1.035f, 24.f, 0.f, -2.f, 2.f);
+                        focus(2, duration * 2 / 3, std::max(1, duration / 15),
+                              1.035f, 24.f, -3.f, 0.f, -2.f);
+                        focus(4, duration * 11 / 15, std::max(1, duration / 15),
+                              1.035f, 24.f, 3.f, 0.f, 2.f);
                     } else {  // penta_priority_cycle: each card pops in priority order
                         for (std::size_t i = 0; i < 5; ++i) {
                             at(i) = {static_cast<int>(i) * s, s, Enter::Pop, Direction::Up};
@@ -245,10 +388,14 @@ namespace chronontemplate {
             static const std::vector<std::string> duo{"duo_split_reveal", "duo_cross_focus",
                                                       "duo_soft_bloom_rise", "duo_soft_drift_settle",
                                                       "duo_soft_cross_bloom", "duo_soft_breathe_hold",
-                                                      "duo_soft_stagger_glow"};
-            static const std::vector<std::string> trio{"trio_fan_reveal", "trio_center_priority"};
-            static const std::vector<std::string> quad{"quad_grid_assemble", "quad_corner_converge"};
-            static const std::vector<std::string> penta{"penta_hero_plus_four", "penta_priority_cycle"};
+                                                      "duo_soft_stagger_glow", "duo_cinematic_parallax",
+                                                      "duo_depth_handoff"};
+            static const std::vector<std::string> trio{"trio_fan_reveal", "trio_center_priority",
+                                                      "trio_orbit_focus", "trio_prism_cascade"};
+            static const std::vector<std::string> quad{"quad_grid_assemble", "quad_corner_converge",
+                                                      "quad_mosaic_wave", "quad_parallax_grid"};
+            static const std::vector<std::string> penta{"penta_hero_plus_four", "penta_priority_cycle",
+                                                       "penta_carousel_orbit", "penta_hero_cascade"};
             switch (layout) {
                 case MultiImageLayout::Duo: return duo;
                 case MultiImageLayout::Trio: return trio;
@@ -443,7 +590,7 @@ namespace chronontemplate {
                                                       .noiseAmount = look.plateNoise,
                                                       .noiseSeed = 7,
                                                       .noiseSize = look.plateNoiseSize});
-            plate.position(canvas.x * 0.5f, canvas.y * 0.5f);
+            plate.position(0.f, 0.f);
             plate.alive(spec.inFrame, endFrame);
             plate.animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
         }
@@ -464,7 +611,7 @@ namespace chronontemplate {
                     .name = "dream_aura",
                     .geometry = ShapeGeometry::Ellipse,
                     .radialGradient = auraGradient});
-            aura.position(canvas.x * 0.5f, canvas.y * 0.5f);
+            aura.position(0.f, 0.f);
             aura.alive(spec.inFrame, endFrame);
             aura.animateOpacity(spec.inFrame, 18, 0.f, 0.9f, Easing::easeOut());
             aura.animateOpacity(exitStart, exitFrames, 0.9f, 0.f, Easing::easeIn());
@@ -476,8 +623,8 @@ namespace chronontemplate {
 
         if (styled && !look.headerInk.empty() &&
             (!spec.headerLabel.empty() || !spec.headerSubtitle.empty())) {
-            const float hx = canvas.x * 0.055f;
-            float hy = canvas.y * 0.105f;
+            const float hx = canvas.x * 0.055f - canvas.x * 0.5f;
+            float hy = canvas.y * 0.105f - canvas.y * 0.5f;
             if (!spec.headerLabel.empty()) {
                 LayerHandle& label = scene.text(TextSpec{.text = spec.headerLabel,
                                                         .font = "Chronon3d/assets/fonts/Inter-Bold.ttf",
@@ -654,11 +801,44 @@ namespace chronontemplate {
             }
         };
 
+        // The premium emphasis pass. It only reads the tile's resting transform,
+        // so it can follow any entrance and rides the same keys on the image and
+        // its soft halo. The pass is skipped if it would run into the exit.
+        const auto authorFocus = [&](LayerHandle& target, const Beat& beat, float baseTilt) {
+            if (beat.focusAt <= 0 || beat.focusHold <= 0) return;
+            const int peakFrame = spec.inFrame + beat.focusAt;
+            const int settleFrame = peakFrame + beat.focusHold;
+            if (settleFrame >= exitStart) return;
+            const Vector3 rest = target.layer().transform.position;
+            const Vector3 restScale = target.layer().transform.scale;
+            target.layer().tracks.position.add(
+                    static_cast<float>(peakFrame) / fps,
+                    rest + Vector3(beat.focusDriftX, beat.focusDriftY, beat.focusDepth),
+                    Easing::inOutCubic());
+            target.layer().tracks.position.add(
+                    static_cast<float>(settleFrame) / fps, rest, Easing::inOutCubic());
+            target.layer().tracks.scale.add(
+                    static_cast<float>(peakFrame) / fps,
+                    Vector3(beat.focusScale, beat.focusScale, 1.f), Easing::inOutCubic());
+            target.layer().tracks.scale.add(
+                    static_cast<float>(settleFrame) / fps, restScale, Easing::inOutCubic());
+            if (beat.focusTiltDegrees != 0.f) {
+                target.layer().tracks.rotation.add(
+                        static_cast<float>(peakFrame) / fps,
+                        Vector3(0.f, 0.f,
+                                 baseTilt + chrononmotion::math::degToRad(beat.focusTiltDegrees)),
+                        Easing::inOutCubic());
+                target.layer().tracks.rotation.add(
+                        static_cast<float>(settleFrame) / fps,
+                        Vector3(0.f, 0.f, baseTilt), Easing::inOutCubic());
+            }
+        };
+
         for (std::size_t i = 0; i < cells.size(); ++i) {
             const MultiImageTile& tile = spec.tiles[i];
             const Vector2 cell = cells[i];
-            const float x = canvas.x * cell.x;
-            const float y = canvas.y * cell.y;
+            const float x = canvas.x * (cell.x - 0.5f);
+            const float y = canvas.y * (cell.y - 0.5f);
 
             // The fan look leans the outer tiles outward around an upright
             // center tile; every other style keeps the grid square.
@@ -679,6 +859,7 @@ namespace chronontemplate {
             int tileAliveEnd = endFrame;
             Enter kind = Enter::Rise;
             Direction dir = Direction::Up;
+            const Beat* beat = nullptr;
             if (storyReel) {
                 start = spec.inFrame + static_cast<int>(i) * segment;
                 enterDuration = std::max(3, std::min(16, segment / 3));
@@ -692,12 +873,12 @@ namespace chronontemplate {
                         : std::min(endFrame, tileExitStart + tileExitDuration);
                 dir = (i % 2 == 0) ? Direction::Left : Direction::Right;
             } else if (certified) {
-                const Beat& beat = beats[i];
-                start = spec.inFrame + beat.start;
-                enterDuration = beat.enter;
-                moveDuration = std::max(2, beat.enter);
-                kind = beat.kind;
-                dir = beat.dir;
+                beat = &beats[i];
+                start = spec.inFrame + beat->start;
+                enterDuration = beat->enter;
+                moveDuration = std::max(2, beat->enter);
+                kind = beat->kind;
+                dir = beat->dir;
             } else if (spec.entrance == MultiImageEntrance::Drift) {
                 dir = (i % 2 == 0) ? Direction::Left : Direction::Right;
             }
@@ -801,6 +982,10 @@ namespace chronontemplate {
                 if (halo != nullptr) {
                     authorEnter(*halo, start, enterDuration, moveDuration, kind, dir);
                     halo->animate(FadeOut{.startFrame = exitStart, .duration = exitFrames});
+                }
+                if (beat != nullptr) {
+                    authorFocus(image, *beat, tiltRadians);
+                    if (halo != nullptr) authorFocus(*halo, *beat, tiltRadians);
                 }
             }
             board.tiles.push_back(&image);

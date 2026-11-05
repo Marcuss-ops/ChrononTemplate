@@ -83,6 +83,7 @@ int main(int argc, char** argv) {
 
         for (const auto& choice : date_timeline::timelineMotionChoices()) {
             date_timeline::DateTimelineSpec timelineSpec;
+            timelineSpec.font = "ChrononTemplate/assets/fonts/PlayfairDisplay.ttf";
             timelineSpec.name = "date_timeline_" + choice.id;
             timelineSpec.motion = choice.motion;
             timelineSpec.milestones = date_timeline::technologyDateSample();

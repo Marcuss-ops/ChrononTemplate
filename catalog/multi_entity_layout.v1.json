@@ -382,6 +382,48 @@
           "4.4-5.0s balanced"
         ]
       }
+    ],
+    "multi_image_premium_v1": [
+      {
+        "id": "duo_cinematic_parallax",
+        "layout": "duo",
+        "description": "cinematic parallax focus handoff"
+      },
+      {
+        "id": "duo_depth_handoff",
+        "layout": "duo",
+        "description": "depth handoff focus exchange"
+      },
+      {
+        "id": "trio_orbit_focus",
+        "layout": "trio",
+        "description": "center-led orbit focus sweep"
+      },
+      {
+        "id": "trio_prism_cascade",
+        "layout": "trio",
+        "description": "diagonal prism cascade with depth emphasis"
+      },
+      {
+        "id": "quad_mosaic_wave",
+        "layout": "quad",
+        "description": "mosaic wave with clockwise focus"
+      },
+      {
+        "id": "quad_parallax_grid",
+        "layout": "quad",
+        "description": "parallax grid with row focus exchange"
+      },
+      {
+        "id": "penta_carousel_orbit",
+        "layout": "penta",
+        "description": "five-card carousel with travelling focus"
+      },
+      {
+        "id": "penta_hero_cascade",
+        "layout": "penta",
+        "description": "hero cascade with satellite depth beats"
+      }
     ]
   }
 }
