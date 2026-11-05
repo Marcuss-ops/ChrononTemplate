@@ -390,11 +390,36 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_charts_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_charts_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_charts_pack_test COMMAND chronontemplate_charts_pack_test)
+    # Chart font refs are workspace-relative; measure them from the package root.
+    set_tests_properties(chronontemplate_charts_pack_test PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+
+    # The word-lens marker rides the shaped advance, not a character estimate.
+    add_executable(chronontemplate_word_lens_pack_test tests/word_lens_pack.cpp)
+    target_link_libraries(chronontemplate_word_lens_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_word_lens_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_word_lens_pack_test COMMAND chronontemplate_word_lens_pack_test)
+    set_tests_properties(chronontemplate_word_lens_pack_test PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
     add_executable(chronontemplate_modern_map_pack_test tests/modern_map_pack.cpp)
     target_link_libraries(chronontemplate_modern_map_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_modern_map_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_modern_map_pack_test COMMAND chronontemplate_modern_map_pack_test)
+
+    # The minimal map FX lane: four primitive-only recipes shared with
+    # RenderingGen's runtime `map_fx` parameter.
+    add_executable(chronontemplate_map_fx_pack_test tests/map_fx_pack.cpp)
+    target_link_libraries(chronontemplate_map_fx_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_map_fx_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_map_fx_pack_test COMMAND chronontemplate_map_fx_pack_test)
+
+    # The tactical territory lane: already-projected rings, native grid/fill/
+    # double-glow and a late title, with no geo projection inside the pack.
+    add_executable(chronontemplate_tactical_fill_pack_test tests/tactical_fill_pack.cpp)
+    target_link_libraries(chronontemplate_tactical_fill_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_tactical_fill_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_tactical_fill_pack_test COMMAND chronontemplate_tactical_fill_pack_test)
 
     # The short-phrase family: the twelve archetypes, the semantic emphasis, the
     # exit modes and the star decor bumper.

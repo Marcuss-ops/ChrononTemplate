@@ -31,7 +31,7 @@ namespace {
     void theShortPhraseArchetypesAreWellFormed() {
         section("short-phrase archetypes");
         const std::vector<ShortPhraseAnimation> animations = shortPhraseAnimations();
-        check(animations.size() == 27, "the pack exposes the 27 short-phrase recipes (typewriter removed, burst kept)");
+        check(animations.size() == 14, "the pack exposes 14 distinct short-phrase recipes");
 
         std::set<std::string> ids;
         bool anyLayer = false;
@@ -154,7 +154,20 @@ namespace {
                 "short_phrase_word_cascade_sentence",
                 "short_phrase_word_mask_sequence",
                 "short_phrase_character_write_on",
-                "short_phrase_editorial_paper_title_card"};
+                "short_phrase_editorial_paper_title_card",
+                "short_phrase_character_tracking_reveal",
+                "short_phrase_character_cascade_shapes",
+                "short_phrase_editorial_tracking_close",
+                "short_phrase_editorial_glyph_curtain",
+                "short_phrase_editorial_quiet_zoom",
+                "short_phrase_product_blur_out_up",
+                "short_phrase_product_bottom_up_letters",
+                "short_phrase_product_focus_blur_resolve",
+                "short_phrase_product_text_match_cut",
+                "short_phrase_product_text_shimmer",
+                "short_phrase_product_masked_heading",
+                "short_phrase_product_scrambled_text",
+                "short_phrase_product_gradual_blur"};
         for (const auto& retiredId : retiredIds) {
             check(definitions.count(retiredId) == 0,
                   (retiredId + " is absent from the short-phrase family").c_str());
@@ -246,7 +259,20 @@ namespace {
                 "short_phrase_word_cascade_sentence",
                 "short_phrase_word_mask_sequence",
                 "short_phrase_character_write_on",
-                "short_phrase_editorial_paper_title_card"};
+                "short_phrase_editorial_paper_title_card",
+                "short_phrase_character_tracking_reveal",
+                "short_phrase_character_cascade_shapes",
+                "short_phrase_editorial_tracking_close",
+                "short_phrase_editorial_glyph_curtain",
+                "short_phrase_editorial_quiet_zoom",
+                "short_phrase_product_blur_out_up",
+                "short_phrase_product_bottom_up_letters",
+                "short_phrase_product_focus_blur_resolve",
+                "short_phrase_product_text_match_cut",
+                "short_phrase_product_text_shimmer",
+                "short_phrase_product_masked_heading",
+                "short_phrase_product_scrambled_text",
+                "short_phrase_product_gradual_blur"};
         for (int words = 1; words <= 5; ++words) {
             for (const auto pick : shortPhraseSuggestions(words)) {
                 check(!retired.count(name(pick)), "removed motions are never suggested");

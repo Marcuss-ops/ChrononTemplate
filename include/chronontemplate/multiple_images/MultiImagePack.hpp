@@ -2,7 +2,9 @@
 //
 // The recipes place a fixed number of images in a layout (duo, trio, quad,
 // penta), caption each one, and stage a single entrance across the grid so the
-// board assembles as one move instead of N independent clips. A StoryReel
+// board assembles as one move instead of N independent clips. Premium
+// choreographies add a post-entrance focus/depth pass without changing that
+// grid. A StoryReel
 // presentation centers the same tiles and reveals them one after another, so
 // five images can be told in sequence without leaving the composition. The pack
 // authors ordinary image/text layers; Chronon owns the bytes and the

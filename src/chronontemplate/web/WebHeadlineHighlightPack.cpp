@@ -301,7 +301,7 @@ namespace chronontemplate::web {
 
             layers.push_back({ { "id", "sweep_paper" }, { "type", "color" },
                                { "color", Material::rgba(paper) },
-                               { "size", Json::array({ kW, kH }) }, { "screen_space", true },
+                               { "size", Json::array({ kW, kH }) }, { "position", Json::array({ 0.f, 0.f }) },
                                { "start_frame", 0 }, { "duration_frames", duration } });
             for (int line = 0; line < 14; ++line) {
                 const float y = 120.f + static_cast<float>(line) * 68.f;
@@ -344,7 +344,7 @@ namespace chronontemplate::web {
 
             layers.push_back({ { "id", "bb_ground" }, { "type", "color" },
                                { "color", Material::rgba(paper) },
-                               { "size", Json::array({ kW, kH }) }, { "screen_space", true },
+                               { "size", Json::array({ kW, kH }) }, { "position", Json::array({ 0.f, 0.f }) },
                                { "start_frame", 0 }, { "duration_frames", duration } });
 
             layers.push_back(rect("bb_kicker_bar", 0.f, 0.f, static_cast<float>(kW), 96.f, alert, 1.f));
@@ -404,7 +404,7 @@ namespace chronontemplate::web {
 
             layers.push_back({ { "id", "live_ground" }, { "type", "color" },
                                { "color", Material::rgba(paper) },
-                               { "size", Json::array({ kW, kH }) }, { "screen_space", true },
+                               { "size", Json::array({ kW, kH }) }, { "position", Json::array({ 0.f, 0.f }) },
                                { "start_frame", 0 }, { "duration_frames", duration } });
 
             // blinking LIVE dot: deterministic on/off keys across the clip
@@ -469,12 +469,12 @@ namespace chronontemplate::web {
 
             layers.push_back({ { "id", "quote_ground" }, { "type", "color" },
                                { "color", Material::rgba(paper) },
-                               { "size", Json::array({ kW, kH }) }, { "screen_space", true },
+                               { "size", Json::array({ kW, kH }) }, { "position", Json::array({ 0.f, 0.f }) },
                                { "start_frame", 0 }, { "duration_frames", duration } });
 
             layers.push_back(rect("quote_card", 240.f, 150.f, 1440.f, 780.f, "#FFFFFF", 1.f));
             layers.push_back(rect("quote_bar", 240.f, 150.f, 1440.f, 12.f, marker, 1.f));
-            layers.push_back(textLayer("quote_mark", "\\u201C", 300.f, 190.f, 190.f,
+            layers.push_back(textLayer("quote_mark", "“", 300.f, 190.f, 190.f,
                                        kSerifItalic, marker, duration, 0.f, 0));
 
             const float qSize = 54.f;
@@ -507,7 +507,7 @@ namespace chronontemplate::web {
                                       blockW, qSize * 1.05f, marker, 0.88f,
                                       highlightSweepTracks(blockW, begin, span)));
             }
-            const std::string by = "\\u2014 " + spec.attribution;
+            const std::string by = "— " + spec.attribution;
             const float byW = measuredTextWidth(spec.attribution, 28.f, kBold) + 60.f;
             const float byTop = qTop + static_cast<float>(n) * qStep + 56.f;
             layers.push_back(textLayer("quote_by", by, 960.f - byW * 0.5f, byTop,
@@ -528,7 +528,7 @@ namespace chronontemplate::web {
 
             layers.push_back({ { "id", "page_paper" }, { "type", "color" },
                                { "color", Material::rgba(paper) },
-                               { "size", Json::array({ kW, kH }) }, { "screen_space", true },
+                               { "size", Json::array({ kW, kH }) }, { "position", Json::array({ 0.f, 0.f }) },
                                { "start_frame", 0 }, { "duration_frames", duration } });
 
             float top = 150.f;

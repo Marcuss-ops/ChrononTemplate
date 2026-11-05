@@ -1,3 +1,5 @@
+#include "chronontemplate/web/WebFontMeasure.hpp"
+
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -15,21 +17,13 @@ using Json = nlohmann::ordered_json;
 namespace {
 constexpr int W=1920,H=1080,FPS=30,FRAMES=240;
 constexpr const char* BOLD="out/web_article_fold/fonts/Inter-Bold.ttf";
-double estimate_width(const std::string& text,double size){
-  double units=0.0;
-  for(unsigned char c:text){
-    if(c==' ') units+=0.28;
-    else if(c=='i'||c=='l'||c=='I'||c=='!'||c=='.'||c==','||c==':') units+=0.29;
-    else if(c=='m'||c=='w'||c=='M'||c=='W') units+=0.78;
-    else if(c>='A'&&c<='Z') units+=0.64;
-    else units+=0.52;
-  }
-  return units*size;
-}
+// Measure against the source face that is staged into the plan's runtime font
+// directory; same outlines, so the advance is identical.
+constexpr const char* BOLD_SOURCE="assets/fonts/Inter-Bold.ttf";
 Json key(int frame,Json value){return Json{{"frame",frame},{"value",std::move(value)}};}
 Json text_layer(std::string id,std::string text,double left,double y,double size,
                 const char* font,const char* fill){
-  const double width=estimate_width(text,size);
+  const double width=chronontemplate::web::shot::measuredTextWidth(text,size,BOLD_SOURCE);
   Json layer={{"id",std::move(id)},{"type","text"},{"text",std::move(text)},
     {"size",{width*1.32+48.0,static_cast<double>(size*1.65)}},
     {"position",{left+width*.5,H-y}},{"start_frame",0},{"duration_frames",FRAMES},

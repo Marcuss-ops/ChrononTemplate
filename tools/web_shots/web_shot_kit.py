@@ -47,12 +47,14 @@ _FONT_FILES = {
     "sans-bold": "Inter-Bold.ttf",
     "sans-xbold": "Inter-ExtraBold.ttf",
     "sans-black": "Inter-Black.ttf",
+    "interdisplay": "InterDisplay-Bold.ttf",
     "serif": "PlayfairDisplay.ttf",
     "serif-med": "PlayfairDisplay-MediumItalic.ttf",
     "serif-it": "PlayfairDisplay-Italic.ttf",
     "serif-bold": "PlayfairDisplay-Bold.ttf",
     "serif-bold-it": "PlayfairDisplay-BoldItalic.ttf",
     "serif-black-it": "PlayfairDisplay-BlackItalic.ttf",
+    "serif-black": "PlayfairDisplay-Black.ttf",
     "oswald": "Oswald.ttf",
     "oswald-med": "Oswald-Medium.ttf",
     "oswald-bold": "Oswald-Bold.ttf",
@@ -66,6 +68,8 @@ _FONT_FILES = {
     "dejavu": "DejaVuSans.ttf",
     "times": "FreeSerif.ttf",
     "times-bold": "Georgia_Bold.ttf",
+    "play": "Play-Bold.ttf",
+    "mono": "LiberationMono-Bold.ttf",
 }
 
 _font_cache: dict = {}

@@ -3,7 +3,7 @@
 // A short phrase does not need twelve engines: it needs one vocabulary of
 // selectors (phrase / word / glyph), properties (position / scale / rotation /
 // opacity / blur / tracking), a stagger and an exit. The twelve archetypes here
-// are that vocabulary applied twelve ways — the recipes RenderingGen picks from
+// are that vocabulary applied fourteen ways — the recipes RenderingGen picks from
 // when a phrase is short.
 //
 // The pack is data, not rendering, exactly like the important-phrase families:

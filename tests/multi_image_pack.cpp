@@ -212,6 +212,53 @@ namespace {
         }
     }
 
+    void thePremiumMotionsAddFocusAndDepth() {
+        section("premium group motions add focus and depth");
+        constexpr std::array<MultiImageLayout, 4> layouts{
+                MultiImageLayout::Duo, MultiImageLayout::Trio,
+                MultiImageLayout::Quad, MultiImageLayout::Penta};
+        constexpr std::array<std::size_t, 4> counts{9, 4, 4, 4};
+        constexpr std::array<std::array<const char*, 2>, 4> premium{{
+                {"duo_cinematic_parallax", "duo_depth_handoff"},
+                {"trio_orbit_focus", "trio_prism_cascade"},
+                {"quad_mosaic_wave", "quad_parallax_grid"},
+                {"penta_carousel_orbit", "penta_hero_cascade"},
+        }};
+
+        for (std::size_t layoutIndex = 0; layoutIndex < layouts.size(); ++layoutIndex) {
+            const MultiImageLayout layout = layouts[layoutIndex];
+            check(multiImageMotionIds(layout).size() == counts[layoutIndex],
+                  "the premium pass leaves the layout catalog at its expected size");
+            for (const char* id : premium[layoutIndex]) {
+                check(isMultiImageMotion(layout, id), "the premium motion is certified");
+                MultiImageSpec spec = specFor(layout);
+                spec.motionId = id;
+                FakeContentHost host;
+                TemplateScene scene(std::string("premium_") + id, 30.f, host, 1920.f, 1080.f);
+                const MultiImageBoard board = addMultiImageBoard(scene, spec);
+                check(board.motionId == id, "the board reports its premium motion");
+                check(scene.validate().empty(), "the premium board validates");
+
+                const FrameSubmission settled = scene.submit(100);
+                bool liftsDepth = false;
+                bool addsFocus = false;
+                for (LayerHandle* tile : board.tiles) {
+                    const BoundLayer* layer = findLayer(settled, tile->id());
+                    check(layer && layer->transform.opacity >= 0.95f,
+                          "every premium tile is visible by mid-board");
+                    for (const auto& key : tile->layer().tracks.position.keys()) {
+                        if (key.value.z > 0.5f) liftsDepth = true;
+                    }
+                    for (const auto& key : tile->layer().tracks.scale.keys()) {
+                        if (key.value.x > 1.01f) addsFocus = true;
+                    }
+                }
+                check(liftsDepth, "the premium motion lifts a tile in depth");
+                check(addsFocus, "the premium motion gives a tile a focus scale");
+            }
+        }
+    }
+
     void theSoftDreamStyleAndReelMovesHaveStableIds() {
         section("soft dream style and story reel moves");
         check(std::string(multiImageStyleId(MultiImageStyle::SoftDream)) ==
@@ -319,7 +366,7 @@ namespace {
             const MultiImageBoard board = addMultiImageBoard(scene, spec);
             const auto& positionKeys = board.tiles[0]->layer().tracks.position.keys();
             const auto& scaleKeys = board.tiles[0]->layer().tracks.scale.keys();
-            check(!positionKeys.empty() && positionKeys.front().value.y > 540.f,
+            check(!positionKeys.empty() && positionKeys.front().value.y > 0.f,
                   "soft bloom starts above the resting print");
             check(!scaleKeys.empty() && scaleKeys.front().value.x < 0.95f,
                   "soft bloom starts slightly smaller");
@@ -334,9 +381,9 @@ namespace {
             const MultiImageBoard board = addMultiImageBoard(scene, spec);
             const auto& left = board.tiles[0]->layer().tracks.position.keys();
             const auto& right = board.tiles[1]->layer().tracks.position.keys();
-            check(!left.empty() && left.front().value.x < 1920.f * 0.30f,
+            check(!left.empty() && left.front().value.x < 1920.f * (0.30f - 0.5f),
                   "the left card drifts in from the left");
-            check(!right.empty() && right.front().value.x > 1920.f * 0.70f,
+            check(!right.empty() && right.front().value.x > 1920.f * (0.70f - 0.5f),
                   "the right card drifts in from the right");
             check(scene.validate().empty(), "the soft drift board validates");
         }
@@ -468,5 +515,6 @@ int main() {
     theGroupMotionsAreCertifiedPerLayout();
     randomGroupMotionsAreStableAndApplied();
     theTwoMotionsOfALayoutDiffer();
+    thePremiumMotionsAddFocusAndDepth();
     return chrononmotion_test::report();
 }

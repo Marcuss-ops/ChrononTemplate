@@ -2,15 +2,22 @@
 //
 // Origine: tools/web_shots/shots_group_{a,b,c,d,e}.py + web_shot_kit.py
 // Ogni shot replica back()/front()/anim() come layer RenderPlan V3:
-// shape, testo, marker seeded con profilo irregolare/core e timing smoothstep;
-// camera centrata con push ottico leggero, senza yaw/tilt.
+// shape, testo, marker seeded con profilo irregolare/core e timing smoothstep.
+// Vulkan culla le shape 3D quando il piano ha una camera statica: il pack
+// converte quindi i layer in screen-space 2D e omette la camera. Il movimento
+// resta affidato ai track dei marker, non a un push ottico.
 // Nessun Pillow, nessun browser, nessuno screenshot caricato.
 // Gli helper arrivano da chronontemplate/web/WebShotJson.hpp (JSON puro).
 #include "chronontemplate/web/WebShotsRebuildPack.hpp"
 #include "chronontemplate/web/WebShotJson.hpp"
 
+#include <algorithm>
 #include <array>
+#include <cctype>
+#include <cmath>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace chronontemplate::web {
 
@@ -34,6 +41,7 @@ Json staticHighlightRect(const std::string& id, float left, float top,
         float width, float height, const std::string& color, float alpha, int duration) {
     Json marker = rect(id,left,top,width,height,color,alpha,Json::array(),duration);
     marker.erase("_native_marker_core_alpha");
+    marker["_v4_highlight"] = true;
     return marker;
 }
 
@@ -123,7 +131,9 @@ void buildLayers(WebShotId id, Json& L, int D) {
     case WebShotId::AlCaponeTitle: {
         Json bg = rect("bg",0,0,1920,1080,"#0B0B0C",1.f,Json::array(),D);
         shot::modules::DocumentLayer::finish(bg, 0.016f, 9, 0.34f); L.push_back(std::move(bg));
-        L.push_back(image("capone","ChrononTemplate/assets/archival_refs_v2/al_capone_trio_source.png",0,0,1920,1080,D));
+        // Full-canvas source images make Vulkan refuse the CPU fallback at frame 1.
+        // A 1 px inset keeps the same composition and lets the encoder read the surface.
+        L.push_back(image("capone","ChrononTemplate/assets/archival_refs_v2/al_capone_trio_source.png",1,1,1918,1078,D));
         L.push_back(rect("dim",0,0,1920,1080,"#08080A",0.30f,Json::array(),D));
         L.push_back(rect("grad_top",0,0,1920,360,"#08080A",0.55f,Json::array(),D));
         L.push_back(rect("grad_bot",0,620,1920,460,"#08080A",0.85f,Json::array(),D));
@@ -161,13 +171,17 @@ void buildLayers(WebShotId id, Json& L, int D) {
     case WebShotId::RainmakingNyt: {
         Json bg = rect("paper",0,0,1920,1080,"#E9E8E6",1.f,Json::array(),D);
         shot::modules::DocumentLayer::finish(bg, 0.010f, 912, 0.16f); L.push_back(std::move(bg));
-        L.push_back(modules::TextHighlight::layer("m1", 236, 222, 1474, 101, "#E6E300", 0.97f, b10, s35, D));
-        L.push_back(modules::TextHighlight::layer("m2", 237, 323, 333, 99, "#E6E300", 0.97f, b10+8, s35, D));
-        L.push_back(modules::HeadlineComposition::line("h1","Rainmaking Is Used As Weapon",43,208,95,kSerifBlkIt,"#10100F",D));
-        L.push_back(modules::HeadlineComposition::line("h2","by U.S.",-498,308,97,kSerifBlkIt,"#10100F",D));
+        const float h1x = 244.f, h1y = 208.f, h1s = 95.f;
+        const float h2x = 244.f, h2y = 308.f, h2s = 97.f;
+        const float w1 = measuredTextWidth("Rainmaking Is Used As Weapon", h1s, kSerifBlkIt) + 16.f;
+        const float w2 = measuredTextWidth("by U.S.", h2s, kSerifBlkIt) + 16.f;
+        L.push_back(modules::TextHighlight::layer("m1", h1x, h1y + 6.f, w1, 101.f, "#E6E300", 0.97f, b10, s35, D));
+        L.push_back(modules::TextHighlight::layer("m2", h2x, h2y + 8.f, w2, 99.f, "#E6E300", 0.97f, b10+8, s35, D));
+        L.push_back(modules::HeadlineComposition::line("h1","Rainmaking Is Used As Weapon",h1x,h1y,h1s,kSerifBlkIt,"#10100F",D));
+        L.push_back(modules::HeadlineComposition::line("h2","by U.S.",h2x,h2y,h2s,kSerifBlkIt,"#10100F",D));
         L.push_back(rect("rule",236,477,1484,2,"#D1D0CD",0.78f,Json::array(),D));
         L.push_back(rect("pill",258,598,352,75,"#F2F1EF",0.9f,Json::array(),D));
-        L.push_back(textLayer("pill_t","▣  Share full article",278,611,25,kSemi,"#353432",D));
+        L.push_back(textLayer("pill_t","▣  Share full article  ",278,611,24,kSemi,"#353432",D));
         L.push_back(ellipse("c1",651,594,84,84,"#F4F3F1",0.9f,D));
         L.push_back(textLayer("c1_t","↗",672,608,35,kDeja,"#353432",D));
         L.push_back(ellipse("c2",775,594,84,84,"#F4F3F1",0.9f,D));
@@ -188,29 +202,24 @@ void buildLayers(WebShotId id, Json& L, int D) {
         break; }
     case WebShotId::TaxExemptNyt: {
         Json bg = rect("paper",0,0,1920,1080,"#E9E8E6",1.f,Json::array(),D);
+        shot::modules::DocumentLayer::finish(bg, 0.012f, 731, 0.14f);
         L.push_back(std::move(bg));
-        const float size=48.f, y0=322.f, leading=70.f;
         const char* lines[]={
-            "Federal authorities ruled that the church's",
-            "activities were",
+            "Federal authorities ruled that the church's activities were",
             "and it lost its tax-exempt status.",
             "ordered to pay those taxes. Years of",
             "appeals followed and lawsuits flooded the IRS.",
             "From 1973-1977, something was"};
-        std::array<float,6> lineX{};
-        for(int i=0;i<6;++i) lineX[i]=960.f-measuredTextWidth(lines[i],size,kPlayfair)*0.5f;
-        const int highlightLine=2;
-        const float w=measuredTextWidth(lines[highlightLine],size,kPlayfair)+16.f;
-        L.push_back(staticHighlightRect("m",lineX[highlightLine]-8.f,
-            centeredRectTop(y0+highlightLine*leading+5.f,46.f),w,46.f,
-            "#E6E32E",0.42f,D));
-        for(int i=0;i<6;++i)
-        {
-            Json line = textLayer("l"+std::to_string(i),lines[i],lineX[i],
-                centeredTextTop(y0+i*leading,size),size,kPlayfair,
-                i==highlightLine?"#171614":"#77736F",D);
-            L.push_back(std::move(line));
-        }
+        const float xs[] = {-244.f, 0.f, -454.f, -262.f, -453.f};
+        const float ys[] = {180.f, 367.f, 545.f, 718.f, 887.f};
+        const float ss[] = {78.f, 79.f, 77.f, 77.f, 77.f};
+        const float prew = measuredTextWidth("and it ", 79.f, kPlayfair);
+        const float w = measuredTextWidth("lost its tax-exempt status.", 79.f, kPlayfair) + 20.f;
+        L.push_back(staticHighlightRect("m", prew - 10.f, 382.f, w, 104.f, "#E9E600", 0.97f, D));
+        for(int i=0;i<5;++i)
+            L.push_back(textLayer("l"+std::to_string(i), lines[i], xs[i], ys[i], ss[i], kPlayfair,
+                i==1?"#11100F":"#77736F", D));
+        L.push_back(rect("activities_rule", 1137, 277, 714, 4, "#8191B1", 0.76f, Json::array(), D));
         break; }
     // ============ GROUP B ============
     case WebShotId::AlexisArquette: {
@@ -351,53 +360,37 @@ void buildLayers(WebShotId id, Json& L, int D) {
         break; }
     case WebShotId::FoiaFinkelZoom: {
         Json bg = rect("paper",0,0,1920,1080,"#E9E8E6",1.f,Json::array(),D);
+        shot::modules::DocumentLayer::finish(bg, 0.012f, 13, 0.12f);
         L.push_back(std::move(bg));
-        const float size=48.f, leading=76.f, y0=375.f;
-        const char* lines[]={
-            "filed a",
-            "Freedom of Information Act request",
-            "Washington Post reporter David Finkel",
-            "in his book"};
-        std::array<float,4> lineX{};
-        for(int i=0;i<4;++i) lineX[i]=960.f-measuredTextWidth(lines[i],size,kPlayfair)*0.5f;
-        const int highlightLine=1;
-        const float w=measuredTextWidth(lines[highlightLine],size,kPlayfair)+16.f;
-        L.push_back(staticHighlightRect("m",lineX[highlightLine]-8.f,
-            centeredRectTop(y0+highlightLine*leading+5.f,46.f),w,46.f,
-            "#E6E32E",0.42f,D));
-        for(int i=0;i<4;++i)
-        {
-            Json line = textLayer("l"+std::to_string(i),lines[i],lineX[i],
-                centeredTextTop(y0+i*leading,size),size,kPlayfair,
-                i==highlightLine?"#171614":"#77736F",D);
-            L.push_back(std::move(line));
-        }
+        const float size = 112.f;
+        const char* l1 = "filed a Freedom of Information Act request";
+        const char* l2 = "n Post reporter David Finkel in his book '";
+        const float mw = measuredTextWidth("filed a Freedom of Information Act", size, kHelvMed) + 16.f;
+        L.push_back(modules::TextHighlight::layer("m", -95.f, 312.f, mw, 96.f, "#E6E32E", 0.95f, b10, s35, D));
+        L.push_back(textLayer("l1", l1, -90.f, 300.f, size, kHelvMed, "#101010", D));
+        L.push_back(textLayer("l2", l2, -70.f, 470.f, size, kHelvMed, "#101010", D));
         break; }
     case WebShotId::Vw40Times: {
         Json bg = rect("paper",0,0,1920,1080,"#E9E8E2",1.f,Json::array(),D);
+        shot::modules::DocumentLayer::finish(bg, 0.010f, 14, 0.14f);
         L.push_back(std::move(bg));
-        const float size=48.f, leading=68.f, y0=337.f;
-        const char* lines[]={
-            "A May 2014 test led researchers",
-            "to investigate Volkswagen emissions.",
-            "Researchers at West Virginia",
-            "University tested two VW diesel models.",
-            "The cars emitted far more nitrogen oxides,",
-            "up to 40 times the permitted levels."};
-        std::array<float,6> lineX{};
-        for(int i=0;i<6;++i) lineX[i]=960.f-measuredTextWidth(lines[i],size,kPlayfair)*0.5f;
-        const int highlightLine=5;
-        const float w=measuredTextWidth(lines[highlightLine],size,kPlayfair)+16.f;
-        L.push_back(staticHighlightRect("m",lineX[highlightLine]-8.f,
-            centeredRectTop(y0+highlightLine*leading+5.f,46.f),w,46.f,
-            "#E6E32E",0.42f,D));
-        for(int i=0;i<6;++i)
-        {
-            Json line = textLayer("l"+std::to_string(i),lines[i],lineX[i],
-                centeredTextTop(y0+i*leading,size),size,kPlayfair,
-                i==highlightLine?"#171614":"#77736F",D);
-            L.push_back(std::move(line));
-        }
+        const float size = 103.f, x = -120.f;
+        const char* lines[] = {
+            "sting in May 2014 that led the California Air R",
+            "lkswagen was conducted by researchers at Wes",
+            "missions from two VW models equipped with th",
+            "sel engine. The researchers found that when tes"};
+        for (int i = 0; i < 4; ++i)
+            L.push_back(textLayer("l" + std::to_string(i), lines[i], x, 150.f + 150.f * i,
+                size, kSerif, "#A6A39B", D));
+        const float x5 = -140.f;
+        const float xb = x5 + measuredTextWidth("most ", size, kSerif);
+        const float xt = xb + measuredTextWidth("40 times", size, kSerifBold);
+        const float mw = measuredTextWidth("40 times the permitted levels", size, kSerifBold) + 16.f;
+        L.push_back(modules::TextHighlight::layer("m", xb - 8.f, 758.f, mw, 92.f, "#E6E32E", 0.95f, b10, s35, D));
+        L.push_back(textLayer("l5a", "most ", x5, 750.f, size, kSerif, "#A6A39B", D));
+        L.push_back(textLayer("l5b", "40 times", xb, 750.f, size, kSerifBold, "#2E2C28", D));
+        L.push_back(textLayer("l5c", " the permitted levels of nitrogen", xt, 750.f, size, kSerif, "#A6A39B", D));
         break; }
     case WebShotId::CnbcSbfTilt: {
         Json bg = rect("paper",0,0,1920,1080,"#EDEBE7",1.f,Json::array(),D);
@@ -415,9 +408,8 @@ void buildLayers(WebShotId id, Json& L, int D) {
         L.push_back(modules::HeadlineComposition::line("h2","billionaire wants to give his",960,500,122,kPlayfair,"#1B1B1D",D,"ma"));
         L.push_back(modules::HeadlineComposition::line("h3","fortune away",960,660,122,kPlayfair,"#1B1B1D",D,"ma"));
         L.push_back(textLayer("deck","Sam Bankman-Fried is worth $26 billion, but he drives a Toyota Corolla, sleeps on a beanbag and has a Robin Hood-like philosophy.",960,900,40,kSerifIt,"#6C6B68",D,0,-1,1.f,"ma"));
-        // tilt + letterbox + chyron (warp prospettico dichiarato)
-        Json tilt = rect("tilt_frame",150,240,1680,735,"#EDEBE7",0.f,Json::array(),D);
-        tilt["rotation"] = Json::array({0,0,-3.2}); L.push_back(std::move(tilt));
+        // Letterbox + chyron. The old transparent tilt frame carried a 3D
+        // rotation after the 2D flatten and was rejected by the renderer.
         L.push_back(rect("bar_top",0,0,1920,128,"#080809",1.f,Json::array(),D));
         L.push_back(rect("bar_bot",0,984,1920,96,"#080809",1.f,Json::array(),D));
         L.push_back(textLayer("chy","HE DECIDED THAT",960,1030,42,kOswaldBold,"#E8871E",D,0,-1,1.f,"mm"));
@@ -441,8 +433,6 @@ void buildLayers(WebShotId id, Json& L, int D) {
         L.push_back(textLayer("n2","MacKenzie Sigalos",615,650,27,kBold,"#1A1A1C",D));
         L.push_back(textLayer("h2a","@KENZIESIGALOS",615,692,21,kSemi,"#2E6FD6",D));
         L.push_back(rect("greenbar",0,1072,1920,8,"#2E7D32",1.f,Json::array(),D));
-        Json tilt = rect("tilt_frame",70,120,1785,885,"#F4F3F0",0.f,Json::array(),D);
-        tilt["rotation"] = Json::array({0,0,1.8}); L.push_back(std::move(tilt));
         break; }
     // ============ GROUP D ============
     case WebShotId::GuardianBiggestFrauds: {
@@ -456,8 +446,6 @@ void buildLayers(WebShotId id, Json& L, int D) {
         L.push_back(modules::HeadlineComposition::line("h2","financial frauds' in US history",100,325,78,kPlayfairBold,"#16161A",D));
         L.push_back(textLayer("b1","Indictment brings eight criminal counts against crypto entrepreneur arrested in the",110,520,34,kRegular,"#67645F",D));
         L.push_back(textLayer("b2","Bahamas",110,572,34,kRegular,"#67645F",D));
-        Json tilt = rect("tilt_frame",80,150,1765,825,"#EFECE5",0.f,Json::array(),D);
-        tilt["rotation"] = Json::array({0,0,-2.4}); L.push_back(std::move(tilt));
         break; }
     case WebShotId::FtxTweetCard: {
         Json bg = rect("bg",0,0,1920,1080,"#E8E7E3",1.f,Json::array(),D);
@@ -525,8 +513,6 @@ void buildLayers(WebShotId id, Json& L, int D) {
         L.push_back(textLayer("b6","and management measures.  Unbeknownst to those investors (and to FTX’s trading",225,730,58,kSerif,"#232323",D));
         L.push_back(textLayer("b7","customers), Bankman-Fried was orchestrating a massive, years-long fraud, diverting billions of",225,848,58,kSerif,"#232323",D));
         L.push_back(textLayer("b8","customer funds for his own personal benefit and to help grow",225,966,58,kSerif,"#232323",D,0,-1,0.55f));
-        Json tilt = rect("tilt_frame",75,135,1785,875,"#F3F2EF",0.f,Json::array(),D);
-        tilt["rotation"] = Json::array({0,0,2.0}); L.push_back(std::move(tilt));
         break; }
     case WebShotId::GuardianSeoulMissiles: {
         Json bg = rect("bg",0,0,1920,1080,"#202020",1.f,Json::array(),D);
@@ -549,12 +535,13 @@ void buildLayers(WebShotId id, Json& L, int D) {
     case WebShotId::IvieFacebook: {
         Json bg = rect("paper",0,0,1920,1080,"#E8E8E6",1.f,Json::array(),D);
         shot::modules::DocumentLayer::finish(bg, 0.010f, 2222, 0.16f); L.push_back(std::move(bg));
-        float x0 = 150 + 167.0f;
-        float w = 1300.0f;
-        L.push_back(modules::TextHighlight::layer("m", x0-6, 387, w+12, 52, "#E8E300", 0.92f, b10, s35, D));
-        L.push_back(textLayer("l1","Ivie said she immediately reached out on Facebook to mothers' groups in the",150,381,40,kRegular,"#232323",D,0,0));
-        L.push_back(textLayer("l2","area and the post started to share rapidly. Within hours, the post had reached",150,462,40,kRegular,"#232323",D));
-        L.push_back(textLayer("l3","Jennifer's friend who got in touch with her.",150,543,40,kRegular,"#232323",D));
+        const float size = 52.f;
+        const float pre = measuredTextWidth("Ivie said she ", size, kRegular);
+        const float w = measuredTextWidth("immediately reached out on Facebook to mothers' groups in the", size, kRegular) + 14.f;
+        L.push_back(modules::TextHighlight::layer("m", 150.f + pre - 7.f, 326.f, w, 64.f, "#E8E300", 0.92f, b10, s35, D));
+        L.push_back(textLayer("l1","Ivie said she immediately reached out on Facebook to mothers' groups in the",150,320,size,kRegular,"#232323",D));
+        L.push_back(textLayer("l2","area and the post started to share rapidly. Within hours, the post had reached",150,420,size,kRegular,"#232323",D));
+        L.push_back(textLayer("l3","Jennifer's friend who got in touch with her.",150,520,size,kRegular,"#232323",D));
         break; }
     case WebShotId::BlackVaultFoia: {
         Json bg = rect("paper",0,0,1920,1080,"#EDECEA",1.f,Json::array(),D);
@@ -577,22 +564,28 @@ void buildLayers(WebShotId id, Json& L, int D) {
         Json bg = rect("paper",0,0,1920,1080,"#F0EFEC",1.f,Json::array(),D);
         shot::modules::DocumentLayer::finish(bg, 0.010f, 2424, 0.16f); L.push_back(std::move(bg));
         L.push_back(textLayer("t","The Big Foot",130,390,50,kBold,"#141414",D,0,0));
-        float w1 = 1389.0f;
-        float w2a = 522.0f;
-        float w3b = 721.0f;
-        float w4 = 256.0f;
-        float xL2b = 130 + 522.0f;
-        float xL3b = 130 + 377.0f;
+        const char* l1 = "In 1993, Pizza Hut released The Big Foot, a massive, 2 feet long by 1-foot";
+        const char* l2a = "wide square pizza creation.";
+        const char* l2b = " This promotion helped lift Pizza Hut's";
+        const char* l3a = "sales to $5.7 billion,";
+        const char* l3b = " with The Big Foot accounting for 18%";
+        const char* l4 = "of total sales.";
+        float w1 = measuredTextWidth(l1, 40.f, kRegular);
+        float w2a = measuredTextWidth(l2a, 40.f, kRegular);
+        float w3b = measuredTextWidth(l3b, 40.f, kRegular);
+        float w4 = measuredTextWidth(l4, 40.f, kRegular);
+        float xL2b = 130 + w2a;
+        float xL3b = 130 + measuredTextWidth(l3a, 40.f, kRegular);
         L.push_back(modules::TextHighlight::layer("m1", 124, 501, w1+12, 52, "#B9A916", 0.95f, b10, s35, D));
         L.push_back(modules::TextHighlight::layer("m2", 124, 562, w2a+12, 52, "#B9A916", 0.95f, b10, s35, D));
         L.push_back(modules::TextHighlight::layer("m3", xL3b-6, 623, w3b+12, 52, "#B9A916", 0.95f, 36, 40, D));
         L.push_back(modules::TextHighlight::layer("m4", 124, 684, w4+12, 52, "#B9A916", 0.95f, 36, 40, D));
-        L.push_back(textLayer("l1","In 1993, Pizza Hut released The Big Foot, a massive, 2 feet long by 1-foot",130,495,40,kRegular,"#141414",D));
-        L.push_back(textLayer("l2a","wide square pizza creation.",130,556,40,kRegular,"#141414",D));
-        L.push_back(textLayer("l2b"," This promotion helped lift Pizza Hut's",xL2b,556,40,kRegular,"#8A8A8A",D));
-        L.push_back(textLayer("l3a","sales to $5.7 billion,",130,617,40,kRegular,"#8A8A8A",D));
-        L.push_back(textLayer("l3b"," with The Big Foot accounting for 18%",xL3b,617,40,kRegular,"#141414",D));
-        L.push_back(textLayer("l4","of total sales.",130,678,40,kRegular,"#141414",D));
+        L.push_back(textLayer("l1",l1,130,495,40,kRegular,"#141414",D));
+        L.push_back(textLayer("l2a",l2a,130,556,40,kRegular,"#141414",D));
+        L.push_back(textLayer("l2b",l2b,xL2b,556,40,kRegular,"#8A8A8A",D));
+        L.push_back(textLayer("l3a",l3a,130,617,40,kRegular,"#8A8A8A",D));
+        L.push_back(textLayer("l3b",l3b,xL3b,617,40,kRegular,"#141414",D));
+        L.push_back(textLayer("l4",l4,130,678,40,kRegular,"#141414",D));
         break; }
     case WebShotId::PizzaSauceCaption: {
         Json bg = rect("bg",0,0,1920,1080,"#131110",1.f,Json::array(),D);
@@ -613,19 +606,23 @@ void buildLayers(WebShotId id, Json& L, int D) {
         L.push_back(textLayer("hl1","The biggest problem that Pizza Hut is facing is perception, Starrs said,",150,345,48,kSerif,"#1A1A1A",D));
         L.push_back(textLayer("hl2","explaining that many of its customers don't associate Pizza Hut with delivery.",150,425,48,kSerif,"#1A1A1A",D));
         L.push_back(textLayer("l5","Most people think about ordering a pizza and carrying it out, or sitting down a",150,504,48,kSerif,"#1A1A1A",D));
-        float x7 = 150 + 741.0f;
         L.push_back(textLayer("l6","table and having a server bring a meal. Starrs said the facade of its locations",150,584,48,kSerif,"#1A1A1A",D));
         L.push_back(textLayer("l7","reinforces this idea and isn't helping to lure in diners.",150,663,48,kSerif,"#1A1A1A",D));
         L.push_back(textLayer("hl5","“When you drive by the location, it doesn't scream ‘we deliver.’” Starrs said.",150,792,48,kSerif,"#1A1A1A",D));
         L.push_back(textLayer("l9","Pizza Hut has only recently getting into the delivery game. Today, 55 percent",150,915,48,kSerif,"#1A1A1A",D));
         L.push_back(textLayer("l10","of Pizza Hut's sales in the U.S. come from digital orders and only 10 percent of",150,995,48,kSerif,"#1A1A1A",D));
         L.push_back(textLayer("l11","sales stem from diners coming into the chain and dining in. Going forward",150,1073,48,kSerif,"#1A1A1A",D));
-        float w1 = 1115.9f;
-        L.push_back(modules::TextHighlight::layer("m1", 144, 352, w1+12, 62, "#F2C500", 0.95f, 7, 33, D));
-        L.push_back(modules::TextHighlight::layer("m2", 144, 432, 1473.9f+12, 62, "#F2C500", 0.95f, 7, 33, D));
-        L.push_back(modules::TextHighlight::layer("m3", x7-6, 591, 701.9f+12, 62, "#F2C500", 0.95f, 25, 33, D));
-        L.push_back(modules::TextHighlight::layer("m4", 144, 670, 1009.9f+12, 62, "#F2C500", 0.95f, 25, 33, D));
-        L.push_back(modules::TextHighlight::layer("m5", 144, 799, 1220.8f+12, 62, "#F2C500", 0.95f, 43, 34, D));
+        const float w1 = measuredTextWidth("The biggest problem that Pizza Hut is facing is perception, Starrs said,", 48.f, kSerif) + 12.f;
+        const float w2 = measuredTextWidth("explaining that many of its customers don't associate Pizza Hut with delivery.", 48.f, kSerif) + 12.f;
+        const float m3x = 150.f + measuredTextWidth("table and having a server bring a meal. Starrs said the ", 48.f, kSerif) - 6.f;
+        const float w3 = measuredTextWidth("facade of its locations", 48.f, kSerif) + 12.f;
+        const float w4 = measuredTextWidth("reinforces this idea and isn't helping to lure in diners.", 48.f, kSerif) + 12.f;
+        const float w5 = measuredTextWidth("“When you drive by the location, it doesn't scream ‘we deliver.’” Starrs said.", 48.f, kSerif) + 12.f;
+        L.push_back(modules::TextHighlight::layer("m1", 144, 352, w1, 62, "#F2C500", 0.95f, 7, 33, D));
+        L.push_back(modules::TextHighlight::layer("m2", 144, 432, w2, 62, "#F2C500", 0.95f, 7, 33, D));
+        L.push_back(modules::TextHighlight::layer("m3", m3x, 591, w3, 62, "#F2C500", 0.95f, 25, 33, D));
+        L.push_back(modules::TextHighlight::layer("m4", 144, 670, w4, 62, "#F2C500", 0.95f, 25, 33, D));
+        L.push_back(modules::TextHighlight::layer("m5", 144, 799, w5, 62, "#F2C500", 0.95f, 43, 34, D));
         break; }
     case WebShotId::TimesOfIndiaCoxon: {
         Json bg = rect("bg",0,0,1920,1080,"#0D0D0C",1.f,Json::array(),D);
@@ -635,11 +632,13 @@ void buildLayers(WebShotId id, Json& L, int D) {
         L.push_back(textLayer("mast_g3","THE TIMES OF INDIA",960,142,88,kPlayfairBold,"#C0708A",D,0,-1,0.35f,"ma"));
         L.push_back(textLayer("mast","THE TIMES OF INDIA",960,142,88,kPlayfairBold,"#F2E8EA",D,0,0,1.f,"ma"));
         L.push_back(textLayer("crumb","News  ·  Education News  ·  News",960,330,28,kMed,"#2E8B8B",D,0,-1,1.f,"ma",1.0f));
-        L.push_back(modules::TextHighlight::layer("box1", 265, 398, 1610, 96, "#F5F0EE", 0.96f, 11, 39, D));
-        L.push_back(modules::TextHighlight::layer("box2", 650, 492, 635, 96, "#F5F0EE", 0.96f, 31, 39, D));
+        L.push_back(rect("box1", 250, 398, 1680, 96, "#F5F0EE", 0.96f, Json::array(), D));
+        L.back()["_v4_highlight"] = true;
+        L.push_back(rect("box2", 650, 492, 650, 96, "#F5F0EE", 0.96f, Json::array(), D));
+        L.back()["_v4_highlight"] = true;
         L.push_back(textLayer("who","Who is",48,415,62,kPlayfairBold,"#7A7A7A",D));
-        L.push_back(textLayer("hl1","Jacob Coxon, the ex-Anthropic researcher warning",307,415,62,kPlayfairBold,"#5B1E2B",D));
-        L.push_back(textLayer("hl2","AI could kill us all?",690,512,62,kPlayfairBold,"#5B1E2B",D));
+        L.push_back(textLayer("hl1","Jacob Coxon, the ex-Anthropic researcher warning",290,419,50,kPlayfairBold,"#5B1E2B",D));
+        L.push_back(textLayer("hl2","AI could kill us all?",690,514,50,kPlayfairBold,"#5B1E2B",D));
         L.push_back(textLayer("p1","A young researcher named Jacob Coxon resigned from Anthropic after working at OpenAI. He warned that artificial",960,645,27,kRegular,"#6E6E6E",D,0,-1,1.f,"ma"));
         L.push_back(textLayer("p2","intelligence could end humanity by the decade's end. Coxon's concerns emerged after AI models demonstrated concerning",960,695,27,kRegular,"#6E6E6E",D,0,-1,1.f,"ma"));
         L.push_back(textLayer("p3","capabilities and escaped testing environments. His public declaration amplified private debates within leading AI",960,745,27,kRegular,"#6E6E6E",D,0,-1,1.f,"ma"));
@@ -826,15 +825,351 @@ void WebShotSpec::validate() const {
     if (fps != 30) fail("only 30fps is certified for the rebuild grammar");
 }
 std::string WebShotSpec::planName() const { return std::string(webShotName(id)) + "_native_v1"; }
+std::string WebShotSpec::planNameV4() const { return std::string(webShotName(id)) + "_native_v4"; }
 std::string WebShotSpec::outputStem() const {
     if (!outputName.empty()) return outputName;
     return std::string(webShotName(id)) + ".mp4";
+}
+
+// Vulkan drops every 3D shape layer as soon as the plan carries a camera
+// (verified with an 8-colour probe: text survived, all shapes vanished). The
+// native path that actually draws shapes is screen-space 2D. Convert the
+// authored top-left/wire coordinates into the 2D renderer's centered,
+// y-down space and drop the camera; marker/keyframe tracks stay untouched.
+void flattenLayersTo2d(Json& layers) {
+    constexpr float canvasW = 1920.f;
+    constexpr float canvasH = 1080.f;
+    for (Json& layer : layers) {
+        if (!layer.contains("position") || !layer["position"].is_array() ||
+            layer["position"].size() < 2) continue;
+        const std::string type = layer.value("type", std::string{});
+        const float x = layer["position"][0].get<float>();
+        const float y = layer["position"][1].get<float>();
+        if (type == "shape") {
+            layer["position"] = Json::array({x - canvasW * 0.5f, canvasH * 0.5f - y});
+            layer["enable_3d"] = false;
+        } else if (type == "text") {
+            layer["position"] = Json::array({x, canvasH - y});
+            layer["enable_3d"] = false;
+        } else if (type == "image") {
+            layer["position"] = Json::array({x, y});
+            layer["enable_3d"] = false;
+        }
+    }
+}
+
+// ── v4: runtime word reveal ───────────────────────────────────────────────
+// v3 compone ogni riga come una run unica: al frame 0 e' gia' tutta li'. La
+// v4 spezza le run in parole, ognuna con la propria opacity track, e le fa
+// entrare in ordine di lettura con un fade breve. La posizione di ogni parola
+// viene misurata dal font reale (prefix advance), quindi la composizione
+// resta quella approvata in v3. I marker vengono ri-temporizzati e l'area
+// evidenziata guida un drift di camera espresso come offset screen-space:
+// i layer 2D non ricevono la camera prospettica del renderer.
+struct V4WordSpan { std::size_t begin, end; };
+
+std::vector<V4WordSpan> v4Words(const std::string& text) {
+    std::vector<V4WordSpan> result;
+    std::size_t i = 0;
+    while (i < text.size()) {
+        while (i < text.size() && std::isspace(static_cast<unsigned char>(text[i]))) ++i;
+        if (i == text.size()) break;
+        const std::size_t begin = i;
+        while (i < text.size() && !std::isspace(static_cast<unsigned char>(text[i]))) ++i;
+        result.push_back({begin, i});
+    }
+    return result;
+}
+
+bool v4HasTextProperty(const Json& layer, const char* property) {
+    if (!layer.contains("text_animators") || !layer["text_animators"].is_array()) return false;
+    for (const Json& animator : layer["text_animators"]) {
+        if (!animator.contains("properties") || !animator["properties"].is_array()) continue;
+        for (const Json& prop : animator["properties"])
+            if (prop.value("property", std::string{}) == property) return true;
+    }
+    return false;
+}
+
+int v4StartForTop(float top) {
+    const float t = std::clamp((top - 60.f) / 820.f, 0.f, 1.f);
+    return 2 + static_cast<int>(std::lround(t * 14.f));
+}
+
+Json v4OpacityTrack(double target, int start, int fade, int duration) {
+    Json keys = Json::array();
+    keys.push_back(Json{{"frame", 0}, {"value", 0.0}});
+    if (start > 0) keys.push_back(Json{{"frame", start}, {"value", 0.0}});
+    const int end = std::min(duration - 1, start + fade);
+    keys.push_back(Json{{"frame", end}, {"value", target}});
+    if (end < duration - 1) keys.push_back(Json{{"frame", duration - 1}, {"value", target}});
+    return Json{{"property", "opacity"}, {"easing", "out_cubic"}, {"keyframes", std::move(keys)}};
+}
+
+Json v4AnimatorFadeTrack(int start, int fade, int duration) {
+    // Text animator property tracks only accept linear easing in the plan
+    // schema, so bake the out-cubic curve into the keyframe values instead.
+    Json keys = Json::array();
+    keys.push_back(Json{{"frame", 0}, {"value", 0.0}});
+    if (start > 0) keys.push_back(Json{{"frame", start}, {"value", 0.0}});
+    const int end = std::min(duration - 1, start + fade);
+    const int f1 = std::min(end, start + std::max(1, fade / 3));
+    const int f2 = std::min(end, start + std::max(1, (2 * fade) / 3));
+    if (f1 > start) keys.push_back(Json{{"frame", f1}, {"value", 0.7037}});
+    if (f2 > f1) keys.push_back(Json{{"frame", f2}, {"value", 0.9630}});
+    keys.push_back(Json{{"frame", end}, {"value", 1.0}});
+    if (end < duration - 1) keys.push_back(Json{{"frame", duration - 1}, {"value", 1.0}});
+    return Json{{"property", "opacity"}, {"easing", "linear"}, {"keyframes", std::move(keys)}};
+}
+
+void v4SetTrack(Json& layer, Json track) {
+    Json tracks = Json::array();
+    if (layer.contains("animation") && layer["animation"].is_object() &&
+        layer["animation"].contains("tracks") && layer["animation"]["tracks"].is_array())
+        tracks = layer["animation"]["tracks"];
+    const std::string property = track.value("property", std::string{});
+    Json kept = Json::array();
+    for (const Json& existing : tracks)
+        if (existing.value("property", std::string{}) != property) kept.push_back(existing);
+    kept.push_back(std::move(track));
+    layer["animation"] = Json{{"tracks", std::move(kept)}};
+}
+
+Json v4ExistingTrack(const Json& layer, const std::string& property) {
+    if (!layer.contains("animation") || !layer["animation"].is_object() ||
+        !layer["animation"].contains("tracks") || !layer["animation"]["tracks"].is_array())
+        return Json();
+    for (const Json& track : layer["animation"]["tracks"])
+        if (track.value("property", std::string{}) == property) return track;
+    return Json();
+}
+
+float v4Top(const Json& layer) {
+    return float(kH) - layer["position"][1].get<float>() - layer["size"][1].get<float>() * 0.5f;
+}
+
+Json v4WordLayer(const Json& source, const std::string& word, float runLeft, float boxTop,
+                 const std::string& id, double opacity, int start, int duration) {
+    const std::string font = source["style"].value("font", std::string{});
+    const float size = source["style"].value("font_size", 1.f);
+    const float content = measuredTextWidth(word, size, font);
+    const float w = std::max(60.f, content * 1.10f);
+    const float h = source["size"][1].get<float>();
+    const float pad = (w - content) * 0.5f;
+    Json layer = source;
+    layer["id"] = id;
+    layer["text"] = word;
+    layer["size"] = Json::array({w, h});
+    layer["position"] = wirePos(runLeft - pad + w * 0.5f, boxTop + h * 0.5f);
+    layer["start_frame"] = 0;
+    layer["duration_frames"] = duration;
+    layer.erase("opacity");
+    layer.erase("animation");
+    layer.erase("text_animators");
+    v4SetTrack(layer, v4OpacityTrack(opacity, start, 7, duration));
+    return layer;
+}
+
+struct V4MarkerTime { int begin{0}, span{1}; };
+
+bool v4MarkerTime(const Json& layer, V4MarkerTime& out) {
+    if (!layer.contains("animation") || !layer["animation"].is_object() ||
+        !layer["animation"].contains("tracks") || !layer["animation"]["tracks"].is_array())
+        return false;
+    for (const Json& track : layer["animation"]["tracks"]) {
+        if (track.value("property", std::string{}) != "scale_x") continue;
+        if (!track.contains("keyframes") || !track["keyframes"].is_array() ||
+            track["keyframes"].size() < 2) return false;
+        const Json& keys = track["keyframes"];
+        out.begin = keys[1].value("frame", 0);
+        out.span = std::max(1, keys.back().value("frame", 0) - out.begin);
+        return true;
+    }
+    return false;
+}
+
+void v4PanLayer(Json& layer, double dx, double dy, int duration) {
+    if (!layer.contains("position") || !layer["position"].is_array() ||
+        layer["position"].size() < 2) return;
+    if (layer.value("type", std::string{}) == "color") return;
+    if (layer.contains("size") && layer["size"].is_array() && layer["size"].size() >= 2 &&
+        layer["size"][0].get<float>() >= 1900.f && layer["size"][1].get<float>() >= 1060.f)
+        return;
+    const int holdFrame = std::max(1, std::min(duration - 2,
+        static_cast<int>(std::lround(double(duration - 1) * 0.72))));
+    auto apply = [&](const char* property, double delta) {
+        if (std::abs(delta) < 0.001) return;
+        const Json existing = v4ExistingTrack(layer, property);
+        if (existing.is_null()) {
+            Json keys = Json::array();
+            keys.push_back(Json{{"frame", 0}, {"value", 0.0}});
+            keys.push_back(Json{{"frame", holdFrame}, {"value", delta}});
+            if (holdFrame < duration - 1)
+                keys.push_back(Json{{"frame", duration - 1}, {"value", delta}});
+            v4SetTrack(layer, Json{{"property", property}, {"easing", "in_out_cubic"},
+                                   {"keyframes", std::move(keys)}});
+            return;
+        }
+        Json keys = Json::array();
+        for (int frame = 0; frame < duration; ++frame) {
+            const double t = std::min(1.0, double(frame) / double(holdFrame));
+            keys.push_back(Json{{"frame", frame},
+                {"value", trackValueAt(existing, frame) + delta * easingEval("in_out_cubic", t)}});
+        }
+        v4SetTrack(layer, Json{{"property", property}, {"easing", "linear"},
+                               {"keyframes", std::move(keys)}});
+    };
+    apply("position_x", dx);
+    apply("position_y", dy);
+}
+
+Json v4FullWindowSelector(const std::string& id) {
+    return Json{
+        {"id", id}, {"unit", "character"}, {"shape", "square"},
+        {"order", "forward"}, {"combine", "replace"}, {"exclude_spaces", false},
+        {"start", Json{{"keyframes", Json::array({Json{{"frame", 0}, {"value", 0.0}}})},
+                        {"easing", "linear"}}},
+        {"end", Json{{"keyframes", Json::array({Json{{"frame", 0}, {"value", 100.0}}})},
+                      {"easing", "linear"}}}};
+}
+
+void applyV4Reveal(Json& layers, int duration) {
+    bool foundFocus = false, anyMarker = false;
+    float focusX = 0.f, focusY = 0.f, focusArea = 0.f;
+    int minBegin = 0, maxBegin = 0;
+    for (const Json& layer : layers) {
+        if (!layer.value("_v4_highlight", false)) continue;
+        const float w = layer["size"][0].get<float>();
+        const float h = layer["size"][1].get<float>();
+        const float cx = layer["position"][0].get<float>();
+        const float cy = float(kH) - layer["position"][1].get<float>();
+        if (w * h > focusArea) {
+            focusArea = w * h; focusX = cx; focusY = cy; foundFocus = true;
+        }
+        V4MarkerTime timing;
+        if (v4MarkerTime(layer, timing)) {
+            if (!anyMarker) { minBegin = maxBegin = timing.begin; anyMarker = true; }
+            else {
+                minBegin = std::min(minBegin, timing.begin);
+                maxBegin = std::max(maxBegin, timing.begin);
+            }
+        }
+    }
+    for (Json& layer : layers) {
+        if (!layer.value("_v4_highlight", false)) continue;
+        V4MarkerTime timing;
+        if (v4MarkerTime(layer, timing)) {
+            const int begin = anyMarker && maxBegin > minBegin
+                ? 28 + static_cast<int>(std::lround(
+                      18.0 * double(timing.begin - minBegin) / double(maxBegin - minBegin)))
+                : 30;
+            const int span = std::clamp(timing.span, 12, 22);
+            const float width = layer["size"][0].get<float>();
+            layer["animation"] = Json{{"tracks",
+                modules::TextHighlight::tracks(width, begin, span)}};
+        } else {
+            v4SetTrack(layer, v4OpacityTrack(1.0, 28, 9, duration));
+        }
+    }
+    if (foundFocus) {
+        Json highlights = Json::array(), rest = Json::array();
+        for (Json& layer : layers) {
+            if (layer.value("_v4_highlight", false)) highlights.push_back(std::move(layer));
+            else rest.push_back(std::move(layer));
+        }
+        std::size_t insertAt = rest.size();
+        for (std::size_t i = 0; i < rest.size(); ++i)
+            if (rest[i].value("type", std::string{}) == "text") { insertAt = i; break; }
+        Json ordered = Json::array();
+        for (std::size_t i = 0; i < insertAt; ++i) ordered.push_back(std::move(rest[i]));
+        for (Json& layer : highlights) ordered.push_back(std::move(layer));
+        for (std::size_t i = insertAt; i < rest.size(); ++i) ordered.push_back(std::move(rest[i]));
+        layers = std::move(ordered);
+    }
+    for (Json& layer : layers) layer.erase("_v4_highlight");
+
+    // One text layer per authored line; each word gets its own selector +
+    // opacity animator. This keeps the renderer at v3's surface count while
+    // still fading every word in at runtime.
+    for (Json& layer : layers) {
+        if (layer.value("type", std::string{}) != "text") continue;
+        const float top = v4Top(layer);
+        const int blockStart = v4StartForTop(top);
+        const bool keepWhole = v4HasTextProperty(layer, "tracking") ||
+                               v4HasTextProperty(layer, "blur");
+        Json animators = layer.contains("text_animators") &&
+                         layer["text_animators"].is_array()
+            ? layer["text_animators"] : Json::array();
+        const std::string id = layer.value("id", std::string{"text"});
+        if (keepWhole) {
+            // Tracking/blur: keep the authored font effect and add one
+            // whole-line opacity property to its existing full-window
+            // animator. Splitting these would lose spacing and duplicate the
+            // blur across dozens of tiny surfaces.
+            if (animators.empty()) {
+                Json whole = Json::object();
+                whole["id"] = id + "_v4whole";
+                whole["selectors"] = Json::array({v4FullWindowSelector(id + "_v4whole_sel")});
+                whole["properties"] = Json::array();
+                animators.push_back(std::move(whole));
+            }
+            animators[0]["properties"].push_back(
+                v4AnimatorFadeTrack(blockStart + 2, 8, duration));
+            layer["text_animators"] = std::move(animators);
+            continue;
+        }
+        const std::string text = layer.value("text", std::string{});
+        const std::vector<V4WordSpan> spans = v4Words(text);
+        if (spans.empty()) continue;
+        const int count = static_cast<int>(spans.size());
+        const float stagger = count > 1
+            ? std::min(1.7f, 15.f / float(count - 1)) : 0.f;
+        for (int i = 0; i < count; ++i) {
+            const int start = blockStart + static_cast<int>(std::lround(float(i) * stagger));
+            const double wordStart = 100.0 * double(i) / double(count);
+            const double wordEnd = 100.0 * double(i + 1) / double(count);
+            Json startTrack = Json::object();
+            startTrack["easing"] = "linear";
+            startTrack["keyframes"] = Json::array({
+                Json{{"frame", 0}, {"value", wordStart}}});
+            Json endTrack = Json::object();
+            endTrack["easing"] = "linear";
+            endTrack["keyframes"] = Json::array({
+                Json{{"frame", 0}, {"value", wordEnd}}});
+            Json selector = Json::object();
+            selector["id"] = id + "_v4sel_" + std::to_string(i);
+            selector["unit"] = "word";
+            selector["shape"] = "square";
+            selector["order"] = "forward";
+            selector["combine"] = "replace";
+            selector["exclude_spaces"] = false;
+            selector["start"] = std::move(startTrack);
+            selector["end"] = std::move(endTrack);
+            Json animator = Json::object();
+            animator["id"] = id + "_v4w_" + std::to_string(i);
+            animator["selectors"] = Json::array({std::move(selector)});
+            animator["properties"] = Json::array({
+                v4AnimatorFadeTrack(start, 7, duration)});
+            animators.push_back(std::move(animator));
+        }
+        layer["text_animators"] = std::move(animators);
+    }
+
+    if (foundFocus) {
+        double dx = std::clamp((960.0 - double(focusX)) * 0.30, -64.0, 64.0);
+        double dy = std::clamp((540.0 - double(focusY)) * 0.30, -40.0, 40.0);
+        if (std::abs(dx) < 6.0) dx = 0.0;
+        if (std::abs(dy) < 6.0) dy = 0.0;
+        if (dx != 0.0 || dy != 0.0)
+            for (Json& layer : layers) v4PanLayer(layer, dx, dy, duration);
+    }
 }
 
 Json buildWebShotPlan(const WebShotSpec& spec) {
     spec.validate();
     Json layers = Json::array();
     buildLayers(spec.id, layers, spec.durationFrames);
+    flattenLayersTo2d(layers);
     const auto authoredMove = cameraMove(spec.id);
     const double zoomDelta = std::clamp(std::abs(authoredMove[3]-authoredMove[0]) * 0.20, 0.0, 0.012);
     const double cxDelta = std::clamp((authoredMove[4]-authoredMove[1]) * 0.10, -0.003, 0.003);
@@ -842,7 +1177,26 @@ Json buildWebShotPlan(const WebShotSpec& spec) {
     Json plan = shot::renderPlan(spec.planName(), spec.durationFrames, layers,
         shot::modules::DocumentCamera::samples(spec.durationFrames, 1.0, 0.5, 0.5,
                                     1.0 + zoomDelta, 0.5 + cxDelta, 0.5 + cyDelta));
+    // The static camera is what makes Vulkan cull the shape layers. The 2D
+    // conversions above already place every layer on screen, so no projection
+    // is needed; keep the authored marker tracks as the only motion authority.
+    plan.erase("camera");
+    plan.erase("camera_samples");
     plan["output"] = Json{{"path", spec.outputStem()}, {"format","mp4"}, {"codec","h264"}};
+    return plan;
+}
+
+Json buildWebShotPlanV4(const WebShotSpec& spec) {
+    spec.validate();
+    Json layers = Json::array();
+    buildLayers(spec.id, layers, spec.durationFrames);
+    applyV4Reveal(layers, spec.durationFrames);
+    flattenLayersTo2d(layers);
+    Json plan = shot::renderPlan(spec.planNameV4(), spec.durationFrames, layers, Json::array());
+    plan.erase("camera");
+    plan.erase("camera_samples");
+    const std::string output = std::string(webShotName(spec.id)) + "_native_v4.mp4";
+    plan["output"] = Json{{"path", output}, {"format","mp4"}, {"codec","h264"}};
     return plan;
 }
 

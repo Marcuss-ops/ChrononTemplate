@@ -1,5 +1,7 @@
 #include "chronontemplate/camera_roll/WordLensPack.hpp"
 
+#include "chronontemplate/web/WebFontMeasure.hpp"
+
 #include "chrononmotion/math/Color.hpp"
 #include "chrononmotion/motion/CameraFocusSequence.hpp"
 #include "chrononmotion/motion/Lighting.hpp"
@@ -22,6 +24,7 @@ namespace chronontemplate {
         constexpr float kCanvasHeight = 1080.f;
         constexpr float kBackgroundDepth = 300.f;
         constexpr float kTextFontSize = 142.f;
+        constexpr const char* kTextFont = "assets/fonts/HelveticaNeue-Medium.otf";
         constexpr float kUnderlineHeight = 34.f;
         // Keep the callout in the open upper-right area beside the presenter.
         constexpr float kCameraAimOffsetX = -110.f;
@@ -171,9 +174,12 @@ namespace chronontemplate {
 
         for (std::size_t index = 0; index < spec.words.size(); ++index) {
             const auto& beat = spec.words[index];
-            const float estimatedWidth = std::max(220.f, static_cast<float>(beat.text.size()) * kTextFontSize * 0.61f);
+            // The marker is a reading aid: its width follows the shaped advance
+            // of the same font the word layer renders, not a character count.
+            const float measuredWidth =
+                web::shot::measuredTextWidth(beat.text, kTextFontSize, kTextFont);
             auto& underline = scene.shape({
-                .size = Vector2(estimatedWidth + 30.f, kUnderlineHeight),
+                .size = Vector2(std::max(220.f, measuredWidth) + 30.f, kUnderlineHeight),
                 .fillColor = "#F2C52B",
                 .name = "WordUnderline_" + beat.text,
                 .cornerRadius = 4.f,
@@ -190,7 +196,7 @@ namespace chronontemplate {
 
             auto& word = scene.text({
                 .text = beat.text,
-                .font = "assets/fonts/HelveticaNeue-Medium.otf",
+                .font = kTextFont,
                 .fontSize = kTextFontSize,
                 .color = "#FFF9EC",
                 .name = "WordLens_" + beat.text,

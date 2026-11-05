@@ -41,6 +41,8 @@
 #include "chronontemplate/multiple_images/MultiImagePack.hpp"
 #include "chronontemplate/backgrounds/BackgroundPack.hpp"
 #include "chronontemplate/map/ModernMapPack.hpp"
+#include "chronontemplate/map/MapFxPack.hpp"
+#include "chronontemplate/map/TacticalFillPack.hpp"
 #include "chronontemplate/camera_roll/TitleCameraPack.hpp"
 #include "chronontemplate/camera_roll/WordLensPack.hpp"
 #include "chronontemplate/camera_roll/SceneCameraPack.hpp"

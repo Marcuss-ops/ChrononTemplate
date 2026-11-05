@@ -346,7 +346,7 @@ namespace chronontemplate::web {
                 if (spec.recipe == WebPageRecipe::Highlight3D) {
                     const float markerW = measuredTextWidth(spec.headlineLineTwo, 64.f, kBold) + 28.f;
                     layers.push_back(rect("headline_marker", kMargin - 14.f, 296.f, markerW, 108.f,
-                                          pal.highlight, 0.5f, markerSweepTracks(markerW)));
+                                          pal.highlight, 0.5f, duration, markerSweepTracks(markerW)));
                 }
             }
             layers.push_back(textLayer("masthead_byline", spec.byline, kMargin, 418.f, 20.f,

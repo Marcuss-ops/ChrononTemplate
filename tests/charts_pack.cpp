@@ -1,8 +1,11 @@
 #include "chronontemplate/charts/ChartsPack.hpp"
+#include "chronontemplate/web/WebFontMeasure.hpp"
 
 #include "fake_content_host.hpp"
 #include "motion_check.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -76,6 +79,35 @@ namespace {
         check(scene.validate().empty(), "the gap scene validates");
     }
 
+    void fittedLabelsUseTheMeasuredAdvance() {
+        section("chart label fitting uses the shaped advance width");
+        FakeContentHost host;
+        TemplateScene scene("charts_fit", 30.f, host, 1920.f, 1080.f);
+        ChartSpec spec;
+        spec.style = ChartStyle::DualComparisonBars;
+        spec.comparisonCards = true;
+        spec.unit = "%";
+        spec.scaleMax = 100.;
+        const std::string longLabel = "Trasporto pubblico locale";
+        spec.data = {point(longLabel, 42), point("Auto private", 18)};
+        const auto composition = addChart(scene, spec);
+        check(!composition.values.empty(), "the comparison cards render");
+        check(scene.validate().empty(), "the fitted scene validates");
+
+        const float preferred = 1080.f / 24.f * 1.08f;
+        const float cardW = (1920.f * 0.90f - 1920.f * 0.16f) * 0.43f;
+        const float measured = web::shot::measureTextWidth(spec.font, preferred, longLabel);
+        check(measured > 0.f, "the chart font is measurable");
+        const float expected =
+            std::min(preferred, preferred * (cardW * 0.84f) / std::max(1.f, measured));
+        const auto found = std::find_if(host.textRequests().begin(), host.textRequests().end(),
+            [&](const TextRequest& request) { return request.text == longLabel; });
+        check(found != host.textRequests().end(), "the fitted label reaches the content host");
+        if (found != host.textRequests().end())
+            check(std::fabs(found->fontSize - expected) < 0.01f,
+                  "the label font size follows the measured width, not a character count");
+    }
+
     void semanticContradictionsFailClosed() {
         section("Charts rejects semantic contradictions");
         FakeContentHost host;
@@ -111,6 +143,7 @@ namespace {
 int main() {
     eachRecipeCreatesAValidScene();
     missingDataIsNeverBridgedOrInterpolated();
+    fittedLabelsUseTheMeasuredAdvance();
     semanticContradictionsFailClosed();
     return 0;
 }

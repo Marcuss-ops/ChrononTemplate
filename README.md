@@ -58,6 +58,38 @@ leaders. Geographic projection and provider attribution metadata remain owned
 by RenderingGen; ChrononTemplate accepts already-positioned editorial elements
 and does not implement geographic projection.
 
+### Tactical territory fill
+
+`include/chronontemplate/map/TacticalFillPack.hpp` exposes
+`addTacticalFill()`, the native shape-only version of the
+`territory_tactical_fill` look: a near-black plate, minor/major grid, the green
+territory, a broad red glow, a tighter orange glow, a crisp white outline, and
+a late title/subtitle. Each input ring is a closed polygon already projected to
+canvas coordinates; the pack does not read GeoJSON, reproject coordinates or
+run OpenCV. Rings may be passed as GeoJSON-style closed loops (the duplicate
+last point is dropped).
+
+```cpp
+TacticalFillSpec spec;
+spec.regions = {{{520.f, 360.f}, {860.f, 300.f}, {980.f, 520.f},
+                 {760.f, 700.f}, {480.f, 560.f}}};
+spec.title = "JERUSALEM";
+spec.subtitle = "Capital of Israel";
+const TacticalFillComposition fill = addTacticalFill(scene, spec);
+```
+
+The territory grows from its centroid over `revealFraction` of the clip. That
+is a native transform reveal, not the reference's circular raster mask; the
+red/orange halos are Chronon3d shape glows, not a Gaussian-blur compositing
+pass. The title starts at 42% and is fully in by 62%, matching the editorial
+beat of the reference. `TacticalFillSpec` exposes the palette, grid spacing,
+outline/glow widths, text typography and text positions; attribution and geo
+provenance stay with the caller/RenderingGen. The sample contract
+(`chronontemplate.tactical-fill-sample.v1`) accepts optional `canvas`, `title`
+and `subtitle` fields, and `chronontemplate_emit_tactical_fill` uses them, so a
+caller such as RenderingGen's `map-tactical-fill` supplies the place name and
+canvas without rebuilding the emitter.
+
 ```text
 important_phrases/          phrasing and titling, one subdir per family
   ImportantPhrasePack            shared look + plan data types
@@ -71,7 +103,8 @@ single_images/              ImageAnimationPack — one-image 2.5D entrances
 multiple_images/            MultiImagePack — duo/trio/quad/penta boards, story reels with captions
 backgrounds/                BackgroundPack — editorial documentary/grid/scan/dust looks from shape layers
 entities_with_text/         DocumentarySnapshotPack + YouTubeSubscribe
-map/                        ModernMapPack — styled plate, labels and camera beat
+map/                        ModernMapPack + MapFxPack + TacticalFillPack — styled plates,
+                            map FX and the native tactical territory fill
 camera_roll/                TitleCameraPack + SceneCameraPack — camera-only motion
 transitions/                TransitionPack — eight rapid light looks
 captions_dataviz/           CaptionsDataVizPack — PCM beat grid, beat-timed captions, bar + step-line charts
@@ -159,16 +192,14 @@ the committed file drifts from what the C++ pack emits today.
 
 ### React text-effect adaptations
 
-Four supplied React components have deterministic native short-phrase recipes:
-`short_phrase_product_masked_heading`, `short_phrase_product_split_flap_text`,
-`short_phrase_product_scroll_reveal`, and `short_phrase_product_scrambled_text`.
+Two supplied React components have deterministic native short-phrase recipes:
+`short_phrase_product_split_flap_text` and `short_phrase_product_scroll_reveal`.
 Their `adaptation_note` appears in the catalog and generated manifest. Live
-randomized split-flap tiles, viewport-driven ScrollReveal scrubbing, and
-pointer-distance ScrambledText are not capabilities of these offline
-RenderPlans. The C++ pack uses native glyph/word transforms and frame-based
+randomized split-flap tiles and viewport-driven ScrollReveal scrubbing are not
+capabilities of these offline RenderPlans. The C++ pack uses native glyph/word transforms and frame-based
 reveals; it does not claim those browser-only interactions are preserved.
 
-Build the emitters, regenerate the canonical catalog and emit only the four
+Build the emitters, regenerate the canonical catalog and emit only the two
 surviving React-derived V3 plans (1920×1080, 30 fps, 210 frames):
 
 ```shell
@@ -1240,13 +1271,30 @@ available, and can also be run directly with
 
 `chronontemplate::MultiImageSpec` covers grouped boards with two to five
 images (duo, trio, quad, penta). Its default `motionId` is `"random"`, which
-selects one of the two certified choreographies for that image count. The
+selects one of the certified choreographies for that image count (nine for
+duo, four for trio, quad and penta). The
 selection is reproducible: set `motionSeed` to the group identity or job seed;
 when it is empty, the scene name, layout and ordered image paths form the seed.
 The resolved choreography is returned as `MultiImageBoard::motionId`. Pass a
 specific catalog ID to pin a choreography, or set `motionId` to an empty string
 to retain the older shared entrance. A single image stays on the single-image
 animation path and does not need a one-member group recipe.
+
+### Premium multi-image motions
+
+Each family also certifies two premium choreographies, listed in
+`catalog/multi_entity_layout.v1.json` under `multi_image_premium_v1`:
+
+- duo: `duo_cinematic_parallax`, `duo_depth_handoff`
+- trio: `trio_orbit_focus`, `trio_prism_cascade`
+- quad: `quad_mosaic_wave`, `quad_parallax_grid`
+- penta: `penta_carousel_orbit`, `penta_hero_cascade`
+
+They add a post-entrance focus pass — a shallow depth lift, a restrained scale
+emphasis, an optional tilt and a parallax offset — on top of the entrance. The
+pass is authored on the same layer tracks as the entrance, rides the image and
+its soft halo together, and composes with every style. Select one with
+`motionId`, or let `random` include it in the layout's draw.
 
 ### Multi-image story reels and the soft-dream look
 
