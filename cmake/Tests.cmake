@@ -115,6 +115,13 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_image_animation_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_image_animation_pack_test COMMAND chronontemplate_image_animation_pack_test)
 
+    # The native heterogeneous group pack: five roles, 2..8 members, one
+    # controller per role, a shared stagger timeline and the ten-second cap.
+    add_executable(chronontemplate_group_animation_pack_test tests/group_animation_pack.cpp)
+    target_link_libraries(chronontemplate_group_animation_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_group_animation_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_group_animation_pack_test COMMAND chronontemplate_group_animation_pack_test)
+
     add_executable(chronontemplate_image_style_packs_test tests/image_style_packs.cpp)
     target_link_libraries(chronontemplate_image_style_packs_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_image_style_packs_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -179,6 +186,13 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_web_shots_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_web_shots_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_web_shots_pack_test COMMAND chronontemplate_web_shots_pack_test)
+
+    # Six new web-animation grammars in the Motion Lab pack: stable identities,
+    # 6 s default, 10 s ceiling, deterministic plans and fail-closed specs.
+    add_executable(chronontemplate_web_motion_lab_pack_test tests/web_motion_lab_pack.cpp)
+    target_link_libraries(chronontemplate_web_motion_lab_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_web_motion_lab_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_web_motion_lab_pack_test COMMAND chronontemplate_web_motion_lab_pack_test)
 
     add_executable(chronontemplate_elements_documentary_test tests/elements_documentary.cpp)
     target_link_libraries(chronontemplate_elements_documentary_test PRIVATE chronontemplate)

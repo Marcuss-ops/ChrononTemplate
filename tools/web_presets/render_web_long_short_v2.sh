@@ -75,7 +75,6 @@ render_clip() {
 render_clip web_page_complete_light_v1 240 "$OUT/plans/web/web_page_complete_light_v1.plan.json"
 render_clip web_page_highlight3d_dark_v1 240 "$OUT/plans/web/web_page_highlight3d_dark_v1.plan.json"
 render_clip web_page_longphraseblurred_light_v1 240 "$OUT/plans/web/web_page_longphraseblurred_light_v1.plan.json"
-render_clip short_phrase_editorial_baseline_rise 210 "$OUT/plans/short/short_phrase_editorial_baseline_rise.plan.json"
 render_clip short_phrase_editorial_contrast_sweep 210 "$OUT/plans/short/short_phrase_editorial_contrast_sweep.plan.json"
 render_clip short_phrase_product_kinetic_center_build 210 "$OUT/plans/short/short_phrase_product_kinetic_center_build.plan.json"
 

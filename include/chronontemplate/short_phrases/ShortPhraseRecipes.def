@@ -2,8 +2,6 @@
 // Fields: enum key, wire id, family, min words, max words, suggested,
 // caption target, enabled in the generic RenderingGen runtime.
 SHORT_PHRASE_RECIPE(ShapePhraseWipe, "short_phrase_shape_phrase_wipe", "classic", 5, 5, true, true, true)
-SHORT_PHRASE_RECIPE(EditorialBaselineRise, "short_phrase_editorial_baseline_rise", "editorial", 4, 4, true, true, true)
-SHORT_PHRASE_RECIPE(EditorialSideGlide, "short_phrase_editorial_side_glide", "editorial", 5, 5, true, true, true)
 SHORT_PHRASE_RECIPE(EditorialFocusResolve, "short_phrase_editorial_focus_resolve", "editorial", 5, 5, true, true, true)
 SHORT_PHRASE_RECIPE(EditorialContrastSweep, "short_phrase_editorial_contrast_sweep", "editorial", 4, 4, true, true, true)
 SHORT_PHRASE_RECIPE(ProductTrackingPullIn, "short_phrase_product_kinetic_center_build", "product_video", 3, 3, true, false, true)
@@ -13,5 +11,7 @@ SHORT_PHRASE_RECIPE(ProductRadialExpansion, "short_phrase_product_strikethrough_
 SHORT_PHRASE_RECIPE(ProductDigitalAssembly, "short_phrase_product_chromatic_fringe_title", "product_video", 1, 1, true, true, true)
 SHORT_PHRASE_RECIPE(ProductSplitFlapText, "short_phrase_product_split_flap_text", "product_video", 2, 2, true, false, false)
 SHORT_PHRASE_RECIPE(ProductScrollReveal, "short_phrase_product_scroll_reveal", "product_video", 4, 4, true, true, true)
+SHORT_PHRASE_RECIPE(ProductWordStack, "short_phrase_product_word_stack", "product_video", 3, 3, true, true, true)
+SHORT_PHRASE_RECIPE(ProductTrackingFocus, "short_phrase_product_tracking_focus", "product_video", 4, 4, true, true, true)
 SHORT_PHRASE_RECIPE(EditorialTerminalFocus, "short_phrase_editorial_claude_terminal_focus", "editorial", 1, 3, true, true, true)
 SHORT_PHRASE_RECIPE(BurstReveal, "short_phrase_burst", "classic", 1, 5, true, true, true)

@@ -261,6 +261,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/web/WebShotsRebuildPack.cpp
         src/chronontemplate/web/WebShotsNextPack.cpp
         src/chronontemplate/web/MotionClassicsPack.cpp
+        # motion lab: sei nuove grammatiche web (aperture, flap, halftone, ink, parallax, glitch)
+        src/chronontemplate/web/WebMotionLabPack.cpp
         src/chronontemplate/web/WebFontMeasure.cpp
         # second generation: radians-safe fold, distinct recipes, reworked hierarchy
         src/chronontemplate/web/WebPageV2Pack.cpp
@@ -270,6 +272,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/transitions/TransitionPack.cpp
         # captions + data-viz (BACKLOG item 5): PCM beat grid, captions, bar chart
         src/chronontemplate/captions_dataviz/CaptionsDataVizPack.cpp
+        # first native heterogeneous group-animation pack: phrase/image/caption/date/metric
+        src/chronontemplate/group_animation/GroupAnimationPack.cpp
         # modern, semantically qualified chart recipes
         src/chronontemplate/charts/ChartsPack.cpp
         # the template catalog that used to live inside the motion core
@@ -324,6 +328,15 @@ if(TARGET chrononmotion_chronon3d_adapter)
     target_link_libraries(chronontemplate_emit_real_depth_focus_v1 PRIVATE chrononmotion_chronon3d_adapter)
 endif()
 target_compile_options(chronontemplate_emit_real_depth_focus_v1 PRIVATE -Wall -Wextra)
+
+# Native C++ heterogeneous group animations: one master with all five roles and
+# four two-member clips, projected to chronon.render-plan.v3 and a manifest.
+add_executable(chronontemplate_emit_group_animation_showcase
+        tools/showcases/emit_group_animation_showcase.cpp)
+target_link_libraries(chronontemplate_emit_group_animation_showcase PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_group_animation_showcase PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_group_animation_showcase PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_resolve_camera_samples
         tools/camera_roll/resolve_camera_samples.cpp)
@@ -457,6 +470,13 @@ add_executable(chronontemplate_emit_web_motion_classics
         tools/web_shots/emit_web_motion_classics.cpp)
 target_link_libraries(chronontemplate_emit_web_motion_classics PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_motion_classics PRIVATE -Wall -Wextra)
+
+# Six Web Motion Lab experiments: aperture scan, split flap, halftone dissolve,
+# ink bloom, parallax depth and slice glitch as native RenderPlan V3 plans.
+add_executable(chronontemplate_emit_web_motion_lab
+        tools/web_shots/emit_web_motion_lab.cpp)
+target_link_libraries(chronontemplate_emit_web_motion_lab PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_motion_lab PRIVATE -Wall -Wextra)
 
 # Reference web phrase rebuilds are direct native render-plan V3 data. The
 # provided screenshots supply copy and composition references only.

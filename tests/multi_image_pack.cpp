@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cmath>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -108,20 +109,6 @@ namespace {
         check(threw, "a quad with three tiles is rejected");
     }
 
-    /// Opacity of every tile sampled every 10 frames: the choreography's signature.
-    std::vector<float> tileOpacityTimeline(const MultiImageSpec& spec, std::size_t tileIndex) {
-        FakeContentHost host;
-        TemplateScene scene("timeline", 30.f, host, 1920.f, 1080.f);
-        const MultiImageBoard board = addMultiImageBoard(scene, spec);
-        std::vector<float> out;
-        for (int frame = 0; frame <= 140; frame += 10) {
-            const FrameSubmission sub = scene.submit(frame);
-            const BoundLayer* layer = findLayer(sub, board.tiles[tileIndex]->id());
-            out.push_back(layer ? layer->transform.opacity : -1.f);
-        }
-        return out;
-    }
-
     void theGroupMotionsAreCertifiedPerLayout() {
         section("group motions are certified per layout");
         constexpr std::array<MultiImageLayout, 4> layouts{
@@ -191,71 +178,40 @@ namespace {
         }
     }
 
-    void theTwoMotionsOfALayoutDiffer() {
-        section("the two motions of a layout produce different choreographies");
+    void everyLayoutUsesTheSameReusableMotionSet() {
+        section("every image count uses the same reusable motion set");
         constexpr std::array<MultiImageLayout, 4> layouts{
                 MultiImageLayout::Duo, MultiImageLayout::Trio,
                 MultiImageLayout::Quad, MultiImageLayout::Penta};
-        for (const MultiImageLayout layout : layouts) {
-            const std::vector<std::string> ids = multiImageMotionIds(layout);
-            MultiImageSpec first = specFor(layout);
-            first.motionId = ids[0];
-            MultiImageSpec second = specFor(layout);
-            second.motionId = ids[1];
-            bool differs = false;
-            for (std::size_t tile = 0; tile < multiImageTileCount(layout); ++tile) {
-                if (tileOpacityTimeline(first, tile) != tileOpacityTimeline(second, tile)) {
-                    differs = true;
-                }
-            }
-            check(differs, "the two certified motions stagger the tiles differently");
+        // The pack owns the list; this test derives it instead of restating it.
+        const std::vector<std::string> expected = multiImageMotionIds(MultiImageLayout::Duo);
+        check(expected.size() == 14, "the reusable set exposes fourteen transitions");
+        check(std::set<std::string>(expected.begin(), expected.end()).size() == expected.size(),
+              "the reusable transition ids are unique");
+        std::size_t cameraPans = 0;
+        for (const std::string& id : expected) {
+            check(id.rfind("image_group_", 0) == 0,
+                  "every reusable transition carries the image_group_ prefix");
+            if (id.rfind("image_group_camera_pan_", 0) == 0) ++cameraPans;
         }
-    }
-
-    void thePremiumMotionsAddFocusAndDepth() {
-        section("premium group motions add focus and depth");
-        constexpr std::array<MultiImageLayout, 4> layouts{
-                MultiImageLayout::Duo, MultiImageLayout::Trio,
-                MultiImageLayout::Quad, MultiImageLayout::Penta};
-        constexpr std::array<std::size_t, 4> counts{9, 4, 4, 4};
-        constexpr std::array<std::array<const char*, 2>, 4> premium{{
-                {"duo_cinematic_parallax", "duo_depth_handoff"},
-                {"trio_orbit_focus", "trio_prism_cascade"},
-                {"quad_mosaic_wave", "quad_parallax_grid"},
-                {"penta_carousel_orbit", "penta_hero_cascade"},
-        }};
-
-        for (std::size_t layoutIndex = 0; layoutIndex < layouts.size(); ++layoutIndex) {
-            const MultiImageLayout layout = layouts[layoutIndex];
-            check(multiImageMotionIds(layout).size() == counts[layoutIndex],
-                  "the premium pass leaves the layout catalog at its expected size");
-            for (const char* id : premium[layoutIndex]) {
-                check(isMultiImageMotion(layout, id), "the premium motion is certified");
+        check(cameraPans == 4, "the reusable set carries the four camera-pan directions");
+        for (const MultiImageLayout layout : layouts) {
+            check(multiImageMotionIds(layout) == expected,
+                  "every layout exposes the same reusable transitions");
+            for (const std::string& id : expected) {
+                check(isMultiImageMotion(layout, id), "reusable transition is admitted for each layout");
                 MultiImageSpec spec = specFor(layout);
                 spec.motionId = id;
                 FakeContentHost host;
-                TemplateScene scene(std::string("premium_") + id, 30.f, host, 1920.f, 1080.f);
+                TemplateScene scene("reusable_" + id, 30.f, host, 1920.f, 1080.f);
                 const MultiImageBoard board = addMultiImageBoard(scene, spec);
-                check(board.motionId == id, "the board reports its premium motion");
-                check(scene.validate().empty(), "the premium board validates");
-
-                const FrameSubmission settled = scene.submit(100);
-                bool liftsDepth = false;
-                bool addsFocus = false;
-                for (LayerHandle* tile : board.tiles) {
-                    const BoundLayer* layer = findLayer(settled, tile->id());
-                    check(layer && layer->transform.opacity >= 0.95f,
-                          "every premium tile is visible by mid-board");
-                    for (const auto& key : tile->layer().tracks.position.keys()) {
-                        if (key.value.z > 0.5f) liftsDepth = true;
-                    }
-                    for (const auto& key : tile->layer().tracks.scale.keys()) {
-                        if (key.value.x > 1.01f) addsFocus = true;
-                    }
-                }
-                check(liftsDepth, "the premium motion lifts a tile in depth");
-                check(addsFocus, "the premium motion gives a tile a focus scale");
+                check(board.motionId == id, "board reports the selected reusable transition");
+                check(scene.validate().empty(), "reusable transition scene validates");
             }
+            check(!isMultiImageMotion(layout, "duo_split_reveal"),
+                  "count-specific choreography is not selectable");
+            check(!isMultiImageMotion(layout, "image_group_not_certified"),
+                  "an unknown image-group id is not selectable");
         }
     }
 
@@ -440,7 +396,7 @@ namespace {
             check(host.lastImageRequest().cornerRadius == 28.f,
                   "the archive cards are rounded");
             check(scene.validate().empty(), "the archive board validates");
-            const FrameSubmission frame = scene.submit(70);
+            const FrameSubmission frame = scene.submit(110);
             for (LayerHandle* tile : board.tiles) {
                 const BoundLayer* layer = findLayer(frame, tile->id());
                 check(layer && layer->transform.opacity >= 0.9f,
@@ -476,7 +432,7 @@ namespace {
             check(board.tiles[1]->layer().tracks.rotation.empty(),
                   "the center polaroid stays upright");
             check(scene.validate().empty(), "the polaroid board validates");
-            const FrameSubmission frame = scene.submit(70);
+            const FrameSubmission frame = scene.submit(110);
             for (LayerHandle* tile : board.tiles) {
                 const BoundLayer* layer = findLayer(frame, tile->id());
                 check(layer && layer->transform.opacity >= 0.9f,
@@ -514,7 +470,6 @@ int main() {
     theSoftEntrancesAnimateSimultaneousBoards();
     theGroupMotionsAreCertifiedPerLayout();
     randomGroupMotionsAreStableAndApplied();
-    theTwoMotionsOfALayoutDiffer();
-    thePremiumMotionsAddFocusAndDepth();
+    everyLayoutUsesTheSameReusableMotionSet();
     return chrononmotion_test::report();
 }

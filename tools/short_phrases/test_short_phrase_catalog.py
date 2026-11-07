@@ -125,17 +125,17 @@ def main() -> int:
         "short_phrase_product_masked_heading",
         "short_phrase_product_scrambled_text",
         "short_phrase_product_gradual_blur",
+        "short_phrase_editorial_baseline_rise",
+        "short_phrase_editorial_side_glide",
     }
     check("none of the retired motions is published", not retired_ids.intersection({r["id"] for r in recipes}))
     check("14 surviving recipes", len(recipes) == 14, str(len(recipes)))
     editorial = [r for r in recipes if r["id"].startswith("short_phrase_editorial_")]
     product = [r for r in recipes if r["id"].startswith("short_phrase_product_")]
-    check("surviving editorial recipes", len(editorial) == 5, str(len(editorial)))
-    check("surviving product recipes", len(product) == 7, str(len(product)))
+    check("surviving editorial recipes", len(editorial) == 3, str(len(editorial)))
+    check("surviving product recipes", len(product) == 9, str(len(product)))
     check("exact surviving id set", {recipe.get("id") for recipe in recipes} == {
         "short_phrase_shape_phrase_wipe",
-        "short_phrase_editorial_baseline_rise",
-        "short_phrase_editorial_side_glide",
         "short_phrase_editorial_focus_resolve",
         "short_phrase_editorial_contrast_sweep",
         "short_phrase_product_kinetic_center_build",
@@ -147,6 +147,8 @@ def main() -> int:
         "short_phrase_product_scroll_reveal",
         "short_phrase_editorial_claude_terminal_focus",
         "short_phrase_burst",
+        "short_phrase_product_word_stack",
+        "short_phrase_product_tracking_focus",
     })
     adapted_product_ids = {
         "short_phrase_product_split_flap_text", "short_phrase_product_scroll_reveal",
