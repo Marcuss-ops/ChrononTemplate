@@ -22,6 +22,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace chronontemplate {
@@ -63,6 +64,55 @@ namespace chronontemplate {
         chrononmotion::Vector2 padding{12.f, 8.f};
     };
 
+    /// Native text material. Chronon3D already owns the GEL shader, extruded
+    /// backing geometry and the sharp MTSDF silhouette; this is the declarative
+    /// request for them, not a second renderer.
+    struct TextMaterialStyle {
+        bool gelSurface{false};
+        bool gelTransmission{true};
+        bool gelSoftFusion{false};
+        /// Positive values request real extruded text geometry at that depth.
+        /// Zero keeps the flat text run.
+        float extrusionDepth{0.f};
+    };
+
+    struct TextDropShadowStyle {
+        std::string color{"#000000"};
+        float opacity{0.45f};
+        float blur{2.f};
+        chrononmotion::Vector2 offset{-1.f, 2.f};
+    };
+
+    struct TextChromaticAberrationStyle {
+        float redOffset{0.f};
+        float blueOffset{0.f};
+        chrononmotion::Vector2 redShift{0.f, 0.f};
+        chrononmotion::Vector2 greenShift{0.f, 0.f};
+        chrononmotion::Vector2 blueShift{0.f, 0.f};
+    };
+
+    struct TextBloomStyle {
+        float threshold{0.72f};
+        float radius{7.5f};
+        float intensity{0.65f};
+    };
+
+    struct TextLensFlareStyle {
+        float threshold{0.72f};
+        float intensity{0.9f};
+        float radius{0.82f};
+        float halo{0.f};
+        float ghost{0.f};
+        float streak{1.f};
+    };
+
+    /// Escape hatch for the canonical effect catalog (for example the native
+    /// `generate.fill` pass on an extruded backing). Parameters stay ordered.
+    struct TextCatalogEffectStyle {
+        std::string effectId{};
+        std::vector<std::pair<std::string, float>> params{};
+    };
+
     /// What the template wants written. The fields mirror Chronon's authoring
     /// vocabulary; the module keeps them as data and hands them over untouched.
     struct TextRequest {
@@ -75,6 +125,17 @@ namespace chronontemplate {
         std::optional<TextShadowStyle> shadow{};
         std::optional<TextGlowStyle> glow{};
         std::optional<TextBackgroundStyle> background{};
+        /// GEL/extruded material and the selective optics that live on the
+        /// text layer. All of them lower to fields Chronon3D already consumes.
+        std::optional<TextMaterialStyle> material{};
+        std::optional<TextDropShadowStyle> dropShadow{};
+        std::optional<TextChromaticAberrationStyle> chromaticAberration{};
+        std::optional<TextBloomStyle> bloom{};
+        std::optional<TextLensFlareStyle> lensFlare{};
+        std::vector<TextCatalogEffectStyle> catalogEffects{};
+        /// Keep a 3D text layer (needed by extruded_text) on canvas coordinates
+        /// instead of projecting it through the scene camera.
+        bool screenSpace{false};
     };
 
     struct ImageRequest {
@@ -117,6 +178,9 @@ namespace chronontemplate {
         float lensCurvature{0.f};
         float lensScale{1.f};
         float softBlur{0.f};
+        /// Keep this content pinned to output-canvas coordinates instead of
+        /// projecting it through the scene camera. Background plates use it.
+        bool screenSpace{false};
     };
 
     enum class ShapeGeometry : std::uint8_t { Rectangle, Ellipse, Grid, DotGrid, Polygon, Path };
