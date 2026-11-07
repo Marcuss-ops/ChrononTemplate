@@ -4,6 +4,7 @@
 #include "chrononmotion/motion/Presets.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cmath>
 #include <cstdint>
@@ -146,7 +147,7 @@ namespace chronontemplate {
         }
 
         /// How one tile enters: a slide along a direction, a pop, or a plain rise.
-        enum class Enter : std::uint8_t { Slide, Pop, Rise };
+        enum class Enter : std::uint8_t { Slide, Pop, Rise, Fade, SoftZoom, SoftLift, SoftDrift, Settle };
 
         struct Beat {
             int start{0};        ///< frame offset from the board's inFrame
@@ -165,6 +166,36 @@ namespace chronontemplate {
             float focusDriftY{0.f};     ///< peak y offset during the emphasis
             float focusTiltDegrees{0.f};///< peak rotation during the emphasis
         };
+
+        /// One certification row per reusable group choreography. The public
+        /// id list and the beat schedule both derive from this table; adding a
+        /// motion here is what makes it reachable, and the catalog emitter
+        /// fails if the row has no matching `image_group_v1` catalog entry.
+        struct ReusableMotion {
+            const char* id;
+            Direction direction;
+            Enter enter;
+        };
+
+        const std::array<ReusableMotion, 14>& reusableMotions() {
+            static constexpr std::array<ReusableMotion, 14> motions{{
+                    {"image_group_slide_right", Direction::Right, Enter::Slide},
+                    {"image_group_slide_left", Direction::Left, Enter::Slide},
+                    {"image_group_slide_in", Direction::Up, Enter::Pop},
+                    {"image_group_slide_down", Direction::Down, Enter::Slide},
+                    {"image_group_slide_up", Direction::Up, Enter::Slide},
+                    {"image_group_soft_fade", Direction::Up, Enter::Fade},
+                    {"image_group_gentle_zoom", Direction::Up, Enter::SoftZoom},
+                    {"image_group_soft_lift", Direction::Up, Enter::SoftLift},
+                    {"image_group_diagonal_drift", Direction::Up, Enter::SoftDrift},
+                    {"image_group_depth_settle", Direction::Up, Enter::Settle},
+                    {"image_group_camera_pan_right", Direction::Right, Enter::Slide},
+                    {"image_group_camera_pan_left", Direction::Left, Enter::Slide},
+                    {"image_group_camera_pan_down", Direction::Down, Enter::Slide},
+                    {"image_group_camera_pan_up", Direction::Up, Enter::Slide},
+            }};
+            return motions;
+        }
 
         /// The certified choreography of each layout as a per-tile beat schedule.
         /// `s` is the stagger step; every start stays inside the duration.
@@ -185,6 +216,27 @@ namespace chronontemplate {
                 beat.focusDriftY = driftY;
                 beat.focusTiltDegrees = tilt;
             };
+
+            // Reusable transitions derive their stagger from the number of
+            // tiles at render time. The motion itself stays the same for duo,
+            // trio, quad and penta instead of maintaining per-count tracks.
+            if (motionId.rfind("image_group_", 0) == 0) {
+                const auto& motions = reusableMotions();
+                const auto motion = std::find_if(
+                        motions.begin(), motions.end(),
+                        [&](const ReusableMotion& candidate) { return motionId == candidate.id; });
+                if (motion == motions.end()) {
+                    throw std::invalid_argument("beatsFor: uncertified reusable group motion");
+                }
+                const Direction direction = motion->direction;
+                const Enter enter = motion->enter;
+                const int move = std::max(12, std::min(24, duration / std::max(2, count)));
+                const int step = std::max(1, (duration - move) / std::max(1, count));
+                for (int i = 0; i < count; ++i) {
+                    at(static_cast<std::size_t>(i)) = {i * step, move, enter, direction};
+                }
+                return beats;
+            }
 
             switch (layout) {
                 case MultiImageLayout::Duo:
@@ -385,22 +437,22 @@ namespace chronontemplate {
         }
 
         const std::vector<std::string>& motionIdsFor(MultiImageLayout layout) {
-            static const std::vector<std::string> duo{"duo_split_reveal", "duo_cross_focus",
-                                                      "duo_soft_bloom_rise", "duo_soft_drift_settle",
-                                                      "duo_soft_cross_bloom", "duo_soft_breathe_hold",
-                                                      "duo_soft_stagger_glow", "duo_cinematic_parallax",
-                                                      "duo_depth_handoff"};
-            static const std::vector<std::string> trio{"trio_fan_reveal", "trio_center_priority",
-                                                      "trio_orbit_focus", "trio_prism_cascade"};
-            static const std::vector<std::string> quad{"quad_grid_assemble", "quad_corner_converge",
-                                                      "quad_mosaic_wave", "quad_parallax_grid"};
-            static const std::vector<std::string> penta{"penta_hero_plus_four", "penta_priority_cycle",
-                                                       "penta_carousel_orbit", "penta_hero_cascade"};
+            // One reusable animation inventory for every group size. The
+            // layout still chooses the image arrangement; it no longer
+            // selects a separate animation family for duo/trio/quad/penta.
+            static const std::vector<std::string> reusable = [] {
+                std::vector<std::string> ids;
+                ids.reserve(reusableMotions().size());
+                for (const ReusableMotion& motion : reusableMotions()) {
+                    ids.emplace_back(motion.id);
+                }
+                return ids;
+            }();
             switch (layout) {
-                case MultiImageLayout::Duo: return duo;
-                case MultiImageLayout::Trio: return trio;
-                case MultiImageLayout::Quad: return quad;
-                case MultiImageLayout::Penta: return penta;
+                case MultiImageLayout::Duo:
+                case MultiImageLayout::Trio:
+                case MultiImageLayout::Quad:
+                case MultiImageLayout::Penta: return reusable;
             }
             throw std::invalid_argument("motionIdsFor: unknown layout");
         }
@@ -683,6 +735,33 @@ namespace chronontemplate {
                                               .inFrame = startFrame,
                                               .duration = moveFrames,
                                               .distance = spec.tileHeight * 0.5f})
+                                .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                        break;
+                    case Enter::Fade:
+                        target.animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                        break;
+                    case Enter::SoftZoom:
+                        target.animate(ScalePop{.inFrame = startFrame, .duration = moveFrames,
+                                               .from = 0.965f, .to = 1.f})
+                                .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                        break;
+                    case Enter::SoftLift:
+                        target.animate(SlideIn{.direction = Direction::Up,
+                                              .inFrame = startFrame,
+                                              .duration = moveFrames,
+                                              .distance = 28.f})
+                                .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                        break;
+                    case Enter::SoftDrift:
+                        target.animate(SlideIn{.direction = Direction::Right,
+                                              .inFrame = startFrame,
+                                              .duration = moveFrames,
+                                              .distance = 30.f})
+                                .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
+                        break;
+                    case Enter::Settle:
+                        target.animate(ScalePop{.inFrame = startFrame, .duration = moveFrames,
+                                               .from = 1.03f, .to = 1.f})
                                 .animate(FadeIn{.inFrame = startFrame, .duration = enterFrames});
                         break;
                 }

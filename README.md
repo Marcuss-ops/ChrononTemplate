@@ -141,8 +141,8 @@ tools/
 
 ## Clean editorial short phrases
 
-The surviving short-phrase pack contains 26 recipes across the classic,
-editorial and product-video families. The eight editorial recipes use restrained
+The surviving short-phrase pack contains 14 recipes across the classic,
+editorial and product-video families. The three editorial recipes use restrained
 motion, shrink-only text fitting and a stationary reading hold. Focus blur is a
 native text animator, not a layer effect. All surviving recipes are available
 through `shortPhraseAnimations()` and the word-count suggestion table, with
@@ -1270,15 +1270,12 @@ available, and can also be run directly with
 ### Multi-image group motion selection
 
 `chronontemplate::MultiImageSpec` covers grouped boards with two to five
-images (duo, trio, quad, penta). Its default `motionId` is `"random"`, which
-selects one of the certified choreographies for that image count (nine for
-duo, four for trio, quad and penta). The
-selection is reproducible: set `motionSeed` to the group identity or job seed;
-when it is empty, the scene name, layout and ordered image paths form the seed.
-The resolved choreography is returned as `MultiImageBoard::motionId`. Pass a
-specific catalog ID to pin a choreography, or set `motionId` to an empty string
-to retain the older shared entrance. A single image stays on the single-image
-animation path and does not need a one-member group recipe.
+images (duo, trio, quad, penta). The image picker exposes ten reusable
+transitions: five directional slides plus soft fade, gentle zoom, soft lift,
+diagonal drift and depth settle. Those same ten choices work on one image or
+every member of a group. Group stagger is computed from the actual count at
+render time, so no count-specific recipe is needed. Older count-specific
+catalog IDs remain available to replay saved plans.
 
 ### Premium multi-image motions
 
@@ -1407,3 +1404,78 @@ python3 tools/important_phrases/build_text_depth_focus_v1.py --render-all \\
 Plans, MP4s, frame timing sidecars and `manifest.json` are written under
 `out/text_depth_focus_v1/`; only the plans/MP4s/timing files are mirrored into
 the delivery staging directory.
+
+### Heterogeneous group animation showcase
+
+`chronontemplate::GroupAnimationPack` is the first native group animation that
+puts every editorial role on one timeline instead of animating a single
+element family. The five roles are `important_phrase`, `image`, `caption`,
+`date` and `metric`; each member owns one null controller and the controller
+carries the stagger, the entrance and the shared exit. The pack emits five
+`chronon.render-plan.v3` documents through the ordinary TemplateScene ->
+RenderPlan path:
+
+- `group_sequence_all_roles` - all five roles, 300 frames (10 s)
+- `group_sequence_phrase_image` - phrase + image, 210 frames (7 s)
+- `group_sequence_phrase_caption` - phrase + caption, 210 frames (7 s)
+- `group_sequence_phrase_date` - phrase + date, 210 frames (7 s)
+- `group_sequence_phrase_metric` - phrase + metric, 210 frames (7 s)
+
+Every clip is 1920×1080 at 30 fps and at most ten seconds. The master uses a
+14-frame stagger and the role pairs use 16; every member fades and slides up
+over 24 frames, then the whole group fades out together.
+
+Build the pack, run its contract test, emit and validate the plans:
+
+```shell
+cmake --build build/dev-fast --target chronontemplate_emit_group_animation_showcase chronontemplate_group_animation_pack_test
+./build/dev-fast/chronontemplate_group_animation_pack_test
+./build/dev-fast/chronontemplate_emit_group_animation_showcase out/group_animation_showcase_v1
+
+CLI=../Chronon3d/build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_cli
+for plan in out/group_animation_showcase_v1/*.plan.json; do
+  "$CLI" validate --plan "$plan" --assets-root ../Chronon3d
+done
+```
+
+Render the five MP4s with the Vulkan lane and NVENC:
+
+```shell
+CLI=../Chronon3d/build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_cli
+for name in group_sequence_all_roles group_sequence_phrase_image \
+            group_sequence_phrase_caption group_sequence_phrase_date \
+            group_sequence_phrase_metric; do
+  "$CLI" render \
+    --plan "out/group_animation_showcase_v1/$name.plan.json" \
+    --output "out/group_animation_showcase_v1/$name.mp4" \
+    --assets-root ../Chronon3d \
+    --backend vulkan --profile preview \
+    --hardware nvenc --encoder-backend pipe \
+    --codec h264 --fps 30 --rate-control qp --qp 18
+done
+```
+
+The showcase is deliberately flat: the emitter drops the scene camera, keeps
+the resolved text/shape samples, removes the text glow and re-authors the image
+role in the renderer's centre-relative image convention with its own opacity
+and `position_y` tracks. That keeps the five-role composite legible on the
+canonical 2D plan path without changing the shared two-and-a-half-D pipeline.
+
+Upload the five MP4s with RenderingGen's content-addressed uploader directly
+into the requested `Overlay Chronon` review folder:
+
+```shell
+UPLOADER=../RenderingGen/bin/drive-upload
+CREDENTIALS=../RenderingGen/UploadDrive/credentials.json
+TOKEN=../RenderingGen/UploadDrive/token.json
+for file in out/group_animation_showcase_v1/group_sequence_*.mp4; do
+  "$UPLOADER" -credentials "$CREDENTIALS" -token "$TOKEN" \
+    -folder 1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS \
+    -file "$file" -name "$(basename "$file")" \
+    -sha256 "$(sha256sum "$file" | cut -d ' ' -f 1)"
+done
+```
+
+The upload manifest records each clip's role members, frame count, SHA-256,
+byte count and provider-confirmed Drive id/link in
+`out/group_animation_showcase_v1/upload_manifest.json`.

@@ -518,11 +518,12 @@ namespace {
                 }
                 tracks.push_back(std::move(lowered));
             }
-            layers.push_back(json{{"id", accent.id}, {"type", "shape"},
-                                  {"shape", {{"type", "rect"},
-                                             {"fill", json::array({channel(1), channel(3), channel(5), 1.f})}}},
+            layers.push_back(json{{"id", accent.id}, {"type", "color"},
+                                  {"color", json::array({channel(1), channel(3), channel(5), 1.f})},
                                   {"size", json::array({accent.width, accent.height})},
-                                  {"position", json::array({style.position[0], style.position[1] + accent.y_offset})},
+                                  // Colour layers are positioned from the canvas centre,
+                                  // while text layers use absolute canvas coordinates.
+                                  {"position", json::array({accent.x_offset, accent.y_offset})},
                                   {"opacity", accent.opacity}, {"start_frame", 0},
                                   {"duration_frames", kDurationFrames}, {"animation", {{"tracks", tracks}}}});
         }

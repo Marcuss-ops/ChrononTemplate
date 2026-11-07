@@ -389,7 +389,9 @@ namespace {
             const std::vector<std::string> ids = chronontemplate::multiImageMotionIds(layout);
             if (ids.size() < 2) fail("each multi-image layout must certify at least two group motions");
             for (const auto& id : ids) {
-                if (!certified.insert(id).second) fail("group motion \"" + id + "\" is certified twice");
+                const bool reusable = id.rfind("image_group_", 0) == 0;
+                if (!certified.insert(id).second && !reusable)
+                    fail("layout-bound group motion \"" + id + "\" is certified twice");
             }
         }
         std::set<std::string> catalogued;
@@ -398,8 +400,12 @@ namespace {
             const std::string id = motion.value("id", "");
             if (id.empty() || !catalogued.insert(id).second) fail("empty or duplicate image_group_v1 motion \"" + id + "\"");
             if (certified.find(id) == certified.end()) {
-                fail("image_group_v1 motion \"" + id + "\" is not certified by the C++ pack; "
-                     "add the choreography to MultiImagePack or retire the catalog row");
+                // Count-specific recipes remain readable by old saved plans,
+                // but are intentionally absent from the current picker and
+                // random-selection inventory.
+                if (id.rfind("image_group_", 0) == 0) {
+                    fail("reusable image-group motion \"" + id + "\" is not certified by the C++ pack");
+                }
             }
         }
         for (const auto& id : certified) {

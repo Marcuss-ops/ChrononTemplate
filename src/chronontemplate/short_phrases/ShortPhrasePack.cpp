@@ -71,6 +71,45 @@ namespace chronontemplate {
             case ShortPhraseAnimation::ProductDigitalAssembly: return chromaticFringeTitle();
             case ShortPhraseAnimation::ProductSplitFlapText: return splitFlapText();
             case ShortPhraseAnimation::ProductScrollReveal: return scrollReveal();
+            case ShortPhraseAnimation::ProductWordStack: {
+                constexpr int wordCount = 3;
+                constexpr int stagger = 10;
+                constexpr int rise = 18;
+                ShortPhraseDefinition def{name(animation), "Word Stack", "BUILT TO LAST", 46,
+                    {track("opacity", {{0, 0.f}, {12, 1.f}, {194, 1.f}, {209, 0.f}}, "linear"),
+                     track("scale", {{0, 1.03f}, {46, 1.f}, {194, 1.f}})},
+                    {}, {}, ShortPhraseExit::Reverse, ShortPhraseDecor::None, {}, 120.f};
+                for (int i = 0; i < wordCount; ++i) {
+                    const int start = i * stagger;
+                    const int landing = start + rise;
+                    const std::string window = "pick:" + std::to_string(i) + ":" + std::to_string(wordCount);
+                    std::vector<PhraseKeyframe> opacity = i == 0
+                        ? std::vector<PhraseKeyframe>{{0, 0.f}, {landing, 1.f}, {194, 1.f}}
+                        : std::vector<PhraseKeyframe>{{0, 0.f}, {start, 0.f}, {landing, 1.f}, {194, 1.f}};
+                    std::vector<PhraseKeyframe> y = i == 0
+                        ? std::vector<PhraseKeyframe>{{0, 78.f}, {landing, 0.f}, {194, 0.f}}
+                        : std::vector<PhraseKeyframe>{{0, 78.f}, {start, 78.f}, {landing, 0.f}, {194, 0.f}};
+                    std::vector<PhraseKeyframe> scale = i == 0
+                        ? std::vector<PhraseKeyframe>{{0, 0.94f}, {landing, 1.f}, {194, 1.f}}
+                        : std::vector<PhraseKeyframe>{{0, 0.94f}, {start, 0.94f}, {landing, 1.f}, {194, 1.f}};
+                    def.textAnimators.push_back(animator(PhraseSelector{"word", "forward", window},
+                        {track("opacity", std::move(opacity), "linear"),
+                         track("position_y", std::move(y)),
+                         track("scale", std::move(scale))}));
+                }
+                return def;
+            }
+            case ShortPhraseAnimation::ProductTrackingFocus: {
+                ShortPhraseDefinition def{name(animation), "Tracking Focus", "DETAILS MAKE THE DIFFERENCE", 36,
+                    {track("opacity", {{0, 0.f}, {14, 1.f}, {194, 1.f}, {209, 0.f}}, "linear"),
+                     track("scale", {{0, 1.06f}, {36, 1.f}, {194, 1.f}})},
+                    {animator(PhraseSelector{"word", "forward", "band"},
+                              {track("tracking", {{0, 16.f}, {36, 0.f}, {194, 0.f}}),
+                               track("blur", {{0, 10.f}, {30, 0.f}, {194, 0.f}}),
+                               track("opacity", {{0, 0.25f}, {20, 1.f}, {194, 1.f}}, "linear")})},
+                    {}, ShortPhraseExit::Reverse, ShortPhraseDecor::None, {}, 106.f};
+                return def;
+            }
             default: break;
         }
         // Authored entrance shapes in frames at 30 fps. `definition()` stretches
@@ -80,23 +119,9 @@ namespace chronontemplate {
             case ShortPhraseAnimation::EditorialTerminalFocus:
             case ShortPhraseAnimation::ProductSplitFlapText:
             case ShortPhraseAnimation::ProductScrollReveal:
+            case ShortPhraseAnimation::ProductWordStack:
+            case ShortPhraseAnimation::ProductTrackingFocus:
                 break;
-            case ShortPhraseAnimation::EditorialBaselineRise:
-                return {name(animation), "Word Snap", "Le idee prendono forma", 16,
-                        {track("position_y", {{0, 88.f}, {11, -9.f}, {16, 0.f}}),
-                         track("scale", {{0, 0.88f}, {11, 1.035f}, {16, 1.f}}), fadeIn(16, 7)},
-                        {animator(PhraseSelector{"word", "forward", "band"},
-                                  {track("position_y", {{0, 28.f}, {16, 0.f}}),
-                                   track("opacity", {{0, 0.15f}, {16, 1.f}}, "linear")})},
-                        {}, ShortPhraseExit::Reverse, ShortPhraseDecor::None, {}, 104.f};
-            case ShortPhraseAnimation::EditorialSideGlide:
-                return {name(animation), "Split Slide", "Il dettaglio fa la differenza", 20,
-                        {fadeIn(20, 6)},
-                        {animator(PhraseSelector{"word", "forward", "band"},
-                                  {track("position_x", {{0, -72.f}, {14, 6.f}, {20, 0.f}}),
-                                   track("position_y", {{0, 20.f}, {20, 0.f}}),
-                                   track("opacity", {{0, 0.f}, {8, 1.f}, {20, 1.f}}, "linear")})},
-                        {}, ShortPhraseExit::Reverse, ShortPhraseDecor::None, {}, 88.f, true};
             case ShortPhraseAnimation::EditorialFocusResolve:
                 return {name(animation), "Focus Lock", "Un nuovo punto di vista", 18,
                         {track("scale", {{0, 1.08f}, {13, 0.985f}, {18, 1.f}}), fadeIn(18, 6)},
@@ -214,12 +239,6 @@ namespace chronontemplate {
             if (t.property == "opacity") t = track("opacity", {{0, 0.f}, {90, 1.f}, {120, 1.f}}, "linear");
         }
         switch (animation) {
-            case ShortPhraseAnimation::EditorialBaselineRise:
-                layerBeat("position_y", 92.f, 0.f, -20.f, 0.f);
-                break;
-            case ShortPhraseAnimation::EditorialSideGlide:
-                layerBeat("position_x", -84.f, 0.f, 18.f, 0.f);
-                break;
             case ShortPhraseAnimation::EditorialFocusResolve:
                 layerBeat("position_x", 96.f, 0.f, -16.f, 0.f);
                 def.textAnimators.front().properties.front() = track(
@@ -236,6 +255,8 @@ namespace chronontemplate {
             // These definitions do not use the legacy editorial sequence body.
             case ShortPhraseAnimation::ProductSplitFlapText:
             case ShortPhraseAnimation::ProductScrollReveal:
+            case ShortPhraseAnimation::ProductWordStack:
+            case ShortPhraseAnimation::ProductTrackingFocus:
             case ShortPhraseAnimation::ShapePhraseWipe:
             case ShortPhraseAnimation::BurstReveal:
             case ShortPhraseAnimation::ProductTrackingPullIn:
