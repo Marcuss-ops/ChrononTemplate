@@ -100,6 +100,11 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_plan_lowering_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_plan_lowering_test COMMAND chronontemplate_plan_lowering_test)
 
+    add_executable(chronontemplate_gel_cinematic_title_test tests/gel_cinematic_title.cpp)
+    target_link_libraries(chronontemplate_gel_cinematic_title_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_gel_cinematic_title_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_gel_cinematic_title_test COMMAND chronontemplate_gel_cinematic_title_test)
+
     add_executable(chronontemplate_bullet_list_pack_test tests/bullet_list_pack.cpp)
     target_link_libraries(chronontemplate_bullet_list_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_bullet_list_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)

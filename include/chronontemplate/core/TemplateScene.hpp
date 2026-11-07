@@ -71,6 +71,14 @@ namespace chronontemplate {
         std::optional<TextShadowStyle> shadow{};
         std::optional<TextGlowStyle> glow{};
         std::optional<TextBackgroundStyle> background{};
+        std::optional<TextMaterialStyle> material{};
+        std::optional<TextDropShadowStyle> dropShadow{};
+        std::optional<TextChromaticAberrationStyle> chromaticAberration{};
+        std::optional<TextBloomStyle> bloom{};
+        std::optional<TextLensFlareStyle> lensFlare{};
+        std::vector<TextCatalogEffectStyle> catalogEffects{};
+        /// Pin a 3D text layer (extrusion) to canvas coordinates.
+        bool screenSpace{false};
     };
 
     /// Per-image frame style passed to Chronon's ContentHost. Radius zero keeps
@@ -110,6 +118,8 @@ namespace chronontemplate {
         ImageFitMode fit{ImageFitMode::Contain};
         chrononmotion::Vector2 targetSize{};
         ImageCrop crop{};
+        /// Background plates stay in output-canvas coordinates.
+        bool screenSpace{false};
     };
 
     struct ShapeSpec {

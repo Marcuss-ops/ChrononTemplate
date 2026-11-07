@@ -61,6 +61,7 @@ chronon3d::render_plan::LayerPlan makeImageLayerPlan(
     layer.type = LayerType::Image;
     layer.asset = handle.id;
     layer.size_dimensions = 2;
+    layer.screen_space = request.screenSpace;
     const float naturalWidth = handle.metrics.naturalSize.x;
     const float naturalHeight = handle.metrics.naturalSize.y;
     float cropX = request.crop.enabled ? request.crop.origin.x : 0.f;

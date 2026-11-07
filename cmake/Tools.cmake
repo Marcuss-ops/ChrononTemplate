@@ -1,4 +1,24 @@
 # ChrononTemplate tools (extracted from CMakeLists.txt; no new targets).
+add_executable(chronontemplate_emit_gel_cinematic_title
+        tools/gel/emit_gel_cinematic_title.cpp)
+target_link_libraries(chronontemplate_emit_gel_cinematic_title PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_gel_cinematic_title
+            PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_GEL_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_gel_cinematic_title PRIVATE
+        "${CHRONONTEMPLATE_GEL_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_GEL_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_GEL_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_gel_cinematic_title PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_compile_options(chronontemplate_emit_gel_cinematic_title PRIVATE -Wall -Wextra)
+
 # Demo/showcase emitters, the canonical catalog emitter and the canaries.
 # Included after the `chronontemplate` + `chronontemplate_live_adapter` targets.
 add_executable(chronontemplate_emit_text_depth_focus

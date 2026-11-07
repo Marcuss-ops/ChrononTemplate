@@ -308,6 +308,13 @@ namespace chronontemplate {
         request.shadow = spec.shadow;
         request.glow = spec.glow;
         request.background = spec.background;
+        request.material = spec.material;
+        request.dropShadow = spec.dropShadow;
+        request.chromaticAberration = spec.chromaticAberration;
+        request.bloom = spec.bloom;
+        request.lensFlare = spec.lensFlare;
+        request.catalogEffects = spec.catalogEffects;
+        request.screenSpace = spec.screenSpace;
 
         // Chronon creates and measures; the rectangle and its fingerprint come
         // back neutral, so the motion side can anchor without knowing a font.
@@ -382,6 +389,7 @@ namespace chronontemplate {
         request.lensCurvature = spec.frame.lensCurvature;
         request.lensScale = spec.frame.lensScale;
         request.softBlur = spec.frame.softBlur;
+        request.screenSpace = spec.screenSpace;
 
         ContentHandle handle = m_host.createImage(request);
         return adopt(std::move(handle), derivedName(spec.name, spec.path), Layer::kRoot);
