@@ -106,6 +106,19 @@ namespace chronontemplate {
         float streak{1.f};
     };
 
+    /// Downward volumetric shafts generated from the text layer's luminance.
+    /// The origin is normalized to the layer; the template pack places it at
+    /// each word's top centre so the shafts fall onto the backdrop below.
+    struct TextLightRaysStyle {
+        float originX{0.5f};
+        float originY{0.2f};
+        float length{300.f};
+        float density{1.35f};
+        float decay{0.88f};
+        std::string color{"#35DFFF"};
+        float opacity{0.34f};
+    };
+
     /// Escape hatch for the canonical effect catalog (for example the native
     /// `generate.fill` pass on an extruded backing). Parameters stay ordered.
     struct TextCatalogEffectStyle {
@@ -132,6 +145,7 @@ namespace chronontemplate {
         std::optional<TextChromaticAberrationStyle> chromaticAberration{};
         std::optional<TextBloomStyle> bloom{};
         std::optional<TextLensFlareStyle> lensFlare{};
+        std::optional<TextLightRaysStyle> lightRays{};
         std::vector<TextCatalogEffectStyle> catalogEffects{};
         /// Keep a 3D text layer (needed by extruded_text) on canvas coordinates
         /// instead of projecting it through the scene camera.

@@ -68,8 +68,6 @@ namespace chronontemplate::gel {
 
         const auto canvas = scene.canvas();
         const int endFrame = spec.inFrame + spec.durationFrames;
-        const float backingX = spec.backingOffset.x;
-        const float backingY = spec.backingOffset.y;
         // RenderPlan text/shape positions are absolute canvas centres, while
         // the Template/Motion authoring space is canvas-centred. Convert once
         // here so callers keep writing the reference pixel coordinates.
@@ -95,7 +93,6 @@ namespace chronontemplate::gel {
         scene.cameraRig().setTarget(chrononmotion::Vector3(0.f, 5.f, 0.f));
 
         GelCinematicTitleLayers out{};
-        out.backings.reserve(spec.words.size());
         out.faces.reserve(spec.words.size());
 
         if (!spec.plate.empty()) {
@@ -119,8 +116,10 @@ namespace chronontemplate::gel {
             out.plate = layer.id();
         }
 
-        // The extruded backing is real geometry; the native generate.fill pass
-        // keeps its side normals royal blue instead of dark navy.
+        // The former extruded backing was composited over the GEL face on the
+        // video path, hiding the face and its lime crest. Keep the plate and
+        // the three dielectric faces; the face's drop shadow owns the depth
+        // cue without occluding the transmitted surface.
         for (std::size_t i = 0; i < spec.words.size(); ++i) {
             const GelCinematicWord& word = spec.words[i];
             if (word.text.empty())
@@ -131,48 +130,19 @@ namespace chronontemplate::gel {
             if (word.scale <= 0.f || word.scale > 8.f)
                 throw std::invalid_argument("GelCinematicTitle: word.scale must be in (0, 8]");
 
-            TextSpec backing;
-            backing.text = word.text;
-            backing.font = spec.font;
-            backing.fontSize = spec.fontSize;
-            backing.color = spec.backingColor;
-            backing.name = spec.name + "_backing_" + std::to_string(i);
-            backing.screenSpace = false;
-            backing.material = TextMaterialStyle{
-                .gelSurface = false,
-                .gelTransmission = true,
-                .gelSoftFusion = false,
-                .extrusionDepth = spec.extrusionDepth};
-            backing.catalogEffects.push_back(TextCatalogEffectStyle{
-                .effectId = "generate.fill",
-                .params = {{"amount", 0.78f},
-                           {"color.r", 0.08f},
-                           {"color.g", 0.52f},
-                           {"color.b", 1.00f}}});
-
-            LayerHandle& backingLayer = scene.text(backing);
-            const float backingWordScale = word.scale * spec.backingScale;
-            backingLayer.position(word.x + backingX - originX, word.y + backingY - originY)
-                .layer()
-                .scaled(chrononmotion::Vector3(backingWordScale, backingWordScale, 1.f));
-            backingLayer.alive(spec.inFrame, endFrame);
-            applyPush(scene, backingLayer, backingWordScale, spec.inFrame,
-                      spec.durationFrames, spec.pushScale);
-            out.backings.push_back(backingLayer.id());
-        }
-
-        for (std::size_t i = 0; i < spec.words.size(); ++i) {
-            const GelCinematicWord& word = spec.words[i];
             TextSpec face;
             face.text = word.text;
             face.font = spec.font;
             face.fontSize = spec.fontSize;
-            face.color = spec.faceColor;
+            // The centre word sits over the white slit between the two people:
+            // author it as a near-white gel so the backlit body reads through
+            // instead of as an opaque cyan decal.
+            face.color = word.text == "or" ? "#FFFFFF" : spec.faceColor;
             face.name = spec.name + "_face_" + std::to_string(i);
             face.screenSpace = false;
             face.material = TextMaterialStyle{
                 .gelSurface = true,
-                .gelTransmission = false,
+                .gelTransmission = spec.gelTransmission,
                 .gelSoftFusion = false,
                 .extrusionDepth = 0.f};
             face.dropShadow = spec.dropShadow;
@@ -181,6 +151,12 @@ namespace chronontemplate::gel {
             face.bloom = spec.bloom;
             if (spec.enableLensFlare)
                 face.lensFlare = spec.lensFlare;
+            if (spec.enableLightRays) {
+                TextLightRaysStyle rays = spec.lightRays;
+                rays.originX = word.x / canvas.x;
+                rays.originY = (word.y - spec.fontSize * 0.55f) / canvas.y;
+                face.lightRays = rays;
+            }
 
             LayerHandle& faceLayer = scene.text(face);
             faceLayer.position(word.x - originX, word.y - originY)
