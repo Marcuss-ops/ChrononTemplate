@@ -76,6 +76,7 @@ namespace chronontemplate {
         std::optional<TextChromaticAberrationStyle> chromaticAberration{};
         std::optional<TextBloomStyle> bloom{};
         std::optional<TextLensFlareStyle> lensFlare{};
+        std::optional<TextLightRaysStyle> lightRays{};
         std::vector<TextCatalogEffectStyle> catalogEffects{};
         /// Pin a 3D text layer (extrusion) to canvas coordinates.
         bool screenSpace{false};

@@ -313,6 +313,7 @@ namespace chronontemplate {
         request.chromaticAberration = spec.chromaticAberration;
         request.bloom = spec.bloom;
         request.lensFlare = spec.lensFlare;
+        request.lightRays = spec.lightRays;
         request.catalogEffects = spec.catalogEffects;
         request.screenSpace = spec.screenSpace;
 

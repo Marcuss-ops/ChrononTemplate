@@ -2,9 +2,9 @@
 //
 // This pack exists so a template can request the certified Chronon3D GEL look
 // without rebuilding the recipe by hand and without editing the renderer:
-// plate, extruded royal-blue backing words, opaque cyan GEL faces and the
+// plate, extruded royal-blue backing words, dielectric cyan GEL faces and the
 // selective optics (drop shadow, chromatic dispersion, tight glow, thresholded
-// bloom, horizontal anamorphic streak) are all emitted through the existing
+// bloom, downward light shafts) are all emitted through the existing
 // ContentHost -> RenderPlan contract.
 
 #ifndef CHRONONTEMPLATE_GEL_CINEMATIC_TITLE_PACK_HPP
@@ -18,7 +18,7 @@
 namespace chronontemplate::gel {
 
     /// One word of the title. `x`/`y` are canvas-space centres; `scale` is the
-    /// per-word face scale. The backing is derived from the same word.
+    /// per-word face scale.
     struct GelCinematicWord {
         std::string text{};
         float x{0.f};
@@ -26,9 +26,10 @@ namespace chronontemplate::gel {
         float scale{1.f};
     };
 
-    /// The seven-component GEL recipe: one plate, N extruded backings and N
-    /// opaque GEL faces, with the same effect stack on every face. Defaults are
-    /// the values pinned by the 2026-11-07 reference closure.
+    /// The GEL recipe: one plate and N dielectric faces, with the same effect
+    /// stack on every face. Backings are intentionally not emitted: the video
+    /// path composited them over the faces and hid their lime crest. Defaults
+    /// are the values pinned by the 2026-11-07 reference closure.
     struct GelCinematicTitleSpec {
         std::string name{"GelCinematicTitle"};
         std::string plate{};
@@ -40,6 +41,8 @@ namespace chronontemplate::gel {
         std::string font{};
         float fontSize{125.f};
         std::string faceColor{"#00E8FF"};
+        // Retained for source compatibility with the earlier backing recipe;
+        // the backing is no longer emitted.
         std::string backingColor{"#1454FF"};
         float extrusionDepth{8.f};
         float backingScale{1.004f};
@@ -49,6 +52,16 @@ namespace chronontemplate::gel {
         int durationFrames{300};
         /// Slow optical push shared by every layer. 1.0 keeps the title static.
         float pushScale{1.035f};
+        /// Dielectric backdrop transmission. False is the opaque diagnostic
+        /// ablation kept for A/B renders.
+        bool gelTransmission{true};
+        /// Downward shafts generated from each word's own luminance. The pack
+        /// moves the origin to that word's top centre in canvas space.
+        bool enableLightRays{true};
+        TextLightRaysStyle lightRays{
+            .originX = 0.5f, .originY = 0.2f,
+            .length = 300.f, .density = 1.35f, .decay = 0.88f,
+            .color = "#35DFFF", .opacity = 0.34f};
 
         TextDropShadowStyle dropShadow{
             .color = "#0547E0", .opacity = 0.45f, .blur = 2.f, .offset = {1.f, 2.f}};
@@ -72,23 +85,23 @@ namespace chronontemplate::gel {
             .halo = 0.f,
             .ghost = 0.f,
             .streak = 1.f};
-        /// The highlight-only wing uses a soft-knee mask below the text body's
-        /// luminance and a column-collapsed horizontal profile (Test C). Keep
-        /// the switch for diagnostic A/B renders; the certified composite
-        /// enables it.
-        bool enableLensFlare{true};
+        /// The legacy highlight-only horizontal wing is retained as a
+        /// diagnostic only. The reference has no horizontal cut through the
+        /// backdrop; the current composite uses downward light shafts instead.
+        bool enableLensFlare{false};
     };
 
     struct GelCinematicTitleLayers {
         MotionLayerId plate{0};
+        /// Always empty; retained for source compatibility.
         std::vector<MotionLayerId> backings{};
         std::vector<MotionLayerId> faces{};
     };
 
-    /// Author the recipe into `scene`. Layers are created plate -> all backings
-    /// -> all faces so the draw order is the certified one. The content is
-    /// measured and owned by the supplied ContentHost; this function only
-    /// states what to create, where it sits and how the optics behave.
+    /// Author the recipe into `scene`. Layers are created plate -> all faces
+    /// so the draw order is the certified one. The content is measured and
+    /// owned by the supplied ContentHost; this function only states what to
+    /// create, where it sits and how the optics behave.
     [[nodiscard]] GelCinematicTitleLayers addGelCinematicTitle(
             TemplateScene& scene, const GelCinematicTitleSpec& spec);
 

@@ -1,6 +1,6 @@
-// The GEL cinematic title contract: one full-frame plate, three extruded
-// backings with the native fill pass, three opaque GEL faces, and the selective
-// optics on the face only.
+// The GEL cinematic title contract: one full-frame plate, three dielectric
+// GEL faces, and the selective optics (including downward light shafts) on the
+// face only. Backings are not emitted because they occluded the GEL surface.
 
 #include "chronontemplate/core/RenderPlanContentHost.hpp"
 #include "chronontemplate/gel/GelCinematicTitlePack.hpp"
@@ -50,11 +50,11 @@ int main() {
         {.text = "ingredients", .x = 1408.f, .y = 540.f, .scale = 1.f}};
 
     const auto layers = gel::addGelCinematicTitle(scene, spec);
-    check(layers.plate != 0 && layers.backings.size() == 3 && layers.faces.size() == 3,
-          "the preset authors one plate, three backings and three faces");
+    check(layers.plate != 0 && layers.backings.empty() && layers.faces.size() == 3,
+          "the preset authors one plate and three faces");
 
     const auto plan = lowerToRenderPlan(scene, host, "gel-title-contract", "gel-title.mp4");
-    check(plan.layers.size() == 7, "the lowered plan carries seven layers");
+    check(plan.layers.size() == 4, "the lowered plan carries four layers");
 
     const auto image = std::find_if(plan.layers.begin(), plan.layers.end(),
         [](const LayerPlan& layer) { return layer.type == LayerType::Image; });
@@ -64,19 +64,19 @@ int main() {
           image_count == 1,
           "the reference plate lowers as one full-frame screen-space image");
 
-    const LayerPlan* backing = findByText(plan, "calories", false);
-    check(backing != nullptr && backing->style && backing->style->extruded_text &&
-          backing->style->extrusion_depth == 8.f,
-          "the backing word requests real extruded geometry at the certified depth");
-    check(backing != nullptr && backing->effects.size() == 1 &&
-          backing->effects.front().kind == LayerPlan::EffectKindPlan::Catalog &&
-          backing->effects.front().canonical_effect_id == "generate.fill",
-          "the backing keeps the native generate.fill pass");
+    check(findByText(plan, "calories", false) == nullptr,
+          "no extruded backing occludes the GEL face");
+    const auto gel_faces = std::count_if(plan.layers.begin(), plan.layers.end(),
+        [](const LayerPlan& layer) {
+            return layer.type == LayerType::Text && layer.style &&
+                   layer.style->gel_surface;
+        });
+    check(gel_faces == 3, "all three words lower as dielectric faces");
 
     const LayerPlan* face = findByText(plan, "calories", true);
     check(face != nullptr && face->style && face->style->gel_surface &&
-          !face->style->gel_transmission_enabled,
-          "the face is an opaque GEL surface");
+          face->style->gel_transmission_enabled,
+          "the face is a dielectric GEL surface");
     check(face != nullptr && face->style && face->style->glow &&
           face->style->glow->radius == 4.5f,
           "the tight perimeter glow survives lowering");
@@ -84,13 +84,15 @@ int main() {
           face->effects[0].kind == LayerPlan::EffectKindPlan::DropShadow &&
           face->effects[1].kind == LayerPlan::EffectKindPlan::ChromaticAberration &&
           face->effects[2].kind == LayerPlan::EffectKindPlan::Bloom &&
-          face->effects[3].kind == LayerPlan::EffectKindPlan::Catalog &&
-          face->effects[3].canonical_effect_id == "light.lens_flare",
-          "the face carries drop shadow, dispersion, bloom and the highlight-only streak in order");
-    check(face != nullptr && face->effects[3].canonical_params.size() == 6 &&
-          face->effects[3].canonical_params[5].param == "streak" &&
-          face->effects[3].canonical_params[5].value == 1.f,
-          "the anamorphic streak keeps the certified horizontal contract");
+          face->effects[3].kind == LayerPlan::EffectKindPlan::LightRays,
+          "the face carries drop shadow, dispersion, bloom and downward light rays in order");
+    check(face != nullptr && face->effects[3].light_rays_origin[0] > 0.19f &&
+          face->effects[3].light_rays_origin[0] < 0.21f &&
+          face->effects[3].light_rays_origin[1] > 0.43f &&
+          face->effects[3].light_rays_origin[1] < 0.45f &&
+          face->effects[3].light_rays_length == 300.f &&
+          face->effects[3].light_rays_color[3] == 0.34f,
+          "the rays originate at the word top centre with the certified extent");
     check(face != nullptr && face->effects[1].chromatic_green_transform[0] == -0.75f &&
           face->effects[1].chromatic_green_transform[1] == -1.05f &&
           face->effects[1].chromatic_blue_transform[0] == 0.85f,

@@ -159,6 +159,25 @@ ContentHandle RenderPlanContentHost::createText(const TextRequest& request) {
         effect.bloom_intensity = bloom.intensity;
         plan.effects.push_back(std::move(effect));
     }
+    if (request.lightRays) {
+        const auto& rays = *request.lightRays;
+        if (!std::isfinite(rays.originX) || rays.originX < 0.f || rays.originX > 1.f ||
+            !std::isfinite(rays.originY) || rays.originY < 0.f || rays.originY > 1.f ||
+            !std::isfinite(rays.length) || rays.length < 0.f || rays.length > 4096.f ||
+            !std::isfinite(rays.density) || rays.density < 0.f || rays.density > 8.f ||
+            !std::isfinite(rays.decay) || rays.decay < 0.f || rays.decay > 1.f ||
+            !std::isfinite(rays.opacity) || rays.opacity < 0.f || rays.opacity > 1.f)
+            throw std::invalid_argument("RenderPlanContentHost: light ray values are outside supported ranges");
+        const auto color = parseEffectColor(rays.color, "light rays color");
+        LayerPlan::EffectPlan effect;
+        effect.kind = LayerPlan::EffectKindPlan::LightRays;
+        effect.light_rays_origin = {rays.originX, rays.originY};
+        effect.light_rays_length = rays.length;
+        effect.light_rays_density = rays.density;
+        effect.light_rays_decay = rays.decay;
+        effect.light_rays_color = {color.r, color.g, color.b, rays.opacity};
+        plan.effects.push_back(std::move(effect));
+    }
     if (request.lensFlare) {
         const auto& flare = *request.lensFlare;
         if (!std::isfinite(flare.threshold) || flare.threshold < 0.f || flare.threshold > 1.f ||
