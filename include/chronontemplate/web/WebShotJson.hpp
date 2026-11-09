@@ -98,7 +98,7 @@ inline Json rect(const std::string& id, float left, float top, float w, float h,
         // shape the verified date-timeline and headline packs use.
         return {{"id", id}, {"type", "color"}, {"color", rgba(hex, alpha)},
                 {"size", Json::array({kW, kH})}, {"position", Json::array({0.f, 0.f})},
-                {"start_frame", 0}, {"duration_frames", duration}};
+                {"screen_space", true}, {"start_frame", 0}, {"duration_frames", duration}};
     }
     const bool isMarkerColor = (hex == "#F7F7F5" && id == "cap") ||
         hex == "#C9DC28" || hex == "#E6E300" || hex == "#8F7313" ||

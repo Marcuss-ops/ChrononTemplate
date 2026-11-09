@@ -1,5 +1,10 @@
 # Youtuberstle native animation rebuilds
 
+> **Linux note.** The newspaper/dossier/highlighter/memo beats in this folder
+> were authored for Blend2D on Windows with `C:/` output paths. Their Linux
+> replacement lives in [`tools/newspaper/`](../newspaper/README.md) and runs
+> through the canonical Chronon3D CLI; no Blend2D or Windows paths are needed.
+
 These 20 C++ entrypoints redraw and animate their scenes with Blend2D through the existing ChrononTemplate rendering setup. The supplied PNG references are used only for visual comparison; the generators never load reference frames. Generated stills are written to `C:/Users/pater/OneDrive/Documenti/Chronomotion/MP4/Youtuberstle/Final/<animation>/frame_####.png`.
 
 ## Build and render

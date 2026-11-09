@@ -159,21 +159,6 @@ def build_card(subject: str, display: str, dates: str, index: str, role: str) ->
     portrait = load_portrait(subject, target_h=crop[0], max_w=crop[1])
     px = card_box[0] + (card_size[0] - portrait.width) // 2
     py = card_box[1] + crop[2]
-    alpha = portrait.split()[3]
-
-    # soft warm bloom behind the silhouette
-    glow = Image.new("RGBA", portrait.size, (0, 0, 0, 0))
-    glow.putalpha(alpha.filter(ImageFilter.GaussianBlur(26)).point(lambda a: int(a * 0.42)))
-    glow = Image.composite(Image.new("RGBA", portrait.size, (255, 196, 110, 255)),
-                           Image.new("RGBA", portrait.size, (0, 0, 0, 0)),
-                           glow.split()[3])
-    canvas.alpha_composite(glow, (px - 14, py - 8))
-
-    # contact shadow under the cut-out, kept inside the card
-    shadow = Image.new("RGBA", portrait.size, (0, 0, 0, 0))
-    shadow.putalpha(alpha.filter(ImageFilter.GaussianBlur(22)).point(lambda a: int(a * 0.60)))
-    canvas.alpha_composite(shadow, (px + 6, py + 16))
-
     canvas.alpha_composite(portrait, (px, py))
 
     # lower scrim so the caption reads over the torso
@@ -189,10 +174,9 @@ def build_card(subject: str, display: str, dates: str, index: str, role: str) ->
 
     draw = ImageDraw.Draw(canvas)
 
-    # gold frame + inner hairline
-    draw.rounded_rectangle(card_box, CARD_RADIUS, outline=(*GOLD, 225), width=4)
-    inner = (card_box[0] + 14, card_box[1] + 14, card_box[2] - 14, card_box[3] - 14)
-    draw.rounded_rectangle(inner, CARD_RADIUS - 12, outline=(255, 226, 168, 30), width=1)
+    # The outer gold frame, glow and cast shadow are real engine effects now:
+    # "light.sdf_bevel" in the render plan.  Keep this PNG flat and clean so
+    # the bevel and shadow are generated from the projected silhouette.
 
     # archive header
     tracked(draw, (card_box[0] + 46, card_box[1] + 62), "ARCHIVIO", font(SANS, 27),
@@ -227,30 +211,9 @@ def build_card(subject: str, display: str, dates: str, index: str, role: str) ->
         grain_rgba, Image.new("RGBA", (CARD_W, CARD_H), (0, 0, 0, 0)),
         canvas.split()[3]))
 
-    # bake the glow and the two-level shadow into the PNG: the per-frame blur
-    # passes were the dominant cost of the software render.
-    pad_x, pad_top, pad_bottom = 80, 100, 100
-    out = Image.new("RGBA", (CARD_W + 2 * pad_x, CARD_H + pad_top + pad_bottom),
-                    (0, 0, 0, 0))
-    card_alpha = canvas.split()[3]
-    alpha_layer = Image.new("L", out.size, 0)
-    alpha_layer.paste(card_alpha, (pad_x, pad_top))
-
-    def halo(color, blur, opacity, offset):
-        a = alpha_layer.filter(ImageFilter.GaussianBlur(blur)).point(
-            lambda v: int(v * opacity))
-        layer = Image.new("RGBA", out.size, (*color, 255))
-        layer.putalpha(a)
-        return layer, offset
-
-    for layer, offset in [
-        halo((255, 198, 112), 28, 0.20, (0, 10)),
-        halo((0, 0, 0), 46, 0.62, (0, 36)),
-        halo((0, 0, 0), 12, 0.52, (0, 8)),
-    ]:
-        out.alpha_composite(layer, (offset[0], offset[1]))
-    out.alpha_composite(canvas, (pad_x, pad_top))
-    return out
+    # No baked halo: the engine effect expands the ROI around the card and
+    # projects the shadow from this alpha silhouette every frame.
+    return canvas
 
 
 # --------------------------------------------------------------------------

@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
                     {{"frame", frames - 1}, {"value", {card.x + card.dx, card.y + card.dy}}}
                 })}
             }})}}
-        });
+        }});
     }
     const json plan = {
         {"schema", "chronon.render-plan.v2"}, {"version", 2},
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
                     {"fps_den", 1}, {"duration_frames", frames}}},
         {"layers", std::move(layers)},
         {"output", {{"path", "chronons_archival_triptych_shutter_focus.mp4"},
-                    {"format", "mp4"}, {"codec", "h264"}}
+                    {"format", "mp4"}, {"codec", "h264"}}}
     };
     std::ofstream file(out / "chronons_archival_triptych_shutter_focus.plan.json");
     if (!file) {

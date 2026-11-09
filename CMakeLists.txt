@@ -290,6 +290,29 @@ add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 find_package(blend2d CONFIG REQUIRED)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tools.cmake)
 
+# Newspaper page composer (C++ port of make_newspaper_pages.py): the four
+# 1920x1080 static pages + meta.json, via stb only (no Pillow/Python).
+# Usage: chronontemplate_make_newspaper_pages [ChrononTemplate-root]
+find_path(CHRONONTEMPLATE_STB_ALL_DIR stb_image.h
+        HINTS "${CHRONONTEMPLATE_STB_FLAT_DIR}" "${CHRONONTEMPLATE_STB_SUBDIR_DIR}")
+if(NOT CHRONONTEMPLATE_STB_ALL_DIR)
+    message(FATAL_ERROR "newspaper page composer needs stb_image.h / stb_truetype.h / stb_image_write.h")
+endif()
+add_executable(chronontemplate_make_newspaper_pages
+        tools/newspaper/make_newspaper_pages.cpp)
+target_include_directories(chronontemplate_make_newspaper_pages PRIVATE
+        "${CHRONONTEMPLATE_STB_ALL_DIR}")
+target_compile_features(chronontemplate_make_newspaper_pages PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_make_newspaper_pages PRIVATE -Wall -Wextra -Wno-missing-field-initializers)
+
+# Six native RenderPlan V3 demonstrations of the ChrononMotion mechanics.
+add_executable(chronontemplate_emit_six_mechanics_native
+        tools/six_mechanics_native/author_six_mechanics.cpp)
+target_link_libraries(chronontemplate_emit_six_mechanics_native PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_six_mechanics_native PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_six_mechanics_native PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_beast_land_subject_reframe
         tools/documentary_effects/emit_beast_land_subject_reframe.cpp)
 target_link_libraries(chronontemplate_emit_beast_land_subject_reframe PRIVATE chronontemplate)

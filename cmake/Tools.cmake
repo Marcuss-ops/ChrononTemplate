@@ -702,6 +702,16 @@ else()
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 endif()
 
+# CameraRing_Text 07-12: native C++ RenderPlan V3 authoring with the same
+# materiality as the 01-06 reference set. The Python driver only renders and
+# uploads the plans emitted here.
+add_executable(chronontemplate_emit_camera_ring_text_v2_series
+        tools/text_animators/emit_camera_ring_text_v2_series.cpp)
+target_include_directories(chronontemplate_emit_camera_ring_text_v2_series PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_camera_ring_text_v2_series PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_camera_ring_text_v2_series PRIVATE -Wall -Wextra)
+
 # Six 1920x1080 text-lane canaries for the After Effects parity discussion:
 # range selectors, liquid dissolve, multi-stroke, contact shadow, motion blur,
 # kinetic tracking. The tool only writes chronon.render-plan.v3 documents.

@@ -3,9 +3,9 @@
 //
 // This test pins the parts that used to drift: full-bleed paper is a
 // screen-space color layer, text boxes are measured and carry no fit_mode /
-// text_align overrides, the camera is the shared static page camera (no
-// obsolete centre-origin samples or baked crop tracks), and every plan is a
-// deterministic function of its spec.
+// text_align overrides, rebuild layers are flattened to 2D with no plan
+// camera (Next keeps its static camera), and every plan is a deterministic
+// function of its spec.
 #include "chronontemplate/web/WebShotsRebuildPack.hpp"
 #include "chronontemplate/web/WebShotsNextPack.hpp"
 
@@ -28,7 +28,8 @@ namespace {
     // 1:1 wire->px mapping: 540/tan(25deg) = 1158.06 (calibration renders
     // confirm rects land on authored pixels; -1320 scaled 0.877 to center).
 
-    void checksPlanEnvelope(const json& plan, const std::string& jobId, int duration) {
+    void checksPlanEnvelope(const json& plan, const std::string& jobId, int duration,
+                            bool expectCamera) {
         check(plan.at("schema") == "chronon.render-plan.v3" && plan.at("version") == 3,
               "the plan is render-plan V3");
         check(plan.at("job_id") == jobId, "the job id follows the recipe identity");
@@ -42,14 +43,19 @@ namespace {
         check(plan.at("output").at("format") == "mp4" &&
                   plan.at("output").at("codec") == "h264",
               "the output is H.264 mp4");
-        check(plan.contains("camera"), "the plan declares a camera");
         check(!plan.contains("camera_samples"),
               "the plan does not carry obsolete camera samples");
-        const auto& camera = plan.at("camera");
-        check(camera.at("type") == "perspective", "the camera is perspective");
-        chrononmotion_test::checkNear(camera.at("position")[2].get<float>(),
-                                     -1158.06f, 0.01f,
-                                     "the camera gives 1:1 wire to pixel mapping");
+        if (expectCamera) {
+            check(plan.contains("camera"), "the plan declares a camera");
+            const auto& camera = plan.at("camera");
+            check(camera.at("type") == "perspective", "the camera is perspective");
+            chrononmotion_test::checkNear(camera.at("position")[2].get<float>(),
+                                         -1158.06f, 0.01f,
+                                         "the camera gives 1:1 wire to pixel mapping");
+        } else {
+            check(!plan.contains("camera"),
+                  "the rebuild plan is camera-less screen-space 2D");
+        }
     }
 
     void checksLayerContract(const json& plan) {
@@ -93,7 +99,7 @@ namespace {
             spec.durationFrames = 90;
             spec.fps = 30;
             const json plan = buildWebShotPlan(spec);
-            checksPlanEnvelope(plan, spec.planName(), 90);
+            checksPlanEnvelope(plan, spec.planName(), 90, false);
             checksLayerContract(plan);
             check(names.insert(webShotName(id)).second,
                   "every shot has a unique stable name");
@@ -118,7 +124,7 @@ namespace {
             spec.subline = "Breaking — 10:42 ET";
             spec.body = "Markets rally as export rules take hold.";
             const json plan = buildWebNextPlan(spec);
-            checksPlanEnvelope(plan, spec.planName(), 90);
+            checksPlanEnvelope(plan, spec.planName(), 90, true);
             checksLayerContract(plan);
             check(names.insert(webNextName(recipe)).second,
                   "every recipe has a unique stable name");
