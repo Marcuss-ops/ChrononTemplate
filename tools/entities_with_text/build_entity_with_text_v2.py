@@ -138,7 +138,7 @@ def build_plan(recipe: dict) -> dict:
     if recipe.get("editorial"):
         layers.append(_rule("editorial-wipe-rule",(960,762),660,"#D8B977",start=12))
         layers.append(BASE.layer_text("editorial-caption","A VISION THAT CHANGED EVERYTHING",[850,38],[960,990],22,FRAMES-22,font=FONT,font_size=22,fill="#AAA69D",
-                                      tracks=[BASE.track("opacity",[(0,0),(70,1),(129,1)])]))
+                                      tracks=[BASE.track("opacity",[(0,0),(70,1),(FRAMES-23,1)])]))
     return BASE.scene_plan(recipe["id"],layers,FRAMES)
 
 

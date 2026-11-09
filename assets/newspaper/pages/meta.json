@@ -1,0 +1,26 @@
+{
+  "dossier": {
+    "duration": 150,
+    "markers": [{"id": "dossier_marker", "rect": [317, 369, 550, 90], "delay": 34, "span": 40, "peak": 0.3}],
+    "redactions": [],
+    "asset": "assets/newspaper/pages/dossier.png"
+  },
+  "front_page": {
+    "duration": 180,
+    "markers": [],
+    "redactions": [],
+    "asset": "assets/newspaper/pages/front_page.png"
+  },
+  "highlighter": {
+    "duration": 150,
+    "markers": [{"id": "sweep_marker_1", "rect": [644, 394, 631, 70], "delay": 34, "span": 42, "peak": 0.62}, {"id": "sweep_marker_2", "rect": [773, 613, 371, 50], "delay": 82, "span": 34, "peak": 0.52}],
+    "redactions": [],
+    "asset": "assets/newspaper/pages/highlighter.png"
+  },
+  "memo": {
+    "duration": 150,
+    "markers": [{"id": "memo_date_marker", "rect": [322, 305, 404, 43], "delay": 38, "span": 40, "peak": 0.52}],
+    "redactions": [{"id": "memo_redaction_1", "rect": [1120, 788, 330, 26], "delay": 22, "span": 8}, {"id": "memo_redaction_2", "rect": [1120, 824, 240, 26], "delay": 28, "span": 8}],
+    "asset": "assets/newspaper/pages/memo.png"
+  }
+}

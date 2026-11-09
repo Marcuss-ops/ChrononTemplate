@@ -102,6 +102,25 @@ def card_layer(card_id: str, png: str, x: float, y: float, z: float,
         "rotation": [0, 0, rot_z],
         "fit": "contain",
         "enable_3d": True,
+        # Real per-frame bevel + projected shadow generated from the card
+        # silhouette by the engine, replacing the old baked gold border.
+        "effects": [{
+            "type": "catalog",
+            "effect_id": "light.sdf_bevel",
+            "params": [
+                {"param": "bevel_width", "value": 18.0},
+                {"param": "bevel_height", "value": 14.0},
+                {"param": "rim_width", "value": 3.5},
+                {"param": "rim_intensity", "value": 0.95},
+                {"param": "highlight", "value": 0.65},
+                {"param": "shade", "value": 0.38},
+                {"param": "light_angle", "value": -135.0},
+                {"param": "light_elevation", "value": 38.0},
+                {"param": "shadow_distance", "value": 40.0},
+                {"param": "shadow_softness", "value": 24.0},
+                {"param": "shadow_opacity", "value": 0.62},
+            ],
+        }],
         "start_frame": 0,
         "duration_frames": FRAMES,
         "animation": {"tracks": [
