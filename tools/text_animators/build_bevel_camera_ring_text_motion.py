@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Render/upload driver for the CameraRing_Text 07-12 v2 series.
+"""Render/upload driver for the CameraRing_Text 07-12 v3 series.
 
 The six plans are authored in C++ by
-`chronontemplate_emit_camera_ring_text_v2_series` (tools/text_animators). That
+`chronontemplate_emit_camera_ring_text_v3_series` (tools/text_animators). That
 emitter owns the recipe: 132 px lowercase text, dark vignetted plate, 64-tap
-camera ring, `light.sdf_bevel`, `generate.noise`, bezier push-in, fade and
-tracking settle. It writes `plans/series.json`, the single source of truth for
-ids, durations, fonts, plan paths and output names.
+camera ring with bilinear tile sampling, `light.sdf_bevel`, two-scale glow,
+two-layer midtone grain, bezier push-in with micro-drift, fade and tracking
+settle. It writes `plans/series.json`, the single source of truth for ids,
+durations, fonts, plan paths and output names.
 
 This Python file is only the orchestration layer: it validates the emitted
 plans, renders them through Chronon3D's strict GPU path, verifies the MP4s and
@@ -14,8 +15,8 @@ uploads them to Drive. It never builds or edits RenderPlan JSON.
 
 Usage
 -----
-    chronontemplate_emit_camera_ring_text_v2_series \
-        RenderingGen/UploadDrive/camera_ring_text_v2_style_20261108/plans Chronon3d
+    chronontemplate_emit_camera_ring_text_v3_series \
+        RenderingGen/UploadDrive/camera_ring_text_v3_style_20261109/plans Chronon3d
     python3 ChrononTemplate/tools/text_animators/build_bevel_camera_ring_text_motion.py \
         --render --upload
 """
@@ -36,13 +37,13 @@ from PIL import Image, ImageChops, ImageStat
 ROOT = Path(__file__).resolve().parents[2]          # ChrononTemplate
 REPO = ROOT.parent
 ASSETS = REPO / "Chronon3d"
-OUT = REPO / "RenderingGen" / "UploadDrive" / "camera_ring_text_v2_style_20261108"
+OUT = REPO / "RenderingGen" / "UploadDrive" / "camera_ring_text_v3_style_20261109"
 SERIES = OUT / "plans" / "series.json"
 CLI = ASSETS / "build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_cli"
 UPLOADER = REPO / "RenderingGen" / "bin" / "drive-upload"
 CREDENTIALS = REPO / "RenderingGen" / "UploadDrive" / "credentials.json"
 TOKEN = REPO / "RenderingGen" / "UploadDrive" / "token.json"
-EMITTER = "chronontemplate_emit_camera_ring_text_v2_series"
+EMITTER = "chronontemplate_emit_camera_ring_text_v3_series"
 
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
 DRIVE_FOLDER = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
@@ -244,7 +245,7 @@ def upload(local: Path, name: str) -> dict[str, str]:
 
 def write_manifest(entries: list[dict[str, Any]]) -> None:
     manifest = {
-        "schema": "chronontemplate.camera-ring-text-v2-series.v1",
+        "schema": "chronontemplate.camera-ring-text-v3-series.v1",
         "date": time.strftime("%Y-%m-%d"),
         "generator": EMITTER,
         "reference": f"{REFERENCE_DIR}/camera_ring_text_01_calories_v2.mp4",
@@ -252,9 +253,11 @@ def write_manifest(entries: list[dict[str, Any]]) -> None:
         "stack": {
             "authoring": f"C++ RenderPlan V3 emitter ({EMITTER})",
             "text": "132 px, phrase-specific face and fill",
-            "camera_ring": "64 tap, elliptical wide mask, per-pixel jitter",
-            "bevel": "light.sdf_bevel (bevel + rim + contact shadow)",
-            "grain": "generate.noise",
+            "camera_ring": "64 tap, elliptical wide mask, bilinear 8px sample grid",
+            "bevel": "none (removed: it reconstructed a sharp glyph edge after the ring blur)",
+            "glow": "three blurred text silhouettes (core + mid + atmospheric) + 2% flicker",
+            "grain": "catalog generate.noise over title, 2 px drift",
+            "motion": "push-in + 2 px lateral drift", 
             "backend": "vulkan / require_gpu_native / nvenc",
         },
         "drive": {"folder_id": DRIVE_FOLDER, "folder_url": DRIVE_URL, "placement": "root"},
@@ -265,9 +268,10 @@ def write_manifest(entries: list[dict[str, Any]]) -> None:
     )
 
     lines = [
-        "# CameraRing_Text v2 series — clips 07-12",
+        "# CameraRing_Text v3 series — clips 07-12",
         "",
-        "Stessa ricetta dei riferimenti `CameraRing_Text_01..06_..._v2`;",
+        "Correzione ottica della serie v2: ring blur interpolato, tre passate glow,",
+        "grana catalog sopra il titolo e micro-drift;",
         f"piani RenderPlan V3 generati in C++ da `{EMITTER}`.",
         f"Drive (root): {DRIVE_URL}",
         "",
@@ -286,9 +290,9 @@ def write_manifest(entries: list[dict[str, Any]]) -> None:
         "",
         "```text",
         "testo 132 px, layering lowercase",
-        "camera_ring 64 tap, maschera ellittica 1.85 x 0.72",
-        "light.sdf_bevel, generate.noise, vignette",
-        "push-in bezier 0.94 -> 1.0 (frame 1-91), fade 12f, tracking 8 -> 0 (24f)",
+        "camera_ring 64 tap, maschera ellittica 1.85 x 0.72, griglia 8 px interpolata",
+        "tre glow testuali (core/mid/atmo), generate.noise catalog, vignette, niente bevel",
+        "push-in bezier 0.94 -> 1.012 (frame 1-fine), drift 2 px, fade 12f, tracking 8 -> 0 (24f)",
         "```",
         "",
     ]
@@ -333,7 +337,7 @@ def main() -> int:
             print(f"DRIVE_PASS {entry['id']} {result['link']}")
         if not any(e.get("upload_manifest_url") for e in entries):
             manifest_path = OUT / "UPLOAD-MANIFEST.md"
-            result = upload(manifest_path, "CameraRing_Text_07-12_UPLOAD-MANIFEST.md")
+            result = upload(manifest_path, "CameraRing_Text_07-12_v3_UPLOAD-MANIFEST.md")
             for entry in entries:
                 entry["upload_manifest_url"] = result["link"]
             write_manifest(entries)

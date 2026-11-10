@@ -313,6 +313,15 @@ target_include_directories(chronontemplate_emit_six_mechanics_native PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_six_mechanics_native PRIVATE -Wall -Wextra)
 
+# Particle lab: six native RenderPlan V3 experiments built on Chronon3D's
+# canonical curl-flow sampler (dust, embers, ash, bokeh orbs, chalk, motes).
+add_executable(chronontemplate_emit_particle_lab
+        tools/particle_lab/emit_particle_lab.cpp)
+target_link_libraries(chronontemplate_emit_particle_lab PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_particle_lab PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_particle_lab PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_beast_land_subject_reframe
         tools/documentary_effects/emit_beast_land_subject_reframe.cpp)
 target_link_libraries(chronontemplate_emit_beast_land_subject_reframe PRIVATE chronontemplate)

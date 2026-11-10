@@ -1,6 +1,7 @@
 #include "chronontemplate/effects/EffectsPack.hpp"
 
 #include <chronon3d/render_plan/color_utils.hpp>
+#include <chronon3d/scene/model/shape/particles.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -209,18 +210,80 @@ namespace chronontemplate::effects {
         }
 
         void floatingDust(Ctx& c) {
-            constexpr std::uint32_t kParticles = 24;
-            for (std::uint32_t i = 0; i < kParticles; ++i) {
-                const float d = 3.f + 9.f * unit(c.spec.seed, i, 4);
-                ShapeSpec s = makeShape("dust_" + std::to_string(i), d, d, colorOr(c.spec, "#E8C86B"));
+            // Ambient dust built on Chronon3D's canonical curl-flow sampler:
+            // three depth bands, curved drift, depth-scaled size/opacity and a
+            // per-mote twinkle. The previous version drifted every dot in a
+            // straight line; this one preserves density and reads as real air.
+            constexpr float kTau = 6.2831853071795864769f;
+            constexpr int kMotes = 44;
+            const float fps = std::max(1.f, c.scene.fps());
+            const int positionSteps = std::clamp(c.dur / 10, 4, 16);
+            const int opacitySteps = std::clamp(c.dur / 8, 4, 20);
+            const int fadeFrames = std::max(4, std::min(c.dur / 4,
+                                                        static_cast<int>(fps * 0.5f)));
+            for (int i = 0; i < kMotes; ++i) {
+                const std::uint32_t seed = c.spec.seed;
+                const auto index = static_cast<std::uint32_t>(i);
+                const int band = i % 3; // 0 far, 1 mid, 2 near
+                const float depth = band == 0 ? 0.85f : (band == 1 ? 0.5f : 0.18f);
+                const float diameter = (band == 0 ? 7.5f : band == 1 ? 4.2f : 2.1f) *
+                    (0.72f + 0.6f * unit(seed, index, 4));
+                const std::string tint = c.spec.color.empty()
+                    ? (band == 0 ? "#AFC2DA" : band == 1 ? "#D8D2C4" : "#F0D79E")
+                    : c.spec.color;
+                const chronon3d::Vec2 origin{
+                    c.W * (0.015f + 0.97f * unit(seed, index, 5)),
+                    c.H * (0.015f + 0.97f * unit(seed, index, 6))};
+                ShapeSpec s = makeShape("dust_" + std::to_string(i), diameter, diameter, tint);
                 s.geometry = ShapeGeometry::Ellipse;
-                LayerHandle& h = spawn(c, s, c.W * unit(c.spec.seed, i, 5),
-                                       c.H * unit(c.spec.seed, i, 6));
-                pulse(h, c.spec.startFrame, c.dur,
-                      scaled(c.spec, 0.45f + 0.45f * unit(c.spec.seed, i, 7)));
-                h.animatePosition(c.spec.startFrame, c.dur,
-                                  chrononmotion::Vector3(240.f * (unit(c.spec.seed, i, 8) - 0.5f),
-                                                         180.f * (unit(c.spec.seed, i, 9) - 0.5f), 0.f));
+                LayerHandle& h = spawn(c, s, origin.x, origin.y);
+
+                const float phase = kTau * unit(seed, index, 10);
+                const chronon3d::ParticleFlowParams flow{
+                    .strength = 15.f + 9.f * static_cast<float>(band) +
+                                8.f * unit(seed, index, 11),
+                    .scale = 0.0042f + 0.0018f * static_cast<float>(band) +
+                             0.001f * unit(seed, index, 12),
+                    .speed = 0.12f + 0.07f * static_cast<float>(band) +
+                             0.05f * unit(seed, index, 13)};
+                const chrononmotion::Vector3 wind{
+                    10.f * (unit(seed, index, 8) - 0.5f) + 3.f * static_cast<float>(band),
+                    -4.f - 5.f * (1.f - depth) - 4.f * unit(seed, index, 9),
+                    0.f};
+                const int start = c.spec.startFrame;
+                for (int k = 0; k <= positionSteps; ++k) {
+                    const int offset = c.dur * k / positionSteps;
+                    const float age = static_cast<float>(offset) / fps;
+                    const auto curl = chronon3d::particle_flow_displacement(
+                        origin, age, phase, flow);
+                    const float bob = 3.5f * std::sin(
+                        age * (1.3f + 0.7f * unit(seed, index, 14)) + phase);
+                    h.layer().tracks.position.add(
+                        static_cast<float>(start + offset) / fps,
+                        chrononmotion::Vector3(origin.x + wind.x * age + curl.x,
+                                               origin.y + wind.y * age + curl.y + bob,
+                                               0.f),
+                        chrononmotion::motion::Easing::linear());
+                }
+
+                const float baseAlpha = (band == 0 ? 0.20f : band == 1 ? 0.34f : 0.52f) *
+                    (0.7f + 0.55f * unit(seed, index, 7));
+                const float twinkleHz = 0.35f + 0.55f * unit(seed, index, 15);
+                for (int k = 0; k <= opacitySteps; ++k) {
+                    const int offset = c.dur * k / opacitySteps;
+                    const float age = static_cast<float>(offset) / fps;
+                    const float shimmer = 0.68f + 0.32f *
+                        std::sin(kTau * (twinkleHz * age + unit(seed, index, 16)));
+                    const float fadeIn = std::min(1.f, static_cast<float>(offset) /
+                        static_cast<float>(fadeFrames));
+                    const float fadeOut = std::min(1.f, static_cast<float>(c.dur - offset) /
+                        static_cast<float>(fadeFrames));
+                    const float envelope = std::max(0.f, std::min(fadeIn, fadeOut));
+                    h.layer().tracks.opacity.add(
+                        static_cast<float>(start + offset) / fps,
+                        scaled(c.spec, baseAlpha * shimmer * envelope),
+                        chrononmotion::motion::Easing::linear());
+                }
             }
         }
 
