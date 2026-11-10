@@ -75,8 +75,22 @@ namespace chronontemplate::native {
                                           float nearPlane = 1.f, float farPlane = 10000.f);
     };
 
+    /// Chronon3D's divergence-free ambient flow, in canvas units.
+    struct ParticleFlow {
+        float strength{0.f}; ///< peak displacement; 0 disables
+        float scale{0.012f};
+        float speed{0.35f};
+    };
+    struct ParticleTwinkle {
+        float amount{0.f}; ///< [0, 1]
+        float speed{0.75f};///< cycles per second
+    };
+
     class Particles {
     public:
+        using Flow = ParticleFlow;
+        using Twinkle = ParticleTwinkle;
+
         [[nodiscard]] static Json emitterLayer(const std::string& id, int count, unsigned seed,
                                                 int durationFrames, const std::array<float, 2>& emitterSize,
                                                 const std::array<float, 2>& velocityMin,
@@ -86,7 +100,9 @@ namespace chronontemplate::native {
                                                 const Json& colorRamp,
                                                 const std::array<float, 3>& position = {0.f, 0.f, 0.f},
                                                 int startFrame = 0, float gravity = 0.f,
-                                                float turbulence = 0.f);
+                                                float turbulence = 0.f,
+                                                const ParticleFlow& flow = ParticleFlow{},
+                                                const ParticleTwinkle& twinkle = ParticleTwinkle{});
     };
 
     class Text {

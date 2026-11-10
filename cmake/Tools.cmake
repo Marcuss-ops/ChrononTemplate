@@ -712,6 +712,52 @@ target_include_directories(chronontemplate_emit_camera_ring_text_v2_series PRIVA
 target_compile_features(chronontemplate_emit_camera_ring_text_v2_series PRIVATE cxx_std_20)
 target_compile_options(chronontemplate_emit_camera_ring_text_v2_series PRIVATE -Wall -Wextra)
 
+# CameraRing_Text 07-12 v3: corrected optical pass (smooth camera-ring
+# reconstruction, glow + bloom, two-layer midtone grain, micro-drift).
+add_executable(chronontemplate_emit_camera_ring_text_v3_series
+        tools/text_animators/emit_camera_ring_text_v3_series.cpp)
+target_include_directories(chronontemplate_emit_camera_ring_text_v3_series PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_camera_ring_text_v3_series PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_camera_ring_text_v3_series PRIVATE -Wall -Wextra)
+
+# CameraRing_Text 07-12 v4: native HDR bloom (6-mip RGBA16F pyramid,
+# additive composite) plus ACES at the output boundary. The v3 LDR glow
+# silhouettes stay available in the v3 emitter above.
+add_executable(chronontemplate_emit_camera_ring_text_v4_hdr_bloom
+        tools/text_animators/emit_camera_ring_text_v4_hdr_bloom.cpp)
+target_include_directories(chronontemplate_emit_camera_ring_text_v4_hdr_bloom PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_camera_ring_text_v4_hdr_bloom PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_camera_ring_text_v4_hdr_bloom PRIVATE -Wall -Wextra)
+
+# CameraRing_Text 07-12 v5: tighter bloom, stronger camera ring on the outer
+# words. Same C++ authoring path; the Python driver renders and uploads it.
+add_executable(chronontemplate_emit_camera_ring_text_v5_tighter
+        tools/text_animators/emit_camera_ring_text_v5_tighter.cpp)
+target_include_directories(chronontemplate_emit_camera_ring_text_v5_tighter PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_camera_ring_text_v5_tighter PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_camera_ring_text_v5_tighter PRIVATE -Wall -Wextra)
+
+# CameraRing_Text 07-12 v6: halved bloom, safe camera-ring mask (0.09/0.64).
+add_executable(chronontemplate_emit_camera_ring_text_v6_clean
+        tools/text_animators/emit_camera_ring_text_v6_clean.cpp)
+target_include_directories(chronontemplate_emit_camera_ring_text_v6_clean PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_camera_ring_text_v6_clean PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_camera_ring_text_v6_clean PRIVATE -Wall -Wextra)
+
+# Five-category 1920x1080 vector motion suite: tactical route, node graph,
+# validation burst, technical callout, wireframe-to-solid logo. Pure C++
+# RenderPlan V3 authoring; the Python driver renders, verifies and uploads.
+add_executable(chronontemplate_emit_vector_motion_suite
+        tools/vector_diagram/emit_vector_motion_suite.cpp)
+target_include_directories(chronontemplate_emit_vector_motion_suite PRIVATE
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_features(chronontemplate_emit_vector_motion_suite PRIVATE cxx_std_20)
+target_compile_options(chronontemplate_emit_vector_motion_suite PRIVATE -Wall -Wextra)
+
 # Six 1920x1080 text-lane canaries for the After Effects parity discussion:
 # range selectors, liquid dissolve, multi-stroke, contact shadow, motion blur,
 # kinetic tracking. The tool only writes chronon.render-plan.v3 documents.

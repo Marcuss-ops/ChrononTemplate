@@ -33,6 +33,16 @@ int main() {
     const auto dust=Particles::emitterLayer("dust",4,17,12,{1,1},{0,-2},{1,0},{0.1f,0.5f},{1,2},
         {{{"position",0},{"color",{1,1,1,0}}},{{"position",1},{"color",{1,1,1,1}}}});
     check(dust.at("particle_emitter").at("seed")==17,"particle emitter retains deterministic seed");
+    check(!dust.at("particle_emitter").contains("flow_strength"),
+          "default particle emitter omits the optional curl-flow fields");
+    const auto flowing=Particles::emitterLayer("flow",8,23,12,{100,50},{0,-2},{1,0},{0.1f,0.5f},{1,2},
+        {{{"position",0},{"color",{1,1,1,0}}},{{"position",1},{"color",{1,1,1,1}}}},
+        {0,0,0},0,0.f,0.f,{24.f,0.006f,0.4f},{0.5f,1.2f});
+    check(flowing.at("particle_emitter").at("flow_strength")==24.f &&
+          flowing.at("particle_emitter").at("flow_scale")==0.006f &&
+          flowing.at("particle_emitter").at("twinkle")==0.5f &&
+          flowing.at("particle_emitter").at("twinkle_speed")==1.2f,
+          "particle emitter serializes curl-flow and twinkle parameters");
     check(Text::layer("label","Chronon",{0,0,0},{200,50},"font.ttf",32,"#FFF",12).at("text")=="Chronon","text builder carries native text request");
     const auto plan=buildBlackboardTortureV1();
     check(plan.at("layers").size()==47,"blackboard composes 47 native plan layers");

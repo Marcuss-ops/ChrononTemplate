@@ -179,7 +179,8 @@ Json Particles::emitterLayer(const std::string& id, int count, unsigned seed, in
                              const std::array<float,2>& emitterSize, const std::array<float,2>& velocityMin,
                              const std::array<float,2>& velocityMax, const std::array<float,2>& lifetime,
                              const std::array<float,2>& size, const Json& colorRamp,
-                             const std::array<float,3>& position, int startFrame, float gravity, float turbulence) {
+                             const std::array<float,3>& position, int startFrame, float gravity, float turbulence,
+                             const ParticleFlow& flow, const ParticleTwinkle& twinkle) {
     requireId(id); requirePositive(static_cast<float>(durationFrames),"duration_frames");
     if (count<0 || count>1000000 || startFrame<0) throw std::invalid_argument("particle count or start frame is out of range");
     for (float value : emitterSize) { requireFinite(value,"emitter size"); if (value<0) throw std::invalid_argument("emitter size must be non-negative"); }
@@ -191,12 +192,28 @@ Json Particles::emitterLayer(const std::string& id, int count, unsigned seed, in
     if (lifetime[0]<=0 || lifetime[1]<lifetime[0] || size[0]<0 || size[1]<size[0])
         throw std::invalid_argument("particle lifetime or size range is invalid");
     requireFinite(gravity,"gravity"); requireFinite(turbulence,"turbulence");
-    if (turbulence<0 || !colorRamp.is_array() || colorRamp.size()<2) throw std::invalid_argument("particle ramp/turbulence is invalid");
+    requireFinite(flow.strength,"flow strength"); requirePositive(flow.scale,"flow scale");
+    requireFinite(flow.speed,"flow speed"); requireFinite(twinkle.amount,"twinkle amount");
+    requireFinite(twinkle.speed,"twinkle speed");
+    if (turbulence<0 || flow.strength<0.f || flow.speed<0.f ||
+        twinkle.amount<0.f || twinkle.amount>1.f || twinkle.speed<0.f ||
+        !colorRamp.is_array() || colorRamp.size()<2)
+        throw std::invalid_argument("particle ramp/turbulence/flow is invalid");
+    Json emitter={{"count",count},{"seed",seed},{"emitter_size",vec(emitterSize)},
+        {"velocity_min",vec(velocityMin)},{"velocity_max",vec(velocityMax)},
+        {"lifetime",vec(lifetime)},{"size",vec(size)},{"gravity",gravity},
+        {"turbulence",turbulence},{"color_ramp",colorRamp}};
+    if (flow.strength>0.f) {
+        emitter["flow_strength"]=flow.strength;
+        emitter["flow_scale"]=flow.scale;
+        emitter["flow_speed"]=flow.speed;
+    }
+    if (twinkle.amount>0.f) {
+        emitter["twinkle"]=twinkle.amount;
+        emitter["twinkle_speed"]=twinkle.speed;
+    }
     return {{"id",id},{"type","particles"},{"enable_3d",true},{"position",vec(position)},
-        {"particle_emitter",{{"count",count},{"seed",seed},{"emitter_size",vec(emitterSize)},
-            {"velocity_min",vec(velocityMin)},{"velocity_max",vec(velocityMax)},
-            {"lifetime",vec(lifetime)},{"size",vec(size)},{"gravity",gravity},
-            {"turbulence",turbulence},{"color_ramp",colorRamp}}},
+        {"particle_emitter",std::move(emitter)},
         {"start_frame",startFrame},{"duration_frames",durationFrames}};
 }
 
