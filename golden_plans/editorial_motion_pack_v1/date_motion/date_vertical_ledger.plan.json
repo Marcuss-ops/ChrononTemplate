@@ -1,0 +1,965 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "editorial_motion_date_vertical_ledger",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 180
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "color",
+      "color": [
+        0.031,
+        0.041,
+        0.055,
+        1.0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "effects": [
+        {
+          "type": "vignette",
+          "radius": 0.82,
+          "softness": 0.55,
+          "amount": 0.58
+        }
+      ]
+    },
+    {
+      "id": "bg_wash",
+      "type": "color",
+      "color": [
+        0.06,
+        0.11,
+        0.16,
+        0.22
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180
+    },
+    {
+      "id": "ledger_row_0",
+      "type": "text",
+      "text": "1948",
+      "size": [
+        560,
+        80
+      ],
+      "position": [
+        460.0,
+        350.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 44,
+        "min_font_size": 27,
+        "max_font_size": 44,
+        "fit_mode": "shrink_only",
+        "fill": "#8A98AA"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 20,
+                "value": 0.72
+              },
+              {
+                "frame": 179,
+                "value": 0.72
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_active_0",
+      "type": "text",
+      "text": "1948",
+      "size": [
+        560,
+        80
+      ],
+      "position": [
+        460.0,
+        350.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 44,
+        "min_font_size": 27,
+        "max_font_size": 44,
+        "fit_mode": "shrink_only",
+        "fill": "#6FE3FF",
+        "glow": {
+          "radius": 20,
+          "intensity": 0.5,
+          "color": "#6FE3FF"
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 38,
+                "value": 1.0
+              },
+              {
+                "frame": 46,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_row_1",
+      "type": "text",
+      "text": "1969",
+      "size": [
+        560,
+        80
+      ],
+      "position": [
+        460.0,
+        470.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 44,
+        "min_font_size": 27,
+        "max_font_size": 44,
+        "fit_mode": "shrink_only",
+        "fill": "#8A98AA"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 30,
+                "value": 0.72
+              },
+              {
+                "frame": 179,
+                "value": 0.72
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_active_1",
+      "type": "text",
+      "text": "1969",
+      "size": [
+        560,
+        80
+      ],
+      "position": [
+        460.0,
+        470.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 44,
+        "min_font_size": 27,
+        "max_font_size": 44,
+        "fit_mode": "shrink_only",
+        "fill": "#6FE3FF",
+        "glow": {
+          "radius": 20,
+          "intensity": 0.5,
+          "color": "#6FE3FF"
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 36,
+                "value": 0.0
+              },
+              {
+                "frame": 44,
+                "value": 1.0
+              },
+              {
+                "frame": 82,
+                "value": 1.0
+              },
+              {
+                "frame": 90,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_row_2",
+      "type": "text",
+      "text": "1998",
+      "size": [
+        560,
+        80
+      ],
+      "position": [
+        460.0,
+        590.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 44,
+        "min_font_size": 27,
+        "max_font_size": 44,
+        "fit_mode": "shrink_only",
+        "fill": "#8A98AA"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 40,
+                "value": 0.72
+              },
+              {
+                "frame": 179,
+                "value": 0.72
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_active_2",
+      "type": "text",
+      "text": "1998",
+      "size": [
+        560,
+        80
+      ],
+      "position": [
+        460.0,
+        590.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 44,
+        "min_font_size": 27,
+        "max_font_size": 44,
+        "fit_mode": "shrink_only",
+        "fill": "#6FE3FF",
+        "glow": {
+          "radius": 20,
+          "intensity": 0.5,
+          "color": "#6FE3FF"
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 80,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": 1.0
+              },
+              {
+                "frame": 126,
+                "value": 1.0
+              },
+              {
+                "frame": 134,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_row_3",
+      "type": "text",
+      "text": "2026",
+      "size": [
+        560,
+        80
+      ],
+      "position": [
+        460.0,
+        710.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 44,
+        "min_font_size": 27,
+        "max_font_size": 44,
+        "fit_mode": "shrink_only",
+        "fill": "#8A98AA"
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 50,
+                "value": 0.72
+              },
+              {
+                "frame": 179,
+                "value": 0.72
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_active_3",
+      "type": "text",
+      "text": "2026",
+      "size": [
+        560,
+        80
+      ],
+      "position": [
+        460.0,
+        710.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 44,
+        "min_font_size": 27,
+        "max_font_size": 44,
+        "fit_mode": "shrink_only",
+        "fill": "#6FE3FF",
+        "glow": {
+          "radius": 20,
+          "intensity": 0.5,
+          "color": "#6FE3FF"
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 134,
+                "value": 0.0
+              },
+              {
+                "frame": 142,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_big_0",
+      "type": "text",
+      "text": "1948",
+      "size": [
+        760,
+        330
+      ],
+      "position": [
+        1210.0,
+        520.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 190,
+        "min_font_size": 117,
+        "max_font_size": 190,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EFE4",
+        "glow": {
+          "radius": 36,
+          "intensity": 0.2,
+          "color": "#6FE3FF"
+        },
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.0
+              },
+              {
+                "frame": 38,
+                "value": 1.0
+              },
+              {
+                "frame": 46,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 26.0
+              },
+              {
+                "frame": 18,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_big_1",
+      "type": "text",
+      "text": "1969",
+      "size": [
+        760,
+        330
+      ],
+      "position": [
+        1210.0,
+        520.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 190,
+        "min_font_size": 117,
+        "max_font_size": 190,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EFE4",
+        "glow": {
+          "radius": 36,
+          "intensity": 0.2,
+          "color": "#6FE3FF"
+        },
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 36,
+                "value": 0.0
+              },
+              {
+                "frame": 44,
+                "value": 1.0
+              },
+              {
+                "frame": 82,
+                "value": 1.0
+              },
+              {
+                "frame": 90,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 26.0
+              },
+              {
+                "frame": 62,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_big_2",
+      "type": "text",
+      "text": "1998",
+      "size": [
+        760,
+        330
+      ],
+      "position": [
+        1210.0,
+        520.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 190,
+        "min_font_size": 117,
+        "max_font_size": 190,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EFE4",
+        "glow": {
+          "radius": 36,
+          "intensity": 0.2,
+          "color": "#6FE3FF"
+        },
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 80,
+                "value": 0.0
+              },
+              {
+                "frame": 88,
+                "value": 1.0
+              },
+              {
+                "frame": 126,
+                "value": 1.0
+              },
+              {
+                "frame": 134,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 26.0
+              },
+              {
+                "frame": 106,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_big_3",
+      "type": "text",
+      "text": "2026",
+      "size": [
+        760,
+        330
+      ],
+      "position": [
+        1210.0,
+        520.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/PlayfairDisplay.ttf",
+        "font_size": 190,
+        "min_font_size": 117,
+        "max_font_size": 190,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EFE4",
+        "glow": {
+          "radius": 36,
+          "intensity": 0.2,
+          "color": "#6FE3FF"
+        },
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 134,
+                "value": 0.0
+              },
+              {
+                "frame": 142,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 26.0
+              },
+              {
+                "frame": 152,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_rule",
+      "type": "shape",
+      "size": [
+        2,
+        420
+      ],
+      "position": [
+        -180.0,
+        -70.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "rounded_rect",
+        "radius": 1,
+        "fill": [
+          0.43,
+          0.89,
+          1,
+          0.55
+        ]
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 24,
+                "value": 0.8
+              },
+              {
+                "frame": 179,
+                "value": 0.8
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ledger_marker",
+      "type": "shape",
+      "size": [
+        54,
+        3
+      ],
+      "position": [
+        -180.0,
+        -190.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "rounded_rect",
+        "radius": 1,
+        "fill": [
+          0.43,
+          0.89,
+          1,
+          1
+        ]
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 44,
+                "value": 0.0
+              },
+              {
+                "frame": 60,
+                "value": 120.0
+              },
+              {
+                "frame": 88,
+                "value": 120.0
+              },
+              {
+                "frame": 104,
+                "value": 240.0
+              },
+              {
+                "frame": 132,
+                "value": 240.0
+              },
+              {
+                "frame": 148,
+                "value": 360.0
+              },
+              {
+                "frame": 179,
+                "value": 360.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          },
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 18,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 18,
+          "intensity": 0.7,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    }
+  ],
+  "output": {
+    "path": "date_vertical_ledger.mp4",
+    "format": "mp4",
+    "codec": "h264",
+    "crf": 16
+  }
+}

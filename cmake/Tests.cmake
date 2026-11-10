@@ -94,6 +94,12 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_scene_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_scene_test COMMAND chronontemplate_scene_test)
 
+    # Closed look vocabulary + the strict chronon.style.v1 reader.
+    add_executable(chronontemplate_look_style_spec_test tests/look_style_spec.cpp)
+    target_link_libraries(chronontemplate_look_style_spec_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_look_style_spec_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_look_style_spec_test COMMAND chronontemplate_look_style_spec_test)
+
     add_executable(chronontemplate_plan_lowering_test tests/plan_lowering.cpp
             "${CHRONONTEMPLATE_CHRONON3D_DIR}/src/animations/temporal/temporal_samples.cpp")
     target_link_libraries(chronontemplate_plan_lowering_test PRIVATE chronontemplate)

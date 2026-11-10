@@ -1,0 +1,396 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "editorial_motion_glow_line_arc",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 180
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "color",
+      "color": [
+        0.031,
+        0.041,
+        0.055,
+        1.0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "effects": [
+        {
+          "type": "vignette",
+          "radius": 0.82,
+          "softness": 0.55,
+          "amount": 0.64
+        }
+      ]
+    },
+    {
+      "id": "bg_wash",
+      "type": "color",
+      "color": [
+        0.06,
+        0.11,
+        0.16,
+        0.22
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180
+    },
+    {
+      "id": "arc_left",
+      "type": "text",
+      "text": "LA STORIA",
+      "size": [
+        560,
+        180
+      ],
+      "position": [
+        500.0,
+        650.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 56,
+        "min_font_size": 34,
+        "max_font_size": 56,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EFE4",
+        "glow": {
+          "radius": 24,
+          "intensity": 0.3,
+          "color": "#6FE3FF"
+        },
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 16,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 18.0
+              },
+              {
+                "frame": 22,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "arc_right",
+      "type": "text",
+      "text": "CONTINUA",
+      "size": [
+        560,
+        180
+      ],
+      "position": [
+        1430.0,
+        650.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 56,
+        "min_font_size": 34,
+        "max_font_size": 56,
+        "fit_mode": "shrink_only",
+        "fill": "#6FE3FF",
+        "glow": {
+          "radius": 24,
+          "intensity": 0.46,
+          "color": "#6FE3FF"
+        },
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 30,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 18.0
+              },
+              {
+                "frame": 36,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "arc_connector",
+      "type": "shape",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -300,
+              80
+            ]
+          },
+          {
+            "type": "cubic_to",
+            "control1": [
+              -170,
+              -240
+            ],
+            "control2": [
+              170,
+              -240
+            ],
+            "point": [
+              300,
+              80
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#6FE3FF",
+          "width": 4,
+          "cap": "round",
+          "join": "round"
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "in_out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 26,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 104,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 26,
+          "intensity": 0.8,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "arc_apex",
+      "type": "shape",
+      "size": [
+        18,
+        18
+      ],
+      "position": [
+        0.0,
+        -147.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "rounded_rect",
+        "radius": 9,
+        "fill": [
+          0.55,
+          0.94,
+          1,
+          1
+        ]
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.2
+              },
+              {
+                "frame": 76,
+                "value": 1.5
+              },
+              {
+                "frame": 94,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 70,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 0.9
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 26,
+          "intensity": 0.9,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    }
+  ],
+  "output": {
+    "path": "glow_line_arc.mp4",
+    "format": "mp4",
+    "codec": "h264",
+    "crf": 16
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "editorial_motion_camera_phrase_tilt",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 180
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "color",
+      "color": [
+        0.031,
+        0.041,
+        0.055,
+        1.0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "effects": [
+        {
+          "type": "vignette",
+          "radius": 0.82,
+          "softness": 0.55,
+          "amount": 0.68
+        }
+      ]
+    },
+    {
+      "id": "bg_wash",
+      "type": "color",
+      "color": [
+        0.06,
+        0.11,
+        0.16,
+        0.22
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180
+    },
+    {
+      "id": "phrase",
+      "type": "text",
+      "text": "CAMBIA IL\nPUNTO DI VISTA",
+      "size": [
+        1320,
+        460
+      ],
+      "position": [
+        960.0,
+        520.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 86,
+        "min_font_size": 53,
+        "max_font_size": 86,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EFE4",
+        "glow": {
+          "radius": 46,
+          "intensity": 0.3,
+          "color": "#6FE3FF"
+        },
+        "stroke": {
+          "color": "#05090D",
+          "width": 2.0
+        },
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 24,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 100.0
+              },
+              {
+                "frame": 60,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": -4.0
+              }
+            ],
+            "easing": "in_out_cubic"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.08
+              },
+              {
+                "frame": 60,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.02
+              }
+            ],
+            "easing": "in_out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "camera_rule",
+      "type": "shape",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -260.0,
+              230
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              260.0,
+              230
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#6FE3FF",
+          "width": 3,
+          "cap": "round",
+          "join": "round"
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "in_out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 34,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 80,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 20,
+          "intensity": 0.65,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    }
+  ],
+  "output": {
+    "path": "camera_phrase_tilt.mp4",
+    "format": "mp4",
+    "codec": "h264",
+    "crf": 16
+  }
+}
