@@ -190,6 +190,8 @@ add_library(chronontemplate STATIC
         src/chronontemplate/core/TemplateScene.cpp
         src/chronontemplate/core/PlanLowering.cpp
         src/chronontemplate/core/RenderPlanContentHost.cpp
+        src/chronontemplate/core/LookSpec.cpp
+        src/chronontemplate/core/StyleSpec.cpp
         src/chronontemplate/gel/GelCinematicTitlePack.cpp
         src/chronontemplate/single_images/ImageAnimationPack.cpp
         src/chronontemplate/single_images/ArchivalCardPack.cpp

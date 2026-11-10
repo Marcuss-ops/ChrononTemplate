@@ -1,0 +1,326 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "editorial_motion_camera_phrase_parallax",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 180
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "color",
+      "color": [
+        0.031,
+        0.041,
+        0.055,
+        1.0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "effects": [
+        {
+          "type": "vignette",
+          "radius": 0.82,
+          "softness": 0.55,
+          "amount": 0.72
+        }
+      ]
+    },
+    {
+      "id": "bg_wash",
+      "type": "color",
+      "color": [
+        0.06,
+        0.11,
+        0.16,
+        0.22
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180
+    },
+    {
+      "id": "phrase_back",
+      "type": "text",
+      "text": "LA STORIA",
+      "size": [
+        1200,
+        240
+      ],
+      "position": [
+        840.0,
+        440.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 92,
+        "min_font_size": 57,
+        "max_font_size": 92,
+        "fit_mode": "shrink_only",
+        "fill": "#D6DEE8",
+        "glow": {
+          "radius": 30,
+          "intensity": 0.18,
+          "color": "#FFFFFF"
+        },
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 22,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 90.0
+              },
+              {
+                "frame": 179,
+                "value": -40.0
+              }
+            ],
+            "easing": "in_out_sine"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.97
+              },
+              {
+                "frame": 179,
+                "value": 1.03
+              }
+            ],
+            "easing": "in_out_sine"
+          }
+        ]
+      }
+    },
+    {
+      "id": "phrase_front",
+      "type": "text",
+      "text": "CONTINUA",
+      "size": [
+        900,
+        240
+      ],
+      "position": [
+        1120.0,
+        650.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/Inter-Bold.ttf",
+        "font_size": 92,
+        "min_font_size": 57,
+        "max_font_size": 92,
+        "fit_mode": "shrink_only",
+        "fill": "#6FE3FF",
+        "glow": {
+          "radius": 40,
+          "intensity": 0.4,
+          "color": "#6FE3FF"
+        },
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 30,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": -60.0
+              },
+              {
+                "frame": 179,
+                "value": 80.0
+              }
+            ],
+            "easing": "in_out_sine"
+          },
+          {
+            "property": "scale",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 1.06
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "in_out_sine"
+          }
+        ]
+      }
+    },
+    {
+      "id": "camera_rule",
+      "type": "shape",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -310.0,
+              250
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              310.0,
+              250
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#6FE3FF",
+          "width": 3,
+          "cap": "round",
+          "join": "round"
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "in_out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 40,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 86,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 20,
+          "intensity": 0.65,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    }
+  ],
+  "output": {
+    "path": "camera_phrase_parallax.mp4",
+    "format": "mp4",
+    "codec": "h264",
+    "crf": 16
+  }
+}

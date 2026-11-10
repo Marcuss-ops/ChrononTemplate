@@ -1,0 +1,1022 @@
+{
+  "schema": "chronon.render-plan.v3",
+  "version": 3,
+  "job_id": "editorial_motion_image_list_filmstrip",
+  "canvas": {
+    "width": 1920,
+    "height": 1080,
+    "fps_num": 30,
+    "fps_den": 1,
+    "duration_frames": 180
+  },
+  "layers": [
+    {
+      "id": "bg",
+      "type": "color",
+      "color": [
+        0.031,
+        0.041,
+        0.055,
+        1.0
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "effects": [
+        {
+          "type": "vignette",
+          "radius": 0.82,
+          "softness": 0.55,
+          "amount": 0.6
+        }
+      ]
+    },
+    {
+      "id": "bg_wash",
+      "type": "color",
+      "color": [
+        0.06,
+        0.11,
+        0.16,
+        0.22
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0.0,
+        0.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180
+    },
+    {
+      "id": "strip_image_0",
+      "type": "image",
+      "asset": "assets/images/card_trio_1.png",
+      "size": [
+        340,
+        220
+      ],
+      "position": [
+        -400.0,
+        -210.0
+      ],
+      "fit": "cover",
+      "radius": 10,
+      "start_frame": 0,
+      "duration_frames": 180,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 22,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 24.0
+              },
+              {
+                "frame": 42,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14,
+          "intensity": 0.2,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            0.35
+          ]
+        }
+      ]
+    },
+    {
+      "id": "strip_frame_0",
+      "type": "shape",
+      "size": [
+        350,
+        230
+      ],
+      "position": [
+        -400.0,
+        -210.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "rounded_rect",
+        "radius": 15,
+        "stroke": {
+          "color": "#8FB8CC",
+          "width": 1.2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 36,
+                "value": 0.6
+              },
+              {
+                "frame": 179,
+                "value": 0.6
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "strip_image_1",
+      "type": "image",
+      "asset": "assets/images/card_trio_2.png",
+      "size": [
+        340,
+        220
+      ],
+      "position": [
+        0.0,
+        -210.0
+      ],
+      "fit": "cover",
+      "radius": 10,
+      "start_frame": 0,
+      "duration_frames": 180,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 36,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 24.0
+              },
+              {
+                "frame": 56,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14,
+          "intensity": 0.2,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            0.35
+          ]
+        }
+      ]
+    },
+    {
+      "id": "strip_frame_1",
+      "type": "shape",
+      "size": [
+        350,
+        230
+      ],
+      "position": [
+        0.0,
+        -210.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "rounded_rect",
+        "radius": 15,
+        "stroke": {
+          "color": "#8FB8CC",
+          "width": 1.2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 50,
+                "value": 0.6
+              },
+              {
+                "frame": 179,
+                "value": 0.6
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "strip_image_2",
+      "type": "image",
+      "asset": "assets/images/card_trio_3.png",
+      "size": [
+        340,
+        220
+      ],
+      "position": [
+        400.0,
+        -210.0
+      ],
+      "fit": "cover",
+      "radius": 10,
+      "start_frame": 0,
+      "duration_frames": 180,
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 50,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_y",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 24.0
+              },
+              {
+                "frame": 70,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 14,
+          "intensity": 0.2,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            0.35
+          ]
+        }
+      ]
+    },
+    {
+      "id": "strip_frame_2",
+      "type": "shape",
+      "size": [
+        350,
+        230
+      ],
+      "position": [
+        400.0,
+        -210.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "rounded_rect",
+        "radius": 15,
+        "stroke": {
+          "color": "#8FB8CC",
+          "width": 1.2
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 64,
+                "value": 0.6
+              },
+              {
+                "frame": 179,
+                "value": 0.6
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "row_0",
+      "type": "text",
+      "text": "Il contesto",
+      "size": [
+        800,
+        80
+      ],
+      "position": [
+        960.0,
+        620.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 36,
+        "min_font_size": 22,
+        "max_font_size": 36,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EFE4",
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 38,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 26.0
+              },
+              {
+                "frame": 48,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "row_dot_0",
+      "type": "shape",
+      "size": [
+        8,
+        8
+      ],
+      "position": [
+        -396.0,
+        80.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "rounded_rect",
+        "radius": 4,
+        "fill": [
+          0.43,
+          0.89,
+          1,
+          0.9
+        ]
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 36,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 0.9
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 10,
+          "intensity": 0.5,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "strip_rule_0",
+      "type": "shape",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 0.6,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -400,
+              122
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              400,
+              122
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#5C7188",
+          "width": 1.2,
+          "cap": "round",
+          "join": "round"
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "in_out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 25,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 82,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "row_1",
+      "type": "text",
+      "text": "La decisione",
+      "size": [
+        800,
+        80
+      ],
+      "position": [
+        960.0,
+        730.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 36,
+        "min_font_size": 22,
+        "max_font_size": 36,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EFE4",
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 54,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 26.0
+              },
+              {
+                "frame": 64,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "row_dot_1",
+      "type": "shape",
+      "size": [
+        8,
+        8
+      ],
+      "position": [
+        -396.0,
+        190.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "rounded_rect",
+        "radius": 4,
+        "fill": [
+          0.43,
+          0.89,
+          1,
+          0.9
+        ]
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 52,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 0.9
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 10,
+          "intensity": 0.5,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "strip_rule_1",
+      "type": "shape",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 0.6,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -400,
+              232
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              400,
+              232
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#5C7188",
+          "width": 1.2,
+          "cap": "round",
+          "join": "round"
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "in_out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 41,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 98,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "row_2",
+      "type": "text",
+      "text": "Le conseguenze",
+      "size": [
+        800,
+        80
+      ],
+      "position": [
+        960.0,
+        840.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "style": {
+        "font": "assets/fonts/Inter-Regular.ttf",
+        "font_size": 36,
+        "min_font_size": 22,
+        "max_font_size": 36,
+        "fit_mode": "shrink_only",
+        "fill": "#F3EFE4",
+        "shadow": {
+          "color": "#000000",
+          "opacity": 0.55,
+          "blur": 18,
+          "offset": [
+            0,
+            6
+          ]
+        }
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 70,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 1.0
+              }
+            ],
+            "easing": "out_cubic"
+          },
+          {
+            "property": "position_x",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 26.0
+              },
+              {
+                "frame": 80,
+                "value": 0.0
+              },
+              {
+                "frame": 179,
+                "value": 0.0
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      }
+    },
+    {
+      "id": "row_dot_2",
+      "type": "shape",
+      "size": [
+        8,
+        8
+      ],
+      "position": [
+        -396.0,
+        300.0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 1.0,
+      "shape": {
+        "type": "rounded_rect",
+        "radius": 4,
+        "fill": [
+          0.43,
+          0.89,
+          1,
+          0.9
+        ]
+      },
+      "animation": {
+        "tracks": [
+          {
+            "property": "opacity",
+            "keyframes": [
+              {
+                "frame": 0,
+                "value": 0.0
+              },
+              {
+                "frame": 68,
+                "value": 1.0
+              },
+              {
+                "frame": 179,
+                "value": 0.9
+              }
+            ],
+            "easing": "out_cubic"
+          }
+        ]
+      },
+      "effects": [
+        {
+          "type": "glow",
+          "radius": 10,
+          "intensity": 0.5,
+          "color": [
+            0.43529411764705883,
+            0.8901960784313725,
+            1.0,
+            1.0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "strip_rule_2",
+      "type": "shape",
+      "size": [
+        1920,
+        1080
+      ],
+      "position": [
+        0,
+        0
+      ],
+      "start_frame": 0,
+      "duration_frames": 180,
+      "opacity": 0.6,
+      "shape": {
+        "type": "path",
+        "path": [
+          {
+            "type": "move_to",
+            "point": [
+              -400,
+              342
+            ]
+          },
+          {
+            "type": "line_to",
+            "point": [
+              400,
+              342
+            ]
+          }
+        ],
+        "stroke": {
+          "color": "#5C7188",
+          "width": 1.2,
+          "cap": "round",
+          "join": "round"
+        },
+        "operators": [
+          {
+            "kind": "trim",
+            "params": {
+              "start": 0.0,
+              "end": 1.0,
+              "offset": 0.0,
+              "animation": {
+                "easing": "in_out_cubic",
+                "keyframes": [
+                  {
+                    "frame": 57,
+                    "value": [
+                      0.0,
+                      0.0,
+                      0.0
+                    ]
+                  },
+                  {
+                    "frame": 114,
+                    "value": [
+                      0.0,
+                      1.0,
+                      0.0
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "output": {
+    "path": "image_list_filmstrip.mp4",
+    "format": "mp4",
+    "codec": "h264",
+    "crf": 16
+  }
+}
