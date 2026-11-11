@@ -21,6 +21,7 @@
 #include "chrononmotion/motion/TitleCameraRecipe.hpp"
 
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -35,7 +36,9 @@ namespace chronontemplate {
         /// authored position, usually the canvas centre in 2.5D scenes).
         chrononmotion::Vector3 center{0.f, 0.f, 0.f};
         /// Half-extent of the title run in world units, used for framing math
-        /// and safe-area checks (a conservative bound is fine).
+        /// and safe-area checks (a conservative bound is fine). Must be
+        /// positive whenever `TitleCameraShot::minVisible > 0`: a zero-size
+        /// subject would make the visibility guard vacuous.
         float halfWidth{300.f};
         float halfHeight{120.f};
     };
@@ -58,7 +61,35 @@ namespace chronontemplate {
         TitleCameraIntensity intensity{TitleCameraIntensity::Editorial};
         int inFrame{0};
         int duration{135};
+        /// Minimum fraction of the title bounds that must stay inside the
+        /// frame at every sampled frame. Set to 0 to opt out explicitly.
+        float minVisible{0.95f};
     };
+
+    /// Result of the per-frame subject-in-frame check. `failure` is a stable,
+    /// human-readable diagnostic naming the move, the frame and the ratio.
+    struct TitleCameraFramingReport {
+        bool passed{true};
+        int worstFrame{0};
+        float worstVisible{1.f};
+        std::string failure{};
+    };
+
+    /// Thrown by applyTitleCameraShot when the authored camera leaves the
+    /// subject outside the frame. A named type lets callers distinguish a
+    /// framing-authoring error from an I/O or plan error.
+    class TitleCameraFramingLost : public std::runtime_error {
+    public:
+        using std::runtime_error::runtime_error;
+    };
+
+    /// Author `shot` on a private copy of the scene rig and sample that probe
+    /// across the whole window. The scene is never mutated, so this can be
+    /// called before `applyTitleCameraShot` to answer "would this shot frame
+    /// the title?". This is the same `CameraValidator` the motion layer uses;
+    /// the pack does not reimplement projection.
+    [[nodiscard]] TitleCameraFramingReport titleCameraFramingReport(
+        TemplateScene& scene, TitleCameraMove move, const TitleCameraShot& shot);
 
     /// Stable snake-case id of a preset (the catalog/consumer-facing name).
     [[nodiscard]] const char* titleCameraMoveId(TitleCameraMove move) noexcept;
@@ -69,8 +100,11 @@ namespace chronontemplate {
     /// Author `shot` onto the scene's camera rig. The title layer is never
     /// touched: dolly/pan/orbit/tilt/roll/FOV/focus keys land on the rig only,
     /// with an end settle (the last beat decelerates) unless the move states
-    /// otherwise. Throws `std::invalid_argument` on a non-positive duration or
-    /// a non-finite anchor.
+    /// otherwise. The shot is validated on a private rig probe first, so a
+    /// framing loss is rejected before the scene rig is mutated. Throws
+    /// `std::invalid_argument` on an invalid duration, anchor or extents, and
+    /// `TitleCameraFramingLost` when the authored camera leaves the title below
+    /// `minVisible` in any sampled frame.
     void applyTitleCameraShot(TemplateScene& scene, TitleCameraMove move,
                               const TitleCameraShot& shot);
 

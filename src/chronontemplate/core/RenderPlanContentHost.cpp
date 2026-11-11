@@ -98,6 +98,8 @@ ContentHandle RenderPlanContentHost::createText(const TextRequest& request) {
             style.gel_surface = true;
             style.gel_transmission_enabled = material.gelTransmission;
             style.gel_soft_fusion = material.gelSoftFusion;
+            style.gel_material_profile = material.gelReference20261107
+                ? "reference_20261107" : "current";
         }
         if (material.extrusionDepth > 0.f) {
             style.extruded_text = true;

@@ -71,6 +71,8 @@ namespace chronontemplate {
         bool gelSurface{false};
         bool gelTransmission{true};
         bool gelSoftFusion{false};
+        /// Select the certified 2026-11-07 GEL material constants.
+        bool gelReference20261107{false};
         /// Positive values request real extruded text geometry at that depth.
         /// Zero keeps the flat text run.
         float extrusionDepth{0.f};

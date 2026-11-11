@@ -41,6 +41,13 @@ target_link_libraries(chronontemplate_emit_title_camera_v2 PRIVATE chronontempla
 target_include_directories(chronontemplate_emit_title_camera_v2 PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_title_camera_v2 PRIVATE -Wall -Wextra)
 
+# Camera-motion text canaries: the title-camera pack drives the rig, while the
+# look adds a cyan halo behind the run and a light RGB split.
+add_executable(chronontemplate_emit_camera_glow_text tools/camera_roll/emit_camera_glow_text.cpp)
+target_link_libraries(chronontemplate_emit_camera_glow_text PRIVATE chronontemplate)
+target_include_directories(chronontemplate_emit_camera_glow_text PRIVATE "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_camera_glow_text PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_word_lens_reference
         tools/camera_roll/emit_word_lens_reference.cpp)
 target_link_libraries(chronontemplate_emit_word_lens_reference PRIVATE chronontemplate)

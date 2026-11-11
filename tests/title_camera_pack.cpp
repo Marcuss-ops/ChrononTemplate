@@ -610,6 +610,80 @@ namespace {
             threw = true;
         }
         check(threw, "a non-finite anchor is refused");
+
+        threw = false;
+        try {
+            FakeContentHost host;
+            TemplateScene scene("title_camera_bad", 30.f, host, kViewportW, kViewportH);
+            applyTitleCameraShot(scene, TitleCameraMove::SlowPush,
+                                 TitleCameraShot{.anchor = {.center = Vector3(960.f, 540.f, 0.f)},
+                                                 .inFrame = 0,
+                                                 .duration = 135,
+                                                 .minVisible = std::nanf("")});
+        } catch (const std::invalid_argument&) {
+            threw = true;
+        }
+        check(threw, "a non-finite minVisible is refused");
+
+        // The proposed-shot report author a private probe, never the scene.
+        // The same lost shot must be rejected before apply keys the rig.
+        {
+            FakeContentHost host;
+            TemplateScene scene("title_camera_probe", 30.f, host, kViewportW, kViewportH);
+            auto& title = scene.text({.text = "THE ART OF SIMPLICITY",
+                                      .font = "Inter-Bold.ttf", .fontSize = 180.f});
+            title.position(960.f, 540.f);
+
+            const CameraPose before = scene.cameraRig().sample(0.f);
+            const TitleCameraShot lost{
+                .anchor = {.center = Vector3(960.f, 540.f, 0.f),
+                           .halfWidth = 50'000.f,
+                           .halfHeight = 50'000.f},
+                .inFrame = 0,
+                .duration = 135};
+            const TitleCameraFramingReport report =
+                titleCameraFramingReport(scene, TitleCameraMove::SlowPush, lost);
+            check(!report.passed,
+                  "the proposed-shot report rejects a shot that loses the title");
+            const CameraPose afterReport = scene.cameraRig().sample(0.f);
+            check(std::fabs(before.position.x - afterReport.position.x) < 1e-6f &&
+                      std::fabs(before.target.x - afterReport.target.x) < 1e-6f &&
+                      std::fabs(before.fov - afterReport.fov) < 1e-6f,
+                  "the proposed-shot report never mutates the scene rig");
+
+            bool framingThrew = false;
+            try {
+                applyTitleCameraShot(scene, TitleCameraMove::SlowPush, lost);
+            } catch (const TitleCameraFramingLost&) {
+                framingThrew = true;
+            }
+            check(framingThrew,
+                  "apply rejects a framing loss with the named error");
+            const CameraPose afterApply = scene.cameraRig().sample(0.f);
+            check(std::fabs(before.position.x - afterApply.position.x) < 1e-6f &&
+                      std::fabs(before.target.x - afterApply.target.x) < 1e-6f &&
+                      std::fabs(before.fov - afterApply.fov) < 1e-6f,
+                  "a rejected shot leaves the camera rig untouched");
+        }
+
+        // A zero-size subject would make the visibility check vacuous; when
+        // the guard is enabled it must be refused up front.
+        threw = false;
+        try {
+            FakeContentHost host;
+            TemplateScene scene("title_camera_bad", 30.f, host, kViewportW, kViewportH);
+            applyTitleCameraShot(
+                scene, TitleCameraMove::SlowPush,
+                TitleCameraShot{
+                    .anchor = {.center = Vector3(960.f, 540.f, 0.f),
+                               .halfWidth = 0.f,
+                               .halfHeight = 0.f},
+                    .inFrame = 0,
+                    .duration = 135});
+        } catch (const std::invalid_argument&) {
+            threw = true;
+        }
+        check(threw, "zero half extents are refused while the framing guard is active");
     }
 
 }// namespace
