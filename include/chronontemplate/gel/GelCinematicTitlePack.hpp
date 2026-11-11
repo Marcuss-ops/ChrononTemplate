@@ -17,6 +17,14 @@
 
 namespace chronontemplate::gel {
 
+    /// The earlier dielectric-only recipe remains the default for existing
+    /// compositions. The pinned 2026-11-07 look opts in to real 3D backings
+    /// and the horizontal streak.
+    enum class GelCinematicTitleLook {
+        reference_20261107,
+        legacy_dielectric
+    };
+
     /// One word of the title. `x`/`y` are canvas-space centres; `scale` is the
     /// per-word face scale.
     struct GelCinematicWord {
@@ -26,11 +34,13 @@ namespace chronontemplate::gel {
         float scale{1.f};
     };
 
-    /// The GEL recipe: one plate and N dielectric faces, with the same effect
-    /// stack on every face. Backings are intentionally not emitted: the video
-    /// path composited them over the faces and hid their lime crest. Defaults
-    /// are the values pinned by the 2026-11-07 reference closure.
+    /// The GEL recipe. `reference_20261107` emits one plate, an extruded blue
+    /// backing for each word, then opaque GEL faces and the approved optics.
+    /// `legacy_dielectric` retains the prior plate-plus-face behavior.
     struct GelCinematicTitleSpec {
+        // Keep existing callers on the previous recipe. Opt into the pinned
+        // seven-layer composition explicitly.
+        GelCinematicTitleLook look{GelCinematicTitleLook::legacy_dielectric};
         std::string name{"GelCinematicTitle"};
         std::string plate{};
         ImageFitMode plateFit{ImageFitMode::Cover};
@@ -52,11 +62,9 @@ namespace chronontemplate::gel {
         int durationFrames{300};
         /// Slow optical push shared by every layer. 1.0 keeps the title static.
         float pushScale{1.035f};
-        /// Dielectric backdrop transmission. False is the opaque diagnostic
-        /// ablation kept for A/B renders.
+        /// Used by `legacy_dielectric`; reference mode is pinned opaque.
         bool gelTransmission{true};
-        /// Downward shafts generated from each word's own luminance. The pack
-        /// moves the origin to that word's top centre in canvas space.
+        /// Legacy downward shafts generated from each word's own luminance.
         bool enableLightRays{true};
         TextLightRaysStyle lightRays{
             .originX = 0.5f, .originY = 0.2f,
@@ -85,21 +93,20 @@ namespace chronontemplate::gel {
             .halo = 0.f,
             .ghost = 0.f,
             .streak = 1.f};
-        /// The legacy highlight-only horizontal wing is retained as a
-        /// diagnostic only. The reference has no horizontal cut through the
-        /// backdrop; the current composite uses downward light shafts instead.
+        /// Used by `legacy_dielectric`. Reference mode enables the pinned
+        /// horizontal anamorphic flare instead.
         bool enableLensFlare{false};
     };
 
     struct GelCinematicTitleLayers {
         MotionLayerId plate{0};
-        /// Always empty; retained for source compatibility.
+        /// Empty in legacy mode; contains one backing id per word in reference mode.
         std::vector<MotionLayerId> backings{};
         std::vector<MotionLayerId> faces{};
     };
 
-    /// Author the recipe into `scene`. Layers are created plate -> all faces
-    /// so the draw order is the certified one. The content is measured and
+    /// Author the recipe into `scene`. Reference-mode layers are ordered as
+    /// plate -> all backings -> all faces. The content is measured and
     /// owned by the supplied ContentHost; this function only states what to
     /// create, where it sits and how the optics behave.
     [[nodiscard]] GelCinematicTitleLayers addGelCinematicTitle(

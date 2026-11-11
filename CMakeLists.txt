@@ -284,12 +284,23 @@ add_library(chronontemplate STATIC
 
 add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 
-# The tools below use Blend2D's imported target; load its package before
-# declaring them rather than relying on another project to define it.
-# Chronon3D installs vcpkg dependencies per preset. The template consumes the
-# sibling checkout rather than its vcpkg toolchain, so add available package
-# roots explicitly for the documented standalone build.
-find_package(blend2d CONFIG REQUIRED)
+# Blend2D-backed tools are optional and discover Blend2D themselves in
+# cmake/Tools.cmake. Do not make the standalone library/tests depend on a
+# package that is only needed by those optional vector tools.
+function(chronontemplate_enable_warnings target)
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /W4)
+        if(CHRONONTEMPLATE_WERROR)
+            target_compile_options(${target} PRIVATE /WX)
+        endif()
+    else()
+        target_compile_options(${target} PRIVATE -Wall -Wextra)
+        if(CHRONONTEMPLATE_WERROR)
+            target_compile_options(${target} PRIVATE -Werror)
+        endif()
+    endif()
+endfunction()
+
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tools.cmake)
 
 # Newspaper page composer (C++ port of make_newspaper_pages.py): the four
@@ -683,16 +694,10 @@ target_include_directories(chronontemplate_live_adapter PUBLIC
         $<BUILD_INTERFACE:${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}>
         $<INSTALL_INTERFACE:include>)
 target_compile_features(chronontemplate_live_adapter PUBLIC cxx_std_20)
-target_compile_options(chronontemplate_live_adapter PRIVATE -Wall -Wextra)
-if(CHRONONTEMPLATE_WERROR)
-    target_compile_options(chronontemplate_live_adapter PRIVATE -Werror)
-endif()
 target_compile_features(chronontemplate PUBLIC cxx_std_20)
 
-target_compile_options(chronontemplate PRIVATE -Wall -Wextra)
-if(CHRONONTEMPLATE_WERROR)
-    target_compile_options(chronontemplate PRIVATE -Werror)
-endif()
+chronontemplate_enable_warnings(chronontemplate)
+chronontemplate_enable_warnings(chronontemplate_live_adapter)
 
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Tests.cmake)
