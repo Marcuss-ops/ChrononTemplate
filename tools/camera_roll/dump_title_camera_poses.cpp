@@ -46,7 +46,7 @@ int main() {
         TemplateScene scene("title_camera_render", static_cast<float>(fps), host, 1920.f,1080.f);
         auto& title=scene.text({.text="THE ART OF SIMPLICITY",.font="Inter-Bold.ttf",.fontSize=180.f});
         title.position(960.f,540.f);
-        applyTitleCameraShot(scene,move,TitleCameraShot{.anchor={.center=Vector3(960.f,540.f,0.f),.halfWidth=900.f,.halfHeight=120.f},.framing=TitleFraming::Medium,.intensity=TitleCameraIntensity::Editorial,.inFrame=0,.duration=duration});
+        applyTitleCameraShot(scene,move,TitleCameraShot{.anchor={.center=Vector3(960.f,540.f,0.f),.halfWidth=900.f,.halfHeight=120.f},.framing=TitleFraming::Medium,.intensity=TitleCameraIntensity::Editorial,.inFrame=0,.duration=duration,.minVisible=0.f});
         std::cout << id << '\n';
         for (int f=0; f<=duration; ++f) {
             const auto p=scene.camera().rig().sample(static_cast<float>(f)/fps);

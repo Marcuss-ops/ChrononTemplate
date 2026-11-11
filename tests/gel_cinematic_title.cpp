@@ -77,6 +77,9 @@ int main() {
     check(face != nullptr && face->style && face->style->gel_surface &&
           face->style->gel_transmission_enabled,
           "the face is a dielectric GEL surface");
+    check(face != nullptr && face->style &&
+          face->style->gel_material_profile == "current",
+          "the legacy face keeps the current GEL material profile");
     check(face != nullptr && face->style && face->style->glow &&
           face->style->glow->radius == 4.5f,
           "the tight perimeter glow survives lowering");
@@ -100,6 +103,78 @@ int main() {
 
     check(face != nullptr && !face->transform_samples.empty(),
           "the preset authors a resolved transform calendar for the video path");
+
+    // ── Reference closure: the seven-layer 2026-11-07 recipe ────────────────
+    TemplateScene referenceScene("gel-title-reference", 30.f, host, 1920.f, 1080.f);
+    gel::GelCinematicTitleSpec referenceSpec;
+    referenceSpec.look = gel::GelCinematicTitleLook::Reference20261107;
+    referenceSpec.name = "gel_ref";
+    referenceSpec.plate = "plate.png";
+    referenceSpec.font = "LiberationMono-Bold.ttf";
+    referenceSpec.fontSize = 125.f;
+    referenceSpec.words = {
+        {.text = "calories", .x = 382.f, .y = 540.f, .scale = 1.f},
+        {.text = "or", .x = 813.f, .y = 540.f, .scale = 1.f},
+        {.text = "ingredients", .x = 1408.f, .y = 540.f, .scale = 1.f}};
+
+    const auto referenceLayers = gel::addGelCinematicTitle(referenceScene, referenceSpec);
+    check(referenceLayers.plate != 0 && referenceLayers.backings.size() == 3 &&
+          referenceLayers.faces.size() == 3,
+          "the reference mode authors one plate, three backings and three faces");
+
+    const auto referencePlan =
+        lowerToRenderPlan(referenceScene, host, "gel-title-reference", "gel-title-reference.mp4");
+    check(referencePlan.layers.size() == 7, "the reference plan carries seven layers");
+
+    int backingCount = 0;
+    std::size_t lastBacking = 0;
+    std::size_t firstFace = referencePlan.layers.size();
+    for (std::size_t i = 0; i < referencePlan.layers.size(); ++i) {
+        const auto& layer = referencePlan.layers[i];
+        if (layer.type != LayerType::Text || !layer.style) continue;
+        if (layer.style->extruded_text && !layer.style->gel_surface) {
+            ++backingCount;
+            lastBacking = i;
+        }
+        if (layer.style->gel_surface) firstFace = std::min(firstFace, i);
+    }
+    check(backingCount == 3 && lastBacking < firstFace,
+          "all three extruded backings precede the GEL faces in draw order");
+
+    const LayerPlan* backing = findByText(referencePlan, "calories", false);
+    check(backing != nullptr && backing->style && backing->style->extruded_text &&
+          backing->style->extrusion_depth == 8.f && backing->style->fill == "#1454FF",
+          "the reference backing is an extruded royal-blue mesh at the certified depth");
+    check(backing != nullptr && backing->effects.size() == 1 &&
+          backing->effects[0].kind == LayerPlan::EffectKindPlan::Catalog &&
+          backing->effects[0].canonical_effect_id == "generate.fill",
+          "the reference backing keeps the native generate.fill pass");
+
+    const LayerPlan* referenceFace = findByText(referencePlan, "calories", true);
+    check(referenceFace != nullptr && referenceFace->style &&
+          !referenceFace->style->gel_transmission_enabled,
+          "the reference face is opaque");
+    check(referenceFace != nullptr && referenceFace->style &&
+          referenceFace->style->gel_material_profile == "reference_20261107",
+          "the reference face selects the certified GEL material profile");
+    check(referenceFace != nullptr && referenceFace->effects.size() == 4 &&
+          referenceFace->effects[0].kind == LayerPlan::EffectKindPlan::DropShadow &&
+          referenceFace->effects[1].kind == LayerPlan::EffectKindPlan::ChromaticAberration &&
+          referenceFace->effects[2].kind == LayerPlan::EffectKindPlan::Bloom &&
+          referenceFace->effects[3].kind == LayerPlan::EffectKindPlan::Catalog &&
+          referenceFace->effects[3].canonical_effect_id == "light.lens_flare",
+          "the reference face carries the pinned streak and no downward shafts");
+    check(referenceFace != nullptr && referenceFace->effects[3].canonical_params.size() == 6 &&
+          referenceFace->effects[3].canonical_params[0].param == "threshold" &&
+          referenceFace->effects[3].canonical_params[0].value == 0.88f &&
+          referenceFace->effects[3].canonical_params[5].param == "streak" &&
+          referenceFace->effects[3].canonical_params[5].value == 1.f,
+          "the reference streak uses the certified threshold and full wing");
+
+    const LayerPlan* referenceOr = findByText(referencePlan, "or", true);
+    check(referenceOr != nullptr && referenceOr->style &&
+          referenceOr->style->fill == "#00E8FF",
+          "the reference keeps the same opaque fill on the centre word");
 
     bool emptyWordsRejected = false;
     try {

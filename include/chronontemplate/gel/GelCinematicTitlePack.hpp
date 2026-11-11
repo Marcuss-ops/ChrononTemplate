@@ -12,10 +12,24 @@
 
 #include "chronontemplate/core/TemplateScene.hpp"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
 namespace chronontemplate::gel {
+
+    /// Which certified recipe to author.
+    ///
+    /// `CinematicV1` is the production look shipped on 2026-11-08: one plate
+    /// and three dielectric faces, no extruded backing. `Reference20261107`
+    /// is the 2026-11-07 reference closure: one plate, three royal-blue
+    /// extruded backings and three opaque GEL faces carrying the horizontal
+    /// anamorphic streak. The reference mode is opt-in so existing videos keep
+    /// the current recipe.
+    enum class GelCinematicTitleLook : std::uint8_t {
+        CinematicV1,
+        Reference20261107,
+    };
 
     /// One word of the title. `x`/`y` are canvas-space centres; `scale` is the
     /// per-word face scale.
@@ -26,12 +40,15 @@ namespace chronontemplate::gel {
         float scale{1.f};
     };
 
-    /// The GEL recipe: one plate and N dielectric faces, with the same effect
-    /// stack on every face. Backings are intentionally not emitted: the video
-    /// path composited them over the faces and hid their lime crest. Defaults
-    /// are the values pinned by the 2026-11-07 reference closure.
+    /// The GEL recipe: one plate and N words. `look` selects the certified
+    /// layer stack; the remaining fields keep the current defaults so existing
+    /// callers are unaffected. Under `Reference20261107` the optics are pinned
+    /// to the 2026-11-07 closure (opaque faces, no downward shafts, horizontal
+    /// anamorphic streak) and the extruded backings are emitted behind the
+    /// faces in plan order.
     struct GelCinematicTitleSpec {
         std::string name{"GelCinematicTitle"};
+        GelCinematicTitleLook look{GelCinematicTitleLook::CinematicV1};
         std::string plate{};
         ImageFitMode plateFit{ImageFitMode::Cover};
         /// Zero means "use the scene canvas". The plate is always one
@@ -41,10 +58,11 @@ namespace chronontemplate::gel {
         std::string font{};
         float fontSize{125.f};
         std::string faceColor{"#00E8FF"};
-        // Retained for source compatibility with the earlier backing recipe;
-        // the backing is no longer emitted.
+        /// Extruded backing fill. Used by `Reference20261107` only.
         std::string backingColor{"#1454FF"};
         float extrusionDepth{8.f};
+        /// Backing scale relative to its face and its lower/right offset in
+        /// canvas pixels. Used by `Reference20261107` only.
         float backingScale{1.004f};
         chrononmotion::Vector2 backingOffset{1.f, 5.f};
         std::vector<GelCinematicWord> words{};
@@ -52,11 +70,11 @@ namespace chronontemplate::gel {
         int durationFrames{300};
         /// Slow optical push shared by every layer. 1.0 keeps the title static.
         float pushScale{1.035f};
-        /// Dielectric backdrop transmission. False is the opaque diagnostic
-        /// ablation kept for A/B renders.
+        /// Dielectric backdrop transmission for `CinematicV1`. The reference
+        /// closure always pins the faces opaque.
         bool gelTransmission{true};
-        /// Downward shafts generated from each word's own luminance. The pack
-        /// moves the origin to that word's top centre in canvas space.
+        /// Downward shafts generated from each word's own luminance.
+        /// `CinematicV1` only: the reference closure has no shafts.
         bool enableLightRays{true};
         TextLightRaysStyle lightRays{
             .originX = 0.5f, .originY = 0.2f,
@@ -85,23 +103,23 @@ namespace chronontemplate::gel {
             .halo = 0.f,
             .ghost = 0.f,
             .streak = 1.f};
-        /// The legacy highlight-only horizontal wing is retained as a
-        /// diagnostic only. The reference has no horizontal cut through the
-        /// backdrop; the current composite uses downward light shafts instead.
+        /// Legacy diagnostic switch for the current recipe. The reference
+        /// closure always applies its own pinned horizontal anamorphic streak.
         bool enableLensFlare{false};
     };
 
     struct GelCinematicTitleLayers {
         MotionLayerId plate{0};
-        /// Always empty; retained for source compatibility.
+        /// Empty for `CinematicV1`; three extruded layers for the reference.
         std::vector<MotionLayerId> backings{};
         std::vector<MotionLayerId> faces{};
     };
 
-    /// Author the recipe into `scene`. Layers are created plate -> all faces
-    /// so the draw order is the certified one. The content is measured and
-    /// owned by the supplied ContentHost; this function only states what to
-    /// create, where it sits and how the optics behave.
+    /// Author the recipe into `scene`. Layers are created plate -> all
+    /// backings -> all faces so the draw order is the certified one. The
+    /// content is measured and owned by the supplied ContentHost; this
+    /// function only states what to create, where it sits and how the optics
+    /// behave.
     [[nodiscard]] GelCinematicTitleLayers addGelCinematicTitle(
             TemplateScene& scene, const GelCinematicTitleSpec& spec);
 

@@ -113,9 +113,9 @@ int main(int argc, char** argv) {
         spec.inFrame = 0;
         spec.durationFrames = kFrames - 1;
         spec.pushScale = 1.04f;
-        spec.gelTransmission = true;
-        spec.enableLightRays = true;
-        spec.enableLensFlare = false;
+        // The production 1080p title is the certified seven-layer closure:
+        // plate, three extruded royal-blue backings, three opaque GEL faces.
+        spec.look = gel::GelCinematicTitleLook::Reference20261107;
         (void)gel::addGelCinematicTitle(scene, spec);
 
         auto plan = lowerToRenderPlan(scene, host, "gel_cinematic_title_1080p", video);
