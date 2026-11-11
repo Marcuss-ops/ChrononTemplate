@@ -284,12 +284,9 @@ add_library(chronontemplate STATIC
 
 add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
 
-# The tools below use Blend2D's imported target; load its package before
-# declaring them rather than relying on another project to define it.
-# Chronon3D installs vcpkg dependencies per preset. The template consumes the
-# sibling checkout rather than its vcpkg toolchain, so add available package
-# roots explicitly for the documented standalone build.
-find_package(blend2d CONFIG REQUIRED)
+# Blend2D-backed tools are optional and discover Blend2D themselves in
+# cmake/Tools.cmake. Do not make the standalone library/tests depend on a
+# package that is only needed by those optional vector tools.
 function(chronontemplate_enable_warnings target)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4)
