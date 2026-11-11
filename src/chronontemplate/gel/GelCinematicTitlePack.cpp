@@ -38,6 +38,8 @@ namespace chronontemplate::gel {
 
     GelCinematicTitleLayers addGelCinematicTitle(
             TemplateScene& scene, const GelCinematicTitleSpec& spec) {
+        const bool referenceLook =
+            spec.look == GelCinematicTitleLook::reference_20261107;
         if (spec.words.empty())
             throw std::invalid_argument("GelCinematicTitle: at least one word is required");
         if (spec.font.empty())
@@ -94,6 +96,7 @@ namespace chronontemplate::gel {
 
         GelCinematicTitleLayers out{};
         out.faces.reserve(spec.words.size());
+        if (referenceLook) out.backings.reserve(spec.words.size());
 
         if (!spec.plate.empty()) {
             if (spec.plateSize.x < 0.f || spec.plateSize.y < 0.f)
@@ -116,10 +119,50 @@ namespace chronontemplate::gel {
             out.plate = layer.id();
         }
 
-        // The former extruded backing was composited over the GEL face on the
-        // video path, hiding the face and its lime crest. Keep the plate and
-        // the three dielectric faces; the face's drop shadow owns the depth
-        // cue without occluding the transmitted surface.
+        // Emit every backing before every face. This is the order captured by
+        // the approved RenderPlan and keeps the 3D rim behind the opaque GEL
+        // body instead of covering its highlights or counters.
+        if (referenceLook) {
+            for (std::size_t i = 0; i < spec.words.size(); ++i) {
+                const GelCinematicWord& word = spec.words[i];
+                if (word.text.empty())
+                    throw std::invalid_argument("GelCinematicTitle: word text is required");
+                requireFinite(word.x, "word.x");
+                requireFinite(word.y, "word.y");
+                requireFinite(word.scale, "word.scale");
+                if (word.scale <= 0.f || word.scale > 8.f)
+                    throw std::invalid_argument("GelCinematicTitle: word.scale must be in (0, 8]");
+
+                TextSpec backing;
+                backing.text = word.text;
+                backing.font = spec.font;
+                backing.fontSize = spec.fontSize;
+                backing.color = spec.backingColor;
+                backing.name = spec.name + "_backing_" + std::to_string(i);
+                backing.screenSpace = false;
+                backing.material = TextMaterialStyle{
+                    .gelSurface = false,
+                    .gelTransmission = false,
+                    .gelSoftFusion = false,
+                    .extrusionDepth = spec.extrusionDepth};
+                backing.catalogEffects.push_back(TextCatalogEffectStyle{
+                    .effectId = "generate.fill",
+                    .params = {{"amount", 0.78f}, {"color.r", 0.08f},
+                               {"color.g", 0.52f}, {"color.b", 1.0f}}});
+
+                LayerHandle& backingLayer = scene.text(backing);
+                const float backingScale = word.scale * spec.backingScale;
+                backingLayer.position(word.x - originX + spec.backingOffset.x,
+                                      word.y - originY + spec.backingOffset.y)
+                    .layer()
+                    .scaled(chrononmotion::Vector3(backingScale, backingScale, 1.f));
+                backingLayer.alive(spec.inFrame, endFrame);
+                applyPush(scene, backingLayer, backingScale, spec.inFrame,
+                          spec.durationFrames, spec.pushScale);
+                out.backings.push_back(backingLayer.id());
+            }
+        }
+
         for (std::size_t i = 0; i < spec.words.size(); ++i) {
             const GelCinematicWord& word = spec.words[i];
             if (word.text.empty())
@@ -134,24 +177,29 @@ namespace chronontemplate::gel {
             face.text = word.text;
             face.font = spec.font;
             face.fontSize = spec.fontSize;
-            // The centre word sits over the white slit between the two people:
-            // author it as a near-white gel so the backlit body reads through
-            // instead of as an opaque cyan decal.
-            face.color = word.text == "or" ? "#FFFFFF" : spec.faceColor;
+            // Reference mode uses one solid cyan material on all words. The
+            // legacy recipe retains its earlier near-white centre word.
+            face.color = !referenceLook && word.text == "or"
+                             ? "#FFFFFF" : spec.faceColor;
             face.name = spec.name + "_face_" + std::to_string(i);
             face.screenSpace = false;
             face.material = TextMaterialStyle{
                 .gelSurface = true,
-                .gelTransmission = spec.gelTransmission,
+                .gelTransmission = referenceLook ? false : spec.gelTransmission,
                 .gelSoftFusion = false,
                 .extrusionDepth = 0.f};
             face.dropShadow = spec.dropShadow;
             face.chromaticAberration = spec.chromaticAberration;
             face.glow = spec.glow;
             face.bloom = spec.bloom;
-            if (spec.enableLensFlare)
+            if (referenceLook) {
+                face.lensFlare = TextLensFlareStyle{
+                    .threshold = 0.88f, .intensity = 0.55f, .radius = 0.98f,
+                    .halo = 0.02f, .ghost = 0.f, .streak = 1.f};
+            } else if (spec.enableLensFlare) {
                 face.lensFlare = spec.lensFlare;
-            if (spec.enableLightRays) {
+            }
+            if (!referenceLook && spec.enableLightRays) {
                 TextLightRaysStyle rays = spec.lightRays;
                 rays.originX = word.x / canvas.x;
                 rays.originY = (word.y - spec.fontSize * 0.55f) / canvas.y;
