@@ -17,7 +17,7 @@ else()
         "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 endif()
-target_compile_options(chronontemplate_emit_gel_cinematic_title PRIVATE -Wall -Wextra)
+chronontemplate_enable_warnings(chronontemplate_emit_gel_cinematic_title)
 
 # Demo/showcase emitters, the canonical catalog emitter and the canaries.
 # Included after the `chronontemplate` + `chronontemplate_live_adapter` targets.
