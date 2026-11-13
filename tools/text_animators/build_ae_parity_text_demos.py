@@ -333,6 +333,149 @@ def morph_plan() -> dict:
     )
 
 
+def selector_parity_plan() -> dict:
+    # One clip covering the selector-engine additions: temporal Wiggly,
+    # per-glyph Expression, and Range Units=Index with Smoothness.  The text
+    # layers stay inside the authored bounds; the animator offsets are small.
+    temporal_wiggly = {
+        "id": "temporal_wiggly",
+        "selectors": [
+            selector(
+                unit="glyph",
+                shape="wiggly",
+                wiggly_frequency=1.1,
+                wiggly_amplitude=0.65,
+                wiggly_seed=7,
+                wiggles_per_second=2.2,
+                correlation=55.0,
+                temporal_phase=0.0,
+                spatial_phase=0.0,
+                min_amount=12.0,
+                max_amount=100.0,
+                lock_dimensions=True,
+                wiggly_mode="smooth",
+            )
+        ],
+        "properties": [
+            track("position", [kf(0, [0.0, 26.0])]),
+            track("rotation", [kf(0, 6.0)]),
+        ],
+    }
+    expression = {
+        "id": "expression_ramp",
+        "selectors": [
+            selector(
+                unit="glyph",
+                shape="square",
+                # Output is a percentage; the expression replaces the base
+                # weight per glyph.  time is seconds, textIndex is 0-based.
+                expression="50 + 50 * sin(time * 2.2 - textIndex * 0.75)",
+            )
+        ],
+        "properties": [track("position", [kf(0, [0.0, 34.0])])],
+    }
+    index_smooth = {
+        "id": "index_smooth",
+        "selectors": [
+            selector(
+                unit="glyph",
+                range_units="index",
+                start={"keyframes": [kf(0, 0.0)]},
+                end={"keyframes": [kf(0, 3.0)]},
+                offset={"keyframes": [kf(0, 0.0), kf(179, 9.0)]},
+                smoothness=70.0,
+            )
+        ],
+        "properties": [
+            track("position", [kf(0, [0.0, -44.0])]),
+            track("fill_color", [kf(0, [1.0, 0.55, 0.10, 1.0])]),
+        ],
+    }
+    return plan_layers(
+        "ae_text_07_selector_parity",
+        [
+            text_layer("wiggly_line", "WIGGLY", 122.0, (960.0, 300.0),
+                       [temporal_wiggly]),
+            text_layer("expression_line", "EXPRESSION", 112.0, (960.0, 540.0),
+                       [expression]),
+            text_layer("index_line", "INDEX SMOOTH", 96.0, (960.0, 780.0),
+                       [index_smooth]),
+        ],
+    )
+
+
+def selector_closure_plan() -> dict:
+    # Three rows pin the closed selector contracts:
+    #  - an index-unit range with a wide smoothness feather;
+    #  - a per-glyph expression using only the validated selector profile;
+    #  - per-glyph Y rotation above the old 89-degree shear limit, which the
+    #    native MTSDF path must render through the exact orthographic branch.
+    # The glyph selector on the 3D row is deliberately not a full-run Word
+    # selector, so the GPU route consumes resolved per-glyph states.
+    smooth = {
+        "id": "smooth_window",
+        "selectors": [
+            selector(
+                unit="glyph",
+                range_units="index",
+                start={"keyframes": [kf(0, 0.0)]},
+                end={"keyframes": [kf(0, 4.0)]},
+                offset={"keyframes": [kf(0, 0.0), kf(179, 10.0)]},
+                smoothness=85.0,
+            )
+        ],
+        "properties": [
+            track("position", [kf(0, [0.0, 30.0])]),
+            track("fill_color", [kf(0, [1.0, 0.55, 0.10, 1.0])]),
+        ],
+    }
+    expression = {
+        "id": "closed_expression",
+        "selectors": [
+            selector(
+                unit="glyph",
+                expression="50 + 50 * sin(time * 2.4 - textIndex * 0.85)",
+            )
+        ],
+        "properties": [
+            track("position", [kf(0, [0.0, 42.0])]),
+            track("fill_color", [kf(0, [0.10, 0.85, 1.0, 1.0])]),
+        ],
+    }
+    exact_3d = {
+        "id": "exact_3d",
+        "selectors": [selector(unit="glyph")],
+        "properties": [
+            {
+                "property": "rotation",
+                "easing": "linear",
+                "keyframes": [
+                    kf(0, [0.0, 0.0, 0.0]),
+                    kf(25, [0.0, 0.0, 0.0]),
+                    # Hold beyond the 89-degree threshold; do not return to
+                    # the tan/shear branch inside the visible hold.
+                    kf(50, [0.0, 120.0, 0.0]),
+                    kf(179, [0.0, 120.0, 0.0]),
+                ],
+            }
+        ],
+    }
+    exact_caption = text_layer(
+        "exact_caption", "EXACT ORTHOGRAPHIC / Y = 120 DEG", 26.0,
+        (960.0, 930.0), [])
+    exact_caption["style"]["fill"] = "#5E7690"
+    return plan_layers(
+        "ae_text_08_selector_closure",
+        [
+            text_layer("title", "AE SELECTOR CLOSURE", 44.0, (960.0, 110.0), []),
+            text_layer("smooth_line", "SMOOTHNESS", 108.0, (960.0, 340.0), [smooth]),
+            text_layer("expression_line", "EXPRESSION", 108.0, (960.0, 570.0), [expression]),
+            text_layer("exact_3d_line", "3D EXACT", 132.0, (960.0, 800.0), [exact_3d]),
+            exact_caption,
+        ],
+    )
+
+
 PLANS = {
     "01_character_value": character_value_plan,
     "02_character_alignment": character_alignment_plan,
@@ -340,14 +483,18 @@ PLANS = {
     "04_typewriter": typewriter_plan,
     "05_scramble": scramble_plan,
     "06_morph": morph_plan,
+    "07_selector_parity": selector_parity_plan,
+    "08_selector_closure": selector_closure_plan,
 }
 
 
-def generate() -> list[Path]:
+def generate(only: str = "") -> list[Path]:
     plans_dir = ROOT / "plans"
     plans_dir.mkdir(parents=True, exist_ok=True)
     written = []
     for stem, builder in PLANS.items():
+        if only and stem != only:
+            continue
         path = plans_dir / f"{stem}.plan.json"
         path.write_text(json.dumps(builder(), indent=2) + "\n", encoding="utf-8")
         written.append(path)
@@ -387,7 +534,7 @@ def probe(video: Path) -> dict:
     }
 
 
-def render() -> dict:
+def render(only: str = "") -> dict:
     if not CLI.is_file():
         raise SystemExit(f"chronon3d_cli not found: {CLI}")
     videos_dir = ROOT / "videos"
@@ -396,7 +543,8 @@ def render() -> dict:
     logs_dir.mkdir(parents=True, exist_ok=True)
 
     manifest = {}
-    for plan_path in generate():
+
+    for plan_path in generate(only):
         stem = plan_path.name.removesuffix(".plan.json")
         video = videos_dir / f"{stem}_1920x1080_6s.mp4"
         log = logs_dir / f"{stem}.log"
@@ -429,18 +577,22 @@ def render() -> dict:
         print(f"RENDER {stem} {info['seconds']}s {info['width']}x{info['height']} "
               f"{info['frames']} frames")
 
-    (ROOT / "MANIFEST.json").write_text(
+    manifest_path = ROOT / (
+        "MANIFEST.json" if not only else f"MANIFEST_{only}.json")
+    manifest_path.write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    print(f"MANIFEST {ROOT.relative_to(REPO)}/MANIFEST.json")
+    print(f"MANIFEST {manifest_path.relative_to(REPO)}")
     return manifest
 
 
-def verify() -> dict:
+def verify(only: str = "") -> dict:
     stills_dir = ROOT / "stills"
     stills_dir.mkdir(parents=True, exist_ok=True)
     videos_dir = ROOT / "videos"
     report = {}
     for video in sorted(videos_dir.glob("*.mp4")):
+        if only and not video.stem.startswith(only):
+            continue
         info = probe(video)
         report[video.stem] = info
         if (info["width"], info["height"], info["frames"]) != (1920, 1080, FRAMES):
@@ -463,13 +615,15 @@ if __name__ == "__main__":
     parser.add_argument("--generate", action="store_true")
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--only", default="",
+                        help="restrict generate/render/verify to one plan stem")
     args = parser.parse_args()
     if args.render:
-        render()
-        verify()
+        render(args.only)
+        verify(args.only)
     elif args.generate:
-        generate()
+        generate(args.only)
     elif args.verify:
-        verify()
+        verify(args.only)
     else:
         parser.print_help()
