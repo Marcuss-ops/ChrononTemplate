@@ -255,7 +255,7 @@ namespace chronontemplate::effects {
                     const int offset = c.dur * k / positionSteps;
                     const float age = static_cast<float>(offset) / fps;
                     const auto curl = chronon3d::particle_flow_displacement(
-                        origin, age, phase, flow);
+                        origin, age, phase, depth, flow);
                     const float bob = 3.5f * std::sin(
                         age * (1.3f + 0.7f * unit(seed, index, 14)) + phase);
                     h.layer().tracks.position.add(
