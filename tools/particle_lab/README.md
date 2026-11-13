@@ -1,8 +1,9 @@
 # Particle Lab
 
-Six native `chronon.render-plan.v3` experiments for the Chronon3D particle
-emitter. They are the ChrononTemplate side of the particle work: the base
-algorithm lives in
+Nine native `chronon.render-plan.v3` experiments for the Chronon3D particle
+emitter. The first six are pure particle studies; the last three are 6-second
+YouTube bumpers that combine a resolved 3D camera, baked transparent title/light
+plates and two depth-separated particle planes. The base algorithm lives in
 [`Chronon3d/include/chronon3d/scene/model/shape/particles.hpp`](../../../Chronon3d/include/chronon3d/scene/model/shape/particles.hpp)
 and these plans exercise it through the canonical `particle_emitter` contract.
 
@@ -41,10 +42,21 @@ lines.
 | `04_bokeh_orbs` | 48 large defocused discs with a very slow field |
 | `05_chalk_burst` | 160 classroom motes, gravity and a short expansion |
 | `06_light_motes` | 90 tiny additive sparks with a strong shimmer |
+| `07_youtube_light_intro` | 6 s, 30 fps: cyan light sweep, dust/bokeh, push-in title card |
+| `08_youtube_particle_reveal` | 6 s, 30 fps: magenta/cyan bokeh, lateral camera orbit |
+| `09_youtube_light_outro` | 6 s, 30 fps: warm light pull-back, outro title card |
+
+The YouTube FX plans use a resolved `camera_samples` array (one perspective
+camera per frame), a baked transparent title card, a glow/beam light plate, and
+3D environment particles at two depths. Only the color plate is screen-space.
+They are 1920×1080, 30 fps, 180 frames. The title and light assets are generated
+from `assets/fonts/` by `make_youtube_fx_assets.py`; rerun it after editing the
+copy in that script to change the typography.
 
 ## Build and run
 
 ```bash
+python3 tools/particle_lab/make_youtube_fx_assets.py
 cmake --build build/dev-fast --target chronontemplate_emit_particle_lab
 ./build/dev-fast/chronontemplate_emit_particle_lab tools/particle_lab/plans
 ```
@@ -55,8 +67,17 @@ layer count and frame count. Validate the plans with the renderer CLI:
 ```bash
 CLI=../Chronon3d/build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_cli
 for plan in tools/particle_lab/plans/*.plan.json; do
-  "$CLI" validate --plan "$plan"
+  "$CLI" validate --plan "$plan" --assets-root "$PWD"
 done
+```
+
+Render one YouTube FX bumper from the repository root:
+
+```bash
+"$CLI" render --plan tools/particle_lab/plans/07_youtube_light_intro.plan.json \
+  --assets-root "$PWD" --backend vulkan --gpu-hot-path-mode require_gpu_native \
+  --tone-map aces --exposure 1.0 --rate-control qp --qp 18 \
+  -o out/youtube_fx/07_youtube_light_intro.mp4
 ```
 
 ## Tuning notes
