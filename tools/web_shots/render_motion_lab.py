@@ -15,6 +15,12 @@ Usage (from ChrononTemplate/):
 
 from __future__ import annotations
 
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
+
+import os
 import argparse
 import hashlib
 import json
@@ -41,7 +47,7 @@ TEMPLATE_ROOT = HERE.parents[1]
 WORKSPACE = HERE.parents[2]
 DEFAULT_OUT = TEMPLATE_ROOT / "out" / "web_motion_lab_v1"
 DEFAULT_CENTER_OUT = TEMPLATE_ROOT / "out" / "web_motion_lab_center_v2"
-DEFAULT_DRIVE_FOLDER = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+DEFAULT_DRIVE_FOLDER = _overlay_root()
 DRIVE_CREDENTIALS = WORKSPACE / "RenderingGen" / "UploadDrive" / "credentials.json"
 DRIVE_TOKEN = WORKSPACE / "RenderingGen" / "UploadDrive" / "token.json"
 WIDTH, HEIGHT, FPS = 1920, 1080, 30

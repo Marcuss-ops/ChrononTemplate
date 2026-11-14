@@ -1,3 +1,8 @@
+
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
 #!/usr/bin/env python3
 """
 render_editorial_didone_canary.py
@@ -852,10 +857,12 @@ def create_side_by_side(ref_path, rendered_path, out_composite_path, title):
     print(f"[+] Saved comparison composite: {out_composite_path}")
 
 
-def upload_to_drive(file_path, folder_id="1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"):
+def upload_to_drive(file_path, folder_id=_overlay_root()):
     uploader = os.path.abspath("RenderingGen/bin/drive-upload")
-    cred = "/home/pierone/.config/velox/credentials.json"
-    tok = "/home/pierone/.config/velox/token.json"
+    cred = os.path.expanduser(os.environ.get(
+        "VELOX_CREDENTIALS_FILE", "~/.config/velox/credentials.json"))
+    tok = os.path.expanduser(os.environ.get(
+        "VELOX_TOKEN_FILE", "~/.config/velox/token.json"))
     if not os.path.exists(uploader):
         print(f"[!] Drive uploader not found at {uploader}")
         return None
@@ -963,7 +970,7 @@ def main():
         print(f"  - {c}")
 
     if args.upload:
-        drive_folder = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+        drive_folder = _overlay_root()
         print(f"\n[*] Uploading results to Google Drive folder: {drive_folder}")
         upload_manifest = []
         all_artifacts = comparisons + [master_mp4] + video_files + frames_to_upload

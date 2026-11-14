@@ -15,9 +15,15 @@ destination folder.
 
 from __future__ import annotations
 
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
+
 import argparse
 import hashlib
 import importlib.util
+import os
 import json
 import subprocess
 import time
@@ -44,10 +50,12 @@ CHRONON_DIR = BASE_DIR / "Chronon3d"
 CHRONON_CLI = CHRONON_DIR / "build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
 ASSETS_ROOT = CHRONON_DIR
 OUT_DIR = TEMPLATE_DIR / "out/multi_image_duo_soft_v2"
-DRIVE_FOLDER_ID = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+DRIVE_FOLDER_ID = _overlay_root()
 DRIVE_UPLOADER = REPOSITORY_ROOT / "RenderingGen/bin/drive-upload"
-DRIVE_CREDENTIALS = Path("/home/pierone/.config/velox/credentials.json")
-DRIVE_TOKEN = Path("/home/pierone/.config/velox/token.json")
+DRIVE_CREDENTIALS = Path(os.environ.get(
+    "VELOX_CREDENTIALS_FILE", "~/.config/velox/credentials.json")).expanduser()
+DRIVE_TOKEN = Path(os.environ.get(
+    "VELOX_TOKEN_FILE", "~/.config/velox/token.json")).expanduser()
 
 # Scene constants (identical slots to multi_image_duo_v1: one detached group).
 WIDTH = 1920

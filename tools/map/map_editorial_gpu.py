@@ -60,7 +60,7 @@ YELLOW = (64, 210, 255)   # BGR, warm gold
 FONT_DIRS = [Path("/usr/share/fonts/truetype/msttcorefonts"),
              Path("/usr/share/fonts/truetype/liberation"),
              Path("/usr/share/fonts/truetype/liberation2"),
-             Path("/home/pierone/src/go-master/projects/Pyt/VeloxEditing/Chronon3d/assets/fonts")]
+             Path(__file__).resolve().parents[3] / "Chronon3d/assets/fonts"]
 _FONT_CACHE = {}
 _SOLID_CACHE = {}
 _GPU_OPS = {"opencl": 0, "mask_uploads": 0, "composites": 0, "blur": 0}

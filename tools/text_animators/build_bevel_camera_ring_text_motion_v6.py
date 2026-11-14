@@ -25,6 +25,12 @@ Usage
 
 from __future__ import annotations
 
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
+
+import os
 import argparse
 import hashlib
 import json
@@ -48,7 +54,7 @@ TOKEN = REPO / "RenderingGen" / "UploadDrive" / "token.json"
 EMITTER = "chronontemplate_emit_camera_ring_text_v6_clean"
 
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
-DRIVE_FOLDER = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+DRIVE_FOLDER = _overlay_root()
 DRIVE_URL = f"https://drive.google.com/drive/u/1/folders/{DRIVE_FOLDER}"
 REFERENCE_DIR = "Chronon3d/docs/evidence/camera-ring-text-drive-20261108"
 

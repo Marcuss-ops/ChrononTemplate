@@ -607,7 +607,22 @@ target_compile_options(chronontemplate_emit_image_effect_samples PRIVATE -Wall -
 
 # SPOILERS reference title card emitter.
 add_executable(chronontemplate_emit_spoilers_title
-        tools/spoilers/emit_spoilers_title.cpp)
+        tools/spoilers/emit_spoilers_title.cpp
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/src/animations/temporal/temporal_samples.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionMedia.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionShape.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionText.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionValidateEffects.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionValidateLayer.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionValidateText.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionValidateTracks.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionValidationBounds.cpp"
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion/RenderPlanEmissionValidation.cpp")
+target_include_directories(chronontemplate_emit_spoilers_title PRIVATE
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_link_libraries(chronontemplate_emit_spoilers_title PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_spoilers_title PRIVATE -Wall -Wextra)
 

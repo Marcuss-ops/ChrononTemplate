@@ -31,6 +31,12 @@ Usage:
 
 from __future__ import annotations
 
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
+
+import os
 import argparse
 import hashlib
 import json
@@ -56,7 +62,7 @@ CLI = ASSETS / "build/chronon/linux-video-release/apps/chronon3d_cli/chronon3d_c
 UPLOADER = REPO / "RenderingGen/bin/drive-upload"
 CREDENTIALS = REPO / "RenderingGen/UploadDrive/credentials.json"
 TOKEN = REPO / "RenderingGen/UploadDrive/token.json"
-DRIVE_FOLDER = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+DRIVE_FOLDER = _overlay_root()
 DRIVE_SUBFOLDER = "Phrase Preset Families v1"
 
 W, H, FPS, FRAMES = 1920, 1080, 30, 240

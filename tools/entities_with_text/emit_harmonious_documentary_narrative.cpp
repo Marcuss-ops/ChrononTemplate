@@ -626,7 +626,7 @@ int main(int argc, char** argv) {
         std::string renderCmd = "./Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli render "
                                 "--plan " + outPlanPath + " "
                                 "-o " + outMp4Path + " "
-                                "--assets-root /home/pierone/src/go-master/projects/Pyt/VeloxEditing/Chronon3d";
+                                "--assets-root Chronon3d";
         int ret = std::system(renderCmd.c_str());
         if (ret != 0) {
             std::cerr << "[C++ Native] Error during Chronon3D render (exit code " << ret << ")\n";
@@ -637,8 +637,8 @@ int main(int argc, char** argv) {
         if (doUpload) {
             std::cout << "[C++ Native] Uploading to Google Drive (" << driveFolderId << ")...\n";
             std::string uploadCmd = "./RenderingGen/bin/drive-upload "
-                                    "-credentials /home/pierone/.config/velox/credentials.json "
-                                    "-token /home/pierone/.config/velox/token.json "
+                                    "-credentials ~/.config/velox/credentials.json "
+                                    "-token ~/.config/velox/token.json "
                                     "-folder " + driveFolderId + " "
                                     "-file " + outMp4Path + " "
                                     "-name documentary_narrative_cpp.mp4";

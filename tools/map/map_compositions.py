@@ -36,7 +36,7 @@ CATEGORY_ACCENT = {
 }
 DEFAULT_ACCENT = (255, 255, 255)
 
-_FONT_DIR = Path("/home/pierone/src/go-master/projects/Pyt/VeloxEditing/Chronon3d/assets/fonts")
+_FONT_DIR = Path(__file__).resolve().parents[3] / "Chronon3d/assets/fonts"
 _FONT_CACHE: dict[tuple[str, int], object] = {}
 
 

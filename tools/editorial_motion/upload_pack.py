@@ -10,6 +10,12 @@ manifest land in a dedicated child folder of the supplied parent.
 """
 from __future__ import annotations
 
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
+
+import os
 import json
 import sys
 from pathlib import Path
@@ -20,7 +26,7 @@ PACK = TEMPLATE / "golden_plans" / "editorial_motion_pack_v1"
 CATALOG = PACK / "catalog.json"
 RENDERS = TEMPLATE / "renders" / "editorial_motion_pack_v1"
 UPLOADER = ROOT / "RenderingGen" / "bin" / "drive-upload"
-PARENT_FOLDER = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+PARENT_FOLDER = _overlay_root()
 PARENT_URL = f"https://drive.google.com/drive/u/1/folders/{PARENT_FOLDER}"
 SUBFOLDER = "Editorial_Motion_Pack_V1_20261110"
 

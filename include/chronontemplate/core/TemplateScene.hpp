@@ -81,6 +81,7 @@ namespace chronontemplate {
         std::optional<TextHalationStyle> halation{};
         std::optional<TextGlowStyle> effectGlow{};
         std::optional<float> gaussianBlurRadius{};
+        std::optional<TextLensDistortionStyle> lensDistortion{};
         std::vector<TextCatalogEffectStyle> catalogEffects{};
         /// Pin a 3D text layer (extrusion) to canvas coordinates.
         bool screenSpace{false};

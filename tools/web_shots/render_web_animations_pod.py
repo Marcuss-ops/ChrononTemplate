@@ -19,6 +19,12 @@ opt-out: pass --skip-upload for a local-only run.
 
 from __future__ import annotations
 
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
+
+import os
 import argparse
 import json
 import shutil
@@ -41,7 +47,7 @@ TEMPLATE_ROOT = HERE.parents[1]
 WORKSPACE = HERE.parents[2]
 DEFAULT_OUT = TEMPLATE_ROOT / "out" / "web_animations_pod_v1"
 NATIVE_ARTIFACTS = TEMPLATE_ROOT / "artifacts" / "web_shots_folder_recreated_native_v1"
-DEFAULT_DRIVE_FOLDER = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+DEFAULT_DRIVE_FOLDER = _overlay_root()
 
 ALL_FACTORIES = list(ALL_GROUPS) + list(NEXT_GROUP)
 FACTORY_BY_NAME = {factory().name: factory for factory in ALL_FACTORIES}

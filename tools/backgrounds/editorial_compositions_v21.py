@@ -10,12 +10,16 @@ else is baked into the static plate. Only numpy+PIL, no new deps.
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
+WORKSPACE = Path(os.environ.get("VELOX_ROOT", Path(__file__).resolve().parents[3]))
 W, H = 1920, 1080
 MARGIN = 120
-FONTS = "/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/assets/fonts"
+FONTS = str(WORKSPACE / "ChrononTemplate/assets/fonts")
 FB = f"{FONTS}/Play-Bold.ttf"
 FR = f"{FONTS}/Play-Regular.ttf"
 

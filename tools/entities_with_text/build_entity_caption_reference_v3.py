@@ -10,6 +10,7 @@ import argparse
 import io
 import json
 import math
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -23,7 +24,9 @@ CHRONON = WORKSPACE / "Chronon3d"
 CLI = CHRONON / "build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
 OUT = ROOT / "out/entity_caption_reference_v3"
 ASSET_ROOT = OUT
-PORTRAIT_SOURCE = Path("/home/pierone/.codex/generated_images/01a102bb-8739-71f1-9b4f-4a189d1661cb/exec-7ff09748-8944-4fcd-a13d-94b8657e535f.png")
+PORTRAIT_SOURCE = Path(
+    os.environ.get("VELOX_PORTRAIT_SOURCE", OUT / "portrait-source.png")
+).expanduser()
 W, H, FPS, FRAMES = 1920, 1080, 30, 150
 PAPER = (235, 233, 223)
 INK = (18, 19, 20)

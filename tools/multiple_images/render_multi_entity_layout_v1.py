@@ -1,3 +1,8 @@
+
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
 #!/usr/bin/env python3
 """
 Chronon Multi-Entity Layout V1 Engine & Showcase Suite
@@ -17,6 +22,7 @@ Zero edge halo, zero letterbox black bands, pre-baked 4x Lanczos anti-aliased ca
 Drive upload uses RenderingGen's verified uploader and the configured destination folder.
 """
 
+import os
 import argparse
 import copy
 import hashlib
@@ -47,7 +53,7 @@ CHRONON_DIR = BASE_DIR / "Chronon3d"
 CHRONON_CLI = CHRONON_DIR / "build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
 ASSETS_ROOT = CHRONON_DIR
 OUT_DIR = TEMPLATE_DIR / "out/multi_image_duo_v1"
-DRIVE_FOLDER_ID = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+DRIVE_FOLDER_ID = _overlay_root()
 DRIVE_UPLOADER = REPOSITORY_ROOT / "RenderingGen/bin/drive-upload"
 DRIVE_CREDENTIALS = Path.home() / ".config/velox/credentials.json"
 DRIVE_TOKEN = Path.home() / ".config/velox/token.json"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="/home/pierone/src/go-master/projects/Pyt/VeloxEditing"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 CLI="$ROOT/Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
 PLANS_DIR="$ROOT/ChrononTemplate/out/modern_entities_with_text/plans"
 VIDEOS_DIR="$ROOT/ChrononTemplate/out/modern_entities_with_text/videos"

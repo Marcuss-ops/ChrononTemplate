@@ -43,7 +43,7 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
-BASE_DIR = Path("/home/pierone/src/go-master/projects/Pyt/VeloxEditing")
+BASE_DIR = Path(os.environ.get("VELOX_ROOT", Path(__file__).resolve().parents[3]))
 CHRONON_CLI = BASE_DIR / "Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
 ASSETS_ROOT = BASE_DIR / "Chronon3d"
 CATALOG_DIR = BASE_DIR / "ChrononTemplate/catalog/minimal_documentary_backgrounds"
