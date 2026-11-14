@@ -77,6 +77,10 @@ namespace chronontemplate {
         std::optional<TextBloomStyle> bloom{};
         std::optional<TextLensFlareStyle> lensFlare{};
         std::optional<TextLightRaysStyle> lightRays{};
+        std::optional<TextWearStyle> wear{};
+        std::optional<TextHalationStyle> halation{};
+        std::optional<TextGlowStyle> effectGlow{};
+        std::optional<float> gaussianBlurRadius{};
         std::vector<TextCatalogEffectStyle> catalogEffects{};
         /// Pin a 3D text layer (extrusion) to canvas coordinates.
         bool screenSpace{false};
@@ -175,6 +179,51 @@ namespace chronontemplate {
         std::uint32_t samples{4};
     };
 
+    struct AdjustmentLensDistortion {
+        float curvature{0.f};
+        float scale{1.f};
+        chrononmotion::Vector2 center{0.5f, 0.5f};
+    };
+
+    struct AdjustmentRadialBlur {
+        chrononmotion::Vector2 center{0.5f, 0.5f};
+        float amount{0.f};
+        int renderSamples{16};
+        int previewSamples{8};
+    };
+
+    struct AdjustmentChromaticAberration {
+        float redOffset{0.f};
+        float blueOffset{0.f};
+        int offsetMode{1};
+    };
+
+    struct AdjustmentVignette {
+        float amount{0.f};
+        float radius{0.72f};
+        float softness{0.55f};
+        std::array<float, 4> color{0.f, 0.f, 0.f, 1.f};
+    };
+
+    struct AdjustmentNoise {
+        float amount{0.f};
+        std::uint32_t seed{0};
+        bool animated{false};
+        float size{1.f};
+    };
+
+    struct AdjustmentSpec {
+        std::string name{"adjustment"};
+        std::optional<AdjustmentLensDistortion> lensDistortion{};
+        std::optional<AdjustmentRadialBlur> radialBlur{};
+        std::optional<float> gaussianBlurRadius{};
+        std::optional<TextHalationStyle> halation{};
+        std::optional<TextGlowStyle> glow{};
+        std::optional<AdjustmentChromaticAberration> chromaticAberration{};
+        std::optional<AdjustmentVignette> vignette{};
+        std::optional<AdjustmentNoise> noise{};
+    };
+
     class TemplateScene;
 
     /// A handle on one layer. Everything here is fluent so a template reads as
@@ -263,6 +312,10 @@ namespace chronontemplate {
         /// A null/controller layer: it owns no content and animates its children.
         [[nodiscard]] LayerHandle& group(const std::string& name, MotionLayerId parentId = 0);
 
+        /// Composite adjustment layer applied after all scene layers.
+        void addAdjustment(AdjustmentSpec spec);
+        [[nodiscard]] const std::vector<AdjustmentSpec>& adjustments() const { return m_adjustments; }
+
         [[nodiscard]] CameraHandle& camera();
 
         /// Evaluate `frame` and resolve everything the renderer needs. Delegates to
@@ -309,6 +362,7 @@ namespace chronontemplate {
         MotionBridge m_bridge;
 
         std::deque<LayerHandle> m_handles{};
+        std::vector<AdjustmentSpec> m_adjustments{};
         CameraHandle m_cameraHandle;
         MotionLayerId m_nextId{100};
     };
