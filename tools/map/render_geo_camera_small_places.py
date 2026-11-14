@@ -26,7 +26,7 @@ from threading import local
 import numpy as np
 import cv2
 
-BASE_DIR = Path("/home/pierone/src/go-master/projects/Pyt/VeloxEditing")
+BASE_DIR = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(BASE_DIR / "ChrononPlugin/plugins/maps/tools/cartography"))
 sys.path.insert(0, str(BASE_DIR / "ChrononTemplate/tools"))
 

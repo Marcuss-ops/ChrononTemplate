@@ -10,7 +10,7 @@ import urllib.request
 import urllib.parse
 from pathlib import Path
 
-BASE_DIR = Path("/home/pierone/src/go-master/projects/Pyt/VeloxEditing")
+BASE_DIR = Path(os.environ.get("VELOX_ROOT", Path(__file__).resolve().parents[3]))
 OUT_DIR = BASE_DIR / "ChrononTemplate" / "out" / "envato_scenes"
 TOKEN_PATH = BASE_DIR / "refactored" / "token.json"
 CREDS_PATH = BASE_DIR / "refactored" / "credentials.json"

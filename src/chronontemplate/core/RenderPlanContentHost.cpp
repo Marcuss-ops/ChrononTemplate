@@ -260,6 +260,19 @@ ContentHandle RenderPlanContentHost::createText(const TextRequest& request) {
             plan.effects.push_back(std::move(effect));
         }
     }
+    if (request.lensDistortion) {
+        const auto& lens = *request.lensDistortion;
+        if (!std::isfinite(lens.curvature) || lens.curvature < -1.f || lens.curvature > 1.f ||
+            !std::isfinite(lens.scale) || lens.scale < 0.25f || lens.scale > 4.f ||
+            !std::isfinite(lens.center.x) || !std::isfinite(lens.center.y))
+            throw std::invalid_argument("RenderPlanContentHost: text lens distortion values are outside supported ranges");
+        LayerPlan::EffectPlan effect;
+        effect.kind = LayerPlan::EffectKindPlan::LensDistortion;
+        effect.lens_curvature = lens.curvature;
+        effect.lens_scale = lens.scale;
+        effect.lens_center = {lens.center.x, lens.center.y};
+        plan.effects.push_back(std::move(effect));
+    }
     for (const auto& catalog : request.catalogEffects) {
         if (catalog.effectId.empty())
             throw std::invalid_argument("RenderPlanContentHost: catalog effect id is required");

@@ -75,8 +75,7 @@ def _back_out(t: float) -> float:
 # fonts (modern condensed bold for capsules, clean sans for body)
 # ---------------------------------------------------------------------------
 
-_ASSET_FONTS = Path(
-    "/home/pierone/src/go-master/projects/Pyt/VeloxEditing/Chronon3d/assets/fonts")
+_ASSET_FONTS = Path(__file__).resolve().parents[3] / "Chronon3d/assets/fonts"
 _FONT_CACHE: dict[tuple[str, int], object] = {}
 
 

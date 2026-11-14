@@ -1,12 +1,13 @@
 #!/bin/bash
 set -u
-ROOT="/home/pierone/src/go-master/projects/Pyt/VeloxEditing"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 JOB="$ROOT/ChrononTemplate/renders/date_odometer_4dates"
 VIDEO="$JOB/odometer_4dates.mp4"
 DRIVE="$ROOT/RenderingGen/renderinggen/drive-upload"
 CREDS="$ROOT/RenderingGen/UploadDrive/credentials.json"
 TOKEN="$ROOT/RenderingGen/UploadDrive/token.json"
-FOLDER="1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)/ops/lib/common.sh"
+FOLDER="$VELOX_DRIVE_OVERLAY_ROOT"
 NAME="FOCUS_4dates_ODOMETER_CLEAN_1920x1080.mp4"
 LOG="$JOB/logs/upload_odometer.log"
 mkdir -p "$JOB/logs"

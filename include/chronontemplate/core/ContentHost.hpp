@@ -116,6 +116,12 @@ namespace chronontemplate {
         float intensity{0.65f};
     };
 
+    struct TextLensDistortionStyle {
+        float curvature{0.f};
+        float scale{1.f};
+        chrononmotion::Vector2 center{0.5f, 0.5f};
+    };
+
     struct TextLensFlareStyle {
         float threshold{0.72f};
         float intensity{0.9f};
@@ -169,6 +175,7 @@ namespace chronontemplate {
         std::optional<TextHalationStyle> halation{};
         std::optional<TextGlowStyle> effectGlow{};
         std::optional<float> gaussianBlurRadius{};
+        std::optional<TextLensDistortionStyle> lensDistortion{};
         std::vector<TextCatalogEffectStyle> catalogEffects{};
         /// Keep a 3D text layer (needed by extruded_text) on canvas coordinates
         /// instead of projecting it through the scene camera.

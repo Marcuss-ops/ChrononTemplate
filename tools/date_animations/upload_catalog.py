@@ -7,6 +7,12 @@
 """
 from __future__ import annotations
 
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
+
+import os
 import hashlib
 import json
 import re
@@ -24,7 +30,7 @@ PREVIEW = RENDERS / "preview"
 DRIVE = ROOT / "RenderingGen" / "renderinggen" / "drive-upload"
 CREDS = ROOT / "RenderingGen" / "UploadDrive" / "credentials.json"
 TOKEN = ROOT / "RenderingGen" / "UploadDrive" / "token.json"
-FOLDER = "1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS"
+FOLDER = _overlay_root()
 FOLDER_URL = f"https://drive.google.com/drive/u/1/folders/{FOLDER}"
 
 

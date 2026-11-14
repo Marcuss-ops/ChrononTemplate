@@ -24,7 +24,7 @@ import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-BASE_DIR = Path("/home/pierone/src/go-master/projects/Pyt/VeloxEditing")
+BASE_DIR = Path(os.environ.get("VELOX_ROOT", Path(__file__).resolve().parents[3]))
 CHRONON_CLI = BASE_DIR / "Chronon3d/build/chronon/linux-video-fast-dev/apps/chronon3d_cli/chronon3d_cli"
 ASSETS_ROOT = BASE_DIR / "Chronon3d"
 OUT_DIR = BASE_DIR / "ChrononTemplate/out/multi_phrase_stack_v1"

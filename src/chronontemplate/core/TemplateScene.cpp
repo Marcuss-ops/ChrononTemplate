@@ -318,6 +318,7 @@ namespace chronontemplate {
         request.halation = spec.halation;
         request.effectGlow = spec.effectGlow;
         request.gaussianBlurRadius = spec.gaussianBlurRadius;
+        request.lensDistortion = spec.lensDistortion;
         request.catalogEffects = spec.catalogEffects;
         request.screenSpace = spec.screenSpace;
 

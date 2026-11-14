@@ -1,13 +1,15 @@
 // Recreates the SPOILERS reference title card in ChrononTemplate:
 // 1920x1080, 24 fps, 72 frames (3.0 s), procedural film dust & curved lint
-// fibers, smooth crimson title with glowing vector rim, and a composite optical
+// fibers (batched into 4 Path layers for low VRAM & fast GPU execution),
+// smooth crimson title with glowing vector rim, and a composite optical
 // adjustment stack (pincushion lens distortion, radial edge blur, chromatic
 // aberration, soft diffusion, and vignette).
 //
-// Usage: chronontemplate_emit_spoilers_title <output-plan-path>
+// Usage: chronontemplate_emit_spoilers_title <output-plan-path> [output-mp4-path]
 #include "chronontemplate/core/RenderPlanContentHost.hpp"
 #include "chrononmotion/motion/RenderPlanEmission.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
@@ -42,8 +44,7 @@ float hashUnit(std::uint32_t seed, std::uint32_t index, std::uint32_t channel) {
 class SpoilersAssetBackend {
 public:
     ContentHandle text(const TextRequest& request) {
-        return make("text/" + request.text, ContentKind::Text,
-                    {1920.f, 700.f});
+        return make("text/" + request.text, ContentKind::Text, {1920.f, 700.f});
     }
 
     ContentHandle image(const ImageRequest& request) {
@@ -71,7 +72,7 @@ private:
         handle.kind = kind;
         handle.metrics.naturalSize = size;
         handle.metrics.anchor = {0.5f, 0.5f};
-        handle.metrics.fingerprint = "spoilers-title-v1:" + handle.id;
+        handle.metrics.fingerprint = "spoilers-title-v2:" + handle.id;
         m_fingerprints.emplace(handle.id, handle.metrics.fingerprint);
         return handle;
     }
@@ -80,100 +81,217 @@ private:
     std::unordered_map<ContentId, std::string> m_fingerprints;
 };
 
-void addDustSpecks(TemplateScene& scene, std::uint32_t seed) {
-    constexpr int kDustCount = 135;
-    for (int i = 0; i < kDustCount; ++i) {
-        const auto idx = static_cast<std::uint32_t>(i);
-        const float uX = hashUnit(seed, idx, 1);
-        const float uY = hashUnit(seed, idx, 2);
-        const float uSize = hashUnit(seed, idx, 3);
-        const float uAlpha = hashUnit(seed, idx, 4);
-        const float uTone = hashUnit(seed, idx, 5);
-        const float uDx = (hashUnit(seed, idx, 6) - 0.5f) * 14.f;
-        const float uDy = (hashUnit(seed, idx, 7) - 0.5f) * 10.f;
+std::uint32_t crc32Update(std::uint32_t crc, const std::uint8_t* data, std::size_t len) {
+    crc = ~crc;
+    for (std::size_t i = 0; i < len; ++i) {
+        crc ^= data[i];
+        for (int b = 0; b < 8; ++b) {
+            crc = (crc >> 1) ^ (0xEDB88320u & (0u - (crc & 1u)));
+        }
+    }
+    return ~crc;
+}
 
-        const float diameter = 1.8f + uSize * uSize * 5.2f;
-        const float x = 24.f + uX * (kWidth - 48.f);
-        const float y = 24.f + uY * (kHeight - 48.f);
-        const float baseOpacity = 0.14f + uAlpha * 0.58f;
+void appendBe32(std::vector<std::uint8_t>& out, std::uint32_t v) {
+    out.push_back(static_cast<std::uint8_t>((v >> 24) & 0xFF));
+    out.push_back(static_cast<std::uint8_t>((v >> 16) & 0xFF));
+    out.push_back(static_cast<std::uint8_t>((v >> 8) & 0xFF));
+    out.push_back(static_cast<std::uint8_t>(v & 0xFF));
+}
 
-        std::string color = "#EAE8E1";
-        if (uTone < 0.33f) color = "#BFBBB2";
-        else if (uTone < 0.66f) color = "#D9D6CE";
+void appendPngChunk(std::vector<std::uint8_t>& out, const char type[4],
+                    const std::vector<std::uint8_t>& data) {
+    appendBe32(out, static_cast<std::uint32_t>(data.size()));
+    const std::size_t typePos = out.size();
+    out.insert(out.end(), type, type + 4);
+    out.insert(out.end(), data.begin(), data.end());
+    const std::uint32_t crc = crc32Update(0u, out.data() + typePos, 4 + data.size());
+    appendBe32(out, crc);
+}
 
-        ShapeSpec speck{};
-        speck.name = "dust_speck_" + std::to_string(i);
-        speck.size = Vector2(diameter, diameter);
-        speck.geometry = ShapeGeometry::Ellipse;
-        speck.fillColor = color;
+/// Write a standard RGBA8 PNG using stored (uncompressed) deflate blocks.
+void writeRgbaPng(const std::filesystem::path& path, int w, int h,
+                  const std::vector<std::uint8_t>& rgba) {
+    std::vector<std::uint8_t> raw;
+    raw.reserve(static_cast<std::size_t>(h) * (1 + static_cast<std::size_t>(w) * 4));
+    for (int y = 0; y < h; ++y) {
+        raw.push_back(0); // filter type 0 (None)
+        const std::uint8_t* row = rgba.data() + static_cast<std::size_t>(y) * w * 4;
+        raw.insert(raw.end(), row, row + static_cast<std::size_t>(w) * 4);
+    }
 
-        auto& h = scene.shape(speck);
-        h.position(x, y)
-         .opacity(baseOpacity)
-         .alive(0, kFrames - 1)
-         .animatePosition(0, kFrames - 1, Vector3(uDx, uDy, 0.f));
+    // Zlib stream: CMF=0x78, FLG=0x01 + stored deflate blocks + Adler32.
+    std::vector<std::uint8_t> zlib;
+    zlib.push_back(0x78);
+    zlib.push_back(0x01);
+    std::size_t offset = 0;
+    while (offset < raw.size()) {
+        const std::size_t chunk = std::min<std::size_t>(65535u, raw.size() - offset);
+        const bool last = (offset + chunk == raw.size());
+        zlib.push_back(last ? 0x01 : 0x00);
+        const std::uint16_t len = static_cast<std::uint16_t>(chunk);
+        const std::uint16_t nlen = static_cast<std::uint16_t>(~len);
+        zlib.push_back(static_cast<std::uint8_t>(len & 0xFF));
+        zlib.push_back(static_cast<std::uint8_t>((len >> 8) & 0xFF));
+        zlib.push_back(static_cast<std::uint8_t>(nlen & 0xFF));
+        zlib.push_back(static_cast<std::uint8_t>((nlen >> 8) & 0xFF));
+        zlib.insert(zlib.end(), raw.data() + offset, raw.data() + offset + chunk);
+        offset += chunk;
+    }
+    std::uint32_t s1 = 1u, s2 = 0u;
+    for (std::uint8_t b : raw) {
+        s1 = (s1 + b) % 65521u;
+        s2 = (s2 + s1) % 65521u;
+    }
+    appendBe32(zlib, (s2 << 16) | s1);
 
-        if (i % 3 == 0) {
-            const float peak = std::min(0.85f, baseOpacity * 1.35f);
-            h.animateOpacity(0, kFrames / 2, baseOpacity, peak)
-             .animateOpacity(kFrames / 2, kFrames - 1, peak, baseOpacity);
+    std::vector<std::uint8_t> png = {0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A};
+    std::vector<std::uint8_t> ihdr;
+    appendBe32(ihdr, static_cast<std::uint32_t>(w));
+    appendBe32(ihdr, static_cast<std::uint32_t>(h));
+    ihdr.push_back(8); // bit depth
+    ihdr.push_back(6); // RGBA
+    ihdr.push_back(0);
+    ihdr.push_back(0);
+    ihdr.push_back(0);
+    appendPngChunk(png, "IHDR", ihdr);
+    appendPngChunk(png, "IDAT", zlib);
+    appendPngChunk(png, "IEND", {});
+
+    std::ofstream out(path, std::ios::binary | std::ios::trunc);
+    if (!out || !out.write(reinterpret_cast<const char*>(png.data()),
+                           static_cast<std::streamsize>(png.size()))) {
+        throw std::runtime_error("failed to write PNG: " + path.string());
+    }
+}
+
+void splatSoftDot(std::vector<float>& buf, int w, int h, float cx, float cy,
+                  float rx, float ry, float angle, float intensity,
+                  float rTint, float gTint, float bTint) {
+    const float ca = std::cos(angle);
+    const float sa = std::sin(angle);
+    const int margin = static_cast<int>(std::ceil(std::max(rx, ry) * 2.5f)) + 2;
+    const int x0 = std::max(0, static_cast<int>(std::floor(cx)) - margin);
+    const int x1 = std::min(w - 1, static_cast<int>(std::ceil(cx)) + margin);
+    const int y0 = std::max(0, static_cast<int>(std::floor(cy)) - margin);
+    const int y1 = std::min(h - 1, static_cast<int>(std::ceil(cy)) + margin);
+
+    for (int y = y0; y <= y1; ++y) {
+        for (int x = x0; x <= x1; ++x) {
+            const float dx = static_cast<float>(x) - cx;
+            const float dy = static_cast<float>(y) - cy;
+            const float lx = (dx * ca + dy * sa) / std::max(0.4f, rx);
+            const float ly = (-dx * sa + dy * ca) / std::max(0.4f, ry);
+            const float d2 = lx * lx + ly * ly;
+            if (d2 > 4.0f) continue;
+            const float wgt = std::exp(-d2 * 1.45f) * intensity;
+            const std::size_t idx = (static_cast<std::size_t>(y) * w + x) * 3;
+            buf[idx + 0] += wgt * rTint;
+            buf[idx + 1] += wgt * gTint;
+            buf[idx + 2] += wgt * bTint;
         }
     }
 }
 
-void addLintFibers(TemplateScene& scene, std::uint32_t seed) {
-    constexpr int kFiberCount = 34;
-    for (int i = 0; i < kFiberCount; ++i) {
+void generateDustPlatePng(const std::filesystem::path& path, std::uint32_t seed,
+                          int dustCount, int fiberCount, float brightness) {
+    constexpr int W = static_cast<int>(kWidth);
+    constexpr int H = static_cast<int>(kHeight);
+    std::vector<float> sharp(static_cast<std::size_t>(W) * H * 3, 0.f);
+
+    // Dust specks: mix of tiny pinpoints and soft optical flecks.
+    for (int i = 0; i < dustCount; ++i) {
         const auto idx = static_cast<std::uint32_t>(i);
-        const float uX = hashUnit(seed, idx, 10);
-        const float uY = hashUnit(seed, idx, 11);
-        const float uLen = hashUnit(seed, idx, 12);
-        const float uAng = hashUnit(seed, idx, 13) * 6.2831853f;
-        const float uCurve1 = (hashUnit(seed, idx, 14) - 0.5f) * 26.f;
-        const float uCurve2 = (hashUnit(seed, idx, 15) - 0.5f) * 26.f;
-        const float uAlpha = hashUnit(seed, idx, 16);
-        const float uDx = (hashUnit(seed, idx, 17) - 0.5f) * 10.f;
-        const float uDy = (hashUnit(seed, idx, 18) - 0.5f) * 8.f;
-
-        const float boxSize = 90.f;
-        const float half = boxSize * 0.5f;
-        const float len = 18.f + uLen * 44.f;
-        const float ca = std::cos(uAng);
-        const float sa = std::sin(uAng);
-        const float nx = -sa;
-        const float ny = ca;
-
-        const float p0x = half - ca * (len * 0.5f);
-        const float p0y = half - sa * (len * 0.5f);
-        const float p3x = half + ca * (len * 0.5f);
-        const float p3y = half + sa * (len * 0.5f);
-        const float c1x = half - ca * (len * 0.16f) + nx * uCurve1;
-        const float c1y = half - sa * (len * 0.16f) + ny * uCurve1;
-        const float c2x = half + ca * (len * 0.16f) + nx * uCurve2;
-        const float c2y = half + sa * (len * 0.16f) + ny * uCurve2;
-
-        ShapeSpec fiber{};
-        fiber.name = "lint_fiber_" + std::to_string(i);
-        fiber.size = Vector2(boxSize, boxSize);
-        fiber.geometry = ShapeGeometry::Path;
-        fiber.fillEnabled = false;
-        fiber.strokeColor = (i % 2 == 0) ? "#DAD7CF" : "#B4B0A8";
-        fiber.strokeWidth = 1.35f + hashUnit(seed, idx, 19) * 0.9f;
-        fiber.strokeCap = "round";
-        fiber.strokeJoin = "round";
-        fiber.path = {
-            ShapePathCommand::moveTo(p0x, p0y),
-            ShapePathCommand::cubicTo(c1x, c1y, c2x, c2y, p3x, p3y),
-        };
-
-        const float x = 40.f + uX * (kWidth - 80.f);
-        const float y = 40.f + uY * (kHeight - 80.f);
-        scene.shape(fiber)
-             .position(x, y)
-             .opacity(0.18f + uAlpha * 0.36f)
-             .alive(0, kFrames - 1)
-             .animatePosition(0, kFrames - 1, Vector3(uDx, uDy, 0.f));
+        const float cx = hashUnit(seed, idx, 1) * W;
+        const float cy = hashUnit(seed, idx, 2) * H;
+        const float baseR = 0.7f + std::pow(hashUnit(seed, idx, 3), 2.2f) * 2.8f;
+        const float aspect = 0.75f + hashUnit(seed, idx, 4) * 1.15f;
+        const float angle = hashUnit(seed, idx, 5) * 6.2831853f;
+        const float inten = brightness * (0.18f + std::pow(hashUnit(seed, idx, 6), 1.4f) * 0.85f);
+        const float warm = hashUnit(seed, idx, 7);
+        const float rT = 0.90f + 0.10f * warm;
+        const float gT = 0.88f + 0.08f * warm;
+        const float bT = 0.94f - 0.10f * warm;
+        splatSoftDot(sharp, W, H, cx, cy, baseR, baseR * aspect, angle, inten, rT, gT, bT);
     }
+
+    // Curved hair / lint fibers (cubic Bezier sampled finely).
+    for (int i = 0; i < fiberCount; ++i) {
+        const auto idx = static_cast<std::uint32_t>(i + 1000);
+        const float cx = hashUnit(seed, idx, 10) * W;
+        const float cy = hashUnit(seed, idx, 11) * H;
+        const float len = 24.f + hashUnit(seed, idx, 12) * 78.f;
+        const float ang = hashUnit(seed, idx, 13) * 6.2831853f;
+        const float c1 = (hashUnit(seed, idx, 14) - 0.5f) * 34.f;
+        const float c2 = (hashUnit(seed, idx, 15) - 0.5f) * 34.f;
+        const float inten = brightness * (0.14f + hashUnit(seed, idx, 16) * 0.34f);
+        const float radius = 0.65f + hashUnit(seed, idx, 17) * 0.55f;
+
+        const float ca = std::cos(ang), sa = std::sin(ang);
+        const float nx = -sa, ny = ca;
+        const float p0x = cx - ca * (len * 0.5f), p0y = cy - sa * (len * 0.5f);
+        const float p3x = cx + ca * (len * 0.5f), p3y = cy + sa * (len * 0.5f);
+        const float p1x = cx - ca * (len * 0.16f) + nx * c1, p1y = cy - sa * (len * 0.16f) + ny * c1;
+        const float p2x = cx + ca * (len * 0.16f) + nx * c2, p2y = cy + sa * (len * 0.16f) + ny * c2;
+
+        const int steps = std::max(20, static_cast<int>(len * 1.6f));
+        for (int s = 0; s <= steps; ++s) {
+            const float t = static_cast<float>(s) / static_cast<float>(steps);
+            const float u = 1.f - t;
+            const float bx = u*u*u*p0x + 3*u*u*t*p1x + 3*u*t*t*p2x + t*t*t*p3x;
+            const float by = u*u*u*p0y + 3*u*u*t*p1y + 3*u*t*t*p2y + t*t*t*p3y;
+            const float taper = std::sin(t * 3.14159265f);
+            splatSoftDot(sharp, W, H, bx, by, radius, radius, 0.f,
+                         inten * (0.35f + 0.65f * taper) * 0.32f, 0.92f, 0.91f, 0.89f);
+        }
+    }
+
+    // Apply radial optical edge smear toward frame corners (matches reference lens falloff).
+    std::vector<std::uint8_t> rgba(static_cast<std::size_t>(W) * H * 4, 0);
+    const float halfW = W * 0.5f;
+    const float halfH = H * 0.5f;
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            const float dx = static_cast<float>(x) - halfW;
+            const float dy = static_cast<float>(y) - halfH;
+            const float rn = std::sqrt((dx / halfW) * (dx / halfW) + (dy / halfH) * (dy / halfH));
+            const float smear = std::max(0.f, rn - 0.38f);
+            const float streakLen = smear * smear * 28.f;
+            float rAcc = 0.f, gAcc = 0.f, bAcc = 0.f;
+            if (streakLen < 0.6f) {
+                const std::size_t idx = (static_cast<std::size_t>(y) * W + x) * 3;
+                rAcc = sharp[idx + 0];
+                gAcc = sharp[idx + 1];
+                bAcc = sharp[idx + 2];
+            } else {
+                const float invR = 1.f / std::max(1.f, std::sqrt(dx * dx + dy * dy));
+                const float ux = dx * invR;
+                const float uy = dy * invR;
+                constexpr int kTaps = 9;
+                for (int k = 0; k < kTaps; ++k) {
+                    const float f = (static_cast<float>(k) / static_cast<float>(kTaps - 1) - 0.5f) * streakLen;
+                    const int sx = std::clamp(static_cast<int>(std::lround(x - ux * f)), 0, W - 1);
+                    const int sy = std::clamp(static_cast<int>(std::lround(y - uy * f)), 0, H - 1);
+                    const std::size_t sidx = (static_cast<std::size_t>(sy) * W + sx) * 3;
+                    rAcc += sharp[sidx + 0];
+                    gAcc += sharp[sidx + 1];
+                    bAcc += sharp[sidx + 2];
+                }
+                rAcc /= static_cast<float>(kTaps);
+                gAcc /= static_cast<float>(kTaps);
+                bAcc /= static_cast<float>(kTaps);
+            }
+            const std::size_t oidx = (static_cast<std::size_t>(y) * W + x) * 4;
+            const float alpha = std::clamp(std::max({rAcc, gAcc, bAcc}), 0.f, 1.f);
+            if (alpha > 1e-4f) {
+                rgba[oidx + 0] = static_cast<std::uint8_t>(std::clamp(rAcc / alpha, 0.f, 1.f) * 255.f);
+                rgba[oidx + 1] = static_cast<std::uint8_t>(std::clamp(gAcc / alpha, 0.f, 1.f) * 255.f);
+                rgba[oidx + 2] = static_cast<std::uint8_t>(std::clamp(bAcc / alpha, 0.f, 1.f) * 255.f);
+                rgba[oidx + 3] = static_cast<std::uint8_t>(alpha * 255.f);
+            }
+        }
+    }
+    writeRgbaPng(path, W, H, rgba);
 }
 
 } // namespace
@@ -213,20 +331,36 @@ int main(int argc, char** argv) {
              .position(kWidth * 0.5f, kHeight * 0.5f)
              .alive(0, kFrames - 1);
 
-        // 2. Procedural film dust & curved lint fibers.
-        addDustSpecks(scene, 1997u);
-        addLintFibers(scene, 4242u);
+        // 2. Procedural film dust & curved lint fiber plates with radial edge smear.
+        const auto outDir = planPath.has_parent_path() ? planPath.parent_path() : std::filesystem::path(".");
+        const auto bgDustPath = outDir / "dust_plate_bg.png";
+        const auto fgDustPath = outDir / "dust_plate_fg.png";
+        generateDustPlatePng(bgDustPath, 1997u, 185, 22, 0.72f);
+        generateDustPlatePng(fgDustPath, 4242u, 115, 16, 0.90f);
 
-        // 3. SPOILERS title: smooth deep crimson fill, bright glowing rim, soft optical diffusion.
+        ImageSpec dustBg{};
+        dustBg.path = bgDustPath.string();
+        dustBg.name = "dust_plate_bg";
+        dustBg.fit = ImageFitMode::Cover;
+        dustBg.targetSize = Vector2(kWidth, kHeight);
+        dustBg.screenSpace = true;
+        scene.image(dustBg)
+             .position(-28.f, -16.f)
+             .scale(1.03f)
+             .opacity(0.88f)
+             .alive(0, kFrames - 1);
+
+        // 3. SPOILERS title: smooth deep crimson fill, bright glowing rim,
+        //    soft optical diffusion, and chromatic split.
         TextSpec title{};
         title.name = "spoilers_title";
         title.text = "SPOILERS";
         title.font = "Chronon3d/assets/fonts/SF-Pro-Display-Black.otf";
-        title.fontSize = 310.f;
-        title.color = "#861103";
+        title.fontSize = 285.f;
+        title.color = "#7E0F03";
         title.stroke = TextStrokeStyle{
-            .color = "#C81C0A",
-            .width = 4.2f,
+            .color = "#C91E0B",
+            .width = 4.4f,
             .mode = "vector"
         };
         title.glow = TextGlowStyle{
@@ -236,50 +370,43 @@ int main(int argc, char** argv) {
         };
         title.effectGlow = TextGlowStyle{
             .color = "#D61B09",
-            .radius = 26.f,
-            .intensity = 0.70f
+            .radius = 28.f,
+            .intensity = 0.75f
         };
         title.halation = TextHalationStyle{
             .threshold = 0.10f,
             .softness = 0.25f,
-            .radiusPx = 20.f,
-            .intensity = 0.85f,
+            .radiusPx = 22.f,
+            .intensity = 0.90f,
             .tint = {1.0f, 0.14f, 0.04f, 1.0f}
         };
-        title.gaussianBlurRadius = 1.6f;
-
-        scene.text(title)
-             .position(kWidth * 0.5f, kHeight * 0.5f + 16.f)
-             .alive(0, kFrames - 1);
-
-        // 4. Composite optical adjustment layer: pincushion lens curvature,
-        //    radial edge smear, subtle chromatic split, soft diffusion, vignette.
-        AdjustmentSpec optics{};
-        optics.name = "optical_lens_pass";
-        optics.lensDistortion = AdjustmentLensDistortion{
-            .curvature = -0.22f,
-            .scale = 1.08f,
+        title.chromaticAberration = TextChromaticAberrationStyle{
+            .redOffset = 1.0f,
+            .blueOffset = -1.0f
+        };
+        title.gaussianBlurRadius = 1.4f;
+        title.lensDistortion = TextLensDistortionStyle{
+            .curvature = -0.42f,
+            .scale = 0.89f,
             .center = {0.5f, 0.5f}
         };
-        optics.radialBlur = AdjustmentRadialBlur{
-            .center = {0.5f, 0.5f},
-            .amount = 0.45f,
-            .renderSamples = 16,
-            .previewSamples = 8
-        };
-        optics.chromaticAberration = AdjustmentChromaticAberration{
-            .redOffset = 1.2f,
-            .blueOffset = -1.2f,
-            .offsetMode = 1
-        };
-        optics.gaussianBlurRadius = 0.7f;
-        optics.vignette = AdjustmentVignette{
-            .amount = 0.32f,
-            .radius = 0.78f,
-            .softness = 0.55f,
-            .color = {0.f, 0.f, 0.f, 1.f}
-        };
-        scene.addAdjustment(std::move(optics));
+
+        scene.text(title)
+             .position(kWidth * 0.5f, kHeight * 0.5f + 12.f)
+             .alive(0, kFrames - 1);
+
+        // 4. Foreground dust & lint plate (subtly overlaps title and edges).
+        ImageSpec dustFg{};
+        dustFg.path = fgDustPath.string();
+        dustFg.name = "dust_plate_fg";
+        dustFg.fit = ImageFitMode::Cover;
+        dustFg.targetSize = Vector2(kWidth, kHeight);
+        dustFg.screenSpace = true;
+        scene.image(dustFg)
+             .position(-28.f, -16.f)
+             .scale(1.03f)
+             .opacity(0.90f)
+             .alive(0, kFrames - 1);
 
         auto plan = lowerToRenderPlan(scene, host, "spoilers_chronontemplate_v1", mp4Path);
         plan.output.format = chronon3d::render_plan::OutputFormat::Mp4;

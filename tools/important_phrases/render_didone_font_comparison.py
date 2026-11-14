@@ -7,6 +7,12 @@ native plans and rendered frames have been validated.
 """
 from __future__ import annotations
 
+import sys as _velox_sys
+from pathlib import Path as _VeloxPath
+_velox_sys.path.insert(0, str(_VeloxPath(__file__).resolve().parents[3] / "tools"))
+from stack_config import overlay_root as _overlay_root  # noqa: E402
+
+import os
 import argparse
 import json
 import shutil
@@ -160,7 +166,7 @@ def main() -> int:
     parser.add_argument("--assets-root", type=Path, default=WORKSPACE / "Chronon3d")
     parser.add_argument("--render", action="store_true", help="render all candidates after native validation")
     parser.add_argument("--upload", action="store_true", help="upload verified frames + contact sheet to the Didone Drive folder")
-    parser.add_argument("--drive-folder", default="1J_xUGo_bchzXDIGqSX04CU44c_Dm3SxS")
+    parser.add_argument("--drive-folder", default=_overlay_root())
     parser.add_argument("--drive-credentials", type=Path,
                         default=Path.home() / ".config/velox/credentials.json")
     parser.add_argument("--drive-token", type=Path,
