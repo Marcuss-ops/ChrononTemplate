@@ -328,7 +328,7 @@ int main(int argc, char** argv) {
         background.size = Vector2(kWidth, kHeight);
         background.fillColor = "#000000";
         scene.shape(background)
-             .position(kWidth * 0.5f, kHeight * 0.5f)
+             .position(0.f, 0.f)
              .alive(0, kFrames - 1);
 
         // 2. Procedural film dust & curved lint fiber plates with radial edge smear.
@@ -346,8 +346,9 @@ int main(int argc, char** argv) {
         dustBg.screenSpace = true;
         scene.image(dustBg)
              .position(-28.f, -16.f)
-             .scale(1.03f)
+             .scale(1.04f)
              .opacity(0.88f)
+             .animatePosition(0, kFrames - 1, Vector3(22.f, 12.f, 0.f))
              .alive(0, kFrames - 1);
 
         // 3. SPOILERS title: smooth deep crimson fill, bright glowing rim,
@@ -356,7 +357,7 @@ int main(int argc, char** argv) {
         title.name = "spoilers_title";
         title.text = "SPOILERS";
         title.font = "Chronon3d/assets/fonts/SF-Pro-Display-Black.otf";
-        title.fontSize = 285.f;
+        title.fontSize = 265.f;
         title.color = "#7E0F03";
         title.stroke = TextStrokeStyle{
             .color = "#C91E0B",
@@ -391,9 +392,29 @@ int main(int argc, char** argv) {
             .center = {0.5f, 0.5f}
         };
 
-        scene.text(title)
+        auto& titleLayer = scene.text(title)
              .position(kWidth * 0.5f, kHeight * 0.5f + 12.f)
+             .animate(FadeIn{.inFrame = 0, .duration = 12})
+             .animate(ScalePop{.inFrame = 0, .duration = 20, .from = 0.62f, .to = 0.98f})
+             .animatePosition(0, 20, Vector3(0.f, 90.f, 0.f))
              .alive(0, kFrames - 1);
+
+        // Continuous float/drift, push-in, and subtle tilt (tracks.rotation is in radians).
+        {
+            constexpr float kDegToRad = 3.14159265f / 180.f;
+            const auto& easeInOut = chrononmotion::motion::Easing::easeInOut();
+            const auto& easeOut = chrononmotion::motion::Easing::easeOut();
+            auto& tracks = titleLayer.layer().tracks;
+            tracks.position.add(38.f / kFps, Vector3(kWidth * 0.5f + 22.f, kHeight * 0.5f - 2.f, 0.f), easeInOut);
+            tracks.position.add(56.f / kFps, Vector3(kWidth * 0.5f - 20.f, kHeight * 0.5f + 22.f, 0.f), easeInOut);
+            tracks.position.add(71.f / kFps, Vector3(kWidth * 0.5f + 12.f, kHeight * 0.5f + 6.f, 0.f), easeInOut);
+            tracks.scale.add(46.f / kFps, Vector3(1.015f, 1.015f, 1.015f), easeInOut);
+            tracks.scale.add(71.f / kFps, Vector3(1.04f, 1.04f, 1.04f), easeInOut);
+            tracks.rotation.add(0.f, Vector3(0.f, 0.f, -4.5f * kDegToRad), easeOut);
+            tracks.rotation.add(20.f / kFps, Vector3(0.f, 0.f, 0.8f * kDegToRad), easeInOut);
+            tracks.rotation.add(46.f / kFps, Vector3(0.f, 0.f, -1.2f * kDegToRad), easeInOut);
+            tracks.rotation.add(71.f / kFps, Vector3(0.f, 0.f, 1.0f * kDegToRad), easeInOut);
+        }
 
         // 4. Foreground dust & lint plate (subtly overlaps title and edges).
         ImageSpec dustFg{};
@@ -404,8 +425,9 @@ int main(int argc, char** argv) {
         dustFg.screenSpace = true;
         scene.image(dustFg)
              .position(-28.f, -16.f)
-             .scale(1.03f)
+             .scale(1.05f)
              .opacity(0.90f)
+             .animatePosition(0, kFrames - 1, Vector3(-28.f, -14.f, 0.f))
              .alive(0, kFrames - 1);
 
         auto plan = lowerToRenderPlan(scene, host, "spoilers_chronontemplate_v1", mp4Path);
