@@ -605,6 +605,12 @@ target_include_directories(chronontemplate_emit_image_effect_samples PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_image_effect_samples PRIVATE -Wall -Wextra)
 
+# SPOILERS reference title card emitter.
+add_executable(chronontemplate_emit_spoilers_title
+        tools/spoilers/emit_spoilers_title.cpp)
+target_link_libraries(chronontemplate_emit_spoilers_title PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_spoilers_title PRIVATE -Wall -Wextra)
+
 
 # This module's include/ comes first on purpose: `chrononmotion/templates/` is
 # owned here, while `chrononmotion/motion/` comes from the core.

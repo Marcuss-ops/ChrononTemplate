@@ -314,6 +314,10 @@ namespace chronontemplate {
         request.bloom = spec.bloom;
         request.lensFlare = spec.lensFlare;
         request.lightRays = spec.lightRays;
+        request.wear = spec.wear;
+        request.halation = spec.halation;
+        request.effectGlow = spec.effectGlow;
+        request.gaussianBlurRadius = spec.gaussianBlurRadius;
         request.catalogEffects = spec.catalogEffects;
         request.screenSpace = spec.screenSpace;
 
@@ -550,6 +554,16 @@ namespace chronontemplate {
 
         if (name.empty()) throw std::invalid_argument("TemplateScene::group: the name is required");
         return adoptNull(name, parentId);
+    }
+
+    void TemplateScene::addAdjustment(AdjustmentSpec spec) {
+        if (spec.name.empty())
+            throw std::invalid_argument("TemplateScene::addAdjustment: the name is required");
+        if (!spec.lensDistortion && !spec.radialBlur && !spec.gaussianBlurRadius &&
+            !spec.halation && !spec.glow && !spec.chromaticAberration &&
+            !spec.vignette && !spec.noise)
+            throw std::invalid_argument("TemplateScene::addAdjustment: at least one effect is required");
+        m_adjustments.push_back(std::move(spec));
     }
 
     CameraHandle& TemplateScene::camera() {

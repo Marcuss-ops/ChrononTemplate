@@ -45,10 +45,29 @@ ContentHandle RenderPlanContentHost::createText(const TextRequest& request) {
         if (!std::isfinite(request.stroke->width) || request.stroke->width < 0.f ||
             request.stroke->width > 64.f || request.stroke->color.empty())
             throw std::invalid_argument("RenderPlanContentHost: text stroke must have a color and width in [0, 64]");
+        if (!request.stroke->mode.empty() &&
+            request.stroke->mode != "auto" && request.stroke->mode != "distance" &&
+            request.stroke->mode != "vector")
+            throw std::invalid_argument("RenderPlanContentHost: text stroke mode must be auto, distance, or vector");
         StrokeStyle stroke;
         stroke.color = request.stroke->color;
         stroke.width = request.stroke->width;
         style.stroke = std::move(stroke);
+        if (!request.stroke->mode.empty())
+            style.stroke_mode = request.stroke->mode;
+    }
+    if (request.wear) {
+        const auto& wear = *request.wear;
+        if (!std::isfinite(wear.amount) || wear.amount < 0.f || wear.amount > 1.f ||
+            !std::isfinite(wear.scale) || wear.scale <= 0.f || wear.scale > 128.f ||
+            !std::isfinite(wear.softness) || wear.softness < 0.f || wear.softness > 1.f)
+            throw std::invalid_argument("RenderPlanContentHost: text wear values are outside supported ranges");
+        chronon3d::render_plan::TextWearStyle loweredWear;
+        loweredWear.amount = wear.amount;
+        loweredWear.scale = wear.scale;
+        loweredWear.seed = wear.seed;
+        loweredWear.softness = wear.softness;
+        style.wear = loweredWear;
     }
     if (request.shadow) {
         const auto& shadow = *request.shadow;
@@ -200,6 +219,46 @@ ContentHandle RenderPlanContentHost::createText(const TextRequest& request) {
             {"ghost", flare.ghost},
             {"streak", flare.streak}};
         plan.effects.push_back(std::move(effect));
+    }
+    if (request.halation) {
+        const auto& halation = *request.halation;
+        if (!std::isfinite(halation.threshold) || halation.threshold < 0.f || halation.threshold > 1.f ||
+            !std::isfinite(halation.softness) || halation.softness < 0.f || halation.softness > 1.f ||
+            !std::isfinite(halation.radiusPx) || halation.radiusPx < 0.f || halation.radiusPx > 64.f ||
+            !std::isfinite(halation.intensity) || halation.intensity < 0.f || halation.intensity > 8.f)
+            throw std::invalid_argument("RenderPlanContentHost: text halation values are outside supported ranges");
+        LayerPlan::EffectPlan effect;
+        effect.kind = LayerPlan::EffectKindPlan::Halation;
+        effect.halation_threshold = halation.threshold;
+        effect.halation_softness = halation.softness;
+        effect.halation_radius = halation.radiusPx;
+        effect.halation_intensity = halation.intensity;
+        effect.halation_tint = halation.tint;
+        plan.effects.push_back(std::move(effect));
+    }
+    if (request.effectGlow) {
+        const auto& glow = *request.effectGlow;
+        if (!std::isfinite(glow.radius) || glow.radius < 0.f || glow.radius > 256.f ||
+            !std::isfinite(glow.intensity) || glow.intensity < 0.f || glow.intensity > 4.f)
+            throw std::invalid_argument("RenderPlanContentHost: text effect glow values are outside supported ranges");
+        const auto color = parseEffectColor(glow.color, "text effect glow color");
+        LayerPlan::EffectPlan effect;
+        effect.kind = LayerPlan::EffectKindPlan::Glow;
+        effect.radius = glow.radius;
+        effect.glow_intensity = glow.intensity;
+        effect.effect_color = {color.r, color.g, color.b, 1.f};
+        plan.effects.push_back(std::move(effect));
+    }
+    if (request.gaussianBlurRadius) {
+        const float radius = *request.gaussianBlurRadius;
+        if (!std::isfinite(radius) || radius < 0.f || radius > 256.f)
+            throw std::invalid_argument("RenderPlanContentHost: text gaussian blur radius is outside [0, 256]");
+        if (radius > 0.f) {
+            LayerPlan::EffectPlan effect;
+            effect.kind = LayerPlan::EffectKindPlan::GaussianBlur;
+            effect.radius = radius;
+            plan.effects.push_back(std::move(effect));
+        }
     }
     for (const auto& catalog : request.catalogEffects) {
         if (catalog.effectId.empty())

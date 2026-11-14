@@ -18,6 +18,7 @@
 
 #include "chronontemplate/core/ContentBinding.hpp"
 
+#include <array>
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
@@ -42,6 +43,22 @@ namespace chronontemplate {
     struct TextStrokeStyle {
         std::string color{"#111827"};
         float width{0.f};
+        std::string mode{}; ///< optional: "sdf" or "vector"
+    };
+
+    struct TextWearStyle {
+        float amount{0.f};
+        float scale{9.f};
+        std::uint32_t seed{11};
+        float softness{0.3f};
+    };
+
+    struct TextHalationStyle {
+        float threshold{0.85f};
+        float softness{0.15f};
+        float radiusPx{12.f};
+        float intensity{0.50f};
+        std::array<float, 4> tint{1.f, 0.3f, 0.1f, 1.f};
     };
 
     struct TextShadowStyle {
@@ -148,6 +165,10 @@ namespace chronontemplate {
         std::optional<TextBloomStyle> bloom{};
         std::optional<TextLensFlareStyle> lensFlare{};
         std::optional<TextLightRaysStyle> lightRays{};
+        std::optional<TextWearStyle> wear{};
+        std::optional<TextHalationStyle> halation{};
+        std::optional<TextGlowStyle> effectGlow{};
+        std::optional<float> gaussianBlurRadius{};
         std::vector<TextCatalogEffectStyle> catalogEffects{};
         /// Keep a 3D text layer (needed by extruded_text) on canvas coordinates
         /// instead of projecting it through the scene camera.

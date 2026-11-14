@@ -525,6 +525,83 @@ chronon3d::render_plan::RenderPlan lowerToRenderPlanImpl(
                                         std::to_string(layerId));
     }
     auto plan = chrononmotion::motion::lowerToRenderPlan(scene.motion(), options);
+    for (const auto& adj : scene.adjustments()) {
+        chronon3d::render_plan::LayerPlan layer;
+        layer.id = adj.name;
+        layer.type = chronon3d::render_plan::LayerType::Adjustment;
+        if (adj.lensDistortion) {
+            chronon3d::render_plan::LayerPlan::EffectPlan fx;
+            fx.kind = chronon3d::render_plan::LayerPlan::EffectKindPlan::LensDistortion;
+            fx.lens_curvature = adj.lensDistortion->curvature;
+            fx.lens_scale = adj.lensDistortion->scale;
+            fx.lens_center = {adj.lensDistortion->center.x, adj.lensDistortion->center.y};
+            layer.effects.push_back(std::move(fx));
+        }
+        if (adj.radialBlur && adj.radialBlur->amount > 0.f) {
+            chronon3d::render_plan::LayerPlan::EffectPlan fx;
+            fx.kind = chronon3d::render_plan::LayerPlan::EffectKindPlan::RadialBlur;
+            fx.radial_center = {adj.radialBlur->center.x, adj.radialBlur->center.y};
+            fx.radial_amount = adj.radialBlur->amount;
+            fx.radial_render_samples = adj.radialBlur->renderSamples;
+            fx.radial_preview_samples = adj.radialBlur->previewSamples;
+            layer.effects.push_back(std::move(fx));
+        }
+        if (adj.halation) {
+            chronon3d::render_plan::LayerPlan::EffectPlan fx;
+            fx.kind = chronon3d::render_plan::LayerPlan::EffectKindPlan::Halation;
+            fx.halation_threshold = adj.halation->threshold;
+            fx.halation_softness = adj.halation->softness;
+            fx.halation_radius = adj.halation->radiusPx;
+            fx.halation_intensity = adj.halation->intensity;
+            fx.halation_tint = adj.halation->tint;
+            layer.effects.push_back(std::move(fx));
+        }
+        if (adj.glow) {
+            const auto glowCol = chronon3d::render_plan::parse_hex_color(adj.glow->color);
+            if (!glowCol)
+                throw std::invalid_argument("lowerToRenderPlan: adjustment glow color must be #RRGGBB");
+            chronon3d::render_plan::LayerPlan::EffectPlan fx;
+            fx.kind = chronon3d::render_plan::LayerPlan::EffectKindPlan::Glow;
+            fx.radius = adj.glow->radius;
+            fx.glow_intensity = adj.glow->intensity;
+            fx.effect_color = std::array<float, 4>{glowCol->r, glowCol->g, glowCol->b, 1.f};
+            layer.effects.push_back(std::move(fx));
+        }
+        if (adj.gaussianBlurRadius && *adj.gaussianBlurRadius > 0.f) {
+            chronon3d::render_plan::LayerPlan::EffectPlan fx;
+            fx.kind = chronon3d::render_plan::LayerPlan::EffectKindPlan::GaussianBlur;
+            fx.radius = *adj.gaussianBlurRadius;
+            layer.effects.push_back(std::move(fx));
+        }
+        if (adj.chromaticAberration) {
+            chronon3d::render_plan::LayerPlan::EffectPlan fx;
+            fx.kind = chronon3d::render_plan::LayerPlan::EffectKindPlan::ChromaticAberration;
+            fx.chromatic_red_offset = adj.chromaticAberration->redOffset;
+            fx.chromatic_blue_offset = adj.chromaticAberration->blueOffset;
+            fx.chromatic_offset_mode = adj.chromaticAberration->offsetMode;
+            layer.effects.push_back(std::move(fx));
+        }
+        if (adj.vignette && adj.vignette->amount > 0.f) {
+            chronon3d::render_plan::LayerPlan::EffectPlan fx;
+            fx.kind = chronon3d::render_plan::LayerPlan::EffectKindPlan::Vignette;
+            fx.amount = adj.vignette->amount;
+            fx.radius = adj.vignette->radius;
+            fx.softness = adj.vignette->softness;
+            fx.effect_color = adj.vignette->color;
+            layer.effects.push_back(std::move(fx));
+        }
+        if (adj.noise && adj.noise->amount > 0.f) {
+            chronon3d::render_plan::LayerPlan::EffectPlan fx;
+            fx.kind = chronon3d::render_plan::LayerPlan::EffectKindPlan::Noise;
+            fx.amount = adj.noise->amount;
+            fx.seed = adj.noise->seed;
+            fx.animated = adj.noise->animated;
+            fx.noise_size = adj.noise->size;
+            layer.effects.push_back(std::move(fx));
+        }
+        if (!layer.effects.empty())
+            plan.layers.push_back(std::move(layer));
+    }
     return plan;
 }
 } // namespace
