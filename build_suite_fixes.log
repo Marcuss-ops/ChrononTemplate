@@ -1,0 +1,14 @@
+ninja: warning: premature end of file; recovering
+[0/2] Re-checking globbed directories...
+[1/5] Building CXX object CMakeFiles/chronontemplate.dir/src/chronontemplate/web/ModernDocumentaryPack.cpp.o
+/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/src/chronontemplate/web/ModernDocumentaryPack.cpp: In function ‘chronontemplate::web::{anonymous}::Json chronontemplate::web::{anonymous}::particleLayer(const string&, int, unsigned int, float, float, float, const std::array<float, 2>&, const std::array<float, 2>&, const std::array<float, 2>&, const std::array<float, 2>&, const std::array<float, 2>&, const std::array<float, 2>&, const std::array<float, 2>&, float, bool, bool)’:
+/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/src/chronontemplate/web/ModernDocumentaryPack.cpp:286:26: warning: unused parameter ‘z’ [-Wunused-parameter]
+  286 |                    float z, const std::array<float, 2>& velocityMin,
+      |                    ~~~~~~^
+/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/src/chronontemplate/web/ModernDocumentaryPack.cpp: At global scope:
+/home/pierone/src/go-master/projects/Pyt/VeloxEditing/ChrononTemplate/src/chronontemplate/web/ModernDocumentaryPack.cpp:251:6: warning: ‘chronontemplate::web::{anonymous}::Json chronontemplate::web::{anonymous}::cameraSamplesWhip(int)’ defined but not used [-Wunused-function]
+  251 | Json cameraSamplesWhip(int duration) {
+      |      ^~~~~~~~~~~~~~~~~
+[2/5] Linking CXX static library libchronontemplate.a
+[3/5] Building CXX object CMakeFiles/chronontemplate_motion_design_stress_test.dir/tests/motion_design_stress.cpp.o
+[4/5] Linking CXX executable chronontemplate_motion_design_stress_test

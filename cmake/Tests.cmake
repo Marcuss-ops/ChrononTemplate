@@ -106,6 +106,20 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_plan_lowering_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_plan_lowering_test COMMAND chronontemplate_plan_lowering_test)
 
+    # Twenty motion-design stress cases (four modules) that author RenderPlan V3
+    # documents and pin the compositing/alpha/parallax/transition contracts.
+    add_executable(chronontemplate_motion_design_stress_test tests/motion_design_stress.cpp)
+    target_link_libraries(chronontemplate_motion_design_stress_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_motion_design_stress_test PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests
+            ${CHRONONTEMPLATE_NLOHMANN_JSON_DIR})
+    target_compile_definitions(chronontemplate_motion_design_stress_test PRIVATE
+            CHRONONTEMPLATE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+    target_compile_options(chronontemplate_motion_design_stress_test PRIVATE -Wall -Wextra)
+    add_test(NAME chronontemplate_motion_design_stress_test
+            COMMAND chronontemplate_motion_design_stress_test)
+
+
     add_executable(chronontemplate_gel_cinematic_title_test tests/gel_cinematic_title.cpp)
     target_link_libraries(chronontemplate_gel_cinematic_title_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_gel_cinematic_title_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -180,6 +194,26 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     set_tests_properties(chronontemplate_web_headline_highlight_pack_test PROPERTIES
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
+    # Modern documentary: five native V3 looks. Asserts multiply highlighter
+    # ordering, rack-focus travel, glitch/mesh/chroma pairing, particle depth,
+    # kinetic whip and VHS carousel, plus fail-closed spec defects.
+    add_executable(chronontemplate_modern_documentary_pack_test tests/modern_documentary_pack.cpp)
+    target_link_libraries(chronontemplate_modern_documentary_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_modern_documentary_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_modern_documentary_pack_test COMMAND chronontemplate_modern_documentary_pack_test)
+    # Plan font refs are workspace-relative (ChrononTemplate/assets/fonts/...).
+    set_tests_properties(chronontemplate_modern_documentary_pack_test PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
+    # Seven executable parity fixtures. The C++ test pins authoring contracts;
+    # tools/web_styles/verify_documentary_parity.py measures the rendered frames.
+    add_executable(chronontemplate_documentary_parity_test tests/documentary_parity.cpp)
+    target_link_libraries(chronontemplate_documentary_parity_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_documentary_parity_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_documentary_parity_test COMMAND chronontemplate_documentary_parity_test)
+    set_tests_properties(chronontemplate_documentary_parity_test PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
     add_executable(chronontemplate_web_text_layout_test tests/web_text_layout.cpp)
     target_link_libraries(chronontemplate_web_text_layout_test PRIVATE chronontemplate)
     add_test(NAME chronontemplate_web_text_layout_test COMMAND chronontemplate_web_text_layout_test)
@@ -204,6 +238,13 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_web_motion_lab_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_web_motion_lab_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_web_motion_lab_pack_test COMMAND chronontemplate_web_motion_lab_pack_test)
+
+    # Five supplied paper/web reference frames: stable IDs, V3 envelope,
+    # deterministic plans, the multiply highlighter and fail-closed specs.
+    add_executable(chronontemplate_web_paper_reference_pack_test tests/web_paper_reference_pack.cpp)
+    target_link_libraries(chronontemplate_web_paper_reference_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_web_paper_reference_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_web_paper_reference_pack_test COMMAND chronontemplate_web_paper_reference_pack_test)
 
     add_executable(chronontemplate_elements_documentary_test tests/elements_documentary.cpp)
     target_link_libraries(chronontemplate_elements_documentary_test PRIVATE chronontemplate)

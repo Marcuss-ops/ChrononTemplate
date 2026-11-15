@@ -269,6 +269,13 @@ add_library(chronontemplate STATIC
         src/chronontemplate/web/WebFontMeasure.cpp
         # second generation: radians-safe fold, distinct recipes, reworked hierarchy
         src/chronontemplate/web/WebPageV2Pack.cpp
+        # five supplied paper/web reference frames rebuilt as native V3 plans
+        src/chronontemplate/web/WebPaperReferencePack.cpp
+        # modern documentary grammar: Vox marker, split glitch, macro UI rain,
+        # kinetic type and VHS carousel as native V3 plans
+        src/chronontemplate/web/ModernDocumentaryPack.cpp
+        # seven executable parity fixtures for the documentary grammar
+        src/chronontemplate/web/DocumentaryParityPack.cpp
         # native layout composers: flex rows, columns and grids plus FLIP moves
         src/chronontemplate/composers/LayoutComposer.cpp
         # declarative transitions (BACKLOG item 4): sweep/dip/blinds/iris/glitch/leak
@@ -484,6 +491,27 @@ add_executable(chronontemplate_emit_web_headline_highlight
         tools/web_presets/emit_web_headline_highlight.cpp)
 target_link_libraries(chronontemplate_emit_web_headline_highlight PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_headline_highlight PRIVATE -Wall -Wextra)
+
+# Five supplied paper/web reference frames: LA Times 2.5D, torn strip, blurred
+# evidence, archival bridge collage and progressive book highlighter.
+add_executable(chronontemplate_emit_web_paper_reference
+        tools/web_presets/emit_web_paper_reference.cpp)
+target_link_libraries(chronontemplate_emit_web_paper_reference PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_web_paper_reference PRIVATE -Wall -Wextra)
+
+# Five modern documentary looks as pure native V3 plans: multiply highlighter,
+# rack focus, split glitch, macro UI rain, kinetic whip-pan and VHS carousel.
+add_executable(chronontemplate_emit_modern_documentary
+        tools/web_styles/emit_modern_documentary.cpp)
+target_link_libraries(chronontemplate_emit_modern_documentary PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_modern_documentary PRIVATE -Wall -Wextra)
+
+# Seven native documentary parity fixtures: optical wrap, anchored bars,
+# multi-plane focus, particle depth, 3D card AA, CRT HUD and scrub determinism.
+add_executable(chronontemplate_emit_documentary_parity
+        tools/web_styles/emit_documentary_parity.cpp)
+target_link_libraries(chronontemplate_emit_documentary_parity PRIVATE chronontemplate)
+target_compile_options(chronontemplate_emit_documentary_parity PRIVATE -Wall -Wextra)
 
 # Web shots rebuild v1: 28 shot Python portati in C++ + 6 nuove recipe next.
 # Base riusabile per tutti i prossimi render/animazioni (stessa grammatica

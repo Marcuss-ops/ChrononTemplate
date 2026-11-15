@@ -321,6 +321,8 @@ int main(int argc, char** argv) {
 
         TemplateScene scene("spoilers_reference_recreation", kFps, host, kWidth, kHeight);
         scene.camera().setFov(53.14f);
+        scene.camera().push(80.f).between(0, kFrames - 1);
+        scene.camera().orbit(0.025f, -0.012f).between(0, kFrames - 1);
 
         // 1. Deep black backdrop.
         ShapeSpec background{};
