@@ -842,7 +842,8 @@ int main(int argc, char** argv) {
             const std::string id = motion.value("id", "");
             const std::string category = motion.value("category", "");
             const bool phraseFamily =
-                category == "apple_phrase_v1" || category == "phrase_apple_clean_v1";
+                category == "apple_phrase_v1" || category == "phrase_apple_clean_v1" ||
+                category == "typewriter_phrase_v1";
             const bool hasUnsupportedGPUTrack = [&] {
                 const std::set<std::string> layerProperties{
                     "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
