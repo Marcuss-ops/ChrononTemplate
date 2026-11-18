@@ -473,6 +473,15 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_modern_map_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_modern_map_pack_test COMMAND chronontemplate_modern_map_pack_test)
 
+    # The six ChrononPlugin editorial-map DTOs: projection happens upstream,
+    # so each fixture must parse, compose and lower without touching GeoJSON.
+    add_executable(chronontemplate_editorial_map_pack_test tests/editorial_map_pack.cpp)
+    target_link_libraries(chronontemplate_editorial_map_pack_test PRIVATE chronontemplate)
+    target_include_directories(chronontemplate_editorial_map_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    add_test(NAME chronontemplate_editorial_map_pack_test COMMAND chronontemplate_editorial_map_pack_test)
+    set_tests_properties(chronontemplate_editorial_map_pack_test PROPERTIES
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+
     # The minimal map FX lane: four primitive-only recipes shared with
     # RenderingGen's runtime `map_fx` parameter.
     add_executable(chronontemplate_map_fx_pack_test tests/map_fx_pack.cpp)

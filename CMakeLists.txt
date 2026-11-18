@@ -242,6 +242,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/map/ModernMapPack.cpp
         src/chronontemplate/map/MapFxPack.cpp
         src/chronontemplate/map/TacticalFillPack.cpp
+        src/chronontemplate/map/EditorialMapPack.cpp
         # the short-phrase family: surviving recipes plus the star bumper
         src/chronontemplate/short_phrases/ShortPhrasePack.cpp
         include/chronontemplate/short_phrases/ShortPhraseRecipes.def
@@ -290,6 +291,8 @@ add_library(chronontemplate STATIC
         src/chrononmotion/templates/Templates.cpp)
 
 add_library(ChrononTemplate::chronontemplate ALIAS chronontemplate)
+# The editorial vector pack parses the neutral scene DTO.
+target_include_directories(chronontemplate PRIVATE ${CHRONONTEMPLATE_NLOHMANN_JSON_DIR})
 
 # The tools below use Blend2D's imported target; load its package before
 # declaring them rather than relying on another project to define it.

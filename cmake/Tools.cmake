@@ -286,6 +286,28 @@ else()
 endif()
 target_compile_options(chronontemplate_emit_tactical_fill PRIVATE -Wall -Wextra)
 
+# The vector editorial map emitter: consumes the neutral ChrononPlugin scene
+# DTO and lowers it to native paths, text, glow and trim.
+add_executable(chronontemplate_emit_editorial_map tools/map/emit_editorial_map.cpp)
+target_link_libraries(chronontemplate_emit_editorial_map PRIVATE chronontemplate)
+if(TARGET chrononmotion_chronon3d_adapter)
+    target_link_libraries(chronontemplate_emit_editorial_map PRIVATE chrononmotion_chronon3d_adapter)
+else()
+    set(CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/src/chrononmotion/motion")
+    target_sources(chronontemplate_emit_editorial_map PRIVATE
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmission.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionCommon.cpp"
+        "${CHRONONTEMPLATE_RENDER_PLAN_EMISSION_DIR}/RenderPlanEmissionValidation.cpp")
+    target_include_directories(chronontemplate_emit_editorial_map PRIVATE
+        "${CHRONONTEMPLATE_CHRONONMOTION_DIR}/include"
+        "${CHRONONTEMPLATE_CHRONON3D_DIR}/include"
+        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+endif()
+target_include_directories(chronontemplate_emit_editorial_map PRIVATE
+    "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
+target_compile_options(chronontemplate_emit_editorial_map PRIVATE -Wall -Wextra)
+
 add_executable(chronontemplate_emit_truett_cathy_legacy_v1
         tools/entities_with_text/emit_truett_cathy_legacy_v1.cpp)
 target_link_libraries(chronontemplate_emit_truett_cathy_legacy_v1 PRIVATE chronontemplate)
