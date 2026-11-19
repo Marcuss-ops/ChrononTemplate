@@ -209,6 +209,78 @@ RECIPES = [
         pace="out_cubic",
         timing=(9, 31),
     ),
+    # The short lane needs ten distinct gestures, not four: a run of six short
+    # phrases must be able to rotate without repeating. These six differ in the
+    # step unit, the reveal edge, the pace and the layer push, which is exactly
+    # what the renderer reads; none of them carries typography.
+    motion(
+        "typewriter_staccato_short",
+        "Typewriter Staccato (short)",
+        "short",
+        "glyph",
+        "UN COLPO, POI IL SILENZIO",
+        1.25, 0.30, 0.44,
+        pace="linear",
+        timing=(8, 34),
+        tracks=[
+            track("scale", [(0, 1.02), (18, 1.0)]),
+        ],
+    ),
+    motion(
+        "typewriter_soft_glide_short",
+        "Typewriter Soft Glide (short)",
+        "short",
+        "glyph",
+        "LA NOTTE NON ASPETTA",
+        1.45, 0.36, 0.50,
+        shape="smooth",
+        timing=(9, 44),
+    ),
+    motion(
+        "typewriter_rapid_fire_short",
+        "Typewriter Rapid Fire (short)",
+        "short",
+        "glyph",
+        "ORA O MAI PIÙ",
+        0.90, 0.26, 0.40,
+        pace="out_cubic",
+        timing=(7, 26),
+    ),
+    motion(
+        "typewriter_word_step_short",
+        "Typewriter Word Step (short)",
+        "short",
+        "word",
+        "PAROLA DOPO PAROLA",
+        0.95, 0.32, 0.46,
+        timing=(8, 30),
+    ),
+    motion(
+        "typewriter_word_lift_short",
+        "Typewriter Word Lift (short)",
+        "short",
+        "word",
+        "SALE LA TENSIONE",
+        1.00, 0.34, 0.48,
+        shape="smooth",
+        pace="out_cubic",
+        timing=(8, 34),
+        tracks=[
+            track("position_y", [(0, 12.0), (20, 0.0)]),
+        ],
+    ),
+    motion(
+        "typewriter_glyph_drift_short",
+        "Typewriter Glyph Drift (short)",
+        "short",
+        "glyph",
+        "IL CONFINE SI SPOSTA",
+        1.70, 0.38, 0.52,
+        timing=(10, 48),
+        tracks=[
+            track("position_x", [(0, -14.0), (20, 0.0)]),
+        ],
+    ),
 ]
 
 
