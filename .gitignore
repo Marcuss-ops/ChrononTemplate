@@ -26,3 +26,18 @@ assets/screenrecording_word_lens/frame_*.png
 # live in golden_plans/ and the catalog samples next to the catalogs.
 /renders/
 /--help/
+
+# Purged from history 2026-11-21: rendered catalogue outputs, sample clips and
+# still images stay local (or on Drive). Fonts and the geo catalog stay tracked.
+*.mp4
+*.mov
+*.webm
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.rgba
+*.ppm
+*.pgm
+*.mp3
+*.wav
