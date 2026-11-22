@@ -1,10 +1,10 @@
-"""Web shots next — the six reusable recipes, ported from the C++ pack.
+"""Web shots next — the five reusable recipes, ported from the C++ pack.
 
 These are the Python equivalents of `WebShotsNextPack`:
 dual marker cross, glow line pulse, tilt/snap settle, timeline draw, caption
-pop card and CRT fringe flash. They use the same 1920x1080 authoring canvas and
+pop card. They use the same 1920x1080 authoring canvas and
 the same `Shot` pipeline as the 28 reference rebuilds, so the pod can render
-all 34 clips through one code path.
+all 31 clips through one code path.
 """
 
 from __future__ import annotations
@@ -187,44 +187,12 @@ def shot_next_caption_pop_card() -> Shot:
     )
 
 
-def shot_next_crt_fringe_flash() -> Shot:
-    HEAD = "GOVERNMENT TO DOUBLE CONTENT"
-    HL = "DOUBLE"
-
-    def draw_full(c: Canvas, t: float):
-        c.rect(0, 0, 1920, 1080, "#080A0C")
-        c.noise(0.014, seed=3106)
-        c.vignette(0.28, 0.64)
-        x, y = 105, 205
-        size = 96
-        # chroma fringe: yellow and cyan copies under the white headline
-        c.text(x - 10, y - 10, HEAD, size, "serif-bold", "#D5D000", alpha=0.58)
-        c.text(x + 10, y + 10, HEAD, size, "serif-bold", "#67B9D4", alpha=0.44)
-        c.text(x, y, HEAD, size, "serif-bold", "#DDE4E8")
-        s = _sweep(t, 0.12, 0.55)
-        hx = x + c.measure(HEAD[:HEAD.index(HL)], size, "serif-bold")
-        hw = c.measure(HL, size, "serif-bold")
-        c.rect(hx - 4, y + 12, (hw + 8) * s, 116, "#C9DC28", 0.85 * s)
-        c.text(x, 560, "CRT — fringe flash", 34, "oswald", "#DDE4E8")
-
-    return Shot(
-        name="next_crt_fringe_flash",
-        source="native recipe (WebShotsNextPack::CrtFringeFlash)",
-        seconds=3.0,
-        description="Serif CRT headline with RGB fringe and a flash marker reveal",
-        cam_from=(1.0, 0.5, 0.5), cam_to=(1.02, 0.5, 0.5),
-        grain=0.016, vig=0.28,
-        draw_full=draw_full,
-    )
-
-
 NEXT_GROUP = [
     shot_next_dual_marker_cross,
     shot_next_glow_line_pulse,
     shot_next_tilt_snap_reveal,
     shot_next_timeline_dash,
     shot_next_caption_pop_card,
-    shot_next_crt_fringe_flash,
 ]
 
 

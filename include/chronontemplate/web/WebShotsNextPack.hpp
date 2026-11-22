@@ -1,10 +1,10 @@
 // ChrononTemplate — Web Shots Next (nuove animazioni nello stile dei 28).
 //
-// Sei recipe riusabili costruite sulla stessa grammatica dei 28 rebuild:
+// Cinque recipe riusabili costruite sulla stessa grammatica dei 26 rebuild:
 // piastra + marker sweep + camera lenta. Ognuna estende un gesto visto nei
-// 28 senza copiare un singolo shot: doppia evidenziazione incrociata,
+// 26 senza copiare un singolo shot: doppia evidenziazione incrociata,
 // glow pulsante, tilt che si raddrizza, timeline che si disegna, caption
-// che poppa, fringe CRT con flash.
+// che poppa.
 //
 // Pensate come base per i prossimi render: basta riempire headline/
 // highlight/body, il resto (marker, camera, timing) e' gia' coreografato.
@@ -22,8 +22,7 @@ enum class WebNextRecipe : unsigned char {
     GlowLinePulse,   // riga glow gialla pulsante + underline draw (da 12 sabotage)
     TiltSnapReveal,  // pagina tiltata che scatta in piano (da 15/16/20)
     TimelineDash,    // linea timeline che si disegna + dot ping (da 21 seoul)
-    CaptionPopCard,  // card bianca che poppa su fondo blur scuro (da 25 pizza)
-    CrtFringeFlash   // headline serif con fringe RGB + flash reveal (da 07/13)
+    CaptionPopCard   // card bianca che poppa su fondo blur scuro (da 25 pizza)
 };
 
 [[nodiscard]] const char* webNextName(WebNextRecipe r);

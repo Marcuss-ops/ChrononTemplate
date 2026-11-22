@@ -1,8 +1,8 @@
-// ChrononTemplate web.WebShotsNextPack — 6 nuove animazioni nello stile dei 28.
+// ChrononTemplate web.WebShotsNextPack — 5 nuove animazioni nello stile dei 26.
 //
 // Stessa grammatica dei rebuild (piastra + marker sweep + push centrale)
 // con gesti nuovi: marker incrociati, glow pulsante, snap di scala,
-// timeline che si disegna, caption pop, fringe CRT con flash.
+// timeline che si disegna, caption pop.
 // Helper condivisi da chronontemplate/web/WebShotJson.hpp (JSON puro).
 #include "chronontemplate/web/WebShotsNextPack.hpp"
 #include "chronontemplate/web/WebShotJson.hpp"
@@ -38,13 +38,12 @@ const char* webNextName(WebNextRecipe r){
         case WebNextRecipe::TiltSnapReveal: return "next_tilt_snap_reveal";
         case WebNextRecipe::TimelineDash: return "next_timeline_dash";
         case WebNextRecipe::CaptionPopCard: return "next_caption_pop_card";
-        case WebNextRecipe::CrtFringeFlash: return "next_crt_fringe_flash";
     } return "unknown";
 }
 std::vector<WebNextRecipe> allWebNextRecipes(){
     return {WebNextRecipe::DualMarkerCross, WebNextRecipe::GlowLinePulse,
         WebNextRecipe::TiltSnapReveal, WebNextRecipe::TimelineDash,
-        WebNextRecipe::CaptionPopCard, WebNextRecipe::CrtFringeFlash};
+        WebNextRecipe::CaptionPopCard};
 }
 void WebNextSpec::validate() const{
     if(durationFrames<30||durationFrames>600) fail("durationFrames must be in [30,600]");
@@ -135,23 +134,6 @@ Json buildWebNextPlan(const WebNextSpec& spec){
             easedTrack("opacity",0.f,1.f,0,16,"out_cubic"),
             easedTrack("position_y",14.f,0.f,0,16,"out_cubic")})}});
         L.push_back(std::move(card));
-        break; }
-    case WebNextRecipe::CrtFringeFlash: {
-        std::string paper = spec.paperColor.empty() ? "#080A0C" : spec.paperColor;
-        L.push_back(rect("bg",0,0,1920,1080,paper,1.f,Json::array(),D));
-        // fringe: due copie offset rosso/ciano sotto il bianco
-        L.push_back(textLayer("fr_r",spec.headline,105,205,96,kSerifBold,"#D5D000",D,0.f,-1,0.55f));
-        L.push_back(textLayer("fr_b",spec.headline,95,195,96,kSerifBold,"#67B9D4",D,0.f,-1,0.42f));
-        const float wH = measuredTextWidth(spec.highlight, 96, kSerifBold);
-        const float fx = 100.f + measuredTextWidth(
-            spec.headline.substr(0, spec.headline.find(spec.highlight)), 96, kSerifBold);
-        L.push_back(rect("flash",fx-4,210,wH+8,116,"#C9DC28",0.0f,Json::array(),D));
-        // flash reveal: opacity 0->0.85 sul marker + testo bianco sopra
-        L.back()["animation"] = Json::object({{"tracks", Json::array({
-            easedTrack("opacity",0.f,0.85f,b1,s1,"in_out_cubic"),
-            easedTrack("scale_x",0.f,1.f,b1,s1,"in_out_cubic")})}});
-        L.push_back(textLayer("headline",spec.headline,100,200,96,kSerifBold,"#DDE4E8",D,0.f,0));
-        L.push_back(textLayer("sub",spec.subline,100,560,34,kOswald,"#DDE4E8",D,0.f,1));
         break; }
     }
     Json plan = shot::renderPlan(spec.planName(), D, L, shot::cameraSamples(D));

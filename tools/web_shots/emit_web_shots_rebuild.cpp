@@ -1,4 +1,4 @@
-// Emette i piani nativi WebShotsRebuild (28) + WebShotsNext (6).
+// Emette i piani nativi WebShotsRebuild (26) + WebShotsNext (5).
 // Ogni piano e' RenderPlan V3 puro: nessun Pillow, nessun browser.
 // Uso: emit_web_shots_rebuild <out-dir> [--only <shot>...]
 #include "chronontemplate/web/WebShotsNextPack.hpp"
@@ -48,7 +48,7 @@ int main(int argc, char** argv) try {
         if (!f) throw std::runtime_error("cannot write animation_modules.json");
         f << moduleProfiles.dump(2) << '\n';
     }
-    // 6 nuove recipe con copy di esempio pronta da riusare come base
+    // 5 nuove recipe con copy di esempio pronta da riusare come base
     std::vector<WebNextSpec> next = {
         {WebNextRecipe::DualMarkerCross, "Senate passes the chip export bill", "chip export bill",
          "Breaking — 10:42 ET", "Markets rally as export rules take hold."},
@@ -60,8 +60,6 @@ int main(int argc, char** argv) try {
          "Timeline — draw + ping", "The rail draws left to right, then the dot pings."},
         {WebNextRecipe::CaptionPopCard, "When the sauce changed, it went downhill", "sauce changed",
          "Caption — pop card", "White card pops over the dark blurred plate."},
-        {WebNextRecipe::CrtFringeFlash, "GOVERNMENT TO DOUBLE CONTENT", "DOUBLE",
-         "CRT — fringe flash", "Fringe copies flash under the white headline."},
     };
     for (auto& s : next) {
         if (!wanted(webNextName(s.recipe))) continue;
@@ -73,7 +71,7 @@ int main(int argc, char** argv) try {
         std::cout << "Wrote " << out << "  (next: " << webNextName(s.recipe) << ")\n";
         ++written;
     }
-    std::cout << written << " native plans (28 rebuild + 6 next)\n";
+    std::cout << written << " native plans (26 rebuild + 5 next)\n";
     return 0;
 } catch (const std::exception& e) {
     std::cerr << e.what() << '\n';

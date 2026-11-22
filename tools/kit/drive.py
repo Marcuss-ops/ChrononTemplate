@@ -49,12 +49,59 @@ def link_for(result: dict) -> str:
     )
 
 
+def create_folder(token: str, name: str, parent_id: str) -> dict:
+    """Create one Drive folder under `parent_id` and return its metadata."""
+    url = (
+        "https://www.googleapis.com/drive/v3/files"
+        "?fields=id,name,webViewLink"
+    )
+    body = json.dumps({
+        "name": name,
+        "mimeType": "application/vnd.google-apps.folder",
+        "parents": [parent_id],
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json; charset=UTF-8",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req) as resp:
+        return json.load(resp)
+
+
+def trash_file(token: str, file_id: str) -> dict:
+    """Move one Drive file or folder to the trash."""
+    req = urllib.request.Request(
+        f"https://www.googleapis.com/drive/v3/files/{file_id}?fields=id,trashed",
+        data=json.dumps({"trashed": True}).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json; charset=UTF-8",
+        },
+        method="PATCH",
+    )
+    with urllib.request.urlopen(req) as resp:
+        raw = resp.read()
+    return json.loads(raw) if raw else {}
+
+
 def upload_file(
     token: str, file_path: Path, folder_id: str, make_public: bool = True
 ) -> dict:
     """Multipart upload of one file into `folder_id`, optionally made readable."""
     file_path = Path(file_path)
-    mime_type = "video/mp4" if file_path.suffix == ".mp4" else "image/png"
+    mime_type = {
+        ".mp4": "video/mp4",
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".json": "application/json",
+        ".md": "text/markdown",
+    }.get(file_path.suffix.lower(), "application/octet-stream")
     boundary = "-------ChrononKitUpload"
     metadata = json.dumps({"name": file_path.name, "parents": [folder_id]})
 

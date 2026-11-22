@@ -1,4 +1,4 @@
-// ChrononTemplate web.WebShotsRebuildPack — port C++ fedele dei 28 shot Python.
+// ChrononTemplate web.WebShotsRebuildPack — port C++ fedele dei 26 shot Python.
 //
 // Origine: tools/web_shots/shots_group_{a,b,c,d,e}.py + web_shot_kit.py
 // Ogni shot replica back()/front()/anim() come layer RenderPlan V3:
@@ -27,16 +27,6 @@ namespace {
 
 using namespace shot;
 
-// The native 3D text baseline sits below the author's top coordinate. These
-// adapters place centered editorial copy at a requested visible screen Y.
-float centeredTextTop(float screenTop, float size) {
-    return screenTop - 0.375f * size;
-}
-float centeredRectTop(float screenTop, float height) {
-    (void)height;
-    return screenTop - 12.f;
-}
-
 Json staticHighlightRect(const std::string& id, float left, float top,
         float width, float height, const std::string& color, float alpha, int duration) {
     Json marker = rect(id,left,top,width,height,color,alpha,Json::array(),duration);
@@ -56,8 +46,6 @@ Json staticHighlightRect(const std::string& id, float left, float top,
 using CameraMove = std::array<double, 6>;
 CameraMove cameraMove(WebShotId id) {
     switch (id) {
-    case WebShotId::KumingaEspn:           return {1.02,.50,.50, 1.07,.47,.46};
-    case WebShotId::AlCaponeTitle:         return {1.05,.52,.42, 1.00,.50,.50};
     case WebShotId::AlexisArquette:        return {1.00,.50,.50, 1.05,.52,.55};
     case WebShotId::CorllWarehouse:        return {1.02,.50,.50, 1.07,.46,.48};
     case WebShotId::TheyWereEconomy:       return {1.00,.50,.50, 1.06,.50,.50};
@@ -93,55 +81,6 @@ void buildLayers(WebShotId id, Json& L, int D) {
     int b10 = D/9, s35 = D*4/9;
     switch (id) {
     // ============ GROUP A ============
-    case WebShotId::KumingaEspn: {
-        Json bg = rect("desk",0,0,1920,1080,"#15161A",1.f,Json::array(),D);
-        shot::modules::DocumentLayer::finish(bg, 0.010f, 7, 0.24f); L.push_back(std::move(bg));
-        L.push_back(rect("paper",238,46,1468,1030,"#F4F2EE",1.f,Json::array(),D));
-        L.push_back(rect("paper_edge",238,46,1470,18,"#FFFFFF",0.55f,Json::array(),D));
-        L.push_back(textLayer("h1","Sources: Jonathan Kuminga",320,108,47,kBold,"#202124",D,0,0));
-        L.push_back(textLayer("h2","demanding trade away from Warriors",320,172,47,kBold,"#202124",D));
-        L.push_back(textLayer("by","Anthony Slater and Shams Charania",320,252,18,kMed,"#5F6368",D,0,1));
-        L.push_back(textLayer("date","Jan 15, 2026, 08:58 PM",320,282,15,kRegular,"#80868B",D));
-        L.push_back(textLayer("share","⬆ Share",320,330,19,kMed,"#3C4043",D));
-        L.push_back(textLayer("like","♡ Like",490,330,19,kMed,"#3C4043",D));
-        L.push_back(textLayer("react","❤️😭😢  4.0K",1345,330,17,kRegular,"#5F6368",D));
-        L.push_back(rect("rule1",320,382,1300,2,"#DADCE0",1.f,Json::array(),D));
-        L.push_back(textLayer("p1","SAN FRANCISCO -- On the first day he became eligible to be moved,",320,418,22,kRegular,"#202124",D));
-        L.push_back(textLayer("p2a","fifth-year forward ",320,458,22,kRegular,"#202124",D));
-        L.push_back(textLayer("p2b","Jonathan Kuminga",517,458,22,kRegular,"#1A73E8",D));
-        L.push_back(textLayer("p2c"," demanded a trade away from the",720,458,22,kRegular,"#202124",D));
-        L.push_back(textLayer("p3a","Golden State Warriors",320,498,22,kRegular,"#1A73E8",D));
-        L.push_back(textLayer("p3b",", league sources told ESPN.",556,498,22,kRegular,"#202124",D));
-        L.push_back(textLayer("p3","Kuminga could not be traded until Thursday, according to the terms",320,578,22,kRegular,"#202124",D));
-        L.push_back(textLayer("p4","of the contract he signed this summer. The trade deadline is Feb. 5.",320,618,22,kRegular,"#202124",D));
-        L.push_back(textLayer("p5","Kuminga's roller-coaster tenure with the Warriors is perhaps at its",320,668,22,kRegular,"#202124",D));
-        L.push_back(textLayer("p6","lowest point. He started the first 12 games of the season -- with coach",320,708,22,kRegular,"#202124",D));
-        L.push_back(textLayer("p7","Steve Kerr calling him a secure starter following a hot start -- but a",320,748,22,kRegular,"#202124",D));
-        L.push_back(textLayer("p8","patch of struggles led to a demotion, landing poorly with the 23-year-old.",320,788,22,kRegular,"#202124",D));
-        L.push_back(rect("picks",1050,812,570,260,"#FFFFFF",0.9f,Json::array(),D));
-        L.push_back(textLayer("picks_h","EDITOR'S PICKS",1080,836,14,kBold,"#5F6368",D,0,-1,1.f,"la",1.2f));
-        L.push_back(rect("pick_img1",1080,872,82,62,"#C9D1D9",1.f,Json::array(),D));
-        L.push_back(textLayer("pick_t1","NBA trade buzz: All the moves that",1180,876,16,kMed,"#1A73E8",D));
-        L.push_back(textLayer("pick_t1b","did and didn't happen on deadline day",1180,900,16,kMed,"#1A73E8",D));
-        L.push_back(textLayer("pick_s1","ESPN",1180,930,13,kRegular,"#80868B",D));
-        L.push_back(rect("pick_img2",1080,962,82,62,"#C9D1D9",1.f,Json::array(),D));
-        L.push_back(textLayer("pick_t2","Six NBA trade proposals: How the",1180,966,16,kMed,"#1A73E8",D));
-        L.push_back(textLayer("pick_t2b","Lakers, Bucks, Warriors and others",1180,990,16,kMed,"#1A73E8",D));
-        break; }
-    case WebShotId::AlCaponeTitle: {
-        Json bg = rect("bg",0,0,1920,1080,"#0B0B0C",1.f,Json::array(),D);
-        shot::modules::DocumentLayer::finish(bg, 0.016f, 9, 0.34f); L.push_back(std::move(bg));
-        // Full-canvas source images make Vulkan refuse the CPU fallback at frame 1.
-        // A 1 px inset keeps the same composition and lets the encoder read the surface.
-        L.push_back(image("capone","ChrononTemplate/assets/archival_refs_v2/al_capone_trio_source.png",1,1,1918,1078,D));
-        L.push_back(rect("dim",0,0,1920,1080,"#08080A",0.30f,Json::array(),D));
-        L.push_back(rect("grad_top",0,0,1920,360,"#08080A",0.55f,Json::array(),D));
-        L.push_back(rect("grad_bot",0,620,1920,460,"#08080A",0.85f,Json::array(),D));
-        L.push_back(textLayer("title","THE BRUTAL RISE AND FALL OF AL CAPONE",960,442,54,kOswaldBold,"#F2F2F0",D,0,0,1.f,"ma"));
-        L.push_back(rect("rule",500,548,920,2,"#E8E5DE",0.85f,Json::array(),D));
-        Json sub = textLayer("sub","AMERICAN HISTORY'S KINGPIN OF CRIME",960,584,30,kOswaldMed,"#E8E5DE",D,0,1,1.f,"ma",2.0f);
-        L.push_back(std::move(sub));
-        break; }
     case WebShotId::CrtAlcoholHeadline: {
         Json bg = rect("bg",0,0,1920,1080,"#080A0C",1.f,Json::array(),D);
         shot::modules::DocumentLayer::finish(bg, 0.014f, 1984, 0.26f); L.push_back(std::move(bg));
@@ -683,8 +622,6 @@ void buildLayers(WebShotId id, Json& L, int D) {
 
 const char* webShotName(WebShotId id) {
     switch (id) {
-        case WebShotId::KumingaEspn: return "01_kuminga_espn_article";
-        case WebShotId::AlCaponeTitle: return "02_al_capone_title";
         case WebShotId::AlexisArquette: return "03_alexis_arquette_article";
         case WebShotId::CorllWarehouse: return "04_corll_warehouse_excerpt";
         case WebShotId::TheyWereEconomy: return "05_they_were_the_economy";
@@ -716,8 +653,6 @@ const char* webShotName(WebShotId id) {
 }
 const char* webShotSource(WebShotId id) {
     switch (id) {
-        case WebShotId::KumingaEspn: return "Screenshot 2026-10-09 090957.png";
-        case WebShotId::AlCaponeTitle: return "Screenshot 2026-10-21 at 10-01-01 How Al Capone Took Over Chicago at 26 No AI - YouTube.png";
         case WebShotId::AlexisArquette: return "Screenshot 2026-10-25 200405.png";
         case WebShotId::CorllWarehouse: return "Screenshot 2026-10-25 200506.png";
         case WebShotId::TheyWereEconomy: return "Screenshot 2026-10-25 200835.png";
@@ -749,8 +684,6 @@ const char* webShotSource(WebShotId id) {
 }
 const char* webShotDescription(WebShotId id) {
     switch (id) {
-        case WebShotId::KumingaEspn: return "ESPN article plate on dark desk: Kuminga demanding trade";
-        case WebShotId::AlCaponeTitle: return "Tight B&W Capone crop with THE BRUTAL RISE AND FALL title";
         case WebShotId::AlexisArquette: return "news.com.au article: Alexis Arquette tell-all memoir, memoir marked yellow";
         case WebShotId::CorllWarehouse: return "Dark document excerpt, red marker on 1975 warehouse raid line";
         case WebShotId::TheyWereEconomy: return "Cream serif caption 'they were the economy' on dark red band";
@@ -781,7 +714,7 @@ const char* webShotDescription(WebShotId id) {
     return "";
 }
 std::vector<WebShotId> allWebShotIds() {
-    return {WebShotId::KumingaEspn, WebShotId::AlCaponeTitle, WebShotId::AlexisArquette,
+    return {WebShotId::AlexisArquette,
         WebShotId::CorllWarehouse, WebShotId::TheyWereEconomy, WebShotId::ThugTeacherQuote,
         WebShotId::CrtAlcoholHeadline, WebShotId::RainmakingNyt, WebShotId::PintoHighlight,
         WebShotId::TaxExemptNyt, WebShotId::AcousticKitty, WebShotId::SabotageManualGlow,

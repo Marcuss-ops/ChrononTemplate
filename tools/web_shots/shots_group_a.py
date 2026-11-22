@@ -1,7 +1,5 @@
 """Group A — web shots already covered by existing packs, rebuilt natively.
 
-01 kuminga_espn_article   (emit_web_article_fold.cpp content)
-02 al_capone_title        (emit_archival_cards.cpp / archival card content)
 07 crt_alcohol_headline   (DocumentaryReferenceStills::crt_headline)
 08 rainmaking_nyt         (DocumentaryReferenceStills::nyt_title)
 09 pinto_highlight        (DocumentaryReferenceStills::doc_video_highlight)
@@ -30,130 +28,6 @@ def _sweep(t: float, t0: float = 0.10, t1: float = 0.55) -> float:
     if t >= t1:
         return 1.0
     return _ease((t - t0) / (t1 - t0))
-
-
-# --------------------------------------------------------------------------- #
-# 01 — ESPN article on a floating paper plate (Kuminga trade request)
-# --------------------------------------------------------------------------- #
-
-def shot_01_kuminga() -> Shot:
-    def back(c: Canvas):
-        # dark desk backdrop with soft dust
-        c.rect(0, 0, 1920, 1080, "#15161A")
-        for i in range(140):
-            x = (i * 613) % 1920
-            y = (i * 331) % 1080
-            c.ellipse(x, y, 2 + (i % 3), 2 + (i % 3), "#8A8E99", 0.10)
-        c.grad_rect(0, 0, 1920, 1080, (10, 11, 14), (10, 11, 14), alpha1=0.0, alpha2=0.55)
-        # paper plate, slightly rotated
-        c.poly([(238, 46), (1706, 22), (1720, 1052), (252, 1076)], "#F4F2EE", 1.0)
-        c.poly([(238, 46), (1706, 22), (1708, 40), (240, 64)], "#FFFFFF", 0.55)
-
-    def front(c: Canvas):
-        x = 320
-        c.text(x, 108, "Sources: Jonathan Kuminga", 47, "sans-bold", "#202124")
-        c.text(x, 172, "demanding trade away from Warriors", 47, "sans-bold", "#202124")
-        c.text(x, 252, "Anthony Slater and Shams Charania", 18, "sans-med", "#5F6368")
-        c.text(x, 282, "Jan 15, 2026, 08:58 PM", 15, "sans", "#80868B")
-        # share / like row
-        c.text(x, 330, "\u2b06 Share", 19, "sans-med", "#3C4043")
-        c.text(x + 170, 330, "\u2661 Like", 19, "sans-med", "#3C4043")
-        c.text(1345, 330, "\u2764\ufe0f\U0001f62d\U0001f622  4.0K", 17, "sans", "#5F6368")
-        c.rect(x, 382, 1300, 1.5, "#DADCE0")
-
-        sz = 22
-        dark, blue = "#202124", "#1A73E8"
-        c.text(x, 418, "SAN FRANCISCO -- On the first day he became eligible to be moved,",
-               sz, "sans", dark)
-        # line 2: black prefix, linked (blue) name, black suffix — drawn as
-        # segments so the blue glyphs land exactly over their phrase
-        p2a = "fifth-year forward "
-        p2b = "Jonathan Kuminga"
-        c.text(x, 458, p2a, sz, "sans", dark)
-        x2 = x + c.measure(p2a, sz, "sans")
-        c.text(x2, 458, p2b, sz, "sans", blue)
-        c.text(x2 + c.measure(p2b, sz, "sans"), 458,
-               " demanded a trade away from the", sz, "sans", dark)
-        # line 3: linked team at line start, then black suffix
-        p3a = "Golden State Warriors"
-        c.text(x, 498, p3a, sz, "sans", blue)
-        c.text(x + c.measure(p3a, sz, "sans"), 498,
-               ", league sources told ESPN.", sz, "sans", dark)
-
-        para2 = [
-            "Kuminga could not be traded until Thursday, according to the terms",
-            "of the contract he signed this summer. The trade deadline is Feb. 5.",
-        ]
-        y = 578
-        for ln in para2:
-            c.text(x, y, ln, 22, "sans", "#202124")
-            y += 40
-
-        para3 = [
-            "Kuminga's roller-coaster tenure with the Warriors is perhaps at its",
-            "lowest point. He started the first 12 games of the season -- with coach",
-            "Steve Kerr calling him a secure starter following a hot start -- but a",
-            "patch of struggles led to a demotion, landing poorly with the 23-year-old.",
-        ]
-        y = 668
-        for ln in para3:
-            c.text(x, y, ln, 22, "sans", "#202124")
-            y += 40
-
-        # Editor's picks card
-        c.rect(1050, 812, 570, 260, "#FFFFFF", 0.9, radius=6)
-        c.text(1080, 836, "EDITOR'S PICKS", 14, "sans-bold", "#5F6368", spacing=1.2)
-        c.rect(1080, 872, 82, 62, "#C9D1D9", 1.0, radius=4)
-        c.text(1180, 876, "NBA trade buzz: All the moves that", 16, "sans-med", "#1A73E8")
-        c.text(1180, 900, "did and didn't happen on deadline day", 16, "sans-med", "#1A73E8")
-        c.text(1180, 930, "ESPN", 13, "sans", "#80868B")
-        c.rect(1080, 962, 82, 62, "#C9D1D9", 1.0, radius=4)
-        c.text(1180, 966, "Six NBA trade proposals: How the", 16, "sans-med", "#1A73E8")
-        c.text(1180, 990, "Lakers, Bucks, Warriors and others", 16, "sans-med", "#1A73E8")
-
-    return Shot(
-        name="01_kuminga_espn_article",
-        source="Screenshot 2026-10-09 090957.png",
-        seconds=3.0,
-        description="ESPN article plate on dark desk: Kuminga demanding trade from Warriors",
-        cam_from=(1.02, 0.5, 0.5), cam_to=(1.07, 0.47, 0.46),
-        grain=0.010, vig=0.24,
-        build_static=back, build_static_front=front,
-    )
-
-
-# --------------------------------------------------------------------------- #
-# 02 — Al Capone chapter title over B&W portrait
-# --------------------------------------------------------------------------- #
-
-def shot_02_capone() -> Shot:
-    def back(c: Canvas):
-        c.rect(0, 0, 1920, 1080, "#0B0B0C")
-        img = Image.open(asset("assets", "archival_refs_v2", "al_capone_trio_source.png")).convert("L")
-        w, h = img.size
-        # tight crop on the standing central figure (hat, face, tie)
-        crop = img.crop((int(w * 0.42), int(h * 0.02), int(w * 0.82), int(h * 0.90)))
-        crop = ImageOps.fit(crop.convert("RGB"), (1920, 1080), Image.LANCZOS, centering=(0.5, 0.06))
-        c.paste(crop, 0, 0, alpha=1.0)
-        c.rect(0, 0, 1920, 1080, "#08080A", 0.30)
-        c.grad_rect(0, 0, 1920, 360, (8, 8, 10), (8, 8, 10), alpha1=0.55, alpha2=0.0)
-        c.grad_rect(0, 620, 1920, 460, (8, 8, 10), (8, 8, 10), alpha1=0.0, alpha2=0.85)
-        c.vignette(0.52, 0.58)
-
-    def front(c: Canvas):
-        c.text(960, 442, "THE BRUTAL RISE AND FALL OF AL CAPONE", 54, "oswald-bold", "#F2F2F0", anchor="ma")
-        c.rect(500, 548, 920, 2, "#E8E5DE", 0.85)
-        c.text(960, 584, "AMERICAN HISTORY'S KINGPIN OF CRIME", 30, "oswald-med", "#E8E5DE", anchor="ma", spacing=2.0)
-
-    return Shot(
-        name="02_al_capone_title",
-        source="Screenshot 2026-10-21 at 10-01-01 How Al Capone Took Over Chicago at 26 No AI - YouTube.png",
-        seconds=3.0,
-        description="Tight B&W Capone face crop with THE BRUTAL RISE AND FALL title treatment",
-        cam_from=(1.05, 0.52, 0.42), cam_to=(1.0, 0.5, 0.5),
-        grain=0.016, vig=0.34,
-        build_static=back, build_static_front=front,
-    )
 
 
 # --------------------------------------------------------------------------- #
@@ -327,8 +201,6 @@ def shot_10_tax_exempt() -> Shot:
 
 
 GROUP_A = [
-    shot_01_kuminga,
-    shot_02_capone,
     shot_07_crt_headline,
     shot_08_rainmaking,
     shot_09_pinto,

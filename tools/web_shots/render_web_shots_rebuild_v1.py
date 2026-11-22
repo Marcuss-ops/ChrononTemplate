@@ -1,4 +1,4 @@
-"""Render the web screenshot rebuild v1: 28 stills + clips + manifest.
+"""Render the web screenshot rebuild v1: 26 stills + clips + manifest.
 
 Runs every shot in tools/web_shots (groups A-E) and writes, per shot:
   shot_dir/still.png   — hero frame at `still_t`

@@ -427,6 +427,7 @@ class Shot:
     source: str                     # original screenshot filename (for the manifest)
     seconds: float = 3.0
     fps: int = 30
+    ss: float = 1.5                 # authoring supersample; 1.0 = native 1920
     still_t: float = 1.0            # normalized time of the hero still
     description: str = ""
 
@@ -462,10 +463,10 @@ class Shot:
     def render_frame(self, static: Optional[Image.Image], t: float,
                      front: Optional[Image.Image] = None) -> Image.Image:
         if self.draw_full is not None:
-            c = Canvas()
+            c = Canvas(ss=self.ss)
             self.draw_full(c, t)
         else:
-            c = Canvas(image=static.copy() if static is not None else None)
+            c = Canvas(ss=self.ss, image=static.copy() if static is not None else None)
             if self.draw_anim is not None:
                 self.draw_anim(c, t)
             if front is not None:
@@ -483,14 +484,14 @@ class Shot:
     def _static(self) -> Optional[Image.Image]:
         if self.draw_full is not None or self.build_static is None:
             return None
-        c = Canvas()
+        c = Canvas(ss=self.ss)
         self.build_static(c)
         return c.img
 
     def _static_front(self) -> Optional[Image.Image]:
         if self.draw_full is not None or self.build_static_front is None:
             return None
-        c = Canvas()
+        c = Canvas(ss=self.ss)
         self.build_static_front(c)
         return c.img
 

@@ -1,6 +1,6 @@
 // ChrononTemplate — Web Shots Rebuild v1 (C++ base).
 //
-// Port nativo dei 28 shot Python in tools/web_shots/ (groups A-E +
+// Port nativo dei 26 shot Python in tools/web_shots/ (groups A-E +
 // web_shot_kit.py) come dati RenderPlan V3 puri.
 // Ogni shot e' una funzione pura dello spec: nessun Pillow, nessun browser,
 // nessuno screenshot caricato come asset. Chronon3D rasterizza, questo pack
@@ -14,7 +14,7 @@
 // applica la prospettiva), cosi' il piano resta valido senza OpenCV.
 //
 // Mappa shot -> Python originale:
-//   A: 01 kuminga, 02 capone, 07 crt, 08 rainmaking, 09 pinto, 10 tax
+//   A: 07 crt, 08 rainmaking, 09 pinto, 10 tax
 //   B: 03 alexis, 04 corll, 05 economy, 06 thug, 11 acoustic_kitty
 //   C: 12 sabotage, 13 foia, 14 vw, 15 cnbc tilt, 16 nbc tilt
 //   D: 17 guardian tilt, 18 ftx tweet, 19 nyt crazy, 20 indictment tilt, 21 seoul
@@ -29,9 +29,7 @@
 namespace chronontemplate::web {
 
 enum class WebShotId : unsigned char {
-    KumingaEspn = 0,      // 01
-    AlCaponeTitle,         // 02
-    AlexisArquette,        // 03
+    AlexisArquette = 0,    // 03
     CorllWarehouse,       // 04
     TheyWereEconomy,      // 05
     ThugTeacherQuote,     // 06
@@ -66,7 +64,7 @@ enum class WebShotId : unsigned char {
 [[nodiscard]] std::vector<WebShotId> allWebShotIds();
 
 struct WebShotSpec {
-    WebShotId id{WebShotId::KumingaEspn};
+    WebShotId id{WebShotId::CrtAlcoholHeadline};
     int durationFrames{90}; // 3.0s @30fps come i Python
     int fps{30};
     std::string outputName{}; // vuoto -> <shot>.mp4

@@ -1,4 +1,4 @@
-// The native web-shot contract: 28 rebuild plans plus six reusable recipes,
+// The native web-shot contract: 26 rebuild plans plus five reusable recipes,
 // all pure RenderPlan V3 documents in the current web contract.
 //
 // This test pins the parts that used to drift: full-bleed paper is a
@@ -88,9 +88,9 @@ namespace {
     }
 
     void checksRebuild() {
-        section("web shots rebuild 28");
+        section("web shots rebuild 26");
         const std::vector<WebShotId> ids = allWebShotIds();
-        check(ids.size() == 28, "all 28 reference shots are registered");
+        check(ids.size() == 26, "all 26 reference shots are registered");
 
         std::set<std::string> names;
         for (const WebShotId id : ids) {
@@ -113,7 +113,7 @@ namespace {
     void checksNext() {
         section("web shots next recipes");
         const std::vector<WebNextRecipe> recipes = allWebNextRecipes();
-        check(recipes.size() == 6, "all six reusable recipes are registered");
+        check(recipes.size() == 5, "all five reusable recipes are registered");
 
         std::set<std::string> names;
         for (const WebNextRecipe recipe : recipes) {

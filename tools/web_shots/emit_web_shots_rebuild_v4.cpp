@@ -1,4 +1,4 @@
-// Emette i 28 piani nativi WebShotsRebuild v4.
+// Emette i 26 piani nativi WebShotsRebuild v4.
 // v4 = composizione v3 + reveal parola-per-parola a runtime, marker
 // ri-temporizzati e drift di camera verso l'area evidenziata.
 // Uso: emit_web_shots_rebuild_v4 <out-dir> [--only <shot>...]
