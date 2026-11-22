@@ -116,13 +116,24 @@ namespace {
             }
             json targets = json::array();
             for (const auto& target : recipe.targets) targets.push_back(target);
+            // The web presets are layer motions. A depth/rotation track needs
+            // Chronon's camera-backed 3D path even though the projected layer is
+            // text: `web_phrase_v1` must not advertise these rows as flat.
+            bool requires3d = false;
+            for (const auto& track : def.tracks) {
+                if (track.property == "position_z" || track.property == "rotation_x" ||
+                    track.property == "rotation_y") {
+                    requires3d = true;
+                    break;
+                }
+            }
             rows.push_back({{"id", def.id}, {"category", "web_phrase_v1"},
                             {"targets", targets},
                             {"unit", def.textAnimators.empty() ? "layer" : def.textAnimators.front().selector.unit},
                             {"duration_bounds", {{"minimum_frames", 60}, {"maximum_frames", 240}}},
-                            {"render_safe", true}, {"requires_3d", false}, {"requires_camera", false},
+                            {"render_safe", true}, {"requires_3d", requires3d}, {"requires_camera", requires3d},
                             {"enter", def.enter}, {"exit", 15}, {"tracks", tracks},
-                            {"text_animators", animators}});
+                            {"text_animators", animators}, {"adaptation_note", def.adaptation_note}});
         }
         return rows;
     }
@@ -185,7 +196,7 @@ namespace {
         if (candidates.find(id) == candidates.end()) return false;
         const std::set<std::string> layerProperties{
             "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
-            "rotation", "rotation_x", "rotation_y", "rotation_z", "opacity"};
+            "rotation", "rotation_x", "rotation_y", "rotation_z", "position_z", "opacity"};
         const std::set<std::string> gpuTextAnimatorProperties{
             "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
             "opacity", "tracking", "fill_color"};
@@ -914,7 +925,7 @@ int main(int argc, char** argv) {
             const bool hasUnsupportedGPUTrack = [&] {
                 const std::set<std::string> layerProperties{
                     "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
-                    "rotation", "rotation_x", "rotation_y", "rotation_z", "opacity"};
+                    "rotation", "rotation_x", "rotation_y", "rotation_z", "position_z", "opacity"};
                 const std::set<std::string> textProperties{
                     "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
                     "opacity", "tracking", "fill_color"};

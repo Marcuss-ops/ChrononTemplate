@@ -1,12 +1,15 @@
 // ChrononTemplate — web-phrase motion pack.
 //
-// Twenty web-motion recipes distilled to a single text layer, plus ten
-// entrance gestures in the typewriter / highlighting / geometric families.
+// Twenty web layer-motion presets projected from ChrononTemplate's native
+// `web` and `web_rect_v1` families, plus ten entrance gestures in the
+// typewriter / highlighting / geometric families.
 //
 // Every recipe is intentionally "virgin": it authors only the phrase's layer
 // tracks and text animators. It never adds a page plate, marker, card, image,
 // underline or decor layer, so the rendered MP4 is text on the runtime's
-// default background and nothing else.
+// default background and nothing else. The web recipes copy the source layer
+// tracks verbatim (retimed to the phrase entrance); AdaptationNote names the
+// source motion so the projection stays auditable.
 //
 // The same definitions feed both runtime catalogs:
 //   * short_phrase_motion.v1.json  (Short Phrases style picker)
