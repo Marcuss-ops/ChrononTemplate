@@ -142,6 +142,11 @@ def main() -> int:
     check("web subcategory inventory", web_subcategories == {
         "web": 20, "typewriter": 3, "highlighting": 3, "geometric": 4,
     }, str(web_subcategories))
+    check("web recipes are virgin text-only", all(
+        not r.get("accents") and not r.get("text_overlays") and
+        r.get("decor") is None and not r.get("white_background") and
+        not r.get("paper_background") for r in web
+    ))
     check("core surviving id set", {recipe.get("id") for recipe in recipes}.issuperset({
         "short_phrase_shape_phrase_wipe",
         "short_phrase_editorial_focus_resolve",
