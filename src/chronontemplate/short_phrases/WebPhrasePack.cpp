@@ -60,7 +60,10 @@ WebPhraseRecipe recipe(std::string family, std::string subcategory, ShortPhraseD
     row.definition = std::move(definition);
     row.family = std::move(family);
     row.subcategory = std::move(subcategory);
-    row.targets = {"short_phrase", "caption"};
+    // Both phrase lanes are intentional: the same text-only entrance serves
+    // short copy and long/IMPORTANT_PHRASE copy. Keep this in sync with the
+    // struct default in WebPhrasePack.hpp.
+    row.targets = {"short_phrase", "caption", "important_phrase"};
     return row;
 }
 

@@ -142,6 +142,9 @@ def main() -> int:
     check("web subcategory inventory", web_subcategories == {
         "web": 20, "typewriter": 3, "highlighting": 3, "geometric": 4,
     }, str(web_subcategories))
+    check("web recipes declare both phrase lanes", all(
+        {"short_phrase", "important_phrase"}.issubset(set(r.get("targets") or [])) for r in web
+    ))
     check("web recipes are virgin text-only", all(
         not r.get("accents") and not r.get("text_overlays") and
         r.get("decor") is None and not r.get("white_background") and

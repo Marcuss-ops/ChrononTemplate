@@ -1,0 +1,195 @@
+{
+  "count": 20,
+  "deliver": {
+    "fps": 30,
+    "frames": 90,
+    "height": 1080,
+    "seconds": 3.0,
+    "width": 1920
+  },
+  "pack": "doc_web_shots_2026",
+  "schema": "chronon.doc-web-shots.v1",
+  "shots": [
+    {
+      "category": "Evidence & courts",
+      "clip": "d01_court_docket_filed/d01_court_docket_filed.mp4",
+      "description": "PACER-style docket page: sealed entry, row scan and FILED stamp",
+      "id": 1,
+      "shot": "d01_court_docket_filed",
+      "still": "d01_court_docket_filed/still.png",
+      "still_t": 0.82
+    },
+    {
+      "category": "Evidence & courts",
+      "clip": "d02_sec_edgar_redline/d02_sec_edgar_redline.mp4",
+      "description": "SEC 10-K page with a material-weakness redline and exhibit tab",
+      "id": 2,
+      "shot": "d02_sec_edgar_redline",
+      "still": "d02_sec_edgar_redline/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Archives & search",
+      "clip": "d03_wikipedia_revision_diff/d03_wikipedia_revision_diff.mp4",
+      "description": "Wikipedia page with revision history and a rising diff card",
+      "id": 3,
+      "shot": "d03_wikipedia_revision_diff",
+      "still": "d03_wikipedia_revision_diff/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Archives & search",
+      "clip": "d04_wayback_calendar/d04_wayback_calendar.mp4",
+      "description": "Wayback Machine calendar scrub with selected snapshot ring",
+      "id": 4,
+      "shot": "d04_wayback_calendar",
+      "still": "d04_wayback_calendar/still.png",
+      "still_t": 0.82
+    },
+    {
+      "category": "Archives & search",
+      "clip": "d05_search_results_warrant/d05_search_results_warrant.mp4",
+      "description": "Public-records search results, sealed hit and knowledge panel",
+      "id": 5,
+      "shot": "d05_search_results_warrant",
+      "still": "d05_search_results_warrant/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Data & verification",
+      "clip": "d06_factcheck_verdict/d06_factcheck_verdict.mp4",
+      "description": "Fact-check claim, verdict meter and FALSE stamp",
+      "id": 6,
+      "shot": "d06_factcheck_verdict",
+      "still": "d06_factcheck_verdict/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Live & broadcast",
+      "clip": "d07_live_blog_update/d07_live_blog_update.mp4",
+      "description": "Dark live blog with a new breaking update card sliding in",
+      "id": 7,
+      "shot": "d07_live_blog_update",
+      "still": "d07_live_blog_update/still.png",
+      "still_t": 0.86
+    },
+    {
+      "category": "Data & verification",
+      "clip": "d08_data_chart_annotation/d08_data_chart_annotation.mp4",
+      "description": "Data desk with a native line chart, endpoint pulse and annotation",
+      "id": 8,
+      "shot": "d08_data_chart_annotation",
+      "still": "d08_data_chart_annotation/still.png",
+      "still_t": 0.86
+    },
+    {
+      "category": "Data & verification",
+      "clip": "d09_satellite_before_after/d09_satellite_before_after.mp4",
+      "description": "Split before/after field plate with moving scan divider and hotspots",
+      "id": 9,
+      "shot": "d09_satellite_before_after",
+      "still": "d09_satellite_before_after/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Evidence & courts",
+      "clip": "d10_leaked_memo_redaction/d10_leaked_memo_redaction.mp4",
+      "description": "Leaked memo: the redaction bar retracts to expose the finding",
+      "id": 10,
+      "shot": "d10_leaked_memo_redaction",
+      "still": "d10_leaked_memo_redaction/still.png",
+      "still_t": 0.86
+    },
+    {
+      "category": "Interface & field",
+      "clip": "d11_phone_alerts/d11_phone_alerts.mp4",
+      "description": "Lock-screen alert stack: the newest notification expands",
+      "id": 11,
+      "shot": "d11_phone_alerts",
+      "still": "d11_phone_alerts/still.png",
+      "still_t": 0.86
+    },
+    {
+      "category": "Live & broadcast",
+      "clip": "d12_youtube_transcript/d12_youtube_transcript.mp4",
+      "description": "Watch page with a live transcript rail and moving selection",
+      "id": 12,
+      "shot": "d12_youtube_transcript",
+      "still": "d12_youtube_transcript/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Interface & field",
+      "clip": "d13_forum_thread/d13_forum_thread.mp4",
+      "description": "Locked forum thread with climbing votes and a new reply",
+      "id": 13,
+      "shot": "d13_forum_thread",
+      "still": "d13_forum_thread/still.png",
+      "still_t": 0.86
+    },
+    {
+      "category": "Live & broadcast",
+      "clip": "d14_press_release_wire/d14_press_release_wire.mp4",
+      "description": "Newswire release with distribution count and scrolling ticker",
+      "id": 14,
+      "shot": "d14_press_release_wire",
+      "still": "d14_press_release_wire/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Data & verification",
+      "clip": "d15_budget_table/d15_budget_table.mp4",
+      "description": "Federal budget table with scanning rows and growing comparison bars",
+      "id": 15,
+      "shot": "d15_budget_table",
+      "still": "d15_budget_table/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Archives & search",
+      "clip": "d16_obituary_archive/d16_obituary_archive.mp4",
+      "description": "Newsprint obituary with a halftone portrait and archive stamp",
+      "id": 16,
+      "shot": "d16_obituary_archive",
+      "still": "d16_obituary_archive/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Evidence & courts",
+      "clip": "d17_pdf_annotations/d17_pdf_annotations.mp4",
+      "description": "Annotated PDF viewer: highlighter sweep and a comment bubble",
+      "id": 17,
+      "shot": "d17_pdf_annotations",
+      "still": "d17_pdf_annotations/still.png",
+      "still_t": 0.86
+    },
+    {
+      "category": "Interface & field",
+      "clip": "d18_newsletter_inbox/d18_newsletter_inbox.mp4",
+      "description": "Mail inbox with a new issue sliding in over the reading pane",
+      "id": 18,
+      "shot": "d18_newsletter_inbox",
+      "still": "d18_newsletter_inbox/still.png",
+      "still_t": 0.86
+    },
+    {
+      "category": "Live & broadcast",
+      "clip": "d19_podcast_transcript/d19_podcast_transcript.mp4",
+      "description": "Podcast transcript with a native waveform and moving playhead",
+      "id": 19,
+      "shot": "d19_podcast_transcript",
+      "still": "d19_podcast_transcript/still.png",
+      "still_t": 0.84
+    },
+    {
+      "category": "Interface & field",
+      "clip": "d20_map_route/d20_map_route.mp4",
+      "description": "Dark route map: drawn flight path, waypoint pulses and distance",
+      "id": 20,
+      "shot": "d20_map_route",
+      "still": "d20_map_route/still.png",
+      "still_t": 0.84
+    }
+  ],
+  "source_policy": "native C++ Blend2D vector composition; no browser, screenshot or Python"
+}

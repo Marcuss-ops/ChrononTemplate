@@ -10,6 +10,10 @@ __pycache__/
 /output/
 /out/
 tools/**/out/
+
+# Local build tree of the doc web-shot tool (2026-11-22): compiled binaries
+# are regenerated from the tracked sources, never committed.
+/tools/doc_web_shots/build/
 short_phrase/**/out/
 catalog/**/out/
 output/**/*.png

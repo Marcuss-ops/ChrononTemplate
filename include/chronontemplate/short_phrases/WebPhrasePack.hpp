@@ -15,6 +15,11 @@
 //   * short_phrase_motion.v1.json  (Short Phrases style picker)
 //   * chronontemplate_catalog.v1.json category "web_phrase_v1"
 //     (the phrase_motion_pool used by long phrases and IMPORTANT_PHRASE)
+//
+// Every recipe declares both `short_phrase` and `important_phrase`: the same
+// text-only entrance is valid for short copy and for long/IMPORTANT_PHRASE
+// copy, so both pickers must offer it. The typewriter short/long families stay
+// split because each declares only its own lane.
 #ifndef CHRONONTEMPLATE_SHORT_PHRASES_WEB_PHRASE_PACK_HPP
 #define CHRONONTEMPLATE_SHORT_PHRASES_WEB_PHRASE_PACK_HPP
 
@@ -30,7 +35,9 @@ namespace chronontemplate::web_phrase {
         ShortPhraseDefinition definition{};
         std::string family{"web"};
         std::string subcategory{"web"};
-        std::vector<std::string> targets{"short_phrase", "caption"};
+        // `important_phrase` is the long-phrase picker target. Declaring both
+        // targets is the explicit opt-in for a recipe shared by both lanes.
+        std::vector<std::string> targets{"short_phrase", "caption", "important_phrase"};
     };
 
     /// The 30 recipes in stable catalog order. Returned by reference; callers
