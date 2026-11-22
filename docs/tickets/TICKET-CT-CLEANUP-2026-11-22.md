@@ -3,6 +3,8 @@
 **Stato:** `OPEN` (2026-11-22)
 **Owner:** template maintenance
 **Origine:** audit Chronon 2026-11-22, voci CT-AUDIT-01 e REPO-AUDIT-01
+**Ticket figli:** [pack/helper dedup](TICKET-CT-PACKS-HELPER-DEDUP-2026-11-22.md),
+[artifact hygiene](TICKET-REPO-ARTIFACTS-HYGIENE-2026-11-22.md)
 
 ## Problemi
 
