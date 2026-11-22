@@ -17,7 +17,17 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 WORKSPACE = HERE.parents[2]
-sys.path.insert(0, str(WORKSPACE / "Chronon3d" / "tools" / "cartography"))
+# The cartography package moved to the ChrononPlugin maps module (Chronon3d
+# commit 804e77aaa). Keep the legacy location as a fallback so an older
+# checkout still resolves the module instead of failing the import and
+# disabling every map overlay.
+for _cartography in (
+    WORKSPACE / "ChrononPlugin" / "plugins" / "maps" / "tools" / "cartography",
+    WORKSPACE / "Chronon3d" / "tools" / "cartography",
+):
+    if _cartography.is_dir():
+        sys.path.insert(0, str(_cartography))
+        break
 
 from dynamic_tile_pyramid import DynamicTilePyramid, latlon_to_global_px  # noqa: E402
 

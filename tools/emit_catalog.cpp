@@ -34,6 +34,7 @@
 #include "chronontemplate/important_phrases/apple/ApplePhrasePack.hpp"
 #include "chronontemplate/entities_with_text/DocumentarySnapshotPack.hpp"
 #include "chronontemplate/important_phrases/ImportantPhrasePack.hpp"
+#include "chronontemplate/short_phrases/WebPhrasePack.hpp"
 
 #include <cstdint>
 #include <algorithm>
@@ -92,6 +93,70 @@ namespace {
     }
 
 
+    json canonicalTextTrack(const chronontemplate::PhraseTrack& track);
+
+    json webPhraseCatalogMotions() {
+        json rows = json::array();
+        for (const auto& recipe : chronontemplate::web_phrase::webPhraseRecipes()) {
+            const auto& def = recipe.definition;
+            json tracks = json::array();
+            for (const auto& track : def.tracks) tracks.push_back(phraseTrack(track));
+            json animators = json::array();
+            for (const auto& animator : def.textAnimators) {
+                json properties = json::array();
+                for (const auto& track : animator.properties) properties.push_back(canonicalTextTrack(track));
+                std::string shape = "square";
+                if (animator.selector.window == "reveal_soft") shape = "smooth";
+                animators.push_back({{"id", def.id + "_text"},
+                                     {"selector", {{"kind", animator.selector.unit},
+                                                    {"shape", shape},
+                                                    {"order", animator.selector.order},
+                                                    {"stagger", animator.selector.window == "full" ? 0 : 1}}},
+                                     {"properties", properties}});
+            }
+            json targets = json::array();
+            for (const auto& target : recipe.targets) targets.push_back(target);
+            rows.push_back({{"id", def.id}, {"category", "web_phrase_v1"},
+                            {"targets", targets},
+                            {"unit", def.textAnimators.empty() ? "layer" : def.textAnimators.front().selector.unit},
+                            {"duration_bounds", {{"minimum_frames", 60}, {"maximum_frames", 240}}},
+                            {"render_safe", true}, {"requires_3d", false}, {"requires_camera", false},
+                            {"enter", def.enter}, {"exit", 15}, {"tracks", tracks},
+                            {"text_animators", animators}});
+        }
+        return rows;
+    }
+
+    /// Canonical phrase rows must use the renderer's native RGBA fill_color,
+    /// just like the short-phrase runtime catalog does. The C++ pack authors
+    /// the convenient fill_blue/fill_gray/fill_orange scalar mix; project it
+    /// once at the catalog boundary so the two artifacts cannot drift.
+    json canonicalTextTrack(const chronontemplate::PhraseTrack& track) {
+        if (track.property != "fill_blue" && track.property != "fill_gray" &&
+            track.property != "fill_orange") {
+            return phraseTrack(track);
+        }
+        double target[4] = {1.0, 1.0, 1.0, 1.0};
+        if (track.property == "fill_blue") {
+            target[0] = 0.30; target[1] = 0.55; target[2] = 1.00;
+        } else if (track.property == "fill_orange") {
+            target[0] = 1.00; target[1] = 0.38; target[2] = 0.12;
+        } else {
+            target[0] = target[1] = target[2] = 0.62;
+        }
+        json keys = json::array();
+        for (const auto& key : track.keyframes) {
+            const double mix = std::clamp(static_cast<double>(key.value), 0.0, 1.0);
+            json color = json::array();
+            for (int channel = 0; channel < 4; ++channel) {
+                const double rest = 1.0;
+                color.push_back(rest + (target[channel] - rest) * mix);
+            }
+            keys.push_back({{"frame", key.frame}, {"value", color}});
+        }
+        return {{"property", "fill_color"}, {"easing", track.easing}, {"keyframes", keys}};
+    }
+
     json documentarySnapshotRecipes() {
         json rows = json::array();
         for (const auto& id : chronontemplate::documentaryRecipeIds()) {
@@ -120,10 +185,10 @@ namespace {
         if (candidates.find(id) == candidates.end()) return false;
         const std::set<std::string> layerProperties{
             "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
-            "rotation", "rotation_z", "opacity"};
+            "rotation", "rotation_x", "rotation_y", "rotation_z", "opacity"};
         const std::set<std::string> gpuTextAnimatorProperties{
             "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
-            "opacity", "tracking"};
+            "opacity", "tracking", "fill_color"};
         for (const auto& track : motion.value("tracks", json::array())) {
             if (!layerProperties.contains(track.value("property", ""))) return false;
         }
@@ -151,7 +216,7 @@ namespace {
             const std::string order = selector.value("order", "forward");
             if ((unit != "glyph" && unit != "character" && unit != "grapheme" &&
                  unit != "word" && unit != "line") ||
-                (shape != "square" && shape != "smooth") ||
+                (shape != "square" && shape != "smooth" && shape != "triangle") ||
                 (order != "forward" && order != "reverse" &&
                  order != "from_center" && order != "to_center")) return false;
             for (const auto& track : animator.value("properties", json::array())) {
@@ -771,6 +836,8 @@ int main(int argc, char** argv) {
         }
         const json appleMotions = applePhraseMotions();
         for (const auto& row : appleMotions) motions.push_back(row);
+        const json webMotions = webPhraseCatalogMotions();
+        for (const auto& row : webMotions) motions.push_back(row);
         const std::set<std::string> motionIDs = validateMotions(motions);
         std::set<std::string> sectionIDs;
         for (const auto& section : animationSections["sections"]) {
@@ -843,14 +910,14 @@ int main(int argc, char** argv) {
             const std::string category = motion.value("category", "");
             const bool phraseFamily =
                 category == "apple_phrase_v1" || category == "phrase_apple_clean_v1" ||
-                category == "typewriter_phrase_v1";
+                category == "typewriter_phrase_v1" || category == "web_phrase_v1";
             const bool hasUnsupportedGPUTrack = [&] {
                 const std::set<std::string> layerProperties{
                     "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
-                    "rotation", "rotation_z", "opacity"};
+                    "rotation", "rotation_x", "rotation_y", "rotation_z", "opacity"};
                 const std::set<std::string> textProperties{
                     "position", "position_x", "position_y", "scale", "scale_x", "scale_y",
-                    "opacity", "tracking"};
+                    "opacity", "tracking", "fill_color"};
                 for (const auto& track : motion.value("tracks", json::array())) {
                     if (!layerProperties.contains(track.value("property", ""))) return true;
                 }

@@ -17,6 +17,7 @@
 #include <nlohmann/json.hpp>
 
 #include "chronontemplate/short_phrases/ShortPhrasePack.hpp"
+#include "chronontemplate/short_phrases/WebPhrasePack.hpp"
 
 #include <exception>
 #include <iostream>
@@ -276,13 +277,74 @@ namespace {
         return json{{"id", def.id}, {"shape", def.shape}, {"tracks", tracks}};
     }
 
+    /// The 30 web-phrase recipes are authored by WebPhrasePack, not by the
+    /// ShortPhraseRecipes.def roster. They still publish the same catalog shape,
+    /// so the runtime has one selection contract for both packs.
+    json webRecipeJson(const chronontemplate::web_phrase::WebPhraseRecipe& recipe,
+                      std::set<std::string>& ids) {
+        const ShortPhraseDefinition& def = recipe.definition;
+        if (def.id.rfind("short_phrase_", 0) != 0) fail(def.id + ": wire id needs the short_phrase_ prefix");
+        if (!ids.insert(def.id).second) fail("duplicate recipe id " + def.id);
+        if (def.title.empty()) fail(def.id + ": needs a human title");
+        if (def.phrase.empty()) fail(def.id + ": needs a showcase phrase");
+        if (def.enter <= 0 || def.enter > kMaxEnterFrames) fail(def.id + ": enter is outside the short-phrase range");
+        if (def.emphasis.size() != 0 || !def.accents.empty() || !def.textOverlays.empty()) {
+            fail(def.id + ": web phrases must be text-only (no accents, overlays or emphasis)");
+        }
+        if (recipe.family.empty() || recipe.subcategory.empty()) fail(def.id + ": needs a family and subcategory");
+        if (recipe.targets.empty()) fail(def.id + ": needs at least one target");
+        const std::size_t words = chronontemplate::shortPhraseWordCount(def.phrase);
+        if (words == 0 || words > 5) fail(def.id + ": web phrases must have 1..5 words");
+
+        json tracks = json::array();
+        for (std::size_t i = 0; i < def.tracks.size(); ++i) {
+            validateTrack(def.tracks[i], def.id + ".tracks[" + std::to_string(i) + "]");
+            tracks.push_back(trackJson(def.tracks[i]));
+        }
+        json animators = json::array();
+        for (std::size_t i = 0; i < def.textAnimators.size(); ++i) {
+            const auto& animator = def.textAnimators[i];
+            const std::string where = def.id + ".textAnimators[" + std::to_string(i) + "]";
+            const std::string unit = animator.selector.unit;
+            const std::string window = animator.selector.window;
+            if (unit != "glyph" && unit != "word" && unit != "line") fail(where + ": unit must be glyph, word, or line");
+            if (window != "full" && window != "reveal" && window != "reveal_soft" && window != "band") {
+                fail(where + ": window must be full | reveal | reveal_soft | band");
+            }
+            json properties = json::array();
+            for (std::size_t j = 0; j < animator.properties.size(); ++j) {
+                validateTrack(animator.properties[j], where + ".properties[" + std::to_string(j) + "]");
+                properties.push_back(trackJson(animator.properties[j]));
+            }
+            if (properties.empty()) fail(where + ": needs at least one property");
+            animators.push_back({{"selector", selectorJson(animator.selector)}, {"properties", properties}});
+        }
+        json targets = json::array();
+        for (const auto& target : recipe.targets) targets.push_back(target);
+        const ShortPhraseTiming timing = chronontemplate::shortPhraseTiming(static_cast<int>(words));
+        return json{
+            {"id", def.id}, {"family", recipe.family}, {"subcategory", recipe.subcategory},
+            {"targets", targets}, {"runtime_enabled", true}, {"title", def.title},
+            {"phrase", def.phrase}, {"enter", def.enter}, {"word_count", words},
+            {"selector", recipeSelector(def)}, {"tracks", tracks}, {"text_animators", animators},
+            {"text_overlays", json::array()}, {"accents", json::array()},
+            {"font_size", def.font_size}, {"light", def.light},
+            {"white_background", def.white_background}, {"emphasis", json::array()},
+            {"exit", exitId(def.exit)}, {"decor", nullptr}, {"adaptation_note", def.adaptation_note},
+            {"timing", {{"min_frames", timing.minFrames}, {"max_frames", timing.maxFrames},
+                        {"in_frames", timing.inFrames}, {"hold_frames", timing.holdFrames},
+                        {"out_frames", timing.outFrames}}}};
+    }
+
     json selectionJson() {
         json selection = json::object();
+        const auto& webRecipes = chronontemplate::web_phrase::webPhraseRecipes();
         for (int words = 1; words <= 5; ++words) {
             const std::vector<ShortPhraseAnimation> picks = chronontemplate::shortPhraseSuggestions(words);
             if (picks.empty()) fail("word count " + std::to_string(words) + " has no suggested recipe");
             json ids = json::array();
             for (const ShortPhraseAnimation pick : picks) ids.push_back(chronontemplate::name(pick));
+            for (const auto& web : webRecipes) ids.push_back(web.definition.id);
             selection[std::to_string(words)] = ids;
         }
         return selection;
@@ -325,6 +387,10 @@ int main() {
             if (wordCount < spec.min_words || wordCount > spec.max_words)
                 fail(std::string(spec.id) + ": authored phrase word count is outside its family spec");
             recipes.push_back(recipeJson(animations[index], ids));
+        }
+
+        for (const auto& web : chronontemplate::web_phrase::webPhraseRecipes()) {
+            recipes.push_back(webRecipeJson(web, ids));
         }
 
         if (!chronontemplate::shortPhraseSuggestions(0).empty() ||

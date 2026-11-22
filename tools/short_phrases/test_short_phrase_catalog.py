@@ -129,12 +129,20 @@ def main() -> int:
         "short_phrase_editorial_side_glide",
     }
     check("none of the retired motions is published", not retired_ids.intersection({r["id"] for r in recipes}))
-    check("14 surviving recipes", len(recipes) == 14, str(len(recipes)))
+    check("44 surviving recipes", len(recipes) == 44, str(len(recipes)))
     editorial = [r for r in recipes if r["id"].startswith("short_phrase_editorial_")]
     product = [r for r in recipes if r["id"].startswith("short_phrase_product_")]
+    web = [r for r in recipes if r["id"].startswith("short_phrase_web_")]
     check("surviving editorial recipes", len(editorial) == 3, str(len(editorial)))
     check("surviving product recipes", len(product) == 9, str(len(product)))
-    check("exact surviving id set", {recipe.get("id") for recipe in recipes} == {
+    check("30 web phrase recipes", len(web) == 30, str(len(web)))
+    check("web recipe family", {r.get("family") for r in web} == {"web"}, str({r.get("family") for r in web}))
+    web_subcategories = {name: sum(1 for r in web if r.get("subcategory") == name)
+                         for name in ("web", "typewriter", "highlighting", "geometric")}
+    check("web subcategory inventory", web_subcategories == {
+        "web": 20, "typewriter": 3, "highlighting": 3, "geometric": 4,
+    }, str(web_subcategories))
+    check("core surviving id set", {recipe.get("id") for recipe in recipes}.issuperset({
         "short_phrase_shape_phrase_wipe",
         "short_phrase_editorial_focus_resolve",
         "short_phrase_editorial_contrast_sweep",
@@ -149,7 +157,7 @@ def main() -> int:
         "short_phrase_burst",
         "short_phrase_product_word_stack",
         "short_phrase_product_tracking_focus",
-    })
+    }))
     adapted_product_ids = {
         "short_phrase_product_split_flap_text", "short_phrase_product_scroll_reveal",
     }
@@ -165,7 +173,7 @@ def main() -> int:
                 check(f"{recipe['id']} uses a three-second entrance", recipe.get("enter") == 90,
                       str(recipe.get("enter")))
     check("every recipe is categorized", all(r.get("family") and r.get("subcategory") for r in recipes))
-    check("surviving animation families", {r.get("family") for r in recipes} == {"classic", "editorial", "product_video"})
+    check("surviving animation families", {r.get("family") for r in recipes} == {"classic", "editorial", "product_video", "web"})
     check("computer-character assembly remains available",
           "computer_character_assembly" in {r.get("subcategory") for r in recipes})
     check("editorial recipes retain their render style", all(r.get("font_size", 0) > 0 and isinstance(r.get("light"), bool) for r in editorial))

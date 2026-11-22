@@ -245,6 +245,7 @@ add_library(chronontemplate STATIC
         src/chronontemplate/map/EditorialMapPack.cpp
         # the short-phrase family: surviving recipes plus the star bumper
         src/chronontemplate/short_phrases/ShortPhrasePack.cpp
+        src/chronontemplate/short_phrases/WebPhrasePack.cpp
         include/chronontemplate/short_phrases/ShortPhraseRecipes.def
         src/chronontemplate/short_phrases/animations/KineticCenterBuild.cpp
         src/chronontemplate/short_phrases/animations/PerWordRise.cpp
