@@ -35460,6 +35460,1335 @@
         }
       ],
       "render_safe": true
+    },
+    {
+      "id": "typewriter_breath_long",
+      "title": "Typewriter Breath (long)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase"
+      ],
+      "unit": "glyph",
+      "enter": 71,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.97
+            },
+            {
+              "frame": 30,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "smooth",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 10,
+            "enter": 71
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true
+    },
+    {
+      "id": "typewriter3d_yaw_flip_short",
+      "title": "Typewriter 3D Yaw Flip (short)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase",
+        "short_phrase"
+      ],
+      "unit": "glyph",
+      "enter": 52,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": -52.0
+            },
+            {
+              "frame": 52,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_z",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 170.0
+            },
+            {
+              "frame": 52,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 9,
+            "enter": 37
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_pitch_lift_short",
+      "title": "Typewriter 3D Pitch Lift (short)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase",
+        "short_phrase"
+      ],
+      "unit": "glyph",
+      "enter": 50,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_x",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 24.0
+            },
+            {
+              "frame": 50,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": -46.0
+            },
+            {
+              "frame": 50,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 8,
+            "enter": 38
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_roll_settle_short",
+      "title": "Typewriter 3D Roll Settle (short)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase",
+        "short_phrase"
+      ],
+      "unit": "glyph",
+      "enter": 48,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_z",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": -10.0
+            },
+            {
+              "frame": 48,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "scale",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.9
+            },
+            {
+              "frame": 48,
+              "value": 1.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 8,
+            "enter": 35
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_depth_push_long",
+      "title": "Typewriter 3D Depth Push (long)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase"
+      ],
+      "unit": "glyph",
+      "enter": 96,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "position_z",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 380.0
+            },
+            {
+              "frame": 56,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "rotation_x",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 13.0
+            },
+            {
+              "frame": 56,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 9,
+            "enter": 96
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_z_bounce_short",
+      "title": "Typewriter 3D Z Bounce (short)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase",
+        "short_phrase"
+      ],
+      "unit": "glyph",
+      "enter": 48,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "position_z",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 330.0
+            },
+            {
+              "frame": 30,
+              "value": -26.0
+            },
+            {
+              "frame": 48,
+              "value": 0.0
+            }
+          ],
+          "easing": "out_cubic"
+        },
+        {
+          "property": "scale",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.94
+            },
+            {
+              "frame": 30,
+              "value": 1.04
+            },
+            {
+              "frame": 48,
+              "value": 1.0
+            }
+          ],
+          "easing": "out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 7,
+            "enter": 32
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_card_swing_long",
+      "title": "Typewriter 3D Card Swing (long)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase"
+      ],
+      "unit": "glyph",
+      "enter": 80,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 40.0
+            },
+            {
+              "frame": 34,
+              "value": -7.0
+            },
+            {
+              "frame": 58,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_z",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 210.0
+            },
+            {
+              "frame": 58,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 10,
+            "enter": 80
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_dolly_settle_long",
+      "title": "Typewriter 3D Dolly Settle (long)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase"
+      ],
+      "unit": "glyph",
+      "enter": 97,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "position_z",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 240.0
+            },
+            {
+              "frame": 54,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": -34.0
+            },
+            {
+              "frame": 54,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 10,
+            "enter": 97
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_orbit_short",
+      "title": "Typewriter 3D Orbit (short)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase",
+        "short_phrase"
+      ],
+      "unit": "glyph",
+      "enter": 52,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": -32.0
+            },
+            {
+              "frame": 24,
+              "value": 7.0
+            },
+            {
+              "frame": 52,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_x",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": -46.0
+            },
+            {
+              "frame": 52,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 8,
+            "enter": 40
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_hero_pull_short",
+      "title": "Typewriter 3D Hero Pull (short)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase",
+        "short_phrase"
+      ],
+      "unit": "glyph",
+      "enter": 46,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "scale",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 1.18
+            },
+            {
+              "frame": 46,
+              "value": 1.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_z",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": -130.0
+            },
+            {
+              "frame": 46,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 7,
+            "enter": 30
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_spin_in_long",
+      "title": "Typewriter 3D Spin In (long)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase"
+      ],
+      "unit": "glyph",
+      "enter": 66,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 118.0
+            },
+            {
+              "frame": 54,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_z",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 240.0
+            },
+            {
+              "frame": 54,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 8,
+            "enter": 66
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_parallax_split_short",
+      "title": "Typewriter 3D Parallax Split (short)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase",
+        "short_phrase"
+      ],
+      "unit": "glyph",
+      "enter": 48,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": -18.0
+            },
+            {
+              "frame": 48,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 8,
+            "enter": 33
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_camera_rise_long",
+      "title": "Typewriter 3D Camera Rise (long)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase"
+      ],
+      "unit": "glyph",
+      "enter": 85,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_x",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 9.0
+            },
+            {
+              "frame": 52,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 26.0
+            },
+            {
+              "frame": 52,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 10,
+            "enter": 85
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_camera_whip_short",
+      "title": "Typewriter 3D Camera Whip (short)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase",
+        "short_phrase"
+      ],
+      "unit": "glyph",
+      "enter": 44,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": -24.0
+            },
+            {
+              "frame": 44,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_x",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 90.0
+            },
+            {
+              "frame": 44,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 7,
+            "enter": 38
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
+    },
+    {
+      "id": "typewriter3d_iso_slide_long",
+      "title": "Typewriter 3D Iso Slide (long)",
+      "category": "typewriter_phrase_v1",
+      "targets": [
+        "text",
+        "phrase"
+      ],
+      "unit": "glyph",
+      "enter": 87,
+      "exit": 14,
+      "tracks": [
+        {
+          "property": "rotation_y",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 26.0
+            },
+            {
+              "frame": 50,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "rotation_x",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 11.0
+            },
+            {
+              "frame": 50,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "position_x",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 64.0
+            },
+            {
+              "frame": 50,
+              "value": 0.0
+            }
+          ],
+          "easing": "in_out_cubic"
+        },
+        {
+          "property": "opacity",
+          "keyframes": [
+            {
+              "frame": 0,
+              "value": 0.0
+            },
+            {
+              "frame": 16,
+              "value": 1.0
+            }
+          ],
+          "easing": "linear"
+        }
+      ],
+      "text_animators": [
+        {
+          "id": "typing",
+          "selector": {
+            "kind": "glyph",
+            "shape": "square",
+            "order": "forward",
+            "stagger": 1,
+            "pace": "linear",
+            "delay": 9,
+            "enter": 87
+          },
+          "properties": [
+            {
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0.0
+                },
+                {
+                  "frame": 1,
+                  "value": 0.0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "render_safe": true,
+      "requires_3d": true,
+      "requires_camera": true
     }
   ],
   "overlay_presets": {

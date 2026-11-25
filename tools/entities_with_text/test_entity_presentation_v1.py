@@ -63,6 +63,26 @@ class EntityPresentationCatalogTests(unittest.TestCase):
             self.assertTrue(family["render_safe"])
             self.assertEqual(family["duration_bounds"], {"minimum_frames": 24, "maximum_frames": 240})
 
+    def test_typewriter_families_type_per_glyph(self):
+        """A typewriter card must actually type, not only fade its whole layer."""
+        for family_id in ("metric_typewriter_v1", "date_typewriter_v1"):
+            for preset in self.families[family_id]["presets"]:
+                with self.subTest(preset=preset["id"]):
+                    animators = preset.get("text_animators")
+                    self.assertTrue(animators, "typewriter preset needs a per-glyph animator")
+                    self.assertEqual(len(animators), 1)
+                    selector = animators[0]["selector"]
+                    self.assertEqual(selector["kind"], "glyph")
+                    self.assertGreater(selector["stagger"], 0)
+                    self.assertEqual(animators[0]["properties"][0]["property"], "opacity")
+                    self.assertTrue(preset["tracks"], "the card entrance tracks must remain authored")
+        for family_id, family in self.families.items():
+            if family_id in ("metric_typewriter_v1", "date_typewriter_v1"):
+                continue
+            for preset in family["presets"]:
+                with self.subTest(preset=preset["id"]):
+                    self.assertNotIn("text_animators", preset)
+
     def test_metric_and_date_presets_have_distinct_motion_signatures(self):
         for family_id in ("metric_v1", "date_v1"):
             signatures = []

@@ -78,6 +78,23 @@ void everySceneRoundTripsToARenderPlan() {
                 return !layer.transform_samples.empty();
             });
         check(hasResolvedSamples, "lowering materializes resolved transform samples");
+        // A map animation must not finish in the first half of the clip and leave
+        // a static tail. Every style needs at least one layer whose last sample
+        // is in the final 10% of the frame window and differs from its first.
+        bool lateMotion = false;
+        for (const auto& layer : plan.layers) {
+            if (layer.transform_samples.size() < 2) continue;
+            const auto& first = layer.transform_samples.front();
+            const auto& last = layer.transform_samples.back();
+            if (last.frame < static_cast<double>(spec.frameCount - 1) * 0.9) continue;
+            if (first.opacity != last.opacity || first.scale != last.scale ||
+                first.position != last.position) {
+                lateMotion = true;
+                break;
+            }
+        }
+        check(lateMotion,
+              "every editorial style keeps a layer animating through the final 10% of the clip");
         bool fadingTextReachesVisibility = false;
         for (const auto& layer : plan.layers) {
             if (layer.type != chronon3d::render_plan::LayerType::Text) continue;

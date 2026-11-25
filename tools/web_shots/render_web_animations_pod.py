@@ -1,6 +1,6 @@
-"""The web-animation pod: all 31 recipes at 1920x1080, verified and uploaded.
+"""The web-animation pod: all 27 recipes at 1920x1080, verified and uploaded.
 
-The 26 reference rebuilds already have verified native MP4s in
+The 22 reference rebuilds already have verified native MP4s in
 ``artifacts/web_shots_folder_recreated_native_v1``. This pod reuses those,
 renders the missing shot 07 and the five ``next_*`` recipes through
 the Python kit, verifies every clip with ffprobe, writes one manifest and a
@@ -194,7 +194,7 @@ def main(argv=None) -> int:
     parser.add_argument("--force", action="store_true",
                         help="re-render/re-copy existing clips")
     parser.add_argument("--no-reuse-native", action="store_true",
-                        help="render all 31 with Pillow instead of reusing the 25 native clips")
+                        help="render all 27 with Pillow instead of reusing the 21 native clips")
     parser.add_argument("--skip-upload", action="store_true", help="never touch Drive")
     parser.add_argument("--upload-only", action="store_true",
                         help="verify + upload the MP4s already in --out")

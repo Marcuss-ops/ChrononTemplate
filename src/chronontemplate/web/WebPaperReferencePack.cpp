@@ -75,15 +75,17 @@ void tracks(Json& layer, Json value) {
     layer["animation"] = Json{{"tracks", std::move(value)}};
 }
 
-/// Shape layers use a center relative to the canvas origin, exactly like image
-/// layers. `rect`/`ellipse` build the absolute center with wirePos, so shift it
-/// back; full-frame screen-space plates already sit at [0,0] and are left alone.
+/// Shapes share the text layer's absolute top-down space. `rect`/`ellipse`
+/// already emit the absolute center X and a bottom-up Y through wirePos, so
+/// only Y needs converting. The old pass also removed the canvas centre from
+/// both axes; the renderer read that as absolute, parking shadows and
+/// watermark boxes in the top-left corner. Full-frame screen-space plates
+/// already sit at [0,0] and are left alone.
 Json shiftShape(Json layer) {
     if (layer.value("screen_space", false)) return layer;
     if (layer.contains("position") && layer["position"].is_array() &&
         layer["position"].size() >= 2) {
-        layer["position"][0] = layer["position"][0].get<float>() - 960.f;
-        layer["position"][1] = layer["position"][1].get<float>() - 540.f;
+        layer["position"][1] = 1080.f - layer["position"][1].get<float>();
     }
     return layer;
 }
@@ -101,8 +103,17 @@ Json marker(const std::string& id, const std::string& file, float left, float to
             float width, float height, int begin, int span, int duration) {
     Json band = image(id, asset(file.c_str()), left, top, width, height, duration);
     tracks(band, sweepTracks(width, begin, span));
+    // The marker image is composited over the sharp text plate on this backend.
+    // Keep the band translucent so the ink stays readable while it sweeps.
+    for (Json& track : band["animation"]["tracks"]) {
+        if (track.value("property", std::string{}) != "opacity") continue;
+        for (Json& key : track["keyframes"]) {
+            key["value"] = key["value"].get<float>() * 0.38f;
+        }
+    }
     return band;
 }
+
 
 /// The 2.5D pose is baked into the page plate: image-layer rotation is not
 /// applied by the executor, while the transform still shows real perspective.
@@ -133,8 +144,8 @@ Json liftAbove(Json plan, const std::string& id, float z = -0.8f) {
 Json sWatermark(int duration, float left = 1756.f, float top = 26.f) {
     Json box = panel("archive_watermark_box", left, top, 76, 76, kPaper, 0.40f,
                      duration);
-    Json mark = textLayer("archive_watermark_s", "S", left + 38.f, top + 38.f, 30,
-                          kFontBold, kWatermark, duration, 0.f, -1, 0.82f, "mm");
+    Json mark = image("archive_watermark_s", asset("watermark_s.png"), left, top,
+                      76, 76, duration);
     return Json::array({box, mark});
 }
 
@@ -206,7 +217,10 @@ Json buildBlurredEvidence(int D) {
 // ── 4. Archival collage with the Golden Gate photograph ─────────────────────
 Json buildBridgeCollage(int D) {
     Json layers = Json::array();
-    Json bg = image("collage_background", asset("collage_bg.png"), 0, 0, 1920, 1080, D);
+    // The two title lines are baked into the plate: the camera-path text and
+    // image passes both offset these runs past the right edge, while a
+    // full-frame plate keeps the authored left edge exactly.
+    Json bg = image("collage_background", asset("collage_bg_titled.png"), 0, 0, 1920, 1080, D);
     tracks(bg, Json::array({
         twoKeyTrack("scale", 1.035f, 1.f, D, "in_out_cubic"),
         twoKeyTrack("position_y", 6.f, 0.f, D, "in_out_cubic")}));
@@ -219,42 +233,12 @@ Json buildBridgeCollage(int D) {
     tracks(left, Json::array({fadeTrack(D, 4, 14)}));
     layers.push_back(std::move(left));
 
-    // Left-aligned with the photo's left edge, larger and darker than before.
-    Json title_1 = textLayer("collage_title_1", "Giants drafted Barry Bonds", 496, 85,
-                             76, kFontPlayfairBold, "#111111", D, 0.f, -1, 1.f, "la");
-    tracks(title_1, Json::array({fadeTrack(D, 0, 18),
-                                 moveTrack("position_y", 10.f, 0.f, D, 0, 18,
-                                           "out_cubic")}));
-    layers.push_back(std::move(title_1));
-    Json title_2 = textLayer("collage_title_2", "but didn't sign him", 496, 169,
-                             76, kFontPlayfairBold, "#111111", D, 0.f, -1, 1.f, "la");
-    tracks(title_2, Json::array({fadeTrack(D, 3, 18),
-                                 moveTrack("position_y", 10.f, 0.f, D, 3, 18,
-                                           "out_cubic")}));
-    layers.push_back(std::move(title_2));
-
     const Json rise = moveTrack("position_y", 24.f, 0.f, D, 10, 28, "out_cubic");
     const Json reveal = fadeTrack(D, 8, 20);
-
-    Json shadow = panel("photo_shadow", 518, 350, 1024, 616, "#000000", 0.36f, D);
-    tracks(shadow, Json::array({rise, reveal}));
-    layers.push_back(std::move(shadow));
-
-    Json border = panel("photo_border", 486, 318, 1044, 636, "#080808", 1.f, D);
-    tracks(border, Json::array({rise, reveal}));
-    layers.push_back(std::move(border));
 
     Json photo = image("golden_gate_photo", asset("bridge_bw.png"), 496, 328, 1024, 616, D);
     tracks(photo, Json::array({rise, reveal}));
     layers.push_back(std::move(photo));
-
-    Json mlb_box = panel("mlb_box", 408, 371, 112, 58, "#080808", 1.f, D);
-    tracks(mlb_box, Json::array({rise, reveal}));
-    layers.push_back(std::move(mlb_box));
-    Json mlb = textLayer("mlb_text", "MLB", 464, 400, 26, kFontBold, "#F4F3EF", D,
-                         0.f, -1, 1.f, "mm");
-    tracks(mlb, Json::array({rise, reveal}));
-    layers.push_back(std::move(mlb));
 
     for (const Json& layer : sWatermark(D)) layers.push_back(layer);
     return renderPlan("web_ref_bridge_collage_v1", D, layers, staticCamera());

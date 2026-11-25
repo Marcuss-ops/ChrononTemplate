@@ -1,4 +1,4 @@
-// The native web-shot contract: 26 rebuild plans plus five reusable recipes,
+// The native web-shot contract: 22 rebuild plans plus five reusable recipes,
 // all pure RenderPlan V3 documents in the current web contract.
 //
 // This test pins the parts that used to drift: full-bleed paper is a
@@ -58,6 +58,12 @@ namespace {
         }
     }
 
+    const json* findLayer(const json& plan, const std::string& id) {
+        for (const auto& layer : plan.at("layers"))
+            if (layer.value("id", std::string{}) == id) return &layer;
+        return nullptr;
+    }
+
     void checksLayerContract(const json& plan) {
         std::set<std::string> ids;
         bool hasText = false;
@@ -88,9 +94,9 @@ namespace {
     }
 
     void checksRebuild() {
-        section("web shots rebuild 26");
+        section("web shots rebuild 22");
         const std::vector<WebShotId> ids = allWebShotIds();
-        check(ids.size() == 26, "all 26 reference shots are registered");
+        check(ids.size() == 22, "all 22 reference shots are registered");
 
         std::set<std::string> names;
         for (const WebShotId id : ids) {
@@ -107,6 +113,28 @@ namespace {
                   "the output stem follows the stable shot name");
             check(buildWebShotPlan(spec).dump() == plan.dump(),
                   "the emitted plan is deterministic");
+        }
+
+        // V4-006: shapes and text share absolute top-down coordinates. The
+        // old flatten pass centred only the shapes, mirroring banners/markers
+        // to the top while the headline stayed put.
+        WebShotSpec alexisSpec;
+        alexisSpec.id = WebShotId::AlexisArquette;
+        alexisSpec.durationFrames = 90;
+        alexisSpec.fps = 30;
+        const json alexis = buildWebShotPlan(alexisSpec);
+        const json* banner = findLayer(alexis, "banner");
+        const json* marker = findLayer(alexis, "m");
+        const json* headline = findLayer(alexis, "h2");
+        check(banner && marker && headline, "Alexis keeps banner, marker and headline layers");
+        if (banner && marker && headline) {
+            const float bannerY = banner->at("position")[1].get<float>();
+            const float headlineY = headline->at("position")[1].get<float>();
+            const float markerY = marker->at("position")[1].get<float>();
+            check(bannerY > 700.f, "the yellow banner stays in the lower page");
+            check(bannerY > headlineY + 300.f, "the banner sits well below the headline");
+            check(std::abs(markerY - headlineY) < 40.f,
+                  "the marker shares the headline row instead of mirroring it");
         }
     }
 

@@ -1,6 +1,6 @@
 // ChrononTemplate — Web Shots Rebuild v1 (C++ base).
 //
-// Port nativo dei 26 shot Python in tools/web_shots/ (groups A-E +
+// Port nativo dei 22 shot Python in tools/web_shots/ (groups A-E +
 // web_shot_kit.py) come dati RenderPlan V3 puri.
 // Ogni shot e' una funzione pura dello spec: nessun Pillow, nessun browser,
 // nessuno screenshot caricato come asset. Chronon3D rasterizza, questo pack
@@ -18,7 +18,7 @@
 //   B: 03 alexis, 04 corll, 05 economy, 06 thug, 11 acoustic_kitty
 //   C: 12 sabotage, 13 foia, 14 vw, 15 cnbc tilt, 16 nbc tilt
 //   D: 17 guardian tilt, 18 ftx tweet, 19 nyt crazy, 20 indictment tilt, 21 seoul
-//   E: 22 ivie, 23 blackvault, 24 bigfoot, 25 pizza sauce, 26 pizza hut, 27 toi, 28 amodei
+//   E: 22 ivie, 23 blackvault, 24 bigfoot
 #ifndef CHRONONTEMPLATE_WEB_SHOTS_REBUILD_PACK_HPP
 #define CHRONONTEMPLATE_WEB_SHOTS_REBUILD_PACK_HPP
 
@@ -50,11 +50,7 @@ enum class WebShotId : unsigned char {
     GuardianSeoulMissiles,// 21
     IvieFacebook,         // 22
     BlackVaultFoia,       // 23
-    BigFootPizza,         // 24
-    PizzaSauceCaption,    // 25
-    PizzaHutPerception,   // 26
-    TimesOfIndiaCoxon,    // 27
-    AmodeiPaceFrontier    // 28
+    BigFootPizza          // 24
 };
 
 [[nodiscard]] const char* webShotName(WebShotId id);

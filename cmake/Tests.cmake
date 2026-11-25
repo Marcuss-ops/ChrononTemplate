@@ -172,28 +172,6 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_include_directories(chronontemplate_elements_web_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_elements_web_test COMMAND chronontemplate_elements_web_test)
 
-    # The native web-page family: theme inversion, blur on context text only,
-    # the sharp important center phrase, and fail-closed spec defects.
-    add_executable(chronontemplate_web_page_highlight_pack_test tests/web_page_highlight_pack.cpp)
-    target_link_libraries(chronontemplate_web_page_highlight_pack_test PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_web_page_highlight_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    add_test(NAME chronontemplate_web_page_highlight_pack_test COMMAND chronontemplate_web_page_highlight_pack_test)
-
-    # The headline highlighter looks: statement page, marker sweep and stepped
-    # highlight, one pure plan per recipe with a mid-clip sweep.
-    add_executable(chronontemplate_web_headline_highlight_pack_test tests/web_headline_highlight_pack.cpp)
-    target_link_libraries(chronontemplate_web_headline_highlight_pack_test PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_web_headline_highlight_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    target_compile_definitions(chronontemplate_web_headline_highlight_pack_test PRIVATE
-        CHRONONTEMPLATE_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
-    add_test(NAME chronontemplate_web_headline_highlight_pack_test COMMAND chronontemplate_web_headline_highlight_pack_test)
-    # Plan font refs are workspace-relative (for example
-    # ChrononTemplate/assets/fonts/...), so this test must run at the workspace
-    # root; otherwise the pack falls back to estimateWidth while the assertion
-    # measures the real font.
-    set_tests_properties(chronontemplate_web_headline_highlight_pack_test PROPERTIES
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/..")
-
     # Modern documentary: five native V3 looks. Asserts multiply highlighter
     # ordering, rack-focus travel, glitch/mesh/chroma pairing, particle depth,
     # kinetic whip and VHS carousel, plus fail-closed spec defects.
@@ -214,10 +192,6 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     set_tests_properties(chronontemplate_documentary_parity_test PROPERTIES
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
-    add_executable(chronontemplate_web_text_layout_test tests/web_text_layout.cpp)
-    target_link_libraries(chronontemplate_web_text_layout_test PRIVATE chronontemplate)
-    add_test(NAME chronontemplate_web_text_layout_test COMMAND chronontemplate_web_text_layout_test)
-
     # Second generation: six plans build, fold rotation stays in radians
     # (V1 authored degrees and killed video exports), recipes differ.
     add_executable(chronontemplate_web_page_v2_pack_test tests/web_page_v2_pack.cpp)
@@ -231,13 +205,6 @@ if(CHRONONTEMPLATE_BUILD_TESTS)
     target_link_libraries(chronontemplate_web_shots_pack_test PRIVATE chronontemplate)
     target_include_directories(chronontemplate_web_shots_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     add_test(NAME chronontemplate_web_shots_pack_test COMMAND chronontemplate_web_shots_pack_test)
-
-    # Six new web-animation grammars in the Motion Lab pack: stable identities,
-    # 6 s default, 10 s ceiling, deterministic plans and fail-closed specs.
-    add_executable(chronontemplate_web_motion_lab_pack_test tests/web_motion_lab_pack.cpp)
-    target_link_libraries(chronontemplate_web_motion_lab_pack_test PRIVATE chronontemplate)
-    target_include_directories(chronontemplate_web_motion_lab_pack_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
-    add_test(NAME chronontemplate_web_motion_lab_pack_test COMMAND chronontemplate_web_motion_lab_pack_test)
 
     # Five supplied paper/web reference frames: stable IDs, V3 envelope,
     # deterministic plans, the multiply highlighter and fail-closed specs.

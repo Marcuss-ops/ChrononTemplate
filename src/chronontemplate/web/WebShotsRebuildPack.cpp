@@ -1,4 +1,4 @@
-// ChrononTemplate web.WebShotsRebuildPack — port C++ fedele dei 26 shot Python.
+// ChrononTemplate web.WebShotsRebuildPack — port C++ fedele dei 22 shot Python.
 //
 // Origine: tools/web_shots/shots_group_{a,b,c,d,e}.py + web_shot_kit.py
 // Ogni shot replica back()/front()/anim() come layer RenderPlan V3:
@@ -68,10 +68,6 @@ CameraMove cameraMove(WebShotId id) {
     case WebShotId::IvieFacebook:          return {1.02,.50,.50, 1.07,.48,.52};
     case WebShotId::BlackVaultFoia:        return {1.03,.50,.50, 1.08,.47,.51};
     case WebShotId::BigFootPizza:          return {1.02,.50,.52, 1.06,.52,.50};
-    case WebShotId::PizzaSauceCaption:     return {1.00,.50,.50, 1.05,.50,.50};
-    case WebShotId::PizzaHutPerception:    return {1.02,.50,.50, 1.07,.48,.52};
-    case WebShotId::TimesOfIndiaCoxon:     return {1.00,.50,.50, 1.045,.50,.48};
-    case WebShotId::AmodeiPaceFrontier:    return {1.00,.50,.50, 1.04,.51,.49};
     }
     return {1.00,.50,.50, 1.035,.50,.50};
 }
@@ -133,8 +129,6 @@ void buildLayers(WebShotId id, Json& L, int D) {
         L.push_back(image("plate","ChrononTemplate/assets/images/investigative_journalist_blurred_bg.png",0,0,1920,1080,D));
         Json tone = rect("tone",0,0,1920,1080,"#80685B",0.24f,Json::array(),D);
         shot::modules::DocumentLayer::finish(tone, 0.014f, 31, 0.18f); L.push_back(std::move(tone));
-        L.push_back(textLayer("pre","Records later revealed that",-600,430,48,kRegular,"#F1EEE9",D));
-        L.push_back(textLayer("pre2","before",1300,430,48,kRegular,"#F1EEE9",D));
         L.push_back(modules::TextHighlight::layer("m", 133, 453, 1554, 56, "#8F7313", 0.78f, 4, 36, D));
         L.push_back(textLayer("hl","Ford secretly crash-tested the Pinto more than forty times",-5,442,55,kRegular,"#F1D923",D));
         L.push_back(textLayer("post","the fuel tank ruptured in every test performed at speeds over twenty-five miles per hour.",-169,533,47,kRegular,"#EEEAE5",D));
@@ -292,7 +286,6 @@ void buildLayers(WebShotId id, Json& L, int D) {
         shot::modules::DocumentLayer::finish(bg, 0.014f, 1212, 0.30f); L.push_back(std::move(bg));
         L.push_back(textLayer("d1","was written during active wartime, the",-140,210,130,kPlayfair,"#6B6156",D));
         L.push_back(textLayer("d2","gestions for causing physical violence",-140,370,130,kPlayfair,"#4E4841",D));
-        L.push_back(rect("halo",-140,530,1600,130,"#F2CD52",0.35f,Json::array(),D));
         L.push_back(textLayer("glow","ting fires, flooding warehouses, break",-140,530,130,kPlayfair,"#F5D24A",D,0,1));
         L.push_back(textLayer("d3","s many suggestions for how to just get",-140,690,130,kPlayfair,"#4E4841",D));
         L.push_back(textLayer("d4","ithin a bureaucracy or office setting.",-140,850,130,kPlayfair,"#6B6156",D));
@@ -347,10 +340,6 @@ void buildLayers(WebShotId id, Json& L, int D) {
         L.push_back(modules::HeadlineComposition::line("h2","billionaire wants to give his",960,500,122,kPlayfair,"#1B1B1D",D,"ma"));
         L.push_back(modules::HeadlineComposition::line("h3","fortune away",960,660,122,kPlayfair,"#1B1B1D",D,"ma"));
         L.push_back(textLayer("deck","Sam Bankman-Fried is worth $26 billion, but he drives a Toyota Corolla, sleeps on a beanbag and has a Robin Hood-like philosophy.",960,900,40,kSerifIt,"#6C6B68",D,0,-1,1.f,"ma"));
-        // Letterbox + chyron. The old transparent tilt frame carried a 3D
-        // rotation after the 2D flatten and was rejected by the renderer.
-        L.push_back(rect("bar_top",0,0,1920,128,"#080809",1.f,Json::array(),D));
-        L.push_back(rect("bar_bot",0,984,1920,96,"#080809",1.f,Json::array(),D));
         L.push_back(textLayer("chy","HE DECIDED THAT",960,1030,42,kOswaldBold,"#E8871E",D,0,-1,1.f,"mm"));
         break; }
     case WebShotId::NbcSwindled8b: {
@@ -526,95 +515,6 @@ void buildLayers(WebShotId id, Json& L, int D) {
         L.push_back(textLayer("l3b",l3b,xL3b,617,40,kRegular,"#141414",D));
         L.push_back(textLayer("l4",l4,130,678,40,kRegular,"#141414",D));
         break; }
-    case WebShotId::PizzaSauceCaption: {
-        Json bg = rect("bg",0,0,1920,1080,"#131110",1.f,Json::array(),D);
-        shot::modules::DocumentLayer::finish(bg, 0.016f, 25, 0.34f); L.push_back(std::move(bg));
-        L.push_back(ellipse("pizza1",240,-180,1520,1240,"#2B241E",1.f,D));
-        L.push_back(ellipse("pizza2",360,-60,1290,1010,"#221C17",1.f,D));
-        for (int i = 0; i < 5; ++i)
-            L.push_back(ellipse("pep"+std::to_string(i),400+229*i%1050,20+317*i%760,130,100,"#3B322A",0.8f,D));
-        L.push_back(modules::TextHighlight::layer("cap", 80, 492, 1760, 148, "#F7F7F5", 1.f, 11, 43, D));
-        L.push_back(textLayer("hl","When they started changing the sauce, it went downhill.",960,566,52,kRegular,"#101010",D,0,0,1.f,"mm"));
-        break; }
-    case WebShotId::PizzaHutPerception: {
-        Json bg = rect("paper",0,0,1920,1080,"#FDFCFA",1.f,Json::array(),D);
-        shot::modules::DocumentLayer::finish(bg, 0.008f, 2626, 0.12f); L.push_back(std::move(bg));
-        L.push_back(textLayer("l0",") of Pizza Hut's U.S., speaking at Yum's investor day",150,15,48,kSerif,"#1A1A1A",D,2.5f,0));
-        L.push_back(textLayer("l1","Wednesday, said he is “dissatisfied” with Pizza Hut's growth, telling investors",150,87,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("l2","that the brand has “a lot of work to do.”",150,158,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("hl1","The biggest problem that Pizza Hut is facing is perception, Starrs said,",150,345,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("hl2","explaining that many of its customers don't associate Pizza Hut with delivery.",150,425,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("l5","Most people think about ordering a pizza and carrying it out, or sitting down a",150,504,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("l6","table and having a server bring a meal. Starrs said the facade of its locations",150,584,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("l7","reinforces this idea and isn't helping to lure in diners.",150,663,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("hl5","“When you drive by the location, it doesn't scream ‘we deliver.’” Starrs said.",150,792,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("l9","Pizza Hut has only recently getting into the delivery game. Today, 55 percent",150,915,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("l10","of Pizza Hut's sales in the U.S. come from digital orders and only 10 percent of",150,995,48,kSerif,"#1A1A1A",D));
-        L.push_back(textLayer("l11","sales stem from diners coming into the chain and dining in. Going forward",150,1073,48,kSerif,"#1A1A1A",D));
-        const float w1 = measuredTextWidth("The biggest problem that Pizza Hut is facing is perception, Starrs said,", 48.f, kSerif) + 12.f;
-        const float w2 = measuredTextWidth("explaining that many of its customers don't associate Pizza Hut with delivery.", 48.f, kSerif) + 12.f;
-        const float m3x = 150.f + measuredTextWidth("table and having a server bring a meal. Starrs said the ", 48.f, kSerif) - 6.f;
-        const float w3 = measuredTextWidth("facade of its locations", 48.f, kSerif) + 12.f;
-        const float w4 = measuredTextWidth("reinforces this idea and isn't helping to lure in diners.", 48.f, kSerif) + 12.f;
-        const float w5 = measuredTextWidth("“When you drive by the location, it doesn't scream ‘we deliver.’” Starrs said.", 48.f, kSerif) + 12.f;
-        L.push_back(modules::TextHighlight::layer("m1", 144, 352, w1, 62, "#F2C500", 0.95f, 7, 33, D));
-        L.push_back(modules::TextHighlight::layer("m2", 144, 432, w2, 62, "#F2C500", 0.95f, 7, 33, D));
-        L.push_back(modules::TextHighlight::layer("m3", m3x, 591, w3, 62, "#F2C500", 0.95f, 25, 33, D));
-        L.push_back(modules::TextHighlight::layer("m4", 144, 670, w4, 62, "#F2C500", 0.95f, 25, 33, D));
-        L.push_back(modules::TextHighlight::layer("m5", 144, 799, w5, 62, "#F2C500", 0.95f, 43, 34, D));
-        break; }
-    case WebShotId::TimesOfIndiaCoxon: {
-        Json bg = rect("bg",0,0,1920,1080,"#0D0D0C",1.f,Json::array(),D);
-        shot::modules::DocumentLayer::finish(bg, 0.012f, 2727, 0.30f); L.push_back(std::move(bg));
-        L.push_back(textLayer("mast_g1","THE TIMES OF INDIA",956,140,88,kPlayfairBold,"#C0708A",D,0,-1,0.55f,"ma"));
-        L.push_back(textLayer("mast_g2","THE TIMES OF INDIA",964,144,88,kPlayfairBold,"#C0708A",D,0,-1,0.55f,"ma"));
-        L.push_back(textLayer("mast_g3","THE TIMES OF INDIA",960,142,88,kPlayfairBold,"#C0708A",D,0,-1,0.35f,"ma"));
-        L.push_back(textLayer("mast","THE TIMES OF INDIA",960,142,88,kPlayfairBold,"#F2E8EA",D,0,0,1.f,"ma"));
-        L.push_back(textLayer("crumb","News  ·  Education News  ·  News",960,330,28,kMed,"#2E8B8B",D,0,-1,1.f,"ma",1.0f));
-        L.push_back(rect("box1", 250, 398, 1680, 96, "#F5F0EE", 0.96f, Json::array(), D));
-        L.back()["_v4_highlight"] = true;
-        L.push_back(rect("box2", 650, 492, 650, 96, "#F5F0EE", 0.96f, Json::array(), D));
-        L.back()["_v4_highlight"] = true;
-        L.push_back(textLayer("who","Who is",48,415,62,kPlayfairBold,"#7A7A7A",D));
-        L.push_back(textLayer("hl1","Jacob Coxon, the ex-Anthropic researcher warning",290,419,50,kPlayfairBold,"#5B1E2B",D));
-        L.push_back(textLayer("hl2","AI could kill us all?",690,514,50,kPlayfairBold,"#5B1E2B",D));
-        L.push_back(textLayer("p1","A young researcher named Jacob Coxon resigned from Anthropic after working at OpenAI. He warned that artificial",960,645,27,kRegular,"#6E6E6E",D,0,-1,1.f,"ma"));
-        L.push_back(textLayer("p2","intelligence could end humanity by the decade's end. Coxon's concerns emerged after AI models demonstrated concerning",960,695,27,kRegular,"#6E6E6E",D,0,-1,1.f,"ma"));
-        L.push_back(textLayer("p3","capabilities and escaped testing environments. His public declaration amplified private debates within leading AI",960,745,27,kRegular,"#6E6E6E",D,0,-1,1.f,"ma"));
-        L.push_back(textLayer("src","TOI Education",30,795,26,kRegular,"#6E6E6E",D));
-        L.push_back(textLayer("date","Sep 19, 2026, 15:11 IST",1890,795,26,kRegular,"#6E6E6E",D,0,-1,1.f,"ra"));
-        L.push_back(rect("photo",202,937,1515,143,"#7C8794",1.f,Json::array(),D));
-        L.push_back(ellipse("hill1",260,900,500,260,"#4E6B3A",0.9f,D));
-        L.push_back(ellipse("hill2",900,890,620,280,"#587742",0.9f,D));
-        L.push_back(rect("capbox",720,982,480,60,"#141414",0.92f,Json::array(),D));
-        L.push_back(textLayer("cap","alarm bells across the country.",960,998,26,kRegular,"#F2F2F2",D,0,-1,1.f,"ma"));
-        break; }
-    case WebShotId::AmodeiPaceFrontier: {
-        Json bg = rect("bg",0,0,1920,1080,"#0A0A09",1.f,Json::array(),D);
-        shot::modules::DocumentLayer::finish(bg, 0.010f, 2828, 0.30f); L.push_back(std::move(bg));
-        L.push_back(textLayer("back","←",142,55,40,kDeja,"#E7E9EA",D));
-        L.push_back(textLayer("post","Post",225,52,44,kBold,"#E7E9EA",D,0,0));
-        L.push_back(ellipse("av",127,187,115,115,"#8B8F94",1.f,D));
-        L.push_back(ellipse("av_h",157,205,55,62,"#3A3D41",1.f,D));
-        L.push_back(textLayer("name","Dario Amodei",270,192,40,kBold,"#E7E9EA",D));
-        L.push_back(ellipse("ver",575,202,40,40,"#1D9BF0",1.f,D));
-        L.push_back(rect("ai",638,200,46,42,"#E7E9EA",1.f,Json::array(),D));
-        L.push_back(textLayer("ai_t","AI",661,210,22,kBold,"#0A0A09",D,0,-1,1.f,"ma"));
-        L.push_back(textLayer("handle","@DarioAmodei",270,252,34,kRegular,"#71767B",D));
-        L.push_back(textLayer("dots","•••",1770,200,34,kDeja,"#E7E9EA",D));
-        float w1 = 1356.0f;
-        float w2 = 1278.0f;
-        L.push_back(modules::TextHighlight::layer("box1", 118, 352, w1+16, 62, "#F2F2F0", 0.96f, 11, 41, D));
-        L.push_back(modules::TextHighlight::layer("box2", 118, 417, w2+16, 62, "#F2F2F0", 0.96f, 50, 35, D));
-        L.push_back(textLayer("hl1","We Must Pace the Frontier: I’ve written a new essay on why the AI",125,360,44,kRegular,"#0E0F10",D));
-        L.push_back(textLayer("hl2","industry should slow down, with a three-part plan for doing so.",125,425,44,kRegular,"#0E0F10",D));
-        L.push_back(textLayer("b1","Anthropic is unilaterally committing to the first of these steps. We’ll",125,570,44,kRegular,"#E7E9EA",D));
-        L.push_back(textLayer("b2","provide third-party evaluators with permanent, employee-level access",125,645,44,kRegular,"#E7E9EA",D));
-        L.push_back(textLayer("b3","to our systems, so that they can verify adherence to our safety",125,720,44,kRegular,"#E7E9EA",D));
-        L.push_back(textLayer("b4","measures, report on incidents, and assess models’ alignment during",125,795,44,kRegular,"#E7E9EA",D));
-        L.push_back(textLayer("b5","training.",125,870,44,kRegular,"#E7E9EA",D));
-        L.push_back(textLayer("foot","You can read the full post here:",125,1005,52,kRegular,"#E7E9EA",D));
-        break; }
     }
 }
 
@@ -644,10 +544,6 @@ const char* webShotName(WebShotId id) {
         case WebShotId::IvieFacebook: return "22_ivie_facebook";
         case WebShotId::BlackVaultFoia: return "23_black_vault_foia";
         case WebShotId::BigFootPizza: return "24_big_foot_pizza";
-        case WebShotId::PizzaSauceCaption: return "25_pizza_sauce_caption";
-        case WebShotId::PizzaHutPerception: return "26_pizza_hut_perception";
-        case WebShotId::TimesOfIndiaCoxon: return "27_times_of_india_coxon";
-        case WebShotId::AmodeiPaceFrontier: return "28_amodei_pace_frontier";
     }
     return "unknown";
 }
@@ -675,10 +571,6 @@ const char* webShotSource(WebShotId id) {
         case WebShotId::IvieFacebook: return "Screenshot 2026-10-27 140914.png";
         case WebShotId::BlackVaultFoia: return "Screenshot 2026-10-27 141145.png";
         case WebShotId::BigFootPizza: return "Screenshot 2026-10-27 171823.png";
-        case WebShotId::PizzaSauceCaption: return "Screenshot 2026-10-27 171918.png";
-        case WebShotId::PizzaHutPerception: return "Screenshot 2026-10-27 172102.png";
-        case WebShotId::TimesOfIndiaCoxon: return "Screenshot 2026-10-28 at 08-42-33 Elon Musk & Dario's Final Warning - YouTube.png";
-        case WebShotId::AmodeiPaceFrontier: return "Screenshot 2026-10-28 at 08-42-54 Elon Musk & Dario's Final Warning - YouTube.png";
     }
     return "";
 }
@@ -706,10 +598,6 @@ const char* webShotDescription(WebShotId id) {
         case WebShotId::IvieFacebook: return "Light excerpt: Ivie reached out to mothers' groups on Facebook";
         case WebShotId::BlackVaultFoia: return "Serif zoom: Black Vault 5,000+ FOIA requests, two marker sweeps";
         case WebShotId::BigFootPizza: return "Wide excerpt: Pizza Hut 'The Big Foot' promo 1993, olive markers";
-        case WebShotId::PizzaSauceCaption: return "Dark blurred pizza close-up with white rough caption card";
-        case WebShotId::PizzaHutPerception: return "Serif article: Pizza Hut perception problem, yellow markers";
-        case WebShotId::TimesOfIndiaCoxon: return "TOI page on dark screen: Coxon AI warning in white boxes";
-        case WebShotId::AmodeiPaceFrontier: return "Dark-mode Amodei post: 'We Must Pace the Frontier'";
     }
     return "";
 }
@@ -721,9 +609,7 @@ std::vector<WebShotId> allWebShotIds() {
         WebShotId::FoiaFinkelZoom, WebShotId::Vw40Times, WebShotId::CnbcSbfTilt,
         WebShotId::NbcSwindled8b, WebShotId::GuardianBiggestFrauds, WebShotId::FtxTweetCard,
         WebShotId::NytLookCrazyZoom, WebShotId::IndictmentSummary, WebShotId::GuardianSeoulMissiles,
-        WebShotId::IvieFacebook, WebShotId::BlackVaultFoia, WebShotId::BigFootPizza,
-        WebShotId::PizzaSauceCaption, WebShotId::PizzaHutPerception,
-        WebShotId::TimesOfIndiaCoxon, WebShotId::AmodeiPaceFrontier};
+        WebShotId::IvieFacebook, WebShotId::BlackVaultFoia, WebShotId::BigFootPizza};
 }
 
 std::vector<std::string> webShotAnimationModules(WebShotId id) {
@@ -767,10 +653,14 @@ std::string WebShotSpec::outputStem() const {
 // Vulkan drops every 3D shape layer as soon as the plan carries a camera
 // (verified with an 8-colour probe: text survived, all shapes vanished). The
 // native path that actually draws shapes is screen-space 2D. Convert the
-// authored top-left/wire coordinates into the 2D renderer's centered,
+// authored top-left/wire coordinates into the 2D renderer's absolute,
 // y-down space and drop the camera; marker/keyframe tracks stay untouched.
+//
+// Shapes and text share the same absolute top-down space here. An earlier
+// version centred shape X and Y around the canvas; the 2D renderer read that
+// as absolute, so banners and markers were mirrored to the top of the frame
+// while text stayed in place.
 void flattenLayersTo2d(Json& layers) {
-    constexpr float canvasW = 1920.f;
     constexpr float canvasH = 1080.f;
     for (Json& layer : layers) {
         if (!layer.contains("position") || !layer["position"].is_array() ||
@@ -778,10 +668,7 @@ void flattenLayersTo2d(Json& layers) {
         const std::string type = layer.value("type", std::string{});
         const float x = layer["position"][0].get<float>();
         const float y = layer["position"][1].get<float>();
-        if (type == "shape") {
-            layer["position"] = Json::array({x - canvasW * 0.5f, canvasH * 0.5f - y});
-            layer["enable_3d"] = false;
-        } else if (type == "text") {
+        if (type == "shape" || type == "text") {
             layer["position"] = Json::array({x, canvasH - y});
             layer["enable_3d"] = false;
         } else if (type == "image") {

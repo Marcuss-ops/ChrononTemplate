@@ -62,7 +62,6 @@ GROUPS = [
                 "shots": [
                     "08_rainmaking_nyt",
                     "17_guardian_biggest_frauds",
-                    "27_times_of_india_coxon",
                 ],
             },
             {
@@ -72,7 +71,6 @@ GROUPS = [
                     "15_cnbcsbf_profile_tilt",
                     "16_nbc_swindled_8b",
                     "24_big_foot_pizza",
-                    "26_pizza_hut_perception",
                 ],
             },
         ],
@@ -115,7 +113,7 @@ GROUPS = [
             {
                 "id": "02_captions",
                 "label": "Captions",
-                "shots": ["25_pizza_sauce_caption", "next_caption_pop_card"],
+                "shots": ["next_caption_pop_card"],
             },
         ],
     },
@@ -129,7 +127,6 @@ GROUPS = [
                 "shots": [
                     "18_ftx_tweet_card",
                     "22_ivie_facebook",
-                    "28_amodei_pace_frontier",
                 ],
             }
         ],
@@ -207,10 +204,6 @@ SHOT_LABELS = {
     "22_ivie_facebook": "Ivie — Facebook post",
     "23_black_vault_foia": "Black Vault — FOIA archive",
     "24_big_foot_pizza": "Pizza Hut — Big Foot",
-    "25_pizza_sauce_caption": "Pizza sauce — caption",
-    "26_pizza_hut_perception": "Pizza Hut — perception",
-    "27_times_of_india_coxon": "Times of India — Coxon",
-    "28_amodei_pace_frontier": "Amodei — pace the frontier",
     "next_caption_pop_card": "Caption pop — recipe",
     "next_dual_marker_cross": "Dual marker — recipe",
     "next_glow_line_pulse": "Glow line — recipe",
@@ -241,10 +234,6 @@ LEGACY_GROUP = {
     "22_ivie_facebook": "E",
     "23_black_vault_foia": "E",
     "24_big_foot_pizza": "E",
-    "25_pizza_sauce_caption": "E",
-    "26_pizza_hut_perception": "E",
-    "27_times_of_india_coxon": "E",
-    "28_amodei_pace_frontier": "E",
     "next_caption_pop_card": "NEXT",
     "next_dual_marker_cross": "NEXT",
     "next_glow_line_pulse": "NEXT",

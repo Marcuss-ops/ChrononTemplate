@@ -1,14 +1,15 @@
 // ChrononTemplate — Web Pages V2 (Complete + Highlight 3D + Long Phrases Blurred).
 //
 // Second-generation native C++ web-page composition pack. Same six-variant
-// grammar as WebPageHighlightPack (three recipes · two themes) but with the
+// web-page grammar (three recipes · two themes) but with the
 // V1 defects fixed and the design reworked:
 //
 //   V1-001  per-glyph headline fold authored rotation in *degrees* (82.0)
 //           while the renderer reads text_animator rotation in *radians*:
 //           the tight producer surface exploded to ~248k px and every video
-//           export threw std::bad_alloc. V2 authors the fold in radians
-//           (kFoldMaxRad) and the test below pins |rotation| <= 3.0.
+//           export threw std::bad_alloc. V2 avoids per-glyph text animators
+//           entirely and uses a layer-level 3D tilt, which also avoids the
+//           cached-text-run bug that left the headline at opacity 0.
 //   V1-002  Complete and Highlight3D both folded the headline, so two of the
 //           three recipes looked identical. V2 Complete uses a soft editorial
 //           fade/rise; only Highlight3D (and the LongPhrase center) folds.

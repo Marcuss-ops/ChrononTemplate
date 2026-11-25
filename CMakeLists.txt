@@ -256,18 +256,12 @@ add_library(chronontemplate STATIC
         src/chronontemplate/short_phrases/animations/ScrollReveal.cpp
         # the packs a template author starts from
         src/chronontemplate/entities_with_text/YouTubeSubscribe.cpp
-        # the native web-page family: complete page + highlight 3D + blurred phrases
-        src/chronontemplate/web/WebPageHighlightPack.cpp
-        src/chronontemplate/web/WebHeadlineHighlightPack.cpp
         src/chronontemplate/web/DocumentaryReferenceStills.cpp
         src/chronontemplate/web/WebTextLayout.cpp
         src/chronontemplate/web/ArticleEvidenceReveal.cpp
         # web shots rebuild v1: port C++ dei 28 shot Python + 6 nuove recipe next
         src/chronontemplate/web/WebShotsRebuildPack.cpp
         src/chronontemplate/web/WebShotsNextPack.cpp
-        src/chronontemplate/web/MotionClassicsPack.cpp
-        # motion lab: sei nuove grammatiche web (aperture, flap, halftone, ink, parallax, glitch)
-        src/chronontemplate/web/WebMotionLabPack.cpp
         src/chronontemplate/web/WebFontMeasure.cpp
         # second generation: radians-safe fold, distinct recipes, reworked hierarchy
         src/chronontemplate/web/WebPageV2Pack.cpp
@@ -482,20 +476,6 @@ target_include_directories(chronontemplate_emit_web_article_fold PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_web_article_fold PRIVATE -Wall -Wextra)
 
-# The native web-page family: three recipes x two themes, all pure C++ V3
-# plans — no Pillow plate, no browser, no screenshot.
-add_executable(chronontemplate_emit_web_page_highlight
-        tools/web_presets/emit_web_page_highlight.cpp)
-target_link_libraries(chronontemplate_emit_web_page_highlight PRIVATE chronontemplate)
-target_compile_options(chronontemplate_emit_web_page_highlight PRIVATE -Wall -Wextra)
-
-# The headline highlighter looks (statement page, marker sweep, stepped
-# highlight) recreated from the supplied reference frames as native V3 plans.
-add_executable(chronontemplate_emit_web_headline_highlight
-        tools/web_presets/emit_web_headline_highlight.cpp)
-target_link_libraries(chronontemplate_emit_web_headline_highlight PRIVATE chronontemplate)
-target_compile_options(chronontemplate_emit_web_headline_highlight PRIVATE -Wall -Wextra)
-
 # Five supplied paper/web reference frames: LA Times 2.5D, torn strip, blurred
 # evidence, archival bridge collage and progressive book highlighter.
 add_executable(chronontemplate_emit_web_paper_reference
@@ -532,28 +512,6 @@ add_executable(chronontemplate_emit_web_shots_rebuild_v4
 target_link_libraries(chronontemplate_emit_web_shots_rebuild_v4 PRIVATE chronontemplate)
 target_compile_options(chronontemplate_emit_web_shots_rebuild_v4 PRIVATE -Wall -Wextra)
 
-# Twelve native web-motion classics: RenderPlan V3 built from Chronon primitives.
-add_executable(chronontemplate_emit_web_motion_classics
-        tools/web_shots/emit_web_motion_classics.cpp)
-target_link_libraries(chronontemplate_emit_web_motion_classics PRIVATE chronontemplate)
-target_compile_options(chronontemplate_emit_web_motion_classics PRIVATE -Wall -Wextra)
-
-# Six Web Motion Lab experiments: aperture scan, split flap, halftone dissolve,
-# ink bloom, parallax depth and slice glitch as native RenderPlan V3 plans.
-add_executable(chronontemplate_emit_web_motion_lab
-        tools/web_shots/emit_web_motion_lab.cpp)
-target_link_libraries(chronontemplate_emit_web_motion_lab PRIVATE chronontemplate)
-target_compile_options(chronontemplate_emit_web_motion_lab PRIVATE -Wall -Wextra)
-
-# Reference web phrase rebuilds are direct native render-plan V3 data. The
-# provided screenshots supply copy and composition references only.
-add_executable(chronontemplate_emit_reference_web_phrases
-        tools/web_presets/emit_reference_web_phrases.cpp)
-target_link_libraries(chronontemplate_emit_reference_web_phrases PRIVATE chronontemplate)
-target_include_directories(chronontemplate_emit_reference_web_phrases PRIVATE
-        "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
-target_compile_options(chronontemplate_emit_reference_web_phrases PRIVATE -Wall -Wextra)
-
 # Ten-photo NBA corkboard Fast Intro with native editable camera and note layers.
 add_executable(chronontemplate_emit_fast_intro_board_10
         tools/nba_rivalry/emit_fast_intro_board_10.cpp)
@@ -568,11 +526,6 @@ add_executable(chronontemplate_emit_investigation_board
 target_include_directories(chronontemplate_emit_investigation_board PRIVATE
         "${CHRONONTEMPLATE_NLOHMANN_JSON_DIR}")
 target_compile_options(chronontemplate_emit_investigation_board PRIVATE -Wall -Wextra)
-
-add_executable(chronontemplate_emit_web_classic_home
-        tools/web_presets/emit_web_classic_home.cpp)
-target_link_libraries(chronontemplate_emit_web_classic_home PRIVATE chronontemplate)
-target_compile_options(chronontemplate_emit_web_classic_home PRIVATE -Wall -Wextra)
 
 add_executable(chronontemplate_emit_classic_web_pages
         tools/web_presets/emit_classic_web_pages.cpp)

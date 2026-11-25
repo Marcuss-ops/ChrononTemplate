@@ -1,9 +1,9 @@
 // ChrononTemplate web.WebPageV2Pack — second-generation native web pages.
 //
-// See the header for the V1 defect list this pack fixes. The single most
-// important invariant: text_animator `rotation` is read by the renderer in
-// RADIANS (V1 authored 82.0 degrees and every video export died in
-// TextRunNode with a ~248k px producer surface). kFoldMaxRad is the ceiling.
+// See the header for the V1 defect list this pack fixes. V2 deliberately
+// avoids per-glyph text animators: the renderer caches the text run and can
+// leave an animated fold frozen at opacity 0. The headline uses a layer-level
+// 3D tilt instead, which is evaluated with the layer transform every frame.
 #include "chronontemplate/web/WebPageV2Pack.hpp"
 
 #include "chronontemplate/core/NativePrimitives.hpp"
@@ -31,17 +31,19 @@ namespace chronontemplate::web {
         constexpr const char* kBold = "assets/fonts/Inter-Bold.ttf";
         constexpr const char* kRegular = "assets/fonts/Inter-Regular.ttf";
         constexpr const char* kSerif = "assets/fonts/FreeSerif.ttf";
-        constexpr int kFoldStagger = 2, kFoldFrames = 9;
-        // RADIANS ceiling for the per-glyph fold (1.45 rad ~= 83 deg of look).
-        // Anything above ~3.0 rad is a units bug: see V1-001 in the header.
-        constexpr double kFoldMaxRad = 1.45;
-        constexpr float kFoldLift = 30.f;
-
         [[noreturn]] void fail(const std::string& message) {
             throw std::invalid_argument("WebPageV2Spec: " + message);
         }
 
         using shot::measuredTextWidth;
+
+        float textBoxWidth(const std::string& text, float size, const char* font) {
+            return std::max(60.f, measuredTextWidth(text, size, font) * 1.10f);
+        }
+
+        float centeredTextLeft(const std::string& text, float size, const char* font) {
+            return static_cast<float>(kW) * 0.5f - textBoxWidth(text, size, font) * 0.5f - 8.f;
+        }
 
         Json easedTrack(const std::string& property, float from, float to, int start, int span,
                         const std::string& easing) {
@@ -52,20 +54,11 @@ namespace chronontemplate::web {
                         {{"frame", start + span}, {"value", to}}})}};
         }
 
-        /// Camera-transformed shapes are authored with their center in
-        /// top-left-down px, but the enable_3d wire space is bottom-left-up
-        /// world units (the reference phrase emitter lowers with the same
-        /// `kHeight - y` conversion). Emission flips Y here — the single
-        /// conversion point for every authored Y quantity.
-        float wireY(float topDownCenterY) {
-            return static_cast<float>(kH) - topDownCenterY;
-        }
-
         Json rect(const std::string& id, float left, float top, float w, float h,
                   const std::string& hex, float alpha, const Json& tracks = Json::array()) {
             Json layer = {{"id", id}, {"type", "shape"}, {"enable_3d", true},
                           {"size", Json::array({w, h})},
-                          {"position", Json::array({left + w * 0.5f, wireY(top + h * 0.5f), 0.f})},
+                          {"position", Json::array({left + w * 0.5f, top + h * 0.5f, 0.f})},
                           {"start_frame", 0}, {"duration_frames", 1},
                           {"shape", {{"type", "rect"}, {"fill", Material::rgba(hex, alpha)}}}};
             if (!tracks.empty()) layer["animation"] = {{"tracks", tracks}};
@@ -88,63 +81,43 @@ namespace chronontemplate::web {
                             {{"frame", durationFrames - 1}, {"value", blur}}})}}})}};
         }
 
-        /// Per-glyph 3D fold in RADIANS: each character rotates in around X
-        /// from kFoldMaxRad with a kFoldLift px lift, staggered per glyph.
-        Json foldAnimators(const std::string& id, const std::string& text, int offset, int durationFrames) {
-            const int n = static_cast<int>(text.size());
-            Json animators = Json::array();
-            for (int i = 0; i < n; ++i) {
-                const int begin = offset + i * kFoldStagger;
-                const double lo = 100.0 * i / n, hi = 100.0 * (i + 1) / n;
-                Json selector = fullWindowSelector("v2_glyph_fold_" + std::to_string(i));
-                if (begin > 0) {
-                    selector["start"]["keyframes"].push_back({{"frame", begin}, {"value", lo}});
-                    selector["end"]["keyframes"].push_back({{"frame", begin}, {"value", hi}});
-                }
-                Json rot = Json::array(), pos = Json::array(), opacity = Json::array();
-                auto sample = [&](int frame) {
-                    const double p = static_cast<double>(std::clamp(frame - begin, 0, kFoldFrames)) / kFoldFrames;
-                    const double eased = 1.0 - std::pow(1.0 - p, 3.0);
-                    rot.push_back({{"frame", frame}, {"value", Json::array({kFoldMaxRad * (1.0 - eased), 0.0, 0.0})}});
-                    pos.push_back({{"frame", frame}, {"value", -kFoldLift * (1.0 - eased)}});
-                    opacity.push_back({{"frame", frame}, {"value", eased}});
-                };
-                if (begin > 0) sample(0);
-                for (int f = 0; f <= kFoldFrames; ++f) sample(begin + f);
-                for (Json* track : {&rot, &pos, &opacity}) {
-                    if (begin + kFoldFrames < durationFrames - 1) {
-                        track->push_back({{"frame", durationFrames - 1}, {"value", track->back()["value"]}});
-                    }
-                }
-                animators.push_back({{"id", id + "_fold_" + std::to_string(i)},
-                                     {"selectors", Json::array({std::move(selector)})},
-                                     {"properties", Json::array({
-                                         {{"property", "rotation"}, {"easing", "linear"}, {"keyframes", std::move(rot)}},
-                                         {{"property", "position_y"}, {"easing", "linear"}, {"keyframes", std::move(pos)}},
-                                         {{"property", "opacity"}, {"easing", "linear"}, {"keyframes", std::move(opacity)}}})}});
-            }
-            return animators;
+        /// Layer-level 3D entrance. Per-glyph text animators are avoided here:
+        /// the renderer evaluates them on a cached text run and the fold can
+        /// stay frozen at its initial opacity (invisible headline).
+        Json tiltTrack(float fromDegrees, int start, int span) {
+            return {{"property", "rotation"}, {"easing", "out_cubic"},
+                    {"keyframes", Json::array({
+                        {{"frame", 0}, {"value", Json::array({fromDegrees, 0.f, 0.f})}},
+                        {{"frame", std::max(1, start)}, {"value", Json::array({fromDegrees, 0.f, 0.f})}},
+                        {{"frame", start + span}, {"value", Json::array({0.f, 0.f, 0.f})}}})}};
         }
 
         Json textLayer(const std::string& id, const std::string& text, float left, float top,
                        float size, const char* font, const std::string& fill, int durationFrames,
-                       float blur = 0.f, int entranceSlot = -1, bool fold = false, int foldOffset = 0) {
-            const float w = std::max(60.f, measuredTextWidth(text, size, font) * 1.10f);
+                       float blur = 0.f, int entranceSlot = -1, bool tilt = false) {
+            const float w = textBoxWidth(text, size, font);
             const float h = size * 1.65f;
             Json layer = {{"id", id}, {"type", "text"}, {"text", text},
                           {"size", Json::array({w, h})},
-                          {"position", Json::array({left + w * 0.5f + 8.f, wireY(top + h * 0.5f), 0.f})},
+                          // 3D text keeps its authored position, while the
+                          // render-plan compiler recenters shapes. Subtract the
+                          // canvas half here so text and shapes share the same
+                          // centre-relative world space. Y grows downward.
+                          {"position", Json::array({left + w * 0.5f + 8.f - kW * 0.5f,
+                                                    top + h * 0.5f - kH * 0.5f, 0.f})},
                           {"enable_3d", true},
                           {"style", {{"font", font}, {"font_size", size}, {"fill", fill}}},
                           {"start_frame", 0}, {"duration_frames", durationFrames}};
             Json animators = Json::array();
             if (blur > 0.f) animators.push_back(blurAnimator(id + "_blur", blur, durationFrames));
-            if (fold) {
-                Json glyphAnimators = foldAnimators(id, text, foldOffset, durationFrames);
-                animators.insert(animators.end(), glyphAnimators.begin(), glyphAnimators.end());
-            }
             if (!animators.empty()) layer["text_animators"] = std::move(animators);
-            if (entranceSlot >= 0) {
+            if (tilt) {
+                const int start = 3;
+                layer["animation"] = {{"tracks", Json::array({
+                        easedTrack("opacity", 0.f, 1.f, start, 30, "out_cubic"),
+                        easedTrack("position_y", -24.f, 0.f, start, 30, "out_cubic"),
+                        tiltTrack(10.f, start, 30)})}};
+            } else if (entranceSlot >= 0) {
                 const int start = 3 + entranceSlot * 4;
                 layer["animation"] = {{"tracks", Json::array({
                         easedTrack("opacity", 0.f, 1.f, start, 30, "out_cubic"),
@@ -300,10 +273,10 @@ namespace chronontemplate::web {
 
             if (folded) {
                 layers.push_back(textLayer("headline_line_1", spec.headlineLineOne, kMargin, 200.f,
-                                           72.f, kBold, pal.ink, duration, 0.f, -1, true, 0));
+                                           72.f, kBold, pal.ink, duration, 0.f, -1, true));
                 if (!spec.headlineLineTwo.empty()) {
                     layers.push_back(textLayer("headline_line_2", spec.headlineLineTwo, kMargin, 296.f,
-                                               72.f, kBold, pal.ink, duration, 0.f, -1, true, 40));
+                                               72.f, kBold, pal.ink, duration, 0.f, -1, true));
                     layers.push_back(rect("headline_marker", kMargin - 14.f, 292.f, 600.f, 118.f,
                                           pal.highlight, 0.45f, markerSweepTracks(600.f)));
                 }
@@ -383,19 +356,18 @@ namespace chronontemplate::web {
                                        1024.f, 15.f, kRegular, pal.muted, duration, 2.6f));
         } else {
             auto contextLine = [&](const std::string& id, const std::string& text, float y) {
-                const float w = measuredTextWidth(text, 30.f, kRegular);
-                layers.push_back(textLayer(id, text, 960.f - w * 0.5f, y, 30.f, kRegular,
-                                           pal.muted, duration, 6.0f));
+                layers.push_back(textLayer(id, text, centeredTextLeft(text, 30.f, kRegular), y,
+                                           30.f, kRegular, pal.muted, duration, 6.0f));
             };
             if (!spec.contextPhrases.empty()) contextLine("long_context_top_0", spec.contextPhrases[0], 232.f);
             if (spec.contextPhrases.size() > 1)
                 contextLine("long_context_top_1", spec.contextPhrases[1], 292.f);
 
             layers.push_back(textLayer("important_center_phrase", spec.importantPhrase,
-                                       960.f - measuredTextWidth(spec.importantPhrase, 76.f, kBold) * 0.5f, 476.f,
-                                       76.f, kBold, pal.ink, duration, 0.f, -1, true, 0));
-            const float phraseW = measuredTextWidth(spec.importantPhrase, 76.f, kBold);
-            layers.push_back(rect("important_underline", 960.f - phraseW * 0.5f, 626.f,
+                                       centeredTextLeft(spec.importantPhrase, 76.f, kBold), 476.f,
+                                       76.f, kBold, pal.ink, duration, 0.f, -1, true));
+            const float phraseW = textBoxWidth(spec.importantPhrase, 76.f, kBold);
+            layers.push_back(rect("important_underline", 960.f - (phraseW + 32.f) * 0.5f, 626.f,
                                   phraseW + 32.f, 6.f, pal.accent, 0.85f,
                                   markerSweepTracks(phraseW + 32.f)));
 
@@ -408,6 +380,8 @@ namespace chronontemplate::web {
         // ── camera: 3% push-in plus a slow half-degree drift ──────────────
         constexpr float kDegToRad = 0.01745329251994329577f;
         chrononmotion::motion::CameraRig cameraRig(1, 50.f, float(kW) / float(kH), 1.f, 10000.f);
+        // Text and shapes are emitted centre-relative, so the camera looks at
+        // the world origin (the centre of the canvas).
         cameraRig.setPosition({0.f, 0.f, 1320.f});
         chrononmotion::Quaternion initialYaw;
         initialYaw.setFromAxisAngle(chrononmotion::Vector3(0.f, 1.f, 0.f), -0.5f * kDegToRad);

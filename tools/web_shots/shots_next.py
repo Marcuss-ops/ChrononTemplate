@@ -3,8 +3,8 @@
 These are the Python equivalents of `WebShotsNextPack`:
 dual marker cross, glow line pulse, tilt/snap settle, timeline draw, caption
 pop card. They use the same 1920x1080 authoring canvas and
-the same `Shot` pipeline as the 28 reference rebuilds, so the pod can render
-all 31 clips through one code path.
+the same `Shot` pipeline as the 22 reference rebuilds, so the pod can render
+all 27 clips through one code path.
 """
 
 from __future__ import annotations

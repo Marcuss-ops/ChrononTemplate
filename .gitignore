@@ -1,4 +1,8 @@
 /build/
+
+# Local CMake build tree of the map-anim check (2026-11-25): compiled archives,
+# executables and CMakeFiles are regenerated from the tracked sources.
+/build-map-anim/
 /out/
 __pycache__/
 *.py[cod]

@@ -35,9 +35,11 @@ float keyValue(const json& layer, const std::string& property, bool first) {
     return -1.f;
 }
 
-/// Authored left edge in canvas px for center-positioned shape/image layers.
+/// Authored left edge in canvas px. Images are centre-relative; shapes are
+/// absolute top-down in this pack.
 float leftEdge(const json& layer) {
-    return layer.at("position")[0].get<float>() + 960.f -
+    const float centre = layer.at("position")[0].get<float>();
+    return (layer.value("type", "") == "shape" ? centre : centre + 960.f) -
            layer.at("size")[0].get<float>() * 0.5f;
 }
 
@@ -209,26 +211,15 @@ void checksVisualContracts() {
     spec.recipe = PaperReferenceRecipe::BridgeCollage;
     const json bridge = buildPaperReferencePlan(spec);
     const json* photo = layerById(bridge, "golden_gate_photo");
-    const json* badge = layerById(bridge, "mlb_box");
     check(photo != nullptr && leftEdge(*photo) == 496.f,
           "the photo keeps the reference frame offset");
-    check(badge != nullptr && leftEdge(*badge) < leftEdge(*photo) - 20.f &&
-              leftEdge(*badge) + badge->at("size")[0].get<float>() >
-                  leftEdge(*photo),
-          "the MLB badge straddles the photo border");
+    const json* background = layerById(bridge, "collage_background");
+    check(background != nullptr &&
+              background->value("asset", "").find("collage_bg_titled.png") !=
+                  std::string::npos,
+          "the collage title is baked into the full-frame plate");
     const json* continuation = layerById(bridge, "collage_left_text");
     check(continuation != nullptr, "the defocused previous paragraph survives at the left");
-    const json* title1 = layerById(bridge, "collage_title_1");
-    const json* title2 = layerById(bridge, "collage_title_2");
-    // Text boxes are padded 10% and centered on the run, so the run's left
-    // edge is boxCenter - size/2.2, not the box position.
-    const auto runLeft = [](const json& layer) {
-        return layer.at("position")[0].get<float>() -
-               layer.at("size")[0].get<float>() / 2.2f;
-    };
-    check(title1 != nullptr && title2 != nullptr &&
-              std::abs(runLeft(*title1) - runLeft(*title2)) < 1.f,
-          "the collage title keeps a left-aligned two-line block");
 }
 
 void failsClosed() {

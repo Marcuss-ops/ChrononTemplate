@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Author the typewriter motions into the phrase pool.
 
-The eight recipes are the ones rendered into the Typewriter Pack v1 clips, but
+The recipes are the ones rendered into the Typewriter Pack v2 clips, but
 expressed as *animation only*: no font, no size, no colour, no caret. Those
-belong to the runtime, which picks them per job (overlay_style), so a pool entry
-that carried them would override the user's typography. What is left here is the
-gesture: which unit steps forward, how fast, with which reveal edge, and whether
-the line pushes in as it starts.
+belong to the runtime, which picks them per job from the payload, so a pool
+entry that carried them would override the user's typography. What is left here
+is the gesture: which unit steps forward, how fast, with which reveal edge, and
+whether the line pushes in as it starts.
 
 Two things the clips do stay out, because the pool contract cannot express them
 and a motion that fakes them would render wrong: the caret (decoration, and the
@@ -114,7 +114,11 @@ def motion(mid, title, fit, unit, phrase, frames_per_char, start_sec, type_budge
     if fit == "short":
         targets.append("short_phrase")
     animators = [reveal(unit, shape, pace, start, sweep_end), *extra_animators]
-    enter = max(sweep_end, *(a["selector"]["enter"] for a in animators))
+    # An entrance is the whole motion window: the typing sweep, every animator
+    # window, and every layer track. A camera-backed entrance can outlive the
+    # typing, so the track ends are part of the maximum.
+    enter = max(sweep_end, *(a["selector"]["enter"] for a in animators),
+                *(t["keyframes"][-1]["frame"] for t in tracks))
     return {
         "id": mid,
         "title": title,
@@ -127,6 +131,15 @@ def motion(mid, title, fit, unit, phrase, frames_per_char, start_sec, type_budge
         "text_animators": animators,
         "render_safe": True,
     }
+
+
+def motion3d(*args, **kwargs):
+    """A phrase motion that the renderer may only execute with 3D + camera."""
+
+    recipe = motion(*args, **kwargs)
+    recipe["requires_3d"] = True
+    recipe["requires_camera"] = True
+    return recipe
 
 
 RECIPES = [
@@ -281,6 +294,217 @@ RECIPES = [
             track("position_x", [(0, -14.0), (20, 0.0)]),
         ],
     ),
+    # Il quindicesimo 2D: la stessa battitura per-glyph con la riga che
+    # respira (scale 0.97 -> 1) mentre il frontier e' morbido. Chiude la
+    # famiglia 2D a quindici gesture, come le quindici 3D sotto.
+    motion(
+        "typewriter_breath_long",
+        "Typewriter Breath (long)",
+        "long",
+        "glyph",
+        "Ogni parola arriva da sola, poi resta.",
+        1.6, 0.40, 0.58,
+        shape="smooth",
+        tracks=[
+            track("scale", [(0, 0.97), (30, 1.0)]),
+        ],
+    ),
+    # ── Famiglia 3D: quindici ingressi camera-backed ───────────────────────
+    # Stessa grammatica di typing delle 2D, piu' i tre assi della camera:
+    # yaw/pitch/roll, position_z e position_x/y. Le track finiscono in posa
+    # neutra (0 tranne scale/opacity a 1) perche' il runtime sintetizza
+    # l'uscita dal valore di riposo. `requires_3d` e `requires_camera` sono
+    # letti dall'inventario del renderer, non inventano una famiglia nuova.
+    motion3d(
+        "typewriter3d_yaw_flip_short",
+        "Typewriter 3D Yaw Flip (short)",
+        "short",
+        "glyph",
+        "TURN INTO THE LIGHT",
+        1.5, 0.36, 0.52,
+        tracks=[
+            track("rotation_y", [(0, -52.0), (52, 0.0)], "in_out_cubic"),
+            track("position_z", [(0, 170.0), (52, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_pitch_lift_short",
+        "Typewriter 3D Pitch Lift (short)",
+        "short",
+        "glyph",
+        "LIFT WITH A TILT UP",
+        1.6, 0.34, 0.52,
+        tracks=[
+            track("rotation_x", [(0, 24.0), (50, 0.0)], "in_out_cubic"),
+            track("position_y", [(0, -46.0), (50, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_roll_settle_short",
+        "Typewriter 3D Roll Settle (short)",
+        "short",
+        "glyph",
+        "ROLL IN AND SETTLE",
+        1.5, 0.32, 0.50,
+        tracks=[
+            track("rotation_z", [(0, -10.0), (48, 0.0)], "in_out_cubic"),
+            track("scale", [(0, 0.90), (48, 1.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_depth_push_long",
+        "Typewriter 3D Depth Push (long)",
+        "long",
+        "glyph",
+        "Il futuro arriva prima di quanto siamo pronti a nominarlo.",
+        1.5, 0.38, 0.58,
+        tracks=[
+            track("position_z", [(0, 380.0), (56, 0.0)], "in_out_cubic"),
+            track("rotation_x", [(0, 13.0), (56, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_z_bounce_short",
+        "Typewriter 3D Z Bounce (short)",
+        "short",
+        "glyph",
+        "ORA O MAI PIÙ",
+        1.9, 0.28, 0.46,
+        tracks=[
+            track("position_z", [(0, 330.0), (30, -26.0), (48, 0.0)], "out_cubic"),
+            track("scale", [(0, 0.94), (30, 1.04), (48, 1.0)], "out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_card_swing_long",
+        "Typewriter 3D Card Swing (long)",
+        "long",
+        "glyph",
+        "La verità non ha fretta: aspetta il suo primo piano.",
+        1.35, 0.42, 0.58,
+        tracks=[
+            track("rotation_y", [(0, 40.0), (34, -7.0), (58, 0.0)], "in_out_cubic"),
+            track("position_z", [(0, 210.0), (58, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_dolly_settle_long",
+        "Typewriter 3D Dolly Settle (long)",
+        "long",
+        "glyph",
+        "Ogni storia comincia da un dettaglio che nessuno aveva notato.",
+        1.4, 0.40, 0.60,
+        tracks=[
+            track("position_z", [(0, 240.0), (54, 0.0)], "in_out_cubic"),
+            track("position_y", [(0, -34.0), (54, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_orbit_short",
+        "Typewriter 3D Orbit (short)",
+        "short",
+        "glyph",
+        "ORBIT FINDS THE ANGLE",
+        1.5, 0.34, 0.50,
+        tracks=[
+            track("rotation_y", [(0, -32.0), (24, 7.0), (52, 0.0)], "in_out_cubic"),
+            track("position_x", [(0, -46.0), (52, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_hero_pull_short",
+        "Typewriter 3D Hero Pull (short)",
+        "short",
+        "glyph",
+        "HERO PULL",
+        2.6, 0.30, 0.44,
+        tracks=[
+            track("scale", [(0, 1.18), (46, 1.0)], "in_out_cubic"),
+            track("position_z", [(0, -130.0), (46, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_spin_in_long",
+        "Typewriter 3D Spin In (long)",
+        "long",
+        "glyph",
+        "CENTO FRAME PER CAMBIARE IDEA AL MONDO.",
+        1.5, 0.34, 0.54,
+        tracks=[
+            track("rotation_y", [(0, 118.0), (54, 0.0)], "in_out_cubic"),
+            track("position_z", [(0, 240.0), (54, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_parallax_split_short",
+        "Typewriter 3D Parallax Split (short)",
+        "short",
+        "glyph",
+        "DUE PIANI, UNA STORIA",
+        1.2, 0.32, 0.52,
+        tracks=[
+            track("rotation_y", [(0, -18.0), (48, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_camera_rise_long",
+        "Typewriter 3D Camera Rise (long)",
+        "long",
+        "glyph",
+        "La città si sveglia mentre la voce finisce la frase.",
+        1.45, 0.40, 0.58,
+        tracks=[
+            track("rotation_x", [(0, 9.0), (52, 0.0)], "in_out_cubic"),
+            track("position_y", [(0, 26.0), (52, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_camera_whip_short",
+        "Typewriter 3D Camera Whip (short)",
+        "short",
+        "glyph",
+        "SEGUE IL MOVIMENTO",
+        1.7, 0.30, 0.50,
+        tracks=[
+            track("rotation_y", [(0, -24.0), (44, 0.0)], "in_out_cubic"),
+            track("position_x", [(0, 90.0), (44, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+    motion3d(
+        "typewriter3d_iso_slide_long",
+        "Typewriter 3D Iso Slide (long)",
+        "long",
+        "glyph",
+        "Tutto si sposta di lato, anche ciò che sembra fermo.",
+        1.5, 0.38, 0.58,
+        tracks=[
+            track("rotation_y", [(0, 26.0), (50, 0.0)], "in_out_cubic"),
+            track("rotation_x", [(0, 11.0), (50, 0.0)], "in_out_cubic"),
+            track("position_x", [(0, 64.0), (50, 0.0)], "in_out_cubic"),
+            track("opacity", [(0, 0.0), (16, 1.0)]),
+        ],
+    ),
+]
+
+# Removed at the user's request after reviewing the rendered pack: the tilt is
+# unreadable at phrase size and the clip was dropped. Keeping the id here makes
+# the removal idempotent instead of a manual catalog edit that a later run of
+# this script would not reproduce.
+RETIRED = [
+    "typewriter3d_tilt_drift_long",
 ]
 
 
@@ -341,12 +565,18 @@ def main() -> None:
     if args.check:
         if missing:
             raise SystemExit(f"missing typewriter motions: {', '.join(missing)}")
+        still_retired = [mid for mid in RETIRED if mid in by_id]
+        if still_retired:
+            raise SystemExit(f"retired typewriter motions still present: {', '.join(still_retired)}")
         stale = [r["id"] for r in RECIPES if rows[by_id[r["id"]]] != r]
         if stale:
             raise SystemExit(f"stale typewriter motions: {', '.join(stale)}")
         print(f"{len(RECIPES)} typewriter motions are authored")
         return
 
+    catalog["motions"] = [row for row in rows if row.get("id") not in set(RETIRED)]
+    rows = catalog["motions"]
+    by_id = {row["id"]: index for index, row in enumerate(rows)}
     for recipe in RECIPES:
         if recipe["id"] in by_id:
             rows[by_id[recipe["id"]]] = recipe

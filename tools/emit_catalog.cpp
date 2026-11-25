@@ -837,12 +837,28 @@ int main(int argc, char** argv) {
                     requires3D = requires3D || property == "position_z" || property == "rotation_x" || property == "rotation_y";
                 }
                 const json targets = family["supported_content"].get<json>();
-                motions.push_back({{"id", preset["id"]}, {"category", familyID},
-                                   {"supported_template", family["supported_template"]},
-                                   {"targets", targets}, {"supported_content", targets}, {"unit", "layer"},
-                                   {"duration_bounds", bounds}, {"required_properties", requiredProperties},
-                                   {"render_safe", true}, {"requires_3d", requires3D}, {"requires_camera", requires3D},
-                                   {"seeded", false}, {"enter", 48}, {"tracks", tracks}});
+                // A presentation preset stays a layer entrance by default. The
+                // typewriter families also author a per-unit animator: its
+                // selector kind is the motion's unit, and the emitter must not
+                // flatten that glyph animator back to `layer`, otherwise dates
+                // and numbers would keep a typewriter name with no typing.
+                const json textAnimators = preset.value("text_animators", json::array());
+                std::string unit = "layer";
+                if (!textAnimators.empty()) {
+                    const json selector = textAnimators.front().value("selector", json::object());
+                    unit = selector.value("kind", std::string{});
+                    if (unit.empty())
+                        fail("entity presentation motion " + preset["id"].get<std::string>() +
+                             " text animator needs selector.kind");
+                }
+                json motion = {{"id", preset["id"]}, {"category", familyID},
+                              {"supported_template", family["supported_template"]},
+                              {"targets", targets}, {"supported_content", targets}, {"unit", unit},
+                              {"duration_bounds", bounds}, {"required_properties", requiredProperties},
+                              {"render_safe", true}, {"requires_3d", requires3D}, {"requires_camera", requires3D},
+                              {"seeded", false}, {"enter", 48}, {"tracks", tracks}};
+                if (!textAnimators.empty()) motion["text_animators"] = textAnimators;
+                motions.push_back(motion);
             }
         }
         const json appleMotions = applePhraseMotions();

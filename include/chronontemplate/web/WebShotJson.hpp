@@ -68,7 +68,7 @@ inline Json rgba(const std::string& hex, float alpha = 1.f) {
 /// pixel-truth raw: wire [-760,-340] centra un box su (200,880) px).
 /// `position` e' il centro del layer. Lo z e' assegnato da renderPlan.
 inline Json wirePos(float topDownCenterX, float topDownCenterY, float z = 0.f) {
-    // Same contract as WebPageHighlightPack/WebPageV2Pack: position is the
+    // Same contract as WebPageV2Pack: position is the
     // layer center in top-left-down px for X and bottom-left-up px for Y.
     return Json::array({topDownCenterX, float(kH) - topDownCenterY, z});
 }
